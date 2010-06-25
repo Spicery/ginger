@@ -1,0 +1,543 @@
+static Ref *spcfn__add( Ref *pc, Machine vm ) {
+    long y = ToLong( *( VMVP-- ) );
+    long x = ToLong( *( VMVP ) );
+    long sum = x + y;
+    if ( x < 0 ? sum > y : sum < y ) {
+        throw Mishap( "Overflow detected in +" ).culprit( "Argument1", "" + x ).culprit( "Argument2", "" + y );
+    }
+    *VMVP = ToRef( sum );
+    RETURN( pc + 1 );
+    
+    //int y = ToLong( *( VMVP-- ) );
+    //*VMVP = ToRef( ToLong( *( VMVP ) ) + y );
+    //RETURN( pc + 1 );
+    
+}
+
+static Ref *spcfn__decr( Ref *pc, Machine vm ) {
+    long x = ToLong( *( VMVP ) );
+    long sum = x - ToLong( IntToSmall( 1 ) );
+    if ( sum > x ) {
+        throw Mishap( "integer overflow detected in x - 1" ).culprit( "x", "" + x );
+    }
+    *( VMVP ) = ToRef( sum );
+    RETURN( pc + 1 );
+    
+    
+    //*( VMVP ) = ToRef( ToLong( *( VMVP ) ) - ToLong( IntToSmall( 1 ) ) );
+    //RETURN( pc + 1 );
+}
+
+static Ref *spcfn__div( Ref *pc, Machine vm ) {
+    long b = ToLong( *( VMVP-- ) );
+    *( VMVP ) = ToRef( ToLong( *( VMVP ) ) / b );
+    RETURN( pc + 1 );
+}
+
+static Ref *spcfn__eq( Ref *pc, Machine vm ) {
+    Ref r = *( VMVP-- );
+    *( VMVP ) = *( VMVP ) == r ? sys_true : sys_false;
+    RETURN( pc + 1 );
+}
+
+static Ref *spcfn__gt( Ref *pc, Machine vm ) {
+    long b = ToLong( *( VMVP-- ) );
+    *( VMVP ) = ToLong( *( VMVP ) ) > b ? sys_true : sys_false;
+    RETURN( pc + 1 );
+}
+
+static Ref *spcfn__gte( Ref *pc, Machine vm ) {
+    long b = ToLong( *( VMVP-- ) );
+    *( VMVP ) = ToLong( *( VMVP ) ) >= b ? sys_true : sys_false;
+    RETURN( pc + 1 );
+}
+
+static Ref *spcfn__incr( Ref *pc, Machine vm ) {
+    long x = ToLong( *( VMVP ) );
+    long sum = x + ToLong( IntToSmall( 1 ) );
+    if ( sum < x ) {
+        throw Mishap( "integer overflow detected in x + 1" ).culprit( "x", "" + x );
+    }
+    *( VMVP ) = ToRef( sum );
+    RETURN( pc + 1 );
+    
+    //*( VMVP ) = ToRef( ToLong( *( VMVP ) ) + ToLong( IntToSmall( 1 ) ) );
+    //RETURN( pc + 1 );
+    
+}
+
+static Ref *spcfn__incr_by( Ref *pc, Machine vm ) {
+    long x = ToLong( *( VMVP ) );
+    long y = ToLong( pc[ 1 ] );
+    long sum = x + y;
+    if ( x < 0 ? sum > y : sum < y ) {
+        throw Mishap( "overflow detected in x + y" ).culprit( "x", "" + x ).culprit( "y", "" + y );
+    }
+    *VMVP = ToRef( sum );
+    RETURN( pc + 2 );
+    
+    //int n = ToLong( pc[ 1 ] );
+    //*( VMVP ) = ToRef( ToLong( *( VMVP ) ) + n );
+    //RETURN( pc + 2 );
+    
+}
+
+static Ref *spcfn__lt( Ref *pc, Machine vm ) {
+    long b = ToLong( *( VMVP-- ) );
+    *( VMVP ) = ToLong( *( VMVP ) ) < b ? sys_true : sys_false;
+    RETURN( pc + 1 );
+}
+
+static Ref *spcfn__lte( Ref *pc, Machine vm ) {
+    long b = ToLong( *( VMVP-- ) );
+    *( VMVP ) = ToLong( *( VMVP ) ) <= b ? sys_true : sys_false;
+    RETURN( pc + 1 );
+}
+
+static Ref *spcfn__mul( Ref *pc, Machine vm ) {
+    //  This needs to be given overflow detection!
+    long b = ToLong( *( VMVP-- ) );
+    *( VMVP ) = ToRef( ToLong( *( VMVP ) ) * ( b >> TAG ) );
+    RETURN( pc + 1 );
+}
+
+static Ref *spcfn__print( Ref *pc, Machine vm ) {
+    Ref r = *VMVP--;
+    sys_print( r );
+    RETURN( pc + 1 );
+}
+
+static Ref *spcfn__putchar( Ref *pc, Machine vm ) {
+    putchar( ( ( unsigned long )( *VMVP-- ) ) >> 8 );
+    RETURN( pc + 1 );
+}
+
+static Ref *spcfn__sub( Ref *pc, Machine vm ) {
+    //  This needs to be given overflow detection!
+    long b = ToLong( *( VMVP-- ) );
+    *( VMVP ) = ToRef( ToLong( *( VMVP ) ) - b );
+    RETURN( pc + 1 );
+}
+
+static Ref *spcfn_calls( Ref *pc, Machine vm ) {
+    Ref r = *( VMVP-- );
+    {    
+        Ref *ptr;
+        if ( !IsPtr4( r ) ) call_error( r );
+        ptr = RefToPtr4( r );
+        if ( !IsFnKey( *ptr ) ) call_error( r );
+        VMLINK = pc + 1;
+        RETURN( ptr + 1 );
+    }
+}
+
+static Ref *spcfn_check0( Ref *pc, Machine vm ) {
+    long n = ToLong( *( ++pc ) );
+    #ifdef DBG_SPECIAL
+    fprintf(
+    	stderr,
+    	"Difference between %lu and %lu (held in %ld)\n",
+    	ToULong( VMVP ),
+    	ToULong( VMSP[n] ),
+    	n
+    );
+    #endif
+    if ( VMVP == VMSP[n] ) RETURN( pc + 1 );
+    throw Mishap( "Wrong number of results (needed 0)" ).culprit( "#Results", "" + ( VMVP - ToRefRef( VMSP[n] ) ) );
+    RETURN( NULL );	// stupid compiler
+}
+
+static Ref *spcfn_check1( Ref *pc, Machine vm ) {
+    #ifdef FOGLE
+    
+    long n = ToLong( *( ++pc ) );
+    unsigned long d;
+    #ifdef DBG_SPECIAL
+    fprintf( stderr, "Recovering %lu from %ld\n", ToULong( VMSP[n] ), n );
+    fprintf( stderr, "Comparing with %u\n",  ToULong( VMVP ) );
+    fprintf( stderr, "Length of value stack = %d\n", ( VMVP - VMVP_base ) );
+    #endif
+    d = VMVP - ToRefRef( VMSP[n] );
+    if ( d == 1 ) RETURN( pc + 1 );
+    throw Mishap( "Wrong number of results (needed 1)" ).culprit( "#results", "" + d );
+    RETURN( NULL );	// stupid compiler
+    #else
+    ++pc;
+    RETURN(pc+1);
+    
+    #endif
+}
+
+static Ref *spcfn_end( Ref *pc, Machine vm ) {
+    Ref r;
+    long n = ToLong( *( ++pc ) );
+    #ifdef DBG_SPECIAL
+    fprintf( stderr, "Recovering %u from %d\n", ToULong( VMSP[n] ), n );
+    fprintf( stderr, "Comparing with %u\n",  ToULong( VMVP ) );
+    fprintf( stderr, "Length of value stack = %d\n", ( VMVP - VMVP_base ) );
+    #endif
+    r = ToRef( ToULong( VMVP ) - ToULong( VMSP[n] ) );
+    *( ++VMVP ) = r;
+    RETURN( pc + 1 );
+}
+
+static Ref *spcfn_end1_calls( Ref *pc, Machine vm ) {
+    Ref r = *( VMVP-- );
+    long var = ToLong( pc[ 1 ] );
+    VMCOUNT = ( VMVP - ( Ref * )( VMSP[ var ] ) ) - 1;
+    {    
+        Ref *ptr;
+        if ( !IsPtr4( r ) ) call_error( r );
+        ptr = RefToPtr4( r );
+        if ( !IsFnKey( *ptr ) ) call_error( r );
+        VMLINK = pc + 2;
+        RETURN( ptr + 1 );
+    }
+}
+
+static Ref *spcfn_end_call_global( Ref *pc, Machine vm ) {
+    long var = ToLong( pc[ 1 ] );
+    Ref r = ((IdentClass *)( pc[ 2 ] )) -> valof;
+    VMCOUNT = VMVP - ( Ref * )( VMSP[ var ] );
+    {    
+        Ref *ptr;
+        if ( !IsPtr4( r ) ) call_error( r );
+        ptr = RefToPtr4( r );
+        if ( !IsFnKey( *ptr ) ) call_error( r );
+        VMLINK = pc + 3;
+        RETURN( ptr + 1 );
+    }
+}
+
+static Ref *spcfn_enter( Ref *pc, Machine vm ) {
+    long A = ToLong( pc[ -2 ] );
+    Ref *prev = VMSP;
+    VMSP += ToLong( VMSP[ -1 ] );
+    VMSP[ 0 ] = VMLINK;
+    VMSP[ 1 ] = prev;
+    VMSP[ 2 ] = ToRef( pc[ -3 ] );
+    VMSP += 3;
+    if ( A != VMCOUNT ) enter_error( VMCOUNT, A );
+    {    int i;
+        for ( i = 0; i < A; i++ ) {
+            VMSP[ i ] = *( VMVP-- );
+        }
+    }
+    RETURN( pc + 1 );
+}
+
+static Ref *spcfn_enter0( Ref *pc, Machine vm ) {
+    Ref *prev = VMSP;
+    VMSP += ToLong( VMSP[ -1 ] );
+    VMSP[ 0 ] = VMLINK;
+    VMSP[ 1 ] = prev;
+    VMSP[ 2 ] = ToRef( pc[ -3 ] );
+    VMSP += 3;
+    if ( VMCOUNT != 0 ) {
+        enter_error( VMCOUNT, 0 );
+    }
+    RETURN( pc + 1 );
+}
+
+static Ref *spcfn_enter1( Ref *pc, Machine vm ) {
+    Ref *prev = VMSP;
+    VMSP += ToLong( VMSP[ -1 ] );
+    VMSP[ 0 ] = VMLINK;
+    VMSP[ 1 ] = prev;
+    VMSP[ 2 ] = ToRef( pc[ -3 ] );
+    VMSP += 3;
+    if ( VMCOUNT != 1 ) {
+        enter_error( VMCOUNT, 1 );
+    }
+    VMSP[ 0 ] = *( VMVP-- );
+    RETURN( pc + 1 );
+}
+
+static Ref *spcfn_eq_si( Ref *pc, Machine vm ) {
+    long s = ToLong( pc[1] );
+    long i = ToLong( pc[2] );
+    long d = ToLong( pc[3] );
+    RETURN( ToLong( VMSP[ s ] ) == i ? pc + d + 3 : pc + 4 );
+}
+
+static Ref *spcfn_eq_ss( Ref *pc, Machine vm ) {
+    long s = ToLong( pc[1] );
+    long t = ToLong( pc[2] );
+    long d = ToLong( pc[3] );
+    RETURN( ToLong( VMSP[ s ] ) == ToLong( VMSP[ t ] ) ? pc + d + 3 : pc + 4 );
+}
+
+static Ref *spcfn_goto( Ref *pc, Machine vm ) {
+    //	TEMPORARY HACK!!!!
+    
+    //long n = ToLong( *( ++pc ) );
+    //RETURN( pc + n );
+    
+    Ref *link;
+    link = (Ref *)VMSP[ -3 ];	//	recover return address
+    VMSP = (Ref *)VMSP[ -2 ];				//	restore stack pointer
+    #ifdef DBG_SPECIAL
+    	printf( "Recover link = %x\n", ToUInt( link ) );
+    	printf( "Stack pointer recovered as %x\n", ToUInt( VMSP ) );
+    #endif
+    RETURN( link );
+    
+}
+
+static Ref *spcfn_gt_si( Ref *pc, Machine vm ) {
+    long s = ToLong( pc[1] );
+    long i = ToLong( pc[2] );
+    RETURN( ToLong( VMSP[ s ] ) > i ? pc + ToLong( pc[3] ) + 3 : pc + 4 );
+}
+
+static Ref *spcfn_gt_ss( Ref *pc, Machine vm ) {
+    long s = ToLong( pc[1] );
+    long t = ToLong( pc[2] );
+    long d = ToLong( pc[3] );
+    RETURN( ToLong( VMSP[ s ] ) > ToLong( VMSP[ t ] ) ? pc + d + 3 : pc + 4 );
+}
+
+static Ref *spcfn_gte_si( Ref *pc, Machine vm ) {
+    long s = ToLong( pc[1] );
+    long i = ToLong( pc[2] );
+    long d = ToLong( pc[3] );
+    RETURN( ToLong( VMSP[ s ] ) >= i ? pc + d + 3: pc + 4 );
+}
+
+static Ref *spcfn_gte_ss( Ref *pc, Machine vm ) {
+    long s = ToLong( pc[1] );
+    long t = ToLong( pc[2] );
+    long d = ToLong( pc[3] );
+    RETURN( ToLong( VMSP[ s ] ) >= ToLong( VMSP[ t ] ) ? pc + d + 3 : pc + 4 );
+}
+
+static Ref *spcfn_halt( Ref *pc, Machine vm ) {
+    #ifdef DBG_SPECIAL	
+    printf( "\nhalt\n" );
+    #endif
+    exit( EXIT_SUCCESS );
+}
+
+static Ref *spcfn_ifnot( Ref *pc, Machine vm ) {
+    #ifdef DBG_SPECIAL
+    fprintf( stderr, "IFNOT finds %x on the stack (cf. %x & %x)\n", (unt)(*( VMVP )), (unt)(sys_false), (unt)(sys_true) );
+    #endif
+    RETURN(
+    	*( VMVP-- ) == sys_false ?
+    	pc + ToLong( pc[ 1 ] ) + 1:
+    	pc + 2
+    );
+}
+
+static Ref *spcfn_ifso( Ref *pc, Machine vm ) {
+    RETURN(
+    	*( VMVP-- ) == sys_false ?
+    	pc + 2 :
+    	pc + ToLong( pc[ 1 ] ) + 1
+    );
+}
+
+static Ref *spcfn_lt_si( Ref *pc, Machine vm ) {
+    long s = ToLong( pc[1] );
+    long i = ToLong( pc[2] );
+    long d = ToLong( pc[3] );
+    RETURN( ToLong( VMSP[ s ] ) < i ? pc + d + 3 : pc + 4 );
+}
+
+static Ref *spcfn_lt_ss( Ref *pc, Machine vm ) {
+    long s = ToLong( pc[1] );
+    long t = ToLong( pc[2] );
+    long d = ToLong( pc[3] );
+    RETURN( ToLong( VMSP[ s ] ) < ToLong( VMSP[ t ] ) ? pc + d + 3 : pc + 4 );
+}
+
+static Ref *spcfn_lte_si( Ref *pc, Machine vm ) {
+    long s = ToLong( pc[1] );
+    long i = ToLong( pc[2] );
+    long d = ToLong( pc[3] );
+    RETURN( ToLong( VMSP[ s ] ) <= i ? pc + d + 3 : pc + 4 );
+}
+
+static Ref *spcfn_lte_ss( Ref *pc, Machine vm ) {
+    long s = ToLong( pc[1] );
+    long t = ToLong( pc[2] );
+    long d = ToLong( pc[3] );
+    RETURN( ToLong( VMSP[ s ] ) <= ToLong( VMSP[ t ] ) ? pc + d + 3 : pc + 4 );
+}
+
+static Ref *spcfn_neq_si( Ref *pc, Machine vm ) {
+    long s = ToLong( pc[1] );
+    long i = ToLong( pc[2] );
+    RETURN( ToLong( VMSP[ s ] ) == i ? pc + 4 : pc + ToLong( pc[3] ) + 3 );
+}
+
+static Ref *spcfn_neq_ss( Ref *pc, Machine vm ) {
+    long s = ToLong( pc[1] );
+    long t = ToLong( pc[2] );
+    long d = ToLong( pc[3] );
+    RETURN( ToLong( VMSP[ s ] ) != ToLong( VMSP[ t ] ) ? pc + d + 3 : pc + 4 );
+}
+
+static Ref *spcfn_not( Ref *pc, Machine vm ) {
+    *VMVP = ( *VMVP == sys_false ? sys_true : sys_false );
+    RETURN( pc + 1 );
+}
+
+static Ref *spcfn_pop_global( Ref *pc, Machine vm ) {
+    IdentClass * id = (IdentClass *)( *( ++pc ) );
+    id->valof = *( VMVP-- );
+    RETURN( pc + 1 );
+}
+
+static Ref *spcfn_pop_local( Ref *pc, Machine vm ) {
+    VMSP[ ToLong( *( ++pc ) ) ] = *( VMVP-- );
+    RETURN( pc + 1 );
+}
+
+static Ref *spcfn_push_global( Ref *pc, Machine vm ) {
+    IdentClass * id = (IdentClass *)( *( ++pc ) );
+    *( ++VMVP ) = id->valof;
+    RETURN( pc + 1 );
+}
+
+static Ref *spcfn_push_local( Ref *pc, Machine vm ) {
+    *( ++VMVP ) = VMSP[ ToLong( *( ++pc ) ) ];
+    RETURN( pc + 1 );
+}
+
+static Ref *spcfn_push_local0( Ref *pc, Machine vm ) {
+    *( ++VMVP ) = VMSP[ 0 ];
+    RETURN( pc + 1 );
+}
+
+static Ref *spcfn_push_local1( Ref *pc, Machine vm ) {
+    *( ++VMVP ) = VMSP[ 1 ];
+    RETURN( pc + 1 );
+}
+
+static Ref *spcfn_pushq( Ref *pc, Machine vm ) {
+    *( ++VMVP ) = *( ++pc );
+    RETURN( pc + 1 );
+}
+
+static Ref *spcfn_reset( Ref *pc, Machine vm ) {
+    FREEZE;
+    throw NormalExit();
+}
+
+static Ref *spcfn_return( Ref *pc, Machine vm ) {
+    Ref *link;
+    link = (Ref *)VMSP[ -3 ];	//	recover return address
+    VMSP = (Ref *)VMSP[ -2 ];				//	restore stack pointer
+    #ifdef DBG_SPECIAL
+    	printf( "Recover link = %x\n", ToUInt( link ) );
+    	printf( "Stack pointer recovered as %x\n", ToUInt( VMSP ) );
+    #endif
+    RETURN( link );
+}
+
+static Ref *spcfn_set( Ref *pc, Machine vm ) {
+    VMCOUNT = VMVP - (Ref *)VMSP[ ToLong( pc[ 1 ] ) ];
+    RETURN( pc + 2 );
+}
+
+static Ref *spcfn_set_call_global( Ref *pc, Machine vm ) {
+    Ref r = ((IdentClass *)( pc[ 2 ] )) -> valof;
+    VMCOUNT = ToLong( pc[ 1 ] );
+    {    
+        Ref *ptr;
+        if ( !IsPtr4( r ) ) call_error( r );
+        ptr = RefToPtr4( r );
+        if ( !IsFnKey( *ptr ) ) call_error( r );
+        VMLINK = pc + 3;
+        RETURN( ptr + 1 );
+    }
+}
+
+static Ref *spcfn_set_calls( Ref *pc, Machine vm ) {
+    Ref r = *( VMVP-- );
+    VMCOUNT = ToLong( pc[ 1 ] );
+    {    
+        Ref *ptr;
+        if ( !IsPtr4( r ) ) call_error( r );
+        ptr = RefToPtr4( r );
+        if ( !IsFnKey( *ptr ) ) call_error( r );
+        VMLINK = pc + 2;
+        RETURN( ptr + 1 );
+    }
+}
+
+static Ref *spcfn_start( Ref *pc, Machine vm ) {
+    long n = ToLong( *( ++pc ) );
+    #ifdef DBG_SPECIAL
+    fprintf( stderr, "Storing %u in %d\n", ToULong( ToRef( VMVP ) ), n );
+    #endif
+    VMSP[n] = ToRef( VMVP );
+    RETURN( pc + 1 );
+}
+
+static Ref *spcfn_syscall( Ref *pc, Machine vm ) {
+    SysCall * sys = ToSysCall( *++pc );
+    FREEZE;
+    (*sys)( vm );
+    MELT;
+    RETURN( pc + 1 );
+}
+
+InstructionSet1::InstructionSet1() {
+    this->spc__add = (Ref)spcfn__add;
+    this->spc__decr = (Ref)spcfn__decr;
+    this->spc__div = (Ref)spcfn__div;
+    this->spc__eq = (Ref)spcfn__eq;
+    this->spc__gt = (Ref)spcfn__gt;
+    this->spc__gte = (Ref)spcfn__gte;
+    this->spc__incr = (Ref)spcfn__incr;
+    this->spc__incr_by = (Ref)spcfn__incr_by;
+    this->spc__lt = (Ref)spcfn__lt;
+    this->spc__lte = (Ref)spcfn__lte;
+    this->spc__mul = (Ref)spcfn__mul;
+    this->spc__print = (Ref)spcfn__print;
+    this->spc__putchar = (Ref)spcfn__putchar;
+    this->spc__sub = (Ref)spcfn__sub;
+    this->spc_calls = (Ref)spcfn_calls;
+    this->spc_check0 = (Ref)spcfn_check0;
+    this->spc_check1 = (Ref)spcfn_check1;
+    this->spc_end = (Ref)spcfn_end;
+    this->spc_end1_calls = (Ref)spcfn_end1_calls;
+    this->spc_end_call_global = (Ref)spcfn_end_call_global;
+    this->spc_enter = (Ref)spcfn_enter;
+    this->spc_enter0 = (Ref)spcfn_enter0;
+    this->spc_enter1 = (Ref)spcfn_enter1;
+    this->spc_eq_si = (Ref)spcfn_eq_si;
+    this->spc_eq_ss = (Ref)spcfn_eq_ss;
+    this->spc_goto = (Ref)spcfn_goto;
+    this->spc_gt_si = (Ref)spcfn_gt_si;
+    this->spc_gt_ss = (Ref)spcfn_gt_ss;
+    this->spc_gte_si = (Ref)spcfn_gte_si;
+    this->spc_gte_ss = (Ref)spcfn_gte_ss;
+    this->spc_halt = (Ref)spcfn_halt;
+    this->spc_ifnot = (Ref)spcfn_ifnot;
+    this->spc_ifso = (Ref)spcfn_ifso;
+    this->spc_lt_si = (Ref)spcfn_lt_si;
+    this->spc_lt_ss = (Ref)spcfn_lt_ss;
+    this->spc_lte_si = (Ref)spcfn_lte_si;
+    this->spc_lte_ss = (Ref)spcfn_lte_ss;
+    this->spc_neq_si = (Ref)spcfn_neq_si;
+    this->spc_neq_ss = (Ref)spcfn_neq_ss;
+    this->spc_not = (Ref)spcfn_not;
+    this->spc_pop_global = (Ref)spcfn_pop_global;
+    this->spc_pop_local = (Ref)spcfn_pop_local;
+    this->spc_push_global = (Ref)spcfn_push_global;
+    this->spc_push_local = (Ref)spcfn_push_local;
+    this->spc_push_local0 = (Ref)spcfn_push_local0;
+    this->spc_push_local1 = (Ref)spcfn_push_local1;
+    this->spc_pushq = (Ref)spcfn_pushq;
+    this->spc_reset = (Ref)spcfn_reset;
+    this->spc_return = (Ref)spcfn_return;
+    this->spc_set = (Ref)spcfn_set;
+    this->spc_set_call_global = (Ref)spcfn_set_call_global;
+    this->spc_set_calls = (Ref)spcfn_set_calls;
+    this->spc_start = (Ref)spcfn_start;
+    this->spc_syscall = (Ref)spcfn_syscall;
+}
+

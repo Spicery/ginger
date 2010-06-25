@@ -1,0 +1,19 @@
+if ( IsDefer( *vm->vp ) ) {
+	//	Is it already evaluated.  If so return the answer.
+	Ref *x = ToRef( *vm->vp );
+	if ( x[ 1 ] ) {
+		*vm->vp = x[ 2 ];
+		RETURN( pc + 1 );
+	} else {
+		//	Set up a CALLS
+		*( ++vm->vp ) = IntToRef( 1 );
+		*( ++vm->vp ) = x[ 2 ];
+		#ifdef IMPLEMENTATION1
+			RETURN( spc_calls( pc, vm ) );
+		#else
+			spc_calls();
+		#endif
+	}
+} else {
+	RETURN( pc + 1 );
+}

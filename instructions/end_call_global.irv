@@ -1,0 +1,11 @@
+long var = ToLong( pc[ 1 ] );
+Ref r = ((IdentClass *)( pc[ 2 ] )) -> valof;
+VMCOUNT = VMVP - ( Ref * )( VMSP[ var ] );
+{    
+    Ref *ptr;
+    if ( !IsPtr4( r ) ) call_error( r );
+    ptr = RefToPtr4( r );
+    if ( !IsFnKey( *ptr ) ) call_error( r );
+    VMLINK = pc + 3;
+    RETURN( ptr + 1 );
+}

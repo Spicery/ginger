@@ -1,0 +1,2 @@
+long n = ToLong( *( ++pc ) );
+RETURN( pc + n );

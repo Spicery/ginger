@@ -1,0 +1,29 @@
+function print( x ) =>
+    _print( x )
+endfunction;
+
+function println( x ) =>
+    _print( x );
+    _putchar( '\n' )
+endfunction;
+
+function double( x ) =>
+    x + x
+endfunction;
+
+function fact( n ) =>
+    if n <= 1 then
+        1
+    else
+        n * fact( n - 1 )
+    endif
+endfunction;
+
+function nfib( n ) =>
+    if n <= 1 then
+
+        1
+    else
+        1 + nfib( n - 1 ) + nfib( n - 2 )
+    endif
+endfunction;

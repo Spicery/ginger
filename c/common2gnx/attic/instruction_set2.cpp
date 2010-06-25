@@ -1,0 +1,18 @@
+#include "instruction_set2.hpp"
+
+#include "machine.hpp"
+#include "mishap.hpp"
+#include "common.hpp"
+#include "key.hpp"
+#include "sys.hpp"
+
+#define FREEZE
+#define MELT
+#define VMLINK 	( vm->link )
+#define VMSP	( vm->sp )
+#define VMVP	( vm->vp )
+#define VMCOUNT	( vm->count )
+extern Ref *pc;
+extern Machine vm;
+#define RETURN( e ) 	{ pc = ( e ); return; }
+#include "../automatic/instruction_set2.cpp.auto"

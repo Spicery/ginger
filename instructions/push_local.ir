@@ -1,0 +1,2 @@
+*( ++VMVP ) = VMSP[ ToLong( *( ++pc ) ) ];
+RETURN( pc + 1 );

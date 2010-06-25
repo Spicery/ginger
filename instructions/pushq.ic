@@ -1,0 +1,2 @@
+*( ++VMVP ) = *( ++pc );
+RETURN( pc + 1 );

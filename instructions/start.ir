@@ -1,0 +1,6 @@
+long n = ToLong( *( ++pc ) );
+#ifdef DBG_SPECIAL
+fprintf( stderr, "Storing %u in %d\n", ToULong( ToRef( VMVP ) ), n );
+#endif
+VMSP[n] = ToRef( VMVP );
+RETURN( pc + 1 );

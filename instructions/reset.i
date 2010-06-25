@@ -1,0 +1,2 @@
+FREEZE;
+throw NormalExit();

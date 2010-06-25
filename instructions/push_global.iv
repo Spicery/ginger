@@ -1,0 +1,3 @@
+IdentClass * id = (IdentClass *)( *( ++pc ) );
+*( ++VMVP ) = id->valof;
+RETURN( pc + 1 );

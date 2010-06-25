@@ -1,0 +1,8 @@
+#ifdef DBG_SPECIAL
+fprintf( stderr, "IFNOT finds %x on the stack (cf. %x & %x)\n", (unt)(*( VMVP )), (unt)(sys_false), (unt)(sys_true) );
+#endif
+RETURN(
+	*( VMVP-- ) == sys_false ?
+	pc + ToLong( pc[ 1 ] ) + 1:
+	pc + 2
+);

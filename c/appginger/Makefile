@@ -1,6 +1,6 @@
 CC=g++
 
-CPPFLAGS=-I../headers -I../automatic -I/usr/local/boost_1_43_0 -Wall -O -Wmissing-prototypes
+CPPFLAGS=-I../headers -I../automatic -I/usr/local/boost_1_43_0 -Wall -g -Wmissing-prototypes
 
 OBJS=mishap.o term.o read_xml.o \
 	functor.o plant.o cage.o machine.o vmi.o gc.o \

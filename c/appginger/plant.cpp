@@ -34,6 +34,8 @@ DestinationClass & PlantClass::newDestination() {
 
 #define REFBITS ( 8 * sizeof( Ref ) )
 
+
+
 Ref PlantClass::detach() {
 	//HeapClass & hp = this->vm->heap();
 	int L = this->code_data->size();		//	alt
@@ -120,7 +122,7 @@ static void plant_if( bool sense, Plant plant, Term term, DestinationClass & dst
 	    }
 	    default: {}
 	}
-	plant1( plant, term );
+	plant->compile1( term );
 	vmiIF( sense, plant, dst );
 }
 
@@ -132,13 +134,200 @@ static void plant_ifso( Plant plant, Term term, DestinationClass & dst ) {
 	plant_if( true, plant, term, dst );
 }
 
-void plant_term( Plant plant, Term term ) {
+
+void PlantClass::compile_term( Term term ) {
 	Functor fnc = term_functor( term );
 	/*Role in = term_role( term );
 	if ( IsImmediate( role ) ) {
 		vmiPUSHQ( plant, term_ref_cont( term ) );
 		return;
 	}*/
+	switch ( fnc ) {
+		case fnc_int:
+		case fnc_bool:
+		case fnc_absent:
+		case fnc_char:
+			vmiPUSHQ( this, term_ref_cont( term ) );
+			return;
+		case fnc_string: {
+			vmiPUSHQ(
+				this,
+				this->vm->heap().copyString(
+					term_string_cont( term )
+				)
+			);
+			break;
+		}
+        case fnc_eq:
+        case fnc_lt:
+        case fnc_lte:
+        case fnc_gt:
+        case fnc_gte:
+        case fnc_mul:
+        case fnc_div:
+        case fnc_sub:
+		case fnc_add: {
+			this->compile1( term_index( term, 0 ) );
+			this->compile1( term_index( term, 1 ) );
+			vmiOPERATOR( this, fnc );
+			break;
+		}
+		case fnc_incr_by:
+		case fnc_decr_by: {
+			int n = term_int_cont( term_index( term, 1 ) );
+			this->compile1( term_index( term, 0 ) );
+			vmiINCR( this, fnc == fnc_incr_by ? n : -n );
+			break;
+		}
+		case fnc_appspc: {
+			//	I do not believe this can ever be executed
+			this->compile_term( term_index( term, 1 ) );
+			Instruction instr = functor_inline( term_functor( term_index( term, 0 ) ) );
+			vmiAPPSPC( this, instr );
+			break;
+		}
+		case fnc_seq: {
+			int n = term_arity( term );
+			for ( int i = 0; i < n ; i++ ) {
+				this->compile_term( term_index( term, i ) );
+			}
+			break;
+		}
+		case fnc_id: {
+			Ident id = term_named_ident( term );
+			if ( id != NULL ) {
+				int slot = id->slot;
+				if ( slot >= 0 || !id->is_local ) {
+					vmiPUSHID(  this, id );
+				} else {
+					mishap( "Ident record not assigned slot (%s)", term_named_string( term ).c_str() );
+				}
+			} else {
+				mishap( "Unlifted identifier %s", term_named_string( term ).c_str() );
+			}
+			break;
+		}
+		case fnc_dec: {
+			Term var = term_index( term, 0 );
+			if ( term_functor( var ) != fnc_var ) throw;
+			Ident & ident = term_named_ident( var );
+			Term body = term_index( term, 1 );
+			this->compile1( body );
+			vmiPOPID( this, ident );
+			break;
+		}
+		case fnc_assign: {
+			Term lhs = term_index( term, 0 );
+			if ( term_is_id( lhs ) ) {
+				Ident & ident = term_named_ident( lhs );
+				Term rhs = term_index( term, 1 );
+				this->compile1( rhs );
+				vmiPOPID( this, ident );
+			} else {
+				throw ToBeDone().culprit( "Term", functor_name( term_functor( lhs ) ) );
+			}
+			break;
+		}
+		case fnc_fn: {
+			Term body = term_index( term, 1 );
+			vmiFUNCTION( this, term_fn_nlocals( term ), term_fn_ninputs( term ) );
+			vmiENTER( this );
+			this->compile_term( body );
+			vmiRETURN( this );
+			vmiPUSHQ( this, vmiENDFUNCTION( this ) );
+			break;
+		}
+		case fnc_app: {
+			Term fn = term_index( term, 0 );
+			Term args = term_index( term, 1 );
+			int aargs = arity_term( args );
+			//	plant_count( plant, args );
+			if ( term_is_id( fn ) ) {
+				if ( aargs == DONTKNOW ) {
+					int v = tmpvar( this );
+		        	vmiSTART( this, v );
+					this->compile_term( args );
+					vmiEND_CALL_ID( this, v, term_named_ident( fn ) );
+				} else {
+					this->compile_term( args );
+					vmiSET_CALL_ID( this, aargs, term_named_ident( fn ) );
+				}
+			} else if ( aargs == DONTKNOW ) {
+				int v = tmpvar( this );
+		        vmiSTART( this, v );
+		        this->compile_term(  args );
+				this->compile1( fn );
+				vmiEND1_CALLS( this, v );
+			} else {
+				this->compile_term( args );
+				this->compile1( fn );
+				vmiSET_CALLS( this, aargs );
+			}
+			break;
+		}
+		case fnc_syscall: {
+			Ref sc = term_ref_cont( term );
+			vmiSYS_CALL( this, sc );
+			break;
+		}
+		case fnc_for: {
+			// suppress unused argument ... will be used in the future
+			// Term bindings = term_index( term, 0 );
+			Term tests = term_index( term, 1 );
+			Term body = term_index( term, 2 );
+			DestinationClass body_label( this );
+			DestinationClass test_label( this );
+			vmiGOTO( this, test_label );
+			body_label.destinationSet();
+			this->compile_term( body );
+			test_label.destinationSet();
+			{
+				int i, len = term_arity( tests );
+				for ( i = 0; i < len; i++ ) {
+					plant_ifso( this, term_index( tests, i ), body_label );
+				}
+			}
+			break;
+		}
+		case fnc_if: {
+			int a = term_arity( term );
+			if ( a == 2 ) {
+				DestinationClass d( this );
+				//	plant1( plant, term_index( term, 0 ) );
+				//	vmiIFNOT( plant, d );
+				plant_ifnot( this, term_index( term, 0 ), d );
+				this->compile_term( term_index( term, 1 ) );
+				d.destinationSet();
+			} else if ( a == 3 ) {
+				DestinationClass d( this );
+				DestinationClass e( this );
+				//	plant1( plant, term_index( term, 0 ) );
+				//	vmiIFNOT( plant, e );
+				plant_ifnot( this, term_index( term, 0 ), e );
+				this->compile_term( term_index( term, 1 ) );
+				vmiGOTO( this, d );
+				e.destinationSet();
+				this->compile_term( term_index( term, 2 ) );
+				d.destinationSet();
+			} else {
+				this_never_happens();
+			}
+			break;
+		}
+		case fnc_not: {
+			this->compile1( term_index( term, 0 ) );
+			vmiNOT( this );
+		 	break;
+		}
+		default: {
+			mishap( "PLANT_TERM: Not implemented yet, functor '%s'", functor_name( fnc ) );
+		}
+	}
+}
+
+/*void plant_term( Plant plant, Term term ) {
+	plant->compile_term( term );
+	Functor fnc = term_functor( term );
 	switch ( fnc ) {
 		case fnc_int:
 		case fnc_bool:
@@ -319,7 +508,7 @@ void plant_term( Plant plant, Term term ) {
 			mishap( "PLANT_TERM: Not implemented yet, functor '%s'", functor_name( fnc ) );
 		}
 	}
-}
+} */
 
 /*  void plant_count( Plant plant, Term term ) {                            */
 /*  	int a = arity_term( term );                                         */
@@ -336,7 +525,26 @@ void plant_term( Plant plant, Term term ) {
 /*  	}                                                                   */
 /*  }                                                                       */
 
-void plant1( Plant plant, Term term ) {
+
+void PlantClass::compile1( Term term ) {
+	int a = arity_term( term );
+	if ( a == DONTKNOW ) {
+		int n = this->slot;
+		int v = tmpvar( this );
+		vmiSTART( this, v );
+		this->compile_term( term );
+		vmiCHECK1( this, v );
+		this->slot = n;
+	} else if ( a == 1 ) {
+		this->compile_term( term );
+	} else {
+		throw Mishap( "Wrong number of results in single context" ).culprit( "#Results", "" + a );
+	}
+}
+
+
+/*void plant1( Plant plant, Term term ) {
+	plant->compile1( term );
 	int a = arity_term( term );
 	if ( a == DONTKNOW ) {
 		int n = plant->slot;
@@ -350,9 +558,26 @@ void plant1( Plant plant, Term term ) {
 	} else {
 		throw Mishap( "Wrong number of results in single context" ).culprit( "#Results", "" + a );
 	}
+}*/
+
+void PlantClass::compile0( Term term ) {
+	int a = arity_term( term );
+	if ( a == DONTKNOW ) {
+		int n = this->slot;
+		int v = tmpvar( this );
+		vmiSTART( this, v );
+		this->compile_term( term );
+		vmiCHECK0( this, v );
+		this->slot = n;
+	} else if ( a == 0 ) {
+		this->compile_term( term );
+	} else {
+		throw Mishap( "Wrong number of results in zero context" ).culprit( "#Results", "" + a );
+	}
 }
 
-void plant0( Plant plant, Term term ) {
+/*void plant0( Plant plant, Term term ) {
+	plant->compile0( term ); 
 	int a = arity_term( term );
 	if ( a == DONTKNOW ) {
 		int n = plant->slot;
@@ -366,4 +591,4 @@ void plant0( Plant plant, Term term ) {
 	} else {
 		throw Mishap( "Wrong number of results in zero context" ).culprit( "#Results", "" + a );
 	}
-}
+}*/

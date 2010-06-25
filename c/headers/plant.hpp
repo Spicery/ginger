@@ -9,6 +9,7 @@
 #include "common.hpp"
 #include "instruction_set.hpp"
 #include "destination.hpp"
+#include "term.hpp"
 
 class MachineClass;
 typedef MachineClass * Machine;
@@ -70,8 +71,6 @@ public:
 	
 	const InstructionSet & instructionSet();
 	
-	Ref detach();
-	
 private:
 	std::vector< DestinationClass > 	destination_vector;
 	
@@ -89,6 +88,12 @@ public:
 	MachineClass 	*vm;
 
 public:
+	void compile_term( Term term );
+	Ref detach();
+	void compile1( Term term );
+	void compile0( Term term );
+
+public:
 	PlantClass( MachineClass * machine );
 };
 
@@ -99,10 +104,10 @@ typedef class PlantClass *Plant;
 #include "machine.hpp"
 #include "plant.hpp"
 
-void plant_term( Plant plant, Term term );
+/*void plant_term( Plant plant, Term term );
 Ref plant_detach( Plant plant );
 void plant_count( Plant plant, Term term );
 void plant1( Plant plant, Term term );
-void plant0( Plant plant, Term term );
+void plant0( Plant plant, Term term );*/
 
 #endif

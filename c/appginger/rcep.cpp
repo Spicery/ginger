@@ -60,7 +60,7 @@ bool read_comp_exec_print( Machine vm, istream & input ) {
 	    plant = vm->plant();
 	    vmiFUNCTION( plant, 0, 0 );
 	    vmiENTER( plant );
-        plant_term( plant, term );
+        plant->compile_term( term );
 	    vmiRETURN( plant );
 	    r = vmiENDFUNCTION( plant );
 	    start = clock();

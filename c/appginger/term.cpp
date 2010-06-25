@@ -586,7 +586,7 @@ static void tprint( Term term, int level ) {
 			Ident & id = term->ident();
     		splevel( level + 1 );
             printf(
-				"%s, length = %u, ",
+				"%s, length = %lu, ",
 				c.c_str(), c.size()
 			);
 			if ( id == NULL ) {

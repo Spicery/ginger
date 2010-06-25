@@ -120,7 +120,6 @@ Node ReadStateClass::read_expr_check( Functor fnc ) {
 Node ReadStateClass::postfix_processing( Node lhs, Item item, int prec ) {
 	Role role = item->role;
 	Functor fnc = item->functor;
-	this->clearPatternMode();			//	RHS of operators are never in pattern mode.
 	if ( role.IsPattern() ) {
 		lhs->updateAsPattern();
 		switch ( fnc ) {

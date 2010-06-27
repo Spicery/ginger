@@ -202,22 +202,33 @@ Node ReadStateClass::postfix_processing( Node lhs, Item item, int prec ) {
     throw;	//	Unreachable.
 }
 
+static void predicate( Functor sense, NodeFactory & ifunless, Node pred ) {
+	if ( sense == fnc_if ) {
+		ifunless.addNode( pred );
+	} else {
+		ifunless.start( "sysval" );
+		ifunless.putAttr( "name", "not" );
+		ifunless.addNode( pred );
+		ifunless.end();
+	}
+}
+
 Node ReadStateClass::read_if( Functor sense, Functor closer ) {
 	Node pred = this->read_expr();
 	if ( ! this->try_token( fnc_then ) ) {
 		this->check_token( fnc_do );
 	}
 	Node then_part = this->read_stmnts();
-	if ( this->try_token( fnc_else ) ) {
-		NodeFactory ifunless( sense == fnc_if ? "if" : "unless" );
-		ifunless.addNode( pred );
+	if ( this->try_token( fnc_else ) ) {	
+		NodeFactory ifunless( "if" );
+		predicate( sense, ifunless, pred );
 		ifunless.addNode( then_part );
-		ifunless.addNode( this->read_stmnts_check( fnc_endif ) );
+		ifunless.addNode( this->read_stmnts_check( closer ) );
 		return ifunless.node();
 		//return term_new_basic3( sense, pred, then_part, this->read_stmnts_check( fnc_endif ) );
 	} else if ( this->try_token( closer ) ) {
-		NodeFactory ifunless( sense == fnc_if ? "if" : "unless" );
-		ifunless.addNode( pred );
+		NodeFactory ifunless( "if" );
+		predicate( sense, ifunless, pred );
 		ifunless.addNode( then_part );
 		return ifunless.node();
 		//return term_new_basic2( sense, pred, then_part );
@@ -229,8 +240,8 @@ Node ReadStateClass::read_if( Functor sense, Functor closer ) {
 			this->check_token( fnc_elseunless );
 			new_sense = fnc_unless;
 		}
-		NodeFactory ifunless( sense == fnc_if ? "if" : "unless" );
-		ifunless.addNode( pred );
+		NodeFactory ifunless( "if" );
+		predicate( sense, ifunless, pred );
 		ifunless.addNode( then_part );
 		ifunless.addNode( this->read_if( new_sense, closer ) );
 		return ifunless.node();
@@ -250,27 +261,6 @@ Node ReadStateClass::read_syscall() {
 		throw Mishap( "Invalid token after >-> (syscall) arrow" ).culprit( it->nameString() );
 	}
 }
-
-/*Node ReadStateClass::read_bindings() {
-	NodeFactory bindings( "bindings" );
-	return bindings.node();		//term_new_basic0( fnc_bindings );
-}*/
-
-/*Node ReadStateClass::read_conditions() {
-	NodeFactory conditions( "conditions" );
-	for (;;) {
-	    if ( this->try_token( fnc_while ) ) {
-	    	conditions.addNode( this->read_expr() );
-	    } else if ( this->try_token( fnc_until ) ) {
-	    	conditions.start( "not" );
-	    	conditions.addNode( this->read_expr() );
-	    	conditions.end();
-	    } else {
-			break;
-	    }
-	}
-	return conditions.node();
-}*/
 
 Node ReadStateClass::read_for() {
 	Node query = this->read_query();

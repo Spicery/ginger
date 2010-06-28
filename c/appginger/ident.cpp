@@ -1,3 +1,5 @@
+#include <string>
+
 #include "ident.hpp"
 
 IdentClass::IdentClass( const std::string & nm ) :
@@ -21,6 +23,13 @@ bool IdentClass::isSame( IdentClass * other ) {
 Ident ident_new_local( const std::string & nm ) {
 	IdentClass * id = new IdentClass( nm );
 	id->is_local = true;
+	return shared< IdentClass >( id );
+}
+
+Ident ident_new_tmp( const int n ) {
+	IdentClass * id = new IdentClass( std::string( "tmpvar" ) );
+	id->is_local = true;
+	id->slot = n;
 	return shared< IdentClass >( id );
 }
 

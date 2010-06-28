@@ -11,160 +11,30 @@ using namespace std;
 
 #include <stdio.h>
 
-class TermClass {
-public:
-	virtual enum Functor functor() = 0;
-	virtual Term & child_ref( const int n ) = 0;
-	virtual int arity() = 0;
-	virtual const char * type_name() = 0;
-	
-public:
 
-	virtual Term child( const int n ) {
-		return this->child_ref( n );
-	}
-	
-	
-public:
+void TermClass::add( Term t ) {
+	cerr << this->type_name() << endl;
+	throw "No add for this type";
+}
 
-	virtual void add( Term t ) {
-		cerr << this->type_name() << endl;
-		throw "No add for this type";
-	}
-	
-	virtual Ref ref() {
-		cerr << this->type_name() << endl;
-		throw "No ref for this type";
-	}
-	
-	virtual Ident & ident() {
-		cerr << this->type_name() << endl;
-		throw "No ident for this type";
-	}
-	
-	virtual const std::string & name() {
-		cerr << this->type_name() << endl;
-		throw "No name for this type";
-	}
-	
-};
+Ref TermClass::ref() {
+	cerr << this->type_name() << endl;
+	throw "No ref for this type";
+}
 
-class KidsTermMixin : public virtual TermClass {
-private:
-	std::vector< Term > children;
-	
-public:
+Ident & TermClass::ident() {
+	cerr << this->type_name() << endl;
+	throw "No ident for this type";
+}
 
-	Term & child_ref( const int n ) {
-		return children[ n ];
-	}
-	
-	int arity() {
-		return static_cast< int >( this->children.size() );
-	}
-	
-	void add( Term kid ) {
-		this->children.push_back( kid );
-	}
-			
-public:
-
-	KidsTermMixin() 
-	{
-	}
-	
-	virtual ~KidsTermMixin() {}
-};
-
-class FunctorTermMixin : public virtual TermClass {
-private:
-	enum Functor functor_data;
-	
-public:
-	virtual enum Functor functor() {
-		return this->functor_data;
-	}
-	
-public:
-	FunctorTermMixin( enum Functor f ) :
-		functor_data( f )
-	{
-	}
-	
-	virtual ~FunctorTermMixin() {}
-};
-
-class BasicTermClass : 
-	public FunctorTermMixin,
-	public KidsTermMixin
-{
-public:
-	const char * type_name() { return "BasicTermClass"; }
-		
-public:
-
-	BasicTermClass(
-		enum Functor f
-	) :	
-		FunctorTermMixin( f ),
-		KidsTermMixin()
-	{
-	}
-	
-	virtual ~BasicTermClass() {}
-};
-
-class NoChildrenTermMixin : public virtual TermClass {
-public:
-	Term & child_ref( const int n ) {
-		fprintf( stderr, "Trying to find the child of %s\n", this->type_name() );
-		throw "Invalid index";
-	}
-	
-	int arity() {
-		return 0;
-	}
-	
-	virtual ~NoChildrenTermMixin() {}
-};
-
-class Functor0TermMixin : 
-	public FunctorTermMixin, 
-	public NoChildrenTermMixin 
-{
-public:
-	Functor0TermMixin(
-		enum Functor f
-	) :
-		FunctorTermMixin( f )
-	{
-	}
-	
-	virtual ~Functor0TermMixin() {}
-};
+const std::string & TermClass::name() {
+	cerr << this->type_name() << endl;
+	throw "No name for this type";
+}
 
 
-class EmptyTermClass : 
-	public Functor0TermMixin
-{
-public:
-
-	const char * type_name() { return "EmptyTermClass"; }
-
-public:
-	EmptyTermClass(
-		enum Functor f
-	) :
-		Functor0TermMixin( f )
-	{
-	}
-	
-	virtual ~EmptyTermClass() {}
-
-};
 
 
-//-- general ------------------------------------------------------------
 
 
 Term term_index( Term term, int n ) {
@@ -176,42 +46,7 @@ Term *term_index_ref( Term term, int n ) {
 }
 
 
-//-- ref ----------------------------------------------------------------
 
-class RefTermMixin : public virtual TermClass {
-private:
-	Ref ref_data;
-	
-public:
-	virtual Ref ref() {
-		return this->ref_data;
-	}
-	
-public:
-	RefTermMixin( Ref r ) : ref_data( r ) {}
-};
-
-class RefTermClass : 
-	public FunctorTermMixin, 
-	public KidsTermMixin,
-	public RefTermMixin 
-{
-public:
-	const char * type_name() { return "RefTermClass"; }
-	
-public:
-	RefTermClass(
-		enum Functor f,
-		Ref r
-	) :
-		FunctorTermMixin( f ),
-		KidsTermMixin(),
-		RefTermMixin( r )
-	{
-	}
-	
-	virtual ~RefTermClass() {}
-};
 
 Term term_new_ref( Functor fnc, Ref r ) {
 	return shared< TermClass >( new RefTermClass( fnc, r ) );
@@ -222,46 +57,18 @@ Ref term_ref_cont( Term term ) {
 	return term->ref();
 }
 
-
-//-- int ----------------------------------------------------------------
+//- int
 
 int term_int_cont( Term term ) {
 	Ref r = term->ref();
 	return SmallToLong( r );
 }
 
-//-- char ---------------------------------------------------------------
+//-	char
 
-class CharTermClass : 
-	public NoChildrenTermMixin 
-{
-private:
-	char 		char_data;
-
-public:
-	CharTermClass( const char ch ) {
-		this->char_data = ch;
-	}
-
-public:
-	char character() {
-		return this->char_data;
-	}
-	
-	Ref ref() {
-		return IntToChar( this->char_data );
-	}
-
-	const char * type_name() { return "CharTermClass"; }
-
-	
-public:
-	enum Functor functor() {
-		return fnc_char;
-	}
-	
-	virtual ~CharTermClass() {}
-};
+Ref CharTermClass::ref() {
+	return IntToChar( this->char_data );
+}
 
 Term term_new_char( const char ch ) {
 	return shared< TermClass >( new CharTermClass( ch ) );
@@ -271,39 +78,6 @@ char term_char_cont( Term term ) {
 	return dynamic_cast< CharTermClass * >( term.get() )->character();
 }
 
-//-- string -------------------------------------------------------------
-//	Well, I have clearly got this wrong.  There should be some kind of
-//	unification possible here.  But I am not entirely sure about the right
-//	way to achieve it.
-
-class StringTermClass : 
-	public NoChildrenTermMixin 
-{
-private:
-	std::string 		string_data;
-
-public:
-	StringTermClass( const char * ch ) :
-		string_data( ch )
-	{
-	}
-	
-	virtual ~StringTermClass() {}
-
-public:
-	const char * charArray() {
-		return this->string_data.c_str();
-	}
-	
-	const char * type_name() { return "StringTermClass"; }
-
-	
-public:
-	enum Functor functor() {
-		return fnc_string;
-	}
-		
-};
 
 
 
@@ -321,54 +95,7 @@ const char *term_string_cont( Term term ) {
 
 
 
-//-- id -----------------------------------------------------------------
-//	We need to record
-//		1.	lexical name, hash, length
-//		2.	declared attributes (i.e. flags)
-//		3.	usage attributes
-//		4.	valof (for globals)
-//		5.	slot allocated (for locals)
 
-class NamedTermClass : 
-	public FunctorTermMixin,
-	public NoChildrenTermMixin 
-{
-private:
-	const std::string 	name_data;
-	Ident				ident_data;
-
-public:
-	NamedTermClass( Functor fnc, const char * nm ) :
-		FunctorTermMixin( fnc ),
-		name_data( nm )
-	{
-	}
-	
-	NamedTermClass( Functor fnc, const std::string & nm ) :
-		FunctorTermMixin( fnc ),
-		name_data( nm )
-	{	
-	}
-	
-	virtual ~NamedTermClass() {
-	}
-
-public:
-	Ident & ident() {
-		return this->ident_data;
-	}
-	
-	const char * type_name() { return "NamedTermClass"; }
-
-	const std::string & nameString() {
-		return this->name_data;
-	}
-	
-	const std::string & name() {
-		return this->name_data;
-	}
-	
-};
 
 
 
@@ -389,56 +116,7 @@ bool term_is_id( Term term ) {
 }
 
 
-//-- fn -----------------------------------------------------------------
 
-class FnTermClass : public TermClass {
-private:
-	Term 	arg_data;
-	Term	body_data;
-	int 	nlocals_data;
-	int 	ninputs_data;
-
-public:
-	FnTermClass( Term arg, Term body ) :
-		arg_data( arg ),
-		body_data( body )
-	{
-	}
-	
-	virtual ~FnTermClass() {
-	}
-
-public:
-
-	int arity() {
-		return 2;
-	}
-	
-	Term & child_ref( int n ) {
-		switch ( n ) {
-		case 0: return this->arg_data;
-		case 1: return this->body_data;
-		default: throw "no such index";
-		}
-	}
-
-	int & nlocals() {
-		return this->nlocals_data;
-	}
-	
-	int & ninputs() {
-		return this->ninputs_data;
-	}
-	
-	const char * type_name() { return "FnTermClass"; }
-
-	
-public:
-	enum Functor functor() {
-		return fnc_fn;
-	}
-	
-};
 
 
 Term term_new_fn( Term args, Term body ) {
@@ -461,31 +139,9 @@ int *term_fn_ninputs_ref( Term term ) {
 	return &dynamic_cast< FnTermClass * >( term.get() )->ninputs();
 }
 
-//-- item ---------------------------------------------------------------
 
-class ItemTermClass : 
-	public Functor0TermMixin, 
-	public RefTermMixin
-{
-public:
-	const char * type_name() { return "ItemTermClass"; }
-	
-public:
-	ItemTermClass(
-		enum Functor f,
-		//Role role,
-		Ref r
-	) :
-		Functor0TermMixin( f ),
-		//RoleTermMixin( role ),
-		RefTermMixin( r )
-	{
-	}
-	
-	virtual ~ItemTermClass() {}
-};
 
-//-- general terms ------------------------------------------------------
+//- general terms --------------------------------------------------------------
 
 
 
@@ -543,7 +199,13 @@ Term term_new_absent() {
 	;	
 }
 
-
+Term term_new_from( Term id, Term start_expr, Term end_expr ) {
+	Term x( new FromTermClass() );
+	x->add( id );
+	x->add( start_expr );
+	x->add( end_expr );
+	return x;
+}
 
 Functor term_functor( Term term ) {
     return term->functor();
@@ -552,8 +214,6 @@ Functor term_functor( Term term ) {
 int term_arity( Term term ) {
     return term->arity();
 }
-
-
 
 //-- printing -----------------------------------------------------------
 

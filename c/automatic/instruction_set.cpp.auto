@@ -4,6 +4,7 @@ const char * InstructionSet::name( Ref spc ) const {
         spc == spc__decr ? "_decr" :
         spc == spc__div ? "_div" :
         spc == spc__eq ? "_eq" :
+        spc == spc__neq ? "_neq" :
         spc == spc__gt ? "_gt" :
         spc == spc__gte ? "_gte" :
         spc == spc__incr ? "_incr" :
@@ -99,6 +100,7 @@ Ref InstructionSet::lookup( Instruction instr ) const {
     case vmc__decr: return this->spc__decr;
     case vmc__div: return this->spc__div;
     case vmc__eq: return this->spc__eq;
+    case vmc__neq: return this->spc__neq;
     case vmc__gt: return this->spc__gt;
     case vmc__gte: return this->spc__gte;
     case vmc__incr: return this->spc__incr;

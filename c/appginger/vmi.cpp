@@ -42,6 +42,10 @@ void vmiOPERATOR( Plant plant, Functor fnc ) {
         fnc == fnc_div ? vmc__div :
         fnc == fnc_sub ? vmc__sub :
         fnc == fnc_add ? vmc__add :
+        fnc == fnc_decr ? vmc__decr :
+        fnc == fnc_incr ? vmc__incr :
+        fnc == fnc_not ? vmc_not :
+        fnc == fnc_neq ? vmc__neq :
         ( this_never_happens(), (Instruction)0 )
 	);
 }
@@ -229,6 +233,7 @@ static bool eval_relop( char op, int a, int b ) {
 		op == '=' ? a == b :
 		op == '<' ? a < b :
 		op == 'l' ? a <= b :
+		op == '!' ? a != b :
 		( this_never_happens(), false )
 	);
 }
@@ -240,6 +245,7 @@ static char rev_relop( char op ) {
 		op == '=' ? '!' :
 		op == '<' ? 'g' :
 		op == 'l' ? '>' :
+		op == '!' ? '=' :
 		( this_never_happens(), '\0' )
 	);
 }
@@ -257,11 +263,20 @@ static char rev_relop( char op ) {
 //		'>'		>
 //		'g'		>=
 */
-void vmiIF_RELOP( Plant plant, char flag1, int arg1, char op, char flag2, int arg2, DestinationClass & dst ) {
+
+void vmiIF_RELOP( Plant plant, bool sense, char flag1, int arg1, char op, char flag2, int arg2, DestinationClass & dst ) {
+	if ( sense ) {
+		vmiIFSO_RELOP( plant, flag1, arg1, op, flag2, arg2, dst );
+	} else {
+		vmiIFNOT_RELOP( plant, flag1, arg1, op, flag2, arg2, dst );
+	}
+}
+
+void vmiIFSO_RELOP( Plant plant, char flag1, int arg1, char op, char flag2, int arg2, DestinationClass & dst ) {
 	if ( flag1 == 'i' && flag2 == 'i' ) {
 		if ( eval_relop( op, arg1, arg2 ) ) vmiGOTO( plant, dst );
 	} else if ( flag1 == 'i' && flag2 == 's' ) {
-		vmiIF_RELOP( plant, flag2, arg2, rev_relop( op ), flag1, arg1, dst );
+		vmiIFSO_RELOP( plant, flag2, arg2, rev_relop( op ), flag1, arg1, dst );
 	} else if ( flag1 == 's' && flag2 == 'i' ) {
 		emitSPC(
 			plant,
@@ -296,5 +311,135 @@ void vmiIF_RELOP( Plant plant, char flag1, int arg1, char op, char flag2, int ar
 }
 
 void vmiIFNOT_RELOP( Plant plant, char flag1, int arg1, char op, char flag2, int arg2, DestinationClass & dst ) {
-	vmiIF_RELOP( plant, flag1, arg1, rev_relop( op ), flag2, arg2, dst );
+	vmiIFSO_RELOP( plant, flag1, arg1, rev_relop( op ), flag2, arg2, dst );
+}
+
+void VmiRelOpFactory::setLeft( int arg ) {
+	this->flag1 = 'i';
+	this->int1 = arg;
+}
+
+void VmiRelOpFactory::setLeft( Ident id ) {
+	this->flag1 = 's';
+	this->ident1 = id;
+}
+
+void VmiRelOpFactory::setRight( int arg ) {
+	this->flag2 = 'i';
+	this->int2 = arg;
+}
+
+void VmiRelOpFactory::setRight( Ident id ) {
+	this->flag2 = 's';
+	this->ident2 = id;
+}
+
+void VmiRelOpFactory::setLT() {
+	this->op = '<';
+}
+
+void VmiRelOpFactory::setGT() {
+	this->op = '>';
+}
+
+void VmiRelOpFactory::setLTE() {
+	this->op = 'l';
+}
+
+void VmiRelOpFactory::setGTE() {
+	this->op = 'g';
+}
+
+void VmiRelOpFactory::setEQ() {
+	this->op = '=';
+}
+
+void VmiRelOpFactory::setNEQ() {
+	this->op = '!';
+}
+
+void VmiRelOpFactory::negate() {
+	this->op = rev_relop( this->op );
+}
+
+void VmiRelOpFactory::compilePushLeft() {
+	switch ( this->flag1 ) {
+		case 'i': {
+			emitRef( this->plant, IntToSmall( this->int1 ) );
+			break;
+		}
+		case 's': {
+			vmiPUSHID( this->plant, this->ident1 );
+			break;
+		}
+		default: throw;			//	Never happens.
+	}
+}
+
+void VmiRelOpFactory::compilePushRight() {
+	switch ( this->flag2 ) {
+		case 'i': {
+			emitRef( this->plant, IntToSmall( this->int2 ) );
+			break;
+		}
+		case 's': {
+			vmiPUSHID( this->plant, this->ident2 );
+			break;
+		}
+		default: throw;			//	Never happens.
+	}
+}
+
+void VmiRelOpFactory::compileOp() {
+	vmiOPERATOR( 
+		this->plant,
+		op == 'g' ? fnc_gte :
+		op == '>' ? fnc_gt :
+		op == '=' ? fnc_eq  :
+		op == '!' ? fnc_neq :
+		op == '<' ? fnc_lt :
+		op == 'l' ? fnc_lte :
+		( this_never_happens(), (Functor)0 )
+	);
+}
+
+
+void VmiRelOpFactory::ifSo( DestinationClass &dst ) {
+	if ( this->flag1 == '?' ) throw;
+	if ( this->flag2 == '?' ) throw;
+	if ( this->op == '?' ) throw;
+	if ( 
+		( this->flag1 != 's' || this->ident1->is_local ) &&
+		( this->flag2 != 's' || !this->ident2->is_local )
+	) {
+		int arg1 = this->flag1 == 'i' ? this->int1 : this->ident1->slot;
+		int arg2 = this->flag1 == 'i' ? this->int2 : this->ident2->slot;
+		vmiIFSO_RELOP( this->plant, this->flag1, arg1, this->op, this->flag2, arg2, dst );
+	} else {
+		this->compilePushLeft();
+		this->compilePushRight();
+		this->compileOp();
+		vmiIFSO( this->plant, dst );
+	}
+}
+
+void VmiRelOpFactory::ifNot( DestinationClass &dst ) {
+	if ( this->flag1 == '?' ) throw;
+	if ( this->flag2 == '?' ) throw;
+	if ( this->op == '?' ) throw;
+	if ( this->flag1 == 's' && !this->ident1->is_local ) throw;
+	if ( this->flag2 == 's' && !this->ident2->is_local ) throw;
+	if ( 
+		( this->flag1 != 's' || this->ident1->is_local ) &&
+		( this->flag2 != 's' || !this->ident2->is_local )
+	) {
+		int arg1 = this->flag1 == 'i' ? this->int1 : this->ident1->slot;
+		int arg2 = this->flag1 == 'i' ? this->int2 : this->ident2->slot;
+		vmiIFNOT_RELOP( this->plant, this->flag1, arg1, this->op, this->flag2, arg2, dst );
+	} else {
+		this->compilePushLeft();
+		this->compilePushRight();
+		this->compileOp();
+		vmiIFNOT( this->plant, dst );
+	}
 }

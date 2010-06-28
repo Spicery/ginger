@@ -293,9 +293,15 @@ Term TermData::makeTerm() {
 		} else {
 			return makeIf( 0, n, kids );
 		}
+	} else if ( name == "for" && kids.size() == 2 ) {
+		return term_new_basic2( fnc_for, kids[0], kids[1] );
+	} else if ( name == "from" && kids.size() == 3 ) {
+		return term_new_from( kids[0], kids[1], kids[2] );
 	} else if ( name == "app" && kids.size() == 2 ) {
 		return term_new_basic2( fnc_app, kids[ 0 ], kids[ 1 ] );
 	} else {
+		cerr << "name = " << name << endl;
+		cerr << "#kids = " << kids.size() << endl;
 		throw;
 	}
 }

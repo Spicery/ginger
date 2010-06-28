@@ -40,6 +40,12 @@ static void spcfn__eq( void ) {
     RETURN( pc + 1 );
 }
 
+static void spcfn__neq( void ) {
+    Ref r = *( VMVP-- );
+    *( VMVP ) = *( VMVP ) == r ? sys_false : sys_true;
+    RETURN( pc + 1 );
+}
+
 static void spcfn__gt( void ) {
     long b = ToLong( *( VMVP-- ) );
     *( VMVP ) = ToLong( *( VMVP ) ) > b ? sys_true : sys_false;
@@ -148,8 +154,6 @@ static void spcfn_check0( void ) {
 }
 
 static void spcfn_check1( void ) {
-    #ifdef FOGLE
-    
     long n = ToLong( *( ++pc ) );
     unsigned long d;
     #ifdef DBG_SPECIAL
@@ -161,11 +165,6 @@ static void spcfn_check1( void ) {
     if ( d == 1 ) RETURN( pc + 1 );
     throw Mishap( "Wrong number of results (needed 1)" ).culprit( "#results", "" + d );
     RETURN( NULL );	// stupid compiler
-    #else
-    ++pc;
-    RETURN(pc+1);
-    
-    #endif
 }
 
 static void spcfn_end( void ) {
@@ -268,20 +267,8 @@ static void spcfn_eq_ss( void ) {
 }
 
 static void spcfn_goto( void ) {
-    //	TEMPORARY HACK!!!!
-    
-    //long n = ToLong( *( ++pc ) );
-    //RETURN( pc + n );
-    
-    Ref *link;
-    link = (Ref *)VMSP[ -3 ];	//	recover return address
-    VMSP = (Ref *)VMSP[ -2 ];				//	restore stack pointer
-    #ifdef DBG_SPECIAL
-    	printf( "Recover link = %x\n", ToUInt( link ) );
-    	printf( "Stack pointer recovered as %x\n", ToUInt( VMSP ) );
-    #endif
-    RETURN( link );
-    
+    long n = ToLong( *( ++pc ) );
+    RETURN( pc + n );
 }
 
 static void spcfn_gt_si( void ) {
@@ -489,6 +476,7 @@ InstructionSet2::InstructionSet2() {
     this->spc__decr = (Ref)spcfn__decr;
     this->spc__div = (Ref)spcfn__div;
     this->spc__eq = (Ref)spcfn__eq;
+    this->spc__neq = (Ref)spcfn__neq;
     this->spc__gt = (Ref)spcfn__gt;
     this->spc__gte = (Ref)spcfn__gte;
     this->spc__incr = (Ref)spcfn__incr;

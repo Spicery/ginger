@@ -2,6 +2,7 @@
 	Ref spc__decr;
 	Ref spc__div;
 	Ref spc__eq;
+	Ref spc__neq;
 	Ref spc__gt;
 	Ref spc__gte;
 	Ref spc__incr;

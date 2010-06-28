@@ -41,6 +41,11 @@ void Machine3::core( bool init_mode, Ref *pc ) {
         *( VMVP ) = *( VMVP ) == r ? sys_true : sys_false;
         RETURN( pc + 1 );
     }
+    L__neq: {
+        Ref r = *( VMVP-- );
+        *( VMVP ) = *( VMVP ) == r ? sys_false : sys_true;
+        RETURN( pc + 1 );
+    }
     L__gt: {
         long b = ToLong( *( VMVP-- ) );
         *( VMVP ) = ToLong( *( VMVP ) ) > b ? sys_true : sys_false;
@@ -137,8 +142,6 @@ void Machine3::core( bool init_mode, Ref *pc ) {
         RETURN( NULL );	// stupid compiler
     }
     L_check1: {
-        #ifdef FOGLE
-        
         long n = ToLong( *( ++pc ) );
         unsigned long d;
         #ifdef DBG_SPECIAL
@@ -150,11 +153,6 @@ void Machine3::core( bool init_mode, Ref *pc ) {
         if ( d == 1 ) RETURN( pc + 1 );
         throw Mishap( "Wrong number of results (needed 1)" ).culprit( "#results", "" + d );
         RETURN( NULL );	// stupid compiler
-        #else
-        ++pc;
-        RETURN(pc+1);
-        
-        #endif
     }
     L_end: {
         Ref r;
@@ -248,20 +246,8 @@ void Machine3::core( bool init_mode, Ref *pc ) {
         RETURN( ToLong( VMSP[ s ] ) == ToLong( VMSP[ t ] ) ? pc + d + 3 : pc + 4 );
     }
     L_goto: {
-        //	TEMPORARY HACK!!!!
-        
-        //long n = ToLong( *( ++pc ) );
-        //RETURN( pc + n );
-        
-        Ref *link;
-        link = (Ref *)VMSP[ -3 ];	//	recover return address
-        VMSP = (Ref *)VMSP[ -2 ];				//	restore stack pointer
-        #ifdef DBG_SPECIAL
-        	printf( "Recover link = %x\n", ToUInt( link ) );
-        	printf( "Stack pointer recovered as %x\n", ToUInt( VMSP ) );
-        #endif
-        RETURN( link );
-        
+        long n = ToLong( *( ++pc ) );
+        RETURN( pc + n );
     }
     L_gt_si: {
         long s = ToLong( pc[1] );
@@ -441,6 +427,7 @@ void Machine3::core( bool init_mode, Ref *pc ) {
         ins.spc__decr = &&L__decr;
         ins.spc__div = &&L__div;
         ins.spc__eq = &&L__eq;
+        ins.spc__neq = &&L__neq;
         ins.spc__gt = &&L__gt;
         ins.spc__gte = &&L__gte;
         ins.spc__incr = &&L__incr;

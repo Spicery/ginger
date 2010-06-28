@@ -22,6 +22,10 @@ public abstract class GeneralInstructionSet {
 		return new GenericInstruction();
 	}
 
+	public Instruction _neq_i() {
+		return new GenericInstruction();
+	}
+
 
 	public Instruction _gt_i() {
 		return new GenericInstruction();
@@ -196,8 +200,7 @@ public abstract class GeneralInstructionSet {
 	public Instruction neq_ss_irrr() {
 		return new GenericInstruction();
 	}
-
-
+	
 	public Instruction not_i() {
 		return new GenericInstruction();
 	}

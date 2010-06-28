@@ -46,9 +46,10 @@ public:
 
 class LiftStateClass {
 public:
-    Dict        dict;
-    int         level;
-    Env        	env;
+    Dict        	dict;
+    int         	level;
+    FnTermClass * 	function;
+    Env        		env;
     
 private:    
     enum Lookup lookup( const std::string & c, Ident *id );
@@ -61,7 +62,8 @@ public:
 public:   
 	LiftStateClass( Dict dict, int level ) :
 		dict( dict ),
-		level( level )
+		level( level ),
+		function( NULL )
 	{	
 	}
 };
@@ -125,14 +127,21 @@ Term LiftStateClass::lift( Term term ) {
             return this->lift( synthetic );
         }
         case fnc_fn : {
-            //    fn( _, args( id( _ ), ... ), Body )
-            Term args = term_index( term, 0 );
+            //    fn( args( id( _ ), ... ), Body )
+            this->level += 1;
+            FnTermClass * old_function = this->function;
+            
+            FnTermClass * fn = dynamic_cast< FnTermClass * >( term.get() );
+            this->function = fn;
+            int & slot = fn->nlocals();
+            Term args = fn->child( 0 );
             int a = term_arity( args );
-            int slot = 0;
+            
+            //int slot = 0;
             #ifdef DBG_LIFT
                 fprintf( stderr, "Arity = %d\n", a );
             #endif
-            this->level += 1;
+
             for ( int i = 0; i < a; i++ ) {
                 Term arg = term_index( args, i );
                 const std::string & c = term_named_string( arg );
@@ -141,7 +150,9 @@ Term LiftStateClass::lift( Term term ) {
                 #endif
                 Ident id = ident_new_local( c );
                 this->env.add( id );
+                printf( "Function now has %d slots\n", fn->nlocals() );
                 id->slot = slot++;
+                printf( "Function now has %d slots\n", fn->nlocals() );
                 id->level = this->level;
                 term_named_ident( arg ) = id;
             }
@@ -156,11 +167,34 @@ Term LiftStateClass::lift( Term term ) {
             #ifdef DBG_LIFT
                 fprintf( stderr, "Returning term\n" );
             #endif
-            *term_fn_nlocals_ref( term ) = ( this->env.isNull() ? 0 : this->env.top()->slot + 1 );
-            *term_fn_ninputs_ref( term ) = a;
+    		fn->ninputs() = a;
+            //*term_fn_nlocals_ref( term ) = ( this->env.isNull() ? 0 : this->env.top()->slot + 1 );
+            //*term_fn_ninputs_ref( term ) = a;
+            
+            this->level -= 1;
+            this->function = old_function;
             return term;
         }
-        case fnc_id: {
+        case fnc_var : {
+            const std::string & c = term_named_string( term );
+            if ( this->level == 0 ) {
+                //    printf( "GLOBAL VAR %s\n", c );
+                Ident id = this->dict->lookup_or_add( c );
+                term_named_ident( term ) = id;
+            } else {
+            	FnTermClass * fn = this->function;
+            	int & slot = fn->nlocals();
+                //    printf( "LOCAL VAR %s\n", c );
+                Ident id = ident_new_local( c );
+                this->env.add( id );
+                id->slot = slot++;
+                id->level = this->level;
+                term_named_ident( term ) = id;
+                printf( "Function now has %d slots\n", fn->nlocals() );
+            }
+ 			return term;			        	
+        }
+         case fnc_id: {
             Ident id;
             switch ( this->lookup( term_named_string( term ), &id ) ) {
                 case Global:
@@ -176,22 +210,7 @@ Term LiftStateClass::lift( Term term ) {
             }
             throw;	//	Unreachable.
         }
-        case fnc_dec : {
-            Term var = term_index( term, 0 );
-            Term *bodyref = term_index_ref( term, 1 );
-            const std::string & c = term_named_string( term_index( term, 0 ) );
-            if ( this->level == 0 ) {
-                //    printf( "GLOBAL VAR %s\n", c );
-                Ident id = this->dict->lookup_or_add( c );
-                term_named_ident( var ) = id;
-            } else {
-                //    printf( "LOCAL VAR %s\n", c );
-                to_be_done( "fnc_var" );
-            }
-            *bodyref = this->lift( *bodyref );
-            return term;
-        }
-        case fnc_add: {
+       case fnc_add: {
             //Pool scratch = state.pools->scratch;
             Term arg0 = term_index( term, 0 );
             Term arg1 = term_index( term, 1 );

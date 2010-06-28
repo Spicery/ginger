@@ -27,7 +27,8 @@ void vmiIFNOT( Plant plant, DestinationClass & d );
 void vmiIFSO( Plant plant, DestinationClass & d );
 void vmiIF( bool sense, Plant plant, DestinationClass & d );
 void vmiGOTO( Plant plant, DestinationClass & d );
-void vmiIF_RELOP( Plant plant, char flag1, int arg1, char op, char flag2, int arg2, DestinationClass & dst );
+void vmiIF_RELOP( Plant plant, bool sense, char flag1, int arg1, char op, char flag2, int arg2, DestinationClass & dst );
+void vmiIFSO_RELOP( Plant plant, char flag1, int arg1, char op, char flag2, int arg2, DestinationClass & dst );
 void vmiIFNOT_RELOP( Plant plant, char flag1, int arg1, char op, char flag2, int arg2, DestinationClass & dst );
 void vmiEND1_CALLS( Plant plant, int var );
 void vmiSET_CALLS( Plant plant, int in_arity );
@@ -35,5 +36,49 @@ void vmiEND_CALL_ID( Plant plant, int var, Ident ident );
 void vmiSET_CALL_ID( Plant plant, int in_arity, Ident ident );
 void vmiSET( Plant plant, int A );
 void vmiNOT( Plant plant );
+
+class VmiRelOpFactory {
+private:
+	Plant plant;
+	char flag1;
+	Ident ident1;
+	int int1;
+	char op;
+	char flag2;
+	Ident ident2;
+	int int2;
+	
+public:
+	void setLeft( int arg1 );
+	void setLeft( Ident id );
+	void setRight( int arg1 );
+	void setRight( Ident id );
+	void setLT();
+	void setGT();
+	void setLTE();
+	void setGTE();
+	void setEQ();
+	void setNEQ();
+	void negate();
+	
+private:
+	void compilePushLeft();
+	void compilePushRight();
+	void compileOp();
+
+	
+public:
+	void ifSo( DestinationClass &dst );
+	void ifNot( DestinationClass &dst );
+	
+public:
+	VmiRelOpFactory( Plant p ) :
+		plant( p ),
+		flag1( '?' ),
+		op( '?' ),
+		flag2( '?' )
+	{
+	}
+};
 
 #endif

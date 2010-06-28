@@ -86,12 +86,23 @@ public:
 	int 		ninputs;
 	int 		slot;
 	MachineClass 	*vm;
+	
+private:
+	void compileQueryInit( Term query );
+	void compileQueryNext( Term query );
+	void compileQueryIfSo( Term query, DestinationClass & dst );
+	void compileFor( Term query, Term body );
+	Ident newTmpIdent();
+
 
 public:
-	void compile_term( Term term );
+	void compileTerm( Term term );
 	Ref detach();
 	void compile1( Term term );
 	void compile0( Term term );
+	void compileIf( bool sense, Term term, DestinationClass & dst );
+	void compileIfNot( Term, DestinationClass& );
+	void compileIfSo( Term, DestinationClass& );
 
 public:
 	PlantClass( MachineClass * machine );

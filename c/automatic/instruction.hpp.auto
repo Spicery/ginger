@@ -2,6 +2,7 @@
     vmc__decr,
     vmc__div,
     vmc__eq,
+    vmc__neq,
     vmc__gt,
     vmc__gte,
     vmc__incr,

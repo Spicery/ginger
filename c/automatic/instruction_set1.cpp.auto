@@ -40,6 +40,12 @@ static Ref *spcfn__eq( Ref *pc, Machine vm ) {
     RETURN( pc + 1 );
 }
 
+static Ref *spcfn__neq( Ref *pc, Machine vm ) {
+    Ref r = *( VMVP-- );
+    *( VMVP ) = *( VMVP ) == r ? sys_false : sys_true;
+    RETURN( pc + 1 );
+}
+
 static Ref *spcfn__gt( Ref *pc, Machine vm ) {
     long b = ToLong( *( VMVP-- ) );
     *( VMVP ) = ToLong( *( VMVP ) ) > b ? sys_true : sys_false;
@@ -148,8 +154,6 @@ static Ref *spcfn_check0( Ref *pc, Machine vm ) {
 }
 
 static Ref *spcfn_check1( Ref *pc, Machine vm ) {
-    #ifdef FOGLE
-    
     long n = ToLong( *( ++pc ) );
     unsigned long d;
     #ifdef DBG_SPECIAL
@@ -161,11 +165,6 @@ static Ref *spcfn_check1( Ref *pc, Machine vm ) {
     if ( d == 1 ) RETURN( pc + 1 );
     throw Mishap( "Wrong number of results (needed 1)" ).culprit( "#results", "" + d );
     RETURN( NULL );	// stupid compiler
-    #else
-    ++pc;
-    RETURN(pc+1);
-    
-    #endif
 }
 
 static Ref *spcfn_end( Ref *pc, Machine vm ) {
@@ -268,20 +267,8 @@ static Ref *spcfn_eq_ss( Ref *pc, Machine vm ) {
 }
 
 static Ref *spcfn_goto( Ref *pc, Machine vm ) {
-    //	TEMPORARY HACK!!!!
-    
-    //long n = ToLong( *( ++pc ) );
-    //RETURN( pc + n );
-    
-    Ref *link;
-    link = (Ref *)VMSP[ -3 ];	//	recover return address
-    VMSP = (Ref *)VMSP[ -2 ];				//	restore stack pointer
-    #ifdef DBG_SPECIAL
-    	printf( "Recover link = %x\n", ToUInt( link ) );
-    	printf( "Stack pointer recovered as %x\n", ToUInt( VMSP ) );
-    #endif
-    RETURN( link );
-    
+    long n = ToLong( *( ++pc ) );
+    RETURN( pc + n );
 }
 
 static Ref *spcfn_gt_si( Ref *pc, Machine vm ) {
@@ -489,6 +476,7 @@ InstructionSet1::InstructionSet1() {
     this->spc__decr = (Ref)spcfn__decr;
     this->spc__div = (Ref)spcfn__div;
     this->spc__eq = (Ref)spcfn__eq;
+    this->spc__neq = (Ref)spcfn__neq;
     this->spc__gt = (Ref)spcfn__gt;
     this->spc__gte = (Ref)spcfn__gte;
     this->spc__incr = (Ref)spcfn__incr;

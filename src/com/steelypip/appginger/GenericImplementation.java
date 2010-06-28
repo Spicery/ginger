@@ -25,6 +25,11 @@ public class GenericImplementation extends Implementation {
 	}
 
 	@Override
+	public Instruction _neq_i() {
+		return new GenericInstruction();
+	}
+
+	@Override
 	public Instruction _gt_i() {
 		return new GenericInstruction();
 	}

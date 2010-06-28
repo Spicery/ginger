@@ -30,6 +30,7 @@ typedef shared< IdentClass > Ident;
 
 
 Ident ident_new_local( const std::string & nm );
+Ident ident_new_tmp( int n );
 Ident ident_new_global( const std::string & nm );
 
 #endif

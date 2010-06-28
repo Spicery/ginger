@@ -15,6 +15,7 @@ public abstract class Implementation extends GeneralInstructionSet {
 		answer.add( this._decr_i().init( "_decr", "i" ) );
 		answer.add( this._div_i().init( "_div", "i" ) );
 		answer.add( this._eq_i().init( "_eq", "i" ) );
+		answer.add( this._neq_i().init( "_neq", "i" ) );
 		answer.add( this._gt_i().init( "_gt", "i" ) );
 		answer.add( this._gte_i().init( "_gte","i" ) );
 		answer.add( this._incr_i().init( "_incr", "i" ) );

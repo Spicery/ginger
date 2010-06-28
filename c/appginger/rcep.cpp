@@ -36,7 +36,6 @@ bool read_comp_exec_print( Machine vm, istream & input ) {
 #endif
 
 	try {
-        //term = read_state.read_expr();
         term = read_xml.readElement();
         
         if ( not term ) return false;
@@ -60,14 +59,14 @@ bool read_comp_exec_print( Machine vm, istream & input ) {
 	    plant = vm->plant();
 	    vmiFUNCTION( plant, 0, 0 );
 	    vmiENTER( plant );
-        plant->compile_term( term );
+        plant->compileTerm( term );
 	    vmiRETURN( plant );
 	    r = vmiENDFUNCTION( plant );
 	    start = clock();
     	vm->execute( r );
-	} catch ( Mishap & m ) {
-		m.report();
-		throw;
+	//} catch ( Mishap & m ) {
+		//m.report();
+		//throw;
 	} catch ( NormalExit ) {
 	}
 

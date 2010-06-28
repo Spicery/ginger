@@ -16,6 +16,12 @@ Machine vm;
 typedef void SpecialFn( void );
 typedef SpecialFn *Special;
 
+Machine2::Machine2( AppGinger & g ) :
+	MachineClass( g )
+{
+}
+
+
 void Machine2::execute( Ref r ) {
 	pc = this->setUpPC( r );
 	vm = this;

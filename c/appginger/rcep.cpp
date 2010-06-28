@@ -5,7 +5,6 @@ using namespace std;
 #include "read_xml.hpp"
 #include "plant.hpp"
 #include "machine.hpp"
-#include "print.hpp"
 #include "rcep.hpp"
 #include "vmi.hpp"
 #include "mishap.hpp"
@@ -71,7 +70,7 @@ bool read_comp_exec_print( Machine vm, istream & input ) {
 	}
 
 	finish = clock();
-    print_results( vm, ( ( float )( finish - start ) ) / CLOCKS_PER_SEC );
+    vm->print_results( static_cast<float>( finish - start ) / CLOCKS_PER_SEC );
     fflush( stdout );
 	fflush( stderr );
 	

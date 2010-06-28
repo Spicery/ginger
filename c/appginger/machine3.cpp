@@ -11,8 +11,11 @@
 #include "key.hpp"
 #include "sys.hpp"
 #include "mishap.hpp"
+#include "appginger.hpp"
 
-Machine3::Machine3() {
+Machine3::Machine3( AppGinger & g ) :
+	MachineClass( g )
+{
 	this->core( true, 0 );
 }
 

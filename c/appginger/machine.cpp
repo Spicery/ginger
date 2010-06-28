@@ -1,3 +1,6 @@
+#include <cstdlib>
+#include <iostream>
+
 #include "machine1.hpp"
 #include "machine2.hpp"
 #include "common.hpp"
@@ -5,14 +8,15 @@
 #include "plant.hpp"
 #include "heap.hpp"
 #include "key.hpp"
+#include "sys.hpp"
 
-#include <cstdio>
-#include <cstdlib>
+using namespace std;
 
 //#define DBG_MACHINE
 
 
-MachineClass::MachineClass() :
+MachineClass::MachineClass( AppGinger & application ) :
+	appg( application ),
 	plant_aptr( new PlantClass( this ) ),
 	dict_aptr( new DictClass() ),
 	heap_aptr( new HeapClass( this ) )
@@ -62,46 +66,51 @@ Ref * MachineClass::setUpPC( Ref r ) {
 	return PC;
 }
 
-void MachineClass::printfn( Ref x ) {
+void MachineClass::printfn( ostream & out, Ref x ) {
 	Ref *r = RefToPtr4( x );
 	//	Ref K = r[ 0 ];
 	long A = SmallToLong( r[ -1 ] );
 	long N = ToLong( r[ -2 ] );
 	long R = ToLong( r[ -3 ] );
 	long L = ToLong( r[ -4 ] );
-	printf( "define: %ld args, %ld locals, %ld results\n", A, N, R );
+	out << "define: " << A << " args, " << N << " locals, " << R << "results" << endl;
 	{
 		Ref *pc = r + 1;
 	    while ( pc <= r + L ) {
-		    printf( "[ %d ]\t ", pc - r );
-		   	pc = this->instructionShow( pc );
+		    out << "[" <<  ( pc - r ) << "]\t ";
+		   	pc = this->instructionShow( out, pc );
 	    }
 	}
-	printf( "enddefine\n" );
+	out << "enddefine" << endl;
 }
 
-Ref * MachineClass::instructionShow( Ref *pc ) {
+void MachineClass::printfn( Ref x ) {
+	this->printfn( std::clog, x );
+}
+
+
+Ref * MachineClass::instructionShow( ostream & out, Ref *pc ) {
 	const InstructionSet & ins = this->instructionSet();
 	const char *types = ins.signature( *pc );
 	while ( *types != '\0' ) {
 		switch ( *types++ ) {
 			case 'i': {
-				printf( "%s ", ins.name( *pc ) );
+				out << ins.name( *pc ) << " ";
 				break;
 			}
 			case 'r': {
-				printf( "%ld ", (unsigned long)( *pc ) );
+				out << (unsigned long)( *pc ) << " ";
 				break;
 			}
 			case 'c': {
 				//sys_print( *pc );               
 				//printf( " " );
-				printf( "XXX " );
+				out <<  "XXX ";
 				break;
 			}
 			case 'v': {
 				IdentClass *id = (IdentClass *)pc;
-				printf( "%s ", id->getNameString().c_str() );
+				out << id->getNameString() << " ";
 				break;
 			}
 			default:
@@ -109,8 +118,38 @@ Ref * MachineClass::instructionShow( Ref *pc ) {
 		}
 		pc += 1;
 	}
-	printf( "\n" );
+	out << endl;
 	return pc;
 }
 
+Ref * MachineClass::instructionShow( Ref *pc ) {
+	return this->instructionShow( std::cout, pc );
+}
 
+void MachineClass::print_results( float time_taken ) {
+	this->print_results( std::cout, time_taken );
+}
+
+void MachineClass::print_results( std::ostream & out, float time_taken ) {
+	const bool quiet = this->appg.isBatchMode();
+
+
+	int n = this->vp - this->vp_base;
+
+	if ( !quiet ) {
+		out << "There " << ( n == 1 ? "is" : "are" ) << " " << 
+		n << " result" << ( n == 1 ? "" : "s" ) << "\t(" << 
+		time_taken << "s)" << endl;
+	}
+	for ( int i = 0; i < n; i++ ) {
+		if ( !quiet ) {
+			out << ( i + 1 ) << ".\t";
+		}
+		sys_print( out, this->vp[ 1 + i - n ] );
+		out << endl;
+	}
+	if ( !quiet ) {
+		out << endl;
+	}
+	this->vp = this->vp_base;
+}

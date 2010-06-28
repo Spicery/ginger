@@ -109,7 +109,7 @@ static void spcfn__mul( void ) {
 
 static void spcfn__print( void ) {
     Ref r = *VMVP--;
-    sys_print( r );
+    sys_print( std::cout, r );
     RETURN( pc + 1 );
 }
 

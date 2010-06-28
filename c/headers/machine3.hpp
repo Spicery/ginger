@@ -3,6 +3,7 @@
 
 #include "machine.hpp"
 #include "instruction_set3.hpp"
+#include "appginger.hpp"
 
 class Machine3 : public MachineClass {
 
@@ -19,7 +20,7 @@ public:
 	}
 
 public:
-	Machine3();
+	Machine3( AppGinger & application );
 	virtual ~Machine3() {}
 };
 

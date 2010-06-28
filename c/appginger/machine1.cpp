@@ -7,10 +7,16 @@
 #include "key.hpp"
 #include "sys.hpp"
 #include "mishap.hpp"
+#include "appginger.hpp"
 
 
 typedef Ref *SpecialFn( Ref *pc, Machine vm );
 typedef SpecialFn *Special;
+
+Machine1::Machine1( AppGinger & g ) :
+	MachineClass( g )
+{
+}
 
 void Machine1::execute( Ref r ) {
 	Ref * PC = this->setUpPC( r );

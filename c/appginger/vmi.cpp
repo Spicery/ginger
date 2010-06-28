@@ -9,7 +9,7 @@
 
 #include <stdio.h>
 
-#define DBG_VMI
+//#define DBG_VMI
 
 static void emitSPC( Plant plant, Instruction instr ) {
 	const InstructionSet & ins = plant->instructionSet();
@@ -192,7 +192,7 @@ Ref vmiENDFUNCTION( Plant plant ) {
 
 	r = plant->detach();
 	#ifdef DBG_VMI
-		plant->vm->printfn( r );
+		plant->vm->printfn( std::clog, r );
 	#endif
 	plant->restore();
 	

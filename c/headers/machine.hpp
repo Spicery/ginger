@@ -2,17 +2,20 @@
 #define MACHINE_HPP
 
 #include <memory>
+#include <iostream> 
 
 #include "dict.hpp"
 #include "plant.hpp"
 #include "instruction_set.hpp"
 #include "heap.hpp"
+#include "appginger.hpp"
 
 class PlantClass;
 typedef PlantClass * Plant;
 
 class MachineClass {
 private:
+	AppGinger &						appg;
 	std::auto_ptr<PlantClass>		plant_aptr;
 	std::auto_ptr<DictClass>		dict_aptr;
 	std::auto_ptr<HeapClass>		heap_aptr;
@@ -28,8 +31,14 @@ public:
 	Ref			*vp_end;
 	
 public:
+
+	void 			print_results( std::ostream & out, float time_taken );
+	void 			print_results( float time_taken );
+
 	void			printfn( Ref x );
+	void			printfn( std::ostream & out, Ref x );
 	Ref*			instructionShow( Ref * pc );
+	Ref*			instructionShow( std::ostream & out, Ref * pc );
 	void			resetMachine();
 	PlantClass *	plant();		
 	DictClass *		dict();
@@ -42,7 +51,7 @@ public:
 	
 
 public:
-	MachineClass();
+	MachineClass( AppGinger & appg );
 	virtual ~MachineClass() {}
 };
 

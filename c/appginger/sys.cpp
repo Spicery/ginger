@@ -1,5 +1,6 @@
 #include <map>
 #include <string>
+#include <iostream>
 
 #include <stdio.h>
 
@@ -26,6 +27,10 @@ Ref sys_key( Ref r ) {
 }
 
 void sys_print( Ref r ) {
+	sys_print( std::cout, r );
+}
+
+void sys_print( std::ostream & out, Ref r ) {
 	Ref k;
 #ifdef DBG_SYS	
 	printf( "About to print '%x'\n", (unsigned int) r );

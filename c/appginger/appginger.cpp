@@ -1,7 +1,7 @@
 #include <iostream>
 
-#include <stdio.h>
-#include <stdlib.h>
+#include <cstdio>
+#include <cstdlib>
 
 #include <unistd.h>
 #include <getopt.h>
@@ -16,10 +16,8 @@
 #include "machine2.hpp"
 #include "machine3.hpp"
 
-enum Mode {
-	InteractiveMode,
-	CGIMode
-};
+using namespace std;
+
 
 //  struct option {
 //      const char *name;   // option name
@@ -31,24 +29,25 @@ enum Mode {
 extern char * optarg;
 static struct option long_options[] =
     {
-		{ "cgi", 		no_argument, 			0, 'C' },
-        { "help", 		no_argument, 			0, 'h' },
-        { "machine",	required_argument, 		0, 'm' },
-        { "version", 	no_argument, 			0, 'v' },
+		{ "cgi", 			no_argument, 			0, 'C' },
+		{ "interactive",	no_argument,			0, 'I' },
+		{ "batch",			no_argument,			0, 'B' },
+        { "help", 			no_argument, 			0, 'h' },
+        { "machine",		required_argument, 		0, 'm' },
+        { "version", 		no_argument, 			0, 'v' },
         { 0, 0, 0, 0 }
     };
 
 int NFIB_ARG;
 
 int main( int argc, char **argv, char **envp ) {
-	enum Mode mode = InteractiveMode;
-	int machine_impl_num = 1;
+	AppGinger appg;
 
     initialize();
 
     for(;;) {
         int option_index = 0;
-        int c = getopt_long( argc, argv, "Chm:v", long_options, &option_index );
+        int c = getopt_long( argc, argv, "CIBhm:v", long_options, &option_index );
         if ( c == -1 ) break;
         switch ( c ) {
 			case 'C': {
@@ -56,7 +55,15 @@ int main( int argc, char **argv, char **envp ) {
                   	fprintf( stderr, "cgi_init: %s\n", strerror( cgi_errno ) );
                   	exit( EXIT_FAILURE );
                 }           	
-				mode = CGIMode;
+                appg.setCgiMode();
+				break;
+			}
+			case 'I': {
+				appg.setInteractiveMode();
+				break;
+			}
+			case 'B': {
+				appg.setBatchMode();
 				break;
 			}
             case 'h': {
@@ -70,12 +77,12 @@ int main( int argc, char **argv, char **envp ) {
                 exit( EXIT_SUCCESS );   //  Is that right?
             }
             case 'm' : {
-            	machine_impl_num = atoi( optarg );
+            	appg.setMachineImplNum( atoi( optarg ) );
        			//printf( "Machine #%d (%s)\n", machine_impl_num, optarg );
             	break;
             }
             case 'v': {
-                printf( "appginger: version " VERSION "\n" );
+            	cout << "appginger: version " << appg.version() << endl;
                 exit( EXIT_SUCCESS );   //  Is that right?
             }
             case '?': {
@@ -87,40 +94,29 @@ int main( int argc, char **argv, char **envp ) {
         }
     }
 
-	if ( mode == InteractiveMode ) {
-		
+	if ( appg.isInteractiveMode() ) {
 		printf( "Welcome to Ginger\n" );
 		fflush( stdout );
+	}
 
+	if ( appg.isInteractiveMode() || appg.isBatchMode() ) {
         if ( optind < argc ) {
-             printf( "non-option ARGV-elements: " );
+             cout << "non-option ARGV-elements: ";
              while ( optind < argc ) {
-                printf ("%s ", argv[ optind++ ] );
+               cout << argv[ optind++ ] << " ";
              }
-             printf ("\n");
+             cout << endl;
         }
 
         //ItemFactoryClass ifact( stdin );
         
-        MachineClass * vm;
-        switch ( machine_impl_num ) {
-        	case 1: vm = new Machine1(); break;
-        	case 2: vm = new Machine2(); break;
-        	case 3: vm = new Machine3(); break;
-        	default:
-				warning( 
-					"Invalid implementation (#%d), using implementation %d\n", machine_impl_num, 1 
-				);
-				vm = new Machine1();
-				break;
-		}
-
+        MachineClass * vm = appg.newMachine();
+ 
 #ifdef DBG_APPGINGER
-		fprintf( stdout, "RCEP ...\n" );
-		fflush( stdout );
+		clog << "RCEP ..." << endl;
 #endif
 		while ( read_comp_exec_print( vm, std::cin ) ) {};
-    } else if ( mode == CGIMode ) {
+    } else if ( appg.isCgiMode() ) {
 		printf( "Content-type: text/html\r\n\r\n" );
 		printf( "<html><head><title>AppGinger</title></head><body>\n" );
 		printf( "<H1>AppGinger Version %s</H1>\n", VERSION );
@@ -132,3 +128,17 @@ int main( int argc, char **argv, char **envp ) {
     return EXIT_SUCCESS;
 }
 
+MachineClass * AppGinger::newMachine() {
+   switch ( this->machine_impl_num ) {
+		case 1: return new Machine1( *this );
+		case 2: return new Machine2( *this );
+		case 3: return new Machine3( *this );
+		default: {
+			warning( 
+				"Invalid implementation (#%d), using implementation %d\n", this->machine_impl_num, 1 
+			);
+			return new Machine1( *this );
+			break;
+		}
+	}
+}

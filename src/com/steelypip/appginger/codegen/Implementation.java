@@ -1,4 +1,4 @@
-package com.steelypip.appginger;
+package com.steelypip.appginger.codegen;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;

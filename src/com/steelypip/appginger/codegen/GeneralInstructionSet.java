@@ -1,4 +1,4 @@
-package com.steelypip.appginger;
+package com.steelypip.appginger.codegen;
 
 public abstract class GeneralInstructionSet {
 

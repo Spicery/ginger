@@ -1,5 +1,6 @@
 all:
 	( cd ./c; make ) 
+	if [ ! -d bin ]; then mkdir -p bin; fi
 	cp c/appginger/appginger bin/
 	cp c/common2gnx/common2gnx bin
 

@@ -1,3 +1,3 @@
 Ref r = *VMVP--;
-sys_print( r );
+sys_print( std::cout, r );
 RETURN( pc + 1 );

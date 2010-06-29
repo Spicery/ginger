@@ -32,9 +32,10 @@ static struct option long_options[] =
 		{ "cgi", 			no_argument, 			0, 'C' },
 		{ "interactive",	no_argument,			0, 'I' },
 		{ "batch",			no_argument,			0, 'B' },
-        { "help", 			no_argument, 			0, 'h' },
+        { "help", 			optional_argument, 		0, 'h' },
         { "machine",		required_argument, 		0, 'm' },
         { "version", 		no_argument, 			0, 'v' },
+        { "debug",			required_argument,		0, 'd' },
         { 0, 0, 0, 0 }
     };
 
@@ -66,14 +67,32 @@ int main( int argc, char **argv, char **envp ) {
 				appg.setBatchMode();
 				break;
 			}
+			case 'd': {
+				if ( std::string( optarg ) == std::string( "showcode" ) ) {
+					appg.setShowCode();
+				}
+				break;
+			}
             case 'h': {
-                printf( "Usage :  appginger [options] [files]\n\n" );
-                printf( "OPTION              SUMMARY\n" );
-				printf( "-C, --cgi           run as CGI script\n" );
-                printf( "-h, --help          print out this help info\n" );
-                printf( "-m<n>               run using machine #n\n" );
-                printf( "-v, --version       print out version information and exit\n" );
-                printf( "\n" );
+            	//	Eventually we will have a "home" for our auxillary
+            	//	files and this will simply go there. Or run a web
+            	//	browser pointed there.
+            	if ( optarg == NULL ) {
+					printf( "Usage :  appginger [options] [files]\n\n" );
+					printf( "OPTION              SUMMARY\n" );
+					printf( "-B, --batch         run in batch mode\n" );
+					printf( "-C, --cgi           run as CGI script\n" );
+					printf( "-I, --interactive   run interactively\n" );
+					printf( "-d, --debug         add debug option (see --help=debug)\n" );
+					printf( "-h, --help          print out this help info\n" );
+					printf( "-m<n>               run using machine #n\n" );
+					printf( "-v, --version       print out version information and exit\n" );
+					printf( "\n" );
+				} else if ( std::string( optarg ) == "debug" ) {
+					printf( "--debug=showcode    Causes the generated instructions to be displayed.\n" );
+                } else {
+                	printf( "Unknown help topic %s\n", optarg );
+                }
                 exit( EXIT_SUCCESS );   //  Is that right?
             }
             case 'm' : {

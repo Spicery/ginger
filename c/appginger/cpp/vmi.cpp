@@ -191,7 +191,11 @@ Ref vmiENDFUNCTION( Plant plant ) {
 	Ref r;
 
 	r = plant->detach();
-	#ifdef DBG_VMI
+	#ifndef DBG_VMI
+		if ( plant->vm->getShowCode() ) {
+			plant->vm->printfn( std::clog, r );
+		}
+	#else
 		plant->vm->printfn( std::clog, r );
 	#endif
 	plant->restore();

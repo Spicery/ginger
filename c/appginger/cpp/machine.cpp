@@ -27,6 +27,10 @@ MachineClass::MachineClass( AppGinger & application ) :
 	this->vp_end = this->vp_base + 1024;
 }
 
+bool MachineClass::getShowCode() {
+	return this->appg.getShowCode();
+}
+
 void MachineClass::resetMachine() {
 	this->plant_aptr.reset( new PlantClass( this ) );
 }
@@ -103,9 +107,9 @@ Ref * MachineClass::instructionShow( ostream & out, Ref *pc ) {
 				break;
 			}
 			case 'c': {
-				//sys_print( *pc );               
+				sys_print( out, *pc );               
 				//printf( " " );
-				out <<  "XXX ";
+				//out <<  "XXX ";
 				break;
 			}
 			case 'v': {

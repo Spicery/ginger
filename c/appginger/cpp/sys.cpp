@@ -33,28 +33,28 @@ void sys_print( Ref r ) {
 void sys_print( std::ostream & out, Ref r ) {
 	Ref k;
 #ifdef DBG_SYS	
-	printf( "About to print '%x'\n", (unsigned int) r );
+	out << "About to print '" << (unsigned int) r << "'\n";
 #endif
 	k = sys_key( r );
 #ifdef DBG_SYS
-	printf( "key = %x\n", ToULong(k) );
+	out << "key = " << ToULong(k) << "\n";
 #endif
 	if ( k == sysStringKey ) {
 		Ref *rr = RefToPtr4( r );
 		char *s = ToChars( rr + 1 );
-		printf( "%s", s );
+		out << s;
 	} else if ( k == sysSmallKey ) {
-		printf( "%ld", SmallToLong ( r ) );
+		out << SmallToLong( r );
 	} else if ( k == sysBoolKey ) {
-		printf( "%s", r == sys_false ? "false" : "true" );
+		out << ( r == sys_false ? "false" : "true" );
 	} else if ( k == sysAbsentKey ) {
-		printf( "absent" );
+		out << "absent";
 	} else if ( k == sysFnKey ) {
-		printf( "<function>" );
+		out << "<function>";
 	} else if ( k == sysCharKey ) {
-		printf( "%c", CharacterToChar( r ) );
+		out << CharacterToChar( r );
 	} else {
-		printf( "?" );
+		out << "?";
 	}
 }
 

@@ -48,6 +48,7 @@ public:
 	virtual Ref * setUpPC( Ref r );
 	virtual void execute( Ref r ) = 0;
 	virtual const InstructionSet & instructionSet() = 0;
+	bool getShowCode();
 	
 
 public:

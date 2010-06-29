@@ -1,8 +1,8 @@
 all:
 	( cd ./c; make ) 
 	if [ ! -d bin ]; then mkdir -p bin; fi
-	cp c/appginger/appginger bin/
-	cp c/common2gnx/common2gnx bin
+	cp c/appginger/cpp/appginger bin/
+	cp c/common2gnx/cpp/common2gnx bin
 
 clean:
 	rm -rf build/appginger

@@ -16,8 +16,6 @@
 #define DEF_TAG         2
 #define SIM_TAG         3
 
-#if CELL_SCHEME == 1
-
 #define RefToPtr4( r )  	ToRefRef( ToULong( r ) & ~PTR_TAG )
 #define Ptr4ToRef( p ) 		ToRef( ToULong( p ) | PTR_TAG )
 
@@ -30,15 +28,6 @@
 #define IsDefer( r )		( ( TAG_MASK & ToULong( r ) ) == DEF_TAG )
 
 #define IntToChar( i )		( (Ref)( ( i ) << TAGGG | CHAR_TAGGG ) )
-
-#elif CELL_SCHEME == 2
-
-inline void ** RefToPtr4( Ref r ) {
-	
-}
-
-#endif
-
 
 
 

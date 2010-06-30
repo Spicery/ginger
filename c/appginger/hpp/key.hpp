@@ -23,8 +23,8 @@
 
 #define IntToRef( i )		( (Ref)( ToULong( i ) << TAG | INT_TAG ) )
 #define IntToSmall( i ) 	( (Ref)( ToULong( i ) << TAG | INT_TAG ) )
-#define RefToLong( r )   	( (long)( ToULong( r ) >> TAG ) )
-#define SmallToLong( r )	( (long)( ToULong( r ) >> TAG ) )
+#define RefToLong( r )   	( (long)( ToLong( r ) >> TAG ) )
+#define SmallToLong( r )	( (long)( ToLong( r ) >> TAG ) )
 
 #define IsPtr4( r )			( ( TAG_MASK & ToULong( r ) ) == PTR_TAG )
 #define IsDefer( r )		( ( TAG_MASK & ToULong( r ) ) == DEF_TAG )

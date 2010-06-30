@@ -1,7 +1,9 @@
 package com.steelypip.appginger.functest;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FilenameFilter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,7 +19,7 @@ public class FuncTestMain {
 	}
 
 	private List< FuncTest > tests( File home ) {
-		List< FuncTest > t = new ArrayList< FuncTest >();
+		List< FuncTest > test_list = new ArrayList< FuncTest >();
 		for ( 
 			File test :
 			home.listFiles(
@@ -28,9 +30,24 @@ public class FuncTestMain {
 				}
 			)
 		) {
-			t.add( new FolderFuncTest( test ) );
+			if ( test.isDirectory() ) {
+				test_list.add( new FolderFuncTest( test ) );
+			} else if ( test.isFile() ) {
+				try {
+					FileFuncTestReader r =  new FileFuncTestReader( test );
+					for (;;) {
+						FuncTest t = r.readTest();
+						if ( t == null ) break;
+						test_list.add( t );
+					}
+				} catch ( IOException e ) {
+					throw new RuntimeException( e );
+				}
+			} else {
+				throw new RuntimeException();
+			}
 		}
-		return t;
+		return test_list;
 	}
 	
 	private void runCommon2GnxFuncTests() {

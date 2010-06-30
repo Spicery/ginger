@@ -114,8 +114,7 @@ int main( int argc, char **argv, char **envp ) {
     }
 
 	if ( appg.isInteractiveMode() ) {
-		printf( "Welcome to Ginger\n" );
-		fflush( stdout );
+		cout << "Welcome to Ginger (" << VERSION << ")\n";
 	}
 
 	if ( appg.isInteractiveMode() || appg.isBatchMode() ) {
@@ -126,8 +125,6 @@ int main( int argc, char **argv, char **envp ) {
              }
              cout << endl;
         }
-
-        //ItemFactoryClass ifact( stdin );
         
         MachineClass * vm = appg.newMachine();
  
@@ -136,10 +133,10 @@ int main( int argc, char **argv, char **envp ) {
 #endif
 		while ( read_comp_exec_print( vm, std::cin ) ) {};
     } else if ( appg.isCgiMode() ) {
-		printf( "Content-type: text/html\r\n\r\n" );
-		printf( "<html><head><title>AppGinger</title></head><body>\n" );
-		printf( "<H1>AppGinger Version %s</H1>\n", VERSION );
-		printf( "</body></html>\n" );
+		cout << "Content-type: text/html\r\n\r\n";
+		cout << "<html><head><title>AppGinger</title></head><body>\n";
+		cout << "<H1>AppGinger Version " << VERSION << "</H1>\n";
+		cout << "</body></html>\n";
 	} else {
 		fprintf( stderr, "Invalid execute mode" );
 		exit( EXIT_FAILURE );

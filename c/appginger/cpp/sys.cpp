@@ -8,6 +8,7 @@
 #include "sys.hpp"
 #include "key.hpp"
 #include "cage.hpp"
+#include "mishap.hpp"
 
 //#define DBG_SYS
 
@@ -103,6 +104,19 @@ void sysNewList( class MachineClass * vm ) {
 	vm->fastPush( sofar );
 }
 
+void sysHead( class MachineClass * vm ) {
+	if ( vm->count == 1 ) {
+		Ref x = vm->fastPeek();
+		if ( sys_key( x ) == sysPairKey ) {
+			vm->fastPeek() = RefToPtr4( x )[ 1 ];
+		} else {
+			throw Mishap( "Trying to take the head of a non-pair" );
+		}
+	} else {
+		throw Mishap( "Wrong number of arguments for head" );
+	}
+}
+
 typedef std::map< std::string, SysInfo > SysMap;
 
 const SysMap::value_type rawData[] = {
@@ -117,7 +131,8 @@ const SysMap::value_type rawData[] = {
 	SysMap::value_type( ">", SysInfo( fnc_gt, Arity( 2 ), 0 ) ),
 	SysMap::value_type( ">=", SysInfo( fnc_gte, Arity( 2 ), 0 ) ),	
 	SysMap::value_type( "gc", SysInfo( fnc_syscall, Arity( 0 ), sysGarbageCollect ) ),
-	SysMap::value_type( "newList", SysInfo( fnc_syscall, Arity( 0, true ), sysNewList ) )
+	SysMap::value_type( "newList", SysInfo( fnc_syscall, Arity( 0, true ), sysNewList ) ),
+	SysMap::value_type( "head", SysInfo( fnc_syscall, Arity( 1 ), sysHead ) )
 };
 const int numElems = sizeof rawData / sizeof rawData[0];
 SysMap sysMap( rawData, rawData + numElems );

@@ -55,7 +55,6 @@ ItemMap::ItemMap() {
 	add( "]", 			fnc_cbracket, 	Clo, 		0			);
 	add( "absent", 		fnc_absent, 	Lit, 		0			);
 	add( "and", 		fnc_and, 		BFo, 		1700		);
-	//add( "const", 		fnc_const, 		PrF, 		0			);
 	add( "define", 		fnc_define, 	PrF, 		0			);
 	add( "do", 			fnc_do, 		PrF, 		0			);
 	add( "else", 		fnc_else, 		PrF, 		0			);
@@ -66,16 +65,12 @@ ItemMap::ItemMap() {
 	add( "endfor", 		fnc_endfor, 	PrF, 		0			);
 	add( "endif", 		fnc_endif, 		PrF, 		0			);
 	add( "endunless", 	fnc_endunless, 	PrF, 		0			);
-	add( "false", 		fnc_bool, 		Lit, 		0			);
 	add( "fn", 			fnc_fn, 		PrF, 		0			);
 	add( "for", 		fnc_for, 		PrF, 		0			);
 	add( "from",		fnc_from, 		Pat,		2000		);
 	add( "if", 			fnc_if, 		PrF, 		0			);
-	add( "not", 		fnc_not, 		USA, 		0			);
 	add( "or", 			fnc_or, 		BFo, 		1800		);
-	add( "present",		fnc_present,	Lit,		0			);
 	add( "then", 		fnc_then, 		PrF, 		0			);
-	add( "true",	 	fnc_bool, 		Lit, 		0			);
 	add( "to",			fnc_to, 		PrF,		0			);
 	add( "unless", 		fnc_unless, 	PrF, 		0			);
 	add( "until", 		fnc_until, 		PrF, 		0			);

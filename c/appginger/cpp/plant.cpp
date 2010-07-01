@@ -38,10 +38,16 @@ DestinationClass & PlantClass::newDestination() {
 
 
 Ref PlantClass::detach() {
-	//HeapClass & hp = this->vm->heap();
-	int L = this->code_data->size();		//	alt
-	int M = ( L + REFBITS-1 ) % REFBITS;
-	int preflight_size = 5 + L + M;
+	int L = this->code_data->size();
+	
+	// Disabled temporarily.
+	//int M = ( L + REFBITS-1 ) % REFBITS;
+
+	unsigned long preflight_size = 5 + L /* + M */;
+	//	The preflighted size must fit into WORDBITS-8 bits.
+	if ( ( preflight_size & ~TAGGG_MASK ) != 0 ) {
+		throw Mishap( "Procedure too large" );
+	}
 
 	XfrClass xfr( *this->vm, preflight_size );
 
@@ -49,7 +55,7 @@ Ref PlantClass::detach() {
 	//	to be preserved - and I would like that for a variety of
 	//	reasons.
 	//
-	xfr.xfrRef( ToRef( L ) );                 	// 	raw L - wrong!
+	xfr.xfrRef( ToRef( ( preflight_size << TAGGG ) | FUNC_LEN_TAGGG ) );  //	tagged for heap scanning
 	xfr.xfrRef( ToRef( this->nresults ) );		//	raw R
 	xfr.xfrRef( ToRef( this->nlocals ) );		//	raw N
 	xfr.xfrRef( ToRef( this->ninputs ) );		//	raw A
@@ -59,11 +65,13 @@ Ref PlantClass::detach() {
 
 	xfr.xfrVector( *this->code_data );	//	alt
 
+	/* Disabled for a while
 	//	For the moment, fake the mask bits.  Since we have no garbage
 	//	collector this shouldn't be a problem!
 	for ( int i = 0; i < M; i++ ) {
 		xfr.xfrRef( ToRef( 0 ) );
 	}
+	*/
 
 	return xfr.make();
 }

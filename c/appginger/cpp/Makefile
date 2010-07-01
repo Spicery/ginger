@@ -6,6 +6,7 @@ OBJS=mishap.o term.o read_xml.o \
 	functor.o plant.o cage.o machine.o vmi.o gc.o \
 	rcep.o arity.o lift.o ident.o dict.o sys.o \
 	destination.o initialize.o cgi.o heap.o \
+	scanfunc.o \
         instruction_set.o \
 	machine1.o \
 	instruction_set1.o \

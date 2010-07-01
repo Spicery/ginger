@@ -11,6 +11,11 @@
 
 //#define DBG_VMI
 
+#ifdef DBG_VMI
+	#include "scanfunc.hpp"	
+#endif
+
+
 static void emitSPC( Plant plant, Instruction instr ) {
 	const InstructionSet & ins = plant->instructionSet();
 	Ref instr_ptr = ins.lookup( instr );
@@ -197,6 +202,14 @@ Ref vmiENDFUNCTION( Plant plant ) {
 		}
 	#else
 		plant->vm->printfn( std::clog, r );
+		Ref * p = RefToPtr4( r );
+		std::clog << "Scanning ... " << std::endl;
+		ScanFunc scan( plant->vm->instructionSet(), p );
+		for (;;) {
+			Ref * pc = scan.next();
+			if ( !pc ) break;
+			std::clog << "Ref at offset " << ( pc - p ) << std::endl;
+		}
 	#endif
 	plant->restore();
 	

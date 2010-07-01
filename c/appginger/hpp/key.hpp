@@ -55,7 +55,7 @@
 #define IsFloat( x )	( ( FLOAT_MASK & ToULong( x ) ) == FLOAT0_TAGG )
 
 ////////////////////////////////////////////////////////////////////////
-// zzz01011 tags: Procedure Keys
+// zzz01011 tags: Function Keys
 ////////////////////////////////////////////////////////////////////////
 
 #define sysFnKey		ToRef( 0 << TAGG | FN_TAGG )
@@ -97,7 +97,7 @@
 #define MISC_TAGGG      ( 0 << TAGG | ESC_TAGG )
 #define RGB_TAGGG   	( 1 << TAGG | ESC_TAGG )
 #define CHAR_TAGGG   	( 2 << TAGG | ESC_TAGG )
-#define UNUSED3_TAGGG   ( 3 << TAGG | ESC_TAGG )
+#define FUNC_LEN_TAGGG  ( 3 << TAGG | ESC_TAGG )
 #define UNUSED4_TAGGG   ( 4 << TAGG | ESC_TAGG )
 #define UNUSED5_TAGGG   ( 5 << TAGG | ESC_TAGG )
 #define UNUSED6_TAGGG   ( 6 << TAGG | ESC_TAGG )

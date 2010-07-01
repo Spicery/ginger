@@ -31,7 +31,7 @@ public:
 	Ref			*vp_end;
 	
 public:
-	Ref			fastPeek() { return *vp; }
+	Ref	&		fastPeek() { return *vp; }
 	Ref			fastPop() { return *vp--; }
 	void		fastPush( Ref r ) { *++vp = r; }
 	

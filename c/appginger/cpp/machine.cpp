@@ -76,11 +76,12 @@ void MachineClass::printfn( ostream & out, Ref x ) {
 	long A = SmallToLong( r[ -1 ] );
 	long N = ToLong( r[ -2 ] );
 	long R = ToLong( r[ -3 ] );
-	long L = ToLong( r[ -4 ] );
-	out << "define: " << A << " args, " << N << " locals, " << R << "results" << endl;
+	long L = ToULong( r[ -4 ] ) >> TAGGG;
+	Ref * end = r - 4 + L;
+	out << "define: " << A << " args, " << N << " locals, " << R << " results, " << L << " #words used" << endl;
 	{
 		Ref *pc = r + 1;
-	    while ( pc <= r + L ) {
+	    while ( pc < end ) {
 		    out << "[" <<  ( pc - r ) << "]\t ";
 		   	pc = this->instructionShow( out, pc );
 	    }
@@ -113,7 +114,7 @@ Ref * MachineClass::instructionShow( ostream & out, Ref *pc ) {
 				break;
 			}
 			case 'v': {
-				IdentClass *id = (IdentClass *)pc;
+				IdentClass *id = (IdentClass *)RefToPtr4( *pc );
 				out << id->getNameString() << " ";
 				break;
 			}

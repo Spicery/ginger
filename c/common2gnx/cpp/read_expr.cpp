@@ -11,6 +11,7 @@
 #include "read_expr.hpp"
 #include "item.hpp"
 #include "role.hpp"
+#include "sysconst.hpp"
 
 static Node makeApp( Node lhs, Node rhs ) {
 	if ( lhs->elementName() == "sysfn" ) {
@@ -341,9 +342,17 @@ Node ReadStateClass::prefix_processing() {
 
 	switch ( fnc ) {
 		case fnc_id: {
-			NodeFactory id( this->pattern_mode ? "var" : "id" );
-			id.putAttr( "name", item->nameString() );
-			return id.node();
+			std::string & name = item->nameString();
+			SysConst * sysc = lookupSysConst( name );
+			if ( sysc != NULL ) {
+				NodeFactory constant( sysc->tag );
+				constant.putAttr( "value", sysc->value );
+				return constant.node();
+			} else {
+				NodeFactory id( this->pattern_mode ? "var" : "id" );
+				id.putAttr( "name", name );
+				return id.node();
+			}
 		}
 		case fnc_string: {
 			//printf( "Copying string %s\n", (char *)item->extra );
@@ -384,6 +393,12 @@ Node ReadStateClass::prefix_processing() {
         }
 		case fnc_oparen: {
 			return this->read_stmnts_check( fnc_cparen );
+		}
+		case fnc_obracket: {
+			NodeFactory list( "sysapp" );
+			list.putAttr( "name", "newList" );
+			list.addNode( this->read_stmnts_check( fnc_cbracket ) );
+			return list.node();
 		}
 		case fnc_unless: {
 			return this->read_if( fnc_unless, fnc_endunless );

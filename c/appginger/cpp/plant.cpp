@@ -65,7 +65,7 @@ Ref PlantClass::detach() {
 		xfr.xfrRef( ToRef( 0 ) );
 	}
 
-	return xfr.end();
+	return xfr.make();
 }
 
 
@@ -342,6 +342,10 @@ void PlantClass::compileTerm( Term term ) {
 		}
 		case fnc_syscall: {
 			Ref sc = term_ref_cont( term );
+			int v = tmpvar( this );
+			vmiSTART( this, v );
+			this->compileArgs( term );
+			vmiSET( this, v );
 			vmiSYS_CALL( this, sc );
 			break;
 		}
@@ -389,6 +393,12 @@ void PlantClass::compileTerm( Term term ) {
 	}
 }
 
+void PlantClass::compileArgs( Term term ) {
+	int n = term->arity();
+	for ( int i = 0; i < n; i++ ) {
+		this->compileTerm( term->child( i ) );
+	}
+}
 
 void PlantClass::compile1( Term term ) {
 	int a = arity_term( term );

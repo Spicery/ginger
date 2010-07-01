@@ -31,6 +31,11 @@ public:
 	Ref			*vp_end;
 	
 public:
+	Ref			fastPeek() { return *vp; }
+	Ref			fastPop() { return *vp--; }
+	void		fastPush( Ref r ) { *++vp = r; }
+	
+public:
 
 	void 			print_results( std::ostream & out, float time_taken );
 	void 			print_results( float time_taken );
@@ -58,10 +63,7 @@ public:
 
 typedef class MachineClass *Machine;
 
-class PlantClass;
-
 Machine machine_new( int n );
-PlantClass *  machine_plant( Machine vm );
 void machine_reset( Machine vm );
 
 #endif

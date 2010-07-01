@@ -97,6 +97,8 @@ private:
 
 public:
 	void compileTerm( Term term );
+	void compileArgs( Term term );
+
 	Ref detach();
 	void compile1( Term term );
 	void compile0( Term term );

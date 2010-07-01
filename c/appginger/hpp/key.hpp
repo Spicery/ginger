@@ -115,8 +115,9 @@
 //	00010111 tags
 ////////////////////////////////////////////////////////////////////////
 
-#define sys_underflow	ToRef( 0 << TAGGG | MISC_TAGGG )
-#define sys_undefined	ToRef( 1 << TAGGG | MISC_TAGGG )
+#define sys_nil			ToRef( 0 << TAGGG | MISC_TAGGG )
+#define sys_underflow	ToRef( 1 << TAGGG | MISC_TAGGG )
+#define sys_undefined	ToRef( 2 << TAGGG | MISC_TAGGG )
 
 
 ////////////////////////////////////////////////////////////////////////

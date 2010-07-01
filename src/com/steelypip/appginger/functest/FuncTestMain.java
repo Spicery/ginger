@@ -25,12 +25,13 @@ public class FuncTestMain {
 			home.listFiles(
 				new FilenameFilter() {
 					public boolean accept( File dir, String name ) {
-						return name.endsWith( ".test" );
+						return name.endsWith( ".tests" );
 					}
 				}
 			)
 		) {
 			if ( test.isDirectory() ) {
+				//	Not supported at present.
 				test_list.add( new FolderFuncTest( test ) );
 			} else if ( test.isFile() ) {
 				try {

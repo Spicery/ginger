@@ -53,7 +53,7 @@ Ref HeapClass::copyString( const char *s ) {
 	xfr.xfrRef( sysStringKey );
 	//	printf( "Set origin to '%x'\n", ToUInt( sysStringKey ) );
 	xfr.xfrSubstring( s, 0, n );
-	return xfr.end();
+	return xfr.make();
 
 }
 

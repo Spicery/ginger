@@ -4,9 +4,10 @@
 
 #include <stdio.h>
 
+#include "machine.hpp"
 #include "sys.hpp"
 #include "key.hpp"
-#include "machine.hpp"
+#include "cage.hpp"
 
 //#define DBG_SYS
 
@@ -23,7 +24,14 @@ Ref sys_key( Ref r ) {
 	if ( tagg == KEY_TAGG ) return sysKeyKey;
 	taggg = u & TAGGG_MASK;
 	if ( taggg == CHAR_TAGGG ) return sysCharKey;
-	return sys_absent;
+	if ( taggg == MISC_TAGGG ) {
+		if ( r == sys_nil ) {
+			return sysNilKey; 
+		} else {
+			throw;
+		}
+	}
+	throw;
 }
 
 void sys_print( Ref r ) {
@@ -53,33 +61,50 @@ void sys_print( std::ostream & out, Ref r ) {
 		out << "<function>";
 	} else if ( k == sysCharKey ) {
 		out << CharacterToChar( r );
+	} else if ( k == sysPairKey ) {
+		Ref sofar = r;
+		bool sep = false;
+		out << "[";
+		while ( sys_key( sofar ) == sysPairKey ) {
+			if ( sep ) { out << ","; } else { sep = true; }
+			sys_print( out, *( RefToPtr4( sofar ) + 1 ) );
+			sofar = *( RefToPtr4( sofar ) + 2 );
+		}
+		out << "]";
+	} else if ( k == sysNilKey ) {
+		out << "[]";
 	} else {
-		out << "?";
+		out << "?(" << std::hex << ToULong( r ) << ")";
 	}
 }
 
-void sysGarbageCollect( MachineClass * vm ) {
+void sysGarbageCollect( class MachineClass * vm ) {
 	vm->heap().garbageCollect();
+}
+
+void sysNewList( class MachineClass * vm ) {
+	Ref sofar = sys_nil;
+	int n = vm->count;
+	//std::cerr << "Count " << n << std::endl;
+	XfrClass xfr( vm->heap().preflight( 3 * n ) );
+	for ( int i = 0; i < n; i++ ) {
+		xfr.setOrigin();
+		xfr.xfrRef( sysPairKey );
+		//std::cerr << "Peek: " << vm->fastPeek() << std::endl;
+		//std::cerr << "Peek: " << vm->fastPeek() << std::endl;
+		Ref r = vm->fastPop();
+		//std::cerr << "Pop: " << r << std::endl;
+
+		xfr.xfrRef( r );
+		xfr.xfrRef( sofar );
+		sofar = xfr.make();
+		//std::cerr << "Stored " << *( RefToPtr4( sofar ) + 1 ) << std::endl;
+	}
+	vm->fastPush( sofar );
 }
 
 typedef std::map< std::string, SysInfo > SysMap;
 
-/*
-	struct { Functor fnc; int arity; } flavour = (
-		name == "+" ? struct { fnc_add, 2 } :
-		name == "*" ? { fnc_mul, 2 } :
-		name == "-" ? { fnc_sub, 2 } :
-		name == "/" ? { fnc_div, 2 } :
-		name == "**" ? { fnc_pow, 2 } :
-		name == "<" ? { fnc_lt, 2 } :
-		name == "<=" ? { fnc_lte, 2 } :
-		name == ">" ? { fnc_gt, 2 } :
-		name == ">=" ? { fnc_gte, 2 } :
-		name == "==" ? { fnc_eq, 2 } :
-		name == "not" ? { fnc_not :
-		fnc_unknown
-	);
-*/
 const SysMap::value_type rawData[] = {
 	SysMap::value_type( "+", SysInfo( fnc_add, Arity( 2 ), 0 ) ),
 	SysMap::value_type( "-", SysInfo( fnc_sub, Arity( 2 ), 0 ) ),
@@ -91,7 +116,8 @@ const SysMap::value_type rawData[] = {
 	SysMap::value_type( "==", SysInfo( fnc_eq, Arity( 2 ), 0 ) ),
 	SysMap::value_type( ">", SysInfo( fnc_gt, Arity( 2 ), 0 ) ),
 	SysMap::value_type( ">=", SysInfo( fnc_gte, Arity( 2 ), 0 ) ),	
-	SysMap::value_type( "gc", SysInfo( fnc_syscall, Arity( 0 ), sysGarbageCollect ) )
+	SysMap::value_type( "gc", SysInfo( fnc_syscall, Arity( 0 ), sysGarbageCollect ) ),
+	SysMap::value_type( "newList", SysInfo( fnc_syscall, Arity( 0, true ), sysNewList ) )
 };
 const int numElems = sizeof rawData / sizeof rawData[0];
 SysMap sysMap( rawData, rawData + numElems );

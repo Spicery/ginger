@@ -22,7 +22,7 @@ public:
 	void xfrSubstring( const char *s, int a, int b );
 
 	void setOrigin();      						//  set the object origin
-	Ref end();              					//  return valid ptr
+	Ref make();              					//  return valid ptr
 
 public:
 	XfrClass( CageClass & c );

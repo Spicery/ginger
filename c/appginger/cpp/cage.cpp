@@ -84,7 +84,7 @@ void XfrClass::setOrigin() {
 }
 
 //  return valid ptr
-Ref XfrClass::end() {
+Ref XfrClass::make() {
 	if ( this->origin == NULL ) {
 		throw std::runtime_error( "Origin was not set during copy" );
 	}

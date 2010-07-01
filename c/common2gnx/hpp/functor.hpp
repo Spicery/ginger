@@ -72,6 +72,7 @@ typedef enum Functor {
      fnc_to,
      fnc_unless,
      fnc_until,
+     fnc_val,
      fnc_var,
      fnc_while
 } Functor;

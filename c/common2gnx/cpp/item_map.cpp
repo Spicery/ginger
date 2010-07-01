@@ -55,7 +55,7 @@ ItemMap::ItemMap() {
 	add( "]", 			fnc_cbracket, 	Clo, 		0			);
 	add( "absent", 		fnc_absent, 	Lit, 		0			);
 	add( "and", 		fnc_and, 		BFo, 		1700		);
-	add( "const", 		fnc_const, 		PrF, 		0			);
+	//add( "const", 		fnc_const, 		PrF, 		0			);
 	add( "define", 		fnc_define, 	PrF, 		0			);
 	add( "do", 			fnc_do, 		PrF, 		0			);
 	add( "else", 		fnc_else, 		PrF, 		0			);
@@ -79,6 +79,7 @@ ItemMap::ItemMap() {
 	add( "to",			fnc_to, 		PrF,		0			);
 	add( "unless", 		fnc_unless, 	PrF, 		0			);
 	add( "until", 		fnc_until, 		PrF, 		0			);
+	add( "val", 		fnc_val, 		PrF, 		0			);
 	add( "var", 		fnc_var, 		PrF, 		0			);
 	add( "while", 		fnc_while, 		PrF, 		0			);
 	add( "{", 			fnc_obrace, 	PrF, 		100			);

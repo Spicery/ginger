@@ -73,6 +73,7 @@ const char *functor_name( Functor fnc ) {
 	case fnc_to : return "to";
 	case fnc_unless : return "unless";
 	case fnc_until : return "until";
+	case fnc_val: return "val";
 	case fnc_var : return "var";
 	case fnc_while : return "while";
     }

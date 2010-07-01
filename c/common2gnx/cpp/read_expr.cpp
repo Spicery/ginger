@@ -368,12 +368,16 @@ Node ReadStateClass::prefix_processing() {
 				return charseq.node();
 			}
 		}
+		case fnc_val:
         case fnc_var : {
 	        Item item = this->read_id_item();
 	        this->check_token( fnc_bind );
 	        NodeFactory dec( "dec" );
 	        dec.start( "var" );
 	        dec.putAttr( "name", item->nameString() );
+	        if ( fnc == fnc_val ) {
+	        	dec.putAttr( "protected", "true" );
+	        }
 	        dec.end();
 	        dec.addNode( this->read_expr() );
 	        return dec.node();

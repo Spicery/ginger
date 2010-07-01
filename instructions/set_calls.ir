@@ -4,7 +4,7 @@ VMCOUNT = ToLong( pc[ 1 ] );
     Ref *ptr;
     if ( !IsPtr4( r ) ) call_error( r );
     ptr = RefToPtr4( r );
-    if ( !IsFnKey( *ptr ) ) call_error( r );
+    if ( !IsFunction( *ptr ) ) call_error( r );
     VMLINK = pc + 2;
     RETURN( ptr + 1 );
 }

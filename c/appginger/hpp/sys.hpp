@@ -16,7 +16,12 @@ extern void sys_print( Ref r );
 extern void sys_print( std::ostream & out, Ref r );
 
 extern void sysNewList( MachineClass * vm );
+extern void sysNewPair( MachineClass * vm );
 extern void sysHead( MachineClass * vm );
+extern void sysTail( MachineClass * vm );
+extern void sysTail( class MachineClass * vm );
+extern void sysIsPair( class MachineClass * vm );
+extern void sysIsNil( class MachineClass * vm );
 extern void sysGarbageCollect( MachineClass * vm );
 
 struct SysInfo { 

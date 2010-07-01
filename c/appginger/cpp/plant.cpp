@@ -61,7 +61,7 @@ Ref PlantClass::detach() {
 	xfr.xfrRef( ToRef( this->ninputs ) );		//	raw A
 
 	xfr.setOrigin();
-	xfr.xfrRef( sysFnKey );
+	xfr.xfrRef( sysFunctionKey );
 
 	xfr.xfrVector( *this->code_data );	//	alt
 

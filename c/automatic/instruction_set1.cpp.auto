@@ -131,7 +131,7 @@ static Ref *spcfn_calls( Ref *pc, Machine vm ) {
         Ref *ptr;
         if ( !IsPtr4( r ) ) call_error( r );
         ptr = RefToPtr4( r );
-        if ( !IsFnKey( *ptr ) ) call_error( r );
+        if ( !IsFunction( *ptr ) ) call_error( r );
         VMLINK = pc + 1;
         RETURN( ptr + 1 );
     }
@@ -188,7 +188,7 @@ static Ref *spcfn_end1_calls( Ref *pc, Machine vm ) {
         Ref *ptr;
         if ( !IsPtr4( r ) ) call_error( r );
         ptr = RefToPtr4( r );
-        if ( !IsFnKey( *ptr ) ) call_error( r );
+        if ( !IsFunction( *ptr ) ) call_error( r );
         VMLINK = pc + 2;
         RETURN( ptr + 1 );
     }
@@ -202,7 +202,7 @@ static Ref *spcfn_end_call_global( Ref *pc, Machine vm ) {
         Ref *ptr;
         if ( !IsPtr4( r ) ) call_error( r );
         ptr = RefToPtr4( r );
-        if ( !IsFnKey( *ptr ) ) call_error( r );
+        if ( !IsFunction( *ptr ) ) call_error( r );
         VMLINK = pc + 3;
         RETURN( ptr + 1 );
     }
@@ -435,7 +435,7 @@ static Ref *spcfn_set_call_global( Ref *pc, Machine vm ) {
         Ref *ptr;
         if ( !IsPtr4( r ) ) call_error( r );
         ptr = RefToPtr4( r );
-        if ( !IsFnKey( *ptr ) ) call_error( r );
+        if ( !IsFunction( *ptr ) ) call_error( r );
         VMLINK = pc + 3;
         RETURN( ptr + 1 );
     }
@@ -448,7 +448,7 @@ static Ref *spcfn_set_calls( Ref *pc, Machine vm ) {
         Ref *ptr;
         if ( !IsPtr4( r ) ) call_error( r );
         ptr = RefToPtr4( r );
-        if ( !IsFnKey( *ptr ) ) call_error( r );
+        if ( !IsFunction( *ptr ) ) call_error( r );
         VMLINK = pc + 2;
         RETURN( ptr + 1 );
     }

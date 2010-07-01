@@ -121,7 +121,7 @@ void Machine3::core( bool init_mode, Ref *pc ) {
             Ref *ptr;
             if ( !IsPtr4( r ) ) call_error( r );
             ptr = RefToPtr4( r );
-            if ( !IsFnKey( *ptr ) ) call_error( r );
+            if ( !IsFunction( *ptr ) ) call_error( r );
             VMLINK = pc + 1;
             RETURN( ptr + 1 );
         }
@@ -174,7 +174,7 @@ void Machine3::core( bool init_mode, Ref *pc ) {
             Ref *ptr;
             if ( !IsPtr4( r ) ) call_error( r );
             ptr = RefToPtr4( r );
-            if ( !IsFnKey( *ptr ) ) call_error( r );
+            if ( !IsFunction( *ptr ) ) call_error( r );
             VMLINK = pc + 2;
             RETURN( ptr + 1 );
         }
@@ -187,7 +187,7 @@ void Machine3::core( bool init_mode, Ref *pc ) {
             Ref *ptr;
             if ( !IsPtr4( r ) ) call_error( r );
             ptr = RefToPtr4( r );
-            if ( !IsFnKey( *ptr ) ) call_error( r );
+            if ( !IsFunction( *ptr ) ) call_error( r );
             VMLINK = pc + 3;
             RETURN( ptr + 1 );
         }
@@ -389,7 +389,7 @@ void Machine3::core( bool init_mode, Ref *pc ) {
             Ref *ptr;
             if ( !IsPtr4( r ) ) call_error( r );
             ptr = RefToPtr4( r );
-            if ( !IsFnKey( *ptr ) ) call_error( r );
+            if ( !IsFunction( *ptr ) ) call_error( r );
             VMLINK = pc + 3;
             RETURN( ptr + 1 );
         }
@@ -401,7 +401,7 @@ void Machine3::core( bool init_mode, Ref *pc ) {
             Ref *ptr;
             if ( !IsPtr4( r ) ) call_error( r );
             ptr = RefToPtr4( r );
-            if ( !IsFnKey( *ptr ) ) call_error( r );
+            if ( !IsFunction( *ptr ) ) call_error( r );
             VMLINK = pc + 2;
             RETURN( ptr + 1 );
         }

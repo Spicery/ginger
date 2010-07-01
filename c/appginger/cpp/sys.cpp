@@ -21,7 +21,7 @@ Ref sys_key( Ref r ) {
 	tagg = u & TAGG_MASK;
 	if ( tagg == ( 0 | SIM_TAG ) ) return sysAbsentKey;
 	if ( tagg == ToULong( sys_false ) || tagg == ToULong( sys_true ) ) return sysBoolKey;
-	if ( tagg == FN_TAGG ) return sysFnKey;
+	if ( tagg == FN_TAGG ) return sysFunctionKey;
 	if ( tagg == KEY_TAGG ) return sysKeyKey;
 	taggg = u & TAGGG_MASK;
 	if ( taggg == CHAR_TAGGG ) return sysCharKey;
@@ -58,7 +58,7 @@ void sys_print( std::ostream & out, Ref r ) {
 		out << ( r == sys_false ? "false" : "true" );
 	} else if ( k == sysAbsentKey ) {
 		out << "absent";
-	} else if ( k == sysFnKey ) {
+	} else if ( k == sysFunctionKey ) {
 		out << "<function>";
 	} else if ( k == sysCharKey ) {
 		out << CharacterToChar( r );
@@ -104,6 +104,21 @@ void sysNewList( class MachineClass * vm ) {
 	vm->fastPush( sofar );
 }
 
+void sysNewPair( class MachineClass * vm ) {
+	if ( vm->count == 2 ) {
+		XfrClass xfr( vm->heap().preflight( 3 ) );
+		xfr.setOrigin();
+		xfr.xfrRef( sysPairKey );
+		Ref t = vm->fastPop();
+		Ref h = vm->fastPop();
+		xfr.xfrRef( h );
+		xfr.xfrRef( t );
+		vm->fastPush( xfr.make() );
+	} else {
+		throw Mishap( "Wrong number of arguments for newPair" );
+	}
+}
+
 void sysHead( class MachineClass * vm ) {
 	if ( vm->count == 1 ) {
 		Ref x = vm->fastPeek();
@@ -117,8 +132,36 @@ void sysHead( class MachineClass * vm ) {
 	}
 }
 
-typedef std::map< std::string, SysInfo > SysMap;
+void sysTail( class MachineClass * vm ) {
+	if ( vm->count == 1 ) {
+		Ref x = vm->fastPeek();
+		if ( sys_key( x ) == sysPairKey ) {
+			vm->fastPeek() = RefToPtr4( x )[ 2 ];
+		} else {
+			throw Mishap( "Trying to take the head of a non-pair" );
+		}
+	} else {
+		throw Mishap( "Wrong number of arguments for head" );
+	}
+}
 
+void sysIsPair( class MachineClass * vm ) {
+	if ( vm->count == 1 ) {
+		vm->fastPeek() = IsPair( vm->fastPeek() ) ? sys_true : sys_false;
+	} else {
+		throw Mishap( "Wrong number of arguments for head" );
+	}
+}
+
+void sysIsNil( class MachineClass * vm ) {
+	if ( vm->count == 1 ) {
+		vm->fastPeek() = IsNil( vm->fastPeek() ) ? sys_true : sys_false;
+	} else {
+		throw Mishap( "Wrong number of arguments for head" );
+	}
+}
+
+typedef std::map< std::string, SysInfo > SysMap;
 const SysMap::value_type rawData[] = {
 	SysMap::value_type( "+", SysInfo( fnc_add, Arity( 2 ), 0 ) ),
 	SysMap::value_type( "-", SysInfo( fnc_sub, Arity( 2 ), 0 ) ),
@@ -132,7 +175,11 @@ const SysMap::value_type rawData[] = {
 	SysMap::value_type( ">=", SysInfo( fnc_gte, Arity( 2 ), 0 ) ),	
 	SysMap::value_type( "gc", SysInfo( fnc_syscall, Arity( 0 ), sysGarbageCollect ) ),
 	SysMap::value_type( "newList", SysInfo( fnc_syscall, Arity( 0, true ), sysNewList ) ),
-	SysMap::value_type( "head", SysInfo( fnc_syscall, Arity( 1 ), sysHead ) )
+	SysMap::value_type( "newPair", SysInfo( fnc_syscall, Arity( 2 ), sysNewPair ) ),
+	SysMap::value_type( "head", SysInfo( fnc_syscall, Arity( 1 ), sysHead ) ),
+	SysMap::value_type( "tail", SysInfo( fnc_syscall, Arity( 1 ), sysTail ) ),
+	SysMap::value_type( "isPair", SysInfo( fnc_syscall, Arity( 1 ), sysIsPair ) ),
+	SysMap::value_type( "isNil", SysInfo( fnc_syscall, Arity( 1 ), sysIsNil ) ),
 };
 const int numElems = sizeof rawData / sizeof rawData[0];
 SysMap sysMap( rawData, rawData + numElems );

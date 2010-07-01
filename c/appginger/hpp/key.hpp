@@ -52,15 +52,12 @@
 #define FLOAT0_TAGG    	( 6 << TAG | SIM_TAG )
 #define FLOAT1_TAGG     ( 7 << TAG | SIM_TAG )
 
+//	Floats
 #define IsFloat( x )	( ( FLOAT_MASK & ToULong( x ) ) == FLOAT0_TAGG )
 
-////////////////////////////////////////////////////////////////////////
-// zzz01011 tags: Function Keys
-////////////////////////////////////////////////////////////////////////
-
-#define sysFnKey		ToRef( 0 << TAGG | FN_TAGG )
-
-#define IsFnKey( x ) 	( ( TAGG_MASK & ToULong( x ) ) == FN_TAGG )
+//	Functions
+#define sysFunctionKey		ToRef( 0 << TAGG | FN_TAGG )
+#define IsFunction( x ) 	( ( TAGG_MASK & ToULong( x ) ) == FN_TAGG )
 
 
 ////////////////////////////////////////////////////////////////////////
@@ -84,6 +81,9 @@
 #define sysKeyKey		ToRef( 10 << TAGG | KEY_TAGG )
 #define sysUnicodeKey	ToRef( 11 << TAGG | KEY_TAGG )
 #define sysCharKey		ToRef( 12 << TAGG | KEY_TAGG )
+
+//	Lists
+#define IsPair( x )		( IsPtr4( x ) && ( *RefToPtr4( x ) == sysPairKey ) )
 
 
 ////////////////////////////////////////////////////////////////////////
@@ -118,6 +118,9 @@
 #define sys_nil			ToRef( 0 << TAGGG | MISC_TAGGG )
 #define sys_underflow	ToRef( 1 << TAGGG | MISC_TAGGG )
 #define sys_undefined	ToRef( 2 << TAGGG | MISC_TAGGG )
+
+//	Nil
+#define IsNil( x )		( x == sys_nil )
 
 
 ////////////////////////////////////////////////////////////////////////

@@ -126,8 +126,8 @@ static int parse_urlenc(void)
   return 1;
 }
 
-static int parse_uint(const char *str, unsigned int *value)
-{
+/* Not used at present
+static int parse_uint( const char *str, unsigned int *value ) {
   char *tail;
 
   errno = 0;
@@ -136,6 +136,7 @@ static int parse_uint(const char *str, unsigned int *value)
     return 0;
   return 1;
 }
+*/
 
 static int parse_size_t(const char *str, size_t *value)
 {

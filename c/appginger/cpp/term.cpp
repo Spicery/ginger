@@ -183,6 +183,10 @@ Term term_new_int( const int n ) {
 	;
 }
 
+Term term_new_list_empty() {
+	return shared< TermClass >( new ItemTermClass( fnc_list, sys_nil ) );
+}
+
 Term term_new_bool( const bool flag ) {
 	return 
 		shared< TermClass >(
@@ -211,8 +215,8 @@ Functor term_functor( Term term ) {
     return term->functor();
 }
 
-int term_arity( Term term ) {
-    return term->arity();
+int term_count( Term term ) {
+    return term->count();
 }
 
 //-- printing -----------------------------------------------------------
@@ -227,7 +231,7 @@ static void splevel( int level ) {
 
 static void tprint( Term term, int level ) {
     splevel( level );
-    printf( "[%d,%s]", term->arity(), term->type_name() );	//	DEBUG ONLY
+    printf( "[%d,%s]", term->count(), term->type_name() );	//	DEBUG ONLY
     printf( "_%s_\n", functor_name( term->functor() ) );
 
 	switch ( term->functor() ) {
@@ -260,9 +264,9 @@ static void tprint( Term term, int level ) {
             break;
         }
 		default: {
-            //  printf( "(%d children to print)\n", term->arity );
+            //  printf( "(%d children to print)\n", term->count );
             {
-            	const int n = term_arity( term );
+            	const int n = term_count( term );
 				for ( int i = 0; i < n; i++ ) {
 					tprint( term_index( term, i ), level + 1 );
 				}

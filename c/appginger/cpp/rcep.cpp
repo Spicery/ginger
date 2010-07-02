@@ -23,10 +23,6 @@ bool read_comp_exec_print( Machine vm, istream & input ) {
     Ref r;
     Term term;
 	volatile clock_t start, finish;
-	//Item it;
-	//ReadStateClass read_state( ifact );
-	
-	// Sort out ifact later
 	ReadXmlClass read_xml( input );
 
 #ifdef DBG_RCEP

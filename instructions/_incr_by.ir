@@ -1,13 +1,15 @@
-long x = ToLong( *( VMVP ) );
-long y = ToLong( pc[ 1 ] );
-long sum = x + y;
-if ( x < 0 ? sum > y : sum < y ) {
-    throw Mishap( "overflow detected in x + y" ).culprit( "x", "" + x ).culprit( "y", "" + y );
-}
-*VMVP = ToRef( sum );
-RETURN( pc + 2 );
-
-//int n = ToLong( pc[ 1 ] );
-//*( VMVP ) = ToRef( ToLong( *( VMVP ) ) + n );
-//RETURN( pc + 2 );
-
+Ref ry = ToRef( pc[ 1 ] );
+Ref rx = *( VMVP );
+if ( IsSmall( rx ) && IsSmall( ry ) ) {
+	long y = (long)ry;
+	long x = (long)rx;
+	long sum = x + y;
+	if ( x < 0 ? sum <= y : sum >= y ) {
+		*VMVP = ToRef( sum );
+		RETURN( pc + 2 );
+	} else {
+    	throw Mishap( "Overflow detected in +" );
+	}
+} else {
+	throw Mishap( "Small integers only" );
+} 

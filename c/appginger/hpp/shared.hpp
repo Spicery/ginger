@@ -1,10 +1,14 @@
 #ifndef SHARED_HPP
 #define SHARED_HPP
 
-//#include <boost/shared_ptr.hpp>
-#include <tr1/memory>
+#define BOOST
+#ifdef BOOST
+	#include <boost/shared_ptr.hpp>
+	#define shared boost::shared_ptr
+#else
+	#include <tr1/memory>
+	#define shared std::tr1::shared_ptr
+#endif
 
-//#define shared boost::shared_ptr
-#define shared std::tr1::shared_ptr
 
 #endif

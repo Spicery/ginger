@@ -1,28 +1,34 @@
 static Ref *spcfn__add( Ref *pc, Machine vm ) {
-    long y = ToLong( *( VMVP-- ) );
-    long x = ToLong( *( VMVP ) );
-    long sum = x + y;
-    if ( x < 0 ? sum > y : sum < y ) {
-        throw Mishap( "Overflow detected in +" ).culprit( "Argument1", "" + x ).culprit( "Argument2", "" + y );
-    }
-    *VMVP = ToRef( sum );
-    RETURN( pc + 1 );
-    
-    //int y = ToLong( *( VMVP-- ) );
-    //*VMVP = ToRef( ToLong( *( VMVP ) ) + y );
-    //RETURN( pc + 1 );
-    
+    Ref ry = *( VMVP-- );
+    Ref rx = *( VMVP );
+    if ( IsSmall( rx ) && IsSmall( ry ) ) {
+    	long y = (long)ry;
+    	long x = (long)rx;
+    	long sum = x + y;
+    	if ( x < 0 ? sum <= y : sum >= y ) {
+    		*VMVP = ToRef( sum );
+    		RETURN( pc + 1 );
+    	} else {
+        	throw Mishap( "Overflow detected in +" );
+    	}
+    } else {
+    	throw Mishap( "Small integers only" );
+    } 
 }
 
 static Ref *spcfn__decr( Ref *pc, Machine vm ) {
-    long x = ToLong( *( VMVP ) );
-    long sum = x - ToLong( IntToSmall( 1 ) );
-    if ( sum > x ) {
-        throw Mishap( "integer overflow detected in x - 1" ).culprit( "x", "" + x );
+    Ref rx = *VMVP;
+    if ( IsSmall( rx ) ) {
+    	long x = (long)rx;
+    	long sum = x - (long)IntToSmall( 1 );
+    	if ( sum > x ) {
+    		throw Mishap( "integer overflow detected in x - 1" ).culprit( "x", "" + x );
+    	}
+    	*( VMVP ) = ToRef( sum );
+    	RETURN( pc + 1 );
+    } else {
+    	throw Mishap( "Small integer needed" );
     }
-    *( VMVP ) = ToRef( sum );
-    RETURN( pc + 1 );
-    
     
     //*( VMVP ) = ToRef( ToLong( *( VMVP ) ) - ToLong( IntToSmall( 1 ) ) );
     //RETURN( pc + 1 );
@@ -59,33 +65,38 @@ static Ref *spcfn__gte( Ref *pc, Machine vm ) {
 }
 
 static Ref *spcfn__incr( Ref *pc, Machine vm ) {
-    long x = ToLong( *( VMVP ) );
-    long sum = x + ToLong( IntToSmall( 1 ) );
-    if ( sum < x ) {
-        throw Mishap( "integer overflow detected in x + 1" ).culprit( "x", "" + x );
+    Ref rx = *VMVP;
+    if ( IsSmall( rx ) ) {
+    	long x = (long)rx;
+    	long sum = x + (long)IntToSmall( 1 );
+    	if ( sum > x ) {
+    		*( VMVP ) = ToRef( sum );
+    		RETURN( pc + 1 );
+    	} else {
+    		throw Mishap( "integer overflow detected in x + 1" );
+    	}
+    } else {
+    	throw Mishap( "Small integer needed" );
     }
-    *( VMVP ) = ToRef( sum );
-    RETURN( pc + 1 );
-    
-    //*( VMVP ) = ToRef( ToLong( *( VMVP ) ) + ToLong( IntToSmall( 1 ) ) );
-    //RETURN( pc + 1 );
     
 }
 
 static Ref *spcfn__incr_by( Ref *pc, Machine vm ) {
-    long x = ToLong( *( VMVP ) );
-    long y = ToLong( pc[ 1 ] );
-    long sum = x + y;
-    if ( x < 0 ? sum > y : sum < y ) {
-        throw Mishap( "overflow detected in x + y" ).culprit( "x", "" + x ).culprit( "y", "" + y );
-    }
-    *VMVP = ToRef( sum );
-    RETURN( pc + 2 );
-    
-    //int n = ToLong( pc[ 1 ] );
-    //*( VMVP ) = ToRef( ToLong( *( VMVP ) ) + n );
-    //RETURN( pc + 2 );
-    
+    Ref ry = ToRef( pc[ 1 ] );
+    Ref rx = *( VMVP );
+    if ( IsSmall( rx ) && IsSmall( ry ) ) {
+    	long y = (long)ry;
+    	long x = (long)rx;
+    	long sum = x + y;
+    	if ( x < 0 ? sum <= y : sum >= y ) {
+    		*VMVP = ToRef( sum );
+    		RETURN( pc + 2 );
+    	} else {
+        	throw Mishap( "Overflow detected in +" );
+    	}
+    } else {
+    	throw Mishap( "Small integers only" );
+    } 
 }
 
 static Ref *spcfn__lt( Ref *pc, Machine vm ) {
@@ -216,10 +227,12 @@ static Ref *spcfn_enter( Ref *pc, Machine vm ) {
     VMSP[ 1 ] = prev;
     VMSP[ 2 ] = ToRef( pc[ -3 ] );
     VMSP += 3;
-    if ( A != VMCOUNT ) enter_error( VMCOUNT, A );
-    {    int i;
-        for ( i = 0; i < A; i++ ) {
-            VMSP[ i ] = *( VMVP-- );
+    if ( A != VMCOUNT ) {
+        enter_error( VMCOUNT, A );
+    }
+    {
+        while ( --A >= 0 ) {
+            VMSP[ A ] = *( VMVP-- );
         }
     }
     RETURN( pc + 1 );

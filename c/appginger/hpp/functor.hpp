@@ -44,6 +44,7 @@ typedef enum Functor {
 	fnc_incr,
 	fnc_incr_by,
 	fnc_int,
+	fnc_list,
 	fnc_lt,
 	fnc_lte,
 	fnc_mul,
@@ -58,6 +59,7 @@ typedef enum Functor {
 	fnc_syscall,
 	fnc_until,
 	fnc_var,
+	fnc_vector,
 	fnc_while
 } Functor;
 

@@ -25,6 +25,7 @@
 #define SmallToLong( r )	( (long)( ToLong( r ) >> TAG ) )
 
 #define IsPtr4( r )			( ( TAG_MASK & ToULong( r ) ) == PTR_TAG )
+#define IsSmall( r )		( ( TAG_MASK & ToULong( r ) ) == INT_TAG )
 #define IsDefer( r )		( ( TAG_MASK & ToULong( r ) ) == DEF_TAG )
 
 #define IntToChar( i )		( (Ref)( ( i ) << TAGGG | CHAR_TAGGG ) )

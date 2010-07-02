@@ -42,6 +42,7 @@ const char * functor_name( Functor tag ) {
 	case fnc_incr : return "incr";
 	case fnc_incr_by : return "incr_by";
 	case fnc_int : return "int";
+	case fnc_list: return "list";
 	case fnc_lt : return "lt";
 	case fnc_lte : return "lte";
 	case fnc_mul : return "mul";
@@ -56,6 +57,7 @@ const char * functor_name( Functor tag ) {
 	case fnc_syscall : return "syscall";
 	case fnc_until : return "until";
 	case fnc_var : return "var";
+	case fnc_vector : return "vector";
 	case fnc_while : return "while";
     }
     return "?";

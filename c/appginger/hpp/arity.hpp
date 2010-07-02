@@ -4,9 +4,9 @@
 #include "term.hpp"
 #include "dontknow.hpp"
 
-int arity_add( int a, int b );
-int arity_join( int a, int b );
-int arity_term( Term term );
+int arity_add( const int a, const int b );
+int arity_join( const int a, const int b );
+int arity_analysis( Term term );
 
 class Arity {
 private:
@@ -15,12 +15,14 @@ private:
 	short arity;
 	
 public:
-	Arity add( Arity that );
-	Arity join( Arity that );
-	void check( int actual_nargs );
-	bool isOK( int actual_nargs );
-	bool isZero();
-	bool isntZero();
+	Arity add( const Arity that ) const;
+	Arity join( const Arity that ) const;
+	void check( const Arity that ) const;
+	void check( const int actual_nargs ) const;
+	bool isOK( const Arity that ) const;
+	bool isOK( const int actual_nargs ) const;
+	bool isZero() const;
+	bool isntZero() const;
 	
 public:
 	Arity( int a ) : more( false ), arity( a ) {}

@@ -93,7 +93,7 @@ enum Lookup LiftStateClass::lookup( const std::string & c, Ident *id ) {
 
 Term LiftStateClass::general_lift( Term term ) {
     int i;
-    int A = term_arity( term );
+    int A = term_count( term );
     for ( i = 0; i < A; i++ ) {
         Term *r = term_index_ref( term, i );
         #ifdef DBG_LIFT
@@ -135,7 +135,7 @@ Term LiftStateClass::lift( Term term ) {
             this->function = fn;
             int & slot = fn->nlocals();
             Term args = fn->child( 0 );
-            int a = term_arity( args );
+            int a = term_count( args );
             
             //int slot = 0;
             #ifdef DBG_LIFT
@@ -150,9 +150,9 @@ Term LiftStateClass::lift( Term term ) {
                 #endif
                 Ident id = ident_new_local( c );
                 this->env.add( id );
-                printf( "Function now has %d slots\n", fn->nlocals() );
+                //printf( "Function now has %d slots\n", fn->nlocals() );
                 id->slot = slot++;
-                printf( "Function now has %d slots\n", fn->nlocals() );
+                //printf( "Function now has %d slots\n", fn->nlocals() );
                 id->level = this->level;
                 term_named_ident( arg ) = id;
             }
@@ -190,7 +190,7 @@ Term LiftStateClass::lift( Term term ) {
                 id->slot = slot++;
                 id->level = this->level;
                 term_named_ident( term ) = id;
-                printf( "Function now has %d slots\n", fn->nlocals() );
+                //printf( "Function now has %d slots\n", fn->nlocals() );
             }
  			return term;			        	
         }
@@ -233,7 +233,7 @@ Term LiftStateClass::lift( Term term ) {
             return this->general_lift( term );
         }
         default: {
-            if ( term_arity( term ) == 0 ) {
+            if ( term_count( term ) == 0 ) {
                 return term;
             } else {
                 return this->general_lift( term );

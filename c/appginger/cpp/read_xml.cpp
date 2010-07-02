@@ -212,6 +212,15 @@ static Term makeIf( const int i, const int n, const std::vector< Term > & kids )
 	}
 }
 
+static Arity kids_analysis( vector< Term > & kids ) {
+	Arity sofar( 0 );
+	for ( vector< Term >::iterator it = kids.begin(); it != kids.end(); it++ ) {
+		Arity ta( *it );
+		sofar = sofar.join( ta );
+	}
+	return sofar;
+}
+
 static Term makeSysApp( string & name, vector< Term > & kids ) {
 	SysMap::iterator smit = sysMap.find( name );
 	if ( smit == sysMap.end() ) {
@@ -219,7 +228,8 @@ static Term makeSysApp( string & name, vector< Term > & kids ) {
 	}
 
 	SysInfo & info = smit->second;
-	info.arity.check( kids.size() ); 
+	Arity ka = kids_analysis( kids );
+	info.arity.check( ka ); 
 
 	Term t;
 	if ( info.functor == fnc_syscall ) {
@@ -262,6 +272,12 @@ Term TermData::makeTerm() {
 			return term_new_string( this->attrs[ "value" ] );
 		} else if ( name == "absent" ) {
 			return term_new_absent();
+		} else if ( name == "list" ) {
+			if ( this->attrs[ "value" ] == "empty" ) {
+				return term_new_list_empty();
+			} else {
+				throw;
+			}
 		} else {
 			throw;
 		}

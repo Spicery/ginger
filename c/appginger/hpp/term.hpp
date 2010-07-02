@@ -16,7 +16,7 @@ class TermClass {
 public:
 	virtual enum Functor functor() = 0;
 	virtual Term & child_ref( const int n ) = 0;
-	virtual int arity() = 0;
+	virtual int count() = 0;
 	virtual const char * type_name() = 0;
 	
 	
@@ -46,7 +46,7 @@ public:
 		return children[ n ];
 	}
 	
-	int arity() {
+	int count() {
 		return static_cast< int >( this->children.size() );
 	}
 	
@@ -108,7 +108,7 @@ public:
 		throw "Invalid index";
 	}
 	
-	int arity() {
+	int count() {
 		return 0;
 	}
 	
@@ -323,7 +323,7 @@ public:
 
 public:
 
-	int arity() {
+	int count() {
 		return 2;
 	}
 	
@@ -418,6 +418,8 @@ Term term_add( Term t, Term x );
 Ref term_item_extra_ref( Term term );
 Instruction term_item_extra_instruction( Term term );
 
+Term term_new_list_empty();
+
 Term term_new_int( const int n );
 Term term_new_bool( const bool flag );
 
@@ -458,7 +460,6 @@ bool term_is_id( Term term );
 Term term_new_from( Term id, Term start_expr, Term end_expr );
 
 Functor term_functor( Term term );
-int term_arity( Term term );
 int term_count( Term term );
 
 void term_print( Term term );

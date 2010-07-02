@@ -5,10 +5,12 @@ VMSP[ 0 ] = VMLINK;
 VMSP[ 1 ] = prev;
 VMSP[ 2 ] = ToRef( pc[ -3 ] );
 VMSP += 3;
-if ( A != VMCOUNT ) enter_error( VMCOUNT, A );
-{    int i;
-    for ( i = 0; i < A; i++ ) {
-        VMSP[ i ] = *( VMVP-- );
+if ( A != VMCOUNT ) {
+    enter_error( VMCOUNT, A );
+}
+{
+    while ( --A >= 0 ) {
+        VMSP[ A ] = *( VMVP-- );
     }
 }
 RETURN( pc + 1 );

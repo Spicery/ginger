@@ -230,6 +230,8 @@ void PlantClass::compileTerm( Term term ) {
 		case fnc_bool:
 		case fnc_absent:
 		case fnc_char:
+		case fnc_list:
+		case fnc_vector:
 			vmiPUSHQ( this, term_ref_cont( term ) );
 			return;
 		case fnc_string: {
@@ -270,7 +272,7 @@ void PlantClass::compileTerm( Term term ) {
 			break;
 		}
 		case fnc_seq: {
-			int n = term_arity( term );
+			int n = term_count( term );
 			for ( int i = 0; i < n ; i++ ) {
 				this->compileTerm( term_index( term, i ) );
 			}
@@ -323,7 +325,7 @@ void PlantClass::compileTerm( Term term ) {
 		case fnc_app: {
 			Term fn = term_index( term, 0 );
 			Term args = term_index( term, 1 );
-			int aargs = arity_term( args );
+			int aargs = arity_analysis( args );
 			//	plant_count( plant, args );
 			if ( term_is_id( fn ) ) {
 				if ( aargs == DONTKNOW ) {
@@ -366,7 +368,7 @@ void PlantClass::compileTerm( Term term ) {
 			break;
 		}
 		case fnc_if: {
-			int a = term_arity( term );
+			int a = term_count( term );
 			if ( a == 2 ) {
 				DestinationClass d( this );
 				//	plant1( plant, term_index( term, 0 ) );
@@ -402,14 +404,14 @@ void PlantClass::compileTerm( Term term ) {
 }
 
 void PlantClass::compileArgs( Term term ) {
-	int n = term->arity();
+	int n = term->count();
 	for ( int i = 0; i < n; i++ ) {
 		this->compileTerm( term->child( i ) );
 	}
 }
 
 void PlantClass::compile1( Term term ) {
-	int a = arity_term( term );
+	int a = arity_analysis( term );
 	if ( a == DONTKNOW ) {
 		int n = this->slot;
 		int v = tmpvar( this );
@@ -425,7 +427,7 @@ void PlantClass::compile1( Term term ) {
 }
 
 void PlantClass::compile0( Term term ) {
-	int a = arity_term( term );
+	int a = arity_analysis( term );
 	if ( a == DONTKNOW ) {
 		int n = this->slot;
 		int v = tmpvar( this );

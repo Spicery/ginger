@@ -1,6 +1,7 @@
 #ifndef READ_EXPR_H
 #define READ_EXPR_H
 
+#include "toktype.hpp"
 #include "item_factory.hpp"
 #include "node.hpp"
 
@@ -14,14 +15,14 @@ private:
 	Node prefix_processing();
 	Node postfix_processing();
 	Node postfix_processing( Node lhs, Item item, int prec );
-	Node read_stmnts_check( Functor fnc );
-	bool try_token( Functor fnc );
+	Node read_stmnts_check( TokType fnc );
+	bool try_token( TokType fnc );
 	Node read_stmnts();
 	Node read_id();
 	Item read_id_item();
-	void check_token( Functor fnc );
-	Node read_expr_check( Functor fnc );
-	Node read_if( Functor sense, Functor closer );
+	void check_token( TokType fnc );
+	Node read_expr_check( TokType fnc );
+	Node read_if( TokType sense, TokType closer );
 	Node read_syscall();
 	Node read_bindings();
 	Node read_conditions();

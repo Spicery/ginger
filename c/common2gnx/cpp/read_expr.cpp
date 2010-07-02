@@ -13,6 +13,7 @@
 #include "role.hpp"
 #include "sysconst.hpp"
 
+
 static Node makeApp( Node lhs, Node rhs ) {
 	if ( lhs->elementName() == "sysfn" ) {
 		NodeFactory sysapp( "sysapp" );
@@ -31,7 +32,7 @@ static Node makeApp( Node lhs, Node rhs ) {
 
 Node ReadStateClass::read_id() {
 	Item it = this->item_factory->read();
-	if ( it->functor != fnc_id ) {
+	if ( it->tok_type != tokty_id ) {
 		throw Mishap( "Identifier expected" ).culprit( "Found", it->nameString() );
 	}
 	NodeFactory id( "id" );
@@ -41,7 +42,7 @@ Node ReadStateClass::read_id() {
 
 Item ReadStateClass::read_id_item() {
 	Item it = this->item_factory->read();
-	if ( it->functor != fnc_id ) {
+	if ( it->tok_type != tokty_id ) {
 		throw Mishap( "Identifier expected" ).culprit( "Found", it->nameString() );
 	}
 	return it;
@@ -60,22 +61,22 @@ Node ReadStateClass::read_expr_prec( int prec ) {
 	return e;
 }
 
-void ReadStateClass::check_token( Functor fnc ) {
+void ReadStateClass::check_token( TokType fnc ) {
 	ItemFactory ifact = this->item_factory;
 	Item it = ifact->read();
 	ifact->drop();
-	if ( it->functor != fnc ) {
-		throw Mishap( "Unexpected token" ).culprit( "Found", it->nameString() ).culprit( "Expected", functor_name( fnc ) );
+	if ( it->tok_type != fnc ) {
+		throw Mishap( "Unexpected token" ).culprit( "Found", it->nameString() ).culprit( "Expected", tok_type_name( fnc ) );
 	}
 }
 
 void ReadStateClass::checkSemi() {
-	this->check_token( fnc_semi );
+	this->check_token( tokty_semi );
 }
 
-bool ReadStateClass::try_token( Functor fnc ) {
+bool ReadStateClass::try_token( TokType fnc ) {
 	ItemFactory ifact = this->item_factory;
-	if ( ifact->peek()->functor == fnc ) {
+	if ( ifact->peek()->tok_type == fnc ) {
 		ifact->drop();
 		return true;
 	} else {
@@ -93,7 +94,7 @@ Node ReadStateClass::read_stmnts() {
 	}
 }
 
-Node ReadStateClass::read_stmnts_check( Functor fnc ) {
+Node ReadStateClass::read_stmnts_check( TokType fnc ) {
 	Node t = this->read_stmnts();
 	this->check_token( fnc );
 	return t;
@@ -112,7 +113,7 @@ Node ReadStateClass::read_opt_expr() {
 	return this->read_opt_expr_prec( prec_semi );
 }
 
-Node ReadStateClass::read_expr_check( Functor fnc ) {
+Node ReadStateClass::read_expr_check( TokType fnc ) {
 	Node t = this->read_expr();
 	this->check_token( fnc );
 	return t;
@@ -120,20 +121,20 @@ Node ReadStateClass::read_expr_check( Functor fnc ) {
 
 Node ReadStateClass::postfix_processing( Node lhs, Item item, int prec ) {
 	Role role = item->role;
-	Functor fnc = item->functor;
+	TokType fnc = item->tok_type;
 	if ( role.IsPattern() ) {
 		lhs->updateAsPattern();
 		switch ( fnc ) {
-			case fnc_bind: {
+			case tokty_bind: {
 				Node rhs = this->read_expr_prec( prec );
 				NodeFactory bind( "dec" );
 				bind.addNode( lhs );
 				bind.addNode( rhs );
 				return bind.node();
 			}
-			case fnc_from: {				
+			case tokty_from: {				
 				Node from_expr = this->read_expr();
-				this->check_token( fnc_to );
+				this->check_token( tokty_to );
 				Node to_expr = this->read_expr_prec( prec );
 				NodeFactory node( "from" );
 				node.addNode( lhs );
@@ -147,12 +148,12 @@ Node ReadStateClass::postfix_processing( Node lhs, Item item, int prec ) {
 	} else if ( role.IsBinary() ) {
 		if ( role.IsSys() ) {
 			NodeFactory a( "sysapp" );
-			a.putAttr( "name", functor_as_sysapp( fnc ) );
+			a.putAttr( "name", tok_type_as_sysapp( fnc ) );
 			a.addNode( lhs );
 			a.addNode( this->read_expr_prec( prec ) );
 			return a.node();
 		} else if ( role.IsForm() ) {
-			NodeFactory a( functor_as_tag( fnc ) );
+			NodeFactory a( tok_type_as_tag( fnc ) );
 			a.addNode( lhs );
 			a.addNode( this->read_expr_prec( prec ) );
 			return a.node();			
@@ -161,7 +162,7 @@ Node ReadStateClass::postfix_processing( Node lhs, Item item, int prec ) {
 		}
 	} else {
 		switch ( fnc ) {
-			case fnc_semi: {
+			case tokty_semi: {
 				Node rhs = this->read_opt_expr_prec( prec );
 				if ( not( rhs ) ) {
 					return lhs;
@@ -172,12 +173,12 @@ Node ReadStateClass::postfix_processing( Node lhs, Item item, int prec ) {
 					return s.node();
 				}
 			}
-			case fnc_oparen: {
-				Node rhs = this->read_stmnts_check( fnc_cparen );
+			case tokty_oparen: {
+				Node rhs = this->read_stmnts_check( tokty_cparen );
 				return makeApp( lhs, rhs );
 			}
-			case fnc_at:
-			case fnc_dot: {
+			case tokty_at:
+			case tokty_dot: {
 				Node func = this->read_expr_prec( prec_tight );
 				Node rhs = this->read_opt_expr_prec( prec );			
 				NodeFactory seq( "seq" );
@@ -185,7 +186,7 @@ Node ReadStateClass::postfix_processing( Node lhs, Item item, int prec ) {
 				if ( ! not rhs ) { seq.addNode( rhs ); }
 				return makeApp( func, seq.node() );
 			}
-			case fnc_int: {
+			case tokty_int: {
 				NodeFactory add( "add" );
 				add.addNode( lhs );
 				add.start( "int" );
@@ -203,8 +204,8 @@ Node ReadStateClass::postfix_processing( Node lhs, Item item, int prec ) {
     throw;	//	Unreachable.
 }
 
-static void predicate( Functor sense, NodeFactory & ifunless, Node pred ) {
-	if ( sense == fnc_if ) {
+static void predicate( TokType sense, NodeFactory & ifunless, Node pred ) {
+	if ( sense == tokty_if ) {
 		ifunless.addNode( pred );
 	} else {
 		ifunless.start( "sysval" );
@@ -214,19 +215,19 @@ static void predicate( Functor sense, NodeFactory & ifunless, Node pred ) {
 	}
 }
 
-Node ReadStateClass::read_if( Functor sense, Functor closer ) {
+Node ReadStateClass::read_if( TokType sense, TokType closer ) {
 	Node pred = this->read_expr();
-	if ( ! this->try_token( fnc_then ) ) {
-		this->check_token( fnc_do );
+	if ( ! this->try_token( tokty_then ) ) {
+		this->check_token( tokty_do );
 	}
 	Node then_part = this->read_stmnts();
-	if ( this->try_token( fnc_else ) ) {	
+	if ( this->try_token( tokty_else ) ) {	
 		NodeFactory ifunless( "if" );
 		predicate( sense, ifunless, pred );
 		ifunless.addNode( then_part );
 		ifunless.addNode( this->read_stmnts_check( closer ) );
 		return ifunless.node();
-		//return term_new_basic3( sense, pred, then_part, this->read_stmnts_check( fnc_endif ) );
+		//return term_new_basic3( sense, pred, then_part, this->read_stmnts_check( tokty_endif ) );
 	} else if ( this->try_token( closer ) ) {
 		NodeFactory ifunless( "if" );
 		predicate( sense, ifunless, pred );
@@ -234,12 +235,12 @@ Node ReadStateClass::read_if( Functor sense, Functor closer ) {
 		return ifunless.node();
 		//return term_new_basic2( sense, pred, then_part );
 	} else {
-		Functor new_sense;
-		if ( this->try_token( fnc_elseif ) ) {
-			new_sense = fnc_if;
+		TokType new_sense;
+		if ( this->try_token( tokty_elseif ) ) {
+			new_sense = tokty_if;
 		} else {
-			this->check_token( fnc_elseunless );
-			new_sense = fnc_unless;
+			this->check_token( tokty_elseunless );
+			new_sense = tokty_unless;
 		}
 		NodeFactory ifunless( "if" );
 		predicate( sense, ifunless, pred );
@@ -253,11 +254,11 @@ Node ReadStateClass::read_if( Functor sense, Functor closer ) {
 Node ReadStateClass::read_syscall() {
 	ItemFactory ifact = this->item_factory;	
 	Item it = ifact->read();
-	if ( it->functor == fnc_id ) {
+	if ( it->tok_type == tokty_id ) {
 		//const std::string & name = it->nameString();
 		NodeFactory sc( "syscall" );
 		sc.putAttr( "name", it->nameString() );
-		return sc.node();	//term_new_ref( fnc_syscall, (Ref)sc );
+		return sc.node();	//term_new_ref( tokty_syscall, (Ref)sc );
 	} else {
 		throw Mishap( "Invalid token after >-> (syscall) arrow" ).culprit( it->nameString() );
 	}
@@ -265,8 +266,8 @@ Node ReadStateClass::read_syscall() {
 
 Node ReadStateClass::read_for() {
 	Node query = this->read_query();
-	this->check_token( fnc_do );
-	Node body = this->read_stmnts_check( fnc_endfor );
+	this->check_token( tokty_do );
+	Node body = this->read_stmnts_check( tokty_endfor );
 	NodeFactory for_node( "for" );
 	for_node.addNode( query );
 	for_node.addNode( body );
@@ -319,21 +320,21 @@ static void flatten( Node & ap, Node & fn, Node & args ) {
 Node ReadStateClass::prefix_processing() {
 	ItemFactory ifact = this->item_factory;
 	Item item = ifact->read();
-	Functor fnc = item->functor;
+	TokType fnc = item->tok_type;
 	Role role = item->role;
 
 	if ( role.IsLiteral() ) {
-		NodeFactory simple( functor_as_type( fnc ) );
+		NodeFactory simple( tok_type_as_type( fnc ) );
 		simple.putAttr( "value", item->nameString() );
 	 	return simple.node();
 	} else if ( role.IsUnary() ) {
 		if ( role.IsForm() ) {
-			NodeFactory unary( functor_as_tag( fnc ) );
+			NodeFactory unary( tok_type_as_tag( fnc ) );
 			unary.addNode( this->read_expr_prec( item->precedence ) );
 			return unary.node();
 		} else if ( role.IsSys() ) {
 			NodeFactory sysapp( "sysfn" );
-			sysapp.putAttr( "value", functor_as_sysapp( fnc ) );
+			sysapp.putAttr( "value", tok_type_as_sysapp( fnc ) );
 			return sysapp.node();
 		} else {
 			throw;	// 	Unreachable.
@@ -341,7 +342,7 @@ Node ReadStateClass::prefix_processing() {
 	}
 
 	switch ( fnc ) {
-		case fnc_id: {
+		case tokty_id: {
 			std::string & name = item->nameString();
 			SysConst * sysc = lookupSysConst( name );
 			if ( sysc != NULL ) {
@@ -354,13 +355,13 @@ Node ReadStateClass::prefix_processing() {
 				return id.node();
 			}
 		}
-		case fnc_string: {
+		case tokty_string: {
 			//printf( "Copying string %s\n", (char *)item->extra );
 			NodeFactory str( "string" );
 			str.putAttr( "value", item->nameString() );	//	Prolly wrong.
 			return str.node();
 		}
-		case fnc_charseq: {
+		case tokty_charseq: {
 			int n = item->nameString().size();
 			if ( n == 0 ) {
 				NodeFactory skip( "seq" );
@@ -377,42 +378,42 @@ Node ReadStateClass::prefix_processing() {
 				return charseq.node();
 			}
 		}
-		case fnc_val:
-        case fnc_var : {
+		case tokty_val:
+        case tokty_var : {
 	        Item item = this->read_id_item();
-	        this->check_token( fnc_bind );
+	        this->check_token( tokty_bind );
 	        NodeFactory dec( "dec" );
 	        dec.start( "var" );
 	        dec.putAttr( "name", item->nameString() );
-	        if ( fnc == fnc_val ) {
+	        if ( fnc == tokty_val ) {
 	        	dec.putAttr( "protected", "true" );
 	        }
 	        dec.end();
 	        dec.addNode( this->read_expr() );
 	        return dec.node();
         }
-		case fnc_oparen: {
-			return this->read_stmnts_check( fnc_cparen );
+		case tokty_oparen: {
+			return this->read_stmnts_check( tokty_cparen );
 		}
-		case fnc_obracket: {
+		case tokty_obracket: {
 			NodeFactory list( "sysapp" );
 			list.putAttr( "name", "newList" );
-			list.addNode( this->read_stmnts_check( fnc_cbracket ) );
+			list.addNode( this->read_stmnts_check( tokty_cbracket ) );
 			return list.node();
 		}
-		case fnc_unless: {
-			return this->read_if( fnc_unless, fnc_endunless );
+		case tokty_unless: {
+			return this->read_if( tokty_unless, tokty_endunless );
 		}
-		case fnc_if: {
-			return this->read_if( fnc_if, fnc_endif );
+		case tokty_if: {
+			return this->read_if( tokty_if, tokty_endif );
 		}
-		case fnc_syscall: {
+		case tokty_syscall: {
 			return this->read_syscall();
 		}
-		case fnc_for: {
+		case tokty_for: {
 		  	return this->read_for();
 		}
-		case fnc_define: {
+		case tokty_define: {
 			ReadStateClass pattern( *this );
 			pattern.setPatternMode();
 			Node ap = pattern.read_expr_prec( prec_arrow );
@@ -420,8 +421,8 @@ Node ReadStateClass::prefix_processing() {
 			Node args;
 			flatten( ap, fn, args );
 			const std::string name = fn->get( "name" );
-			this->check_token( fnc_arrow );
-			Node body = this->read_stmnts_check( fnc_enddefine );
+			this->check_token( tokty_arrow );
+			Node body = this->read_stmnts_check( tokty_enddefine );
 			NodeFactory def( "dec" );
 			def.start( "var" );
 			def.putAttr( "name", name );
@@ -433,15 +434,15 @@ Node ReadStateClass::prefix_processing() {
 			def.addNode( body );
 			def.end();
 			return def.node();
-			//return term_new_basic3( fnc_define, fn, args, body );
+			//return term_new_basic3( tokty_define, fn, args, body );
 		}
-		case fnc_fn: {
+		case tokty_fn: {
 			ReadStateClass pattern( *this );
 			pattern.setPatternMode();
 			Node args = pattern.read_expr_prec( prec_arrow );
-			this->check_token( fnc_arrow );
+			this->check_token( tokty_arrow );
 			//args = just_args( args );
-			Node body = this->read_stmnts_check( fnc_endfn );
+			Node body = this->read_stmnts_check( tokty_endfn );
 			NodeFactory fn( "fn" );
 			fn.addNode( args );
 			fn.addNode( body );
@@ -465,7 +466,7 @@ Node ReadStateClass::read_opt_expr_prec( int prec ) {
 			NodeFactory t( "sysapp" );
 			t.putAttr( "name", "+" );
 			t.addNode( e );			
-			if ( it->functor == fnc_int ) {
+			if ( it->tok_type == tokty_int ) {
 				t.start( "int" );
 				t.putAttr( "value", it->nameString() );
 				t.end();

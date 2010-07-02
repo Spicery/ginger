@@ -11,7 +11,7 @@ private:
 	std::map< std::string, ItemClass * > table;
 	
 private:
-	void add( const char *n, Functor f, Role r, int p );
+	void add( const char *n, TokType f, Role r, int p );
 	
 public:
 	ItemMap();

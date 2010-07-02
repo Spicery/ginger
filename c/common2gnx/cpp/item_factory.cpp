@@ -69,7 +69,7 @@ Item ItemFactoryClass::read() {
 		//
 		it = this->item = this->spare;
 		it->role = EofRole;
-		it->functor = fnc_eof;
+		it->tok_type = tokty_eof;
 		it->nameString() = "<eof>";
     } else if ( isdigit( ch ) || ( ch == '-' && isdigit( this->peekchar() ) ) ) {
 		//
@@ -84,7 +84,7 @@ Item ItemFactoryClass::read() {
         	this->item = itemMap.lookup( this->text );
 		} else {
 			it = this->item = this->spare;
-			it->functor = fnc_int;
+			it->tok_type = tokty_int;
             it->role = LiteralRole;
 			it->nameString() = this->text;
 		}
@@ -118,8 +118,8 @@ Item ItemFactoryClass::read() {
             throw "unterminated string (%s)";
         }
 		it = this->item = this->spare;
-		it->functor = open_quote == '"' ? fnc_string : fnc_charseq;
-		it->role = it->functor == fnc_string ? StringRole : CharSeqRole;
+		it->tok_type = open_quote == '"' ? tokty_string : tokty_charseq;
+		it->role = it->tok_type == tokty_string ? StringRole : CharSeqRole;
 		it->nameString() = this->text;
 		//it->extra = ToRef( it->nameString().c_str() );
     } else if ( isalpha( ch ) || ch == '_' ) {
@@ -134,7 +134,7 @@ Item ItemFactoryClass::read() {
         this->item = itemMap.lookup( this->text );
         if ( this->item == NULL ) {
 		    it = this->item = this->spare;
-		    it->functor = fnc_id;
+		    it->tok_type = tokty_id;
 		    it->role = PrefixRole;
 			it->nameString() = this->text;
 			//it->extra = ToRef( it->nameString().c_str() );

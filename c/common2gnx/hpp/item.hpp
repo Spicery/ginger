@@ -3,7 +3,7 @@
 
 #include <string>
 
-#include "functor.hpp"
+#include "toktype.hpp"
 #include "role.hpp"
 
 enum {
@@ -21,7 +21,7 @@ private:
     std::string 			name;			//	mandatory
     
 public:
-    Functor 				functor;		//	mandatory
+    TokType 				tok_type;		//	mandatory
     Role 					role;			//	mandatory
     int 					precedence;
     
@@ -29,9 +29,9 @@ public:
 	std::string & 	nameString() { return this->name; }
 	
 public:
-	ItemClass( const char *n, Functor f, Role r, int p ) :
+	ItemClass( const char *n, TokType f, Role r, int p ) :
 		name( n ),
-		functor( f ),
+		tok_type( f ),
 		role( r ),
 		precedence( p )
 	{
@@ -39,7 +39,7 @@ public:
 	
 	ItemClass() :
 		name( "" ),
-		functor( fnc___fnc_default ),
+		tok_type( tokty___default ),
 		role( PrefixRole ),
 		precedence( 0 )
 	{

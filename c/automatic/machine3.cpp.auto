@@ -111,15 +111,6 @@ void Machine3::core( bool init_mode, Ref *pc ) {
         *( VMVP ) = ToRef( ToLong( *( VMVP ) ) * ( b >> TAG ) );
         RETURN( pc + 1 );
     }
-    L__print: {
-        Ref r = *VMVP--;
-        sys_print( std::cout, r );
-        RETURN( pc + 1 );
-    }
-    L__putchar: {
-        putchar( ( ( unsigned long )( *VMVP-- ) ) >> 8 );
-        RETURN( pc + 1 );
-    }
     L__sub: {
         //  This needs to be given overflow detection!
         long b = ToLong( *( VMVP-- ) );
@@ -448,8 +439,6 @@ void Machine3::core( bool init_mode, Ref *pc ) {
         ins.spc__lt = &&L__lt;
         ins.spc__lte = &&L__lte;
         ins.spc__mul = &&L__mul;
-        ins.spc__print = &&L__print;
-        ins.spc__putchar = &&L__putchar;
         ins.spc__sub = &&L__sub;
         ins.spc_calls = &&L_calls;
         ins.spc_check0 = &&L_check0;

@@ -10,8 +10,6 @@
     vmc__lt,
     vmc__lte,
     vmc__mul,
-    vmc__print,
-    vmc__putchar,
     vmc__sub,
     vmc_calls,
     vmc_check0,

@@ -264,13 +264,6 @@ void PlantClass::compileTerm( Term term ) {
 			vmiINCR( this, fnc == fnc_incr_by ? n : -n );
 			break;
 		}
-		case fnc_appspc: {
-			//	I do not believe this can ever be executed
-			this->compileTerm( term_index( term, 1 ) );
-			Instruction instr = functor_inline( term_functor( term_index( term, 0 ) ) );
-			vmiAPPSPC( this, instr );
-			break;
-		}
 		case fnc_seq: {
 			int n = term_count( term );
 			for ( int i = 0; i < n ; i++ ) {

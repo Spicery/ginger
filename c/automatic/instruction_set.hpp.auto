@@ -10,8 +10,6 @@
 	Ref spc__lt;
 	Ref spc__lte;
 	Ref spc__mul;
-	Ref spc__print;
-	Ref spc__putchar;
 	Ref spc__sub;
 	Ref spc_calls;
 	Ref spc_check0;

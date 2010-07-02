@@ -12,8 +12,6 @@ const char * InstructionSet::name( Ref spc ) const {
         spc == spc__lt ? "_lt" :
         spc == spc__lte ? "_lte" :
         spc == spc__mul ? "_mul" :
-        spc == spc__print ? "_print" :
-        spc == spc__putchar ? "_putchar" :
         spc == spc__sub ? "_sub" :
         spc == spc_calls ? "calls" :
         spc == spc_check0 ? "check0" :
@@ -108,8 +106,6 @@ Ref InstructionSet::lookup( Instruction instr ) const {
     case vmc__lt: return this->spc__lt;
     case vmc__lte: return this->spc__lte;
     case vmc__mul: return this->spc__mul;
-    case vmc__print: return this->spc__print;
-    case vmc__putchar: return this->spc__putchar;
     case vmc__sub: return this->spc__sub;
     case vmc_calls: return this->spc_calls;
     case vmc_check0: return this->spc_check0;

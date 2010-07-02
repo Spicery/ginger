@@ -4,8 +4,6 @@
 const char * functor_name( Functor tag ) {
     switch ( tag ) {
 	case fnc___fnc_default : return "__fnc_default";
-	case fnc__print : return "_print";
-	case fnc__putchar : return "_putchar";
 	case fnc_eof : return "eof";
 	case fnc_absand : return "absand";
 	case fnc_absent : return "absent";
@@ -16,7 +14,6 @@ const char * functor_name( Functor tag ) {
 	case fnc_anon : return "anon";
 	case fnc_app : return "app";
 	case fnc_append : return "append";
-	case fnc_appspc : return "appspc";
 	case fnc_args : return "args";
 	case fnc_arrow : return "arrow";
 	case fnc_assign : return "assign";
@@ -61,14 +58,6 @@ const char * functor_name( Functor tag ) {
 	case fnc_while : return "while";
     }
     return "?";
-}
-
-Instruction functor_inline( enum Functor tag ) {
-	switch ( tag ) {
-	case fnc__print: 	return vmc__print;
-	case fnc__putchar:	return vmc__putchar;
-	default: 			throw "No inline value";
-	}
 }
 
 Ref functor_value( enum Functor tag ) {

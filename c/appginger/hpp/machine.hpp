@@ -34,6 +34,8 @@ public:
 	Ref	&		fastPeek() { return *vp; }
 	Ref			fastPop() { return *vp--; }
 	void		fastPush( Ref r ) { *++vp = r; }
+	Ref			fastSubscr( int n ) { return *( vp - n ); }
+	void 		fastDrop( int n ) { vp -= n; }
 	
 public:
 

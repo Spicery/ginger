@@ -118,17 +118,6 @@ static Ref *spcfn__mul( Ref *pc, Machine vm ) {
     RETURN( pc + 1 );
 }
 
-static Ref *spcfn__print( Ref *pc, Machine vm ) {
-    Ref r = *VMVP--;
-    sys_print( std::cout, r );
-    RETURN( pc + 1 );
-}
-
-static Ref *spcfn__putchar( Ref *pc, Machine vm ) {
-    putchar( ( ( unsigned long )( *VMVP-- ) ) >> 8 );
-    RETURN( pc + 1 );
-}
-
 static Ref *spcfn__sub( Ref *pc, Machine vm ) {
     //  This needs to be given overflow detection!
     long b = ToLong( *( VMVP-- ) );
@@ -497,8 +486,6 @@ InstructionSet1::InstructionSet1() {
     this->spc__lt = (Ref)spcfn__lt;
     this->spc__lte = (Ref)spcfn__lte;
     this->spc__mul = (Ref)spcfn__mul;
-    this->spc__print = (Ref)spcfn__print;
-    this->spc__putchar = (Ref)spcfn__putchar;
     this->spc__sub = (Ref)spcfn__sub;
     this->spc_calls = (Ref)spcfn_calls;
     this->spc_check0 = (Ref)spcfn_check0;

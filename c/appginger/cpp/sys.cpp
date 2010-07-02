@@ -12,7 +12,7 @@
 
 //#define DBG_SYS
 
-Ref sys_key( Ref r ) {
+Ref refKey( Ref r ) {
 	unsigned long u = ( unsigned long )r;
 	unsigned long tag, tagg, taggg;
 	tag = u & TAG_MASK;
@@ -35,16 +35,16 @@ Ref sys_key( Ref r ) {
 	throw;
 }
 
-void sys_print( Ref r ) {
-	sys_print( std::cout, r );
+void refPrint( Ref r ) {
+	refPrint( std::cout, r );
 }
 
-void sys_print( std::ostream & out, Ref r ) {
+void refPrint( std::ostream & out, Ref r ) {
 	Ref k;
 #ifdef DBG_SYS	
 	out << "About to print '" << (unsigned int) r << "'\n";
 #endif
-	k = sys_key( r );
+	k = refKey( r );
 #ifdef DBG_SYS
 	out << "key = " << ToULong(k) << "\n";
 #endif
@@ -66,9 +66,9 @@ void sys_print( std::ostream & out, Ref r ) {
 		Ref sofar = r;
 		bool sep = false;
 		out << "[";
-		while ( sys_key( sofar ) == sysPairKey ) {
+		while ( refKey( sofar ) == sysPairKey ) {
 			if ( sep ) { out << ","; } else { sep = true; }
-			sys_print( out, *( RefToPtr4( sofar ) + 1 ) );
+			refPrint( out, *( RefToPtr4( sofar ) + 1 ) );
 			sofar = *( RefToPtr4( sofar ) + 2 );
 		}
 		out << "]";
@@ -81,6 +81,19 @@ void sys_print( std::ostream & out, Ref r ) {
 
 void sysGarbageCollect( class MachineClass * vm ) {
 	vm->heap().garbageCollect();
+}
+
+void sysRefPrint( class MachineClass * vm ) {
+	for ( int i = vm->count - 1; i >= 0; i-- ) {
+		Ref r = vm->fastSubscr( i );
+		refPrint( r );		
+	}
+	vm->fastDrop( vm->count );
+}
+
+void sysRefPrintln( class MachineClass * vm ) {
+	sysRefPrint( vm );
+	std::cout << std::endl;
 }
 
 void sysNewList( class MachineClass * vm ) {
@@ -122,7 +135,7 @@ void sysNewPair( class MachineClass * vm ) {
 void sysHead( class MachineClass * vm ) {
 	if ( vm->count == 1 ) {
 		Ref x = vm->fastPeek();
-		if ( sys_key( x ) == sysPairKey ) {
+		if ( refKey( x ) == sysPairKey ) {
 			vm->fastPeek() = RefToPtr4( x )[ 1 ];
 		} else {
 			throw Mishap( "Trying to take the head of a non-pair" );
@@ -135,7 +148,7 @@ void sysHead( class MachineClass * vm ) {
 void sysTail( class MachineClass * vm ) {
 	if ( vm->count == 1 ) {
 		Ref x = vm->fastPeek();
-		if ( sys_key( x ) == sysPairKey ) {
+		if ( refKey( x ) == sysPairKey ) {
 			vm->fastPeek() = RefToPtr4( x )[ 2 ];
 		} else {
 			throw Mishap( "Trying to take the head of a non-pair" );
@@ -174,6 +187,8 @@ const SysMap::value_type rawData[] = {
 	SysMap::value_type( ">", SysInfo( fnc_gt, Arity( 2 ), 0 ) ),
 	SysMap::value_type( ">=", SysInfo( fnc_gte, Arity( 2 ), 0 ) ),	
 	SysMap::value_type( "gc", SysInfo( fnc_syscall, Arity( 0 ), sysGarbageCollect ) ),
+	SysMap::value_type( "refPrint", SysInfo( fnc_syscall, Arity( 1 ), sysRefPrint ) ),
+	SysMap::value_type( "refPrintln", SysInfo( fnc_syscall, Arity( 1 ), sysRefPrintln ) ),
 	SysMap::value_type( "newList", SysInfo( fnc_syscall, Arity( 0, true ), sysNewList ) ),
 	SysMap::value_type( "newPair", SysInfo( fnc_syscall, Arity( 2 ), sysNewPair ) ),
 	SysMap::value_type( "head", SysInfo( fnc_syscall, Arity( 1 ), sysHead ) ),

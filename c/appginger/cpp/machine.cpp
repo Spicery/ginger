@@ -108,7 +108,7 @@ Ref * MachineClass::instructionShow( ostream & out, Ref *pc ) {
 				break;
 			}
 			case 'c': {
-				sys_print( out, *pc );               
+				refPrint( out, *pc );               
 				//printf( " " );
 				//out <<  "XXX ";
 				break;
@@ -150,7 +150,7 @@ void MachineClass::print_results( std::ostream & out, float time_taken ) {
 		if ( !quiet ) {
 			out << ( i + 1 ) << ".\t";
 		}
-		sys_print( out, this->vp[ 1 + i - n ] );
+		refPrint( out, this->vp[ 1 + i - n ] );
 		out << endl;
 	}
 	if ( !quiet ) {

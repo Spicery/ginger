@@ -36,6 +36,10 @@ public:
 		this->table[ "isNil" ] = new SysConst( "sysfn", "isNil" );
 		this->table[ "head" ] = new SysConst( "sysfn", "head" );
 		this->table[ "tail" ] = new SysConst( "sysfn", "tail" );
+		
+		this->table[ "garbageCollect" ] = new SysConst( "sysfn", "garbageCollect" );
+		this->table[ "print" ] = new SysConst( "sysfn", "refPrint" );
+		this->table[ "println" ] = new SysConst( "sysfn", "refPrintln" );
 	}
 } theSysConstTable;
 

@@ -6,8 +6,6 @@
 
 typedef enum Functor {
 	fnc___fnc_default,
-	fnc__print,
-	fnc__putchar,
 	fnc_eof,
 	fnc_absand,
 	fnc_absent,
@@ -18,7 +16,6 @@ typedef enum Functor {
 	fnc_anon,
 	fnc_app,
 	fnc_append,
-	fnc_appspc,
 	fnc_args,
 	fnc_arrow,
 	fnc_assign,
@@ -64,7 +61,6 @@ typedef enum Functor {
 } Functor;
 
 const char *functor_name( Functor fnc );
-Instruction functor_inline( enum Functor tag );
 Ref functor_value( enum Functor tag );
 
 

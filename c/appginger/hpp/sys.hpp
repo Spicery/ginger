@@ -11,10 +11,13 @@
 class MachineClass;
 
 
-extern Ref sys_key( Ref r );
-extern void sys_print( Ref r );
-extern void sys_print( std::ostream & out, Ref r );
+extern void refPrint( Ref r );
+extern void refPrint( std::ostream & out, Ref r );
 
+extern Ref refKey( Ref r );
+
+extern void sysRefPrint( MachineClass * );
+extern void sysRefPrintln( MachineClass * );
 extern void sysNewList( MachineClass * vm );
 extern void sysNewPair( MachineClass * vm );
 extern void sysHead( MachineClass * vm );

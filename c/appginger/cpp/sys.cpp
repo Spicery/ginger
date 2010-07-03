@@ -74,6 +74,16 @@ void refPrint( std::ostream & out, Ref r ) {
 		out << "]";
 	} else if ( k == sysNilKey ) {
 		out << "[]";
+	} else if ( k == sysVectorKey ) {
+		bool sep = false;
+		out << "{";
+		Ref * p = RefToPtr4( r );
+		long len = RefToLong( p[ -1 ] );
+		for ( int i = 1; i <= len; i++ ) {
+			if ( sep ) { out << ","; } else { sep = true; }
+			refPrint( p[ i ] ); 
+		}
+		out << "}";
 	} else {
 		out << "?(" << std::hex << ToULong( r ) << ")";
 	}
@@ -94,6 +104,16 @@ void sysRefPrint( class MachineClass * vm ) {
 void sysRefPrintln( class MachineClass * vm ) {
 	sysRefPrint( vm );
 	std::cout << std::endl;
+}
+
+void sysNewVector( MachineClass * vm ) {
+	int n = vm->count;
+	XfrClass xfr( vm->heap().preflight( 2 + n ) );
+	xfr.xfrRef( IntToSmall( n ) );
+	xfr.setOrigin();
+	xfr.xfrRef( sysVectorKey );
+	xfr.xfrCopy( ++vm->vp -= n, n );
+	vm->fastSet( xfr.make() );
 }
 
 void sysNewList( class MachineClass * vm ) {
@@ -195,6 +215,7 @@ const SysMap::value_type rawData[] = {
 	SysMap::value_type( "tail", SysInfo( fnc_syscall, Arity( 1 ), sysTail ) ),
 	SysMap::value_type( "isPair", SysInfo( fnc_syscall, Arity( 1 ), sysIsPair ) ),
 	SysMap::value_type( "isNil", SysInfo( fnc_syscall, Arity( 1 ), sysIsNil ) ),
+	SysMap::value_type( "newVector", SysInfo( fnc_syscall, Arity( 0, true ), sysNewVector ) ),
 };
 const int numElems = sizeof rawData / sizeof rawData[0];
 SysMap sysMap( rawData, rawData + numElems );

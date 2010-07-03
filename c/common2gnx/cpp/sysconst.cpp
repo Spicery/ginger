@@ -37,6 +37,10 @@ public:
 		this->table[ "head" ] = new SysConst( "sysfn", "head" );
 		this->table[ "tail" ] = new SysConst( "sysfn", "tail" );
 		
+		//	Vectors
+		this->table[ "newVector" ] = new SysConst( "sysfn", "newVector" );
+		
+		
 		this->table[ "garbageCollect" ] = new SysConst( "sysfn", "garbageCollect" );
 		this->table[ "print" ] = new SysConst( "sysfn", "refPrint" );
 		this->table[ "println" ] = new SysConst( "sysfn", "refPrintln" );

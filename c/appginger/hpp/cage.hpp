@@ -20,6 +20,7 @@ public:
 	void xfrRef( Ref x );
 	void xfrVector( std::vector< Ref > & chain );
 	void xfrSubstring( const char *s, int a, int b );
+	void xfrCopy( Ref *p, int n );
 
 	void setOrigin();      						//  set the object origin
 	Ref make();              					//  return valid ptr

@@ -26,6 +26,7 @@ extern void sysTail( class MachineClass * vm );
 extern void sysIsPair( class MachineClass * vm );
 extern void sysIsNil( class MachineClass * vm );
 extern void sysGarbageCollect( MachineClass * vm );
+extern void sysNewVector( MachineClass * vm );
 
 struct SysInfo { 
 	Functor functor; 

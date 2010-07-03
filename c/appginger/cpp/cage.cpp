@@ -78,6 +78,11 @@ void XfrClass::xfrSubstring( const char *s, int a, int b ) {
 	this->tmptop += ( sizeof( Ref ) + b - a ) / sizeof( Ref );
 }
 
+void XfrClass::xfrCopy( Ref * words, int n ) {
+	memcpy( this->tmptop, words, n * sizeof( Ref ) );
+	this->tmptop += n;
+}
+
 //  set the object origin
 void XfrClass::setOrigin() {
 	this->origin = this->tmptop;

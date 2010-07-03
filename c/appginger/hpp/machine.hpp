@@ -33,6 +33,7 @@ public:
 public:
 	Ref	&		fastPeek() { return *vp; }
 	Ref			fastPop() { return *vp--; }
+	Ref			fastSet( Ref r ) { return *vp = r; }
 	void		fastPush( Ref r ) { *++vp = r; }
 	Ref			fastSubscr( int n ) { return *( vp - n ); }
 	void 		fastDrop( int n ) { vp -= n; }

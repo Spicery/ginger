@@ -401,6 +401,12 @@ Node ReadStateClass::prefix_processing() {
 			list.addNode( this->read_stmnts_check( tokty_cbracket ) );
 			return list.node();
 		}
+		case tokty_obrace: {
+			NodeFactory list( "sysapp" );
+			list.putAttr( "name", "newVector" );
+			list.addNode( this->read_stmnts_check( tokty_cbrace ) );
+			return list.node();
+		}
 		case tokty_unless: {
 			return this->read_if( tokty_unless, tokty_endunless );
 		}

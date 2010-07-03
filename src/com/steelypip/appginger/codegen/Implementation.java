@@ -23,8 +23,6 @@ public abstract class Implementation extends GeneralInstructionSet {
 		answer.add( this._lt_i().init( "_lt", "i" ) );
 		answer.add( this._lte_i().init( "_lte", "i" ) );
 		answer.add( this._mul_i().init( "_mul", "i" ) );
-		answer.add( this._print_i().init( "_print", "i" ) );
-		answer.add( this._putchar_i().init( "_putchar", "i" ) );
 		answer.add( this._sub_i().init( "_sub", "i" ) );
 		answer.add( this.calls_i().init( "calls", "i" ) );
 		answer.add( this.check0_ir().init( "check0", "ir" ) );

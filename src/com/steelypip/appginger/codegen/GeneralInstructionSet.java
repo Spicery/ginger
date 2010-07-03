@@ -61,17 +61,6 @@ public abstract class GeneralInstructionSet {
 		return new GenericInstruction();
 	}
 
-
-	public Instruction _print_i() {
-		return new GenericInstruction();
-	}
-
-
-	public Instruction _putchar_i() {
-		return new GenericInstruction();
-	}
-
-
 	public Instruction _sub_i() {
 		return new GenericInstruction();
 	}

@@ -85,8 +85,9 @@
 #define sysUnicodeKey	ToRef( 11 << TAGG | KEY_TAGG )
 #define sysCharKey		ToRef( 12 << TAGG | KEY_TAGG )
 
-//	Lists
+//	Recognisers
 #define IsPair( x )		( IsPtr4( x ) && ( *RefToPtr4( x ) == sysPairKey ) )
+#define IsVector( x )	( IsPtr4( x ) && ( *RefToPtr4( x ) == sysVectorKey ) )
 
 
 ////////////////////////////////////////////////////////////////////////

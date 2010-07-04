@@ -39,6 +39,7 @@ public:
 		
 		//	Vectors
 		this->table[ "newVector" ] = new SysConst( "sysfn", "newVector" );
+		this->table[ "isVector" ] = new SysConst( "sysfn", "isVector" );
 		
 		
 		this->table[ "garbageCollect" ] = new SysConst( "sysfn", "garbageCollect" );

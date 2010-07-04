@@ -116,6 +116,21 @@ void sysNewVector( MachineClass * vm ) {
 	vm->fastSet( xfr.make() );
 }
 
+static inline void recognise( class MachineClass * vm, Ref key ) {
+	if ( vm->count == 1 ) {
+		Ref r = vm->fastPeek();
+		vm->fastPeek() = IsPtr4( r ) && ( *RefToPtr4( r ) == key ) ? sys_true : sys_false;
+	} else {
+		throw Mishap( "Wrong number of arguments for head" );
+	}
+}
+
+void sysIsVector( class MachineClass * vm ) {
+	recognise( vm, sysVectorKey );
+}
+
+
+
 void sysNewList( class MachineClass * vm ) {
 	Ref sofar = sys_nil;
 	int n = vm->count;
@@ -216,6 +231,7 @@ const SysMap::value_type rawData[] = {
 	SysMap::value_type( "isPair", SysInfo( fnc_syscall, Arity( 1 ), sysIsPair ) ),
 	SysMap::value_type( "isNil", SysInfo( fnc_syscall, Arity( 1 ), sysIsNil ) ),
 	SysMap::value_type( "newVector", SysInfo( fnc_syscall, Arity( 0, true ), sysNewVector ) ),
+	SysMap::value_type( "isVector", SysInfo( fnc_syscall, Arity( 1 ), sysIsVector ) ),
 };
 const int numElems = sizeof rawData / sizeof rawData[0];
 SysMap sysMap( rawData, rawData + numElems );

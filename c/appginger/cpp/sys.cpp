@@ -106,31 +106,6 @@ void sysRefPrintln( class MachineClass * vm ) {
 	std::cout << std::endl;
 }
 
-void sysNewVector( MachineClass * vm ) {
-	int n = vm->count;
-	XfrClass xfr( vm->heap().preflight( 2 + n ) );
-	xfr.xfrRef( IntToSmall( n ) );
-	xfr.setOrigin();
-	xfr.xfrRef( sysVectorKey );
-	xfr.xfrCopy( ++vm->vp -= n, n );
-	vm->fastSet( xfr.make() );
-}
-
-static inline void recognise( class MachineClass * vm, Ref key ) {
-	if ( vm->count == 1 ) {
-		Ref r = vm->fastPeek();
-		vm->fastPeek() = IsPtr4( r ) && ( *RefToPtr4( r ) == key ) ? sys_true : sys_false;
-	} else {
-		throw Mishap( "Wrong number of arguments for head" );
-	}
-}
-
-void sysIsVector( class MachineClass * vm ) {
-	recognise( vm, sysVectorKey );
-}
-
-
-
 void sysNewList( class MachineClass * vm ) {
 	Ref sofar = sys_nil;
 	int n = vm->count;
@@ -152,55 +127,6 @@ void sysNewList( class MachineClass * vm ) {
 	vm->fastPush( sofar );
 }
 
-void sysNewPair( class MachineClass * vm ) {
-	if ( vm->count == 2 ) {
-		XfrClass xfr( vm->heap().preflight( 3 ) );
-		xfr.setOrigin();
-		xfr.xfrRef( sysPairKey );
-		Ref t = vm->fastPop();
-		Ref h = vm->fastPop();
-		xfr.xfrRef( h );
-		xfr.xfrRef( t );
-		vm->fastPush( xfr.make() );
-	} else {
-		throw Mishap( "Wrong number of arguments for newPair" );
-	}
-}
-
-void sysHead( class MachineClass * vm ) {
-	if ( vm->count == 1 ) {
-		Ref x = vm->fastPeek();
-		if ( refKey( x ) == sysPairKey ) {
-			vm->fastPeek() = RefToPtr4( x )[ 1 ];
-		} else {
-			throw Mishap( "Trying to take the head of a non-pair" );
-		}
-	} else {
-		throw Mishap( "Wrong number of arguments for head" );
-	}
-}
-
-void sysTail( class MachineClass * vm ) {
-	if ( vm->count == 1 ) {
-		Ref x = vm->fastPeek();
-		if ( refKey( x ) == sysPairKey ) {
-			vm->fastPeek() = RefToPtr4( x )[ 2 ];
-		} else {
-			throw Mishap( "Trying to take the head of a non-pair" );
-		}
-	} else {
-		throw Mishap( "Wrong number of arguments for head" );
-	}
-}
-
-void sysIsPair( class MachineClass * vm ) {
-	if ( vm->count == 1 ) {
-		vm->fastPeek() = IsPair( vm->fastPeek() ) ? sys_true : sys_false;
-	} else {
-		throw Mishap( "Wrong number of arguments for head" );
-	}
-}
-
 void sysIsNil( class MachineClass * vm ) {
 	if ( vm->count == 1 ) {
 		vm->fastPeek() = IsNil( vm->fastPeek() ) ? sys_true : sys_false;
@@ -208,6 +134,8 @@ void sysIsNil( class MachineClass * vm ) {
 		throw Mishap( "Wrong number of arguments for head" );
 	}
 }
+
+#include "datatypes.cpp.auto"
 
 typedef std::map< std::string, SysInfo > SysMap;
 const SysMap::value_type rawData[] = {
@@ -224,14 +152,9 @@ const SysMap::value_type rawData[] = {
 	SysMap::value_type( "gc", SysInfo( fnc_syscall, Arity( 0 ), sysGarbageCollect ) ),
 	SysMap::value_type( "refPrint", SysInfo( fnc_syscall, Arity( 1 ), sysRefPrint ) ),
 	SysMap::value_type( "refPrintln", SysInfo( fnc_syscall, Arity( 1 ), sysRefPrintln ) ),
-	SysMap::value_type( "newList", SysInfo( fnc_syscall, Arity( 0, true ), sysNewList ) ),
-	SysMap::value_type( "newPair", SysInfo( fnc_syscall, Arity( 2 ), sysNewPair ) ),
-	SysMap::value_type( "head", SysInfo( fnc_syscall, Arity( 1 ), sysHead ) ),
-	SysMap::value_type( "tail", SysInfo( fnc_syscall, Arity( 1 ), sysTail ) ),
-	SysMap::value_type( "isPair", SysInfo( fnc_syscall, Arity( 1 ), sysIsPair ) ),
 	SysMap::value_type( "isNil", SysInfo( fnc_syscall, Arity( 1 ), sysIsNil ) ),
-	SysMap::value_type( "newVector", SysInfo( fnc_syscall, Arity( 0, true ), sysNewVector ) ),
-	SysMap::value_type( "isVector", SysInfo( fnc_syscall, Arity( 1 ), sysIsVector ) ),
+	SysMap::value_type( "newList", SysInfo( fnc_syscall, Arity( 0, true ), sysNewList ) ),
+	#include "sysmap.inc.auto"
 };
 const int numElems = sizeof rawData / sizeof rawData[0];
 SysMap sysMap( rawData, rawData + numElems );

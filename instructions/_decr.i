@@ -1,7 +1,7 @@
 Ref rx = *VMVP;
 if ( IsSmall( rx ) ) {
 	long x = (long)rx;
-	long sum = x - (long)IntToSmall( 1 );
+	long sum = x - (long)LongToSmall( 1 );
 	if ( sum > x ) {
 		throw Mishap( "integer overflow detected in x - 1" ).culprit( "x", "" + x );
 	}

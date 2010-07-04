@@ -36,7 +36,7 @@ void Machine2::execute( Ref r ) {
 	}
 }
 
-#include "../automatic/machine2.cpp.auto"
+#include "machine2.cpp.auto"
 
 
 

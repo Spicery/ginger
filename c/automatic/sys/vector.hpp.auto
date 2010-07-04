@@ -1,0 +1,3 @@
+extern void sysNewVector( MachineClass * vm );
+extern void sysIsVector( MachineClass * vm );
+extern void sysIndexVector( MachineClass * vm );

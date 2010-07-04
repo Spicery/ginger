@@ -1,0 +1,37 @@
+void sysNewVector( MachineClass * vm ) {
+    int n = vm->count;
+    XfrClass xfr( vm->heap().preflight( 2 + n ) );
+    xfr.xfrRef( LongToSmall( n ) );
+    xfr.setOrigin();
+    xfr.xfrRef( sysVectorKey );
+    xfr.xfrCopy( ++vm->vp -= n, n );
+    vm->fastSet( xfr.make() );
+}
+void sysIsVector( class MachineClass * vm ) {
+    if ( vm->count == 1 ) {
+        Ref r = vm->fastPeek();
+        vm->fastPeek() = IsPtr4( r ) && ( *RefToPtr4( r ) == sysVectorKey ) ? sys_true : sys_false;
+    } else {
+        throw Mishap( "Wrong number of arguments for head" );
+    }
+}
+
+void sysIndexVector( MachineClass * vm ) {
+   if ( vm->count == 2 ) {
+       Ref n = vm->fastPop();
+       Ref v = vm->fastPeek();
+       Ref * p = RefToPtr4( v );
+       if ( IsPtr4( v ) && *RefToPtr4( v ) == sysVectorKey ) {
+           if ( IsSmall( n ) && LongToSmall( 1 ) <= n && n <= p[ -1 ] ) {
+               vm->fastPeek() = p[ SmallToLong( n ) ];
+           } else {
+               throw Mishap( "Small integer index needed" );
+           }
+       } else {
+           throw Mishap( "Vector needed" );
+       }
+   } else {
+       throw Mishap( "Wrong number of arguments for index" );
+   }
+}
+

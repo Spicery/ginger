@@ -26,4 +26,4 @@ void call_error( Ref r ) {
 }
 
 
-#include "../automatic/instruction_set.cpp.auto"
+#include "instruction_set.cpp.auto"

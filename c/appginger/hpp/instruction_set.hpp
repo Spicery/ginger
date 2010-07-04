@@ -6,7 +6,7 @@
 
 class InstructionSet {
 public:
-#include "../automatic/instruction_set.hpp.auto"
+#include "instruction_set.hpp.auto"
 public: 
 	Ref lookup( Instruction instr ) const;
 	const char * name( Ref spc ) const;

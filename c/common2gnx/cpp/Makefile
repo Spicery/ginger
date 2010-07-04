@@ -1,6 +1,6 @@
 CC=g++
 
-CPPFLAGS=-I../hpp -I../../automatic -I../../appginger/hpp -I/usr/local/boost_1_43_0 -Wall -g -Wmissing-prototypes 
+CPPFLAGS=-I../hpp -I../../automatic/machine -I../../automatic/sys -I../../appginger/hpp -I/usr/local/boost_1_43_0 -Wall -g -Wmissing-prototypes 
 
 OBJS=common2gnx.o read_expr.o item.o item_map.o item_factory.o toktype.o node.o mishap.o role.o sysconst.o
 

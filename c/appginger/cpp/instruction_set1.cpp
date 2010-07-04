@@ -20,4 +20,4 @@
 //typedef SpecialFn *Special;
 #define RETURN( e ) 	return( e )
 
-#include "../automatic/instruction_set1.cpp.auto"
+#include "instruction_set1.cpp.auto"

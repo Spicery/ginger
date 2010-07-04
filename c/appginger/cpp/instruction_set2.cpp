@@ -18,4 +18,4 @@
 extern Ref *pc;
 extern Machine vm;
 #define RETURN( e ) 	{ pc = ( e ); return; }
-#include "../automatic/instruction_set2.cpp.auto"
+#include "instruction_set2.cpp.auto"

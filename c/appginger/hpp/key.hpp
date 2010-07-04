@@ -21,8 +21,8 @@
 
 
 
-#define IntToRef( i )		( (Ref)( ToULong( i ) << TAG | INT_TAG ) )
-#define IntToSmall( i ) 	( (Ref)( ToULong( i ) << TAG | INT_TAG ) )
+#define LongToRef( i )		( (Ref)( ToULong( i ) << TAG | INT_TAG ) )
+#define LongToSmall( i ) 	( (Ref)( ToULong( i ) << TAG | INT_TAG ) )
 #define RefToLong( r )   	( (long)( ToLong( r ) >> TAG ) )
 #define SmallToLong( r )	( (long)( ToLong( r ) >> TAG ) )
 
@@ -84,6 +84,7 @@
 #define sysKeyKey		ToRef( 10 << TAGG | KEY_TAGG )
 #define sysUnicodeKey	ToRef( 11 << TAGG | KEY_TAGG )
 #define sysCharKey		ToRef( 12 << TAGG | KEY_TAGG )
+#define sysMapletKey	ToRef( 13 << TAGG | KEY_TAGG )
 
 //	Recognisers
 #define IsPair( x )		( IsPtr4( x ) && ( *RefToPtr4( x ) == sysPairKey ) )

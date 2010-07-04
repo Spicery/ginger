@@ -48,7 +48,7 @@ Ref HeapClass::copyString( const char *s ) {
 	
 	//	We will actually copy n+1 bytes to include the null-termination.
 	//	So the calculation of the size is a little bit trickier.
-	xfr.xfrRef( IntToRef( n ) );
+	xfr.xfrRef( LongToRef( n ) );
 	xfr.setOrigin();
 	xfr.xfrRef( sysStringKey );
 	//	printf( "Set origin to '%x'\n", ToUInt( sysStringKey ) );

@@ -1,0 +1,50 @@
+void sysNewPair( class MachineClass * vm ) {
+    if ( vm->count == 2 ) {
+        XfrClass xfr( vm->heap().preflight( 3 ) );
+        xfr.setOrigin();
+        xfr.xfrRef( sysPairKey );
+        Ref f1 = vm->fastPop();
+        Ref f0 = vm->fastPop();
+        xfr.xfrRef( f0 );
+        xfr.xfrRef( f1 );
+        vm->fastPush( xfr.make() );
+    } else {
+        throw Mishap( "Wrong number of arguments for sysNewPair" );
+    }
+}
+
+void sysIsPair( class MachineClass * vm ) {
+    if ( vm->count == 1 ) {
+        Ref r = vm->fastPeek();
+        vm->fastPeek() = IsPtr4( r ) && ( *RefToPtr4( r ) == sysPairKey ) ? sys_true : sys_false;
+    } else {
+        throw Mishap( "Wrong number of arguments for head" );
+    }
+}
+
+void sysHeadField( class MachineClass * vm ) {
+    if ( vm->count == 1 ) {
+        Ref x = vm->fastPeek();
+        if ( refKey( x ) == sysPairKey ) {
+            vm->fastPeek() = RefToPtr4( x )[ 1 ];
+        } else {
+            throw Mishap( "Trying to take the head of non-Pair" );
+        }
+    } else {
+        throw Mishap( "Wrong number of arguments" );
+    }
+}
+
+void sysTailField( class MachineClass * vm ) {
+    if ( vm->count == 1 ) {
+        Ref x = vm->fastPeek();
+        if ( refKey( x ) == sysPairKey ) {
+            vm->fastPeek() = RefToPtr4( x )[ 2 ];
+        } else {
+            throw Mishap( "Trying to take the tail of non-Pair" );
+        }
+    } else {
+        throw Mishap( "Wrong number of arguments" );
+    }
+}
+

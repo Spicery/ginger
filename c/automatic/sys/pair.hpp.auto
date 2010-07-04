@@ -1,0 +1,4 @@
+extern void sysNewPair( MachineClass * vm );
+extern void sysIsPair( MachineClass * vm );
+extern void sysHeadField( MachineClass * vm );
+extern void sysTailField( MachineClass * vm );

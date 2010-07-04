@@ -1,0 +1,4 @@
+extern void sysNewMaplet( MachineClass * vm );
+extern void sysIsMaplet( MachineClass * vm );
+extern void sysMapletKeyField( MachineClass * vm );
+extern void sysMapletValueField( MachineClass * vm );

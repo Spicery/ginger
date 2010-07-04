@@ -31,4 +31,4 @@ void Machine1::execute( Ref r ) {
 	}
 }
 
-#include "../automatic/machine1.cpp.auto"
+#include "machine1.cpp.auto"

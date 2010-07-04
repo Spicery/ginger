@@ -28,23 +28,14 @@ public:
 		this->table[ "true" ] = new SysConst( "bool", "true" );
 		this->table[ "false" ] = new SysConst( "bool", "false" );		
 		this->table[ "not" ] = new SysConst( "sysfn", "not" );
-
-		//	Lists (Pairs & Nils)
-		this->table[ "newList" ] = new SysConst( "sysfn", "newList" );
-		this->table[ "newPair" ] = new SysConst( "sysfn", "newPair" );
-		this->table[ "isPair" ] = new SysConst( "sysfn", "isPair" );
-		this->table[ "isNil" ] = new SysConst( "sysfn", "isNil" );
-		this->table[ "head" ] = new SysConst( "sysfn", "head" );
-		this->table[ "tail" ] = new SysConst( "sysfn", "tail" );
 		
-		//	Vectors
-		this->table[ "newVector" ] = new SysConst( "sysfn", "newVector" );
-		this->table[ "isVector" ] = new SysConst( "sysfn", "isVector" );
-		
-		
+		//	Misc
 		this->table[ "garbageCollect" ] = new SysConst( "sysfn", "garbageCollect" );
 		this->table[ "print" ] = new SysConst( "sysfn", "refPrint" );
 		this->table[ "println" ] = new SysConst( "sysfn", "refPrintln" );
+		
+		//	Recordclasses & Vectorclasses
+		#include "sysconsts.inc.auto"
 	}
 } theSysConstTable;
 

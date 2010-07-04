@@ -178,7 +178,7 @@ Term term_add( Term t, Term x ) {
 Term term_new_int( const int n ) {
 	return 
 		shared< TermClass >(
-			new ItemTermClass( fnc_int, IntToRef( n ) )
+			new ItemTermClass( fnc_int, LongToRef( n ) )
 		)
 	;
 }

@@ -19,15 +19,10 @@ extern Ref refKey( Ref r );
 extern void sysRefPrint( MachineClass * );
 extern void sysRefPrintln( MachineClass * );
 extern void sysNewList( MachineClass * vm );
-extern void sysNewPair( MachineClass * vm );
-extern void sysHead( MachineClass * vm );
-extern void sysTail( MachineClass * vm );
-extern void sysTail( class MachineClass * vm );
-extern void sysIsPair( class MachineClass * vm );
 extern void sysIsNil( class MachineClass * vm );
 extern void sysGarbageCollect( MachineClass * vm );
-extern void sysNewVector( MachineClass * vm );
-extern void sysIsVector( MachineClass * vm );
+
+#include "datatypes.hpp.auto"
 
 struct SysInfo { 
 	Functor functor; 

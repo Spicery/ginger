@@ -2,7 +2,7 @@
 #define INSTRUCTION_HPP
 
 enum Instruction {
-#include "../automatic/instruction.hpp.auto"
+#include "instruction.hpp.auto"
 };
 
 

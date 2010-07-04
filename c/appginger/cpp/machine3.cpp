@@ -31,4 +31,4 @@ void Machine3::execute( Ref r ) {
 typedef void *Special;
 #define RETURN( e )     { pc = ( e ); goto **pc; }
 
-#include "../automatic/machine3.cpp.auto"
+#include "machine3.cpp.auto"

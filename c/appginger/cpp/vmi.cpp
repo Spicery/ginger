@@ -70,7 +70,7 @@ void vmiINCR( Plant plant, int n ) {
 		}
 		default: {
 			emitSPC( plant, vmc__incr_by );
-			emitRef( plant, ToRef( IntToSmall( n ) ) );
+			emitRef( plant, ToRef( LongToSmall( n ) ) );
 		}
 	}
 }
@@ -306,7 +306,7 @@ void vmiIFSO_RELOP( Plant plant, char flag1, int arg1, char op, char flag2, int 
 		    ( this_never_happens(), (Instruction)0 )
 		);
 		emitRef( plant, ToRef( arg1 ) );
-		emitRef( plant, IntToSmall( arg2 ) );
+		emitRef( plant, LongToSmall( arg2 ) );
 		dst.destinationInsert();
 	} else if ( flag1 == 's' && flag2 == 's' ) {
 		emitSPC(
@@ -382,7 +382,7 @@ void VmiRelOpFactory::negate() {
 void VmiRelOpFactory::compilePushLeft() {
 	switch ( this->flag1 ) {
 		case 'i': {
-			emitRef( this->plant, IntToSmall( this->int1 ) );
+			emitRef( this->plant, LongToSmall( this->int1 ) );
 			break;
 		}
 		case 's': {
@@ -396,7 +396,7 @@ void VmiRelOpFactory::compilePushLeft() {
 void VmiRelOpFactory::compilePushRight() {
 	switch ( this->flag2 ) {
 		case 'i': {
-			emitRef( this->plant, IntToSmall( this->int2 ) );
+			emitRef( this->plant, LongToSmall( this->int2 ) );
 			break;
 		}
 		case 's': {

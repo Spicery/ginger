@@ -1,7 +1,7 @@
 Ref rx = *VMVP;
 if ( IsSmall( rx ) ) {
 	long x = (long)rx;
-	long sum = x + (long)IntToSmall( 1 );
+	long sum = x + (long)LongToSmall( 1 );
 	if ( sum > x ) {
 		*( VMVP ) = ToRef( sum );
 		RETURN( pc + 1 );

@@ -32,6 +32,7 @@ public:
 };
 
 class CageClass {
+friend class CageCrawl;
 private:
 	Ref				*	start;
     Ref         	*	top;
@@ -51,6 +52,8 @@ public:
 
 	void setCopyOrigin();      				//  set the object origin
 	Ref endCopy();              			//  return valid ptr
+	
+	long ncells() { return this->top - this->start; }
 	
 public:
 	XfrClass & newXfr();

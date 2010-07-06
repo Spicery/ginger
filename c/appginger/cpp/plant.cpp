@@ -55,7 +55,7 @@ Ref PlantClass::detach() {
 	//	to be preserved - and I would like that for a variety of
 	//	reasons.
 	//
-	xfr.xfrRef( ToRef( ( preflight_size << TAGGG ) | FUNC_LEN_TAGGG ) );  //	tagged for heap scanning
+	xfr.xfrRef( ToRef( ( L << TAGGG ) | FUNC_LEN_TAGGG ) );  //	tagged for heap scanning
 	xfr.xfrRef( ToRef( this->nresults ) );		//	raw R
 	xfr.xfrRef( ToRef( this->nlocals ) );		//	raw N
 	xfr.xfrRef( ToRef( this->ninputs ) );		//	raw A
@@ -318,19 +318,19 @@ void PlantClass::compileTerm( Term term ) {
 		case fnc_app: {
 			Term fn = term_index( term, 0 );
 			Term args = term_index( term, 1 );
-			int aargs = arity_analysis( args );
+			Arity aargs( args );
 			//	plant_count( plant, args );
 			if ( term_is_id( fn ) ) {
-				if ( aargs == DONTKNOW ) {
+				if ( aargs.isntExact() ) { 
 					int v = tmpvar( this );
 		        	vmiSTART( this, v );
 					this->compileTerm( args );
 					vmiEND_CALL_ID( this, v, term_named_ident( fn ) );
 				} else {
 					this->compileTerm( args );
-					vmiSET_CALL_ID( this, aargs, term_named_ident( fn ) );
+					vmiSET_CALL_ID( this, aargs.count(), term_named_ident( fn ) );
 				}
-			} else if ( aargs == DONTKNOW ) {
+			} else if ( aargs.isntExact() ) {
 				int v = tmpvar( this );
 		        vmiSTART( this, v );
 		        this->compileTerm(  args );
@@ -339,7 +339,7 @@ void PlantClass::compileTerm( Term term ) {
 			} else {
 				this->compileTerm( args );
 				this->compile1( fn );
-				vmiSET_CALLS( this, aargs );
+				vmiSET_CALLS( this, aargs.count() );
 			}
 			break;
 		}
@@ -404,33 +404,33 @@ void PlantClass::compileArgs( Term term ) {
 }
 
 void PlantClass::compile1( Term term ) {
-	int a = arity_analysis( term );
-	if ( a == DONTKNOW ) {
+	Arity a( term );
+	if ( a.isntExact() ) {
 		int n = this->slot;
 		int v = tmpvar( this );
 		vmiSTART( this, v );
 		this->compileTerm( term );
 		vmiCHECK1( this, v );
 		this->slot = n;
-	} else if ( a == 1 ) {
+	} else if ( a.count() == 1 ) {
 		this->compileTerm( term );
 	} else {
-		throw Mishap( "Wrong number of results in single context" ).culprit( "#Results", "" + a );
+		throw Mishap( "Wrong number of results in single context" ).culprit( "#Results", "" + a.count() );
 	}
 }
 
 void PlantClass::compile0( Term term ) {
-	int a = arity_analysis( term );
-	if ( a == DONTKNOW ) {
+	Arity a( term );
+	if ( a.isntExact() ) {
 		int n = this->slot;
 		int v = tmpvar( this );
 		vmiSTART( this, v );
 		this->compileTerm( term );
 		vmiCHECK0( this, v );
 		this->slot = n;
-	} else if ( a == 0 ) {
+	} else if ( a.count() == 0 ) {
 		this->compileTerm( term );
 	} else {
-		throw Mishap( "Wrong number of results in zero context" ).culprit( "#Results", "" + a );
+		throw Mishap( "Wrong number of results in zero context" ).culprit( "#Results", "" + a.count() );
 	}
 }

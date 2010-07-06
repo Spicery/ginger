@@ -51,5 +51,8 @@ public:
 class NormalExit {
 };
 
+class EmergencyExit {
+};
+
 
 #endif

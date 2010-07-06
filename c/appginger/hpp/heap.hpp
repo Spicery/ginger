@@ -4,6 +4,7 @@
 #include "cage.hpp"
 
 class HeapClass {
+friend class HeapCrawl;
 private:
 	CageClass *						current;
 	std::vector< CageClass * >		zoo;

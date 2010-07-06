@@ -39,6 +39,14 @@ void refPrint( Ref r ) {
 	refPrint( std::cout, r );
 }
 
+void refPtrPrint( Ref * r ) {
+	refPrint( Ptr4ToRef( r ) );
+}
+
+void refPtrPrint( std::ostream & out, Ref * r ) {
+	refPrint( out, Ptr4ToRef( r ) );
+}
+
 void refPrint( std::ostream & out, Ref r ) {
 	Ref k;
 #ifdef DBG_SYS	

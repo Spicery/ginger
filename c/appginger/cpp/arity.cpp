@@ -1,58 +1,13 @@
 #include "arity.hpp"
 #include "mishap.hpp"
+#include <string>
+#include <sstream>
 
 //#define DBG_ARITY
 
 //	Just for debugging
-#include <stdio.h>
+#include <iostream>
 
-int arity_add( int a, int b ) {
-	return a >= 0 && b >= 0 ? a + b : DONTKNOW;
-}
-
-int arity_join( int a, int b ) {
-	return a == b ? a : DONTKNOW;
-}
-
-/*
- * Refactor!
- */
-int arity_analysis( Term term ) {
-	Functor fnc = term_functor( term );
-	switch ( fnc ) {
-		case fnc_assign:   
-			return 0;
-		case fnc_id:       
-		case fnc_fn:       
-		case fnc_incr_by:  
-		case fnc_decr_by:  
-			return 1;
-		case fnc_seq: {
-			int n = term->count();
-			int k = 0;
-			for ( int i = 0; i < n; i++ ) {
-				k = arity_add( k, arity_analysis( term->child( i ) ) );
-			}
-			return k;
-		}
-		case fnc_if:
-			return(
-				arity_join(
-					arity_analysis( term->child( 1 ) ),
-					arity_analysis( term->child( 2 ) )
-				)
-			);
-		case fnc_for:
-			return(
-				arity_analysis( term->child( 2 ) ) == 0 ? 0 : DONTKNOW
-			);
-		default: {}
-	}
-	#ifdef DBG_ARITY
-		printf( "Giving up with functor %s\n", functor_name( fnc ) );
-	#endif
-	return DONTKNOW;
-}
 
 bool Arity::isZero() const {
 	return this->arity == 0;
@@ -62,15 +17,33 @@ bool Arity::isntZero() const {
 	return this->arity != 0;
 }
 
+bool Arity::isExact() const {
+	return not( this->more );
+}
+
+bool Arity::isntExact() const {
+	return this->more;
+}
+
+int Arity::count() const {
+	return this->arity;
+}
+
 void Arity::check( const int actual_nargs ) const {
 	if ( ! this->isOK( actual_nargs ) ) {
 		throw Mishap( "Wrong number of arguments" );
 	}
 }
 
+std::string Arity::toString() const {
+	std::stringstream ss;
+	ss << this->arity << "/" << ( this->more ? "i" : "e" );
+	return ss.str();
+}
+
 void Arity::check( const Arity that ) const {
 	if ( ! this->isOK( that ) ) {
-		throw Mishap( "Wrong number of arguments" );
+		throw Mishap( "Wrong number of arguments" ).culprit( "Expected", this->toString() ).culprit( "Actual", that.toString() );
 	}
 }
 
@@ -112,6 +85,9 @@ Arity Arity::join( const Arity that ) const {
 }
 
 Arity::Arity( Term term ) {
+	#ifdef DBG_ARITY
+		std::cout << "> Analysing " << functor_name( term_functor( term ) ) << std::endl;
+	#endif
 	Functor fnc = term_functor( term );
 	switch ( fnc ) {
 		case fnc_assign: {
@@ -119,6 +95,9 @@ Arity::Arity( Term term ) {
 			this->more = false;
 			break;
 		}
+		case fnc_int:
+		case fnc_bool:
+		case fnc_char:
 		case fnc_id:       
 		case fnc_fn:       
 		case fnc_incr_by:  
@@ -157,6 +136,6 @@ Arity::Arity( Term term ) {
 		}
 	}
 	#ifdef DBG_ARITY
-		printf( "Giving up with functor %s\n", functor_name( fnc ) );
+		std::cout << "< Result for " << functor_name( term_functor( term ) ) << " = " << this->toString() << std::endl; 
 	#endif
 }

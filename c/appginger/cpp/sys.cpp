@@ -9,6 +9,7 @@
 #include "key.hpp"
 #include "cage.hpp"
 #include "mishap.hpp"
+#include "sysgarbagecollect.hpp"
 
 //#define DBG_SYS
 
@@ -97,9 +98,9 @@ void refPrint( std::ostream & out, Ref r ) {
 	}
 }
 
-void sysGarbageCollect( class MachineClass * vm ) {
+/*void sysGarbageCollect( class MachineClass * vm ) {
 	vm->heap().garbageCollect();
-}
+}*/
 
 void sysRefPrint( class MachineClass * vm ) {
 	for ( int i = vm->count - 1; i >= 0; i-- ) {

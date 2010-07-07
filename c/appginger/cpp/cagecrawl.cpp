@@ -38,15 +38,15 @@ unsigned long CageCrawl::lengthAfterKey( Ref * k ) {
 	Ref key = *k;
 	if ( IsSimpleKey( key ) ) {
 		switch ( KindOfSimpleKey( key ) ) {
-			case RECORD_FLAVOUR: {
+			case RECORD_KIND: {
 				return sizeAfterKeyOfRecord( k );
 				break;
 			}
-			case VECTOR_FLAVOUR: {
+			case VECTOR_KIND: {
 				return sizeAfterKeyOfVector( k );
 				break;
 			}
-			case STRING_FLAVOUR: {
+			case STRING_KIND: {
 				return sizeAfterKeyOfString( k );
 				break;
 			}

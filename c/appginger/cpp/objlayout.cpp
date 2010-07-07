@@ -4,7 +4,7 @@
 #include "key.hpp"
 
 unsigned long sizeAfterKeyOfRecord( Ref * key ) {
-	return ( ToULong( *key ) & LENGTH_MASK ) >> FLAVOUR_WIDTH >> TAGG;
+	return ( ToULong( *key ) & LENGTH_MASK ) >> KIND_WIDTH >> TAGG;
 }
 
 unsigned long sizeAfterKeyOfVector( Ref * key ) {

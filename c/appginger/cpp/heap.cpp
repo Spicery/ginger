@@ -9,11 +9,6 @@ using namespace std;
 
 //#define DBG_HEAP
 
-void HeapClass::garbageCollect() {
-	//	Not implemented.
-	cerr << "Garbage collection not implemented yet" << endl;
-}
-
 #define ARBITRARY_SIZE 1048576
 
 

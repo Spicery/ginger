@@ -57,6 +57,7 @@ public:
 	virtual void execute( Ref r ) = 0;
 	virtual const InstructionSet & instructionSet() = 0;
 	bool getShowCode();
+	virtual void garbageCollect();
 	
 
 public:

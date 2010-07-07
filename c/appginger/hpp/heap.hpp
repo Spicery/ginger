@@ -11,7 +11,6 @@ private:
 	MachineClass *					machine_ptr;
 	
 public:
-	void garbageCollect();
 	CageClass & preflight( int size );
 	Ref copyString( const char *s );		//	Copy string, possibly causing GC
 

@@ -22,7 +22,7 @@ extern void sysRefPrint( MachineClass * );
 extern void sysRefPrintln( MachineClass * );
 extern void sysNewList( MachineClass * vm );
 extern void sysIsNil( class MachineClass * vm );
-extern void sysGarbageCollect( MachineClass * vm );
+//extern void sysGarbageCollect( MachineClass * vm );
 
 #include "datatypes.hpp.auto"
 

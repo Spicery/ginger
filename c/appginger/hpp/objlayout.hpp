@@ -47,15 +47,30 @@ unsigned long sizeAfterKeyOfVector( Ref * key );
 
 unsigned long sizeAfterKeyOfString( Ref * key );
 
+////////////////////////////////////////////////////////////////////////////////
+//	Objects
+////////////////////////////////////////////////////////////////////////////////
 
+void findObjectLimits( Ref * object, Ref * & start, Ref * & end );
 
 ////////////////////////////////////////////////////////////////////////////////
 //	Function Objects
 ////////////////////////////////////////////////////////////////////////////////
 
+// field before the function key.
+#define OFFSET_TO_NSLOTS_FROM_PC			-2
+
 #define OFFSET_FROM_FN_LENGTH_TO_KEY		4
 
 unsigned long sizeAfterKeyOfFnLength( Ref * key );
+
+/*Ref * findFunctionKey( Ref * inside_fn ) {
+	//	Walk back down until you find a FnLength ptr.
+	while ( not IsFnLength( *inside_fn ) ) {
+		inside_fn++;
+	}
+	
+}*/
 
 
 #endif

@@ -9,7 +9,7 @@
 #include "key.hpp"
 #include "cage.hpp"
 #include "mishap.hpp"
-#include "sysgarbagecollect.hpp"
+#include "garbagecollect.hpp"
 
 //#define DBG_SYS
 

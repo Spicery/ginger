@@ -1,6 +1,7 @@
 #include "instruction_set2.hpp"
 
 #include "machine.hpp"
+#include "callstacklayout.hpp"
 #include "mishap.hpp"
 #include "common.hpp"
 #include "key.hpp"

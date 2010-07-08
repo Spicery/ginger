@@ -13,7 +13,7 @@ private:
 public:
 	CageClass & preflight( int size );
 	Ref copyString( const char *s );		//	Copy string, possibly causing GC
-
+	void collectGarbage();
 
 public:
 	HeapClass( MachineClass * machine );

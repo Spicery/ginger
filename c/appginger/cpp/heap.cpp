@@ -4,6 +4,7 @@ using namespace std;
 #include "common.hpp"
 #include "key.hpp"
 #include "heap.hpp"
+#include "garbagecollect.hpp"
 
 #include <cstring>
 
@@ -19,7 +20,7 @@ CageClass & HeapClass::preflight( int size ) {
 	if ( this->current->checkRoom( size ) ) {
 		return *this->current;
 	} else {
-		this->garbageCollect();
+		this->collectGarbage();
 		if ( this->current->checkRoom( size ) ) {
 			return *this->current;
 		} else {
@@ -29,6 +30,10 @@ CageClass & HeapClass::preflight( int size ) {
 			return *this->current;
 		}
 	}
+}
+
+void HeapClass::collectGarbage() {
+	sysGarbageCollect( this->machine_ptr );
 }
 
 /*

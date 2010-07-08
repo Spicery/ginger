@@ -146,6 +146,7 @@ const char * keyName( Ref key );
 #define sys_termin				ToRef( 1 << TAGGG | MISC_TAGGG )
 #define sys_underflow			ToRef( 2 << TAGGG | MISC_TAGGG )
 #define sys_undefined			ToRef( 3 << TAGGG | MISC_TAGGG )
+#define sys_forwarded			ToRef( 4 << TAGGG | MISC_TAGGG )
 
 //	Nil
 #define IsNil( x )		( x == sys_nil )

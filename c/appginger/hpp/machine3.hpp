@@ -2,6 +2,7 @@
 #define MACHINE3_HPP
 
 #include "machine.hpp"
+#include "callstacklayout.hpp"
 #include "instruction_set3.hpp"
 #include "appginger.hpp"
 

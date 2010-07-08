@@ -19,3 +19,7 @@ unsigned long sizeAfterKeyOfString( Ref * key ) {
 unsigned long sizeAfterKeyOfFnLength( Ref * key ) {
 	return ToULong( *( key - OFFSET_FROM_FN_LENGTH_TO_KEY ) ) >> TAGGG;
 }
+
+void findObjectLimits( Ref * object, Ref * & start, Ref * & end ) {
+	
+}

@@ -3,7 +3,6 @@
 
 #include <memory>
 #include <iostream> 
-
 #include "dict.hpp"
 #include "plant.hpp"
 #include "instruction_set.hpp"
@@ -57,7 +56,6 @@ public:
 	virtual void execute( Ref r ) = 0;
 	virtual const InstructionSet & instructionSet() = 0;
 	bool getShowCode();
-	virtual void garbageCollect();
 	
 
 public:

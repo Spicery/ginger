@@ -62,7 +62,6 @@ Ref * MachineClass::setUpPC( Ref r ) {
 	this->sp += 1;
 	//	Now store a fake return address.  This will cause this to halt.
 	//	That's a little bit nasty but we'll sort that out later.
-	////launch[ 0 ] = this->instructionSet().spc_reset;
 	this->link = ToRefRef( &launch );
 
 	this->count = 0;
@@ -71,18 +70,18 @@ Ref * MachineClass::setUpPC( Ref r ) {
 }
 
 void MachineClass::printfn( ostream & out, Ref x ) {
-	Ref *r = RefToPtr4( x );
-	//	Ref K = r[ 0 ];
-	long A = SmallToLong( r[ -1 ] );
-	long N = ToLong( r[ -2 ] );
-	long R = ToLong( r[ -3 ] );
-	long L = ToULong( r[ -4 ] ) >> TAGGG;
-	Ref * end = r - 4 + L;
-	out << "define: " << A << " args, " << N << " locals, " << R << " results, " << L << " #words used" << endl;
+	Ref * obj_K = RefToPtr4( x );
+	Ref * obj_K1 = obj_K + 1;
+	long A = SmallToLong( obj_K[ -1 ] );
+	long N = ToLong( obj_K[ -2 ] );
+	long R = ToLong( obj_K[ -3 ] );
+	long C = ToULong( obj_K[ -4 ] ) >> TAGGG;
+	Ref * obj_Z1 = obj_K + C + 1;
+	out << "define: " << A << " args, " << N << " locals, " << R << " results, " << C << " #words used" << endl;
 	{
-		Ref *pc = r + 1;
-	    while ( pc < end ) {
-		    out << "[" <<  ( pc - r ) << "]\t ";
+		Ref *pc = obj_K1;
+	    while ( pc < obj_Z1 ) {
+		    out << "[" <<  ( pc - obj_K ) << "]\t ";
 		   	pc = this->instructionShow( out, pc );
 	    }
 	}

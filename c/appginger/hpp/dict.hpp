@@ -8,6 +8,7 @@
 
 
 class DictClass {
+friend class ScanDict;
 private:
 	std::map< std::string, Ident > table;
     

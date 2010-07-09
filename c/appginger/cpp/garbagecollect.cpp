@@ -6,6 +6,7 @@ using namespace std;
 #include "key.hpp"
 #include "objlayout.hpp"
 #include "scancallstack.hpp"
+#include "scandict.hpp"
 
 
 
@@ -65,15 +66,28 @@ public:
 	}
 
 	void forwardValueStack() {
+		for ( Ref * p = vm->vp; p != vm->vp_base; p-- ) {
+			this->forward( *p );
+		}
 	}
 	
 	void forwardCallStack() {
 		ScanCallStack scanner( this->vm );
+		for (;;) {
+			Ref * p = scanner.next();
+			if ( not p ) break;
+			this->forward( *p );
+		}
+	}
+	
+	void forwardDictionary() {
+		ScanDict scanner( this->vm->dict() );
 	}
 	
 	void forwardRoots() {
 		this->forwardValueStack();
 		this->forwardCallStack();
+		this->forwardDictionary();
 	}
 	
 	void forwardContents( Ref * obj ) {

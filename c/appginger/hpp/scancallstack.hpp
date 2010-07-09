@@ -10,33 +10,33 @@ private:
 	MachineClass * 		vm;
 	Ref *				frame_pointer;
 	enum ScanState {
-		ScanLink,
+		ScanFunc,
 		ScanLocals
 	} 					state;
 	unsigned int 		local;
 	
 public:
 	Ref * next() {
-		if ( not this->frame_pointer ) {
-			return (Ref *)0;
-		} else if ( this->state == ScanLink ) {
-			//Ref * func = findFunctionKey( this->frame_pointer );
-			//	prolly not implementable.
-			throw;
-			//this->state = ScanLocals;
-			//return func;
-		} else if ( this->state == ScanLocals ) {
-			unsigned long nslots = ToULong( this->frame_pointer[ SP_NSLOTS ] );
-			if  ( this->local < nslots ) {
-				return ToRefRef( this->frame_pointer[ this->local++ ] );
+		if ( vm->sp_base <= this->frame_pointer && this->frame_pointer < vm->sp_end ) {
+			if ( this->state == ScanFunc ) {
+				Ref * func = ToRefRef( this->frame_pointer[ SP_FUNC ] );
+				this->state = ScanLocals;
+				return func;
+			} else if ( this->state == ScanLocals ) {
+				unsigned long nslots = ToULong( this->frame_pointer[ SP_NSLOTS ] );
+				if  ( this->local < nslots ) {
+					return ToRefRef( this->frame_pointer[ this->local++ ] );
+				} else {
+					this->state = ScanFunc;
+					this->local = 0;
+					this->frame_pointer = ToRefRef( this->frame_pointer[ SP_PREV_SP ] );
+					return this->next();
+				}
 			} else {
-				this->state = ScanLink;
-				this->local = 0;
-				this->frame_pointer = ToRefRef( this->frame_pointer[ SP_PREV_SP ] );
-				return this->next();
+				throw "Unreachable";
 			}
 		} else {
-			throw "Unreachable";
+			return static_cast< Ref * >( 0 );
 		}
 	}
 	
@@ -45,7 +45,7 @@ public:
 	ScanCallStack( MachineClass * m ) : 
 		vm( m ),
 		frame_pointer( m->sp ),
-		state( ScanLink ),
+		state( ScanFunc ),
 		local( 0 )
 	{
 	}

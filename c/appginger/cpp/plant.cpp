@@ -49,7 +49,8 @@ Ref PlantClass::detach() {
 		throw Mishap( "Procedure too large" );
 	}
 
-	XfrClass xfr( *this->vm, preflight_size );
+	Ref * fake_pc;
+	XfrClass xfr( fake_pc, *this->vm, preflight_size );
 
 	//	L has to be a "procedure-length" value if heap scanning is
 	//	to be preserved - and I would like that for a variety of

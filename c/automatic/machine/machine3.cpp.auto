@@ -125,6 +125,8 @@ void Machine3::core( bool init_mode, Ref *pc ) {
             ptr = RefToPtr4( r );
             if ( !IsFunction( *ptr ) ) call_error( r );
             VMLINK = pc + 1;
+            VMLINKFUNC = VMPCFUNC;
+            VMPCFUNC = ptr;
             RETURN( ptr + 1 );
         }
     }
@@ -178,6 +180,8 @@ void Machine3::core( bool init_mode, Ref *pc ) {
             ptr = RefToPtr4( r );
             if ( !IsFunction( *ptr ) ) call_error( r );
             VMLINK = pc + 2;
+            VMLINKFUNC = VMPCFUNC;
+            VMPCFUNC = ptr;
             RETURN( ptr + 1 );
         }
     }
@@ -191,17 +195,20 @@ void Machine3::core( bool init_mode, Ref *pc ) {
             ptr = RefToPtr4( r );
             if ( !IsFunction( *ptr ) ) call_error( r );
             VMLINK = pc + 3;
+            VMLINKFUNC = VMPCFUNC;
+        	VMPCFUNC = ptr;
             RETURN( ptr + 1 );
         }
     }
     L_enter: {
-        long A = ToLong( pc[ -2 ] );
+        long A = ToLong( pc[ -2 ] ); // field before the function key.
         Ref *prev = VMSP;
         VMSP += ToLong( VMSP[ -1 ] );
-        VMSP[ 0 ] = VMLINK;
-        VMSP[ 1 ] = prev;
-        VMSP[ 2 ] = ToRef( pc[ -3 ] );
-        VMSP += 3;
+        VMSP[ 0 ] = VMLINKFUNC;
+        VMSP[ 1 ] = VMLINK;
+        VMSP[ 2 ] = prev;
+        VMSP[ 3 ] = ToRef( pc[ -3 ] );
+        VMSP += SP_OVERHEAD;
         if ( A != VMCOUNT ) {
             enter_error( VMCOUNT, A );
         }
@@ -215,10 +222,11 @@ void Machine3::core( bool init_mode, Ref *pc ) {
     L_enter0: {
         Ref *prev = VMSP;
         VMSP += ToLong( VMSP[ -1 ] );
-        VMSP[ 0 ] = VMLINK;
-        VMSP[ 1 ] = prev;
-        VMSP[ 2 ] = ToRef( pc[ -3 ] );
-        VMSP += 3;
+        VMSP[ 0 ] = VMLINKFUNC;
+        VMSP[ 1 ] = VMLINK;
+        VMSP[ 2 ] = prev;
+        VMSP[ 3 ] = ToRef( pc[ -3 ] );
+        VMSP += SP_OVERHEAD;
         if ( VMCOUNT != 0 ) {
             enter_error( VMCOUNT, 0 );
         }
@@ -227,10 +235,11 @@ void Machine3::core( bool init_mode, Ref *pc ) {
     L_enter1: {
         Ref *prev = VMSP;
         VMSP += ToLong( VMSP[ -1 ] );
-        VMSP[ 0 ] = VMLINK;
-        VMSP[ 1 ] = prev;
-        VMSP[ 2 ] = ToRef( pc[ -3 ] );
-        VMSP += 3;
+        VMSP[ 0 ] = VMLINKFUNC;
+        VMSP[ 1 ] = VMLINK;
+        VMSP[ 2 ] = prev;
+        VMSP[ 3 ] = ToRef( pc[ -3 ] );
+        VMSP += SP_OVERHEAD;
         if ( VMCOUNT != 1 ) {
             enter_error( VMCOUNT, 1 );
         }
@@ -373,14 +382,15 @@ void Machine3::core( bool init_mode, Ref *pc ) {
         throw NormalExit();
     }
     L_return: {
-        Ref *link;
-        link = (Ref *)VMSP[ -3 ];	//	recover return address
-        VMSP = (Ref *)VMSP[ -2 ];				//	restore stack pointer
+        Ref *linkptr;
+        VMPCFUNC = (Ref *)VMSP[ SP_FUNC ];
+        linkptr = (Ref *)VMSP[ SP_LINK ];				//	recover return address
+        VMSP = (Ref *)VMSP[ SP_PREV_SP ];				//	restore stack pointer
         #ifdef DBG_SPECIAL
         	printf( "Recover link = %x\n", ToUInt( link ) );
         	printf( "Stack pointer recovered as %x\n", ToUInt( VMSP ) );
         #endif
-        RETURN( link );
+        RETURN( linkptr );
     }
     L_set: {
         VMCOUNT = VMVP - (Ref *)VMSP[ ToLong( pc[ 1 ] ) ];
@@ -395,6 +405,8 @@ void Machine3::core( bool init_mode, Ref *pc ) {
             ptr = RefToPtr4( r );
             if ( !IsFunction( *ptr ) ) call_error( r );
             VMLINK = pc + 3;
+            VMLINKFUNC = VMPCFUNC;
+        	VMPCFUNC = ptr;
             RETURN( ptr + 1 );
         }
     }
@@ -407,6 +419,8 @@ void Machine3::core( bool init_mode, Ref *pc ) {
             ptr = RefToPtr4( r );
             if ( !IsFunction( *ptr ) ) call_error( r );
             VMLINK = pc + 2;
+            VMLINKFUNC = VMPCFUNC;
+            VMPCFUNC = ptr;
             RETURN( ptr + 1 );
         }
     }
@@ -421,9 +435,9 @@ void Machine3::core( bool init_mode, Ref *pc ) {
     L_syscall: {
         SysCall * sys = ToSysCall( *++pc );
         FREEZE;
-        (*sys)( vm );
+        pc = (*sys)( ++pc, vm );
         MELT;
-        RETURN( pc + 1 );
+        RETURN( pc );
     }
     Initialize: {
         InstructionSet & ins = vm->instruction_set;

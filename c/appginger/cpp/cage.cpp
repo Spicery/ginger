@@ -19,25 +19,57 @@ CageClass::CageClass( int capacity ) {
 	this->end = this->start + n;
 }
 
-XfrClass::XfrClass( CageClass & c ) :
-	tmptop( c.top ),
+#define ARBITRARY_SIZE 1048576
+
+CageClass::CageClass() {
+	size_t n = sizeof( Ref ) * 1048576;
+	Ref *data = (Ref *)malloc( n );
+	this->start = data;
+	this->queue_base = this->start;
+	this->top = this->start;
+	this->end = this->start + n;
+}
+
+bool CageClass::hasEmptyQueue() { 
+	return this->queue_base >= this->top; 
+}
+
+bool CageClass::hasntEmptyQueue() { 
+	return this->queue_base < this->top; 
+}
+
+
+void CageClass::reset() {
+	this->top = this->start;
+}
+
+void CageClass::resetQueue() {
+	this->queue_base = this->start;
+}
+
+bool CageClass::isEmpty() {
+	return this->top == this->start;
+}
+
+XfrClass::XfrClass( CageClass * c ) :
+	tmptop( c->top ),
 	origin( NULL ),
 	cage( c )
 {
 }
 
-XfrClass::XfrClass( HeapClass & h, int preflight ) :
+XfrClass::XfrClass( Ref * & pc, HeapClass & h, int preflight ) :
 	origin( NULL ),
-	cage( h.preflight( preflight ) )
+	cage( h.preflight( pc, preflight ) )
 {
-	this->tmptop = this->cage.top;
+	this->tmptop = this->cage->top;
 }
 
-XfrClass::XfrClass( MachineClass & m, int preflight ) :
+XfrClass::XfrClass( Ref * & pc, MachineClass & m, int preflight ) :
 	origin( NULL ),
-	cage( m.heap().preflight( preflight ) )
+	cage( m.heap().preflight( pc, preflight ) )
 {
-	this->tmptop = this->cage.top;
+	this->tmptop = this->cage->top;
 }
 
 CageClass::~CageClass() {
@@ -49,7 +81,7 @@ bool CageClass::checkRoom( int k ) {
 }
 
 bool XfrClass::checkRoom( int k ) {
-	return this->cage.end - this->tmptop >= k;
+	return this->cage->end - this->tmptop >= k;
 }
 
 //  copy x to tmp-end-of-heap
@@ -83,6 +115,13 @@ void XfrClass::xfrCopy( Ref * words, int n ) {
 	this->tmptop += n;
 }
 
+void XfrClass::xfrCopy( Ref * obj_A, Ref * obj_Z1 ) {
+	ptrdiff_t d = obj_Z1 - obj_A;
+	if ( d < 0 ) throw "Assertion violation";
+	memcpy( this->tmptop, obj_A, d * sizeof( Ref ) );
+	this->tmptop += d;
+}
+
 //  set the object origin
 void XfrClass::setOrigin() {
 	this->origin = this->tmptop;
@@ -93,7 +132,7 @@ Ref XfrClass::make() {
 	if ( this->origin == NULL ) {
 		throw std::runtime_error( "Origin was not set during copy" );
 	}
-	this->cage.top = this->tmptop;
+	this->cage->top = this->tmptop;
 	//	printf( "Origin = %x\n", ToUInt( *RefToPtr4( origin ) ) );
 	return Ptr4ToRef( this->origin );
 }

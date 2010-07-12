@@ -98,28 +98,26 @@ void refPrint( std::ostream & out, Ref r ) {
 	}
 }
 
-/*void sysGarbageCollect( class MachineClass * vm ) {
-	vm->heap().garbageCollect();
-}*/
-
-void sysRefPrint( class MachineClass * vm ) {
+Ref * sysRefPrint( Ref * pc, class MachineClass * vm ) {
 	for ( int i = vm->count - 1; i >= 0; i-- ) {
 		Ref r = vm->fastSubscr( i );
 		refPrint( r );		
 	}
 	vm->fastDrop( vm->count );
+	return pc;
 }
 
-void sysRefPrintln( class MachineClass * vm ) {
-	sysRefPrint( vm );
+Ref * sysRefPrintln( Ref * pc, class MachineClass * vm ) {
+	pc = sysRefPrint( pc, vm );
 	std::cout << std::endl;
+	return pc;
 }
 
-void sysNewList( class MachineClass * vm ) {
+Ref * sysNewList( Ref * pc, class MachineClass * vm ) {
 	Ref sofar = sys_nil;
 	int n = vm->count;
 	//std::cerr << "Count " << n << std::endl;
-	XfrClass xfr( vm->heap().preflight( 3 * n ) );
+	XfrClass xfr( vm->heap().preflight( pc, 3 * n ) );
 	for ( int i = 0; i < n; i++ ) {
 		xfr.setOrigin();
 		xfr.xfrRef( sysPairKey );
@@ -134,11 +132,13 @@ void sysNewList( class MachineClass * vm ) {
 		//std::cerr << "Stored " << *( RefToPtr4( sofar ) + 1 ) << std::endl;
 	}
 	vm->fastPush( sofar );
+	return pc;
 }
 
-void sysIsNil( class MachineClass * vm ) {
+Ref * sysIsNil( Ref * pc, class MachineClass * vm ) {
 	if ( vm->count == 1 ) {
 		vm->fastPeek() = IsNil( vm->fastPeek() ) ? sys_true : sys_false;
+		return pc;
 	} else {
 		throw Mishap( "Wrong number of arguments for head" );
 	}

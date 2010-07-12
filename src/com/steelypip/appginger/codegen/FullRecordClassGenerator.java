@@ -26,7 +26,7 @@ public class FullRecordClassGenerator extends DataClassGenerator {
 		final String cap_field = capitalise( field );
 		final String keyName = "sys" + this.dataKeyRoot + "Key";
 		final String accessorName = "sys" + cap_field + "Field";
-		cpp.format( "void %s( class MachineClass * vm ) {\n", accessorName );
+		cpp.format( "Ref * %s( Ref * pc, class MachineClass * vm ) {\n", accessorName );
 		cpp.format( "    if ( vm->count == 1 ) {\n" );
 		cpp.format( "        Ref x = vm->fastPeek();\n" );
 		cpp.format( "        if ( refKey( x ) == %s ) {\n", keyName );
@@ -34,12 +34,13 @@ public class FullRecordClassGenerator extends DataClassGenerator {
 		cpp.format( "        } else {\n" );
 		cpp.format( "            throw Mishap( \"Trying to take the %s of non-%s\" );\n", field, dataKeyRoot );
 		cpp.format( "        }\n" );
+		cpp.format( "        return pc;\n" );
 		cpp.format( "    } else {\n" );
 		cpp.format( "        throw Mishap( \"Wrong number of arguments\" );\n" );
 		cpp.format( "    }\n" );
 		cpp.format( "}\n\n" );
 		
-		hpp.format( "extern void %s( MachineClass * vm );\n", accessorName );
+		hpp.format( "extern Ref * %s( Ref * pc, MachineClass * vm );\n", accessorName );
 		this.addSysConst( field, 1, accessorName );
 
 	}
@@ -49,9 +50,9 @@ public class FullRecordClassGenerator extends DataClassGenerator {
 	private void generateConstructor( final PrintWriter cpp, final PrintWriter hpp ) {
 		final String constructorName = this.consName();
 		final String keyName = this.keyName();
-		cpp.format( "void %s( class MachineClass * vm ) {\n", constructorName );
+		cpp.format( "Ref * %s( Ref * pc, class MachineClass * vm ) {\n", constructorName );
 		cpp.format( "    if ( vm->count == 2 ) {\n" );
-		cpp.format( "        XfrClass xfr( vm->heap().preflight( %s ) );\n", this.fieldNames.length + 1 );
+		cpp.format( "        XfrClass xfr( vm->heap().preflight( pc, %s ) );\n", this.fieldNames.length + 1 );
 		cpp.format( "        xfr.setOrigin();\n" );
 		cpp.format( "        xfr.xfrRef( %s );\n", keyName );
 		
@@ -67,6 +68,7 @@ public class FullRecordClassGenerator extends DataClassGenerator {
 				cpp.format( "        xfr.xfrRef( f%s );\n", i );
 			}
 			cpp.format( "        vm->fastPush( xfr.make() );\n" );
+			cpp.format( "        return pc;\n" );
 		}
 		
 		cpp.format( "    } else {\n" );
@@ -74,7 +76,7 @@ public class FullRecordClassGenerator extends DataClassGenerator {
 		cpp.format( "    }\n" );
 		cpp.format( "}\n\n" );
 
-		hpp.format( "extern void %s( MachineClass * vm );\n", constructorName );
+		hpp.format( "extern Ref * %s( Ref * pc, MachineClass * vm );\n", constructorName );
 		this.addSysConst( "new" + this.dataKeyRoot, this.fieldNames.length, constructorName );
 	}
 	

@@ -7,5 +7,7 @@ VMCOUNT = ( VMVP - ( Ref * )( VMSP[ var ] ) ) - 1;
     ptr = RefToPtr4( r );
     if ( !IsFunction( *ptr ) ) call_error( r );
     VMLINK = pc + 2;
+    VMLINKFUNC = VMPCFUNC;
+    VMPCFUNC = ptr;
     RETURN( ptr + 1 );
 }

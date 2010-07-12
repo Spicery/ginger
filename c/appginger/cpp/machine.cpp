@@ -19,7 +19,8 @@ MachineClass::MachineClass( AppGinger & application ) :
 	appg( application ),
 	plant_aptr( new PlantClass( this ) ),
 	dict_aptr( new DictClass() ),
-	heap_aptr( new HeapClass( this ) )
+	heap_aptr( new HeapClass( this ) ),
+	program_counter( 0 )
 {
 	this->sp_base = (Ref *)malloc( sizeof( Ref ) * 1024 );
 	this->sp_end = this->sp_base + 1024;
@@ -49,24 +50,41 @@ HeapClass & MachineClass::heap() {
 
 Ref * MachineClass::setUpPC( Ref r ) {
 	static Ref launch[ 1 ] = { this->instructionSet().lookup( vmc_reset ) };
-	Ref *PC = (Ref *)RefToPtr4( r ) + 1; 	// point to ENTRY instruction.
+	
+	// pointer to the function object.
+	this->func_of_program_counter = RefToPtr4( r );
+	// +1 to get a pointer to ENTRY instruction.
+	this->program_counter = this->func_of_program_counter + 1;
+
+
 	this->sp = this->sp_base;
 	*this->sp = sys_underflow;
 	this->vp = this->vp_base;
 	*this->vp = sys_underflow;
 
-	//	We need a little bit of stack to get started.  We definitely need
-	//	the number of locals variables - obviously 0.
+	
+	//	The previous function object should be set to null.
 	*( ++this->sp ) = 0;
+	
+	//	The previous link address should be set to null too.
+	*( ++this->sp ) = 0;
+	
+	//	And the previous stack point is additionally set to null.
+	*( ++this->sp ) = 0;
+
+	//	The number of locals variables - obviously null.
+	*( ++this->sp ) = 0;
+	
 	//	We also need to point one on from the number of local variables.
 	this->sp += 1;
+	
 	//	Now store a fake return address.  This will cause this to halt.
 	//	That's a little bit nasty but we'll sort that out later.
 	this->link = ToRefRef( &launch );
 
 	this->count = 0;
 	
-	return PC;
+	return this->program_counter;
 }
 
 void MachineClass::printfn( ostream & out, Ref x ) {
@@ -157,3 +175,4 @@ void MachineClass::print_results( std::ostream & out, float time_taken ) {
 	}
 	this->vp = this->vp_base;
 }
+

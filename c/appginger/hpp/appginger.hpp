@@ -13,6 +13,7 @@ private:
 	} mode;
 	int machine_impl_num;
 	bool dbg_show_code;
+	bool is_trapping_mishap;
 	
 public:
 	void setInteractiveMode() { this->mode = InteractiveMode; }
@@ -21,6 +22,8 @@ public:
 	bool isInteractiveMode() { return this->mode == InteractiveMode; }
 	bool isBatchMode() { return this->mode == BatchMode; }
 	bool isCgiMode() { return this->mode == CGIMode; }
+	void setTrappingMishap() { this->is_trapping_mishap = true; }
+	bool isTrappingMishap() { return this->is_trapping_mishap; }
 	void setMachineImplNum( const int n ) { this->machine_impl_num = n; }
 	int getMachineImplNum() { return this->machine_impl_num; }
 	const char * version() { return VERSION; }
@@ -35,7 +38,8 @@ public:
 	AppGinger() :
 		mode( InteractiveMode ),
 		machine_impl_num( 1 ),
-		dbg_show_code( false )
+		dbg_show_code( false ),
+		is_trapping_mishap( false )
 	{
 	}
 

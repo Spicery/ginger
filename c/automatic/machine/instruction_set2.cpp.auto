@@ -133,6 +133,8 @@ static void spcfn_calls( void ) {
         ptr = RefToPtr4( r );
         if ( !IsFunction( *ptr ) ) call_error( r );
         VMLINK = pc + 1;
+        VMLINKFUNC = VMPCFUNC;
+        VMPCFUNC = ptr;
         RETURN( ptr + 1 );
     }
 }
@@ -190,6 +192,8 @@ static void spcfn_end1_calls( void ) {
         ptr = RefToPtr4( r );
         if ( !IsFunction( *ptr ) ) call_error( r );
         VMLINK = pc + 2;
+        VMLINKFUNC = VMPCFUNC;
+        VMPCFUNC = ptr;
         RETURN( ptr + 1 );
     }
 }
@@ -204,18 +208,21 @@ static void spcfn_end_call_global( void ) {
         ptr = RefToPtr4( r );
         if ( !IsFunction( *ptr ) ) call_error( r );
         VMLINK = pc + 3;
+        VMLINKFUNC = VMPCFUNC;
+    	VMPCFUNC = ptr;
         RETURN( ptr + 1 );
     }
 }
 
 static void spcfn_enter( void ) {
-    long A = ToLong( pc[ -2 ] );
+    long A = ToLong( pc[ -2 ] ); // field before the function key.
     Ref *prev = VMSP;
     VMSP += ToLong( VMSP[ -1 ] );
-    VMSP[ 0 ] = VMLINK;
-    VMSP[ 1 ] = prev;
-    VMSP[ 2 ] = ToRef( pc[ -3 ] );
-    VMSP += 3;
+    VMSP[ 0 ] = VMLINKFUNC;
+    VMSP[ 1 ] = VMLINK;
+    VMSP[ 2 ] = prev;
+    VMSP[ 3 ] = ToRef( pc[ -3 ] );
+    VMSP += SP_OVERHEAD;
     if ( A != VMCOUNT ) {
         enter_error( VMCOUNT, A );
     }
@@ -230,10 +237,11 @@ static void spcfn_enter( void ) {
 static void spcfn_enter0( void ) {
     Ref *prev = VMSP;
     VMSP += ToLong( VMSP[ -1 ] );
-    VMSP[ 0 ] = VMLINK;
-    VMSP[ 1 ] = prev;
-    VMSP[ 2 ] = ToRef( pc[ -3 ] );
-    VMSP += 3;
+    VMSP[ 0 ] = VMLINKFUNC;
+    VMSP[ 1 ] = VMLINK;
+    VMSP[ 2 ] = prev;
+    VMSP[ 3 ] = ToRef( pc[ -3 ] );
+    VMSP += SP_OVERHEAD;
     if ( VMCOUNT != 0 ) {
         enter_error( VMCOUNT, 0 );
     }
@@ -243,10 +251,11 @@ static void spcfn_enter0( void ) {
 static void spcfn_enter1( void ) {
     Ref *prev = VMSP;
     VMSP += ToLong( VMSP[ -1 ] );
-    VMSP[ 0 ] = VMLINK;
-    VMSP[ 1 ] = prev;
-    VMSP[ 2 ] = ToRef( pc[ -3 ] );
-    VMSP += 3;
+    VMSP[ 0 ] = VMLINKFUNC;
+    VMSP[ 1 ] = VMLINK;
+    VMSP[ 2 ] = prev;
+    VMSP[ 3 ] = ToRef( pc[ -3 ] );
+    VMSP += SP_OVERHEAD;
     if ( VMCOUNT != 1 ) {
         enter_error( VMCOUNT, 1 );
     }
@@ -415,14 +424,15 @@ static void spcfn_reset( void ) {
 }
 
 static void spcfn_return( void ) {
-    Ref *link;
-    link = (Ref *)VMSP[ -3 ];	//	recover return address
-    VMSP = (Ref *)VMSP[ -2 ];				//	restore stack pointer
+    Ref *linkptr;
+    VMPCFUNC = (Ref *)VMSP[ SP_FUNC ];
+    linkptr = (Ref *)VMSP[ SP_LINK ];				//	recover return address
+    VMSP = (Ref *)VMSP[ SP_PREV_SP ];				//	restore stack pointer
     #ifdef DBG_SPECIAL
     	printf( "Recover link = %x\n", ToUInt( link ) );
     	printf( "Stack pointer recovered as %x\n", ToUInt( VMSP ) );
     #endif
-    RETURN( link );
+    RETURN( linkptr );
 }
 
 static void spcfn_set( void ) {
@@ -439,6 +449,8 @@ static void spcfn_set_call_global( void ) {
         ptr = RefToPtr4( r );
         if ( !IsFunction( *ptr ) ) call_error( r );
         VMLINK = pc + 3;
+        VMLINKFUNC = VMPCFUNC;
+    	VMPCFUNC = ptr;
         RETURN( ptr + 1 );
     }
 }
@@ -452,6 +464,8 @@ static void spcfn_set_calls( void ) {
         ptr = RefToPtr4( r );
         if ( !IsFunction( *ptr ) ) call_error( r );
         VMLINK = pc + 2;
+        VMLINKFUNC = VMPCFUNC;
+        VMPCFUNC = ptr;
         RETURN( ptr + 1 );
     }
 }
@@ -468,9 +482,9 @@ static void spcfn_start( void ) {
 static void spcfn_syscall( void ) {
     SysCall * sys = ToSysCall( *++pc );
     FREEZE;
-    (*sys)( vm );
+    pc = (*sys)( ++pc, vm );
     MELT;
-    RETURN( pc + 1 );
+    RETURN( pc );
 }
 
 InstructionSet2::InstructionSet2() {

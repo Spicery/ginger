@@ -17,7 +17,7 @@ using namespace std;
 #include <cstdio>
 
 //#define DBG_RCEP
-#define DBG_CRAWL
+//#define DBG_CRAWL
 
 #ifdef DBG_CRAWL
 
@@ -34,9 +34,9 @@ static void crawl( Machine vm ) {
 	for (;;) {
 		CageClass * cage = hcrawl.next();
 		if ( not cage ) break; 
-		out << "  Cage at " << (unsigned long)cage << " with " << cage->ncells() << " cells" << endl;
+		out << "  Cage at " << (unsigned long)cage << " with " << cage->nboxesInUse() << " cells" << endl;
 
-		CageCrawl ccrawl( *cage );
+		CageCrawl ccrawl( cage );
 		for (;;) {
 			Ref * key = ccrawl.next();
 			if ( not key ) break;
@@ -53,7 +53,7 @@ static void crawl( Machine vm ) {
 	
 #endif
 
-bool read_comp_exec_print( Machine vm, istream & input ) {
+bool unsafe_read_comp_exec_print( Machine vm, istream & input ) {
     Plant plant;
     Ref r;
     Term term;
@@ -95,20 +95,17 @@ bool read_comp_exec_print( Machine vm, istream & input ) {
 	    start = clock();
     	vm->execute( r );
      	#ifdef DBG_CRAWL
-    		cout << "Crawling the heap ... ";
-    		cout.flush();
+    		//cout << "Crawling the heap ... ";
+    		//cout.flush();
     		crawl( vm );
-    		cout << "done" << endl;
+    		//cout << "done" << endl;
     	#endif
-	//} catch ( Mishap & m ) {
-		//m.report();
-		//throw;
 	} catch ( NormalExit ) {
      	#ifdef DBG_CRAWL
-    		cout << "Crawling the heap ... ";
-    		cout.flush();
+    		//cout << "Crawling the heap ... ";
+    		//cout.flush();
     		crawl( vm );
-    		cout << "done" << endl;
+    		//cout << "done" << endl;
     	#endif
 	}
 
@@ -118,5 +115,14 @@ bool read_comp_exec_print( Machine vm, istream & input ) {
 	fflush( stderr );
 	
 	return true;
+}
+
+bool read_comp_exec_print( Machine vm, istream & input ) {
+	try {
+		return read_comp_exec_print( vm, input );
+	} catch ( Mishap & m ) {
+		m.report();
+		throw;
+	} 
 }
 

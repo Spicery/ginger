@@ -16,6 +16,8 @@
 #define VMSP	( vm->sp )
 #define VMVP	( vm->vp )
 #define VMCOUNT	( vm->count )
+#define VMLINKFUNC 	( vm->func_of_link )
+#define VMPCFUNC	( vm->func_of_program_counter )
 extern Ref *pc;
 extern Machine vm;
 #define RETURN( e ) 	{ pc = ( e ); return; }

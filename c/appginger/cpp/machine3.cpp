@@ -28,6 +28,8 @@ void Machine3::execute( Ref r ) {
 #define VMCOUNT ( vm->count )
 #define MELT { VMSP = vm->sp; VMVP = vm->vp; VMLINK = vm->link; }
 #define FREEZE { vm->sp = VMSP; vm->vp = VMVP; vm->link = VMLINK; }
+#define VMLINKFUNC 	( vm->func_of_link )
+#define VMPCFUNC	( vm->func_of_program_counter )
 typedef void *Special;
 #define RETURN( e )     { pc = ( e ); goto **pc; }
 

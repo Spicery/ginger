@@ -1,10 +1,11 @@
-long A = ToLong( pc[ -2 ] );
+long A = ToLong( pc[ -2 ] ); // field before the function key.
 Ref *prev = VMSP;
 VMSP += ToLong( VMSP[ -1 ] );
-VMSP[ 0 ] = VMLINK;
-VMSP[ 1 ] = prev;
-VMSP[ 2 ] = ToRef( pc[ -3 ] );
-VMSP += 3;
+VMSP[ 0 ] = VMLINKFUNC;
+VMSP[ 1 ] = VMLINK;
+VMSP[ 2 ] = prev;
+VMSP[ 3 ] = ToRef( pc[ -3 ] );
+VMSP += SP_OVERHEAD;
 if ( A != VMCOUNT ) {
     enter_error( VMCOUNT, A );
 }

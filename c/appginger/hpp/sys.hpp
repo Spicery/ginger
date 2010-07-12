@@ -18,11 +18,10 @@ extern void refPtrPrint( std::ostream & out, Ref * r );
 
 extern Ref refKey( Ref r );
 
-extern void sysRefPrint( MachineClass * );
-extern void sysRefPrintln( MachineClass * );
-extern void sysNewList( MachineClass * vm );
-extern void sysIsNil( class MachineClass * vm );
-//extern void sysGarbageCollect( MachineClass * vm );
+extern Ref * sysRefPrint( Ref * pc, MachineClass * );
+extern Ref * sysRefPrintln( Ref * pc, MachineClass * );
+extern Ref * sysNewList( Ref * pc, MachineClass * vm );
+extern Ref * sysIsNil( Ref * pc, class MachineClass * vm );
 
 #include "datatypes.hpp.auto"
 

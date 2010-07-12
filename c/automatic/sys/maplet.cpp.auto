@@ -1,6 +1,6 @@
-void sysNewMaplet( class MachineClass * vm ) {
+Ref * sysNewMaplet( Ref * pc, class MachineClass * vm ) {
     if ( vm->count == 2 ) {
-        XfrClass xfr( vm->heap().preflight( 3 ) );
+        XfrClass xfr( vm->heap().preflight( pc, 3 ) );
         xfr.setOrigin();
         xfr.xfrRef( sysMapletKey );
         Ref f1 = vm->fastPop();
@@ -8,21 +8,23 @@ void sysNewMaplet( class MachineClass * vm ) {
         xfr.xfrRef( f0 );
         xfr.xfrRef( f1 );
         vm->fastPush( xfr.make() );
+        return pc;
     } else {
         throw Mishap( "Wrong number of arguments for sysNewMaplet" );
     }
 }
 
-void sysIsMaplet( class MachineClass * vm ) {
+Ref * sysIsMaplet( Ref * pc, class MachineClass * vm ) {
     if ( vm->count == 1 ) {
         Ref r = vm->fastPeek();
         vm->fastPeek() = IsPtr4( r ) && ( *RefToPtr4( r ) == sysMapletKey ) ? sys_true : sys_false;
+        return pc;
     } else {
         throw Mishap( "Wrong number of arguments for head" );
     }
 }
 
-void sysMapletKeyField( class MachineClass * vm ) {
+Ref * sysMapletKeyField( Ref * pc, class MachineClass * vm ) {
     if ( vm->count == 1 ) {
         Ref x = vm->fastPeek();
         if ( refKey( x ) == sysMapletKey ) {
@@ -30,12 +32,13 @@ void sysMapletKeyField( class MachineClass * vm ) {
         } else {
             throw Mishap( "Trying to take the mapletKey of non-Maplet" );
         }
+        return pc;
     } else {
         throw Mishap( "Wrong number of arguments" );
     }
 }
 
-void sysMapletValueField( class MachineClass * vm ) {
+Ref * sysMapletValueField( Ref * pc, class MachineClass * vm ) {
     if ( vm->count == 1 ) {
         Ref x = vm->fastPeek();
         if ( refKey( x ) == sysMapletKey ) {
@@ -43,6 +46,7 @@ void sysMapletValueField( class MachineClass * vm ) {
         } else {
             throw Mishap( "Trying to take the mapletValue of non-Maplet" );
         }
+        return pc;
     } else {
         throw Mishap( "Wrong number of arguments" );
     }

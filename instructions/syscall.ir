@@ -1,5 +1,5 @@
 SysCall * sys = ToSysCall( *++pc );
 FREEZE;
-(*sys)( vm );
+pc = (*sys)( ++pc, vm );
 MELT;
-RETURN( pc + 1 );
+RETURN( pc );

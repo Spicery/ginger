@@ -4,8 +4,8 @@
 #include "cage.hpp"
 
 class CageCrawl {
-public:
-	CageClass & 			cage;
+private:
+	CageClass * 			cage;
 	Ref *					current;
 
 private:
@@ -15,13 +15,22 @@ private:
 public:
 	//	Returns sys_cage_crawl_termin when exhausted.
 	Ref * next();
+	Ref * currentObjA() { return this->current; }
 	
 public:
-	CageCrawl( CageClass & c ) : 
+	CageCrawl( CageClass * c ) : 
 		cage( c ) 
 	{
-		this->current = c.start;
+		this->current = c->start;
 	}
+
+	CageCrawl( CageClass * c, Ref * obj_A ) : 
+		cage( c )
+	{	
+		this->current = obj_A;
+	}
+
+
 };
 
 #endif

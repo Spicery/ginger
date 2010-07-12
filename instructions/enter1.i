@@ -1,9 +1,10 @@
 Ref *prev = VMSP;
 VMSP += ToLong( VMSP[ -1 ] );
-VMSP[ 0 ] = VMLINK;
-VMSP[ 1 ] = prev;
-VMSP[ 2 ] = ToRef( pc[ -3 ] );
-VMSP += 3;
+VMSP[ 0 ] = VMLINKFUNC;
+VMSP[ 1 ] = VMLINK;
+VMSP[ 2 ] = prev;
+VMSP[ 3 ] = ToRef( pc[ -3 ] );
+VMSP += SP_OVERHEAD;
 if ( VMCOUNT != 1 ) {
     enter_error( VMCOUNT, 1 );
 }

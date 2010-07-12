@@ -5,7 +5,7 @@
 #include "objlayout.hpp"
 
 Ref * CageCrawl::next() {
-	if ( this->current < this->cage.top ) {
+	if ( this->current < this->cage->top ) {
 		Ref * key = findKey( this->current );
 		unsigned long len = lengthAfterKey( key );
 		this->current = key + len + 1;

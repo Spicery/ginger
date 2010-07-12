@@ -1,0 +1,15 @@
+================================================================================
+Title: nfib
+--------------------------------------------------------------------------------
+<dec><var name="nfib" protected="true"/><fn name="nfib"><seq><var name="n"/></seq><if><sysapp name="&lt;="><id name="n"/><int value="1"/></sysapp><int value="1"/><sysapp name="+"><sysapp name="+"><int value="1"/><app><id name="nfib"/><sysapp name="-"><id name="n"/><int value="1"/></sysapp></app></sysapp><app><id name="nfib"/><sysapp name="-"><id name="n"/><int value="2"/></sysapp></app></sysapp></if></fn></dec>
+<app><id name="nfib"/><int value="15"/></app>
+--------------------------------------------------------------------------------
+1973
+================================================================================
+Title: Identity
+--------------------------------------------------------------------------------
+<dec><var name="f" protected="true"/><fn name="f"><seq><var name="x"/></seq><id name="x"/></fn></dec>
+<app><id name="f"/><int value="99"/></app>
+--------------------------------------------------------------------------------
+99
+================================================================================

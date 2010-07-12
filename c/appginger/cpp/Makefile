@@ -6,9 +6,10 @@ OBJS=mishap.o term.o read_xml.o \
 	functor.o plant.o cage.o machine.o vmi.o gc.o \
 	rcep.o arity.o lift.o ident.o dict.o sys.o \
 	destination.o initialize.o cgi.o heap.o \
-	key.o objlayout.o heapcrawl.o cagecrawl.o garbagecollect.o \
-	scanfunc.o scancallstack.o \
-	scandict.o \
+	key.o objlayout.o \
+	heapcrawl.o cagecrawl.o callstackcrawl.o \
+	garbagecollect.o \
+	scanfunc.o scancallstack.o scandict.o \
 	instruction_set.o \
 	machine1.o \
 	instruction_set1.o \

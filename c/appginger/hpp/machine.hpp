@@ -20,14 +20,21 @@ private:
 	std::auto_ptr<HeapClass>		heap_aptr;
 	
 public:
+	//	Volatile! Only cached when a garbage collection
+	//	might be triggered.
+	Ref *		program_counter;
+	Ref *		func_of_program_counter;
+		
+public:
 	long		count;			//	Args count
-	Ref			*link;			//	Return address
-	Ref			*sp;
-	Ref			*sp_base;
-	Ref			*sp_end;
-	Ref			*vp;
-	Ref			*vp_base;
-	Ref			*vp_end;
+	Ref	*		link;			//	Return address
+	Ref	*		func_of_link;
+	Ref	*		sp;
+	Ref *		sp_base;
+	Ref	*		sp_end;
+	Ref	*		vp;
+	Ref	*		vp_base;
+	Ref	*		vp_end;
 	
 public:
 	Ref	&		fastPeek() { return *vp; }

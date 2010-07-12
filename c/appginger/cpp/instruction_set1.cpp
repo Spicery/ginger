@@ -17,8 +17,8 @@
 #define VMSP	( vm->sp )
 #define VMVP	( vm->vp )
 #define VMCOUNT	( vm->count )
-//typedef Ref *SpecialFn( Ref *pc, Machine vm );
-//typedef SpecialFn *Special;
+#define VMLINKFUNC 	( vm->func_of_link )
+#define VMPCFUNC	( vm->func_of_program_counter )
 #define RETURN( e ) 	return( e )
 
 #include "instruction_set1.cpp.auto"

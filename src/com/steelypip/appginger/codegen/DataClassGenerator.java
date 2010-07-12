@@ -51,16 +51,17 @@ public abstract class DataClassGenerator {
 	
 	protected void generateRecogniser( final PrintWriter cpp, final PrintWriter hpp ) {
 		final String recogniserName = "sysIs" + this.dataKeyRoot;
-		cpp.format( "void %s( class MachineClass * vm ) {\n", recogniserName );
+		cpp.format( "Ref * %s( Ref * pc, class MachineClass * vm ) {\n", recogniserName );
 		cpp.format( "    if ( vm->count == 1 ) {\n" );
 		cpp.format( "        Ref r = vm->fastPeek();\n" );
 		cpp.format( "        vm->fastPeek() = IsPtr4( r ) && ( *RefToPtr4( r ) == %s ) ? sys_true : sys_false;\n", this.keyName() );
+		cpp.format( "        return pc;\n" );
 		cpp.format( "    } else {\n" );
 		cpp.format( "        throw Mishap( \"Wrong number of arguments for head\" );\n" );
 		cpp.format( "    }\n" );
 		cpp.format( "}\n\n" );
 		
-		hpp.format( "extern void %s( MachineClass * vm );\n", recogniserName );
+		hpp.format( "extern Ref * %s( Ref * pc, MachineClass * vm );\n", recogniserName );
 		this.addSysConst( "is" + this.dataKeyRoot, 1, recogniserName );
 	}
 

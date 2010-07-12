@@ -64,13 +64,7 @@ void findObjectLimits( Ref * object, Ref * & start, Ref * & end );
 
 unsigned long sizeAfterKeyOfFnLength( Ref * key );
 
-/*Ref * findFunctionKey( Ref * inside_fn ) {
-	//	Walk back down until you find a FnLength ptr.
-	while ( not IsFnLength( *inside_fn ) ) {
-		inside_fn++;
-	}
-	
-}*/
+
 
 
 #endif

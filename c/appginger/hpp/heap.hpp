@@ -11,9 +11,13 @@ private:
 	MachineClass *					machine_ptr;
 	
 public:
-	CageClass & preflight( int size );
+	CageClass * preflight( int size );
+	CageClass * preflight( Ref * & pc, int size );
 	Ref copyString( const char *s );		//	Copy string, possibly causing GC
-	void collectGarbage();
+
+public:
+	void selectCurrent();
+	CageClass * newCageClass();
 
 public:
 	HeapClass( MachineClass * machine );

@@ -17,7 +17,7 @@ public class FullVectorClassGenerator extends DataClassGenerator {
 	}
 
 	private void generateAccessor( PrintWriter cpp, PrintWriter hpp ) {		
-		cpp.format( "void %s( MachineClass * vm ) {\n", this.indexName() );
+		cpp.format( "Ref * %s( Ref * pc, MachineClass * vm ) {\n", this.indexName() );
 		cpp.format( "   if ( vm->count == 2 ) {\n" );
 		cpp.format( "       Ref n = vm->fastPop();\n" );
 		cpp.format( "       Ref v = vm->fastPeek();\n" );
@@ -28,6 +28,7 @@ public class FullVectorClassGenerator extends DataClassGenerator {
 		cpp.format( "           } else {\n" );
 		cpp.format( "               throw Mishap( \"Small integer index needed\" );\n" );
 		cpp.format( "           }\n" );
+		cpp.format( "           return pc;" );
 		cpp.format( "       } else {\n" );
 		cpp.format( "           throw Mishap( \"Vector needed\" );\n" );
 		cpp.format( "       }\n" );
@@ -37,22 +38,23 @@ public class FullVectorClassGenerator extends DataClassGenerator {
 		cpp.format( "}\n" );
 		cpp.format( "\n" );		
 		
-		hpp.format( "extern void %s( MachineClass * vm );\n", this.indexName() );
+		hpp.format( "extern Ref * %s( Ref * pc, MachineClass * vm );\n", this.indexName() );
 		this.addSysConst( "index" + this.dataKeyRoot, 2, this.indexName() );
 	}
 
 	private void generateConstructor( PrintWriter cpp, PrintWriter hpp ) {
-		cpp.format( "void %s( MachineClass * vm ) {\n", this.consName() );
+		cpp.format( "Ref * %s( Ref * pc, MachineClass * vm ) {\n", this.consName() );
 		cpp.format( "    int n = vm->count;\n" );
-		cpp.format( "    XfrClass xfr( vm->heap().preflight( 2 + n ) );\n" );
+		cpp.format( "    XfrClass xfr( vm->heap().preflight( pc, 2 + n ) );\n" );
 		cpp.format( "    xfr.xfrRef( LongToSmall( n ) );\n" );
 		cpp.format( "    xfr.setOrigin();\n" );
 		cpp.format( "    xfr.xfrRef( %s );\n", this.keyName() );
 		cpp.format( "    xfr.xfrCopy( ++vm->vp -= n, n );\n" );
 		cpp.format( "    vm->fastSet( xfr.make() );\n" );
+		cpp.format( "    return pc;\n" );
 		cpp.format( "}\n" );
 
-		hpp.format( "extern void %s( MachineClass * vm );\n", this.consName() );
+		hpp.format( "extern Ref * %s( Ref * pc, MachineClass * vm );\n", this.consName() );
 		this.addSysConst( "new" + this.dataKeyRoot, Arity.MANY, this.consName() );
 
 	}

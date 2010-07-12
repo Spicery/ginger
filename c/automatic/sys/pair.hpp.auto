@@ -1,4 +1,4 @@
-extern void sysNewPair( MachineClass * vm );
-extern void sysIsPair( MachineClass * vm );
-extern void sysHeadField( MachineClass * vm );
-extern void sysTailField( MachineClass * vm );
+extern Ref * sysNewPair( Ref * pc, MachineClass * vm );
+extern Ref * sysIsPair( Ref * pc, MachineClass * vm );
+extern Ref * sysHeadField( Ref * pc, MachineClass * vm );
+extern Ref * sysTailField( Ref * pc, MachineClass * vm );

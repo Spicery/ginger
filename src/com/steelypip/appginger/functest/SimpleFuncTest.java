@@ -41,7 +41,7 @@ public class SimpleFuncTest implements FuncTest {
 
 	public void run() {
 		try {
-			Process p = Runtime.getRuntime().exec( "c/appginger/cpp/appginger -B" );
+			Process p = Runtime.getRuntime().exec( "../cpp/appginger -B" );
 			
 			OutputStream stdin = p.getOutputStream();
 			InputStream stdout = p.getInputStream();

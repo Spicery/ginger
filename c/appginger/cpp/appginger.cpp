@@ -32,6 +32,7 @@ static struct option long_options[] =
 		{ "cgi", 			no_argument, 			0, 'C' },
 		{ "interactive",	no_argument,			0, 'I' },
 		{ "batch",			no_argument,			0, 'B' },
+		{ "terminate",		no_argument,			0, 'T' },
         { "help", 			optional_argument, 		0, 'h' },
         { "machine",		required_argument, 		0, 'm' },
         { "version", 		no_argument, 			0, 'v' },
@@ -48,7 +49,7 @@ int main( int argc, char **argv, char **envp ) {
 
     for(;;) {
         int option_index = 0;
-        int c = getopt_long( argc, argv, "CIBhm:v", long_options, &option_index );
+        int c = getopt_long( argc, argv, "CIBThm:vd:", long_options, &option_index );
         if ( c == -1 ) break;
         switch ( c ) {
 			case 'C': {
@@ -67,6 +68,10 @@ int main( int argc, char **argv, char **envp ) {
 				appg.setBatchMode();
 				break;
 			}
+			case 'T': {
+				appg.setTrappingMishap();
+				break;
+			}
 			case 'd': {
 				if ( std::string( optarg ) == std::string( "showcode" ) ) {
 					appg.setShowCode();
@@ -83,6 +88,7 @@ int main( int argc, char **argv, char **envp ) {
 					printf( "-B, --batch         run in batch mode\n" );
 					printf( "-C, --cgi           run as CGI script\n" );
 					printf( "-I, --interactive   run interactively\n" );
+					printf( "-T, --terminate     stop on mishap\n" );
 					printf( "-d, --debug         add debug option (see --help=debug)\n" );
 					printf( "-h, --help          print out this help info\n" );
 					printf( "-m<n>               run using machine #n\n" );
@@ -131,7 +137,11 @@ int main( int argc, char **argv, char **envp ) {
 #ifdef DBG_APPGINGER
 		clog << "RCEP ..." << endl;
 #endif
-		while ( read_comp_exec_print( vm, std::cin ) ) {};
+		if ( appg.isTrappingMishap() ) {
+			while ( read_comp_exec_print( vm, std::cin ) ) {};
+		} else {
+			while ( unsafe_read_comp_exec_print( vm, std::cin ) ) {};
+		}
     } else if ( appg.isCgiMode() ) {
 		cout << "Content-type: text/html\r\n\r\n";
 		cout << "<html><head><title>AppGinger</title></head><body>\n";

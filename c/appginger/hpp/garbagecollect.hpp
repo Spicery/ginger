@@ -3,6 +3,6 @@
 
 #include "machine.hpp"
 
-extern void sysGarbageCollect( MachineClass * vm );
+extern Ref * sysGarbageCollect( Ref * pc, MachineClass * vm );
 
 #endif

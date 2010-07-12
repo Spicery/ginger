@@ -25,7 +25,7 @@
 #include <unistd.h>
 #include <getopt.h>
 
-#include "cgi.hpp"
+//#include "cgi.hpp"
 #include "rcep.hpp"
 #include "appginger.hpp"
 #include "term.hpp"
@@ -71,10 +71,10 @@ int main( int argc, char **argv, char **envp ) {
         if ( c == -1 ) break;
         switch ( c ) {
 			case 'C': {
-                if ( !cgi_init() ) {
+                /*if ( !cgi_init() ) {
                   	fprintf( stderr, "cgi_init: %s\n", strerror( cgi_errno ) );
                   	exit( EXIT_FAILURE );
-                }           	
+                } */          	
                 appg.setCgiMode();
 				break;
 			}

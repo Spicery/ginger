@@ -7,7 +7,7 @@ CPPFLAGS=-g -I../hpp -I../../automatic/machine -I../../automatic/sys -I/usr/loca
 OBJS=mishap.o term.o read_xml.o \
 	functor.o plant.o cage.o vmi.o gc.o \
 	rcep.o arity.o lift.o ident.o dict.o sys.o \
-	destination.o cgi.o heap.o \
+	destination.o heap.o \
 	key.o objlayout.o \
 	heapcrawl.o cagecrawl.o callstackcrawl.o \
 	garbagecollect.o \

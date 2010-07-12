@@ -1,8 +1,3 @@
-all:
-	( cd ./appginger; make )
-	( cd ./common2gnx; make )
-
-clean:
-	( cd ./appginger; make clean )
-	( cd ./common2gnx; make clean )
-
+all clean:
+	$(MAKE) -C appginger $@
+	$(MAKE) -C common2gnx $@

@@ -1,4 +1,23 @@
+/******************************************************************************\
+	Copyright (c) 2010 Stephen Leach. AppGinger is distributed under the terms 
+	of the GNU General Public License. This file is part of AppGinger.
+
+    AppGinger is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    AppGinger is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with AppGinger.  If not, see <http://www.gnu.org/licenses/>.
+\******************************************************************************/
+
 #include <iostream>
+#include <fstream>
 
 #include <cstdio>
 #include <cstdlib>
@@ -11,7 +30,6 @@
 #include "appginger.hpp"
 #include "term.hpp"
 #include "mishap.hpp"
-#include "initialize.hpp"
 #include "machine1.hpp"
 #include "machine2.hpp"
 #include "machine3.hpp"
@@ -37,6 +55,8 @@ static struct option long_options[] =
         { "machine",		required_argument, 		0, 'm' },
         { "version", 		no_argument, 			0, 'v' },
         { "debug",			required_argument,		0, 'd' },
+        { "license",		no_argument,			0, 'l' },
+        { "conditions",		no_argument,			0, 'c' },
         { 0, 0, 0, 0 }
     };
 
@@ -45,11 +65,9 @@ int NFIB_ARG;
 int main( int argc, char **argv, char **envp ) {
 	AppGinger appg;
 
-    initialize();
-
     for(;;) {
         int option_index = 0;
-        int c = getopt_long( argc, argv, "CIBThm:vd:", long_options, &option_index );
+        int c = getopt_long( argc, argv, "CIBThm:vd:lc", long_options, &option_index );
         if ( c == -1 ) break;
         switch ( c ) {
 			case 'C': {
@@ -110,6 +128,11 @@ int main( int argc, char **argv, char **envp ) {
             	cout << "appginger: version " << appg.version() << endl;
                 exit( EXIT_SUCCESS );   //  Is that right?
             }
+            case 'c':
+            case 'l': {
+            	appg.printLicense( c == 'l' );
+                exit( EXIT_SUCCESS );   //  Is that right?            	
+            }
             case '?': {
                 break;
             }
@@ -120,7 +143,11 @@ int main( int argc, char **argv, char **envp ) {
     }
 
 	if ( appg.isInteractiveMode() ) {
-		cout << "Welcome to Ginger (" << VERSION << ")\n";
+		//cout << "Welcome to AppGinger (" << VERSION << ")\n";
+		cout << "AppGinger " << VERSION << ", Copyright (c) 2010  Stephen Leach" << endl;
+    	cout << "This program comes with ABSOLUTELY NO WARRANTY; option --license for details." << endl;
+   	 	cout << "This is free software, and you are welcome to redistribute it under certain" << endl;
+    	cout << "conditions; option --conditions for details." << endl;
 	}
 
 	if ( appg.isInteractiveMode() || appg.isBatchMode() ) {
@@ -165,6 +192,19 @@ MachineClass * AppGinger::newMachine() {
 			);
 			return new Machine1( *this );
 			break;
+		}
+	}
+}
+
+void AppGinger::printLicense( bool printing ) {
+	ifstream license( "LICENSE.TXT" );
+	std::string line;
+	while ( getline( license, line ) )  {
+		if ( !printing && line.find( "TERMS AND CONDITIONS" ) != string::npos ) {
+			printing = true;
+		}
+		if ( printing ) {
+			std::cout << line << std::endl;
 		}
 	}
 }

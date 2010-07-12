@@ -1,5 +1,9 @@
 all:
-	( cd ./cpp; make )
+	$(MAKE) -C cpp $@
 
 clean:
-	( cd ./cpp; make clean )
+	$(MAKE) -C cpp $@
+	$(MAKE) -C functests $@
+
+check:
+	$(MAKE) -C functests $@

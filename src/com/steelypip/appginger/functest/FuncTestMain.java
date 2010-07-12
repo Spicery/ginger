@@ -9,34 +9,32 @@ import java.util.List;
 
 public class FuncTestMain {
 	
-	public static void main( String[] args ) {
+	public static void main( String[] args ) throws IOException {
 		new FuncTestMain().runMain( args );
 	}
 
-	private void runMain( String[] args ) {
+	private void runMain( String[] args ) throws IOException {
 		for ( String fname : args ) {
-			this.runAppGingerFuncTests( fname );
+			if ( fname.endsWith( ".tests" ) ) {
+				this.runAppGingerFuncTests( fname );
+			} else {
+				throw new RuntimeException( "Unrecognised argument: " + fname );
+			}
 		}
 		//this.runCommon2GnxFuncTests();	
 	}
 
 	private static void tests( final File f, final List< FuncTest > test_list ) {
-		if ( f.isDirectory() ) {
-			for ( File sub : f.listFiles() ) {
-				tests( sub, test_list );
+		try {
+			FileFuncTestReader r =  new FileFuncTestReader( f );
+			for (;;) {
+				FuncTest t = r.readTest();
+				if ( t == null ) break;
+				test_list.add( t );
 			}
-		} else if ( f.getName().endsWith( ".tests" ) ){
-			try {
-				FileFuncTestReader r =  new FileFuncTestReader( f );
-				for (;;) {
-					FuncTest t = r.readTest();
-					if ( t == null ) break;
-					test_list.add( t );
-				}
-			} catch ( IOException e ) {
-				throw new RuntimeException( e );
-			}			
-		}
+		} catch ( IOException e ) {
+			throw new RuntimeException( e );
+		}			
 	}
 	
 	private List< FuncTest > tests( File home ) {
@@ -52,8 +50,7 @@ public class FuncTestMain {
 	
 	private boolean needNewLine = false;
 
-	private void runAppGingerFuncTests( final String fname ) {
-		//List< FuncTest > tests = this.tests( new File( new File( new File( "c" ), "appginger" ), "functests" ) );
+	private void runAppGingerFuncTests( final String fname ) throws IOException {
 		List< FuncTest > tests = this.tests( new File( fname ) );
 		List< FuncTest > failed = new ArrayList< FuncTest >();
 		int npasses = 0;
@@ -78,6 +75,10 @@ public class FuncTestMain {
 			for ( String r : fail.reasons() ) {
 				System.out.format( "\t%s\n", r );
 			}
+		}
+		if ( failed.isEmpty() ) {
+			int n = fname.lastIndexOf( '.' );
+			new File( fname.substring( 0, fname.lastIndexOf( '.' ) ) + ".pass" ).createNewFile();
 		}
 	}
 

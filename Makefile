@@ -1,5 +1,5 @@
 all:
-	( cd ./c; make ) 
+	$(MAKE) -C c $@ 
 	if [ ! -d bin ]; then mkdir -p bin; fi
 	cp c/appginger/cpp/appginger bin/
 	cp c/common2gnx/cpp/common2gnx bin
@@ -8,8 +8,13 @@ clean:
 	rm -rf build/appginger
 	rm -f bin/common2gnx
 	rm -f bin/appginger
-	( cd ./c ; make clean )
+	$(MAKE) -C c $@
+	
+check: all
+	$(MAKE) -C c $@
 
+
+# This will become dist & distdir??
 snapshot:
 	rm -rf build/appginger
 	mkdir build/appginger

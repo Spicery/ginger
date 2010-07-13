@@ -137,7 +137,7 @@ bool unsafe_read_comp_exec_print( Machine vm, istream & input ) {
 
 bool read_comp_exec_print( Machine vm, istream & input ) {
 	try {
-		return read_comp_exec_print( vm, input );
+		return unsafe_read_comp_exec_print( vm, input );
 	} catch ( Mishap & m ) {
 		m.report();
 		throw;

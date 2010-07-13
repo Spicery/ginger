@@ -50,13 +50,11 @@ static struct option long_options[] =
 		{ "cgi", 			no_argument, 			0, 'C' },
 		{ "interactive",	no_argument,			0, 'I' },
 		{ "batch",			no_argument,			0, 'B' },
-		{ "terminate",		no_argument,			0, 'T' },
         { "help", 			optional_argument, 		0, 'h' },
         { "machine",		required_argument, 		0, 'm' },
         { "version", 		no_argument, 			0, 'v' },
         { "debug",			required_argument,		0, 'd' },
-        { "license",		no_argument,			0, 'l' },
-        { "conditions",		no_argument,			0, 'c' },
+        { "license",		optional_argument,		0, 'l' },
         { 0, 0, 0, 0 }
     };
 
@@ -67,14 +65,10 @@ int main( int argc, char **argv, char **envp ) {
 
     for(;;) {
         int option_index = 0;
-        int c = getopt_long( argc, argv, "CIBThm:vd:lc", long_options, &option_index );
+        int c = getopt_long( argc, argv, "CIBhm:vd:l", long_options, &option_index );
         if ( c == -1 ) break;
         switch ( c ) {
 			case 'C': {
-                /*if ( !cgi_init() ) {
-                  	fprintf( stderr, "cgi_init: %s\n", strerror( cgi_errno ) );
-                  	exit( EXIT_FAILURE );
-                } */          	
                 appg.setCgiMode();
 				break;
 			}
@@ -86,13 +80,15 @@ int main( int argc, char **argv, char **envp ) {
 				appg.setBatchMode();
 				break;
 			}
-			case 'T': {
-				appg.setTrappingMishap();
-				break;
-			}
 			case 'd': {
+				//std::string option( optarg );
 				if ( std::string( optarg ) == std::string( "showcode" ) ) {
 					appg.setShowCode();
+				} else if ( std::string( optarg ) == std::string( "notrap" ) ) {
+					appg.setTrappingMishap( false );
+				} else {
+					std::cerr << "Invalid debug option: " << optarg << std::endl;
+					exit( EXIT_FAILURE );
 				}
 				break;
 			}
@@ -111,9 +107,11 @@ int main( int argc, char **argv, char **envp ) {
 					printf( "-h, --help          print out this help info\n" );
 					printf( "-m<n>               run using machine #n\n" );
 					printf( "-v, --version       print out version information and exit\n" );
+					printf( "-l, --license		 print out license information and exit\n" );
 					printf( "\n" );
 				} else if ( std::string( optarg ) == "debug" ) {
 					printf( "--debug=showcode    Causes the generated instructions to be displayed.\n" );
+					printf( "--debug=notrap      Prevents mishaps being caught, for use with gdb.\n" );
                 } else {
                 	printf( "Unknown help topic %s\n", optarg );
                 }
@@ -128,9 +126,15 @@ int main( int argc, char **argv, char **envp ) {
             	cout << "appginger: version " << appg.version() << endl;
                 exit( EXIT_SUCCESS );   //  Is that right?
             }
-            case 'c':
             case 'l': {
-            	appg.printLicense( c == 'l' );
+            	if ( optarg == NULL ) {
+            		appg.printGPL( true );
+            	} else if ( std::string( optarg ) == std::string( "conditions" ) ) {
+            		appg.printGPL( false );
+            	} else {
+                	std::cerr << "Unknown license option: " << optarg << std::endl;
+            		exit( EXIT_FAILURE );
+            	}
                 exit( EXIT_SUCCESS );   //  Is that right?            	
             }
             case '?': {
@@ -147,7 +151,7 @@ int main( int argc, char **argv, char **envp ) {
 		cout << "AppGinger " << VERSION << ", Copyright (c) 2010  Stephen Leach" << endl;
     	cout << "This program comes with ABSOLUTELY NO WARRANTY; option --license for details." << endl;
    	 	cout << "This is free software, and you are welcome to redistribute it under certain" << endl;
-    	cout << "conditions; option --conditions for details." << endl;
+    	cout << "conditions; option --license=conditions for details." << endl;
 	}
 
 	if ( appg.isInteractiveMode() || appg.isBatchMode() ) {
@@ -196,7 +200,10 @@ MachineClass * AppGinger::newMachine() {
 	}
 }
 
-void AppGinger::printLicense( bool printing ) {
+/*	N.B. The assumption that LICENSE.TXT lives in the same directory as the
+	appginger application is not correct. This is just a temporary fudge.
+*/
+void AppGinger::printGPL( bool printing ) {
 	ifstream license( "LICENSE.TXT" );
 	std::string line;
 	while ( getline( license, line ) )  {

@@ -40,7 +40,7 @@ public:
 	bool isInteractiveMode() { return this->mode == InteractiveMode; }
 	bool isBatchMode() { return this->mode == BatchMode; }
 	bool isCgiMode() { return this->mode == CGIMode; }
-	void setTrappingMishap() { this->is_trapping_mishap = true; }
+	void setTrappingMishap( bool t ) { this->is_trapping_mishap = t; }
 	bool isTrappingMishap() { return this->is_trapping_mishap; }
 	void setMachineImplNum( const int n ) { this->machine_impl_num = n; }
 	int getMachineImplNum() { return this->machine_impl_num; }
@@ -49,7 +49,7 @@ public:
 	bool getShowCode() { return this->dbg_show_code; }
 
 public:
-	void printLicense( bool printing );
+	void printGPL( bool printing );
 	MachineClass * newMachine();
 
 
@@ -58,7 +58,7 @@ public:
 		mode( InteractiveMode ),
 		machine_impl_num( 1 ),
 		dbg_show_code( false ),
-		is_trapping_mishap( false )
+		is_trapping_mishap( true )
 	{
 	}
 

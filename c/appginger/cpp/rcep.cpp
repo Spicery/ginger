@@ -35,7 +35,7 @@ using namespace std;
 #include <cstdio>
 
 //#define DBG_RCEP
-//#define DBG_CRAWL
+#define DBG_CRAWL
 
 #ifdef DBG_CRAWL
 
@@ -43,16 +43,17 @@ using namespace std;
 #include "cagecrawl.hpp"
 #include "sys.hpp"
 #include "key.hpp"
+#include "garbagecollect.hpp"
 	
-static void crawl( Machine vm ) {
-	ofstream out( "crawl.log" );
+static void crawl( Machine vm, const char * logfname ) {
+	ofstream out( logfname );
 	out << "Heap Crawl" << endl;
 	
 	HeapCrawl hcrawl( vm->heap() );
 	for (;;) {
 		CageClass * cage = hcrawl.next();
 		if ( not cage ) break; 
-		out << "  Cage at " << (unsigned long)cage << " with " << cage->nboxesInUse() << " cells" << endl;
+		out << "  Cage[" << cage->serialNumber() << "] at " << (unsigned long)cage << " with " << cage->nboxesInUse() << "/" << cage->capacity() << " cells" << endl;
 
 		CageCrawl ccrawl( cage );
 		for (;;) {
@@ -112,18 +113,11 @@ bool unsafe_read_comp_exec_print( Machine vm, istream & input ) {
 	    r = vmiENDFUNCTION( plant );
 	    start = clock();
     	vm->execute( r );
-     	#ifdef DBG_CRAWL
-    		//cout << "Crawling the heap ... ";
-    		//cout.flush();
-    		crawl( vm );
-    		//cout << "done" << endl;
-    	#endif
 	} catch ( NormalExit ) {
      	#ifdef DBG_CRAWL
-    		//cout << "Crawling the heap ... ";
-    		//cout.flush();
-    		crawl( vm );
-    		//cout << "done" << endl;
+    		crawl( vm, "before.log" );
+    		sysQuiescentGarbageCollect( vm );
+    		crawl( vm, "after.log" );
     	#endif
 	}
 

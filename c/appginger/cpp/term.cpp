@@ -208,7 +208,7 @@ Term term_new_list_empty() {
 Term term_new_bool( const bool flag ) {
 	return 
 		shared< TermClass >(
-			new ItemTermClass( fnc_bool, sys_true )
+			new ItemTermClass( fnc_bool, flag ? sys_true : sys_false )
 		)
 	;	
 }

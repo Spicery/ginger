@@ -98,20 +98,28 @@ int main( int argc, char **argv, char **envp ) {
             	//	browser pointed there.
             	if ( optarg == NULL ) {
 					printf( "Usage :  appginger [options] [files]\n\n" );
-					printf( "OPTION              SUMMARY\n" );
-					printf( "-B, --batch         run in batch mode\n" );
-					printf( "-C, --cgi           run as CGI script\n" );
-					printf( "-I, --interactive   run interactively\n" );
-					printf( "-T, --terminate     stop on mishap\n" );
-					printf( "-d, --debug         add debug option (see --help=debug)\n" );
-					printf( "-h, --help          print out this help info\n" );
-					printf( "-m<n>               run using machine #n\n" );
-					printf( "-v, --version       print out version information and exit\n" );
-					printf( "-l, --license		 print out license information and exit\n" );
+					printf( "OPTION                SUMMARY\n" );
+					printf( "-B, --batch           run in batch mode\n" );
+					printf( "-C, --cgi             run as CGI script\n" );
+					printf( "-I, --interactive     run interactively\n" );
+					printf( "-T, --terminate       stop on mishap\n" );
+					printf( "-d, --debug           add debug option (see --help=debug)\n" );
+					printf( "-h, --help            print out this help info\n" );
+					printf( "-m<n>                 run using machine #n\n" );
+					printf( "-v, --version         print out version information and exit\n" );
+					printf( "-l, --license         print out license information and exit\n" );
 					printf( "\n" );
+				} else if ( std::string( optarg ) == "help" ) {
+					cout << "--help=debug          help on the debugging options available" << endl;
+					cout << "--help=help           this short help" << endl;
+					cout << "--help=licence        help on displaying license information" << endl;
 				} else if ( std::string( optarg ) == "debug" ) {
-					printf( "--debug=showcode    Causes the generated instructions to be displayed.\n" );
-					printf( "--debug=notrap      Prevents mishaps being caught, for use with gdb.\n" );
+					cout << "--debug=showcode      Causes the generated instructions to be displayed." << endl;
+					cout << "--debug=notrap        Prevents mishaps being caught, for use with gdb." << endl;
+				} else if ( std::string( optarg ) == "license" ) {
+					cout << "Displays key sections of the GNU Public License." << endl;
+					cout << "--license=warranty    Shows warranty." << endl;
+					cout << "--license=conditions  Shows terms and conditions." << endl;
                 } else {
                 	printf( "Unknown help topic %s\n", optarg );
                 }
@@ -127,10 +135,12 @@ int main( int argc, char **argv, char **envp ) {
                 exit( EXIT_SUCCESS );   //  Is that right?
             }
             case 'l': {
-            	if ( optarg == NULL ) {
-            		appg.printGPL( true );
+            	if ( optarg == NULL || std::string( optarg ) == std::string( "all" ) ) {
+            		appg.printGPL( NULL, NULL );
+            	} else if ( std::string( optarg ) == std::string( "warranty" ) ) {
+             		appg.printGPL( "Disclaimer of Warranty.", "Limitation of Liability." );           		
             	} else if ( std::string( optarg ) == std::string( "conditions" ) ) {
-            		appg.printGPL( false );
+            		appg.printGPL( "TERMS AND CONDITIONS", "END OF TERMS AND CONDITIONS" );
             	} else {
                 	std::cerr << "Unknown license option: " << optarg << std::endl;
             		exit( EXIT_FAILURE );
@@ -149,9 +159,11 @@ int main( int argc, char **argv, char **envp ) {
 	if ( appg.isInteractiveMode() ) {
 		//cout << "Welcome to AppGinger (" << VERSION << ")\n";
 		cout << "AppGinger " << VERSION << ", Copyright (c) 2010  Stephen Leach" << endl;
-    	cout << "This program comes with ABSOLUTELY NO WARRANTY; option --license for details." << endl;
-   	 	cout << "This is free software, and you are welcome to redistribute it under certain" << endl;
-    	cout << "conditions; option --license=conditions for details." << endl;
+		cout << "  +----------------------------------------------------------------------+" << endl;
+    	cout << "  | This program comes with ABSOLUTELY NO WARRANTY. It is free software, |" << endl;
+    	cout << "  | and you are welcome to redistribute it under certain conditions      |" << endl;
+    	cout << "  | it under certain conditions. Use option --help=license for details.  |" << endl;
+		cout << "  +----------------------------------------------------------------------+" << endl;
 	}
 
 	if ( appg.isInteractiveMode() || appg.isBatchMode() ) {
@@ -203,12 +215,15 @@ MachineClass * AppGinger::newMachine() {
 /*	N.B. The assumption that LICENSE.TXT lives in the same directory as the
 	appginger application is not correct. This is just a temporary fudge.
 */
-void AppGinger::printGPL( bool printing ) {
+void AppGinger::printGPL( const char * start, const char * end ) {
+	bool printing = false;
 	ifstream license( "LICENSE.TXT" );
 	std::string line;
 	while ( getline( license, line ) )  {
-		if ( !printing && line.find( "TERMS AND CONDITIONS" ) != string::npos ) {
+		if ( !printing && ( start == NULL || line.find( start ) != string::npos ) ) {
 			printing = true;
+		} else if ( printing && end != NULL && line.find( end ) != string::npos ) {
+			printing = false;
 		}
 		if ( printing ) {
 			std::cout << line << std::endl;

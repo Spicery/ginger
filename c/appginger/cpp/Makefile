@@ -9,7 +9,7 @@ OBJS=mishap.o term.o read_xml.o \
 	rcep.o arity.o lift.o ident.o dict.o sys.o \
 	destination.o heap.o \
 	key.o objlayout.o \
-	heapcrawl.o cagecrawl.o callstackcrawl.o \
+	heapcrawl.o cagecrawl.o callstackcrawl.o fnobjcrawl.o \
 	garbagecollect.o \
 	scanfunc.o scancallstack.o scandict.o \
 	machine.o \

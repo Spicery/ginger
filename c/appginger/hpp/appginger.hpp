@@ -49,7 +49,7 @@ public:
 	bool getShowCode() { return this->dbg_show_code; }
 
 public:
-	void printGPL( bool printing );
+	void printGPL( const char * start, const char * end );
 	MachineClass * newMachine();
 
 

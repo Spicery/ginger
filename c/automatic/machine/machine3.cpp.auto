@@ -121,7 +121,7 @@ void Machine3::core( bool init_mode, Ref *pc ) {
         Ref r = *( VMVP-- );
         {    
             Ref *ptr;
-            if ( !IsPtr4( r ) ) call_error( r );
+            if ( !IsObj( r ) ) call_error( r );
             ptr = RefToPtr4( r );
             if ( !IsFunction( *ptr ) ) call_error( r );
             VMLINK = pc + 1;
@@ -176,7 +176,7 @@ void Machine3::core( bool init_mode, Ref *pc ) {
         VMCOUNT = ( VMVP - ( Ref * )( VMSP[ var ] ) ) - 1;
         {    
             Ref *ptr;
-            if ( !IsPtr4( r ) ) call_error( r );
+            if ( !IsObj( r ) ) call_error( r );
             ptr = RefToPtr4( r );
             if ( !IsFunction( *ptr ) ) call_error( r );
             VMLINK = pc + 2;
@@ -191,7 +191,7 @@ void Machine3::core( bool init_mode, Ref *pc ) {
         VMCOUNT = VMVP - ( Ref * )( VMSP[ var ] );
         {    
             Ref *ptr;
-            if ( !IsPtr4( r ) ) call_error( r );
+            if ( !IsObj( r ) ) call_error( r );
             ptr = RefToPtr4( r );
             if ( !IsFunction( *ptr ) ) call_error( r );
             VMLINK = pc + 3;
@@ -383,9 +383,9 @@ void Machine3::core( bool init_mode, Ref *pc ) {
     }
     L_return: {
         Ref *linkptr;
-        VMPCFUNC = (Ref *)VMSP[ SP_FUNC ];
-        linkptr = (Ref *)VMSP[ SP_LINK ];				//	recover return address
-        VMSP = (Ref *)VMSP[ SP_PREV_SP ];				//	restore stack pointer
+        VMPCFUNC = ToRefRef( VMSP[ SP_FUNC ] );
+        linkptr = ToRefRef( VMSP[ SP_LINK ] );				//	recover return address
+        VMSP = ToRefRef( VMSP[ SP_PREV_SP ] );				//	restore stack pointer
         #ifdef DBG_SPECIAL
         	printf( "Recover link = %x\n", ToUInt( link ) );
         	printf( "Stack pointer recovered as %x\n", ToUInt( VMSP ) );
@@ -401,7 +401,7 @@ void Machine3::core( bool init_mode, Ref *pc ) {
         VMCOUNT = ToLong( pc[ 1 ] );
         {    
             Ref *ptr;
-            if ( !IsPtr4( r ) ) call_error( r );
+            if ( !IsObj( r ) ) call_error( r );
             ptr = RefToPtr4( r );
             if ( !IsFunction( *ptr ) ) call_error( r );
             VMLINK = pc + 3;
@@ -415,7 +415,7 @@ void Machine3::core( bool init_mode, Ref *pc ) {
         VMCOUNT = ToLong( pc[ 1 ] );
         {    
             Ref *ptr;
-            if ( !IsPtr4( r ) ) call_error( r );
+            if ( !IsObj( r ) ) call_error( r );
             ptr = RefToPtr4( r );
             if ( !IsFunction( *ptr ) ) call_error( r );
             VMLINK = pc + 2;

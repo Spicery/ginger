@@ -29,12 +29,16 @@
 #include "key.hpp"
 #include "mishap.hpp"
 
+static long cage_id_seq = 0;
+
 CageClass::CageClass( int capacity ) {
 	size_t n = sizeof( Ref ) * capacity;
 	Ref *data = (Ref *)malloc( n );
 	this->start = data;
+	this->queue_base = this->start;
 	this->top = this->start;
 	this->end = this->start + n;
+	this->cage_id = cage_id_seq++;
 }
 
 #define ARBITRARY_SIZE 1048576
@@ -46,6 +50,7 @@ CageClass::CageClass() {
 	this->queue_base = this->start;
 	this->top = this->start;
 	this->end = this->start + n;
+	this->cage_id = cage_id_seq++;
 }
 
 bool CageClass::hasEmptyQueue() { 
@@ -145,12 +150,16 @@ void XfrClass::setOrigin() {
 	this->origin = this->tmptop;
 }
 
-//  return valid ptr
-Ref XfrClass::make() {
+Ref * XfrClass::makeRefRef() {
 	if ( this->origin == NULL ) {
 		throw std::runtime_error( "Origin was not set during copy" );
 	}
 	this->cage->top = this->tmptop;
 	//	printf( "Origin = %x\n", ToUInt( *RefToPtr4( origin ) ) );
-	return Ptr4ToRef( this->origin );
+	return this->origin;
+}
+
+//  return valid ptr
+Ref XfrClass::makeRef() {
+	return Ptr4ToRef( this->makeRefRef() );
 }

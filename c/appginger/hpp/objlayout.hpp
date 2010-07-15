@@ -65,11 +65,6 @@ unsigned long sizeAfterKeyOfVector( Ref * key );
 
 unsigned long sizeAfterKeyOfString( Ref * key );
 
-////////////////////////////////////////////////////////////////////////////////
-//	Objects
-////////////////////////////////////////////////////////////////////////////////
-
-void findObjectLimits( Ref * object, Ref * & start, Ref * & end );
 
 ////////////////////////////////////////////////////////////////////////////////
 //	Function Objects
@@ -80,7 +75,15 @@ void findObjectLimits( Ref * object, Ref * & start, Ref * & end );
 
 #define OFFSET_FROM_FN_LENGTH_TO_KEY		4
 
-unsigned long sizeAfterKeyOfFnLength( Ref * key );
+unsigned long sizeAfterKeyOfFn( Ref * key );
+
+////////////////////////////////////////////////////////////////////////////////
+//	Objects
+////////////////////////////////////////////////////////////////////////////////
+
+void findObjectLimits( Ref * object, Ref * & start, Ref * & end );
+Ref * findObjectKey( Ref * obj_A );
+unsigned long lengthAfterObjectKey( Ref * obj_K );
 
 
 

@@ -79,7 +79,7 @@ Ref HeapClass::copyString( const char *s ) {
 	xfr.xfrRef( sysStringKey );
 	//	printf( "Set origin to '%x'\n", ToUInt( sysStringKey ) );
 	xfr.xfrSubstring( s, 0, n );
-	return xfr.make();
+	return xfr.makeRef();
 
 }
 
@@ -104,7 +104,7 @@ CageClass * HeapClass::newCageClass() {
 
 void HeapClass::selectCurrent() {
 	for ( vector< CageClass * >::iterator it = this->zoo.begin(); it != zoo.end(); ++it ) {
-		if ( (*it)->isEmpty() ) {
+		if ( not (*it)->isEmpty() ) {
 			this->current = *it;
 			return;
 		}

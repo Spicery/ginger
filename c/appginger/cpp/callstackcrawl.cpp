@@ -20,6 +20,7 @@
 
 
 Ref * CallStackCrawl::next() {
+	if ( this->sp == this->sp_base ) return NULL;
 	Ref * answer = this->sp;
 	this->sp = ToRefRef( sp[ SP_PREV_SP ] );
 	return answer;

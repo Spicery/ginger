@@ -92,7 +92,7 @@ Ref PlantClass::detach() {
 	}
 	*/
 
-	return xfr.make();
+	return xfr.makeRef();
 }
 
 

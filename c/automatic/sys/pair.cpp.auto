@@ -7,7 +7,7 @@ Ref * sysNewPair( Ref * pc, class MachineClass * vm ) {
         Ref f0 = vm->fastPop();
         xfr.xfrRef( f0 );
         xfr.xfrRef( f1 );
-        vm->fastPush( xfr.make() );
+        vm->fastPush( xfr.makeRef() );
         return pc;
     } else {
         throw Mishap( "Wrong number of arguments for sysNewPair" );
@@ -17,7 +17,7 @@ Ref * sysNewPair( Ref * pc, class MachineClass * vm ) {
 Ref * sysIsPair( Ref * pc, class MachineClass * vm ) {
     if ( vm->count == 1 ) {
         Ref r = vm->fastPeek();
-        vm->fastPeek() = IsPtr4( r ) && ( *RefToPtr4( r ) == sysPairKey ) ? sys_true : sys_false;
+        vm->fastPeek() = IsObj( r ) && ( *RefToPtr4( r ) == sysPairKey ) ? sys_true : sys_false;
         return pc;
     } else {
         throw Mishap( "Wrong number of arguments for head" );

@@ -36,7 +36,7 @@ Ref refKey( Ref r ) {
 	unsigned long tag, tagg, taggg;
 	tag = u & TAG_MASK;
 	if ( tag == INT_TAG ) return sysSmallKey;
-	if ( tag == PTR_TAG ) return *RefToPtr4(r);
+	if ( tag == OBJ_TAG ) return *RefToPtr4(r);
 	tagg = u & TAGG_MASK;
 	if ( tagg == ( 0 | SIM_TAG ) ) return sysAbsentKey;
 	if ( tagg == ToULong( sys_false ) || tagg == ToULong( sys_true ) ) return sysBoolKey;
@@ -146,7 +146,7 @@ Ref * sysNewList( Ref * pc, class MachineClass * vm ) {
 
 		xfr.xfrRef( r );
 		xfr.xfrRef( sofar );
-		sofar = xfr.make();
+		sofar = xfr.makeRef();
 		//std::cerr << "Stored " << *( RefToPtr4( sofar ) + 1 ) << std::endl;
 	}
 	vm->fastPush( sofar );

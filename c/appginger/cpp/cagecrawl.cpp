@@ -24,8 +24,8 @@
 
 Ref * CageCrawl::next() {
 	if ( this->current < this->cage->top ) {
-		Ref * key = findKey( this->current );
-		unsigned long len = lengthAfterKey( key );
+		Ref * key = findObjectKey( this->current );
+		unsigned long len = lengthAfterObjectKey( key );
 		this->current = key + len + 1;
 		return key;
 	} else {
@@ -33,6 +33,7 @@ Ref * CageCrawl::next() {
 	}
 }
 
+/*
 Ref * CageCrawl::findKey( Ref * start ) {
 	//	Cases are that 'start' are pointing at
 	//		1.	FnLengthKey.
@@ -79,3 +80,4 @@ unsigned long CageCrawl::lengthAfterKey( Ref * k ) {
 		throw;
 	}
 }
+*/

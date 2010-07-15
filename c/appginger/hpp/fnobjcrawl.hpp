@@ -16,12 +16,26 @@
     along with AppGinger.  If not, see <http://www.gnu.org/licenses/>.
 \******************************************************************************/
 
-#ifndef GARBAGE_COLLECT_HPP
-#define GARBAGE_COLLECT_HPP
+#ifndef FN_OBJ_CRAWL
+#define FN_OBJ_CRAWL
 
+#include "common.hpp"
+#include "instruction_set.hpp"
 #include "machine.hpp"
 
-extern Ref * sysGarbageCollect( Ref * pc, MachineClass * vm );
-extern void sysQuiescentGarbageCollect( MachineClass * vm );
+/* Find the object pointers in the function object */
+class FnObjCrawl {
+private:
+	Ref * pc;
+	Ref * obj_Z1;
+	const InstructionSet & ins;
+	const char * types;
+	
+public:
+	Ref * next();
+	
+public:
+	FnObjCrawl( MachineClass * vm, Ref * obj_K );
+};
 
 #endif

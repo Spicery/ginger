@@ -42,7 +42,8 @@ public:
 	void xfrCopy( Ref * obj_A, Ref * obj_Z1 );
 
 	void setOrigin();      						//  set the object origin
-	Ref make();              					//  return valid ptr
+	Ref makeRef();              				//  return valid ptr
+	Ref * makeRefRef();
 	
 
 public:
@@ -55,6 +56,7 @@ class CageClass {
 friend class CageCrawl;
 friend class ToSpaceCopier;
 private:
+	long				cage_id;
 	Ref				*	start;
 	Ref				*	queue_base;
     Ref         	*	top;
@@ -65,12 +67,16 @@ public:
 	//bool checkRoomCopy( int );
 	
 public:	
-	long nboxesInUse() { return this->top - this->start; }
+	ptrdiff_t nboxesInUse() { return this->top - this->start; }
+	ptrdiff_t capacity() { return this->end - this->start; }
 	void reset();
 	void resetQueue();
 	bool isEmpty();
 	bool hasEmptyQueue();
 	bool hasntEmptyQueue();
+	
+public:
+	long serialNumber() { return this->cage_id; }
 	
 public:
 	friend class XfrClass;

@@ -42,8 +42,10 @@ MachineClass::MachineClass( AppGinger & application ) :
 {
 	this->sp_base = (Ref *)malloc( sizeof( Ref ) * 1024 );
 	this->sp_end = this->sp_base + 1024;
+	this->sp = this->sp_base;
 	this->vp_base = (Ref *)malloc( sizeof( Ref ) * 1024 );
 	this->vp_end = this->vp_base + 1024;
+	this->vp = this->vp_base;
 }
 
 bool MachineClass::getShowCode() {

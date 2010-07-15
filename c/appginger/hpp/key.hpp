@@ -32,23 +32,27 @@ const char * keyName( Ref key );
 #define TAG             2
 #define TAG_MASK		0x3
 #define INT_TAG         0
-#define PTR_TAG         1
-#define DEF_TAG         2
+#define OBJ_TAG         1
+#define FWD_TAG         2
 #define SIM_TAG         3
 
-#define RefToPtr4( r )  	ToRefRef( ToULong( r ) & ~PTR_TAG )
-#define Ptr4ToRef( p ) 		ToRef( ToULong( p ) | PTR_TAG )
-
-
+//	Synonyms
+#define RefToPtr4( r )  	ToRefRef( ToULong( r ) & ~OBJ_TAG )
+#define Ptr4ToRef( p ) 		ToRef( ToULong( p ) | OBJ_TAG )
+#define ObjToPtr4( r )  	ToRefRef( ToULong( r ) & ~OBJ_TAG )
+#define Ptr4ToObj( p ) 		ToRef( ToULong( p ) | OBJ_TAG )
 
 #define LongToRef( i )		( (Ref)( ToULong( i ) << TAG | INT_TAG ) )
 #define LongToSmall( i ) 	( (Ref)( ToULong( i ) << TAG | INT_TAG ) )
 #define RefToLong( r )   	( (long)( ToLong( r ) >> TAG ) )
 #define SmallToLong( r )	( (long)( ToLong( r ) >> TAG ) )
 
-#define IsPtr4( r )			( ( TAG_MASK & ToULong( r ) ) == PTR_TAG )
+#define FwdToPtr4( r )		( ToULong( r ) & ~0x3 )
+#define Ptr4ToFwd( p )		ToRef( ToULong( p ) | FWD_TAG )
+
+#define IsObj( r )			( ( TAG_MASK & ToULong( r ) ) == OBJ_TAG )
 #define IsSmall( r )		( ( TAG_MASK & ToULong( r ) ) == INT_TAG )
-#define IsDefer( r )		( ( TAG_MASK & ToULong( r ) ) == DEF_TAG )
+#define IsFwd( r )			( ( TAG_MASK & ToULong( r ) ) == FWD_TAG )
 
 #define IntToChar( i )		( (Ref)( ( i ) << TAGGG | CHAR_TAGGG ) )
 
@@ -125,8 +129,8 @@ const char * keyName( Ref key );
 #define sysMapletKey			MAKE_KEY( 13, 2, RECORD_KIND )
 
 //	Recognisers
-#define IsPair( x )		( IsPtr4( x ) && ( *RefToPtr4( x ) == sysPairKey ) )
-#define IsVector( x )	( IsPtr4( x ) && ( *RefToPtr4( x ) == sysVectorKey ) )
+#define IsPair( x )		( IsObj( x ) && ( *RefToPtr4( x ) == sysPairKey ) )
+#define IsVector( x )	( IsObj( x ) && ( *RefToPtr4( x ) == sysVectorKey ) )
 
 
 ////////////////////////////////////////////////////////////////////////
@@ -164,7 +168,6 @@ const char * keyName( Ref key );
 #define sys_termin				ToRef( 1 << TAGGG | MISC_TAGGG )
 #define sys_underflow			ToRef( 2 << TAGGG | MISC_TAGGG )
 #define sys_undefined			ToRef( 3 << TAGGG | MISC_TAGGG )
-#define sys_forwarded			ToRef( 4 << TAGGG | MISC_TAGGG )
 
 //	Nil
 #define IsNil( x )		( x == sys_nil )

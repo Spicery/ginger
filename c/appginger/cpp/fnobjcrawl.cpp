@@ -16,12 +16,37 @@
     along with AppGinger.  If not, see <http://www.gnu.org/licenses/>.
 \******************************************************************************/
 
-#ifndef GARBAGE_COLLECT_HPP
-#define GARBAGE_COLLECT_HPP
 
-#include "machine.hpp"
 
-extern Ref * sysGarbageCollect( Ref * pc, MachineClass * vm );
-extern void sysQuiescentGarbageCollect( MachineClass * vm );
+#include "fnobjcrawl.hpp"
 
-#endif
+#include "objlayout.hpp"
+
+
+
+Ref * FnObjCrawl::next() {
+	while ( this->pc < this->obj_Z1 ) {
+		if ( *types == '\0' ) {
+			this->types = ins.signature( *pc );
+		} else {
+			const char ch = *types++;
+			Ref * current = pc++;
+			if ( ch == 'c' ) return current;
+			
+			//	If we want to be able to delete the global dictionary
+			//	then we must add in tracing through Idents too. They
+			//	have the char 'v'.
+			
+		}
+	}
+	return static_cast< Ref * >( 0 );
+}
+
+FnObjCrawl::FnObjCrawl( MachineClass * vm, Ref * obj_K ) :
+	ins( vm->instructionSet() ),
+	types( "" )
+{
+	this->pc = obj_K + 1;
+	this->obj_Z1 = this->pc + sizeAfterKeyOfFn( obj_K );
+}
+

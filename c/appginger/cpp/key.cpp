@@ -20,7 +20,7 @@
 
 bool isKey( Ref x ) {
 	unsigned long u = ToULong( x );
-	if ( ( u & TAG_MASK ) == PTR_TAG ) {
+	if ( ( u & TAG_MASK ) == OBJ_TAG ) {
 		return *RefToPtr4( x ) == sysKeyKey;
 	} else if ( ( u & TAGG_MASK ) == KEY_TAGG ) {
 		return true;
@@ -52,7 +52,7 @@ const char * keyName( Ref key ) {
 		}
 	} else if ( IsFnKey( key ) ) {
 		return "Function";
-	} else if ( IsPtr4( key ) ) {
+	} else if ( IsObj( key ) ) {
 		//	Compound keys not implemented yet.
 		throw "unimplemented";
 	} else {

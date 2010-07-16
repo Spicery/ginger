@@ -29,10 +29,13 @@
 #include "key.hpp"
 #include "mishap.hpp"
 
+#include <iostream>
+
 static long cage_id_seq = 0;
 
 CageClass::CageClass( int capacity ) {
 	size_t n = sizeof( Ref ) * capacity;
+	std::cerr << "Allocated a cage of size: " << n << std::endl;
 	Ref *data = (Ref *)malloc( n );
 	this->start = data;
 	this->queue_base = this->start;
@@ -44,7 +47,7 @@ CageClass::CageClass( int capacity ) {
 #define ARBITRARY_SIZE 1048576
 
 CageClass::CageClass() {
-	size_t n = sizeof( Ref ) * 1048576;
+	size_t n = sizeof( Ref ) * ARBITRARY_SIZE;
 	Ref *data = (Ref *)malloc( n );
 	this->start = data;
 	this->queue_base = this->start;

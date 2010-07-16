@@ -2,7 +2,7 @@
 
 CC=g++
 
-CPPFLAGS=-g -I../hpp -I../../automatic/machine -I../../automatic/sys -I/usr/local/boost_1_43_0 -Wall -Wmissing-prototypes
+CPPFLAGS=-g -I../hpp -I../../automatic/machine -I../../automatic/sys -I/usr/local/boost_1_43_0 -Wall -Wmissing-prototypes -lgmalloc
 
 OBJS=mishap.o term.o read_xml.o \
 	functor.o plant.o cage.o vmi.o gc.o \

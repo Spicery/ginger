@@ -103,11 +103,13 @@ CageClass * HeapClass::newCageClass() {
 }
 
 void HeapClass::selectCurrent() {
+	this->current = 0;
 	for ( vector< CageClass * >::iterator it = this->zoo.begin(); it != zoo.end(); ++it ) {
+		this->current = *it;	// We prefer non-empty, so only stop if we get that.§
 		if ( not (*it)->isEmpty() ) {
-			this->current = *it;
 			return;
 		}
 	}	
-	this->current = this->newCageClass();
+	//	I do not believe we can ever get here. We should *always* have a 
+	if ( not this->current ) this->current = this->newCageClass();
 }

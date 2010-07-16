@@ -236,6 +236,9 @@ public:
 	}
 	
 	void freezeNonKeyPointers() {
+		//	The current frame is fake.
+		//if ( not this->vm->sp[ SP_LINK ] ) return;
+		
 		//	Program counter.
 		Ref * func = ToRefRef( this->vm->sp[ SP_FUNC ] );
 		this->pc_delta = this->vm->program_counter - func;
@@ -252,6 +255,9 @@ public:
 	}
 	
 	void meltNonKeyPointers() {
+		//	The current frame is fake.
+		//if ( not this->vm->sp[ SP_LINK ] ) return;
+
 		//	Recover program counter.
 		Ref * func = ToRefRef( this->vm->sp[ SP_FUNC ] );	//	Adjusted by the GC.
 		this->vm->program_counter = func + this->pc_delta;
@@ -336,6 +342,7 @@ public:
 
 	
 	void collectGarbage( const bool scan_call_stack ) {
+		cerr << "### " << ( scan_call_stack ? "" : "Quiescent " ) << "GC" << endl;
 		this->forwardRoots( scan_call_stack );
 		for (;;) {
 			Ref * obj = copier.next();

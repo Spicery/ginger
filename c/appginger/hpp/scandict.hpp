@@ -20,8 +20,15 @@
 #define SCAN_DICT_HPP
 
 #include "dict.hpp"
+#include <string>
 
 class ScanDict {
+private:
+	std::string var;	//	debug
+public:
+	std::string variable() { return this->var; }	//	debug
+	
+
 private:
 	DictClass * dict;
 	std::map< std::string, Ident >::iterator it;

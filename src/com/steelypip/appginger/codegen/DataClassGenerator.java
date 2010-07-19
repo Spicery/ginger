@@ -54,7 +54,7 @@ public abstract class DataClassGenerator {
 		cpp.format( "Ref * %s( Ref * pc, class MachineClass * vm ) {\n", recogniserName );
 		cpp.format( "    if ( vm->count == 1 ) {\n" );
 		cpp.format( "        Ref r = vm->fastPeek();\n" );
-		cpp.format( "        vm->fastPeek() = IsPtr4( r ) && ( *RefToPtr4( r ) == %s ) ? sys_true : sys_false;\n", this.keyName() );
+		cpp.format( "        vm->fastPeek() = IsObj( r ) && ( *RefToPtr4( r ) == %s ) ? sys_true : sys_false;\n", this.keyName() );
 		cpp.format( "        return pc;\n" );
 		cpp.format( "    } else {\n" );
 		cpp.format( "        throw Mishap( \"Wrong number of arguments for head\" );\n" );

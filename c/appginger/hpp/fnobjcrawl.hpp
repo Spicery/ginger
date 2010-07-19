@@ -30,7 +30,15 @@ private:
 	Ref * obj_Z1;
 	const InstructionSet & ins;
 	const char * types;
+
+private:
+	const char * sig;
+	const char * name;
+public:
+	const char *getName() { return this->name; }
+	ptrdiff_t getPosn() { return this->types - this->sig; }
 	
+
 public:
 	Ref * next();
 	

@@ -10,7 +10,7 @@ using namespace std;
 
 int main( int argc, char **argv, char **envp ) {
 	for (;;) {
-		//try {
+		try {
 			ItemFactoryClass ifact( stdin );
 			ReadStateClass input( &ifact );
 			for (;;) {
@@ -20,9 +20,9 @@ int main( int argc, char **argv, char **envp ) {
 				cout << endl;
 				input.checkSemi();
 			};
-		//} catch ( Mishap & m ) {
-		//	m.report();
-		//}
+		} catch ( Mishap & m ) {
+			m.report();
+		}
 	} 
 }
 

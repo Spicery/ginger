@@ -22,7 +22,7 @@ public class FullVectorClassGenerator extends DataClassGenerator {
 		cpp.format( "       Ref n = vm->fastPop();\n" );
 		cpp.format( "       Ref v = vm->fastPeek();\n" );
 		cpp.format( "       Ref * p = RefToPtr4( v );\n" );
-		cpp.format( "       if ( IsPtr4( v ) && *RefToPtr4( v ) == %s ) {\n", this.keyName() );
+		cpp.format( "       if ( IsObj( v ) && *RefToPtr4( v ) == %s ) {\n", this.keyName() );
 		cpp.format( "           if ( IsSmall( n ) && LongToSmall( 1 ) <= n && n <= p[ -1 ] ) {\n" );
 		cpp.format( "               vm->fastPeek() = p[ SmallToLong( n ) ];\n" );
 		cpp.format( "           } else {\n" );
@@ -50,7 +50,7 @@ public class FullVectorClassGenerator extends DataClassGenerator {
 		cpp.format( "    xfr.setOrigin();\n" );
 		cpp.format( "    xfr.xfrRef( %s );\n", this.keyName() );
 		cpp.format( "    xfr.xfrCopy( ++vm->vp -= n, n );\n" );
-		cpp.format( "    vm->fastSet( xfr.make() );\n" );
+		cpp.format( "    vm->fastSet( xfr.makeRef() );\n" );
 		cpp.format( "    return pc;\n" );
 		cpp.format( "}\n" );
 

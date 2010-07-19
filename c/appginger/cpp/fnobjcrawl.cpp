@@ -28,6 +28,8 @@ Ref * FnObjCrawl::next() {
 	while ( this->pc < this->obj_Z1 ) {
 		if ( *types == '\0' ) {
 			this->types = ins.signature( *pc );
+			this->name = ins.name( *pc );
+			this->sig = this->types;
 		} else {
 			const char ch = *types++;
 			Ref * current = pc++;

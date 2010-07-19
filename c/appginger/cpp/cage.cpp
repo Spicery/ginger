@@ -34,25 +34,25 @@
 static long cage_id_seq = 0;
 
 CageClass::CageClass( int capacity ) {
-	size_t n = sizeof( Ref ) * capacity;
-	std::cerr << "Allocated a cage of size: " << n << std::endl;
-	Ref *data = (Ref *)malloc( n );
+	//size_t n = sizeof( Ref ) * capacity;
+	//std::cerr << "Allocated a cage of size: " << n << std::endl;
+	Ref *data = new Ref[ capacity ];
 	this->start = data;
 	this->queue_base = this->start;
 	this->top = this->start;
-	this->end = this->start + n;
+	this->end = data + capacity;
 	this->cage_id = cage_id_seq++;
 }
 
 #define ARBITRARY_SIZE 1048576
 
 CageClass::CageClass() {
-	size_t n = sizeof( Ref ) * ARBITRARY_SIZE;
-	Ref *data = (Ref *)malloc( n );
+	//size_t n = sizeof( Ref ) * ARBITRARY_SIZE;
+	Ref *data = new Ref[ ARBITRARY_SIZE ];
 	this->start = data;
 	this->queue_base = this->start;
 	this->top = this->start;
-	this->end = this->start + n;
+	this->end = data + ARBITRARY_SIZE;
 	this->cage_id = cage_id_seq++;
 }
 
@@ -99,7 +99,7 @@ XfrClass::XfrClass( Ref * & pc, MachineClass & m, int preflight ) :
 }
 
 CageClass::~CageClass() {
-	free( this->start );
+	delete this->start;
 }
 
 bool CageClass::checkRoom( int k ) {

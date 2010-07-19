@@ -19,17 +19,19 @@
 #include "garbagecollect.hpp"
 
 #include <iostream>
+#include <fstream>
 using namespace std;
 
 #include "key.hpp"
 #include "objlayout.hpp"
-#include "scancallstack.hpp"
 #include "scandict.hpp"
 #include "machine.hpp"
 #include "heapcrawl.hpp"
 #include "cagecrawl.hpp"
 #include "callstackcrawl.hpp"
 #include "fnobjcrawl.hpp"
+
+#define DBG_GC_LOG
 
 
 /******************************************************************************\
@@ -200,21 +202,142 @@ public:
 };
 
 /******************************************************************************\
+A callback class for the garbage collector.
+\******************************************************************************/
+
+
+class GCLogger {
+private:
+	bool 					scan_call_stack;
+	std::ofstream			gclog;
+
+public:
+	void forwardingRef( Ref current ) {	
+		gclog << "      Forwarding ref = 0x" << hex << ToULong( current ) << endl;
+		gclog.flush();
+		gclog << "        Is obj? " << IsObj( current ) << endl;
+		gclog.flush();
+	}
+
+	void atVariable( std::string var ) {	
+		gclog << "Forwarding " << var << endl;
+	}
+	
+	void startForwardingValueStack() {
+		gclog << "Forwarding value stack" << endl;
+	}
+	
+	void endForwardingValueStack() {
+	}
+	
+	void startForwardingCallStackAndPC() {
+		gclog << "Forwarding call stack and pc" << endl;
+	}
+			
+	void endForwardingCallStackAndPC() {
+	}
+	
+	void startForwardingDictionary() {
+		gclog << "Forward dictionary" << endl;
+	}
+	
+	void endForwardingDictionary() {
+	}
+	
+	void startGarbageCollection() {
+		gclog << "### " << ( scan_call_stack ? "" : "Quiescent " ) << "GC" << endl;	
+	}
+	
+	void endGarbageCollection() {
+		gclog << "Finished GC (" << ( scan_call_stack ? "" : "Quiescent " ) << ")" << endl;	
+	}
+	
+	void pickedObjectToCopy( Ref * obj ) {
+		gclog << "Picked " << obj << endl;
+		gclog.flush();
+	}
+	
+	void startForwardingContents( Ref * obj_K ) {
+		gclog << "Forwarding contents for 0x" << std::hex << ToULong( *obj_K ) << endl;
+	}
+
+	void endForwardingContents() {
+		gclog << "  Finished forwarding contents" << endl;
+		gclog.flush();
+	}
+	
+	void startFnObj() {
+		gclog << "  (Function object)" << endl;
+	}
+
+	void endFnObj() {
+		gclog << "  (Function object)" << endl;
+	}
+
+	void startInstruction( FnObjCrawl & fnobjcrawl ) {
+		gclog << "    At instruction " << fnobjcrawl.getName() << endl;
+		gclog << "       position    " << fnobjcrawl.getPosn() << endl;
+	}
+
+	void endInstruction( FnObjCrawl & fnobjcrawl ) {
+		gclog << "    Forwarded " << fnobjcrawl.getName() << endl;
+	}
+
+	void startVector( Ref * obj_K ) {
+		gclog << "  (Vector)" << endl;
+	}
+					
+	void endVector( Ref * obj_K ) {
+	}
+					
+	void startRecord( Ref * obj_K ) {
+		gclog << "  (Record)" << endl;
+	}
+					
+	void endRecord( Ref * obj_K ) {
+	}
+			
+	void atString( Ref * obj_K ) {
+		gclog << "  (String)" << endl;
+	}
+	
+public:
+	GCLogger( const bool scs ) :
+		scan_call_stack( scs ),
+		gclog( "gc.log", ios_base::app | ios_base::out )
+	{
+	}
+	
+	~GCLogger() {
+		gclog.close();
+	}
+		
+};
+
+
+
+/******************************************************************************\
 
 The Garbage Collector implements a stop-and-copy algorithm.
 
 \******************************************************************************/
 
+
+
 class GarbageCollect {
 private:
+	GCLogger				gclogger;
+
+private:
 	MachineClass * 			vm;
+	bool 					scan_call_stack;
 	ToSpaceCopier 			copier;
 	ptrdiff_t				pc_delta;
-
+	
 public:	
 	void forward( Ref & current ) {
+		gclogger.forwardingRef( current );
 		if( not IsObj( current ) ) return;
-		
 		Ref * obj = RefToPtr4( current );
 		if ( IsFwd( *obj ) ) {
 			//	Already forwarded.
@@ -235,54 +358,33 @@ public:
 		}
 	}
 	
-	void freezeNonKeyPointers() {
-		//	The current frame is fake.
-		//if ( not this->vm->sp[ SP_LINK ] ) return;
-		
-		//	Program counter.
-		Ref * func = ToRefRef( this->vm->sp[ SP_FUNC ] );
-		this->pc_delta = this->vm->program_counter - func;
-	
-		//	Call stack pointers.
-		CallStackCrawl csc( this->vm );
-		for (;;) {
-			Ref * sp = csc.next();
-			if ( not sp ) break;
-			Ref * func = ToRefRef( sp[ SP_FUNC ] );
-			ptrdiff_t d = ToRefRef( sp[ SP_LINK ] ) - func;
-			sp[ SP_LINK ] = ToRef( d );
-		}
-	}
-	
-	void meltNonKeyPointers() {
-		//	The current frame is fake.
-		//if ( not this->vm->sp[ SP_LINK ] ) return;
-
-		//	Recover program counter.
-		Ref * func = ToRefRef( this->vm->sp[ SP_FUNC ] );	//	Adjusted by the GC.
-		this->vm->program_counter = func + this->pc_delta;
-	
-		//	Call stack pointers.
-		CallStackCrawl csc( this->vm );
-		for (;;) {
-			Ref * sp = csc.next();
-			if ( not sp ) break;
-
-			Ref * func = ToRefRef( sp[ SP_FUNC ] );
-			ptrdiff_t d = (ptrdiff_t)( sp[ SP_LINK ] );
-			sp[ SP_LINK ] = func + d;
-		}
+	Ref * forwardPtr4( Ref * ptr ) {
+		Ref r = Ptr4ToObj( ptr );
+		this->forward( r );
+		return ObjToPtr4( r );
 	}
 	
 	void forwardCallStackAndPC() {
-		this->freezeNonKeyPointers();
-		ScanCallStack scanner( this->vm );
+		this->vm->func_of_program_counter = this->forwardPtr4( this->vm->func_of_program_counter );
+		
+		CallStackCrawl csc( this->vm );
 		for (;;) {
-			Ref * p = scanner.next();
-			if ( not p ) break;
-			this->forward( *p );
+			Ref * sp = csc.next();
+			if ( not sp ) break;
+			if ( sp[ SP_FUNC ] == 0 ) break;
+			
+			Ref * func = ToRefRef( sp[ SP_FUNC ] );
+			ptrdiff_t d = ToRefRef( sp[ SP_LINK ] ) - func;
+			
+			Ref * new_func = forwardPtr4( func );
+			sp[ SP_FUNC ] = new_func;
+			sp[ SP_LINK ] = new_func + d;
+			
+			unsigned long n = ToULong( sp[ SP_NSLOTS ] );
+			for ( unsigned long i = 0; i < n; i++ ) {
+				this->forward( sp[ i ] );
+			}			
 		}
-		this->meltNonKeyPointers();
 	}
 	
 	void forwardDictionary() {
@@ -290,83 +392,107 @@ public:
 		for (;;) {
 			Ref * p = scanner.next();
 			if ( not p ) break;
+			gclogger.atVariable( scanner.variable() );
 			this->forward( *p );
 		}
 	}
 	
 	void forwardRoots( const bool scan_call_stack ) {
+		gclogger.startForwardingValueStack();
 		this->forwardValueStack();
-		if ( scan_call_stack ) this->forwardCallStackAndPC();
+		gclogger.endForwardingValueStack();
+		if ( scan_call_stack ) {
+			gclogger.startForwardingCallStackAndPC();
+			this->forwardCallStackAndPC();
+			gclogger.endForwardingCallStackAndPC();
+		}
+		gclogger.startForwardingDictionary();
 		this->forwardDictionary();
+		gclogger.endForwardingDictionary();
 	}
 	
 	void forwardContents( Ref * obj_K ) {
+		gclogger.startForwardingContents( obj_K );
 		Ref key = *obj_K;
 		if ( IsFnKey( key ) ) {
+			gclogger.startFnObj();
 			FnObjCrawl fnobjcrawl( vm, obj_K );
 			for ( ;; ) {
 				Ref * p = fnobjcrawl.next();
 				if ( p == NULL ) break;
+				gclogger.startInstruction( fnobjcrawl );
 				this->forward( *p );
+				gclogger.endInstruction( fnobjcrawl );
 			}
+			gclogger.endFnObj();
 		} else if ( IsSimpleKey( key ) ) {
 			switch ( KindOfSimpleKey( key ) ) {
 				case RECORD_KIND: {
+					gclogger.startRecord( obj_K );
 					this->forward( obj_K[ 1 ] );
 					this->forward( obj_K[ 2 ] );
+					gclogger.endRecord( obj_K );
 					break;
 				}
 				case VECTOR_KIND: {
+					gclogger.startVector( obj_K );
 					long n = sizeAfterKeyOfVector( obj_K );
 					Ref * obj_K1 = obj_K + 1;
 					for ( long i = 0; i < n; i++ ) {
 						this->forward( obj_K1[ i ] );
 					}
+					gclogger.endVector( obj_K );
 					break;
 				}
 				case STRING_KIND: {
+					gclogger.atString( obj_K );
 					//	Non-full. Can stop.
 					break;
 				}				
 				default: {
-					throw;
+					throw "unimplemented (other)";
 				}
 			}
 		} else if ( IsObj( key ) ) {
 			//	Compound keys not implemented yet.
-			throw "unimplemented";
+			throw "unimplemented (compound keys)";
 		} else {
-			throw;
+			throw "unimplemented";
 		}
+		gclogger.endForwardingContents();
 	}
 
 	
-	void collectGarbage( const bool scan_call_stack ) {
-		cerr << "### " << ( scan_call_stack ? "" : "Quiescent " ) << "GC" << endl;
+	void collectGarbage() {
+		gclogger.startGarbageCollection();
 		this->forwardRoots( scan_call_stack );
 		for (;;) {
 			Ref * obj = copier.next();
+			gclogger.pickedObjectToCopy( obj );
 			if ( not obj ) break;
 			this->forwardContents( obj );
 		}
+		gclogger.endGarbageCollection();
 	}
 	
 public:
-	GarbageCollect( MachineClass * virtual_machine ) :
+	GarbageCollect( MachineClass * virtual_machine, bool scan_call_stack ) :
+		gclogger( scan_call_stack ),
 		vm( virtual_machine ),
 		copier( virtual_machine )
 	{
 	}
+	
 };
 
 Ref * sysGarbageCollect( Ref * pc, MachineClass * vm ) {
-	GarbageCollect gc( vm );
+	GarbageCollect gc( vm, true );
 	vm->program_counter = pc;
-	gc.collectGarbage( true );
+	gc.collectGarbage();
 	return vm->program_counter;
 }
 
 void sysQuiescentGarbageCollect( MachineClass *vm ) {
-	GarbageCollect gc( vm );
-	gc.collectGarbage( false );
+	GarbageCollect gc( vm, false );
+	gc.collectGarbage();
 }

@@ -59,7 +59,7 @@ public class FullRecordClassGenerator extends DataClassGenerator {
 		//	Not sure which is better.
 		if ( memcpy ) {
 			cpp.format( "        xfr.xfrCopy( ++vm->vp -= %s, %s );\n", this.fieldNames.length );
-			cpp.format( "        vm->fastSet( xfr.make() );\n" );
+			cpp.format( "        vm->fastSet( xfr.makeRef() );\n" );
 		} else {
 			for ( int i = this.fieldNames.length - 1; i >= 0; i-- ) {
 				cpp.format( "        Ref f%s = vm->fastPop();\n", i );
@@ -67,7 +67,7 @@ public class FullRecordClassGenerator extends DataClassGenerator {
 			for ( int i = 0; i < this.fieldNames.length; i++ ) {
 				cpp.format( "        xfr.xfrRef( f%s );\n", i );
 			}
-			cpp.format( "        vm->fastPush( xfr.make() );\n" );
+			cpp.format( "        vm->fastPush( xfr.makeRef() );\n" );
 			cpp.format( "        return pc;\n" );
 		}
 		

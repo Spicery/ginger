@@ -20,6 +20,7 @@
 
 Ref * ScanDict::next() {
 	if ( it == dict->table.end() ) return static_cast< Ref * >( 0 );
+	this->var = (*it).first;	//	debug
 	Ident id = (*it).second;
 	++it;
 	return &id->valof;

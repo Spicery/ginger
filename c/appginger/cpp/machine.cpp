@@ -32,6 +32,7 @@ using namespace std;
 
 //#define DBG_MACHINE
 
+#define RANDOM_SIZE 100000
 
 MachineClass::MachineClass( AppGinger & application ) :
 	appg( application ),
@@ -40,12 +41,17 @@ MachineClass::MachineClass( AppGinger & application ) :
 	heap_aptr( new HeapClass( this ) ),
 	program_counter( 0 )
 {
-	this->sp_base = (Ref *)malloc( sizeof( Ref ) * 1024 );
-	this->sp_end = this->sp_base + 1024;
+	this->sp_base = new Ref[ RANDOM_SIZE ];
+	this->sp_end = this->sp_base + RANDOM_SIZE;
 	this->sp = this->sp_base;
-	this->vp_base = (Ref *)malloc( sizeof( Ref ) * 1024 );
-	this->vp_end = this->vp_base + 1024;
+	this->vp_base = new Ref[ RANDOM_SIZE ];
+	this->vp_end = this->vp_base + RANDOM_SIZE;
 	this->vp = this->vp_base;
+}
+
+MachineClass::~MachineClass() {
+	delete[] this->sp_base;
+	delete[] this->vp_base;
 }
 
 bool MachineClass::getShowCode() {
@@ -78,29 +84,26 @@ Ref * MachineClass::setUpPC( Ref r ) {
 
 
 	this->sp = this->sp_base;
-	*this->sp = sys_underflow;
 	this->vp = this->vp_base;
 	*this->vp = sys_underflow;
 
 	
 	//	The previous function object should be set to null.
-	*( ++this->sp ) = 0;
+	*( this->sp++ ) = 0;
 	
 	//	The previous link address should be set to null too.
-	*( ++this->sp ) = 0;
+	*( this->sp++ ) = 0;
 	
 	//	And the previous stack point is additionally set to null.
-	*( ++this->sp ) = 0;
+	*( this->sp++ ) = 0;
 
 	//	The number of locals variables - obviously null.
-	*( ++this->sp ) = 0;
-	
-	//	We also need to point one on from the number of local variables.
-	this->sp += 1;
-	
+	*( this->sp++ ) = 0;
+		
 	//	Now store a fake return address.  This will cause this to halt.
 	//	That's a little bit nasty but we'll sort that out later.
 	this->link = ToRefRef( &launch );
+	this->func_of_link = 0x0;
 
 	this->count = 0;
 	
@@ -196,3 +199,26 @@ void MachineClass::print_results( std::ostream & out, float time_taken ) {
 	this->vp = this->vp_base;
 }
 
+static void bite_me() {
+	throw;
+}
+
+void MachineClass::check_call_stack_integrity() {
+	int count = 0;
+	Ref * ptr = this->sp_base + 4;
+	for ( int count = 0; ptr < this->sp; count++ ) {
+		Ref * func = ToRefRef( ptr[0] );
+		Ref * link = ToRefRef( ptr[1] );
+		Ref * prev = ToRefRef( ptr[2] );
+		unsigned long nslots = (unsigned long)ptr[3];
+		
+		if ( func ) {
+			ptrdiff_t d = link - func;
+			if (!( 0 <= d && d <= 1000 )) bite_me();
+		}
+		
+		if ( nslots > 100 ) bite_me();
+		
+		ptr += 4 + nslots;
+	}
+}

@@ -42,6 +42,10 @@ public:
 	//	might be triggered.
 	Ref *		program_counter;
 	Ref *		func_of_program_counter;
+
+public:
+	void check_call_stack_integrity();	//	debug
+
 		
 public:
 	long		count;			//	Args count
@@ -85,7 +89,7 @@ public:
 
 public:
 	MachineClass( AppGinger & appg );
-	virtual ~MachineClass() {}
+	virtual ~MachineClass();
 };
 
 typedef class MachineClass *Machine;

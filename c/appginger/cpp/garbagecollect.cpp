@@ -44,6 +44,169 @@ the A* algorithm configured to do a breadth first search.
 
 //#define DBG_GC
 
+/******************************************************************************\
+A callback class for the garbage collector.
+\******************************************************************************/
+
+static const bool gc_logging = false;
+
+class GCLogger {
+private:
+	bool 					scan_call_stack;
+	std::ofstream			gclog;
+
+public:
+	void atRef( Ref current ) {	
+		if ( gc_logging ) {
+			gclog << "      Forwarding ref = 0x" << hex << ToULong( current ) << endl;
+			gclog.flush();
+			gclog << "        Is obj? " << IsObj( current ) << endl;
+			gclog.flush();
+		}
+	}
+
+	void atVariable( std::string var ) {	
+		if ( gc_logging ) {
+			gclog << "Forwarding " << var << endl;
+		}
+	}
+	
+	void startValueStack() {
+		if ( gc_logging ) {
+			gclog << "Forwarding value stack" << endl;
+		}
+	}
+	
+	void endValueStack() {
+		if ( gc_logging ) {
+		}
+	}
+	
+	void startCallStackAndPC() {
+		if ( gc_logging ) {
+			gclog << "Forwarding call stack and pc" << endl;
+		}
+	}
+			
+	void endCallStackAndPC() {
+		if ( gc_logging ) {
+		}
+	}
+	
+	void startDictionary() {
+		if ( gc_logging ) {
+			gclog << "Forward dictionary" << endl;
+		}
+	}
+	
+	void endDictionary() {
+		if ( gc_logging ) {
+		}		
+	}
+	
+	void startGarbageCollection() {
+		if ( gc_logging ) {
+			gclog << "### " << ( scan_call_stack ? "" : "Quiescent " ) << "GC" << endl;	
+		}
+	}
+	
+	void endGarbageCollection() {
+		if ( gc_logging ) {
+			gclog << "Finished GC (" << ( scan_call_stack ? "" : "Quiescent " ) << ")" << endl;	
+		}
+	}
+	
+	void pickedObjectToCopy( Ref * obj ) {
+		if ( gc_logging ) {
+			gclog << "Picked " << obj << endl;
+			gclog.flush();
+		}
+	}
+	
+	void startContents( Ref * obj_K ) {
+		if ( gc_logging ) {
+			gclog << "Forwarding contents for 0x" << std::hex << ToULong( *obj_K ) << endl;
+		}
+	}
+
+	void endContents() {
+		if ( gc_logging ) {
+			gclog << "  Finished forwarding contents" << endl;
+			gclog.flush();
+		}
+	}
+	
+	void startFnObj() {
+		if ( gc_logging ) {
+			gclog << "  (Function object)" << endl;
+		}
+	}
+
+	void endFnObj() {
+		if ( gc_logging ) {
+			gclog << "  (Function object)" << endl;
+		}
+	}
+
+	void startInstruction( FnObjCrawl & fnobjcrawl ) {
+		if ( gc_logging ) {
+			gclog << "    At instruction " << fnobjcrawl.getName() << endl;
+			gclog << "       position    " << fnobjcrawl.getPosn() << endl;
+		}
+	}
+
+	void endInstruction( FnObjCrawl & fnobjcrawl ) {
+		if ( gc_logging ) {
+			gclog << "    Forwarded " << fnobjcrawl.getName() << endl;
+		}
+	}
+
+	void startVector( Ref * obj_K ) {
+		if ( gc_logging ) {
+			gclog << "  (Vector)" << endl;
+		}
+	}
+					
+	void endVector( Ref * obj_K ) {
+		if ( gc_logging ) {
+		}		
+	}
+					
+	void startRecord( Ref * obj_K ) {
+		if ( gc_logging ) {
+			gclog << "  (Record)" << endl;
+		}		
+	}
+					
+	void endRecord( Ref * obj_K ) {
+		if ( gc_logging ) {
+		}		
+	}
+			
+	void atString( Ref * obj_K ) {
+		if ( gc_logging ) {
+			gclog << "  (String)" << endl;
+		}		
+	}
+	
+public:
+	GCLogger( const bool scs ) :
+		scan_call_stack( scs )
+	{
+		if ( gc_logging ) {
+			gclog.open( "gc.log", ios_base::app | ios_base::out );
+		}
+	}
+	
+	~GCLogger() {
+		if ( gc_logging ) {
+			gclog.close();
+		}
+	}
+		
+};
+
+
 class ToSpaceCopier {
 private:
 	MachineClass * 			vm;
@@ -201,118 +364,6 @@ public:
 	
 };
 
-/******************************************************************************\
-A callback class for the garbage collector.
-\******************************************************************************/
-
-
-class GCLogger {
-private:
-	bool 					scan_call_stack;
-	std::ofstream			gclog;
-
-public:
-	void forwardingRef( Ref current ) {	
-		gclog << "      Forwarding ref = 0x" << hex << ToULong( current ) << endl;
-		gclog.flush();
-		gclog << "        Is obj? " << IsObj( current ) << endl;
-		gclog.flush();
-	}
-
-	void atVariable( std::string var ) {	
-		gclog << "Forwarding " << var << endl;
-	}
-	
-	void startForwardingValueStack() {
-		gclog << "Forwarding value stack" << endl;
-	}
-	
-	void endForwardingValueStack() {
-	}
-	
-	void startForwardingCallStackAndPC() {
-		gclog << "Forwarding call stack and pc" << endl;
-	}
-			
-	void endForwardingCallStackAndPC() {
-	}
-	
-	void startForwardingDictionary() {
-		gclog << "Forward dictionary" << endl;
-	}
-	
-	void endForwardingDictionary() {
-	}
-	
-	void startGarbageCollection() {
-		gclog << "### " << ( scan_call_stack ? "" : "Quiescent " ) << "GC" << endl;	
-	}
-	
-	void endGarbageCollection() {
-		gclog << "Finished GC (" << ( scan_call_stack ? "" : "Quiescent " ) << ")" << endl;	
-	}
-	
-	void pickedObjectToCopy( Ref * obj ) {
-		gclog << "Picked " << obj << endl;
-		gclog.flush();
-	}
-	
-	void startForwardingContents( Ref * obj_K ) {
-		gclog << "Forwarding contents for 0x" << std::hex << ToULong( *obj_K ) << endl;
-	}
-
-	void endForwardingContents() {
-		gclog << "  Finished forwarding contents" << endl;
-		gclog.flush();
-	}
-	
-	void startFnObj() {
-		gclog << "  (Function object)" << endl;
-	}
-
-	void endFnObj() {
-		gclog << "  (Function object)" << endl;
-	}
-
-	void startInstruction( FnObjCrawl & fnobjcrawl ) {
-		gclog << "    At instruction " << fnobjcrawl.getName() << endl;
-		gclog << "       position    " << fnobjcrawl.getPosn() << endl;
-	}
-
-	void endInstruction( FnObjCrawl & fnobjcrawl ) {
-		gclog << "    Forwarded " << fnobjcrawl.getName() << endl;
-	}
-
-	void startVector( Ref * obj_K ) {
-		gclog << "  (Vector)" << endl;
-	}
-					
-	void endVector( Ref * obj_K ) {
-	}
-					
-	void startRecord( Ref * obj_K ) {
-		gclog << "  (Record)" << endl;
-	}
-					
-	void endRecord( Ref * obj_K ) {
-	}
-			
-	void atString( Ref * obj_K ) {
-		gclog << "  (String)" << endl;
-	}
-	
-public:
-	GCLogger( const bool scs ) :
-		scan_call_stack( scs ),
-		gclog( "gc.log", ios_base::app | ios_base::out )
-	{
-	}
-	
-	~GCLogger() {
-		gclog.close();
-	}
-		
-};
 
 
 
@@ -336,7 +387,7 @@ private:
 	
 public:	
 	void forward( Ref & current ) {
-		gclogger.forwardingRef( current );
+		gclogger.atRef( current );
 		if( not IsObj( current ) ) return;
 		Ref * obj = RefToPtr4( current );
 		if ( IsFwd( *obj ) ) {
@@ -363,6 +414,7 @@ public:
 		this->forward( r );
 		return ObjToPtr4( r );
 	}
+	
 	
 	void forwardCallStackAndPC() {
 		this->vm->func_of_program_counter = this->forwardPtr4( this->vm->func_of_program_counter );
@@ -398,21 +450,21 @@ public:
 	}
 	
 	void forwardRoots( const bool scan_call_stack ) {
-		gclogger.startForwardingValueStack();
+		gclogger.startValueStack();
 		this->forwardValueStack();
-		gclogger.endForwardingValueStack();
+		gclogger.endValueStack();
 		if ( scan_call_stack ) {
-			gclogger.startForwardingCallStackAndPC();
+			gclogger.startCallStackAndPC();
 			this->forwardCallStackAndPC();
-			gclogger.endForwardingCallStackAndPC();
+			gclogger.endCallStackAndPC();
 		}
-		gclogger.startForwardingDictionary();
+		gclogger.startDictionary();
 		this->forwardDictionary();
-		gclogger.endForwardingDictionary();
+		gclogger.endDictionary();
 	}
 	
 	void forwardContents( Ref * obj_K ) {
-		gclogger.startForwardingContents( obj_K );
+		gclogger.startContents( obj_K );
 		Ref key = *obj_K;
 		if ( IsFnKey( key ) ) {
 			gclogger.startFnObj();
@@ -459,11 +511,13 @@ public:
 		} else {
 			throw "unimplemented";
 		}
-		gclogger.endForwardingContents();
+		gclogger.endContents();
 	}
 
 	
 	void collectGarbage() {
+		cerr << "### Garbage collection " << ( this->scan_call_stack ? "" : " (quiescent)" ) << endl;
+		this->vm->check_call_stack_integrity();		//	debug
 		gclogger.startGarbageCollection();
 		this->forwardRoots( scan_call_stack );
 		for (;;) {
@@ -473,6 +527,7 @@ public:
 			this->forwardContents( obj );
 		}
 		gclogger.endGarbageCollection();
+		this->vm->check_call_stack_integrity();		//	debug
 	}
 	
 public:

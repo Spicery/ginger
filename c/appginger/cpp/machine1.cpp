@@ -28,7 +28,7 @@ void Machine1::execute( Ref r ) {
 
 	//int n = 0;	//	debug
 	//	printf( "Should return to %s\n", special_name( *(Special **)(*VM->sp) ) );
-	for (;;) {
+	for (;;) {			
 		//sanity_check( this->func_of_program_counter ); // debug
 		Special fn = (Special)( *PC );
 		/*if ( n > 16000000 ) {

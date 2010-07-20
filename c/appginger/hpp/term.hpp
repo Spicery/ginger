@@ -40,9 +40,7 @@ public:
 	
 public:
 
-	virtual Term child( const int n ) {
-		return this->child_ref( n );
-	}
+	virtual Term child( const int n );
 	
 	
 public:

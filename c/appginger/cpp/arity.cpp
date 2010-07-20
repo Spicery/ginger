@@ -143,8 +143,10 @@ Arity::Arity( Term term ) {
 			break;
 		}
 		case fnc_for: {
+			Term t = term->child( 1 );
+			Arity a( t );
 			this->arity = 0;
-			this->more = Arity( term->child( 2 ) ).isntZero();
+			this->more = a.isntZero();
 			break;
 		}
 		default: {

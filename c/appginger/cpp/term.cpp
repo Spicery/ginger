@@ -51,7 +51,9 @@ const std::string & TermClass::name() {
 }
 
 
-
+Term TermClass::child( int n ) {
+	return this->child_ref( n );
+}
 
 
 

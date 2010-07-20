@@ -146,12 +146,12 @@ static Ref *spcfn_check0( Ref *pc, Machine vm ) {
     	stderr,
     	"Difference between %lu and %lu (held in %ld)\n",
     	ToULong( VMVP ),
-    	ToULong( VMSP[n] ),
+    	ToULong( LOCAL(n) ),
     	n
     );
     #endif
-    if ( VMVP == VMSP[n] ) RETURN( pc + 1 );
-    throw Mishap( "Wrong number of results (needed 0)" ).culprit( "#Results", "" + ( VMVP - ToRefRef( VMSP[n] ) ) );
+    if ( VMVP == LOCAL(n) ) RETURN( pc + 1 );
+    throw Mishap( "Wrong number of results (needed 0)" ).culprit( "#Results", "" + ( VMVP - ToRefRef( LOCAL(n) ) ) );
     RETURN( NULL );	// stupid compiler
 }
 
@@ -159,11 +159,11 @@ static Ref *spcfn_check1( Ref *pc, Machine vm ) {
     long n = ToLong( *( ++pc ) );
     unsigned long d;
     #ifdef DBG_SPECIAL
-    fprintf( stderr, "Recovering %lu from %ld\n", ToULong( VMSP[n] ), n );
+    fprintf( stderr, "Recovering %lu from %ld\n", ToULong( LOCAL(n) ), n );
     fprintf( stderr, "Comparing with %u\n",  ToULong( VMVP ) );
     fprintf( stderr, "Length of value stack = %d\n", ( VMVP - VMVP_base ) );
     #endif
-    d = VMVP - ToRefRef( VMSP[n] );
+    d = VMVP - ToRefRef( LOCAL(n) );
     if ( d == 1 ) RETURN( pc + 1 );
     throw Mishap( "Wrong number of results (needed 1)" ).culprit( "#results", "" + d );
     RETURN( NULL );	// stupid compiler
@@ -173,11 +173,11 @@ static Ref *spcfn_end( Ref *pc, Machine vm ) {
     Ref r;
     long n = ToLong( *( ++pc ) );
     #ifdef DBG_SPECIAL
-    fprintf( stderr, "Recovering %u from %d\n", ToULong( VMSP[n] ), n );
+    fprintf( stderr, "Recovering %u from %d\n", ToULong( LOCAL(n) ), n );
     fprintf( stderr, "Comparing with %u\n",  ToULong( VMVP ) );
     fprintf( stderr, "Length of value stack = %d\n", ( VMVP - VMVP_base ) );
     #endif
-    r = ToRef( ToULong( VMVP ) - ToULong( VMSP[n] ) );
+    r = ToRef( ToULong( VMVP ) - ToULong( LOCAL(n) ) );
     *( ++VMVP ) = r;
     RETURN( pc + 1 );
 }
@@ -185,7 +185,7 @@ static Ref *spcfn_end( Ref *pc, Machine vm ) {
 static Ref *spcfn_end1_calls( Ref *pc, Machine vm ) {
     Ref r = *( VMVP-- );
     long var = ToLong( pc[ 1 ] );
-    VMCOUNT = ( VMVP - ( Ref * )( VMSP[ var ] ) ) - 1;
+    VMCOUNT = ( VMVP - ToRefRef( LOCAL( var ) ) ) - 1;
     {    
         Ref *ptr;
         if ( !IsObj( r ) ) call_error( r );
@@ -201,7 +201,7 @@ static Ref *spcfn_end1_calls( Ref *pc, Machine vm ) {
 static Ref *spcfn_end_call_global( Ref *pc, Machine vm ) {
     long var = ToLong( pc[ 1 ] );
     Ref r = ((IdentClass *)( pc[ 2 ] )) -> valof;
-    VMCOUNT = VMVP - ( Ref * )( VMSP[ var ] );
+    VMCOUNT = VMVP - ToRefRef( LOCAL( var ) );
     {    
         Ref *ptr;
         if ( !IsObj( r ) ) call_error( r );
@@ -217,18 +217,28 @@ static Ref *spcfn_end_call_global( Ref *pc, Machine vm ) {
 static Ref *spcfn_enter( Ref *pc, Machine vm ) {
     long A = ToLong( pc[ -2 ] ); // field before the function key.
     Ref *prev = VMSP;
-    VMSP += ToLong( VMSP[ -1 ] );
-    VMSP[ 0 ] = VMLINKFUNC;
-    VMSP[ 1 ] = VMLINK;
-    VMSP[ 2 ] = prev;
-    VMSP[ 3 ] = ToRef( pc[ -3 ] );
-    VMSP += SP_OVERHEAD;
+    #if CALL_STACK_LAYOUT_STYLE == CSLS_ORIGINAL
+    	VMSP += ToLong( VMSP[ SP_NSLOTS ] );
+    	VMSP[ 0 ] = VMLINKFUNC;
+    	VMSP[ 1 ] = VMLINK;
+    	VMSP[ 2 ] = prev;
+    	VMSP[ 3 ] = ToRef( pc[ -3 ] );
+    	VMSP += SP_OVERHEAD;
+    #elif CALL_STACK_LAYOUT_STYLE == CSLS_VARIANT
+    	VMSP -= SP_OVERHEAD + ToULong( pc[ -3 ] );
+    	VMSP[ SP_NSLOTS ] = pc[ -3 ];
+    	VMSP[ SP_PREV_SP ] = prev;
+    	VMSP[ SP_LINK ] = VMLINK;
+    	VMSP[ SP_FUNC ] = VMLINKFUNC;
+    #else
+    	#error
+    #endif
     if ( A != VMCOUNT ) {
         enter_error( VMCOUNT, A );
     }
     {
         while ( --A >= 0 ) {
-            VMSP[ A ] = *( VMVP-- );
+            LOCAL( A ) = *( VMVP-- );
         }
     }
     RETURN( pc + 1 );
@@ -236,12 +246,22 @@ static Ref *spcfn_enter( Ref *pc, Machine vm ) {
 
 static Ref *spcfn_enter0( Ref *pc, Machine vm ) {
     Ref *prev = VMSP;
-    VMSP += ToLong( VMSP[ -1 ] );
-    VMSP[ 0 ] = VMLINKFUNC;
-    VMSP[ 1 ] = VMLINK;
-    VMSP[ 2 ] = prev;
-    VMSP[ 3 ] = ToRef( pc[ -3 ] );
-    VMSP += SP_OVERHEAD;
+    #if CALL_STACK_LAYOUT_STYLE == CSLS_ORIGINAL
+    	VMSP += ToLong( VMSP[ SP_NSLOTS ] );
+    	VMSP[ 0 ] = VMLINKFUNC;
+    	VMSP[ 1 ] = VMLINK;
+    	VMSP[ 2 ] = prev;
+    	VMSP[ 3 ] = ToRef( pc[ -3 ] );
+    	VMSP += SP_OVERHEAD;
+    #elif CALL_STACK_LAYOUT_STYLE == CSLS_VARIANT
+    	VMSP -= SP_OVERHEAD + ToULong( pc[ -3 ] );
+    	VMSP[ SP_NSLOTS ] = pc[ -3 ];
+    	VMSP[ SP_PREV_SP ] = prev;
+    	VMSP[ SP_LINK ] = VMLINK;
+    	VMSP[ SP_FUNC ] = VMLINKFUNC;
+    #else
+    	#error
+    #endif
     if ( VMCOUNT != 0 ) {
         enter_error( VMCOUNT, 0 );
     }
@@ -250,16 +270,26 @@ static Ref *spcfn_enter0( Ref *pc, Machine vm ) {
 
 static Ref *spcfn_enter1( Ref *pc, Machine vm ) {
     Ref *prev = VMSP;
-    VMSP += ToLong( VMSP[ -1 ] );
-    VMSP[ 0 ] = VMLINKFUNC;
-    VMSP[ 1 ] = VMLINK;
-    VMSP[ 2 ] = prev;
-    VMSP[ 3 ] = ToRef( pc[ -3 ] );
-    VMSP += SP_OVERHEAD;
+    #if CALL_STACK_LAYOUT_STYLE == CSLS_ORIGINAL
+    	VMSP += ToLong( VMSP[ SP_NSLOTS ] );
+    	VMSP[ 0 ] = VMLINKFUNC;
+    	VMSP[ 1 ] = VMLINK;
+    	VMSP[ 2 ] = prev;
+    	VMSP[ 3 ] = ToRef( pc[ -3 ] );
+    	VMSP += SP_OVERHEAD;
+    #elif CALL_STACK_LAYOUT_STYLE == CSLS_VARIANT
+    	VMSP -= SP_OVERHEAD + ToULong( pc[ -3 ] );
+    	VMSP[ SP_NSLOTS ] = pc[ -3 ];
+    	VMSP[ SP_PREV_SP ] = prev;
+    	VMSP[ SP_LINK ] = VMLINK;
+    	VMSP[ SP_FUNC ] = VMLINKFUNC;
+    #else
+    	#error
+    #endif
     if ( VMCOUNT != 1 ) {
         enter_error( VMCOUNT, 1 );
     }
-    VMSP[ 0 ] = *( VMVP-- );
+    LOCAL( 0 ) = *( VMVP-- );
     RETURN( pc + 1 );
 }
 
@@ -267,14 +297,14 @@ static Ref *spcfn_eq_si( Ref *pc, Machine vm ) {
     long s = ToLong( pc[1] );
     long i = ToLong( pc[2] );
     long d = ToLong( pc[3] );
-    RETURN( ToLong( VMSP[ s ] ) == i ? pc + d + 3 : pc + 4 );
+    RETURN( ToLong( LOCAL( s ) ) == i ? pc + d + 3 : pc + 4 );
 }
 
 static Ref *spcfn_eq_ss( Ref *pc, Machine vm ) {
     long s = ToLong( pc[1] );
     long t = ToLong( pc[2] );
     long d = ToLong( pc[3] );
-    RETURN( ToLong( VMSP[ s ] ) == ToLong( VMSP[ t ] ) ? pc + d + 3 : pc + 4 );
+    RETURN( ToLong( LOCAL( s ) ) == ToLong( LOCAL( t ) ) ? pc + d + 3 : pc + 4 );
 }
 
 static Ref *spcfn_goto( Ref *pc, Machine vm ) {
@@ -285,28 +315,28 @@ static Ref *spcfn_goto( Ref *pc, Machine vm ) {
 static Ref *spcfn_gt_si( Ref *pc, Machine vm ) {
     long s = ToLong( pc[1] );
     long i = ToLong( pc[2] );
-    RETURN( ToLong( VMSP[ s ] ) > i ? pc + ToLong( pc[3] ) + 3 : pc + 4 );
+    RETURN( ToLong( LOCAL( s ) ) > i ? pc + ToLong( pc[3] ) + 3 : pc + 4 );
 }
 
 static Ref *spcfn_gt_ss( Ref *pc, Machine vm ) {
     long s = ToLong( pc[1] );
     long t = ToLong( pc[2] );
     long d = ToLong( pc[3] );
-    RETURN( ToLong( VMSP[ s ] ) > ToLong( VMSP[ t ] ) ? pc + d + 3 : pc + 4 );
+    RETURN( ToLong( LOCAL( s ) ) > ToLong( LOCAL( t ) ) ? pc + d + 3 : pc + 4 );
 }
 
 static Ref *spcfn_gte_si( Ref *pc, Machine vm ) {
     long s = ToLong( pc[1] );
     long i = ToLong( pc[2] );
     long d = ToLong( pc[3] );
-    RETURN( ToLong( VMSP[ s ] ) >= i ? pc + d + 3: pc + 4 );
+    RETURN( ToLong( LOCAL( s ) ) >= i ? pc + d + 3: pc + 4 );
 }
 
 static Ref *spcfn_gte_ss( Ref *pc, Machine vm ) {
     long s = ToLong( pc[1] );
     long t = ToLong( pc[2] );
     long d = ToLong( pc[3] );
-    RETURN( ToLong( VMSP[ s ] ) >= ToLong( VMSP[ t ] ) ? pc + d + 3 : pc + 4 );
+    RETURN( ToLong( LOCAL( s ) ) >= ToLong( LOCAL( t ) ) ? pc + d + 3 : pc + 4 );
 }
 
 static Ref *spcfn_halt( Ref *pc, Machine vm ) {
@@ -339,41 +369,41 @@ static Ref *spcfn_lt_si( Ref *pc, Machine vm ) {
     long s = ToLong( pc[1] );
     long i = ToLong( pc[2] );
     long d = ToLong( pc[3] );
-    RETURN( ToLong( VMSP[ s ] ) < i ? pc + d + 3 : pc + 4 );
+    RETURN( ToLong( LOCAL( s ) ) < i ? pc + d + 3 : pc + 4 );
 }
 
 static Ref *spcfn_lt_ss( Ref *pc, Machine vm ) {
     long s = ToLong( pc[1] );
     long t = ToLong( pc[2] );
     long d = ToLong( pc[3] );
-    RETURN( ToLong( VMSP[ s ] ) < ToLong( VMSP[ t ] ) ? pc + d + 3 : pc + 4 );
+    RETURN( ToLong( LOCAL( s ) ) < ToLong( LOCAL( t ) ) ? pc + d + 3 : pc + 4 );
 }
 
 static Ref *spcfn_lte_si( Ref *pc, Machine vm ) {
     long s = ToLong( pc[1] );
     long i = ToLong( pc[2] );
     long d = ToLong( pc[3] );
-    RETURN( ToLong( VMSP[ s ] ) <= i ? pc + d + 3 : pc + 4 );
+    RETURN( ToLong( LOCAL( s ) ) <= i ? pc + d + 3 : pc + 4 );
 }
 
 static Ref *spcfn_lte_ss( Ref *pc, Machine vm ) {
     long s = ToLong( pc[1] );
     long t = ToLong( pc[2] );
     long d = ToLong( pc[3] );
-    RETURN( ToLong( VMSP[ s ] ) <= ToLong( VMSP[ t ] ) ? pc + d + 3 : pc + 4 );
+    RETURN( ToLong( LOCAL( s ) ) <= ToLong( LOCAL( t ) ) ? pc + d + 3 : pc + 4 );
 }
 
 static Ref *spcfn_neq_si( Ref *pc, Machine vm ) {
     long s = ToLong( pc[1] );
     long i = ToLong( pc[2] );
-    RETURN( ToLong( VMSP[ s ] ) == i ? pc + 4 : pc + ToLong( pc[3] ) + 3 );
+    RETURN( ToLong( LOCAL( s ) ) == i ? pc + 4 : pc + ToLong( pc[3] ) + 3 );
 }
 
 static Ref *spcfn_neq_ss( Ref *pc, Machine vm ) {
     long s = ToLong( pc[1] );
     long t = ToLong( pc[2] );
     long d = ToLong( pc[3] );
-    RETURN( ToLong( VMSP[ s ] ) != ToLong( VMSP[ t ] ) ? pc + d + 3 : pc + 4 );
+    RETURN( ToLong( LOCAL( s ) ) != ToLong( LOCAL( t ) ) ? pc + d + 3 : pc + 4 );
 }
 
 static Ref *spcfn_not( Ref *pc, Machine vm ) {
@@ -388,7 +418,7 @@ static Ref *spcfn_pop_global( Ref *pc, Machine vm ) {
 }
 
 static Ref *spcfn_pop_local( Ref *pc, Machine vm ) {
-    VMSP[ ToLong( *( ++pc ) ) ] = *( VMVP-- );
+    LOCAL( ToLong( *( ++pc ) ) ) = *( VMVP-- );
     RETURN( pc + 1 );
 }
 
@@ -399,17 +429,17 @@ static Ref *spcfn_push_global( Ref *pc, Machine vm ) {
 }
 
 static Ref *spcfn_push_local( Ref *pc, Machine vm ) {
-    *( ++VMVP ) = VMSP[ ToLong( *( ++pc ) ) ];
+    *( ++VMVP ) = LOCAL( ToLong( *( ++pc ) ) );
     RETURN( pc + 1 );
 }
 
 static Ref *spcfn_push_local0( Ref *pc, Machine vm ) {
-    *( ++VMVP ) = VMSP[ 0 ];
+    *( ++VMVP ) = LOCAL(0);
     RETURN( pc + 1 );
 }
 
 static Ref *spcfn_push_local1( Ref *pc, Machine vm ) {
-    *( ++VMVP ) = VMSP[ 1 ];
+    *( ++VMVP ) = LOCAL(1);
     RETURN( pc + 1 );
 }
 
@@ -436,7 +466,7 @@ static Ref *spcfn_return( Ref *pc, Machine vm ) {
 }
 
 static Ref *spcfn_set( Ref *pc, Machine vm ) {
-    VMCOUNT = VMVP - (Ref *)VMSP[ ToLong( pc[ 1 ] ) ];
+    VMCOUNT = VMVP - (Ref *)LOCAL( ToLong( pc[ 1 ] ) );
     RETURN( pc + 2 );
 }
 
@@ -475,7 +505,7 @@ static Ref *spcfn_start( Ref *pc, Machine vm ) {
     #ifdef DBG_SPECIAL
     fprintf( stderr, "Storing %u in %d\n", ToULong( ToRef( VMVP ) ), n );
     #endif
-    VMSP[n] = ToRef( VMVP );
+    LOCAL(n) = ToRef( VMVP );
     RETURN( pc + 1 );
 }
 

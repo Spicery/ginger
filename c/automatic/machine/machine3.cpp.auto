@@ -137,23 +137,23 @@ void Machine3::core( bool init_mode, Ref *pc ) {
         	stderr,
         	"Difference between %lu and %lu (held in %ld)\n",
         	ToULong( VMVP ),
-        	ToULong( VMSP[n] ),
+        	ToULong( LOCAL(n) ),
         	n
         );
         #endif
-        if ( VMVP == VMSP[n] ) RETURN( pc + 1 );
-        throw Mishap( "Wrong number of results (needed 0)" ).culprit( "#Results", "" + ( VMVP - ToRefRef( VMSP[n] ) ) );
+        if ( VMVP == LOCAL(n) ) RETURN( pc + 1 );
+        throw Mishap( "Wrong number of results (needed 0)" ).culprit( "#Results", "" + ( VMVP - ToRefRef( LOCAL(n) ) ) );
         RETURN( NULL );	// stupid compiler
     }
     L_check1: {
         long n = ToLong( *( ++pc ) );
         unsigned long d;
         #ifdef DBG_SPECIAL
-        fprintf( stderr, "Recovering %lu from %ld\n", ToULong( VMSP[n] ), n );
+        fprintf( stderr, "Recovering %lu from %ld\n", ToULong( LOCAL(n) ), n );
         fprintf( stderr, "Comparing with %u\n",  ToULong( VMVP ) );
         fprintf( stderr, "Length of value stack = %d\n", ( VMVP - VMVP_base ) );
         #endif
-        d = VMVP - ToRefRef( VMSP[n] );
+        d = VMVP - ToRefRef( LOCAL(n) );
         if ( d == 1 ) RETURN( pc + 1 );
         throw Mishap( "Wrong number of results (needed 1)" ).culprit( "#results", "" + d );
         RETURN( NULL );	// stupid compiler
@@ -162,18 +162,18 @@ void Machine3::core( bool init_mode, Ref *pc ) {
         Ref r;
         long n = ToLong( *( ++pc ) );
         #ifdef DBG_SPECIAL
-        fprintf( stderr, "Recovering %u from %d\n", ToULong( VMSP[n] ), n );
+        fprintf( stderr, "Recovering %u from %d\n", ToULong( LOCAL(n) ), n );
         fprintf( stderr, "Comparing with %u\n",  ToULong( VMVP ) );
         fprintf( stderr, "Length of value stack = %d\n", ( VMVP - VMVP_base ) );
         #endif
-        r = ToRef( ToULong( VMVP ) - ToULong( VMSP[n] ) );
+        r = ToRef( ToULong( VMVP ) - ToULong( LOCAL(n) ) );
         *( ++VMVP ) = r;
         RETURN( pc + 1 );
     }
     L_end1_calls: {
         Ref r = *( VMVP-- );
         long var = ToLong( pc[ 1 ] );
-        VMCOUNT = ( VMVP - ( Ref * )( VMSP[ var ] ) ) - 1;
+        VMCOUNT = ( VMVP - ToRefRef( LOCAL( var ) ) ) - 1;
         {    
             Ref *ptr;
             if ( !IsObj( r ) ) call_error( r );
@@ -188,7 +188,7 @@ void Machine3::core( bool init_mode, Ref *pc ) {
     L_end_call_global: {
         long var = ToLong( pc[ 1 ] );
         Ref r = ((IdentClass *)( pc[ 2 ] )) -> valof;
-        VMCOUNT = VMVP - ( Ref * )( VMSP[ var ] );
+        VMCOUNT = VMVP - ToRefRef( LOCAL( var ) );
         {    
             Ref *ptr;
             if ( !IsObj( r ) ) call_error( r );
@@ -203,30 +203,50 @@ void Machine3::core( bool init_mode, Ref *pc ) {
     L_enter: {
         long A = ToLong( pc[ -2 ] ); // field before the function key.
         Ref *prev = VMSP;
-        VMSP += ToLong( VMSP[ -1 ] );
-        VMSP[ 0 ] = VMLINKFUNC;
-        VMSP[ 1 ] = VMLINK;
-        VMSP[ 2 ] = prev;
-        VMSP[ 3 ] = ToRef( pc[ -3 ] );
-        VMSP += SP_OVERHEAD;
+        #if CALL_STACK_LAYOUT_STYLE == CSLS_ORIGINAL
+        	VMSP += ToLong( VMSP[ SP_NSLOTS ] );
+        	VMSP[ 0 ] = VMLINKFUNC;
+        	VMSP[ 1 ] = VMLINK;
+        	VMSP[ 2 ] = prev;
+        	VMSP[ 3 ] = ToRef( pc[ -3 ] );
+        	VMSP += SP_OVERHEAD;
+        #elif CALL_STACK_LAYOUT_STYLE == CSLS_VARIANT
+        	VMSP -= SP_OVERHEAD + ToULong( pc[ -3 ] );
+        	VMSP[ SP_NSLOTS ] = pc[ -3 ];
+        	VMSP[ SP_PREV_SP ] = prev;
+        	VMSP[ SP_LINK ] = VMLINK;
+        	VMSP[ SP_FUNC ] = VMLINKFUNC;
+        #else
+        	#error
+        #endif
         if ( A != VMCOUNT ) {
             enter_error( VMCOUNT, A );
         }
         {
             while ( --A >= 0 ) {
-                VMSP[ A ] = *( VMVP-- );
+                LOCAL( A ) = *( VMVP-- );
             }
         }
         RETURN( pc + 1 );
     }
     L_enter0: {
         Ref *prev = VMSP;
-        VMSP += ToLong( VMSP[ -1 ] );
-        VMSP[ 0 ] = VMLINKFUNC;
-        VMSP[ 1 ] = VMLINK;
-        VMSP[ 2 ] = prev;
-        VMSP[ 3 ] = ToRef( pc[ -3 ] );
-        VMSP += SP_OVERHEAD;
+        #if CALL_STACK_LAYOUT_STYLE == CSLS_ORIGINAL
+        	VMSP += ToLong( VMSP[ SP_NSLOTS ] );
+        	VMSP[ 0 ] = VMLINKFUNC;
+        	VMSP[ 1 ] = VMLINK;
+        	VMSP[ 2 ] = prev;
+        	VMSP[ 3 ] = ToRef( pc[ -3 ] );
+        	VMSP += SP_OVERHEAD;
+        #elif CALL_STACK_LAYOUT_STYLE == CSLS_VARIANT
+        	VMSP -= SP_OVERHEAD + ToULong( pc[ -3 ] );
+        	VMSP[ SP_NSLOTS ] = pc[ -3 ];
+        	VMSP[ SP_PREV_SP ] = prev;
+        	VMSP[ SP_LINK ] = VMLINK;
+        	VMSP[ SP_FUNC ] = VMLINKFUNC;
+        #else
+        	#error
+        #endif
         if ( VMCOUNT != 0 ) {
             enter_error( VMCOUNT, 0 );
         }
@@ -234,29 +254,39 @@ void Machine3::core( bool init_mode, Ref *pc ) {
     }
     L_enter1: {
         Ref *prev = VMSP;
-        VMSP += ToLong( VMSP[ -1 ] );
-        VMSP[ 0 ] = VMLINKFUNC;
-        VMSP[ 1 ] = VMLINK;
-        VMSP[ 2 ] = prev;
-        VMSP[ 3 ] = ToRef( pc[ -3 ] );
-        VMSP += SP_OVERHEAD;
+        #if CALL_STACK_LAYOUT_STYLE == CSLS_ORIGINAL
+        	VMSP += ToLong( VMSP[ SP_NSLOTS ] );
+        	VMSP[ 0 ] = VMLINKFUNC;
+        	VMSP[ 1 ] = VMLINK;
+        	VMSP[ 2 ] = prev;
+        	VMSP[ 3 ] = ToRef( pc[ -3 ] );
+        	VMSP += SP_OVERHEAD;
+        #elif CALL_STACK_LAYOUT_STYLE == CSLS_VARIANT
+        	VMSP -= SP_OVERHEAD + ToULong( pc[ -3 ] );
+        	VMSP[ SP_NSLOTS ] = pc[ -3 ];
+        	VMSP[ SP_PREV_SP ] = prev;
+        	VMSP[ SP_LINK ] = VMLINK;
+        	VMSP[ SP_FUNC ] = VMLINKFUNC;
+        #else
+        	#error
+        #endif
         if ( VMCOUNT != 1 ) {
             enter_error( VMCOUNT, 1 );
         }
-        VMSP[ 0 ] = *( VMVP-- );
+        LOCAL( 0 ) = *( VMVP-- );
         RETURN( pc + 1 );
     }
     L_eq_si: {
         long s = ToLong( pc[1] );
         long i = ToLong( pc[2] );
         long d = ToLong( pc[3] );
-        RETURN( ToLong( VMSP[ s ] ) == i ? pc + d + 3 : pc + 4 );
+        RETURN( ToLong( LOCAL( s ) ) == i ? pc + d + 3 : pc + 4 );
     }
     L_eq_ss: {
         long s = ToLong( pc[1] );
         long t = ToLong( pc[2] );
         long d = ToLong( pc[3] );
-        RETURN( ToLong( VMSP[ s ] ) == ToLong( VMSP[ t ] ) ? pc + d + 3 : pc + 4 );
+        RETURN( ToLong( LOCAL( s ) ) == ToLong( LOCAL( t ) ) ? pc + d + 3 : pc + 4 );
     }
     L_goto: {
         long n = ToLong( *( ++pc ) );
@@ -265,25 +295,25 @@ void Machine3::core( bool init_mode, Ref *pc ) {
     L_gt_si: {
         long s = ToLong( pc[1] );
         long i = ToLong( pc[2] );
-        RETURN( ToLong( VMSP[ s ] ) > i ? pc + ToLong( pc[3] ) + 3 : pc + 4 );
+        RETURN( ToLong( LOCAL( s ) ) > i ? pc + ToLong( pc[3] ) + 3 : pc + 4 );
     }
     L_gt_ss: {
         long s = ToLong( pc[1] );
         long t = ToLong( pc[2] );
         long d = ToLong( pc[3] );
-        RETURN( ToLong( VMSP[ s ] ) > ToLong( VMSP[ t ] ) ? pc + d + 3 : pc + 4 );
+        RETURN( ToLong( LOCAL( s ) ) > ToLong( LOCAL( t ) ) ? pc + d + 3 : pc + 4 );
     }
     L_gte_si: {
         long s = ToLong( pc[1] );
         long i = ToLong( pc[2] );
         long d = ToLong( pc[3] );
-        RETURN( ToLong( VMSP[ s ] ) >= i ? pc + d + 3: pc + 4 );
+        RETURN( ToLong( LOCAL( s ) ) >= i ? pc + d + 3: pc + 4 );
     }
     L_gte_ss: {
         long s = ToLong( pc[1] );
         long t = ToLong( pc[2] );
         long d = ToLong( pc[3] );
-        RETURN( ToLong( VMSP[ s ] ) >= ToLong( VMSP[ t ] ) ? pc + d + 3 : pc + 4 );
+        RETURN( ToLong( LOCAL( s ) ) >= ToLong( LOCAL( t ) ) ? pc + d + 3 : pc + 4 );
     }
     L_halt: {
         #ifdef DBG_SPECIAL	
@@ -312,36 +342,36 @@ void Machine3::core( bool init_mode, Ref *pc ) {
         long s = ToLong( pc[1] );
         long i = ToLong( pc[2] );
         long d = ToLong( pc[3] );
-        RETURN( ToLong( VMSP[ s ] ) < i ? pc + d + 3 : pc + 4 );
+        RETURN( ToLong( LOCAL( s ) ) < i ? pc + d + 3 : pc + 4 );
     }
     L_lt_ss: {
         long s = ToLong( pc[1] );
         long t = ToLong( pc[2] );
         long d = ToLong( pc[3] );
-        RETURN( ToLong( VMSP[ s ] ) < ToLong( VMSP[ t ] ) ? pc + d + 3 : pc + 4 );
+        RETURN( ToLong( LOCAL( s ) ) < ToLong( LOCAL( t ) ) ? pc + d + 3 : pc + 4 );
     }
     L_lte_si: {
         long s = ToLong( pc[1] );
         long i = ToLong( pc[2] );
         long d = ToLong( pc[3] );
-        RETURN( ToLong( VMSP[ s ] ) <= i ? pc + d + 3 : pc + 4 );
+        RETURN( ToLong( LOCAL( s ) ) <= i ? pc + d + 3 : pc + 4 );
     }
     L_lte_ss: {
         long s = ToLong( pc[1] );
         long t = ToLong( pc[2] );
         long d = ToLong( pc[3] );
-        RETURN( ToLong( VMSP[ s ] ) <= ToLong( VMSP[ t ] ) ? pc + d + 3 : pc + 4 );
+        RETURN( ToLong( LOCAL( s ) ) <= ToLong( LOCAL( t ) ) ? pc + d + 3 : pc + 4 );
     }
     L_neq_si: {
         long s = ToLong( pc[1] );
         long i = ToLong( pc[2] );
-        RETURN( ToLong( VMSP[ s ] ) == i ? pc + 4 : pc + ToLong( pc[3] ) + 3 );
+        RETURN( ToLong( LOCAL( s ) ) == i ? pc + 4 : pc + ToLong( pc[3] ) + 3 );
     }
     L_neq_ss: {
         long s = ToLong( pc[1] );
         long t = ToLong( pc[2] );
         long d = ToLong( pc[3] );
-        RETURN( ToLong( VMSP[ s ] ) != ToLong( VMSP[ t ] ) ? pc + d + 3 : pc + 4 );
+        RETURN( ToLong( LOCAL( s ) ) != ToLong( LOCAL( t ) ) ? pc + d + 3 : pc + 4 );
     }
     L_not: {
         *VMVP = ( *VMVP == sys_false ? sys_true : sys_false );
@@ -353,7 +383,7 @@ void Machine3::core( bool init_mode, Ref *pc ) {
         RETURN( pc + 1 );
     }
     L_pop_local: {
-        VMSP[ ToLong( *( ++pc ) ) ] = *( VMVP-- );
+        LOCAL( ToLong( *( ++pc ) ) ) = *( VMVP-- );
         RETURN( pc + 1 );
     }
     L_push_global: {
@@ -362,15 +392,15 @@ void Machine3::core( bool init_mode, Ref *pc ) {
         RETURN( pc + 1 );
     }
     L_push_local: {
-        *( ++VMVP ) = VMSP[ ToLong( *( ++pc ) ) ];
+        *( ++VMVP ) = LOCAL( ToLong( *( ++pc ) ) );
         RETURN( pc + 1 );
     }
     L_push_local0: {
-        *( ++VMVP ) = VMSP[ 0 ];
+        *( ++VMVP ) = LOCAL(0);
         RETURN( pc + 1 );
     }
     L_push_local1: {
-        *( ++VMVP ) = VMSP[ 1 ];
+        *( ++VMVP ) = LOCAL(1);
         RETURN( pc + 1 );
     }
     L_pushq: {
@@ -393,7 +423,7 @@ void Machine3::core( bool init_mode, Ref *pc ) {
         RETURN( linkptr );
     }
     L_set: {
-        VMCOUNT = VMVP - (Ref *)VMSP[ ToLong( pc[ 1 ] ) ];
+        VMCOUNT = VMVP - (Ref *)LOCAL( ToLong( pc[ 1 ] ) );
         RETURN( pc + 2 );
     }
     L_set_call_global: {
@@ -429,7 +459,7 @@ void Machine3::core( bool init_mode, Ref *pc ) {
         #ifdef DBG_SPECIAL
         fprintf( stderr, "Storing %u in %d\n", ToULong( ToRef( VMVP ) ), n );
         #endif
-        VMSP[n] = ToRef( VMVP );
+        LOCAL(n) = ToRef( VMVP );
         RETURN( pc + 1 );
     }
     L_syscall: {

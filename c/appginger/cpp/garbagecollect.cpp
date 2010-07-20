@@ -434,7 +434,7 @@ public:
 			
 			unsigned long n = ToULong( sp[ SP_NSLOTS ] );
 			for ( unsigned long i = 0; i < n; i++ ) {
-				this->forward( sp[ i ] );
+				this->forward( LOCAL_OF( sp, i ) );
 			}			
 		}
 	}

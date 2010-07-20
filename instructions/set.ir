@@ -1,2 +1,2 @@
-VMCOUNT = VMVP - (Ref *)VMSP[ ToLong( pc[ 1 ] ) ];
+VMCOUNT = VMVP - (Ref *)LOCAL( ToLong( pc[ 1 ] ) );
 RETURN( pc + 2 );

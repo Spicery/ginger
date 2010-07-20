@@ -1,3 +1,3 @@
 long s = ToLong( pc[1] );
 long i = ToLong( pc[2] );
-RETURN( ToLong( VMSP[ s ] ) > i ? pc + ToLong( pc[3] ) + 3 : pc + 4 );
+RETURN( ToLong( LOCAL( s ) ) > i ? pc + ToLong( pc[3] ) + 3 : pc + 4 );

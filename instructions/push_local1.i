@@ -1,2 +1,2 @@
-*( ++VMVP ) = VMSP[ 1 ];
+*( ++VMVP ) = LOCAL(1);
 RETURN( pc + 1 );

@@ -4,10 +4,10 @@ fprintf(
 	stderr,
 	"Difference between %lu and %lu (held in %ld)\n",
 	ToULong( VMVP ),
-	ToULong( VMSP[n] ),
+	ToULong( LOCAL(n) ),
 	n
 );
 #endif
-if ( VMVP == VMSP[n] ) RETURN( pc + 1 );
-throw Mishap( "Wrong number of results (needed 0)" ).culprit( "#Results", "" + ( VMVP - ToRefRef( VMSP[n] ) ) );
+if ( VMVP == LOCAL(n) ) RETURN( pc + 1 );
+throw Mishap( "Wrong number of results (needed 0)" ).culprit( "#Results", "" + ( VMVP - ToRefRef( LOCAL(n) ) ) );
 RETURN( NULL );	// stupid compiler

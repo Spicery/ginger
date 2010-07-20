@@ -1,2 +1,2 @@
-VMSP[ ToLong( *( ++pc ) ) ] = *( VMVP-- );
+LOCAL( ToLong( *( ++pc ) ) ) = *( VMVP-- );
 RETURN( pc + 1 );

@@ -1,11 +1,11 @@
 long n = ToLong( *( ++pc ) );
 unsigned long d;
 #ifdef DBG_SPECIAL
-fprintf( stderr, "Recovering %lu from %ld\n", ToULong( VMSP[n] ), n );
+fprintf( stderr, "Recovering %lu from %ld\n", ToULong( LOCAL(n) ), n );
 fprintf( stderr, "Comparing with %u\n",  ToULong( VMVP ) );
 fprintf( stderr, "Length of value stack = %d\n", ( VMVP - VMVP_base ) );
 #endif
-d = VMVP - ToRefRef( VMSP[n] );
+d = VMVP - ToRefRef( LOCAL(n) );
 if ( d == 1 ) RETURN( pc + 1 );
 throw Mishap( "Wrong number of results (needed 1)" ).culprit( "#results", "" + d );
 RETURN( NULL );	// stupid compiler

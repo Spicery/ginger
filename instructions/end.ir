@@ -1,10 +1,10 @@
 Ref r;
 long n = ToLong( *( ++pc ) );
 #ifdef DBG_SPECIAL
-fprintf( stderr, "Recovering %u from %d\n", ToULong( VMSP[n] ), n );
+fprintf( stderr, "Recovering %u from %d\n", ToULong( LOCAL(n) ), n );
 fprintf( stderr, "Comparing with %u\n",  ToULong( VMVP ) );
 fprintf( stderr, "Length of value stack = %d\n", ( VMVP - VMVP_base ) );
 #endif
-r = ToRef( ToULong( VMVP ) - ToULong( VMSP[n] ) );
+r = ToRef( ToULong( VMVP ) - ToULong( LOCAL(n) ) );
 *( ++VMVP ) = r;
 RETURN( pc + 1 );

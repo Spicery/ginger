@@ -1,6 +1,6 @@
 long var = ToLong( pc[ 1 ] );
 Ref r = ((IdentClass *)( pc[ 2 ] )) -> valof;
-VMCOUNT = VMVP - ( Ref * )( VMSP[ var ] );
+VMCOUNT = VMVP - ToRefRef( LOCAL( var ) );
 {    
     Ref *ptr;
     if ( !IsObj( r ) ) call_error( r );

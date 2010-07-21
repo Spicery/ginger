@@ -18,6 +18,7 @@ const char *tok_type_name( TokType fnc ) {
 	case tokty_arrow : return "arrow";
 	case tokty_assign : return "assign";
 	case tokty_at : return "at";
+	case tokty_bar: return "bar";
 	case tokty_bind: return "bind";
 	case tokty_bindings : return "bindings";
 	case tokty_bool: return "bool";

@@ -12,6 +12,7 @@ using namespace std;
 #include "item_map.hpp"
 #include "item.hpp"
 #include "role.hpp"
+#include "mishap.hpp"
 
 
 int ItemFactoryClass::peekchar() {
@@ -137,8 +138,7 @@ Item ItemFactoryClass::read() {
 		    it->tok_type = tokty_id;
 		    it->role = PrefixRole;
 			it->nameString() = this->text;
-			//it->extra = ToRef( it->nameString().c_str() );
-        }
+		}
     } else if ( strchr( ";,()[]{}", ch ) ) {
 		//
 		//	Single character keywords
@@ -146,11 +146,32 @@ Item ItemFactoryClass::read() {
         this->text.push_back( ch );
         it = this->item = itemMap.lookup( this->text );
         if ( this->item == NULL ) {
-            throw "Invalid separator token '%s'"; // ifact->text.c_str() );
+        	//	Never happens.
+            throw Mishap( "Invalid punctuation token" ); 
+        }
+    } else if ( strchr( ".@", ch ) ) {
+    	//	
+    	//	Signs made of a single repeating character.
+    	//		I wonder if semi-colon and comma should be in 
+    	//		this section?
+    	//
+    	this->text.push_back( ch );
+    	for (;;) {
+    		char nextch = getc( this->file );
+    		if ( nextch == ch ) {
+	    		this->text.push_back( ch );
+    		} else {
+    			ungetc( nextch, this->file );
+    			break;
+    		}
+    	}
+    	it = this->item = itemMap.lookup( this->text );
+    	if ( it == NULL ) {
+            throw Mishap( "Invalid repeated-character sign" ).culprit( "Token", this->text );
         }
     } else if ( ispunct( ch ) ) {
 		//
-		//	Probable errors treated as single character keywords.
+		//	Other punctuation treated as multi-character keywords.
 		//
         //  ispunct()
         //      checks  for  any printable character which is not a
@@ -163,7 +184,7 @@ Item ItemFactoryClass::read() {
         ungetc( ch, this->file );
         it = this->item = itemMap.lookup( this->text );
         if ( it == NULL ) {
-            throw "Invalid punctuation token '%s'"; // ifact->text.c_str() );
+            throw Mishap( "Invalid sign (combination of special characters)" ).culprit( "Sign", this->text );
         }
     } else {
 		//

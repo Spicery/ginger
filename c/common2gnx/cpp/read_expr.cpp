@@ -397,8 +397,16 @@ Node ReadStateClass::prefix_processing() {
 		}
 		case tokty_obracket: {
 			NodeFactory list( "sysapp" );
-			list.putAttr( "name", "newList" );
-			list.addNode( this->read_stmnts_check( tokty_cbracket ) );
+			Node stmnts = this->read_stmnts();
+			if ( this->try_token( tokty_bar ) ) {
+				list.putAttr( "name", "newListOnto" );
+				list.addNode( stmnts );
+				list.addNode( this->read_stmnts_check( tokty_cbracket ) );
+			} else {
+				this->check_token( tokty_cbracket );
+				list.putAttr( "name", "newList" );
+				list.addNode( stmnts );
+			}
 			return list.node();
 		}
 		case tokty_obrace: {

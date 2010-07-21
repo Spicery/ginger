@@ -17,6 +17,7 @@ typedef enum TokType {
      tokty_arrow,
      tokty_assign,
      tokty_at,
+     tokty_bar,
      tokty_bind,
      tokty_bindings,
      tokty_bool,

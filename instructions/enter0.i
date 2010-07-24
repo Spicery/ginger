@@ -12,6 +12,11 @@ Ref *prev = VMSP;
 	VMSP[ SP_PREV_SP ] = prev;
 	VMSP[ SP_LINK ] = VMLINK;
 	VMSP[ SP_FUNC ] = VMLINKFUNC;
+#elif CALL_STACK_LAYOUT_STYLE == CSLS_NO_NSLOT
+	VMSP -= SP_OVERHEAD + ToULong( pc[ -3 ] );
+	VMSP[ SP_PREV_SP ] = prev;
+	VMSP[ SP_LINK ] = VMLINK;
+	VMSP[ SP_FUNC ] = VMLINKFUNC;
 #else
 	#error
 #endif

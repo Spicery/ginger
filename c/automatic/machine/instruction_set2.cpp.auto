@@ -230,6 +230,11 @@ static void spcfn_enter( void ) {
     	VMSP[ SP_PREV_SP ] = prev;
     	VMSP[ SP_LINK ] = VMLINK;
     	VMSP[ SP_FUNC ] = VMLINKFUNC;
+    #elif CALL_STACK_LAYOUT_STYLE == CSLS_NO_NSLOT
+    	VMSP -= SP_OVERHEAD + ToULong( pc[ -3 ] );
+    	VMSP[ SP_PREV_SP ] = prev;
+    	VMSP[ SP_LINK ] = VMLINK;
+    	VMSP[ SP_FUNC ] = VMLINKFUNC;
     #else
     	#error
     #endif
@@ -259,6 +264,11 @@ static void spcfn_enter0( void ) {
     	VMSP[ SP_PREV_SP ] = prev;
     	VMSP[ SP_LINK ] = VMLINK;
     	VMSP[ SP_FUNC ] = VMLINKFUNC;
+    #elif CALL_STACK_LAYOUT_STYLE == CSLS_NO_NSLOT
+    	VMSP -= SP_OVERHEAD + ToULong( pc[ -3 ] );
+    	VMSP[ SP_PREV_SP ] = prev;
+    	VMSP[ SP_LINK ] = VMLINK;
+    	VMSP[ SP_FUNC ] = VMLINKFUNC;
     #else
     	#error
     #endif
@@ -280,6 +290,11 @@ static void spcfn_enter1( void ) {
     #elif CALL_STACK_LAYOUT_STYLE == CSLS_VARIANT
     	VMSP -= SP_OVERHEAD + ToULong( pc[ -3 ] );
     	VMSP[ SP_NSLOTS ] = pc[ -3 ];
+    	VMSP[ SP_PREV_SP ] = prev;
+    	VMSP[ SP_LINK ] = VMLINK;
+    	VMSP[ SP_FUNC ] = VMLINKFUNC;
+    #elif CALL_STACK_LAYOUT_STYLE == CSLS_NO_NSLOT
+    	VMSP -= SP_OVERHEAD + ToULong( pc[ -3 ] );
     	VMSP[ SP_PREV_SP ] = prev;
     	VMSP[ SP_LINK ] = VMLINK;
     	VMSP[ SP_FUNC ] = VMLINKFUNC;

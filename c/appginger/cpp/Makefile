@@ -5,8 +5,9 @@ CC=g++
 CPPFLAGS=-g -I../hpp -I../../automatic/machine -I../../automatic/sys -I/usr/local/boost_1_43_0 -Wall -Wmissing-prototypes
 
 OBJS=mishap.o term.o read_xml.o \
-	functor.o plant.o cage.o vmi.o gc.o \
-	rcep.o arity.o lift.o ident.o dict.o sys.o \
+	functor.o plant.o cage.o vmi.o \
+	rcep.o arity.o lift.o ident.o dict.o \
+	sys.o syslist.o sysvector.o sysstring.o \
 	destination.o heap.o \
 	key.o objlayout.o \
 	heapcrawl.o cagecrawl.o callstackcrawl.o fnobjcrawl.o \

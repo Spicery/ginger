@@ -1,0 +1,184 @@
+/******************************************************************************\
+	Copyright (c) 2010 Stephen Leach. AppGinger is distributed under the terms 
+	of the GNU General Public License. This file is part of AppGinger.
+
+    AppGinger is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    AppGinger is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with AppGinger.  If not, see <http://www.gnu.org/licenses/>.
+\******************************************************************************/
+
+#include "syslist.hpp"
+#include "sysvector.hpp"
+#include "key.hpp"
+
+static inline bool IsList( Ref r ) {
+	return IsPair( r ) || IsNil( r );
+}
+
+static inline Ref FastPairHead( Ref r ) {
+	return ObjToPtr4( r )[ 1 ];
+}
+
+static inline Ref FastPairTail( Ref r ) {
+	return ObjToPtr4( r )[ 2 ];
+}
+
+Ref * sysNewList( Ref * pc, class MachineClass * vm ) {
+	Ref sofar = sys_nil;
+	int n = vm->count;
+	//std::cerr << "Count " << n << std::endl;
+	XfrClass xfr( vm->heap().preflight( pc, 3 * n ) );
+	for ( int i = 0; i < n; i++ ) {
+		xfr.setOrigin();
+		xfr.xfrRef( sysPairKey );
+		//std::cerr << "Peek: " << vm->fastPeek() << std::endl;
+		//std::cerr << "Peek: " << vm->fastPeek() << std::endl;
+		Ref r = vm->fastPop();
+		//std::cerr << "Pop: " << r << std::endl;
+
+		xfr.xfrRef( r );
+		xfr.xfrRef( sofar );
+		sofar = xfr.makeRef();
+		//std::cerr << "Stored " << *( RefToPtr4( sofar ) + 1 ) << std::endl;
+	}
+	vm->fastPush( sofar );
+	return pc;
+}
+
+Ref * sysNewListOnto( Ref * pc, class MachineClass * vm ) {
+	int n = vm->count - 1;
+	if ( n < 0 ) throw "Too few arguments";
+	Ref sofar = vm->fastPop();
+	//std::cerr << "Count " << n << std::endl;
+	XfrClass xfr( vm->heap().preflight( pc, 3 * n ) );
+	for ( int i = 0; i < n; i++ ) {
+		xfr.setOrigin();
+		xfr.xfrRef( sysPairKey );
+		//std::cerr << "Peek: " << vm->fastPeek() << std::endl;
+		//std::cerr << "Peek: " << vm->fastPeek() << std::endl;
+		Ref r = vm->fastPop();
+		//std::cerr << "Pop: " << r << std::endl;
+
+		xfr.xfrRef( r );
+		xfr.xfrRef( sofar );
+		sofar = xfr.makeRef();
+		//std::cerr << "Stored " << *( RefToPtr4( sofar ) + 1 ) << std::endl;
+	}
+	vm->fastPush( sofar );
+	return pc;
+}
+
+
+
+Ref * sysIsNil( Ref * pc, class MachineClass * vm ) {
+	if ( vm->count == 1 ) {
+		vm->fastPeek() = IsNil( vm->fastPeek() ) ? sys_true : sys_false;
+		return pc;
+	} else {
+		throw Mishap( "Wrong number of arguments for head" );
+	}
+}
+
+Ref * sysIsList( Ref * pc, class MachineClass * vm ) {
+	if ( vm->count == 1 ) {
+		Ref r = vm->fastPeek();
+		vm->fastPeek() = IsPair( r ) || IsNil( r ) ? sys_true : sys_false;
+		return pc;
+	} else {
+		throw Mishap( "Wrong number of arguments for head" );
+	}
+}
+
+
+
+Ref * sysListAppend( Ref * pc, class MachineClass * vm ) {
+	//	Variables here are unaffected by a GC.
+	ptrdiff_t D;
+	
+	if ( vm->count != 2 ) throw Mishap( "Wrong number of arguments in listAppend" );
+
+	//	This section is carefully to survive relocations of the
+	//	call/value stacks. Will NOT survive a GC.
+	{
+		//	May need to GC so leave on the stack.
+		Ref rhs = vm->fastPeek();
+		Ref lhs = vm->fastPeek( 1 );
+		
+		//	Typecheck arguments.
+		if ( !IsList( lhs ) || !IsList( rhs ) ) throw Mishap( "Invalid arguments in listAppend" );
+		
+		ptrdiff_t start = vm->stackLength();
+		while ( IsPair( lhs ) ) {
+			vm->checkStackRoom( 1 );
+			vm->fastPush( FastPairHead( lhs ) );
+			lhs = FastPairTail( lhs );
+		}
+		vm->checkStackRoom( 1 );
+		vm->fastPush( rhs );
+		D = vm->stackLength() - start;
+	}
+
+	vm->count = D;
+	pc = sysNewListOnto( pc, vm );
+
+	//	Now fix the value stack.
+	Ref r = vm->fastPop();
+	vm->fastPop();
+	vm->fastPeek() = r;
+	return pc;
+}
+
+Ref * sysListExplode( Ref *pc, class MachineClass * vm ) {
+
+	if ( vm->count != 1 ) throw Mishap( "Wrong number of arguments for listExplode" );
+	
+	Ref r = vm->fastPop();
+	
+	if ( !IsList( r ) ) throw Mishap( "Argument mismatch for listExplode" );
+
+	while ( IsPair( r ) ) {
+		vm->checkStackRoom( 1 );
+		vm->fastPush( FastPairHead( r ) );
+		r = FastPairTail( r ) ;
+	}
+
+	return pc;
+}
+
+Ref * sysListLength( Ref *pc, class MachineClass * vm ) {
+	if ( vm->count =! 1 ) throw Mishap( "Wrong number of arguments for listLength" );
+	Ref r = vm->fastPeek();
+	if ( !IsList( r ) ) throw Mishap( "Argument mismatch for listLength" );
+
+	int count = 0;
+	while ( IsPair( r ) ) {
+		count += 1;
+		r = FastPairTail( r );
+	} 
+	vm->fastPeek() = LongToSmall( count );
+	
+	return pc;
+}
+
+Ref * sysFastListLength( Ref *pc, class MachineClass * vm ) {
+	Ref r = vm->fastPeek();
+
+	int count = 0;
+	while ( IsPair( r ) ) {
+		count += 1;
+		r = FastPairTail( r );
+	} 
+	vm->fastPeek() = LongToSmall( count );
+	
+	return pc;
+}
+

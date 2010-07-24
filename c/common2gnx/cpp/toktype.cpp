@@ -43,6 +43,7 @@ const char *tok_type_name( TokType fnc ) {
 	case tokty_endif : return "endif";
 	case tokty_endunless : return "endunless";
 	case tokty_equal : return "equal";
+	case tokty_explode: return "explode";
 	case tokty_fn : return "fn";
 	case tokty_for : return "for";
 	case tokty_from : return "from";
@@ -54,6 +55,7 @@ const char *tok_type_name( TokType fnc ) {
 	case tokty_int : return "int";
 	case tokty_lt : return "lt";
 	case tokty_lte : return "lte";
+	case tokty_maplet: return "maplet";
 	case tokty_mul : return "mul";
 	case tokty_not : return "not";
 	case tokty_obrace : return "obrace";
@@ -92,6 +94,7 @@ const char * tok_type_as_tag( TokType fnc ) {
 const char * tok_type_as_sysapp( TokType fnc ) {
     switch ( fnc ) {
 	case tokty_add : return "+";
+	case tokty_append: return "append";
 	case tokty_arrow : return "newMaplet";
 	case tokty_div : return "/";
 	case tokty_equal : return "=";
@@ -104,7 +107,8 @@ const char * tok_type_as_sysapp( TokType fnc ) {
 	case tokty_not : return "not";
 	case tokty_pow : return "**";
 	case tokty_sub : return "-";
-	default: return NULL;
+	case tokty_maplet : return "newMaplet";
+	default: throw Mishap( "Internal error - missing sysapp" ).culprit( "Token type", tok_type_name( fnc ) );
 	}
 }
 

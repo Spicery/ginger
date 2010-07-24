@@ -28,7 +28,7 @@ using namespace std;
 
 //jmp_buf mishap_jump_buffer;
 
-void mishap( const char *msg, ... ) {
+/*void mishap( const char *msg, ... ) {
     va_list args;
     va_start( args, msg );
     fprintf( stderr, "Mishap: " );
@@ -45,7 +45,7 @@ void warning( const char *msg, ... ) {
     vfprintf( stderr, msg, args );
     fprintf( stderr, "\n" );
     va_end( args );
-}
+}*/
 
 /*void reset( const char *msg, ... ) {
     va_list args;
@@ -65,17 +65,17 @@ void to_be_done( charseq msg ) {
 	throw Mishap( "To be done" ).culprit( "Message", msg );
 }
 
-Mishap & Mishap::culprit( const std::string reason, const std::string arg ) {
+Problem & Problem::culprit( const std::string reason, const std::string arg ) {
 	this->culprits.push_back( pair< const string, const string >( reason, arg ) );
 	return *this;
 }
 
-Mishap & Mishap::culprit( const std::string arg ) {
+Problem & Problem::culprit( const std::string arg ) {
 	this->culprits.push_back( std::pair< const string, const string >( "Argument", arg ) );
 	return *this;
 }
 
-void Mishap::report() {
+void Problem::report() {
 	cerr << "MISHAP: " << this->message << endl;
 	for ( 	
 		vector< pair< string, string > >::iterator it = this->culprits.begin();
@@ -85,8 +85,4 @@ void Mishap::report() {
 		cerr << it->first << " : " << it->second << endl;
 	}
 }
-	
-Mishap::Mishap( const std::string & msg ) : 
-	message( msg ) 
-{
-}
+

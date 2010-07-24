@@ -16,19 +16,21 @@
     along with AppGinger.  If not, see <http://www.gnu.org/licenses/>.
 \******************************************************************************/
 
-#include "cagecrawl.hpp"
+#ifndef SYS_LIST_HPP
+#define SYS_LIST_HPP
 
+#include "common.hpp"
+#include "machine.hpp"
 #include "mishap.hpp"
-#include "key.hpp"
-#include "objlayout.hpp"
 
-Ref * CageCrawl::next() {
-	if ( this->current < this->cage->top ) {
-		Ref * key = findObjectKey( this->current );
-		unsigned long len = lengthAfterObjectKey( key );
-		this->current = key + len + 1;
-		return key;
-	} else {
-		return 0;
-	}
-}
+extern Ref * sysNewList( Ref * pc, MachineClass * vm );
+extern Ref * sysNewListOnto( Ref * pc, MachineClass * vm );
+extern Ref * sysIsNil( Ref * pc, class MachineClass * vm );
+extern Ref * sysIsList( Ref * pc, class MachineClass * vm );
+extern Ref * sysListAppend( Ref *pc, class MachineClass * vm );
+extern Ref * sysListExplode( Ref *pc, class MachineClass * vm );
+extern Ref * sysListLength( Ref *pc, class MachineClass * vm );
+extern Ref * sysFastListLength( Ref *pc, class MachineClass * vm );
+
+
+#endif

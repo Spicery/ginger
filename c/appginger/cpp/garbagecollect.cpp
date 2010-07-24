@@ -432,7 +432,13 @@ public:
 			sp[ SP_FUNC ] = new_func;
 			sp[ SP_LINK ] = new_func + d;
 			
-			unsigned long n = ToULong( sp[ SP_NSLOTS ] );
+			#if CALL_STACK_LAYOUT_STYLE == CSLS_ORIGINAL || CALL_STACK_LAYOUT_STYLE == CSLS_VARIANT
+				unsigned long n = ToULong( sp[ SP_NSLOTS ] );
+			#elif CALL_STACK_LAYOUT_STYLE == CSLS_NO_NSLOT
+				unsigned long n = NSLOTS( sp );
+			#else
+				#error
+			#endif
 			for ( unsigned long i = 0; i < n; i++ ) {
 				this->forward( LOCAL_OF( sp, i ) );
 			}			
@@ -479,10 +485,13 @@ public:
 			gclogger.endFnObj();
 		} else if ( IsSimpleKey( key ) ) {
 			switch ( KindOfSimpleKey( key ) ) {
+				case PAIR_KIND:
 				case RECORD_KIND: {
 					gclogger.startRecord( obj_K );
-					this->forward( obj_K[ 1 ] );
-					this->forward( obj_K[ 2 ] );
+					unsigned long n = sizeAfterKeyOfRecord( obj_K );
+					for ( unsigned long i = 1; i <= n; i++ ) {
+						this->forward( obj_K[ i ] );
+					}
 					gclogger.endRecord( obj_K );
 					break;
 				}

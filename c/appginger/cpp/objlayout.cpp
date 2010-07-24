@@ -35,6 +35,10 @@ unsigned long sizeAfterKeyOfString( Ref * key ) {
 	return ( sizeAfterKeyOfVector( key ) + sizeof( long ) - 1 + 1 ) / sizeof( long );
 }
 
+unsigned long lengthOfString( Ref * key ) {
+	return sizeAfterKeyOfVector( key );
+}
+
 unsigned long sizeAfterKeyOfFn( Ref * key ) {
 	return ToULong( *( key - OFFSET_FROM_FN_LENGTH_TO_KEY ) ) >> TAGGG;
 }
@@ -47,6 +51,7 @@ void findObjectLimits( Ref * obj_K, Ref * & obj_A, Ref * & obj_Z1 ) {
 	Ref * obj_K1 = obj_K + 1;
 	if ( IsSimpleKey( key ) ) {
 		switch ( KindOfSimpleKey( key ) ) {
+			case PAIR_KIND:
 			case RECORD_KIND: {
 				obj_A = obj_K;
 				obj_Z1 = obj_K1 + sizeAfterKeyOfRecord( obj_K );
@@ -94,7 +99,7 @@ Ref * findObjectKey( Ref * obj_A ) {
 				return obj_A;
 			}
 		}
-		throw EmergencyExit();
+		throw Unreachable();
 	}
 }
 
@@ -106,6 +111,7 @@ unsigned long lengthAfterObjectKey( Ref * obj_K ) {
 	Ref key = *obj_K;
 	if ( IsSimpleKey( key ) ) {
 		switch ( KindOfSimpleKey( key ) ) {
+			case PAIR_KIND:
 			case RECORD_KIND: {
 				return sizeAfterKeyOfRecord( obj_K );
 				break;

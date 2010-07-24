@@ -27,6 +27,7 @@
 #include "heap.hpp"
 #include "key.hpp"
 #include "sys.hpp"
+#include "mishap.hpp"
 
 using namespace std;
 
@@ -48,7 +49,7 @@ MachineClass::MachineClass( AppGinger & application ) :
 	this->sp_base = new Ref[ RANDOM_SIZE ];
 	this->sp_end = this->sp_base + RANDOM_SIZE;
 	this->sp = this->sp_base;
-#elif CALL_STACK_LAYOUT_STYLE == CSLS_VARIANT
+#elif CALL_STACK_LAYOUT_STYLE == CSLS_VARIANT || CALL_STACK_LAYOUT_STYLE == CSLS_NO_NSLOT
 	this->sp_base = this->vp_end - 1;
 	this->sp_end = this->vp_base - 1;
 	this->sp = this->sp_base;
@@ -108,6 +109,14 @@ Ref * MachineClass::setUpPC( Ref r ) {
 	*this->sp = sys_underflow;
 	//	The number of locals variables - obviously null.
 	this->sp[ SP_NSLOTS ] = 0;
+	//	And the previous stack point is additionally set to null.
+	this->sp[ SP_PREV_SP ] = 0;
+	//	The previous link address should be set to null too.
+	this->sp[ SP_LINK ] = 0;
+	//	The previous function object should be set to null.
+	this->sp[ SP_FUNC ] = 0;
+#elif CALL_STACK_LAYOUT_STYLE == CSLS_NO_NSLOT
+	*this->sp = sys_underflow;
 	//	And the previous stack point is additionally set to null.
 	this->sp[ SP_PREV_SP ] = 0;
 	//	The previous link address should be set to null too.
@@ -245,6 +254,12 @@ void MachineClass::check_call_stack_integrity() {
 	}
 }
 
+void MachineClass::checkStackRoom( unsigned long n ) {
+	throw "unimplemented";
+}
+
+
+
 #elif CALL_STACK_LAYOUT_STYLE == CSLS_VARIANT
 
 void MachineClass::check_call_stack_integrity() {
@@ -264,6 +279,42 @@ void MachineClass::check_call_stack_integrity() {
 		ptr = prev;		
 	}
 }
+
+void MachineClass::checkStackRoom( unsigned long n ) {
+	throw "unimplemented";
+}
+
+
+
+#elif CALL_STACK_LAYOUT_STYLE == CSLS_NO_NSLOT
+
+void MachineClass::check_call_stack_integrity() {
+	Ref * ptr = this->sp;
+	for ( int count = 0; ptr > this->sp_base; count++ ) {
+		Ref * func = ToRefRef( ptr[SP_FUNC] );
+		Ref * link = ToRefRef( ptr[SP_LINK] );
+		Ref * prev = ToRefRef( ptr[SP_PREV_SP] );
+		unsigned long nslots = NSLOTS( ptr );
+		
+		if ( func ) {
+			ptrdiff_t d = link - func;
+			if (!( 0 <= d && d <= 1000 )) bite_me();
+		}
+		
+		if ( nslots > 100 ) bite_me();
+		ptr = prev;		
+	}
+}
+
+//	Should be bigger than ( SP_OVERHEAD + 1 ) + 1 = 5
+#define STACK_BUFFER_OVERHEAD 16
+
+//	Needs to be inlined after we complete the callstack refactoring.
+void MachineClass::checkStackRoom( long n ) {
+	if ( this->sp < this->vp + n + STACK_BUFFER_OVERHEAD ) throw Mishap( "Stack overflow" );
+}
+
+
 
 #else
 	#error

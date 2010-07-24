@@ -38,6 +38,8 @@ public:
 	void xfrRef( Ref x );
 	void xfrVector( std::vector< Ref > & chain );
 	void xfrSubstring( const char *s, int a, int b );
+	void xfrSubstringStep( int offset, const char *s, int a, int b );
+	void xfrSubstringFinish( int offset );
 	void xfrCopy( Ref *p, int n );
 	void xfrCopy( Ref * obj_A, Ref * obj_Z1 );
 

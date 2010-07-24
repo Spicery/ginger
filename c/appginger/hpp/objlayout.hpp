@@ -64,6 +64,8 @@ unsigned long sizeAfterKeyOfVector( Ref * key );
 
 
 unsigned long sizeAfterKeyOfString( Ref * key );
+unsigned long lengthOfString( Ref * key );
+
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -72,6 +74,7 @@ unsigned long sizeAfterKeyOfString( Ref * key );
 
 // field before the function key.
 #define OFFSET_TO_NSLOTS_FROM_PC			-2
+#define OFFSET_TO_NSLOTS_TO_KEY				1
 
 #define OFFSET_FROM_FN_LENGTH_TO_KEY		4
 

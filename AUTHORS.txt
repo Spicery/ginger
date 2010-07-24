@@ -1,0 +1,14 @@
+AUTHORS.txt for AppGinger
+
+AppGinger - a fast interpreter for Ginger
+
+Copyright (c) 2010 Stephen Leach. AppGinger is distributed under the terms 
+of the GNU General Public License. This file is part of AppGinger.
+
+Development:
+  Stephen Leach <steve@steelypip.com>
+  
+Design Team:
+  Stephen Leach <steve@steelypip.com>
+  Chris Dollin <eh@electric-hedgehog.com> 
+

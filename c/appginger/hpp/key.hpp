@@ -47,6 +47,8 @@ const char * keyName( Ref key );
 #define RefToLong( r )   	( (long)( ToLong( r ) >> TAG ) )
 #define SmallToLong( r )	( (long)( ToLong( r ) >> TAG ) )
 
+#define ULongToSmall( x ) 	ToRef( ( x ) << TAG | INT_TAG )
+
 #define FwdToPtr4( r )		( ToULong( r ) & ~0x3 )
 #define Ptr4ToFwd( p )		ToRef( ToULong( p ) | FWD_TAG )
 
@@ -105,6 +107,7 @@ const char * keyName( Ref key );
 #define RECORD_KIND				1
 #define VECTOR_KIND				2
 #define STRING_KIND				3
+#define PAIR_KIND				4
 #define OTHER_KIND				7
 	
 #define LEN_WIDTH					8
@@ -117,7 +120,7 @@ const char * keyName( Ref key );
 #define sysBoolKey      		MAKE_KEY( 1, 0, PRIMITIVE_KIND )
 #define sysTerminKey    		MAKE_KEY( 2, 0, PRIMITIVE_KIND )
 #define sysNilKey       		MAKE_KEY( 3, 0, PRIMITIVE_KIND )
-#define sysPairKey      		MAKE_KEY( 4, 2, RECORD_KIND )
+#define sysPairKey      		MAKE_KEY( 4, 2, PAIR_KIND )
 #define sysVectorKey    		MAKE_KEY( 5, 0, VECTOR_KIND )
 #define sysStringKey    		MAKE_KEY( 6, 0, STRING_KIND )
 #define sysWordKey      		MAKE_KEY( 7, 0, OTHER_KIND )
@@ -129,8 +132,12 @@ const char * keyName( Ref key );
 #define sysMapletKey			MAKE_KEY( 13, 2, RECORD_KIND )
 
 //	Recognisers
-#define IsPair( x )		( IsObj( x ) && ( *RefToPtr4( x ) == sysPairKey ) )
-#define IsVector( x )	( IsObj( x ) && ( *RefToPtr4( x ) == sysVectorKey ) )
+#define IsPair( x )				( IsObj( x ) && ( *RefToPtr4( x ) == sysPairKey ) )
+#define IsVector( x )			( IsObj( x ) && ( *RefToPtr4( x ) == sysVectorKey ) )
+
+#define IsVectorKind( x )		( IsObj( x ) && KindOfSimpleKey( *RefToPtr4( x ) ) == VECTOR_KIND )
+#define IsRecordKind( x )		( IsObj( x ) && KindOfSimpleKey( *RefToPtr4( x ) ) == RECORD_KIND )
+#define IsStringKind( x )		( IsObj( x ) && KindOfSimpleKey( *RefToPtr4( x ) ) == STRING_KIND )
 
 
 ////////////////////////////////////////////////////////////////////////

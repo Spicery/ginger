@@ -216,6 +216,11 @@ void Machine3::core( bool init_mode, Ref *pc ) {
         	VMSP[ SP_PREV_SP ] = prev;
         	VMSP[ SP_LINK ] = VMLINK;
         	VMSP[ SP_FUNC ] = VMLINKFUNC;
+        #elif CALL_STACK_LAYOUT_STYLE == CSLS_NO_NSLOT
+        	VMSP -= SP_OVERHEAD + ToULong( pc[ -3 ] );
+        	VMSP[ SP_PREV_SP ] = prev;
+        	VMSP[ SP_LINK ] = VMLINK;
+        	VMSP[ SP_FUNC ] = VMLINKFUNC;
         #else
         	#error
         #endif
@@ -244,6 +249,11 @@ void Machine3::core( bool init_mode, Ref *pc ) {
         	VMSP[ SP_PREV_SP ] = prev;
         	VMSP[ SP_LINK ] = VMLINK;
         	VMSP[ SP_FUNC ] = VMLINKFUNC;
+        #elif CALL_STACK_LAYOUT_STYLE == CSLS_NO_NSLOT
+        	VMSP -= SP_OVERHEAD + ToULong( pc[ -3 ] );
+        	VMSP[ SP_PREV_SP ] = prev;
+        	VMSP[ SP_LINK ] = VMLINK;
+        	VMSP[ SP_FUNC ] = VMLINKFUNC;
         #else
         	#error
         #endif
@@ -264,6 +274,11 @@ void Machine3::core( bool init_mode, Ref *pc ) {
         #elif CALL_STACK_LAYOUT_STYLE == CSLS_VARIANT
         	VMSP -= SP_OVERHEAD + ToULong( pc[ -3 ] );
         	VMSP[ SP_NSLOTS ] = pc[ -3 ];
+        	VMSP[ SP_PREV_SP ] = prev;
+        	VMSP[ SP_LINK ] = VMLINK;
+        	VMSP[ SP_FUNC ] = VMLINKFUNC;
+        #elif CALL_STACK_LAYOUT_STYLE == CSLS_NO_NSLOT
+        	VMSP -= SP_OVERHEAD + ToULong( pc[ -3 ] );
         	VMSP[ SP_PREV_SP ] = prev;
         	VMSP[ SP_LINK ] = VMLINK;
         	VMSP[ SP_FUNC ] = VMLINKFUNC;

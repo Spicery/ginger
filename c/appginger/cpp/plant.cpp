@@ -297,10 +297,10 @@ void PlantClass::compileTerm( Term term ) {
 				if ( slot >= 0 || !id->is_local ) {
 					vmiPUSHID(  this, id );
 				} else {
-					mishap( "Ident record not assigned slot (%s)", term_named_string( term ).c_str() );
+					throw Mishap( "Ident record not assigned slot" ).culprit( "Identifier",  term_named_string( term ).c_str() );
 				}
 			} else {
-				mishap( "Unlifted identifier %s", term_named_string( term ).c_str() );
+				throw Mishap( "Unlifted identifier" ).culprit( "Identifier",  term_named_string( term ).c_str() );
 			}
 			break;
 		}
@@ -410,7 +410,7 @@ void PlantClass::compileTerm( Term term ) {
 		 	break;
 		}
 		default: {
-			mishap( "PLANT_TERM: Not implemented yet, functor '%s'", functor_name( fnc ) );
+			throw Mishap( "PLANT_TERM: Not implemented yet" ).culprit( "functor", functor_name( fnc ) );
 		}
 	}
 }

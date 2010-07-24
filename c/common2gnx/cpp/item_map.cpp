@@ -37,8 +37,10 @@ ItemMap::ItemMap() {
 	add( ",", 			tokty_comma, 		BFo, 		prec_comma	);
 	add( "-", 			tokty_sub, 		BSA, 		700			);
 	add( ".", 			tokty_dot, 		PoF, 		200			);
+	add( "...",         tokty_explode,  SOp,        250			);
 	add( "/", 			tokty_div, 		BSA, 		500			);
 	add( ":=", 			tokty_bind, 		Pat, 		2000		);
+	add( ":-", 			tokty_maplet, 		BSA, 		2000		);
 	add( "->",			tokty_assign,		BFo,		2000		);
 	add( ";", 			tokty_semi, 		PoF, 		prec_semi	);
 	add( "<", 			tokty_lt, 		BSA, 			1200		);

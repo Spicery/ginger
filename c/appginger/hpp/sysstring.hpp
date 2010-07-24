@@ -16,19 +16,15 @@
     along with AppGinger.  If not, see <http://www.gnu.org/licenses/>.
 \******************************************************************************/
 
-#include "cagecrawl.hpp"
+#ifndef SYS_STRING_HPP
+#define SYS_STRING_HPP
 
+#include "common.hpp"
+#include "machine.hpp"
 #include "mishap.hpp"
-#include "key.hpp"
-#include "objlayout.hpp"
 
-Ref * CageCrawl::next() {
-	if ( this->current < this->cage->top ) {
-		Ref * key = findObjectKey( this->current );
-		unsigned long len = lengthAfterObjectKey( key );
-		this->current = key + len + 1;
-		return key;
-	} else {
-		return 0;
-	}
-}
+extern Ref * sysStringAppend( Ref *pc, class MachineClass * vm );
+extern Ref * sysStringExplode( Ref *pc, class MachineClass * vm );
+
+
+#endif

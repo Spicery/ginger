@@ -196,6 +196,13 @@ Node ReadStateClass::postfix_processing( Node lhs, Item item, int prec ) {
 				//fprintf( stderr, "DEBUG arity %d\n", term_arity( t ) );
 				return t;
 			}
+			case tokty_explode: {
+				NodeFactory expl( "sysapp" );
+				expl.putAttr( "name", "explode" );
+				expl.addNode( lhs );
+				Node t = expl.node();
+				return t;
+			}
 			default: {
 				throw Mishap( "This keyword not handled" ).culprit( "Keyword", item->nameString() );
 			}
@@ -256,8 +263,8 @@ Node ReadStateClass::read_syscall() {
 	Item it = ifact->read();
 	if ( it->tok_type == tokty_id ) {
 		//const std::string & name = it->nameString();
-		NodeFactory sc( "syscall" );
-		sc.putAttr( "name", it->nameString() );
+		NodeFactory sc( "sysfn" );
+		sc.putAttr( "value", it->nameString() );
 		return sc.node();	//term_new_ref( tokty_syscall, (Ref)sc );
 	} else {
 		throw Mishap( "Invalid token after >-> (syscall) arrow" ).culprit( it->nameString() );

@@ -203,9 +203,7 @@ MachineClass * AppGinger::newMachine() {
 		case 2: return new Machine2( *this );
 		case 3: return new Machine3( *this );
 		default: {
-			warning( 
-				"Invalid implementation (#%d), using implementation %d\n", this->machine_impl_num, 1 
-			);
+			cerr <<  "Invalid implementation (" << this->machine_impl_num << ") using implementation 1" << endl;
 			return new Machine1( *this );
 			break;
 		}

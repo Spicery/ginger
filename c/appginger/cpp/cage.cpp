@@ -25,9 +25,9 @@
 #include <cstdlib>
 
 #include "heap.hpp"
-#include "gc.hpp"
 #include "key.hpp"
 #include "mishap.hpp"
+#include "machine.hpp"
 
 #include <iostream>
 
@@ -134,6 +134,15 @@ void XfrClass::xfrSubstring( const char *s, int a, int b ) {
 	*/
 	memcpy( (void *)(this->tmptop), s + a, b - a + 1 );
 	this->tmptop += ( sizeof( Ref ) + b - a ) / sizeof( Ref );
+}
+
+//  Copy characters from index a to b of s to an offset from tmptop
+void XfrClass::xfrSubstringStep( int offset, const char *s, int a, int b ) {
+	memcpy( reinterpret_cast< char * >( this->tmptop ) + offset, s + a, b - a + 1 );
+}
+
+void XfrClass::xfrSubstringFinish( int offset ) {
+	this->tmptop += ( offset + sizeof( Ref ) - 1 ) / sizeof( Ref );
 }
 
 void XfrClass::xfrCopy( Ref * words, int n ) {

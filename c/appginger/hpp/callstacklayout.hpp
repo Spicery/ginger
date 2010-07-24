@@ -23,7 +23,8 @@
 //	include files were not included.
 #define CSLS_ORIGINAL 1
 #define CSLS_VARIANT 2
-#define CALL_STACK_LAYOUT_STYLE CSLS_VARIANT
+#define CSLS_NO_NSLOT 3
+#define CALL_STACK_LAYOUT_STYLE CSLS_NO_NSLOT
 
 #if CALL_STACK_LAYOUT_STYLE == CSLS_ORIGINAL
 
@@ -94,7 +95,40 @@
 	
 	#define LOCAL( N ) 			VMSP[N]
 	#define LOCAL_OF( X, N ) 	(X)[N]
+
+#elif CALL_STACK_LAYOUT_STYLE == CSLS_NO_NSLOT
+
+//	Variant without NSLOT
+/*	DOWN is DECREASING addresses
+
++----------+
+|slot[N-1] |
++----------+
+|   ...    |
++----------+
+| slot[2]  |
++----------+
+| slot[1]  |
++----------+
+| slot[0]  | <-<
++----------+
+|   prev   |    |   
++----------+    |	direction of growth
+|   link   |    |
++----------+	v
+|   func   |
++----------+
+*/
+	#define SP_OVERHEAD		3
+	#define SP_FUNC			-3
+	#define SP_LINK 		-2
+	#define SP_PREV_SP 		-1
 	
+	#define LOCAL( N ) 			VMSP[N]
+	#define LOCAL_OF( X, N ) 	(X)[N]
+	#define NSLOTS( sp )( ToRefRef( (sp)[ SP_PREV_SP ] ) - (sp) ) - SP_OVERHEAD;
+
+
 #else
 	#error
 #endif

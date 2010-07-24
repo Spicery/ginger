@@ -28,7 +28,7 @@
 
 class MachineClass;
 
-
+extern unsigned long refHash( Ref r );
 extern void refPrint( Ref r );
 extern void refPtrPrint( Ref * r );
 extern void refPrint( std::ostream & out, Ref r );
@@ -38,9 +38,10 @@ extern Ref refKey( Ref r );
 
 extern Ref * sysRefPrint( Ref * pc, MachineClass * );
 extern Ref * sysRefPrintln( Ref * pc, MachineClass * );
-extern Ref * sysNewList( Ref * pc, MachineClass * vm );
-extern Ref * sysNewListOnto( Ref * pc, MachineClass * vm );
-extern Ref * sysIsNil( Ref * pc, class MachineClass * vm );
+extern Ref * sysExplode( Ref *pc, class MachineClass * vm );
+extern Ref * sysLength( Ref *pc, class MachineClass * vm );
+extern Ref * sysHash( Ref *pc, class MachineClass * vm );
+extern Ref * sysAppend( Ref *pc, class MachineClass * vm );
 
 #include "datatypes.hpp.auto"
 

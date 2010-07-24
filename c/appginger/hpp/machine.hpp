@@ -60,11 +60,14 @@ public:
 	
 public:
 	Ref	&		fastPeek() { return *vp; }
+	Ref &		fastPeek( int n ) { return *( vp - n ); } 
 	Ref			fastPop() { return *vp--; }
 	Ref			fastSet( Ref r ) { return *vp = r; }
 	void		fastPush( Ref r ) { *++vp = r; }
 	Ref			fastSubscr( int n ) { return *( vp - n ); }
 	void 		fastDrop( int n ) { vp -= n; }
+	ptrdiff_t	stackLength() { return this->vp - this->vp_base; }
+	void		checkStackRoom( long n );
 	
 public:
 

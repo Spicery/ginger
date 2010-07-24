@@ -45,17 +45,9 @@ MachineClass::MachineClass( AppGinger & application ) :
 	this->vp_base = new Ref[ RANDOM_SIZE ];
 	this->vp_end = this->vp_base + RANDOM_SIZE;
 	this->vp = this->vp_base;
-#if CALL_STACK_LAYOUT_STYLE == CSLS_ORIGINAL
-	this->sp_base = new Ref[ RANDOM_SIZE ];
-	this->sp_end = this->sp_base + RANDOM_SIZE;
-	this->sp = this->sp_base;
-#elif CALL_STACK_LAYOUT_STYLE == CSLS_VARIANT || CALL_STACK_LAYOUT_STYLE == CSLS_NO_NSLOT
 	this->sp_base = this->vp_end - 1;
 	this->sp_end = this->vp_base - 1;
 	this->sp = this->sp_base;
-#else 
-	#error
-#endif
 }
 
 MachineClass::~MachineClass() {
@@ -96,26 +88,6 @@ Ref * MachineClass::setUpPC( Ref r ) {
 	this->vp = this->vp_base;
 	*this->vp = sys_underflow;
 
-#if CALL_STACK_LAYOUT_STYLE == CSLS_ORIGINAL
-	//	The previous function object should be set to null.
-	*( this->sp++ ) = 0;	
-	//	The previous link address should be set to null too.
-	*( this->sp++ ) = 0;	
-	//	And the previous stack point is additionally set to null.
-	*( this->sp++ ) = 0;
-	//	The number of locals variables - obviously null.
-	*( this->sp++ ) = 0;
-#elif CALL_STACK_LAYOUT_STYLE == CSLS_VARIANT
-	*this->sp = sys_underflow;
-	//	The number of locals variables - obviously null.
-	this->sp[ SP_NSLOTS ] = 0;
-	//	And the previous stack point is additionally set to null.
-	this->sp[ SP_PREV_SP ] = 0;
-	//	The previous link address should be set to null too.
-	this->sp[ SP_LINK ] = 0;
-	//	The previous function object should be set to null.
-	this->sp[ SP_FUNC ] = 0;
-#elif CALL_STACK_LAYOUT_STYLE == CSLS_NO_NSLOT
 	*this->sp = sys_underflow;
 	//	And the previous stack point is additionally set to null.
 	this->sp[ SP_PREV_SP ] = 0;
@@ -123,9 +95,6 @@ Ref * MachineClass::setUpPC( Ref r ) {
 	this->sp[ SP_LINK ] = 0;
 	//	The previous function object should be set to null.
 	this->sp[ SP_FUNC ] = 0;
-#else
-	#error
-#endif
 		
 	//	Now store a fake return address.  This will cause this to halt.
 	//	That's a little bit nasty but we'll sort that out later.
@@ -233,60 +202,6 @@ static void bite_me() {
 	throw;
 }
 
-#if CALL_STACK_LAYOUT_STYLE == CSLS_ORIGINAL
-
-void MachineClass::check_call_stack_integrity() {
-	Ref * ptr = this->sp_base + 4;
-	for ( int count = 0; ptr < this->sp; count++ ) {
-		Ref * func = ToRefRef( ptr[0] );
-		Ref * link = ToRefRef( ptr[1] );
-		Ref * prev = ToRefRef( ptr[2] );
-		unsigned long nslots = (unsigned long)ptr[3];
-		
-		if ( func ) {
-			ptrdiff_t d = link - func;
-			if (!( 0 <= d && d <= 1000 )) bite_me();
-		}
-		
-		if ( nslots > 100 ) bite_me();
-		
-		ptr += 4 + nslots;
-	}
-}
-
-void MachineClass::checkStackRoom( unsigned long n ) {
-	throw "unimplemented";
-}
-
-
-
-#elif CALL_STACK_LAYOUT_STYLE == CSLS_VARIANT
-
-void MachineClass::check_call_stack_integrity() {
-	Ref * ptr = this->sp;
-	for ( int count = 0; ptr > this->sp_base; count++ ) {
-		Ref * func = ToRefRef( ptr[SP_FUNC] );
-		Ref * link = ToRefRef( ptr[SP_LINK] );
-		Ref * prev = ToRefRef( ptr[SP_PREV_SP] );
-		unsigned long nslots = (unsigned long)ptr[SP_NSLOTS];
-		
-		if ( func ) {
-			ptrdiff_t d = link - func;
-			if (!( 0 <= d && d <= 1000 )) bite_me();
-		}
-		
-		if ( nslots > 100 ) bite_me();
-		ptr = prev;		
-	}
-}
-
-void MachineClass::checkStackRoom( unsigned long n ) {
-	throw "unimplemented";
-}
-
-
-
-#elif CALL_STACK_LAYOUT_STYLE == CSLS_NO_NSLOT
 
 void MachineClass::check_call_stack_integrity() {
 	Ref * ptr = this->sp;
@@ -313,9 +228,3 @@ void MachineClass::check_call_stack_integrity() {
 void MachineClass::checkStackRoom( long n ) {
 	if ( this->sp < this->vp + n + STACK_BUFFER_OVERHEAD ) throw Mishap( "Stack overflow" );
 }
-
-
-
-#else
-	#error
-#endif

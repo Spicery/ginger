@@ -25,6 +25,8 @@
 
 extern Ref * sysVectorAppend( Ref *pc, class MachineClass * vm );
 extern Ref * sysVectorExplode( Ref *pc, class MachineClass * vm );
+extern Ref * sysVectorLength( Ref *pc, class MachineClass * vm );
+extern Ref * sysFastVectorLength( Ref *pc, class MachineClass * vm );
 
 
 #endif

@@ -19,84 +19,6 @@
 #ifndef CALL_STACK_LAYOUT_HPP
 #define CALL_STACK_LAYOUT_HPP
 
-//	Don't choose 0 for these as that would be error prone if the
-//	include files were not included.
-#define CSLS_ORIGINAL 1
-#define CSLS_VARIANT 2
-#define CSLS_NO_NSLOT 3
-#define CALL_STACK_LAYOUT_STYLE CSLS_NO_NSLOT
-
-#if CALL_STACK_LAYOUT_STYLE == CSLS_ORIGINAL
-
-/*	UP is INCREASING addresses
-+----------+
-|   func   |    ^
-+----------+    |
-|   link   |    |   direction of growth
-+----------+    |
-|   prev   |
-+----------+
-|    N     |
-+----------+
-| slot[0]  | <-<
-+----------+
-| slot[1]  |
-+----------+
-| slot[2]  |
-+----------+
-|   ...    |
-+----------+
-|slot[N-1] |
-+----------+
-*/
-
-
-	#define SP_OVERHEAD		4
-	#define SP_FUNC			-4
-	#define SP_LINK 		-3
-	#define SP_PREV_SP 		-2
-	#define SP_NSLOTS 		-1
-	
-	#define LOCAL( N ) 			VMSP[N]
-	#define LOCAL_OF( X, N )	(X)[ N ]
-
-#elif CALL_STACK_LAYOUT_STYLE == CSLS_VARIANT
-
-//	Variant
-/*	DOWN is DECREASING addresses
-
-+----------+
-|slot[N-1] |
-+----------+
-|   ...    |
-+----------+
-| slot[2]  |
-+----------+
-| slot[1]  |
-+----------+
-| slot[0]  | <-<
-+----------+
-|    N     |
-+----------+    |
-|   prev   |    |   direction of growth
-+----------+    |
-|   link   |    v
-+----------+
-|   func   |
-+----------+
-*/
-
-
-	#define SP_OVERHEAD		4
-	#define SP_FUNC			-4
-	#define SP_LINK 		-3
-	#define SP_PREV_SP 		-2
-	#define SP_NSLOTS 		-1
-	
-	#define LOCAL( N ) 			VMSP[N]
-	#define LOCAL_OF( X, N ) 	(X)[N]
-
-#elif CALL_STACK_LAYOUT_STYLE == CSLS_NO_NSLOT
 
 //	Variant without NSLOT
 /*	DOWN is DECREASING addresses
@@ -119,18 +41,14 @@
 |   func   |
 +----------+
 */
-	#define SP_OVERHEAD		3
-	#define SP_FUNC			-3
-	#define SP_LINK 		-2
-	#define SP_PREV_SP 		-1
-	
-	#define LOCAL( N ) 			VMSP[N]
-	#define LOCAL_OF( X, N ) 	(X)[N]
-	#define NSLOTS( sp )( ToRefRef( (sp)[ SP_PREV_SP ] ) - (sp) ) - SP_OVERHEAD;
 
+#define SP_OVERHEAD		3
+#define SP_FUNC			-3
+#define SP_LINK 		-2
+#define SP_PREV_SP 		-1
 
-#else
-	#error
-#endif
+#define LOCAL( N ) 			VMSP[N]
+#define LOCAL_OF( X, N ) 	(X)[N]
+#define NSLOTS( sp )( ToRefRef( (sp)[ SP_PREV_SP ] ) - (sp) ) - SP_OVERHEAD;
 
 #endif

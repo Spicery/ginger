@@ -432,13 +432,7 @@ public:
 			sp[ SP_FUNC ] = new_func;
 			sp[ SP_LINK ] = new_func + d;
 			
-			#if CALL_STACK_LAYOUT_STYLE == CSLS_ORIGINAL || CALL_STACK_LAYOUT_STYLE == CSLS_VARIANT
-				unsigned long n = ToULong( sp[ SP_NSLOTS ] );
-			#elif CALL_STACK_LAYOUT_STYLE == CSLS_NO_NSLOT
-				unsigned long n = NSLOTS( sp );
-			#else
-				#error
-			#endif
+			unsigned long n = NSLOTS( sp );
 			for ( unsigned long i = 0; i < n; i++ ) {
 				this->forward( LOCAL_OF( sp, i ) );
 			}			

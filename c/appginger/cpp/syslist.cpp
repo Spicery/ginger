@@ -138,11 +138,8 @@ Ref * sysListAppend( Ref * pc, class MachineClass * vm ) {
 }
 
 Ref * sysListExplode( Ref *pc, class MachineClass * vm ) {
-
 	if ( vm->count != 1 ) throw Mishap( "Wrong number of arguments for listExplode" );
-	
 	Ref r = vm->fastPop();
-	
 	if ( !IsList( r ) ) throw Mishap( "Argument mismatch for listExplode" );
 
 	while ( IsPair( r ) ) {
@@ -155,7 +152,7 @@ Ref * sysListExplode( Ref *pc, class MachineClass * vm ) {
 }
 
 Ref * sysListLength( Ref *pc, class MachineClass * vm ) {
-	if ( vm->count =! 1 ) throw Mishap( "Wrong number of arguments for listLength" );
+	if ( vm->count != 1 ) throw Mishap( "Wrong number of arguments for listLength" );
 	Ref r = vm->fastPeek();
 	if ( !IsList( r ) ) throw Mishap( "Argument mismatch for listLength" );
 

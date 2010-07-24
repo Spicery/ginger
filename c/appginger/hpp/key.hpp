@@ -69,7 +69,7 @@ const char * keyName( Ref key );
 //  deferrals.
 ////////////////////////////////////////////////////////////////////////
 
-#define TAGG            5
+#define TAGG            		5
 #define TAGG_MASK				0x1F
 #define FLOAT_MASK				0xF
 #define sys_absent     		 	ToRef( 0 << TAG | SIM_TAG )
@@ -177,7 +177,7 @@ const char * keyName( Ref key );
 #define sys_undefined			ToRef( 3 << TAGGG | MISC_TAGGG )
 
 //	Nil
-#define IsNil( x )		( x == sys_nil )
+#define IsNil( x )				( x == sys_nil )
 
 
 ////////////////////////////////////////////////////////////////////////

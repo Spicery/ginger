@@ -84,3 +84,20 @@ Ref * sysVectorExplode( Ref *pc, class MachineClass * vm ) {
 	return pc;
 }
 
+Ref * sysVectorLength( Ref *pc, class MachineClass * vm ) {
+	if ( vm->count != 1 ) throw Mishap( "Wrong number of arguments for vectorLength" );
+	Ref r = vm->fastPeek();
+	if ( !IsVector( r ) ) throw Mishap( "Argument mismatch for vectorLength" );
+	Ref * obj_K = ObjToPtr4( r );
+	
+	vm->fastPeek() = LongToSmall( sizeAfterKeyOfVector( obj_K ) );
+	return pc;
+}
+
+Ref * sysFastVectorLength( Ref *pc, class MachineClass * vm ) {
+	Ref r = vm->fastPeek();
+	Ref * obj_K = ObjToPtr4( r );
+	vm->fastPeek() = LongToSmall( sizeAfterKeyOfVector( obj_K ) );
+	return pc;
+}
+

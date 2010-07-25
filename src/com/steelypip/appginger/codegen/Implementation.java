@@ -64,6 +64,7 @@ public abstract class Implementation extends GeneralInstructionSet {
 		answer.add( this.set_calls_ir().init( "set_calls", "ir" ) );
 		answer.add( this.start_ir().init( "start", "ir" ) );
 		answer.add( this.syscall_ir().init( "syscall", "ir" ) );
+		answer.add( this.sysreturn_i().init( "sysreturn", "i" ) );
 		return this.cached = answer;
 	}
 	

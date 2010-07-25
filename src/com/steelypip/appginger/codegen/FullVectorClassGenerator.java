@@ -39,7 +39,7 @@ public class FullVectorClassGenerator extends DataClassGenerator {
 		cpp.format( "\n" );		
 		
 		hpp.format( "extern Ref * %s( Ref * pc, MachineClass * vm );\n", this.indexName() );
-		this.addSysConst( "index" + this.dataKeyRoot, 2, this.indexName() );
+		this.addSysConst( "index" + this.dataKeyRoot, 2, 1, this.indexName() );
 	}
 
 	private void generateConstructor( PrintWriter cpp, PrintWriter hpp ) {
@@ -55,7 +55,7 @@ public class FullVectorClassGenerator extends DataClassGenerator {
 		cpp.format( "}\n" );
 
 		hpp.format( "extern Ref * %s( Ref * pc, MachineClass * vm );\n", this.consName() );
-		this.addSysConst( "new" + this.dataKeyRoot, Arity.MANY, this.consName() );
+		this.addSysConst( "new" + this.dataKeyRoot, Arity.MANY, new Arity( 1 ), this.consName() );
 
 	}
 	

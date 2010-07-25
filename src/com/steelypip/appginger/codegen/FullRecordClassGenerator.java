@@ -41,7 +41,7 @@ public class FullRecordClassGenerator extends DataClassGenerator {
 		cpp.format( "}\n\n" );
 		
 		hpp.format( "extern Ref * %s( Ref * pc, MachineClass * vm );\n", accessorName );
-		this.addSysConst( field, 1, accessorName );
+		this.addSysConst( field, 1, 1, accessorName );
 
 	}
 
@@ -77,7 +77,7 @@ public class FullRecordClassGenerator extends DataClassGenerator {
 		cpp.format( "}\n\n" );
 
 		hpp.format( "extern Ref * %s( Ref * pc, MachineClass * vm );\n", constructorName );
-		this.addSysConst( "new" + this.dataKeyRoot, this.fieldNames.length, constructorName );
+		this.addSysConst( "new" + this.dataKeyRoot, this.fieldNames.length, 1, constructorName );
 	}
 	
 	

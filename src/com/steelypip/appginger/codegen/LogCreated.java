@@ -9,12 +9,12 @@ import java.util.Map;
 
 public class LogCreated {
 	
-	final Map< String, Pair< Arity, String > > mapping = new HashMap< String, Pair< Arity, String > >();
+	final Map< String, SysInfo > mapping = new HashMap< String, SysInfo >();
 	
-	public void addSysConst( final String ginger_name, final Arity arity, final String internal_name ) {
-		final Pair< Arity, String > nm = this.mapping.get( ginger_name );
+	public void addSysConst( final String ginger_name, final Arity in_arity, final Arity out_arity, final String internal_name ) {
+		final SysInfo nm = this.mapping.get( ginger_name );
 		if ( nm == null ) {
-			this.mapping.put( ginger_name, new Pair< Arity, String >( arity, internal_name ) );
+			this.mapping.put( ginger_name, new SysInfo( internal_name, in_arity, out_arity ) );
 		} else { 
 			throw new RuntimeException( "Repeated name" );
 		}
@@ -35,19 +35,20 @@ public class LogCreated {
 
 	public void generateSysMapInclude( final PrintWriter inc ) {
 		for ( String ginger_name : mapping.keySet() ) {
-			Pair< Arity, String > p = this.mapping.get( ginger_name );
+			SysInfo p = this.mapping.get( ginger_name );
 			inc.format( 
-				"SysMap::value_type( \"%s\", SysInfo( fnc_syscall, %s, %s ) ),\n",
+				"SysMap::value_type( \"%s\", SysInfo( fnc_syscall, %s, %s, %s ) ),\n",
 				ginger_name,
-				p.getLeft(),
-				p.getRight()
+				p.getInArity(),
+				p.getOutArity(),
+				p.getName()
 			);
 		}
 	}
 
 	public void generateSysConstTableInclude( PrintWriter inc ) {
 		for ( String ginger_name : mapping.keySet() ) {
-			Pair< Arity, String > p = this.mapping.get( ginger_name );
+			SysInfo p = this.mapping.get( ginger_name );
 			inc.format( 
 				"this->table[ \"%s\" ] = new SysConst( \"sysfn\", \"%s\" );\n",
 				ginger_name,

@@ -264,6 +264,11 @@ public class GenericImplementation extends Implementation {
 		return new GenericInstruction();
 	}
 
+	@Override
+	public Instruction sysreturn_i() {
+		return new GenericInstruction();
+	}
+
 
 	@Override
 	public int getNumId() {

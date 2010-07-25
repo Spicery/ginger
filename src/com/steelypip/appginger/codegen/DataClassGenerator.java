@@ -41,12 +41,12 @@ public abstract class DataClassGenerator {
 		this.log.addHppFile( hppfile );
 	}
 	
-	public void addSysConst( final String gname, final Arity a, final String cname ) {
-		this.log.addSysConst( gname, a, cname );
+	public void addSysConst( final String gname, final Arity in_arity, final Arity out_arity, final String cname ) {
+		this.log.addSysConst( gname, in_arity, out_arity, cname );
 	}
 	
-	public void addSysConst( final String gname, final int a, final String cname ) {
-		this.log.addSysConst( gname, new Arity( a ), cname );
+	public void addSysConst( final String gname, final int a, final int b, final String cname ) {
+		this.log.addSysConst( gname, new Arity( a ), new Arity( b ), cname );
 	}
 	
 	protected void generateRecogniser( final PrintWriter cpp, final PrintWriter hpp ) {
@@ -62,7 +62,7 @@ public abstract class DataClassGenerator {
 		cpp.format( "}\n\n" );
 		
 		hpp.format( "extern Ref * %s( Ref * pc, MachineClass * vm );\n", recogniserName );
-		this.addSysConst( "is" + this.dataKeyRoot, 1, recogniserName );
+		this.addSysConst( "is" + this.dataKeyRoot, 1, 1, recogniserName );
 	}
 
 	public static String capitalise( final String field ) { 

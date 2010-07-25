@@ -51,3 +51,4 @@
 	Ref spc_set_calls;
 	Ref spc_start;
 	Ref spc_syscall;
+	Ref spc_sysreturn;

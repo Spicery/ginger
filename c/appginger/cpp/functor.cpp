@@ -70,6 +70,7 @@ const char * functor_name( Functor tag ) {
 	case fnc_string : return "string";
 	case fnc_sub : return "sub";
 	case fnc_syscall : return "syscall";
+	case fnc_sysfn : return "sysfn";
 	case fnc_until : return "until";
 	case fnc_var : return "var";
 	case fnc_vector : return "vector";

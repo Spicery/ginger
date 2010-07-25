@@ -80,8 +80,9 @@ Ref HeapClass::copyString( const char *s ) {
 	//	printf( "Set origin to '%x'\n", ToUInt( sysStringKey ) );
 	xfr.xfrSubstring( s, 0, n );
 	return xfr.makeRef();
-
 }
+
+
 
 
 HeapClass::HeapClass( MachineClass * machine ) :

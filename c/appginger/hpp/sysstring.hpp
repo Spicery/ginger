@@ -25,6 +25,7 @@
 
 extern Ref * sysStringAppend( Ref *pc, class MachineClass * vm );
 extern Ref * sysStringExplode( Ref *pc, class MachineClass * vm );
+extern Ref * sysStringLength( Ref *pc, class MachineClass * vm );
 
 
 #endif

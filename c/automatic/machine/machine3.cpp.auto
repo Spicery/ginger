@@ -433,6 +433,10 @@ void Machine3::core( bool init_mode, Ref *pc ) {
         MELT;
         RETURN( pc );
     }
+    L_sysreturn: {
+        VMPCFUNC = VMLINKFUNC;
+        RETURN( VMLINK );
+    }
     Initialize: {
         InstructionSet & ins = vm->instruction_set;
         ins.spc__add = &&L__add;
@@ -488,6 +492,7 @@ void Machine3::core( bool init_mode, Ref *pc ) {
         ins.spc_set_calls = &&L_set_calls;
         ins.spc_start = &&L_start;
         ins.spc_syscall = &&L_syscall;
+        ins.spc_sysreturn = &&L_sysreturn;
         return;
     }
 }

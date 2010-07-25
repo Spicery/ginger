@@ -3,6 +3,8 @@
 #include <string>
 #include <map>
 
+#define SYSFN( x )    this->table[ x ] = new SysConst( "sysfn", x )
+#define SYSFN2( x, y )    this->table[ x ] = new SysConst( "sysfn", y )
 
 class SysConstTable {
 	typedef std::map< std::string, SysConst * > Table;
@@ -30,9 +32,25 @@ public:
 		this->table[ "not" ] = new SysConst( "sysfn", "not" );
 		
 		//	Misc
-		this->table[ "garbageCollect" ] = new SysConst( "sysfn", "garbageCollect" );
-		this->table[ "print" ] = new SysConst( "sysfn", "refPrint" );
-		this->table[ "println" ] = new SysConst( "sysfn", "refPrintln" );
+		SYSFN( "garbageCollect" );
+		SYSFN2( "print", "refPrint" );
+		SYSFN2( "println", "refPrintln" );
+
+		SYSFN( "explode" );
+		SYSFN( "length" );
+		SYSFN( "append" );
+		
+		SYSFN( "listExplode" );
+		SYSFN( "listLength" );
+		SYSFN( "listAppend" );
+		
+		SYSFN( "vectorExplode" );
+		SYSFN( "vectorLength" );
+		SYSFN( "vectorAppend" );
+		
+		SYSFN( "stringExplode" );
+		SYSFN( "stringLength" );
+		SYSFN( "stringAppend" );
 		
 		//	Recordclasses & Vectorclasses
 		#include "sysconsts.inc.auto"

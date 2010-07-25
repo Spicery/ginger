@@ -28,9 +28,11 @@
 
 
 class IdentClass {
+private:
+	bool			is_local;
+
 public:
 	std::string		name;
-	bool			is_local;
 	int				slot; 		//	used for local idents
 	Ref				valof;		//	used for global idents
 	int 			level;		//	level of scope
@@ -38,6 +40,10 @@ public:
 
 public:
 	bool isSame( IdentClass * other );
+	bool isLocal() { return this->is_local; }
+	bool setLocal() { return this->is_local = true; }
+	bool isGlobal() { return !this->is_local; }
+	bool setGlobal() { return this->is_local = false; }
 	
 public:
 	IdentClass( const std::string & nm );

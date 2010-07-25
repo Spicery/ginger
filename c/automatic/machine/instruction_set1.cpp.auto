@@ -481,6 +481,11 @@ static Ref *spcfn_syscall( Ref *pc, Machine vm ) {
     RETURN( pc );
 }
 
+static Ref *spcfn_sysreturn( Ref *pc, Machine vm ) {
+    VMPCFUNC = VMLINKFUNC;
+    RETURN( VMLINK );
+}
+
 InstructionSet1::InstructionSet1() {
     this->spc__add = (Ref)spcfn__add;
     this->spc__decr = (Ref)spcfn__decr;
@@ -535,5 +540,6 @@ InstructionSet1::InstructionSet1() {
     this->spc_set_calls = (Ref)spcfn_set_calls;
     this->spc_start = (Ref)spcfn_start;
     this->spc_syscall = (Ref)spcfn_syscall;
+    this->spc_sysreturn = (Ref)spcfn_sysreturn;
 }
 

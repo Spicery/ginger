@@ -102,14 +102,26 @@ char term_char_cont( Term term ) {
 
 
 Term term_new_string( const char *str ) {
-	return shared< TermClass >( new StringTermClass( str ) );
+	return shared< TermClass >( new StringTermClass( fnc_string, str ) );
 }
 
 Term term_new_string( const std::string & str ) {
-	return shared< TermClass >( new StringTermClass( str.c_str() ) );
+	return shared< TermClass >( new StringTermClass( fnc_string, str.c_str() ) );
 }
 
 const char *term_string_cont( Term term ) {
+	return dynamic_cast< StringTermClass * >( term.get() )->charArray();
+}
+
+Term term_new_sysfn( const char *str ) {
+	return shared< TermClass >( new StringTermClass( fnc_sysfn, str ) );
+}
+
+Term term_new_sysfn( const std::string & str ) {
+	return shared< TermClass >( new StringTermClass( fnc_sysfn, str.c_str() ) );
+}
+
+const char *term_sysfn_cont( Term term ) {
 	return dynamic_cast< StringTermClass * >( term.get() )->charArray();
 }
 
@@ -275,7 +287,7 @@ static void tprint( Term term, int level ) {
 			);
 			if ( id == NULL ) {
 				printf( "slot = <null>" );
-			} else if ( id->is_local ) {
+			} else if ( id->isLocal() ) {
 				printf( "slot = %d", id->slot );
 			} else {
 				printf( "global" );

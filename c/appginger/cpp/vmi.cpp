@@ -35,6 +35,10 @@ void vmiSYS_CALL( Plant plant, Ref r ) {
 	emitRef( plant, r );
 }
 
+void vmiSYS_RETURN( Plant plant ) {
+	emitSPC( plant, vmc_sysreturn );
+}
+
 void vmiOPERATOR( Plant plant, Functor fnc ) {
 	vmiAPPSPC(
 		plant,
@@ -76,7 +80,7 @@ void vmiINCR( Plant plant, int n ) {
 }
 
 void vmiPOPID( Plant plant, Ident id ) {
-	if ( id->is_local ) {
+	if ( id->isLocal() ) {
 		emitSPC( plant, vmc_pop_local );
 		emitRef( plant, ToRef( id->slot ) );
 	} else {
@@ -86,7 +90,7 @@ void vmiPOPID( Plant plant, Ident id ) {
 }
 
 void vmiPUSHID( Plant plant, Ident id ) {
-	if ( id->is_local ) {
+	if ( id->isLocal() ) {
 		switch ( id->slot ) {
 		case 0:
 			emitSPC( plant, vmc_push_local0 );
@@ -114,7 +118,7 @@ void vmiCALLS( Plant plant ) {
 }
 
 void vmiEND_CALL_ID( Plant plant, int var, Ident ident ) {
-	if ( ident->is_local ) {
+	if ( ident->isLocal() ) {
 		vmiEND( plant, var );
 		vmiPUSHID( plant, ident );
 		emitSPC( plant, vmc_calls );
@@ -126,7 +130,7 @@ void vmiEND_CALL_ID( Plant plant, int var, Ident ident ) {
 }
 
 void vmiSET_CALL_ID( Plant plant, int in_arity, Ident ident ) {
-	if ( ident->is_local ) {
+	if ( ident->isLocal() ) {
 		vmiSET( plant, in_arity );
 		vmiPUSHID( plant, ident );
 		emitSPC( plant, vmc_calls );
@@ -189,7 +193,6 @@ void vmiENTER( Plant plant ) {
 
 void vmiFUNCTION( Plant plant, int N, int A ) {
 	plant->save( N, A );
-	
 }
 
 Ref vmiENDFUNCTION( Plant plant ) {
@@ -426,8 +429,8 @@ void VmiRelOpFactory::ifSo( DestinationClass &dst ) {
 	if ( this->flag2 == '?' ) throw;
 	if ( this->op == '?' ) throw;
 	if ( 
-		( this->flag1 != 's' || this->ident1->is_local ) &&
-		( this->flag2 != 's' || !this->ident2->is_local )
+		( this->flag1 != 's' || this->ident1->isLocal() ) &&
+		( this->flag2 != 's' || !this->ident2->isLocal() )
 	) {
 		int arg1 = this->flag1 == 'i' ? this->int1 : this->ident1->slot;
 		int arg2 = this->flag1 == 'i' ? this->int2 : this->ident2->slot;
@@ -444,11 +447,11 @@ void VmiRelOpFactory::ifNot( DestinationClass &dst ) {
 	if ( this->flag1 == '?' ) throw;
 	if ( this->flag2 == '?' ) throw;
 	if ( this->op == '?' ) throw;
-	if ( this->flag1 == 's' && !this->ident1->is_local ) throw;
-	if ( this->flag2 == 's' && !this->ident2->is_local ) throw;
+	if ( this->flag1 == 's' && !this->ident1->isLocal() ) throw;
+	if ( this->flag2 == 's' && !this->ident2->isLocal() ) throw;
 	if ( 
-		( this->flag1 != 's' || this->ident1->is_local ) &&
-		( this->flag2 != 's' || !this->ident2->is_local )
+		( this->flag1 != 's' || this->ident1->isLocal() ) &&
+		( this->flag2 != 's' || !this->ident2->isLocal() )
 	) {
 		int arg1 = this->flag1 == 'i' ? this->int1 : this->ident1->slot;
 		int arg2 = this->flag1 == 'i' ? this->int2 : this->ident2->slot;

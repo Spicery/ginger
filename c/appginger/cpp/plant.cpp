@@ -28,6 +28,7 @@
 #include "key.hpp"
 #include "arity.hpp"
 #include "ident.hpp"
+#include "makesysfn.hpp"
 
 #ifndef NULL
 #define NULL 0
@@ -294,8 +295,8 @@ void PlantClass::compileTerm( Term term ) {
 			Ident id = term_named_ident( term );
 			if ( id != NULL ) {
 				int slot = id->slot;
-				if ( slot >= 0 || !id->is_local ) {
-					vmiPUSHID(  this, id );
+				if ( slot >= 0 || !id->isLocal() ) {
+					vmiPUSHID( this, id );
 				} else {
 					throw Mishap( "Ident record not assigned slot" ).culprit( "Identifier",  term_named_string( term ).c_str() );
 				}
@@ -371,6 +372,14 @@ void PlantClass::compileTerm( Term term ) {
 			vmiSYS_CALL( this, sc );
 			break;
 		}
+		case fnc_sysfn: {
+			Ident id = this->vm->dict()->lookup_or_add( term_sysfn_cont( term ) );
+			if ( id->valof == sys_absent ) {
+				id->valof = makeSysFn( this, term_sysfn_cont( term ) );
+			}
+			vmiPUSHID( this, id );
+			break;
+		}		
 		case fnc_for: {
 			// suppress unused argument ... will be used in the future
 			// Term bindings = term_index( term, 0 );

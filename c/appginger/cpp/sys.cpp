@@ -235,9 +235,6 @@ Ref * sysHash( Ref *pc, class MachineClass * vm ) {
 }
 
 
-
-
-
 //	This should be decomposed by implemented vectorAppend, listAppend
 //	and stringAppend
 Ref * sysAppend( Ref * pc, class MachineClass * vm ) {
@@ -333,17 +330,8 @@ Ref * sysLength( Ref *pc, class MachineClass * vm ) {
 				throw Mishap( "Trying to explode (...) a function object" );
 			} else if ( IsSimpleKey( key ) ) {
 				switch ( KindOfSimpleKey( key ) ) {
-					case PRIMITIVE_KIND: {
-						if ( key == sysNilKey ) {
-							vm->fastPeek() = LongToSmall( 0 );
-						} else {
-							throw;
-						}
-						break;
-					}
 					case VECTOR_KIND: {
-						vm->fastPeek() = LongToSmall( sizeAfterKeyOfVector( obj_K ) );
-						pc = sysFastVectorLength( pc, vm );
+						vm->fastPeek() = LongToSmall( sizeAfterKeyOfVector( obj_K ) );	// Same as pc = sysFastVectorLength( pc, vm );
 						break;
 					}
 					case PAIR_KIND: {
@@ -355,7 +343,7 @@ Ref * sysLength( Ref *pc, class MachineClass * vm ) {
 						break;
 					}
 					case STRING_KIND: {
-						vm->fastPeek() = LongToSmall( sizeAfterKeyOfVector( obj_K ) );
+						vm->fastPeek() = LongToSmall( sizeAfterKeyOfVector( obj_K ) );	// Same as pc = sysStringLength( pc, vm );
 						break;
 					}				
 					default: {
@@ -368,7 +356,9 @@ Ref * sysLength( Ref *pc, class MachineClass * vm ) {
 			} else {
 				throw "unimplemented";
 			}
-		} else {
+		} else if ( IsNil( r ) ) {
+			vm->fastPeek() = LongToSmall( 0 ); // same as pc = sysListLength( pc, vm );
+		} else {					
 			throw "unimplemented";
 		}
 		return pc;
@@ -381,27 +371,36 @@ Ref * sysLength( Ref *pc, class MachineClass * vm ) {
 
 typedef std::map< std::string, SysInfo > SysMap;
 const SysMap::value_type rawData[] = {
-	SysMap::value_type( "+", SysInfo( fnc_add, Arity( 2 ), 0 ) ),
-	SysMap::value_type( "-", SysInfo( fnc_sub, Arity( 2 ), 0 ) ),
-	SysMap::value_type( "*", SysInfo( fnc_mul, Arity( 2 ), 0 ) ),
-	SysMap::value_type( "/", SysInfo( fnc_div, Arity( 2 ), 0 ) ),
-	SysMap::value_type( "**", SysInfo( fnc_pow, Arity( 2 ), 0 ) ),
-	SysMap::value_type( "<", SysInfo( fnc_lt, Arity( 2 ), 0 ) ),
-	SysMap::value_type( "<=", SysInfo( fnc_lte, Arity( 2 ), 0 ) ),
-	SysMap::value_type( "==", SysInfo( fnc_eq, Arity( 2 ), 0 ) ),
-	SysMap::value_type( ">", SysInfo( fnc_gt, Arity( 2 ), 0 ) ),
-	SysMap::value_type( ">=", SysInfo( fnc_gte, Arity( 2 ), 0 ) ),	
-	SysMap::value_type( "gc", SysInfo( fnc_syscall, Arity( 0 ), sysGarbageCollect ) ),
-	SysMap::value_type( "hash", SysInfo( fnc_syscall, Arity( 1 ), sysHash ) ),
-	SysMap::value_type( "refPrint", SysInfo( fnc_syscall, Arity( 1 ), sysRefPrint ) ),
-	SysMap::value_type( "refPrintln", SysInfo( fnc_syscall, Arity( 1 ), sysRefPrintln ) ),
-	SysMap::value_type( "explode", SysInfo( fnc_syscall, Arity( 0, true ), sysExplode ) ),
-	SysMap::value_type( "length", SysInfo( fnc_syscall, Arity( 1 ), sysLength ) ),	
-	SysMap::value_type( "append", SysInfo( fnc_syscall, Arity( 1 ), sysAppend ) ),	
-	SysMap::value_type( "isNil", SysInfo( fnc_syscall, Arity( 1 ), sysIsNil ) ),
-	SysMap::value_type( "isList", SysInfo( fnc_syscall, Arity( 1 ), sysIsList ) ),
-	SysMap::value_type( "newList", SysInfo( fnc_syscall, Arity( 0, true ), sysNewList ) ),
-	SysMap::value_type( "newListOnto", SysInfo( fnc_syscall, Arity( 1, true ), sysNewListOnto ) ),
+	SysMap::value_type( "+", SysInfo( fnc_add, Arity( 2 ), Arity( 1 ), 0 ) ),
+	SysMap::value_type( "-", SysInfo( fnc_sub, Arity( 2 ), Arity( 1 ), 0 ) ),
+	SysMap::value_type( "*", SysInfo( fnc_mul, Arity( 2 ), Arity( 1 ), 0 ) ),
+	SysMap::value_type( "/", SysInfo( fnc_div, Arity( 2 ), Arity( 1 ), 0 ) ),
+	SysMap::value_type( "**", SysInfo( fnc_pow, Arity( 2 ), Arity( 1 ), 0 ) ),
+	SysMap::value_type( "<", SysInfo( fnc_lt, Arity( 2 ), Arity( 1 ), 0 ) ),
+	SysMap::value_type( "<=", SysInfo( fnc_lte, Arity( 2 ), Arity( 1 ), 0 ) ),
+	SysMap::value_type( "==", SysInfo( fnc_eq, Arity( 2 ), Arity( 1 ), 0 ) ),
+	SysMap::value_type( ">", SysInfo( fnc_gt, Arity( 2 ), Arity( 1 ), 0 ) ),
+	SysMap::value_type( ">=", SysInfo( fnc_gte, Arity( 2 ), Arity( 1 ), 0 ) ),	
+	SysMap::value_type( "gc", SysInfo( fnc_syscall, Arity( 0 ), Arity( 0 ), sysGarbageCollect ) ),
+	SysMap::value_type( "hash", SysInfo( fnc_syscall, Arity( 1 ), Arity( 1 ), sysHash ) ),
+	SysMap::value_type( "refPrint", SysInfo( fnc_syscall, Arity( 1 ), Arity( 0 ), sysRefPrint ) ),
+	SysMap::value_type( "refPrintln", SysInfo( fnc_syscall, Arity( 1 ), Arity( 0 ), sysRefPrintln ) ),
+	SysMap::value_type( "explode", SysInfo( fnc_syscall, Arity( 1 ), Arity( 0, true ), sysExplode ) ),
+	SysMap::value_type( "listExplode", SysInfo( fnc_syscall, Arity( 1 ), Arity( 0, true ), sysListExplode ) ),
+	SysMap::value_type( "vectorExplode", SysInfo( fnc_syscall, Arity( 1 ), Arity( 0, true ), sysVectorExplode ) ),
+	SysMap::value_type( "stringExplode", SysInfo( fnc_syscall, Arity( 1 ), Arity( 0, true ), sysStringExplode ) ),
+	SysMap::value_type( "length", SysInfo( fnc_syscall, Arity( 1 ), Arity( 1 ), sysLength ) ),	
+	SysMap::value_type( "listLength", SysInfo( fnc_syscall, Arity( 1 ), Arity( 1 ), sysListLength ) ),	
+	SysMap::value_type( "vectorLength", SysInfo( fnc_syscall, Arity( 1 ), Arity( 1 ), sysVectorLength ) ),	
+	SysMap::value_type( "stringLength", SysInfo( fnc_syscall, Arity( 1 ), Arity( 1 ), sysStringLength ) ),	
+	SysMap::value_type( "append", SysInfo( fnc_syscall, Arity( 2 ), Arity( 1 ), sysAppend ) ),	
+	SysMap::value_type( "listAppend", SysInfo( fnc_syscall, Arity( 2 ), Arity( 1 ), sysListAppend ) ),	
+	SysMap::value_type( "vectorAppend", SysInfo( fnc_syscall, Arity( 2 ), Arity( 1 ), sysVectorAppend ) ),	
+	SysMap::value_type( "stringAppend", SysInfo( fnc_syscall, Arity( 2 ), Arity( 1 ), sysStringAppend ) ),	
+	SysMap::value_type( "isNil", SysInfo( fnc_syscall, Arity( 1 ), Arity( 1 ), sysIsNil ) ),
+	SysMap::value_type( "isList", SysInfo( fnc_syscall, Arity( 1 ), Arity( 1 ), sysIsList ) ),
+	SysMap::value_type( "newList", SysInfo( fnc_syscall, Arity( 0, true ), Arity( 1 ), sysNewList ) ),
+	SysMap::value_type( "newListOnto", SysInfo( fnc_syscall, Arity( 1, true ), Arity( 1 ), sysNewListOnto ) ),
 	#include "sysmap.inc.auto"
 };
 const int numElems = sizeof rawData / sizeof rawData[0];

@@ -32,6 +32,7 @@ void vmiPUSHID( Plant plant, Ident id );
 void vmiPOPID( Plant plant, Ident id );
 void vmiAPPSPC( Plant plant, Instruction instr );
 void vmiSYS_CALL( Plant plant, Ref r );
+void vmiSYS_RETURN( Plant plant );
 void vmiRETURN( Plant plant );
 void vmiENTER( Plant plant );
 void vmiFUNCTION( Plant plant, int N, int A );

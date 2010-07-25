@@ -135,6 +135,9 @@ bool read_comp_exec_print( Machine vm, istream & input ) {
 	} catch ( Mishap & m ) {
 		m.report();
 		throw;
+	} catch ( SystemError & m ) {
+		m.report();
+		throw;
 	} 
 }
 

@@ -247,7 +247,7 @@ static Term makeSysApp( string & name, vector< Term > & kids ) {
 
 	SysInfo & info = smit->second;
 	Arity ka = kids_analysis( kids );
-	info.arity.check( ka ); 
+	info.in_arity.check( ka ); 
 
 	Term t;
 	if ( info.functor == fnc_syscall ) {
@@ -294,10 +294,12 @@ Term TermData::makeTerm() {
 			if ( this->attrs[ "value" ] == "empty" ) {
 				return term_new_list_empty();
 			} else {
-				throw;
+				throw Mishap( "Invalid Ginger XML" );
 			}
+		} else if ( name == "sysfn" ) {
+			return term_new_sysfn( this->attrs[ "value" ] );
 		} else {
-			throw;
+			throw Unreachable();
 		}
 	} else if ( has_attr( this, "name" ) ) {
 		if ( name == "id" ) {

@@ -239,13 +239,14 @@ public:
 //	way to achieve it.
 
 class StringTermClass : 
-	public NoChildrenTermMixin 
+	public Functor0TermMixin 
 {
 private:
 	std::string 		string_data;
 
 public:
-	StringTermClass( const char * ch ) :
+	StringTermClass( Functor fnc, const char * ch ) :
+		Functor0TermMixin( fnc ),
 		string_data( ch )
 	{
 	}
@@ -260,11 +261,6 @@ public:
 	const char * type_name() { return "StringTermClass"; }
 
 	
-public:
-	enum Functor functor() {
-		return fnc_string;
-	}
-		
 };
 
 //-- id -----------------------------------------------------------------
@@ -465,6 +461,10 @@ char term_char_cont( Term term );
 Term term_new_string( const char *name );
 Term term_new_string( const std::string & s );
 const char *term_string_cont( Term term );
+
+Term term_new_sysfn( const char *name );
+Term term_new_sysfn( const std::string & s );
+const char *term_sysfn_cont( Term term );
 
 Term term_new_absent();
 

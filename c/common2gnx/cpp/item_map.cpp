@@ -56,7 +56,7 @@ ItemMap::ItemMap() {
 	add( "[", 			tokty_obracket, 	PrF, 		100			);
 	add( "|",           tokty_bar,          Clo,        0           );
 	add( "]", 			tokty_cbracket, 	Clo, 		0			);
-	add( "absent", 		tokty_absent, 		Lit, 		0			);
+	//add( "absent", 		tokty_absent, 		Lit, 		0			);
 	add( "and", 		tokty_and, 			BFo, 		1700		);
 	add( "define", 		tokty_define, 		PrF, 		0			);
 	add( "do", 			tokty_do, 			PrF, 		0			);

@@ -16,71 +16,23 @@
     along with AppGinger.  If not, see <http://www.gnu.org/licenses/>.
 \******************************************************************************/
 
-#ifndef FUNCTOR_HPP
-#define FUNCTOR_HPP
+#include "makesysfn.hpp"
+#include "sys.hpp"
+#include "vmi.hpp"
+#include "mishap.hpp"
 
-#include "instruction.hpp"
-#include "common.hpp"
+Ref makeSysFn( Plant plant, std::string fn_name ) {
 
-typedef enum Functor {
-	fnc___fnc_default,
-	fnc_eof,
-	fnc_absand,
-	fnc_absent,
-	fnc_absnot,
-	fnc_absor,
-	fnc_add,
-	fnc_and,
-	fnc_anon,
-	fnc_app,
-	fnc_append,
-	fnc_args,
-	fnc_arrow,
-	fnc_assign,
-	fnc_bindings,
-	fnc_bool,
-	fnc_char,
-	fnc_charseq,
-	fnc_conditions,
-	fnc_const,
-	fnc_dec,
-	fnc_decr,
-	fnc_decr_by,
-	fnc_define,
-	fnc_div,
-	fnc_eq,
-	fnc_fn,
-	fnc_for,
-	fnc_from,
-	fnc_gt,
-	fnc_gte,
-	fnc_id,
-	fnc_if,
-	fnc_incr,
-	fnc_incr_by,
-	fnc_int,
-	fnc_list,
-	fnc_lt,
-	fnc_lte,
-	fnc_mul,
-	fnc_neq,
-	fnc_not,
-	fnc_or,
-	fnc_pow,
-	fnc_present,
-	fnc_seq,
-	fnc_string,
-	fnc_sub,
-	fnc_syscall,		//	Should refactor this into sysapp at some point.
-	fnc_sysfn,
-	fnc_until,
-	fnc_var,
-	fnc_vector,
-	fnc_while
-} Functor;
+	SysMap::iterator smit = sysMap.find( fn_name );
+	if ( smit == sysMap.end() ) {
+		throw Mishap( "No such system call" ).culprit( "Name", fn_name );
+	}
+	SysInfo & info = smit->second;
 
-const char *functor_name( Functor fnc );
-Ref functor_value( enum Functor tag );
-
-
-#endif
+	vmiFUNCTION( plant, info.in_arity.count(), info.out_arity.count() );
+	vmiSYS_CALL( plant, ToRef( info.syscall ) );	//	ToRef should NOT be needed here.
+	vmiSYS_RETURN( plant );
+	Ref r = vmiENDFUNCTION( plant );
+	return r;
+	
+}

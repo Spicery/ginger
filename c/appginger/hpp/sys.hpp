@@ -47,12 +47,14 @@ extern Ref * sysAppend( Ref *pc, class MachineClass * vm );
 
 struct SysInfo { 
 	Functor functor; 
-	Arity arity; 
+	Arity in_arity;
+	Arity out_arity; 
 	SysCall * syscall; 
 	
-	SysInfo( Functor f, Arity a, SysCall * s ) :
+	SysInfo( Functor f, Arity in, Arity out, SysCall * s ) :
 		functor( f ),
-		arity( a ),
+		in_arity( in ),
+		out_arity( out ),
 		syscall( s )
 	{
 	}

@@ -53,6 +53,7 @@ const char * InstructionSet::name( Ref spc ) const {
         spc == spc_set_calls ? "set_calls" :
         spc == spc_start ? "start" :
         spc == spc_syscall ? "syscall" :
+        spc == spc_sysreturn ? "sysreturn" :
         "?"
     );
 }
@@ -147,6 +148,7 @@ Ref InstructionSet::lookup( Instruction instr ) const {
     case vmc_set_calls: return this->spc_set_calls;
     case vmc_start: return this->spc_start;
     case vmc_syscall: return this->spc_syscall;
+    case vmc_sysreturn: return this->spc_sysreturn;
     }
     throw Mishap( "Bad instruction" );
 }

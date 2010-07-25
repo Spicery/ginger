@@ -21,7 +21,8 @@ OBJS=mishap.o term.o read_xml.o \
 	instruction_set2.o \
 	machine3.o \
 	instruction_set3.o \
-	appginger.o
+	appginger.o \
+	makesysfn.o
 
 # $@ is make shorthand for the target.
 # $@ is make shorthand for the dependencies

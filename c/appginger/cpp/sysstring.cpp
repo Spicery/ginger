@@ -67,9 +67,9 @@ Ref * sysStringAppend( Ref * pc, class MachineClass * vm ) {
 }
 
 Ref * sysStringExplode( Ref *pc, class MachineClass * vm ) {
-	if ( vm->count != 1 ) throw Mishap( "Wrong number of arguments for vectorString" );
+	if ( vm->count != 1 ) throw Mishap( "Wrong number of arguments for stringExplode" );
 	Ref r = vm->fastPop();
-	if ( !IsStringKind( r ) ) throw Mishap( "Argument mismatch for vectorString" );
+	if ( !IsStringKind( r ) ) throw Mishap( "Argument mismatch for stringExplode" );
 	Ref *obj_K = ObjToPtr4( r );
 	
 	unsigned long n = sizeAfterKeyOfVector( obj_K );
@@ -79,6 +79,16 @@ Ref * sysStringExplode( Ref *pc, class MachineClass * vm ) {
 		vm->fastPush( CharToCharacter( p[ i ] ) );
 	}
 	
+	return pc;
+}
+
+Ref * sysStringLength( Ref *pc, class MachineClass * vm ) {
+	if ( vm->count != 1 ) throw Mishap( "Wrong number of arguments for stringLength" );
+	Ref r = vm->fastPop();
+	if ( !IsStringKind( r ) ) throw Mishap( "Argument mismatch for stringLength" );
+	Ref *obj_K = ObjToPtr4( r );
+	
+	vm->fastPeek() = LongToSmall( sizeAfterKeyOfVector( obj_K ) );
 	return pc;
 }
 

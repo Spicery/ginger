@@ -481,6 +481,11 @@ static void spcfn_syscall( void ) {
     RETURN( pc );
 }
 
+static void spcfn_sysreturn( void ) {
+    VMPCFUNC = VMLINKFUNC;
+    RETURN( VMLINK );
+}
+
 InstructionSet2::InstructionSet2() {
     this->spc__add = (Ref)spcfn__add;
     this->spc__decr = (Ref)spcfn__decr;
@@ -535,5 +540,6 @@ InstructionSet2::InstructionSet2() {
     this->spc_set_calls = (Ref)spcfn_set_calls;
     this->spc_start = (Ref)spcfn_start;
     this->spc_syscall = (Ref)spcfn_syscall;
+    this->spc_sysreturn = (Ref)spcfn_sysreturn;
 }
 

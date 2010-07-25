@@ -36,12 +36,18 @@ void to_be_done( charseq msg );
 
 //extern jmp_buf mishap_jump_buffer;
 
+//	Abstract.
 class Throwable {
+protected:
+	Throwable() {}
 };
 
 class NormalExit : public Throwable {
+public:
+	NormalExit() {}
 };
 
+//	Abstract
 class Problem : public Throwable {
 private:
 	std::string message;
@@ -52,17 +58,21 @@ public:
 	Problem & culprit( const std::string arg );
 	void report();
 	
-public:
+protected:
 	Problem( const std::string & msg ) : message( msg ) {}
 };
 
 class SystemError : public Problem {
 public:
+	SystemError & culprit( const std::string reason, const std::string arg ) { this->Problem::culprit( reason, arg ); return *this; }
+	SystemError & culprit( const std::string arg ) { this->Problem::culprit( arg ); return *this; }
 	SystemError( const std::string & msg ) : Problem( msg ) {}
 };
 
 class Mishap : public Problem {
 public:
+	Mishap & culprit( const std::string reason, const std::string arg ) { this->Problem::culprit( reason, arg ); return *this; }
+	Mishap & culprit( const std::string arg ) { this->Problem::culprit( arg ); return *this; }
 	Mishap( const std::string & msg ) : Problem( msg ) {}
 };
 

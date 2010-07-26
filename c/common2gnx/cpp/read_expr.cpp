@@ -314,7 +314,11 @@ static void flatten( Node & ap, Node & fn, Node & args ) {
 		squash( acc, ap->child( 1 ) ); 
 		args = acc.node();
 	} else {
-		throw Mishap( "Invalid form for definition" );
+		Mishap mishap( "Invalid use of 'define'" );
+		if ( ap->elementName() == "sysapp" ) {
+			mishap.culprit( "Reason", "Trying to redefine a system function" );
+		}
+		throw mishap;
 	}
 }
 
@@ -420,6 +424,12 @@ Node ReadStateClass::prefix_processing() {
 			NodeFactory list( "sysapp" );
 			list.putAttr( "name", "newVector" );
 			list.addNode( this->read_stmnts_check( tokty_cbrace ) );
+			return list.node();
+		}
+		case tokty_fat_obrace: {
+			NodeFactory list( "sysapp" );
+			list.putAttr( "name", "newMap" );
+			list.addNode( this->read_stmnts_check( tokty_fat_cbrace ) );
 			return list.node();
 		}
 		case tokty_unless: {

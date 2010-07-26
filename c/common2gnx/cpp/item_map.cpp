@@ -26,25 +26,27 @@ void ItemMap::add( const char *n, TokType f, Role r, int p  ) {
 	
 	
 ItemMap::ItemMap() {
-	add( "!!", 			tokty_absnot, 	USA, 		prec_not	);
-	add( "&&", 			tokty_absand, 	BSA, 		1700		);
-	add( "(", 			tokty_oparen, 	BoF, 		100			);
-	add( ")", 			tokty_cparen, 	Clo, 		0			);
-	add( "*", 			tokty_mul, 		BSA, 		400			);
-	add( "**", 			tokty_pow, 		BSA, 		300			);
-	add( "+", 			tokty_add, 		BSA,		600			);
-	add( "++", 			tokty_append, 	BSA, 		800			);
+	add( "!!", 			tokty_absnot, 		USA, 		prec_not	);
+	add( "&&", 			tokty_absand, 		BSA, 		1700		);
+	add( "(", 			tokty_oparen, 		BoF, 		100			);
+	add( ")", 			tokty_cparen, 		Clo, 		0			);
+	add( "(%", 			tokty_fat_oparen, 	BoF, 		100			);
+	add( "%)", 			tokty_fat_cparen, 		Clo, 		0			);
+	add( "*", 			tokty_mul, 			BSA, 		400			);
+	add( "**", 			tokty_pow, 			BSA, 		300			);
+	add( "+", 			tokty_add, 			BSA,		600			);
+	add( "++", 			tokty_append, 		BSA, 		800			);
 	add( ",", 			tokty_comma, 		BFo, 		prec_comma	);
-	add( "-", 			tokty_sub, 		BSA, 		700			);
-	add( ".", 			tokty_dot, 		PoF, 		200			);
-	add( "...",         tokty_explode,  SOp,        250			);
-	add( "/", 			tokty_div, 		BSA, 		500			);
+	add( "-", 			tokty_sub, 			BSA, 		700			);
+	add( ".", 			tokty_dot, 			PoF, 		200			);
+	add( "...",         tokty_explode,  	SOp,        250			);
+	add( "/", 			tokty_div, 			BSA, 		500			);
 	add( ":=", 			tokty_bind, 		Pat, 		2000		);
 	add( ":-", 			tokty_maplet, 		BSA, 		2000		);
 	add( "->",			tokty_assign,		BFo,		2000		);
 	add( ";", 			tokty_semi, 		PoF, 		prec_semi	);
-	add( "<", 			tokty_lt, 		BSA, 			1200		);
-	add( "<=", 			tokty_lte, 		BSA, 		1400		);
+	add( "<", 			tokty_lt, 			BSA, 		1200		);
+	add( "<=", 			tokty_lte, 			BSA, 		1400		);
 	add( "=", 			tokty_equal, 		BSA, 		1100		);
 	add( "==", 			tokty_identical, 	BSA, 		1000		);
 	add( "=>", 			tokty_arrow, 		BSA, 		prec_arrow	);
@@ -54,9 +56,10 @@ ItemMap::ItemMap() {
 	add( "??", 			tokty_present, 		PoF, 		1900		);
 	add( "@", 			tokty_at, 			PoF, 		900			);
 	add( "[", 			tokty_obracket, 	PrF, 		100			);
+	add( "[%", 			tokty_fat_obracket, PrF, 		100			);
 	add( "|",           tokty_bar,          Clo,        0           );
 	add( "]", 			tokty_cbracket, 	Clo, 		0			);
-	//add( "absent", 		tokty_absent, 		Lit, 		0			);
+	add( "%]", 			tokty_fat_cbracket, Clo, 		0			);
 	add( "and", 		tokty_and, 			BFo, 		1700		);
 	add( "define", 		tokty_define, 		PrF, 		0			);
 	add( "do", 			tokty_do, 			PrF, 		0			);
@@ -81,8 +84,10 @@ ItemMap::ItemMap() {
 	add( "var", 		tokty_var, 			PrF, 		0			);
 	add( "while", 		tokty_while, 		PrF, 		0			);
 	add( "{", 			tokty_obrace, 		PrF, 		100			);
+	add( "{%", 			tokty_fat_obrace, 	PrF, 		100			);
 	add( "||", 			tokty_absor, 		BFo, 		1800		);
 	add( "}", 			tokty_cbrace, 		Clo, 		0			);
+	add( "%}", 			tokty_fat_cbrace, 	Clo, 		0			);
 }
 	
 ItemClass * ItemMap::lookup( const char * name ) {

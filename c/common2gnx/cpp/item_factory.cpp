@@ -139,7 +139,7 @@ Item ItemFactoryClass::read() {
 		    it->role = PrefixRole;
 			it->nameString() = this->text;
 		}
-    } else if ( strchr( ";,()[]{}", ch ) ) {
+    } else if ( strchr( ";,", ch ) ) {
 		//
 		//	Single character keywords
 		//
@@ -149,6 +149,30 @@ Item ItemFactoryClass::read() {
         	//	Never happens.
             throw Mishap( "Invalid punctuation token" ); 
         }
+    } else if ( strchr( "()[]{}", ch ) ) {
+	    this->text.push_back( ch );
+    	while ( ( ch = getc( this->file ) ) == '%' ) {
+    		this->text.push_back( ch );
+    	}
+		ungetc( ch, this->file );    
+		it = this->item = itemMap.lookup( this->text );
+		if ( this->item == NULL ) {
+            throw Mishap( "Invalid punctuation token" ); 
+		}
+    } else if ( ch == '%' ) {
+    	while ( ch == '%' ) {
+	    	this->text.push_back( ch );
+    		ch = getc( this->file );
+    	}
+		if ( strchr( "()[]{}", ch ) ) {    	
+			this->text.push_back( ch );
+		} else {
+			ungetc( ch, this->file );
+		}
+		it = this->item = itemMap.lookup( this->text );
+		if ( this->item == NULL ) {
+            throw Mishap( "Invalid punctuation token" ); 
+		}
     } else if ( strchr( ".@", ch ) ) {
     	//	
     	//	Signs made of a single repeating character.

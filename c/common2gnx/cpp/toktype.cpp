@@ -24,12 +24,15 @@ const char *tok_type_name( TokType fnc ) {
 	case tokty_bool: return "bool";
 	case tokty_cbrace : return "cbrace";
 	case tokty_cbracket : return "cbracket";
+	case tokty_fat_cbrace : return "fat_cbrace";
+	case tokty_fat_cbracket : return "fat_cbracket";
 	case tokty_char : return "char";
 	case tokty_charseq : return "charseq";
 	case tokty_comma : return "comma";
 	case tokty_conditions : return "conditions";
 	case tokty_const : return "const";
 	case tokty_cparen : return "cparen";
+	case tokty_fat_cparen : return "fat_cparen";
 	case tokty_define : return "define";
 	case tokty_div : return "div";
 	case tokty_do : return "do";
@@ -61,6 +64,9 @@ const char *tok_type_name( TokType fnc ) {
 	case tokty_obrace : return "obrace";
 	case tokty_obracket : return "obracket";
 	case tokty_oparen : return "oparen";
+	case tokty_fat_obrace : return "fat_obrace";
+	case tokty_fat_obracket : return "fat_obracket";
+	case tokty_fat_oparen : return "fat_oparen";
 	case tokty_or : return "or";
 	case tokty_pow : return "pow";
 	case tokty_present : return "present";

@@ -79,7 +79,7 @@ bool CageClass::isEmpty() {
 
 XfrClass::XfrClass( CageClass * c ) :
 	tmptop( c->top ),
-	origin( NULL ),
+	origin( c->top ),
 	cage( c )
 {
 }

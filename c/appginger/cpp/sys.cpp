@@ -33,207 +33,12 @@
 #include "syslist.hpp"
 #include "sysvector.hpp"
 #include "sysstring.hpp"
+#include "sysmap.hpp"
+#include "syskey.hpp"
+#include "sysequals.hpp"
+#include "sysprint.hpp"
 
 //#define DBG_SYS
-
-Ref refKey( Ref r ) {
-	unsigned long u = ( unsigned long )r;
-	unsigned long tag, tagg, taggg;
-	tag = u & TAG_MASK;
-	if ( tag == INT_TAG ) return sysSmallKey;
-	if ( tag == OBJ_TAG ) return *RefToPtr4(r);
-	tagg = u & TAGG_MASK;
-	if ( tagg == ( 0 | SIM_TAG ) ) return sysAbsentKey;
-	if ( tagg == ToULong( sys_false ) || tagg == ToULong( sys_true ) ) return sysBoolKey;
-	if ( tagg == FN_TAGG ) return sysFunctionKey;
-	if ( tagg == KEY_TAGG ) return sysKeyKey;
-	taggg = u & TAGGG_MASK;
-	if ( taggg == CHAR_TAGGG ) return sysCharKey;
-	if ( taggg == MISC_TAGGG ) {
-		if ( r == sys_nil ) {
-			return sysNilKey; 
-		} else {
-			throw;
-		}
-	}
-	throw;
-}
-
-/*
- *	Dummy implementation.
- */
-class HashEngine {
-public:
-	void add( unsigned long ) {
-	}
-	
-public:
-	unsigned long hash() {
-		return 0;
-	}
-	
-public:
-	HashEngine( unsigned long x ) {
-	}
-};
-
-static unsigned long trivHash( Ref r ) {
-	if ( IsObj( r ) ) {
-		Ref * obj_K = ObjToPtr4( r );
-		Ref key = *obj_K;
-		if ( IsObj( key ) ) {
-			return 0;			//	To be improved.
-		} else {
-			return ToULong( key );
-		}
-	} else {
-		return ToULong( r );
-	}
-}
-
-unsigned long refHash( Ref r ) {
-	if ( IsObj( r ) ) {
-		Ref * obj_K = ObjToPtr4( r );
-		Ref key = *obj_K;
-		if ( IsFnKey( key ) ) {
-			HashEngine e( ToULong( key ) );
-			e.add( ToULong(obj_K[ -OFFSET_TO_NSLOTS_TO_KEY ] ) );
-			e.add( ToULong( obj_K[ -OFFSET_FROM_FN_LENGTH_TO_KEY ] ) );
-			return e.hash();
-		} else if ( IsSimpleKey( key ) ) {
-			switch ( KindOfSimpleKey( key ) ) {
-				case VECTOR_KIND: {
-					HashEngine e( ToULong( key ) );
-					unsigned long n = sizeAfterKeyOfVector( obj_K );
-					e.add( n );
-					if ( n > 0 ) {
-						e.add( trivHash( obj_K[1] ) );
-						e.add( trivHash( obj_K[n] ) );
-					}
-					return e.hash();
-				}
-				case PAIR_KIND:
-				case RECORD_KIND: {
-					HashEngine e( ToULong( key ) );
-					unsigned long n = sizeAfterKeyOfRecord( obj_K );
-					e.add( n );
-					if ( n > 0 ) {
-						e.add( trivHash( obj_K[1] ) );
-						e.add( trivHash( obj_K[n] ) );
-					}
-					return e.hash();
-				}
-				case STRING_KIND: {
-					HashEngine e( ToULong( key ) );
-					unsigned long n = lengthOfString( obj_K );
-					char * obj_K1 = (char *)( obj_K + 1 );
-					if ( n > 0 ) {
-						e.add( obj_K1[ 0 ] );
-						e.add( obj_K1[ n - 1 ] );						
-					}
-					return e.hash();
-				}				
-				default: {
-					return 0;
-				}
-			}
-		} else if ( IsObj( key ) ) {
-			//	Compound keys not implemented yet.
-			return 0;
-		} else {
-			return 0;
-		}
-	} else {
-		return ToULong( r );
-	}
-}
-
-void refPrint( Ref r ) {
-	refPrint( std::cout, r );
-}
-
-void refPtrPrint( Ref * r ) {
-	refPrint( Ptr4ToRef( r ) );
-}
-
-void refPtrPrint( std::ostream & out, Ref * r ) {
-	refPrint( out, Ptr4ToRef( r ) );
-}
-
-void refPrint( std::ostream & out, Ref r ) {
-	Ref k;
-#ifdef DBG_SYS	
-	out << "About to print '" << (unsigned int) r << "'\n";
-#endif
-	k = refKey( r );
-#ifdef DBG_SYS
-	out << "key = " << ToULong(k) << "\n";
-#endif
-	if ( k == sysStringKey ) {
-		Ref *rr = RefToPtr4( r );
-		char *s = ToChars( rr + 1 );
-		out << s;
-	} else if ( k == sysSmallKey ) {
-		out << SmallToLong( r );
-	} else if ( k == sysBoolKey ) {
-		out << ( r == sys_false ? "false" : "true" );
-	} else if ( k == sysAbsentKey ) {
-		out << "absent";
-	} else if ( k == sysFunctionKey ) {
-		out << "<function>";
-	} else if ( k == sysCharKey ) {
-		out << CharacterToChar( r );
-	} else if ( k == sysPairKey ) {
-		Ref sofar = r;
-		bool sep = false;
-		out << "[";
-		while ( refKey( sofar ) == sysPairKey ) {
-			if ( sep ) { out << ","; } else { sep = true; }
-			refPrint( out, *( RefToPtr4( sofar ) + 1 ) );
-			sofar = *( RefToPtr4( sofar ) + 2 );
-		}
-		out << "]";
-	} else if ( k == sysNilKey ) {
-		out << "[]";
-	} else if ( k == sysVectorKey ) {
-		bool sep = false;
-		out << "{";
-		Ref * p = RefToPtr4( r );
-		long len = RefToLong( p[ -1 ] );
-		for ( int i = 1; i <= len; i++ ) {
-			if ( sep ) { out << ","; } else { sep = true; }
-			refPrint( p[ i ] ); 
-		}
-		out << "}";
-	} else {
-		out << "?(" << std::hex << ToULong( r ) << ")";
-	}
-}
-
-Ref * sysRefPrint( Ref * pc, class MachineClass * vm ) {
-	for ( int i = vm->count - 1; i >= 0; i-- ) {
-		Ref r = vm->fastSubscr( i );
-		refPrint( r );		
-	}
-	vm->fastDrop( vm->count );
-	return pc;
-}
-
-Ref * sysRefPrintln( Ref * pc, class MachineClass * vm ) {
-	pc = sysRefPrint( pc, vm );
-	std::cout << std::endl;
-	return pc;
-}
-
-Ref * sysHash( Ref *pc, class MachineClass * vm ) {
-	if ( vm->count == 1 ) {
-		vm->fastPeek() = ULongToSmall( refHash( vm->fastPeek() ) );
-		return pc;
-	} else {
-		throw Mishap( "Wrong number of arguments for hash" );
-	}
-}
-
 
 //	This should be decomposed by implemented vectorAppend, listAppend
 //	and stringAppend
@@ -381,6 +186,8 @@ const SysMap::value_type rawData[] = {
 	SysMap::value_type( "==", SysInfo( fnc_eq, Arity( 2 ), Arity( 1 ), 0 ) ),
 	SysMap::value_type( ">", SysInfo( fnc_gt, Arity( 2 ), Arity( 1 ), 0 ) ),
 	SysMap::value_type( ">=", SysInfo( fnc_gte, Arity( 2 ), Arity( 1 ), 0 ) ),	
+	SysMap::value_type( "objectKey", SysInfo( fnc_syscall, Arity( 1 ), Arity( 1 ), sysObjectKey ) ),
+	SysMap::value_type( "=", SysInfo( fnc_syscall, Arity( 2 ), Arity( 1 ), sysEquals ) ),
 	SysMap::value_type( "gc", SysInfo( fnc_syscall, Arity( 0 ), Arity( 0 ), sysGarbageCollect ) ),
 	SysMap::value_type( "hash", SysInfo( fnc_syscall, Arity( 1 ), Arity( 1 ), sysHash ) ),
 	SysMap::value_type( "refPrint", SysInfo( fnc_syscall, Arity( 1 ), Arity( 0 ), sysRefPrint ) ),
@@ -401,6 +208,7 @@ const SysMap::value_type rawData[] = {
 	SysMap::value_type( "isList", SysInfo( fnc_syscall, Arity( 1 ), Arity( 1 ), sysIsList ) ),
 	SysMap::value_type( "newList", SysInfo( fnc_syscall, Arity( 0, true ), Arity( 1 ), sysNewList ) ),
 	SysMap::value_type( "newListOnto", SysInfo( fnc_syscall, Arity( 1, true ), Arity( 1 ), sysNewListOnto ) ),
+	SysMap::value_type( "newMap", SysInfo( fnc_syscall, Arity( 0, true ), Arity( 1 ), sysNewMap ) ),
 	#include "sysmap.inc.auto"
 };
 const int numElems = sizeof rawData / sizeof rawData[0];

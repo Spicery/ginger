@@ -17,6 +17,7 @@
 \******************************************************************************/
 
 #include "key.hpp"
+#include "mishap.hpp"
 
 bool isKey( Ref x ) {
 	unsigned long u = ToULong( x );
@@ -48,7 +49,9 @@ const char * keyName( Ref key ) {
 			case 11: return "Unicode";
 			case 12: return "Char";
 			case 13: return "Maplet";
-			default: throw;
+			case 14: return "Map";
+			case 15: return "MapEntry";
+			default: throw ToBeDone();
 		}
 	} else if ( IsFnKey( key ) ) {
 		return "Function";
@@ -56,6 +59,7 @@ const char * keyName( Ref key ) {
 		//	Compound keys not implemented yet.
 		throw "unimplemented";
 	} else {
-		throw;
+		//	In fact can be reached if any 
+		throw Unreachable();
 	}
 }

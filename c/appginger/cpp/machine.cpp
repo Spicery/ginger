@@ -27,6 +27,7 @@
 #include "heap.hpp"
 #include "key.hpp"
 #include "sys.hpp"
+#include "sysprint.hpp"
 #include "mishap.hpp"
 
 using namespace std;

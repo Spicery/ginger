@@ -130,10 +130,15 @@ const char * keyName( Ref key );
 #define sysUnicodeKey			MAKE_KEY( 11, 0, PRIMITIVE_KIND )
 #define sysCharKey				MAKE_KEY( 12, 0, PRIMITIVE_KIND )
 #define sysMapletKey			MAKE_KEY( 13, 2, RECORD_KIND )
+#define sysMapKey				MAKE_KEY( 14, 2, RECORD_KIND )
+#define sysMapEntryKey			MAKE_KEY( 15, 3, RECORD_KIND )
 
 //	Recognisers
 #define IsPair( x )				( IsObj( x ) && ( *RefToPtr4( x ) == sysPairKey ) )
 #define IsVector( x )			( IsObj( x ) && ( *RefToPtr4( x ) == sysVectorKey ) )
+#define IsMap( x ) 				( IsObj( x ) && ( *RefToPtr4( x ) == sysMapKey ) )
+#define IsMaplet( x ) 			( IsObj( x ) && ( *RefToPtr4( x ) == sysMapletKey ) )
+#define IsMapEntry( x ) 		( IsObj( x ) && ( *RefToPtr4( x ) == sysMapEntry ) )
 
 #define IsVectorKind( x )		( IsObj( x ) && KindOfSimpleKey( *RefToPtr4( x ) ) == VECTOR_KIND )
 #define IsRecordKind( x )		( IsObj( x ) && KindOfSimpleKey( *RefToPtr4( x ) ) == RECORD_KIND )

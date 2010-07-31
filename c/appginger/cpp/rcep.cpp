@@ -114,12 +114,13 @@ bool unsafe_read_comp_exec_print( Machine vm, istream & input ) {
 	    start = clock();
     	vm->execute( r );
 	} catch ( NormalExit ) {
-     	#ifdef DBG_CRAWL
-    		crawl( vm, "before.log" );
-    		sysQuiescentGarbageCollect( vm );
-    		crawl( vm, "after.log" );
-    	#endif
 	}
+	#ifdef DBG_CRAWL
+		crawl( vm, "before.log" );
+		sysQuiescentGarbageCollect( vm );
+		crawl( vm, "after.log" );
+	#endif
+
 
 	finish = clock();
     vm->print_results( static_cast<float>( finish - start ) / CLOCKS_PER_SEC );
@@ -130,14 +131,15 @@ bool unsafe_read_comp_exec_print( Machine vm, istream & input ) {
 }
 
 bool read_comp_exec_print( Machine vm, istream & input ) {
-	try {
-		return unsafe_read_comp_exec_print( vm, input );
-	} catch ( Mishap & m ) {
-		m.report();
-		throw;
-	} catch ( SystemError & m ) {
-		m.report();
-		throw;
-	} 
+	for (;;) {
+		try {
+			return unsafe_read_comp_exec_print( vm, input );
+		} catch ( Mishap & m ) {
+			m.report();
+		} catch ( SystemError & m ) {
+			m.report();
+			throw;
+		} 
+	}
 }
 

@@ -26,6 +26,10 @@ unsigned long sizeAfterKeyOfRecord( Ref * key ) {
 	return ( ToULong( *key ) & LENGTH_MASK ) >> KIND_WIDTH >> TAGG;
 }
 
+unsigned long lengthOfRecord( Ref * key ) {
+	return sizeAfterKeyOfRecord( key );
+}
+
 unsigned long sizeAfterKeyOfVector( Ref * key ) {
 	return ToULong( *( key - 1 ) ) >> TAG;
 }
@@ -52,6 +56,7 @@ void findObjectLimits( Ref * obj_K, Ref * & obj_A, Ref * & obj_Z1 ) {
 	if ( IsSimpleKey( key ) ) {
 		switch ( KindOfSimpleKey( key ) ) {
 			case PAIR_KIND:
+			case MAP_KIND:
 			case RECORD_KIND: {
 				obj_A = obj_K;
 				obj_Z1 = obj_K1 + sizeAfterKeyOfRecord( obj_K );
@@ -111,6 +116,7 @@ unsigned long lengthAfterObjectKey( Ref * obj_K ) {
 	Ref key = *obj_K;
 	if ( IsSimpleKey( key ) ) {
 		switch ( KindOfSimpleKey( key ) ) {
+			case MAP_KIND:
 			case PAIR_KIND:
 			case RECORD_KIND: {
 				return sizeAfterKeyOfRecord( obj_K );

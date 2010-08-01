@@ -108,6 +108,7 @@ const char * keyName( Ref key );
 #define VECTOR_KIND				2
 #define STRING_KIND				3
 #define PAIR_KIND				4
+#define MAP_KIND				5
 #define OTHER_KIND				7
 	
 #define LEN_WIDTH					8
@@ -130,7 +131,7 @@ const char * keyName( Ref key );
 #define sysUnicodeKey			MAKE_KEY( 11, 0, PRIMITIVE_KIND )
 #define sysCharKey				MAKE_KEY( 12, 0, PRIMITIVE_KIND )
 #define sysMapletKey			MAKE_KEY( 13, 2, RECORD_KIND )
-#define sysMapKey				MAKE_KEY( 14, 2, RECORD_KIND )
+#define sysMapKey				MAKE_KEY( 14, 2, MAP_KIND )
 #define sysMapEntryKey			MAKE_KEY( 15, 3, RECORD_KIND )
 
 //	Recognisers

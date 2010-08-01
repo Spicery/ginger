@@ -48,6 +48,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 unsigned long sizeAfterKeyOfRecord( Ref * key );
+unsigned long lengthOfRecord( Ref * key );
 
 
 
@@ -87,8 +88,5 @@ unsigned long sizeAfterKeyOfFn( Ref * key );
 void findObjectLimits( Ref * object, Ref * & start, Ref * & end );
 Ref * findObjectKey( Ref * obj_A );
 unsigned long lengthAfterObjectKey( Ref * obj_K );
-
-
-
 
 #endif

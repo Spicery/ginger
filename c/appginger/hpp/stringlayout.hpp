@@ -16,15 +16,13 @@
     along with AppGinger.  If not, see <http://www.gnu.org/licenses/>.
 \******************************************************************************/
 
-#ifndef SYS_MAP_HPP
-#define SYS_MAP_HPP
+#ifndef STRING_LAYOUT_HPP
+#define STRING_LAYOUT_HPP
 
 #include "common.hpp"
-#include "machine.hpp"
-#include <ostream>
 
-extern Ref * sysNewMap( Ref * pc, MachineClass * vm );
-extern Ref * sysMapExplode( Ref *pc, class MachineClass * vm );
-extern void refMapPrint( std::ostream & out, Ref * r );
+#define STRING_LENGTH_OFFSET -1
+
+extern unsigned long fastStringLength( Ref r );
 
 #endif

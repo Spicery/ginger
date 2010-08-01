@@ -104,6 +104,10 @@ static bool refStringEquals( Ref * rx, Ref * ry ) {
 	}
 }
 
+static bool refMapEquals( Ref * rx, Ref * ry ) {
+	throw ToBeDone();
+}
+
 bool refEquals( Ref x, Ref y ) {
 	if ( x == y ) {
 		return true;
@@ -124,6 +128,7 @@ bool refEquals( Ref x, Ref y ) {
 					switch ( KindOfSimpleKey( xkey ) ) {
 						case VECTOR_KIND: 	return refVectorEquals( x_K, y_K );
 						case PAIR_KIND: 	return refPairEquals( x, y );
+						case MAP_KIND:		return refMapEquals( x_K, y_K );
 						case RECORD_KIND: 	return refRecordEquals( x_K, y_K );
 						case STRING_KIND: 	return refStringEquals( x_K, y_K );
 						default: {
@@ -164,6 +169,11 @@ unsigned long refHash( Ref r ) {
 						e.add( trivHash( obj_K[1] ) );
 						e.add( trivHash( obj_K[n] ) );
 					}
+					return e.hash();
+				}
+				case MAP_KIND: {
+					HashEngine e( ToULong( key ) );
+					e.add( ToULong( obj_K[2] ) );
 					return e.hash();
 				}
 				case PAIR_KIND:

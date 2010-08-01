@@ -16,15 +16,16 @@
     along with AppGinger.  If not, see <http://www.gnu.org/licenses/>.
 \******************************************************************************/
 
-#ifndef SYS_MAP_HPP
-#define SYS_MAP_HPP
+#ifndef LIST_LAYOUT_HPP
+#define LIST_LAYOUT_HPP
 
 #include "common.hpp"
-#include "machine.hpp"
-#include <ostream>
 
-extern Ref * sysNewMap( Ref * pc, MachineClass * vm );
-extern Ref * sysMapExplode( Ref *pc, class MachineClass * vm );
-extern void refMapPrint( std::ostream & out, Ref * r );
+#define PAIR_HEAD_OFFSET 1
+#define PAIR_TAIL_OFFSET 2
+
+extern bool isList( Ref r );
+extern Ref fastPairHead( Ref r );
+extern Ref fastPairTail( Ref r );
 
 #endif

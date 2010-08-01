@@ -19,18 +19,7 @@
 #include "syslist.hpp"
 #include "sysvector.hpp"
 #include "key.hpp"
-
-static inline bool IsList( Ref r ) {
-	return IsPair( r ) || IsNil( r );
-}
-
-static inline Ref FastPairHead( Ref r ) {
-	return ObjToPtr4( r )[ 1 ];
-}
-
-static inline Ref FastPairTail( Ref r ) {
-	return ObjToPtr4( r )[ 2 ];
-}
+#include "listlayout.hpp"
 
 Ref * sysNewList( Ref * pc, class MachineClass * vm ) {
 	Ref sofar = sys_nil;
@@ -114,13 +103,13 @@ Ref * sysListAppend( Ref * pc, class MachineClass * vm ) {
 		Ref lhs = vm->fastPeek( 1 );
 		
 		//	Typecheck arguments.
-		if ( !IsList( lhs ) || !IsList( rhs ) ) throw Mishap( "Invalid arguments in listAppend" );
+		if ( !isList( lhs ) || !isList( rhs ) ) throw Mishap( "Invalid arguments in listAppend" );
 		
 		ptrdiff_t start = vm->stackLength();
 		while ( IsPair( lhs ) ) {
 			vm->checkStackRoom( 1 );
-			vm->fastPush( FastPairHead( lhs ) );
-			lhs = FastPairTail( lhs );
+			vm->fastPush( fastPairHead( lhs ) );
+			lhs = fastPairTail( lhs );
 		}
 		vm->checkStackRoom( 1 );
 		vm->fastPush( rhs );
@@ -140,12 +129,12 @@ Ref * sysListAppend( Ref * pc, class MachineClass * vm ) {
 Ref * sysListExplode( Ref *pc, class MachineClass * vm ) {
 	if ( vm->count != 1 ) throw Mishap( "Wrong number of arguments for listExplode" );
 	Ref r = vm->fastPop();
-	if ( !IsList( r ) ) throw Mishap( "Argument mismatch for listExplode" );
+	if ( !isList( r ) ) throw Mishap( "Argument mismatch for listExplode" );
 
 	while ( IsPair( r ) ) {
 		vm->checkStackRoom( 1 );
-		vm->fastPush( FastPairHead( r ) );
-		r = FastPairTail( r ) ;
+		vm->fastPush( fastPairHead( r ) );
+		r = fastPairTail( r ) ;
 	}
 
 	return pc;
@@ -154,12 +143,12 @@ Ref * sysListExplode( Ref *pc, class MachineClass * vm ) {
 Ref * sysListLength( Ref *pc, class MachineClass * vm ) {
 	if ( vm->count != 1 ) throw Mishap( "Wrong number of arguments for listLength" );
 	Ref r = vm->fastPeek();
-	if ( !IsList( r ) ) throw Mishap( "Argument mismatch for listLength" );
+	if ( !isList( r ) ) throw Mishap( "Argument mismatch for listLength" );
 
 	int count = 0;
 	while ( IsPair( r ) ) {
 		count += 1;
-		r = FastPairTail( r );
+		r = fastPairTail( r );
 	} 
 	vm->fastPeek() = LongToSmall( count );
 	
@@ -172,7 +161,7 @@ Ref * sysFastListLength( Ref *pc, class MachineClass * vm ) {
 	int count = 0;
 	while ( IsPair( r ) ) {
 		count += 1;
-		r = FastPairTail( r );
+		r = fastPairTail( r );
 	} 
 	vm->fastPeek() = LongToSmall( count );
 	

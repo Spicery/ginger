@@ -480,6 +480,7 @@ public:
 		} else if ( IsSimpleKey( key ) ) {
 			switch ( KindOfSimpleKey( key ) ) {
 				case PAIR_KIND:
+				case MAP_KIND:
 				case RECORD_KIND: {
 					gclogger.startRecord( obj_K );
 					unsigned long n = sizeAfterKeyOfRecord( obj_K );

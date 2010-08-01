@@ -18,40 +18,12 @@
 
 #include "sysmap.hpp"
 
+#include "sysprint.hpp"
 #include "sysequals.hpp"
 #include "key.hpp"
 #include "machine.hpp"
 #include "mishap.hpp"
-
-static inline Ref & FastMapData( Ref r ) {
-	return ObjToPtr4( r )[ 1 ];
-}
-
-static inline Ref & FastMapCount( Ref r ) {
-	return ObjToPtr4( r )[ 2 ];
-}
-
-static inline Ref & FastMapletKey( Ref r ) {
-	return ObjToPtr4( r )[ 1 ];
-}
-
-static inline Ref & FastMapletValue( Ref r ) {
-	return ObjToPtr4( r )[ 2 ];
-}
-
-static inline Ref & FastMapEntryKey( Ref r ) {
-	return ObjToPtr4( r )[ 1 ];
-}
-
-static inline Ref & FastMapEntryValue( Ref r ) {
-	return ObjToPtr4( r )[ 2 ];
-}
-
-static inline Ref & FastMapEntryNext( Ref r ) {
-	return ObjToPtr4( r )[ 3 ];
-}
-
-
+#include "maplayout.hpp"
 
 static long estimateMapSize( MachineClass * vm ) {
 	long total = 0;
@@ -61,7 +33,7 @@ static long estimateMapSize( MachineClass * vm ) {
 		if ( IsMaplet( r ) ) {
 			total += 1;
 		} else if ( IsMap( r ) ) {
-			total += SmallToLong( FastMapCount( r ) );
+			total += SmallToLong( fastMapCount( r ) );
 		} else {
 			throw Mishap( "Invalid argument for newMap" );
 		}
@@ -93,42 +65,94 @@ static long log2( unsigned long v ) {
 	}
 }
 
+class MapCrawl {
+private:
+	long size_of_data;
+	int index_of_data;
+	Ref * data;
+	Ref bucket;
+
+public:
+	Ref * nextBucket() { 
+		if ( this->bucket != sys_absent ) {
+			Ref * x = ObjToPtr4( this->bucket );
+			this->bucket = x[ BUCKET_NEXT_OFFSET ];
+			return x;
+		} else {
+			while ( index_of_data < size_of_data ) {
+				this->bucket = this->data[ this->index_of_data++ ];
+				if ( this->bucket != sys_absent ) return this->nextBucket();
+			}
+			return NULL;
+		}
+	}
+
+public:
+	MapCrawl( Ref * map_K ) :
+		size_of_data( SmallToLong( map_K[ MAP_COUNT_OFFSET ] ) ),
+		index_of_data( 0 ),
+		data( ObjToPtr4( map_K[1] ) + 1 ),
+		bucket( sys_absent )
+	{}
+	
+};
+
+
 
 class AddArgument {
-public:
+private:
 	XfrClass & xfr;
 	Ref * data_refref;
 	long data_size;
 	long width;
+	long num_buckets;
 	
-	void addMaplet( Ref r ) {
-		this->addMaplet( r );
-		Ref k = FastMapletKey( r );
-		unsigned long hk = refHash( k ) & ~( 1 << width - 1 );
-		Ref bucket = data_refref[ hk ];
+public:
+	long numBuckets() {
+		return this->num_buckets;
+	}
+	
+private:
+	void addKeyValue( Ref k, Ref v ) {
+		unsigned long hk = refHash( k ) & ( ( 1 << width ) - 1 );
+		Ref bucket0 = data_refref[ hk ];
+		Ref bucket = bucket0;
 		
 		while ( bucket != sys_absent ) {
-			Ref k1 = FastMapEntryKey( bucket );
+			Ref k1 = fastMapEntryKey( bucket );
 			if ( refEquals( k, k1 ) ) {
 				//	Overwrite.
-				FastMapEntryValue( bucket ) = FastMapletValue( r );
+				fastMapEntryValue( bucket ) = v;
+				return;
 			} else {
-				bucket = FastMapEntryNext( bucket );
+				bucket = fastMapEntryNext( bucket );
 			}
 		}
 		
 		xfr.setOrigin();
 		xfr.xfrRef( sysMapEntryKey );
 		xfr.xfrRef( k );
-		xfr.xfrRef( FastMapletValue( r ) );
-		xfr.xfrRef( bucket );
+		xfr.xfrRef( v );
+		xfr.xfrRef( bucket0 );
 		data_refref[ hk ] = xfr.makeRef();
+		
+		this->num_buckets += 1;
+	}
+
+	void addMaplet( Ref r ) {
+		this->addKeyValue( fastMapletKey( r ), fastMapletValue( r ) );
 	}
 	
 	void addMap( Ref r ) {
-		throw ToBeDone();
+		MapCrawl map_crawl( ObjToPtr4( r ) );
+		for (;;) {
+			Ref * bucket = map_crawl.nextBucket();
+			if ( bucket == NULL ) break;
+			this->addKeyValue( bucket[ BUCKET_KEY_OFFSET ], bucket[ BUCKET_VALUE_OFFSET ] );
+		}
 	}
 
+public:
 	void add( Ref r ) {
 		if ( IsMaplet( r ) ) {
 			this->addMaplet( r );
@@ -143,7 +167,8 @@ public:
 		xfr( xfr ),
 		data_refref( data_refref ),
 		data_size( data_size ),
-		width( width )
+		width( width ),
+		num_buckets( 0 )
 	{
 	}
 
@@ -158,7 +183,7 @@ public:
 */
 Ref * sysNewMap( Ref *pc, MachineClass * vm ) {
 	long count = estimateMapSize( vm );
-	std::cout << "Estimated size is " << count << std::endl;
+	//std::cout << "Estimated size is " << count << std::endl;
 	
 	//	Calculate the total preflight size: we have a map record (3 long words),
 	//	a data vector (2 + power of 2 greater than count), and count bucket 
@@ -166,16 +191,19 @@ Ref * sysNewMap( Ref *pc, MachineClass * vm ) {
 	long width = 1 + log2( count );
 	long data_size = 1 << width;
 	long preflight = 3 + ( 2 + data_size ) + ( 4 * count );
-	std::cout << "Estimated preflight size as " << preflight << std::endl;
+	//std::cout << "Estimated preflight size as " << preflight << std::endl;
 
 	XfrClass xfr( vm->heap().preflight( pc, preflight ) );
 	
 	xfr.xfrRef( LongToSmall( data_size ) );
 	xfr.setOrigin();
 	xfr.xfrRef( sysVectorKey );
+	
+	//	ToBeDone: We could really do with a memcpy style operation here. 
 	for ( long i = 0; i < data_size; i++ ) {
 		xfr.xfrRef( sys_absent );
 	}
+	
 	Ref * data_refref = xfr.makeRefRef();
 	
 	xfr.setOrigin();
@@ -186,14 +214,64 @@ Ref * sysNewMap( Ref *pc, MachineClass * vm ) {
 	
 	//	Now add all the members. Need to perform the update in LEFT to RIGHT
 	//	order, from vm->vp[ -( vm->count - 1 ) ] to vm->vp[ 0 ]
-	AddArgument args( xfr, data_refref, data_size, width );
+	AddArgument args( xfr, data_refref + 1, data_size, width );
 	for ( long i = vm->count - 1; i >= 0; i-- ) {
 		Ref r = *( vm->vp - i );
 		args.add( r );
 	}
+	
+	ObjToPtr4( map_ref )[ MAP_COUNT_OFFSET ] = LongToSmall( args.numBuckets() );
 	
 	vm->vp -= vm->count;
 	*( ++vm->vp ) = map_ref;
 	
 	return pc;
 }
+
+
+
+Ref * sysMapExplode( Ref *pc, class MachineClass * vm ) {
+	if ( vm->count == 1 ) {
+		Ref r = vm->fastPop();
+		if ( IsMap( r ) ) {
+			Ref * map_K = ObjToPtr4( r );
+			long len = SmallToLong( map_K[ MAP_COUNT_OFFSET ] );
+			vm->checkStackRoom( len );
+			
+			MapCrawl map_crawl( map_K );
+			for (;;) {
+				Ref * bucket_K = map_crawl.nextBucket();
+				if ( bucket_K == NULL ) break;
+				Ref v = bucket_K[ BUCKET_VALUE_OFFSET ];
+				vm->fastPush( v );
+			}
+			
+			return pc;
+		} else {
+			throw Mishap( "Map needed for mapExplode" );
+		}
+	} else {
+		throw Mishap( "Wrong number of arguments for mapExplode" );
+	}
+}
+
+void refMapPrint( std::ostream & out, Ref * map_K ) {
+	MapCrawl map_crawl( map_K );
+	bool sep = false;
+	out << "{%";
+	for (;;) {
+		Ref * bucket_K = map_crawl.nextBucket();
+		if ( bucket_K == NULL ) break;
+		if ( sep ) { out << ","; } else { sep = true; }
+		Ref k = bucket_K[ BUCKET_KEY_OFFSET ];
+		Ref v = bucket_K[ BUCKET_VALUE_OFFSET ];
+		refPrint( out, k );
+		out << ":-";
+		refPrint( out, v );
+	}
+	out << "%}";
+}
+
+
+
+

@@ -16,15 +16,34 @@
     along with AppGinger.  If not, see <http://www.gnu.org/licenses/>.
 \******************************************************************************/
 
-#ifndef SYS_MAP_HPP
-#define SYS_MAP_HPP
+#include "maplayout.hpp"
 
-#include "common.hpp"
-#include "machine.hpp"
-#include <ostream>
+#include "key.hpp"
 
-extern Ref * sysNewMap( Ref * pc, MachineClass * vm );
-extern Ref * sysMapExplode( Ref *pc, class MachineClass * vm );
-extern void refMapPrint( std::ostream & out, Ref * r );
+Ref & fastMapData( Ref r ) {
+	return ObjToPtr4( r )[ MAP_DATA_OFFSET ];
+}
 
-#endif
+Ref & fastMapCount( Ref r ) {
+	return ObjToPtr4( r )[ MAP_COUNT_OFFSET ];
+}
+
+Ref & fastMapletKey( Ref r ) {
+	return ObjToPtr4( r )[ MAPLET_KEY_OFFSET ];
+}
+
+Ref & fastMapletValue( Ref r ) {
+	return ObjToPtr4( r )[ MAPLET_VALUE_OFFSET ];
+}
+
+Ref & fastMapEntryKey( Ref r ) {
+	return ObjToPtr4( r )[ BUCKET_KEY_OFFSET ];
+}
+
+Ref & fastMapEntryValue( Ref r ) {
+	return ObjToPtr4( r )[ BUCKET_VALUE_OFFSET ];
+}
+
+Ref & fastMapEntryNext( Ref r ) {
+	return ObjToPtr4( r )[ BUCKET_NEXT_OFFSET ];
+}

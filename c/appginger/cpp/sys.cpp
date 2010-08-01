@@ -103,7 +103,11 @@ Ref * sysExplode( Ref *pc, class MachineClass * vm ) {
 					case STRING_KIND: {
 						pc = sysStringExplode( pc, vm );
 						break;
-					}				
+					}
+					case MAP_KIND: {
+						pc = sysMapExplode( pc, vm );
+						break;
+					}
 					default: {
 						throw ToBeDone();
 					}
@@ -150,7 +154,11 @@ Ref * sysLength( Ref *pc, class MachineClass * vm ) {
 					case STRING_KIND: {
 						vm->fastPeek() = LongToSmall( sizeAfterKeyOfVector( obj_K ) );	// Same as pc = sysStringLength( pc, vm );
 						break;
-					}				
+					}
+					case MAP_KIND: {
+						throw Mishap( "Trying to take length of a map" );
+						break;
+					}
 					default: {
 						throw "unimplemented (other)";
 					}

@@ -151,20 +151,19 @@ Item ItemFactoryClass::read() {
         }
     } else if ( strchr( "()[]{}", ch ) ) {
 	    this->text.push_back( ch );
-    	while ( ( ch = getc( this->file ) ) == '%' ) {
+    	if ( ( ch = getc( this->file ) ) == '%' ) {
     		this->text.push_back( ch );
+    	} else {
+    		ungetc( ch, this->file );
     	}
-		ungetc( ch, this->file );    
 		it = this->item = itemMap.lookup( this->text );
 		if ( this->item == NULL ) {
             throw Mishap( "Invalid punctuation token" ); 
 		}
     } else if ( ch == '%' ) {
-    	while ( ch == '%' ) {
-	    	this->text.push_back( ch );
-    		ch = getc( this->file );
-    	}
-		if ( strchr( "()[]{}", ch ) ) {    	
+    	this->text.push_back( ch );
+   		ch = getc( this->file );
+    	if ( strchr( "()[]{}", ch ) ) {    	
 			this->text.push_back( ch );
 		} else {
 			ungetc( ch, this->file );

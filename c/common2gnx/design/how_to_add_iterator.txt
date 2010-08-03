@@ -1,0 +1,83 @@
+How to Add an Iterator to Common
+================================
+
+This is based on the experience of adding the 'in' iterator.
+
+1.	Determine whether or not the iterator needs supporting in
+	GingerXML. If it does add it in, based on iterators such
+	as from-to.
+	
+	In this case we added the <in>...</in> element.
+	
+		QUERY ::= 
+		<dec> PATTERN EXPR </dec>
+		<from> PATTERN FROM_EXPR TO_EXPR </from>
+		<in> PATTERN EXPR </in>
+		
+2.	Add all the tokens that the syntax needs. For every new keyword 
+	this means modifying
+	
+		a.	toktype.hpp - to add a new case to the enum tokType
+		b.	toktype.hpp - to add the enum to new tok_type_name
+		c.	item_map.cpp - where the attributes of the token are set
+		
+	Only the last part (c) is tricky. You need to specify 
+	
+		* 	the external name of the token ("in")
+		* 	the internal enum (tokty_in)
+		*	the 'role' of the token (PatternRole)
+		*	the precedence, if it can appear in a postfix context
+			(2000)
+			
+	Figuring out the role and precedence need detailed knowledge
+	of the parser. The role determines the generic treatment of
+	the token and just getting that right does most of the work
+	for you. The most useful roles are
+	
+		PatternRole 		PATTERN TOKEN <rest>, postfix to a pattern
+		CloserRole			e.g. endif, endfor
+		PrefixRole			TOKEN <rest>, starts an expression
+		PostfixRole			EXPR TOKEN <rest>, postfix or infix
+		BothfixRole			May be prefix, postfix or infix
+		LiteralRole			TOKEN, e.g. true, absent, termin
+		UnarySysRole		TOKEN EXPR, prefix sys call
+		BinaryFormRole		EXPR TOKEN EXPR, Specifically infix
+		BinarySysRole		EXPR TOKEN EXPR, infix sys call
+		SuffixOpRole		EXPR TOKEN, suffix operator
+
+3.	Based on the role, find the relevant place in read_expr.cpp to
+	modify. In this case the relevant place 
+	
+		ReadStateClass::postfix_processing
+		
+	The easiest way to find the relevant place is to search for 
+	references to similar tokens. In this case I searched for
+	tokty_from.
+	
+	Almost always this will entail building a bit of GNX tree.
+	GNX is a carefully selected subset of XML and the API for
+	building trees is very simple.
+	
+	In this case we need to grab the expression to the right of
+	the "in" keyword, then build 
+	
+		<in> PATTERN EXPR </in>
+	
+	Here is what it looks like for this specific case.
+	
+		//	Grab expr to right of "in"	
+		Node in_expr = this->read_expr();
+		
+		//	Build a node with a tag of "in".
+		NodeFactory node( "in" );
+		
+		//	Add the PATTERN child, already processed for us in "lhs"
+		node.addNode( lhs );
+		
+		//	Now add the EXPR child, which is the node we just built.
+		node.addNode( in_expr );
+		
+		//	Finally create the actual node.
+		return node.node();
+
+		

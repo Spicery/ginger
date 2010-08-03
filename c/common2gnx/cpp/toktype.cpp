@@ -55,6 +55,7 @@ const char *tok_type_name( TokType fnc ) {
 	case tokty_id : return "id";
 	case tokty_identical: return "identical";
 	case tokty_if : return "if";
+	case tokty_in : return "in";
 	case tokty_int : return "int";
 	case tokty_lt : return "lt";
 	case tokty_lte : return "lte";

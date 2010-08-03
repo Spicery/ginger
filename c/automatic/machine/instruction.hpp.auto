@@ -30,6 +30,7 @@
     vmc_halt,
     vmc_ifnot,
     vmc_ifso,
+    vmc_listiterate,
     vmc_lt_si,
     vmc_lt_ss,
     vmc_lte_si,

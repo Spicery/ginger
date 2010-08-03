@@ -123,7 +123,7 @@ void Machine3::core( bool init_mode, Ref *pc ) {
             Ref *ptr;
             if ( !IsObj( r ) ) call_error( r );
             ptr = RefToPtr4( r );
-            if ( !IsFunction( *ptr ) ) call_error( r );
+            if ( !IsFunctionKey( *ptr ) ) call_error( r );
             VMLINK = pc + 1;
             VMLINKFUNC = VMPCFUNC;
             VMPCFUNC = ptr;
@@ -178,7 +178,7 @@ void Machine3::core( bool init_mode, Ref *pc ) {
             Ref *ptr;
             if ( !IsObj( r ) ) call_error( r );
             ptr = RefToPtr4( r );
-            if ( !IsFunction( *ptr ) ) call_error( r );
+            if ( !IsFunctionKey( *ptr ) ) call_error( r );
             VMLINK = pc + 2;
             VMLINKFUNC = VMPCFUNC;
             VMPCFUNC = ptr;
@@ -193,7 +193,7 @@ void Machine3::core( bool init_mode, Ref *pc ) {
             Ref *ptr;
             if ( !IsObj( r ) ) call_error( r );
             ptr = RefToPtr4( r );
-            if ( !IsFunction( *ptr ) ) call_error( r );
+            if ( !IsFunctionKey( *ptr ) ) call_error( r );
             VMLINK = pc + 3;
             VMLINKFUNC = VMPCFUNC;
         	VMPCFUNC = ptr;
@@ -302,6 +302,24 @@ void Machine3::core( bool init_mode, Ref *pc ) {
         	pc + ToLong( pc[ 1 ] ) + 1
         );
     }
+    L_listiterate: {
+        //	This instruction implements the fast iterator for lists.
+        //	It may assume that there 2 items on the stack (L:List, _) on input.
+        //	Since there were 2 inputs, it may therefore safely return 2 items
+        //	without a stack check.
+        
+        Ref list = VMVP[-1];	//	Ignore VMVP[0], which is a dummy value.
+        if ( IsPair( list ) ) {
+        	VMVP[0] = ObjToPtr4( list )[ PAIR_TAIL_OFFSET ];
+        	VMVP[-1] = ObjToPtr4( list )[ PAIR_HEAD_OFFSET ];
+        } else {
+        	VMVP[0] = sys_termin;	//	Signals exit.
+        }
+        
+        
+        VMPCFUNC = VMLINKFUNC;
+        RETURN( VMLINK );
+    }
     L_lt_si: {
         long s = ToLong( pc[1] );
         long i = ToLong( pc[2] );
@@ -397,7 +415,7 @@ void Machine3::core( bool init_mode, Ref *pc ) {
             Ref *ptr;
             if ( !IsObj( r ) ) call_error( r );
             ptr = RefToPtr4( r );
-            if ( !IsFunction( *ptr ) ) call_error( r );
+            if ( !IsFunctionKey( *ptr ) ) call_error( r );
             VMLINK = pc + 3;
             VMLINKFUNC = VMPCFUNC;
         	VMPCFUNC = ptr;
@@ -411,7 +429,7 @@ void Machine3::core( bool init_mode, Ref *pc ) {
             Ref *ptr;
             if ( !IsObj( r ) ) call_error( r );
             ptr = RefToPtr4( r );
-            if ( !IsFunction( *ptr ) ) call_error( r );
+            if ( !IsFunctionKey( *ptr ) ) call_error( r );
             VMLINK = pc + 2;
             VMLINKFUNC = VMPCFUNC;
             VMPCFUNC = ptr;
@@ -471,6 +489,7 @@ void Machine3::core( bool init_mode, Ref *pc ) {
         ins.spc_halt = &&L_halt;
         ins.spc_ifnot = &&L_ifnot;
         ins.spc_ifso = &&L_ifso;
+        ins.spc_listiterate = &&L_listiterate;
         ins.spc_lt_si = &&L_lt_si;
         ins.spc_lt_ss = &&L_lt_ss;
         ins.spc_lte_si = &&L_lte_si;

@@ -131,7 +131,7 @@ static Ref *spcfn_calls( Ref *pc, Machine vm ) {
         Ref *ptr;
         if ( !IsObj( r ) ) call_error( r );
         ptr = RefToPtr4( r );
-        if ( !IsFunction( *ptr ) ) call_error( r );
+        if ( !IsFunctionKey( *ptr ) ) call_error( r );
         VMLINK = pc + 1;
         VMLINKFUNC = VMPCFUNC;
         VMPCFUNC = ptr;
@@ -190,7 +190,7 @@ static Ref *spcfn_end1_calls( Ref *pc, Machine vm ) {
         Ref *ptr;
         if ( !IsObj( r ) ) call_error( r );
         ptr = RefToPtr4( r );
-        if ( !IsFunction( *ptr ) ) call_error( r );
+        if ( !IsFunctionKey( *ptr ) ) call_error( r );
         VMLINK = pc + 2;
         VMLINKFUNC = VMPCFUNC;
         VMPCFUNC = ptr;
@@ -206,7 +206,7 @@ static Ref *spcfn_end_call_global( Ref *pc, Machine vm ) {
         Ref *ptr;
         if ( !IsObj( r ) ) call_error( r );
         ptr = RefToPtr4( r );
-        if ( !IsFunction( *ptr ) ) call_error( r );
+        if ( !IsFunctionKey( *ptr ) ) call_error( r );
         VMLINK = pc + 3;
         VMLINKFUNC = VMPCFUNC;
     	VMPCFUNC = ptr;
@@ -329,6 +329,25 @@ static Ref *spcfn_ifso( Ref *pc, Machine vm ) {
     );
 }
 
+static Ref *spcfn_listiterate( Ref *pc, Machine vm ) {
+    //	This instruction implements the fast iterator for lists.
+    //	It may assume that there 2 items on the stack (L:List, _) on input.
+    //	Since there were 2 inputs, it may therefore safely return 2 items
+    //	without a stack check.
+    
+    Ref list = VMVP[-1];	//	Ignore VMVP[0], which is a dummy value.
+    if ( IsPair( list ) ) {
+    	VMVP[0] = ObjToPtr4( list )[ PAIR_TAIL_OFFSET ];
+    	VMVP[-1] = ObjToPtr4( list )[ PAIR_HEAD_OFFSET ];
+    } else {
+    	VMVP[0] = sys_termin;	//	Signals exit.
+    }
+    
+    
+    VMPCFUNC = VMLINKFUNC;
+    RETURN( VMLINK );
+}
+
 static Ref *spcfn_lt_si( Ref *pc, Machine vm ) {
     long s = ToLong( pc[1] );
     long i = ToLong( pc[2] );
@@ -441,7 +460,7 @@ static Ref *spcfn_set_call_global( Ref *pc, Machine vm ) {
         Ref *ptr;
         if ( !IsObj( r ) ) call_error( r );
         ptr = RefToPtr4( r );
-        if ( !IsFunction( *ptr ) ) call_error( r );
+        if ( !IsFunctionKey( *ptr ) ) call_error( r );
         VMLINK = pc + 3;
         VMLINKFUNC = VMPCFUNC;
     	VMPCFUNC = ptr;
@@ -456,7 +475,7 @@ static Ref *spcfn_set_calls( Ref *pc, Machine vm ) {
         Ref *ptr;
         if ( !IsObj( r ) ) call_error( r );
         ptr = RefToPtr4( r );
-        if ( !IsFunction( *ptr ) ) call_error( r );
+        if ( !IsFunctionKey( *ptr ) ) call_error( r );
         VMLINK = pc + 2;
         VMLINKFUNC = VMPCFUNC;
         VMPCFUNC = ptr;
@@ -519,6 +538,7 @@ InstructionSet1::InstructionSet1() {
     this->spc_halt = (Ref)spcfn_halt;
     this->spc_ifnot = (Ref)spcfn_ifnot;
     this->spc_ifso = (Ref)spcfn_ifso;
+    this->spc_listiterate = (Ref)spcfn_listiterate;
     this->spc_lt_si = (Ref)spcfn_lt_si;
     this->spc_lt_ss = (Ref)spcfn_lt_ss;
     this->spc_lte_si = (Ref)spcfn_lte_si;

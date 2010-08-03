@@ -30,6 +30,7 @@
 	Ref spc_halt;
 	Ref spc_ifnot;
 	Ref spc_ifso;
+	Ref spc_listiterate;
 	Ref spc_lt_si;
 	Ref spc_lt_ss;
 	Ref spc_lte_si;

@@ -32,6 +32,7 @@ const char * InstructionSet::name( Ref spc ) const {
         spc == spc_halt ? "halt" :
         spc == spc_ifnot ? "ifnot" :
         spc == spc_ifso ? "ifso" :
+        spc == spc_listiterate ? "listiterate" :
         spc == spc_lt_si ? "lt_si" :
         spc == spc_lt_ss ? "lt_ss" :
         spc == spc_lte_si ? "lte_si" :
@@ -127,6 +128,7 @@ Ref InstructionSet::lookup( Instruction instr ) const {
     case vmc_halt: return this->spc_halt;
     case vmc_ifnot: return this->spc_ifnot;
     case vmc_ifso: return this->spc_ifso;
+    case vmc_listiterate: return this->spc_listiterate;
     case vmc_lt_si: return this->spc_lt_si;
     case vmc_lt_ss: return this->spc_lt_ss;
     case vmc_lte_si: return this->spc_lte_si;

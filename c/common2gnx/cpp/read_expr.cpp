@@ -142,6 +142,13 @@ Node ReadStateClass::postfix_processing( Node lhs, Item item, int prec ) {
 				node.addNode( to_expr );
 				return node.node();
 			}
+			case tokty_in: {				
+				Node in_expr = this->read_expr();
+				NodeFactory node( "in" );
+				node.addNode( lhs );
+				node.addNode( in_expr );
+				return node.node();
+			}
 			default: 
 				throw;
 		}

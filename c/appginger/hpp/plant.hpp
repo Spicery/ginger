@@ -117,7 +117,7 @@ public:
 	void compileTerm( Term term );
 	void compileArgs( Term term );
 
-	Ref detach();
+	Ref detach( bool in_heap );
 	void compile1( Term term );
 	void compile0( Term term );
 	void compileIf( bool sense, Term term, DestinationClass & dst );

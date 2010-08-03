@@ -32,7 +32,7 @@ bool isKey( Ref x ) {
 
 
 const char * keyName( Ref key ) {
-	//	Keys fall into the following categories: FnKey, SimpleKey, Pointer to Keys
+	//	Keys fall into the following categories: FunctionKey, SimpleKey, Pointer to Keys
 	if ( IsSimpleKey( key ) ) {
 		switch ( SimpleKeyID( key ) ) {
 			case 0: return "Absent";
@@ -53,7 +53,7 @@ const char * keyName( Ref key ) {
 			case 15: return "MapEntry";
 			default: throw ToBeDone();
 		}
-	} else if ( IsFnKey( key ) ) {
+	} else if ( IsFunctionKey( key ) ) {
 		return "Function";
 	} else if ( IsObj( key ) ) {
 		//	Compound keys not implemented yet.

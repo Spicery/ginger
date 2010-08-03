@@ -31,6 +31,7 @@ extern Ref * sysExplode( Ref *pc, class MachineClass * vm );
 extern Ref * sysLength( Ref *pc, class MachineClass * vm );
 extern Ref * sysHash( Ref *pc, class MachineClass * vm );
 extern Ref * sysAppend( Ref *pc, class MachineClass * vm );
+extern Ref * sysGetFastIterator( Ref * pc, class MachineClass * vm );
 
 #include "datatypes.hpp.auto"
 
@@ -39,12 +40,14 @@ struct SysInfo {
 	Arity in_arity;
 	Arity out_arity; 
 	SysCall * syscall; 
+	Ref coreFunctionObject;
 	
 	SysInfo( Functor f, Arity in, Arity out, SysCall * s ) :
 		functor( f ),
 		in_arity( in ),
 		out_arity( out ),
-		syscall( s )
+		syscall( s ),
+		coreFunctionObject( NULL )
 	{
 	}
 };

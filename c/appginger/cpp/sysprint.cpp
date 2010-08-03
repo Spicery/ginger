@@ -79,7 +79,7 @@ void refPrint( std::ostream & out, Ref r ) {
 	if ( IsObj( r ) ) {
 		Ref * obj_K = ObjToPtr4( r );
 		Ref key = *obj_K;
-		if ( IsFnKey( key ) ) {
+		if ( IsFunctionKey( key ) ) {
 			out << "<function>";
 		} else if ( IsSimpleKey( key ) ) {
 			switch ( KindOfSimpleKey( key ) ) {

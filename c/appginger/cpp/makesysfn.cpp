@@ -28,11 +28,16 @@ Ref makeSysFn( Plant plant, std::string fn_name ) {
 		throw Mishap( "No such system call" ).culprit( "Name", fn_name );
 	}
 	SysInfo & info = smit->second;
+	
+	Ref x = info.coreFunctionObject;
+	if ( x != NULL ) return x;
 
 	vmiFUNCTION( plant, info.in_arity.count(), info.out_arity.count() );
 	vmiSYS_CALL( plant, ToRef( info.syscall ) );	//	ToRef should NOT be needed here.
 	vmiSYS_RETURN( plant );
-	Ref r = vmiENDFUNCTION( plant );
+	Ref r = vmiENDFUNCTION( plant, false );
+	
+	info.coreFunctionObject = r;
 	return r;
 	
 }

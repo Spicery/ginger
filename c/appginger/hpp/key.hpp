@@ -85,9 +85,11 @@ const char * keyName( Ref key );
 #define IsFloat( x )			( ( FLOAT_MASK & ToULong( x ) ) == FLOAT0_TAGG )
 
 //	Functions
-#define sysFunctionKey			ToRef( 0 << TAGG | FN_TAGG )
-#define IsFnKey( key )			( ( key ) == sysFunctionKey )
-#define IsFunction( x ) 		( ( TAGG_MASK & ToULong( x ) ) == FN_TAGG )
+#define sysFunctionKey				ToRef( 0 << TAGG | FN_TAGG )
+#define sysCoreFunctionKey			ToRef( 1 << TAGG | FN_TAGG )
+#define IsFunctionKey( key )		( ( TAGG_MASK & ToULong( key ) ) == FN_TAGG )
+#define IsHeapFunctionKey( key )	( ( key ) == sysFunctionKey )
+#define IsCoreFunctionKey( key ) 	( ( key ) == sysCoreFunctionKey )
 
 
 

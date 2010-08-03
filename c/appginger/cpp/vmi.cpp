@@ -26,7 +26,7 @@ static void emitRef( Plant plant, Ref ref ) {
 	plant->plantRef( ref );
 }
 
-void vmiAPPSPC( Plant plant, Instruction instr ) {
+void vmiINSTRUCTION( Plant plant, Instruction instr ) {
 	emitSPC( plant, instr );
 }
 
@@ -40,7 +40,7 @@ void vmiSYS_RETURN( Plant plant ) {
 }
 
 void vmiOPERATOR( Plant plant, Functor fnc ) {
-	vmiAPPSPC(
+	vmiINSTRUCTION(
 		plant,
         fnc == fnc_eq ? vmc__eq :
         fnc == fnc_lt ? vmc__lt :
@@ -195,10 +195,10 @@ void vmiFUNCTION( Plant plant, int N, int A ) {
 	plant->save( N, A );
 }
 
-Ref vmiENDFUNCTION( Plant plant ) {
+Ref vmiENDFUNCTION( Plant plant, bool in_heap ) {
 	Ref r;
 
-	r = plant->detach();
+	r = plant->detach( in_heap );
 	#ifndef DBG_VMI
 		if ( plant->vm->getShowCode() ) {
 			plant->vm->printfn( std::clog, r );
@@ -217,6 +217,10 @@ Ref vmiENDFUNCTION( Plant plant ) {
 	plant->restore();
 	
 	return r;
+}
+
+Ref vmiENDFUNCTION( Plant plant ) {
+	return vmiENDFUNCTION( plant, true );
 }
 
 void vmiNOT( Plant plant ) {

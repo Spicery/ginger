@@ -3,6 +3,7 @@
 
 #include "common.hpp"
 #include "instruction.hpp"
+#include "listlayout.hpp"
 
 class InstructionSet {
 public:

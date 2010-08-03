@@ -29,6 +29,7 @@
 #include "arity.hpp"
 #include "ident.hpp"
 #include "makesysfn.hpp"
+#include "objlayout.hpp"
 
 #ifndef NULL
 #define NULL 0
@@ -54,46 +55,59 @@ DestinationClass & PlantClass::newDestination() {
 
 #define REFBITS ( 8 * sizeof( Ref ) )
 
-
-
-Ref PlantClass::detach() {
-	int L = this->code_data->size();
+Ref PlantClass::detach( const bool in_heap ) {
+	unsigned long L = this->code_data->size();
+	unsigned long preflight_size = OFFSET_FROM_FN_LENGTH_TO_KEY + 1 + L /* + M */;
 	
-	// Disabled temporarily.
-	//int M = ( L + REFBITS-1 ) % REFBITS;
-
-	unsigned long preflight_size = 5 + L /* + M */;
 	//	The preflighted size must fit into WORDBITS-8 bits.
 	if ( ( preflight_size & ~TAGGG_MASK ) != 0 ) {
 		throw Mishap( "Procedure too large" );
 	}
-
-	Ref * fake_pc;
-	XfrClass xfr( fake_pc, *this->vm, preflight_size );
-
-	//	L has to be a "procedure-length" value if heap scanning is
-	//	to be preserved - and I would like that for a variety of
-	//	reasons.
-	//
-	xfr.xfrRef( ToRef( ( L << TAGGG ) | FUNC_LEN_TAGGG ) );  //	tagged for heap scanning
-	xfr.xfrRef( ToRef( this->nresults ) );		//	raw R
-	xfr.xfrRef( ToRef( this->nlocals ) );		//	raw N
-	xfr.xfrRef( ToRef( this->ninputs ) );		//	raw A
-
-	xfr.setOrigin();
-	xfr.xfrRef( sysFunctionKey );
-
-	xfr.xfrVector( *this->code_data );	//	alt
-
-	/* Disabled for a while
-	//	For the moment, fake the mask bits.  Since we have no garbage
-	//	collector this shouldn't be a problem!
-	for ( int i = 0; i < M; i++ ) {
-		xfr.xfrRef( ToRef( 0 ) );
+	
+	if ( in_heap ) {
+		
+		// Disabled temporarily.
+		//int M = ( L + REFBITS-1 ) % REFBITS;
+	
+		Ref * fake_pc = NULL;
+		XfrClass xfr( fake_pc, *this->vm, preflight_size );
+	
+		//	L has to be a "procedure-length" value if heap scanning is
+		//	to be preserved - and I would like that for a variety of
+		//	reasons.
+		//
+		xfr.xfrRef( ToRef( ( L << TAGGG ) | FUNC_LEN_TAGGG ) );  //	tagged for heap scanning
+		xfr.xfrRef( ToRef( this->nresults ) );		//	raw R
+		xfr.xfrRef( ToRef( this->nlocals ) );		//	raw N
+		xfr.xfrRef( ToRef( this->ninputs ) );		//	raw A
+	
+		xfr.setOrigin();
+		xfr.xfrRef( sysFunctionKey );
+	
+		xfr.xfrVector( *this->code_data );	//	alt
+	
+		/* Disabled for a while
+		//	For the moment, fake the mask bits.  Since we have no garbage
+		//	collector this shouldn't be a problem!
+		for ( int i = 0; i < M; i++ ) {
+			xfr.xfrRef( ToRef( 0 ) );
+		}
+		*/
+	
+		return xfr.makeRef();
+	} else {
+		Ref * permanentStore = new Ref[ preflight_size ];		//	This store is never reclaimed.
+		Ref * p = permanentStore;
+		*p++ = ToRef( ( L << TAGGG ) | FUNC_LEN_TAGGG );
+		*p++ = ToRef( this->nresults );
+		*p++ = ToRef( this->nlocals );
+		Ref * func = p;
+		*p++ = sysCoreFunctionKey;
+		for ( std::vector< Ref >::iterator it = this->code_data->begin(); it != this->code_data->end(); ++it ) {
+			*p++ = *it;
+		}
+		return Ptr4ToRef( func );
 	}
-	*/
-
-	return xfr.makeRef();
 }
 
 
@@ -200,7 +214,7 @@ void PlantClass::compileQueryNext( Term query ) {
 			if ( term_functor( var ) != fnc_var ) throw;
 			Ident & ident = term_named_ident( var );
 			vmiPUSHID( this, ident );
-			vmiAPPSPC( this, vmc__incr );
+			vmiINSTRUCTION( this, vmc__incr );
 			vmiPOPID( this, ident );
 			break;
 		}

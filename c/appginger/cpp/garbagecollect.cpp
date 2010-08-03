@@ -417,7 +417,11 @@ public:
 	
 	
 	void forwardCallStackAndPC() {
-		this->vm->func_of_program_counter = this->forwardPtr4( this->vm->func_of_program_counter );
+	
+		//	The PC might be set to a fake value.
+		if ( this->vm->func_of_program_counter != NULL ) {
+			this->vm->func_of_program_counter = this->forwardPtr4( this->vm->func_of_program_counter );
+		}
 		
 		CallStackCrawl csc( this->vm );
 		for (;;) {
@@ -466,17 +470,19 @@ public:
 	void forwardContents( Ref * obj_K ) {
 		gclogger.startContents( obj_K );
 		Ref key = *obj_K;
-		if ( IsFnKey( key ) ) {
-			gclogger.startFnObj();
-			FnObjCrawl fnobjcrawl( vm, obj_K );
-			for ( ;; ) {
-				Ref * p = fnobjcrawl.next();
-				if ( p == NULL ) break;
-				gclogger.startInstruction( fnobjcrawl );
-				this->forward( *p );
-				gclogger.endInstruction( fnobjcrawl );
+		if ( IsFunctionKey( key ) ) {
+			if ( IsHeapFunctionKey( key ) ) {
+				gclogger.startFnObj();
+				FnObjCrawl fnobjcrawl( vm, obj_K );
+				for ( ;; ) {
+					Ref * p = fnobjcrawl.next();
+					if ( p == NULL ) break;
+					gclogger.startInstruction( fnobjcrawl );
+					this->forward( *p );
+					gclogger.endInstruction( fnobjcrawl );
+				}
+				gclogger.endFnObj();
 			}
-			gclogger.endFnObj();
 		} else if ( IsSimpleKey( key ) ) {
 			switch ( KindOfSimpleKey( key ) ) {
 				case PAIR_KIND:

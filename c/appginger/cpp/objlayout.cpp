@@ -50,7 +50,7 @@ unsigned long sizeAfterKeyOfFn( Ref * key ) {
 //
 //	This computes obj_A and obj_Z1 from obj_K
 void findObjectLimits( Ref * obj_K, Ref * & obj_A, Ref * & obj_Z1 ) {
-	//	Keys fall into the following categories: FnKey, SimpleKey, Pointer to Keys
+	//	Keys fall into the following categories: FunctionKey, SimpleKey, Pointer to Keys
 	Ref key = *obj_K;
 	Ref * obj_K1 = obj_K + 1;
 	if ( IsSimpleKey( key ) ) {
@@ -75,7 +75,7 @@ void findObjectLimits( Ref * obj_K, Ref * & obj_A, Ref * & obj_Z1 ) {
 			}
 			default: throw "Unreachable";
 		}
-	} else if ( IsFnKey( key ) ) {		
+	} else if ( IsFunctionKey( key ) ) {		
 		obj_A = obj_K - OFFSET_FROM_FN_LENGTH_TO_KEY;
 		obj_Z1 = obj_K1 + sizeAfterKeyOfFn( obj_K );
 		return;
@@ -112,7 +112,7 @@ Ref * findObjectKey( Ref * obj_A ) {
 //	This computes obj_C = obj_Z - obj_A from obj_K
 //
 unsigned long lengthAfterObjectKey( Ref * obj_K ) {
-	//	Keys fall into the following categories: FnKey, SimpleKey, Pointer to Keys
+	//	Keys fall into the following categories: FunctionKey, SimpleKey, Pointer to Keys
 	Ref key = *obj_K;
 	if ( IsSimpleKey( key ) ) {
 		switch ( KindOfSimpleKey( key ) ) {
@@ -132,7 +132,7 @@ unsigned long lengthAfterObjectKey( Ref * obj_K ) {
 			}
 			default: throw "Unreachable";
 		}
-	} else if ( IsFnKey( key ) ) {
+	} else if ( IsFunctionKey( key ) ) {
 		return sizeAfterKeyOfFn( obj_K );
 	} else if ( IsObj( key ) ) {
 		//	Compound keys not implemented yet.

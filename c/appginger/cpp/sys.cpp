@@ -40,6 +40,61 @@
 
 //#define DBG_SYS
 
+
+Ref * sysGetFastIterator( Ref * pc, class MachineClass * vm ) {
+	if ( vm->count == 1 ) {
+		Ref r = vm->fastPop();
+		vm->checkStackRoom( 3 );
+		if ( IsObj( r ) ) {
+			Ref * obj_K = ObjToPtr4( r );
+			Ref key = *obj_K;
+			if ( IsSimpleKey( key ) ) {
+				switch ( KindOfSimpleKey( key ) ) {
+					case PAIR_KIND: {
+						vm->fastPush( r );			//	Iteration state.
+						vm->fastPush( sys_absent );	//	Iteration context, a dummy.
+						vm->fastPush( vm->sysFastListIterator() );
+						break;
+					}
+					case RECORD_KIND: {
+						throw ToBeDone();
+						break;
+					}
+					case STRING_KIND: {
+						throw ToBeDone();
+						break;
+					}
+					case MAP_KIND: {
+						throw ToBeDone();
+						break;
+					}
+					case VECTOR_KIND: {
+						throw ToBeDone();
+						break;
+					}
+					default: {
+						throw ToBeDone();
+					}
+				}
+			} else if ( IsObj( key ) ) {
+				//	Compound keys not implemented yet.
+				throw ToBeDone();	//	(compound keys)
+			} else {
+				throw ToBeDone();
+			}
+		} else if ( IsNil( r ) ) {
+			vm->fastPush( r );			//	Iteration state.
+			vm->fastPush( sys_absent );	//	Iteration context, a dummy.
+			vm->fastPush( vm->sysFastListIterator() );
+		} else {
+			throw ToBeDone();
+		}
+		return pc;
+	} else {
+		throw Mishap( "Wrong number of arguments for sysIterate" );
+	}	
+}
+
 //	This should be decomposed by implemented vectorAppend, listAppend
 //	and stringAppend
 Ref * sysAppend( Ref * pc, class MachineClass * vm ) {
@@ -81,7 +136,7 @@ Ref * sysExplode( Ref *pc, class MachineClass * vm ) {
 			vm->fastPop();
 			Ref * obj_K = ObjToPtr4( r );
 			Ref key = *obj_K;
-			if ( IsFnKey( key ) ) {
+			if ( IsFunctionKey( key ) ) {
 				throw Mishap( "Trying to explode (...) a function object" );
 			} else if ( IsSimpleKey( key ) ) {
 				switch ( KindOfSimpleKey( key ) ) {
@@ -135,7 +190,7 @@ Ref * sysLength( Ref *pc, class MachineClass * vm ) {
 		if ( IsObj( r ) ) {
 			Ref * obj_K = ObjToPtr4( r );
 			Ref key = *obj_K;
-			if ( IsFnKey( key ) ) {
+			if ( IsFunctionKey( key ) ) {
 				throw Mishap( "Trying to explode (...) a function object" );
 			} else if ( IsSimpleKey( key ) ) {
 				switch ( KindOfSimpleKey( key ) ) {

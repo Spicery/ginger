@@ -29,6 +29,7 @@
 #include "sys.hpp"
 #include "sysprint.hpp"
 #include "mishap.hpp"
+#include "vmi.hpp"
 
 using namespace std;
 
@@ -196,9 +197,32 @@ void MachineClass::print_results( std::ostream & out, float time_taken ) {
 	this->vp = this->vp_base;
 }
 
+//	Should be bigger than ( SP_OVERHEAD + 1 ) + 1 = 5
+#define STACK_BUFFER_OVERHEAD 16
+
+//	Needs to be inlined after we complete the callstack refactoring.
+void MachineClass::checkStackRoom( long n ) {
+	if ( this->sp < this->vp + n + STACK_BUFFER_OVERHEAD ) throw Mishap( "Stack overflow" );
+}
+
+Ref MachineClass::sysFastListIterator() {
+	
+	//	Memoise.
+	static Ref iterator = NULL;
+	if ( iterator != NULL ) return iterator;
+	
+	PlantClass * plant = this->plant();
+	vmiFUNCTION( plant, 2, 2 );
+	vmiINSTRUCTION( plant, vmc_listiterate );
+	iterator = vmiENDFUNCTION( plant, false );
+
+	return iterator;
+}
+
+// -----------------------------------------------------------------------------
+
 //	The following routines are a bit peculiar as they are really intended
 //	to be used with gdb.
-
 static void bite_me() {
 	throw;
 }
@@ -222,10 +246,3 @@ void MachineClass::check_call_stack_integrity() {
 	}
 }
 
-//	Should be bigger than ( SP_OVERHEAD + 1 ) + 1 = 5
-#define STACK_BUFFER_OVERHEAD 16
-
-//	Needs to be inlined after we complete the callstack refactoring.
-void MachineClass::checkStackRoom( long n ) {
-	if ( this->sp < this->vp + n + STACK_BUFFER_OVERHEAD ) throw Mishap( "Stack overflow" );
-}

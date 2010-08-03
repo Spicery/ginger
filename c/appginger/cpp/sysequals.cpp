@@ -120,7 +120,7 @@ bool refEquals( Ref x, Ref y ) {
 			Ref xkey = *x_K;
 			Ref ykey = *y_K;
 			
-			if ( IsFnKey( xkey ) ) {
+			if ( IsFunctionKey( xkey ) ) {
 				//	Functions must be identical to be equal.
 				return false;
 			} else if ( IsSimpleKey( xkey ) ) {
@@ -154,7 +154,7 @@ unsigned long refHash( Ref r ) {
 	if ( IsObj( r ) ) {
 		Ref * obj_K = ObjToPtr4( r );
 		Ref key = *obj_K;
-		if ( IsFnKey( key ) ) {
+		if ( IsFunctionKey( key ) ) {
 			HashEngine e( ToULong( key ) );
 			e.add( ToULong(obj_K[ -OFFSET_TO_NSLOTS_TO_KEY ] ) );
 			e.add( ToULong( obj_K[ -OFFSET_FROM_FN_LENGTH_TO_KEY ] ) );

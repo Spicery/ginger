@@ -412,6 +412,31 @@ public:
 	virtual ~FromTermClass() {}
 };
 
+//-- from ---------------------------------------------------------------
+
+
+class InTermClass : 
+	public KidsTermMixin
+{
+public:
+	const char * type_name() { return "InTermClass"; }
+	virtual enum Functor functor() { return fnc_in; }
+	
+public:
+	Ident 	state;
+	Ident	context;
+	Ident 	next_fn;
+	
+public:
+
+	InTermClass() :
+		KidsTermMixin()
+	{
+	}
+	
+	virtual ~InTermClass() {}
+};
+
 //------------------------------------------------------------------------------
 
 
@@ -474,6 +499,7 @@ Ident & term_named_ident( Term term );
 bool term_is_id( Term term );
 
 Term term_new_from( Term id, Term start_expr, Term end_expr );
+Term term_new_in( Term id, Term expr );
 
 Functor term_functor( Term term );
 int term_count( Term term );

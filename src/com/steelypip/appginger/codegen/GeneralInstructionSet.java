@@ -125,6 +125,10 @@ public abstract class GeneralInstructionSet {
 		return new GenericInstruction();
 	}
 
+	public Instruction getiterator_i() {
+		return new GenericInstruction();
+	}
+
 
 	public Instruction gt_si_irrr() {
 		return new GenericInstruction();
@@ -154,12 +158,14 @@ public abstract class GeneralInstructionSet {
 	public Instruction ifnot_ir() {
 		return new GenericInstruction();
 	}
-
-
+	
 	public Instruction ifso_ir() {
 		return new GenericInstruction();
 	}
-
+	
+	public Instruction listiterate_i() {
+		return new GenericInstruction();
+	}
 
 	public Instruction lt_si_irrr() {
 		return new GenericInstruction();
@@ -262,7 +268,12 @@ public abstract class GeneralInstructionSet {
 	public Instruction syscall_ir() {
 		return new GenericInstruction();	
 	}
+	
 	public Instruction sysreturn_i() {
+		return new GenericInstruction();	
+	}
+	
+	public Instruction vectoriterate_i() {
 		return new GenericInstruction();	
 	}
 	

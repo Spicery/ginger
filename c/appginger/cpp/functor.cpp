@@ -54,6 +54,7 @@ const char * functor_name( Functor tag ) {
 	case fnc_gte : return "gte";
 	case fnc_id : return "id";
 	case fnc_if : return "if";
+	case fnc_in: return "in";
 	case fnc_incr : return "incr";
 	case fnc_incr_by : return "incr_by";
 	case fnc_int : return "int";
@@ -79,7 +80,7 @@ const char * functor_name( Functor tag ) {
     return "?";
 }
 
-Ref functor_value( enum Functor tag ) {
+/*Ref functor_value( enum Functor tag ) {
 	switch ( tag ) {
 	case fnc_absent:	return sys_absent;
 	//case fnc_false:		return sys_false;
@@ -87,4 +88,4 @@ Ref functor_value( enum Functor tag ) {
 	default:			throw "No value";
 	}
 	
-}
+}*/

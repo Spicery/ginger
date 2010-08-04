@@ -22,14 +22,9 @@
 #include <cstdlib>
 
 
-//	Now source the auto-generated C++ file. The 
-//	header files are provided here (for no very
-//	good reason.)
-#include "machine.hpp"
-#include "key.hpp"
-#include "sys.hpp"
-#include "mishap.hpp"
-#include "appginger.hpp"
+//	Now source the auto-generated C++ file. 
+#include "instructions_context.hpp"
+
 
 Machine3::Machine3( AppGinger & g ) :
 	MachineClass( g )

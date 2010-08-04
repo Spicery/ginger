@@ -33,7 +33,7 @@ Ref makeSysFn( Plant plant, std::string fn_name ) {
 	if ( x != NULL ) return x;
 
 	vmiFUNCTION( plant, info.in_arity.count(), info.out_arity.count() );
-	vmiSYS_CALL( plant, ToRef( info.syscall ) );	//	ToRef should NOT be needed here.
+	vmiSYS_CALL( plant, info.syscall );	
 	vmiSYS_RETURN( plant );
 	Ref r = vmiENDFUNCTION( plant, false );
 	

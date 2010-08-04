@@ -4,7 +4,7 @@ import java.io.PrintWriter;
 
 public class GenericImplementation extends Implementation {
 
-	@Override
+	/*@Override
 	public Instruction _add_i() {
 		return new GenericInstruction();
 	}
@@ -267,7 +267,7 @@ public class GenericImplementation extends Implementation {
 	@Override
 	public Instruction sysreturn_i() {
 		return new GenericInstruction();
-	}
+	}*/
 
 
 	@Override

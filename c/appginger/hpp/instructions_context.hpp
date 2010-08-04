@@ -16,42 +16,17 @@
     along with AppGinger.  If not, see <http://www.gnu.org/licenses/>.
 \******************************************************************************/
 
-#ifndef SYS_HPP
-#define SYS_HPP
+#ifndef INSTRUCTIONS_CONTEXT_HPP
+#define INSTRUCTIONS_CONTEXT_HPP
 
-#include <map>
-#include <iostream>
-
+#include "machine.hpp"
+#include "callstacklayout.hpp"
+#include "mishap.hpp"
 #include "common.hpp"
-#include "arity.hpp"
+#include "key.hpp"
+#include "sys.hpp"
+#include "vectorlayout.hpp"
 
-class MachineClass;
 
-extern Ref * sysExplode( Ref *pc, class MachineClass * vm );
-extern Ref * sysLength( Ref *pc, class MachineClass * vm );
-extern Ref * sysHash( Ref *pc, class MachineClass * vm );
-extern Ref * sysAppend( Ref *pc, class MachineClass * vm );
-extern Ref * sysFastGetFastIterator( Ref * pc, class MachineClass * vm );
-
-#include "datatypes.hpp.auto"
-
-struct SysInfo { 
-	Functor functor; 
-	Arity in_arity;
-	Arity out_arity; 
-	SysCall * syscall; 
-	Ref coreFunctionObject;
-	
-	SysInfo( Functor f, Arity in, Arity out, SysCall * s ) :
-		functor( f ),
-		in_arity( in ),
-		out_arity( out ),
-		syscall( s ),
-		coreFunctionObject( NULL )
-	{
-	}
-};
-typedef std::map< std::string, SysInfo > SysMap;
-extern SysMap sysMap;
 
 #endif

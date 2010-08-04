@@ -35,6 +35,7 @@ public abstract class Implementation extends GeneralInstructionSet {
 		answer.add( this.enter1_i().init( "enter1", "i" ) );
 		answer.add( this.eq_si_irrr().init( "eq_si", "irrr" ) );
 		answer.add( this.eq_ss_irrr().init( "eq_ss", "irrr" ) );
+		answer.add( this.getiterator_i().init( "getiterator", "i" ) );
 		answer.add( this.goto_ir().init( "goto", "ir" ) );
 		answer.add( this.gt_si_irrr().init( "gt_si", "irrr" ) );
 		answer.add( this.gt_ss_irrr().init( "gt_ss", "irrr" ) );
@@ -43,6 +44,7 @@ public abstract class Implementation extends GeneralInstructionSet {
 		answer.add( this.halt_i().init( "halt", "i" ) );
 		answer.add( this.ifnot_ir().init( "ifnot", "ir" ) );
 		answer.add( this.ifso_ir().init( "ifso", "ir" ) );
+		answer.add( this.listiterate_i().init( "listiterate", "i" ) );
 		answer.add( this.lt_si_irrr().init( "lt_si", "irrr" ) );
 		answer.add( this.lt_ss_irrr().init( "lt_ss", "irrr" ) );
 		answer.add( this.lte_si_irrr().init( "lte_si", "irrr" ) );
@@ -65,39 +67,9 @@ public abstract class Implementation extends GeneralInstructionSet {
 		answer.add( this.start_ir().init( "start", "ir" ) );
 		answer.add( this.syscall_ir().init( "syscall", "ir" ) );
 		answer.add( this.sysreturn_i().init( "sysreturn", "i" ) );
+		answer.add( this.vectoriterate_i().init( "vectoriterate", "i" ) );
 		return this.cached = answer;
 	}
-	
-	/*void generateSpecialPrototypes( final PrintWriter output ) {
-		for ( Instruction inst : this.instructions() ) {
-			output.format( "extern Special spc_%s;\n", inst.getName() );
-		}
-	}*/
-	
-	/*void generateSpecialName( final PrintWriter output ) {
-		output.format( "const char *special_name( Special spc ) {\n" );
-		output.format( "    return(\n" );
-		for ( Instruction inst : this.instructions() ) {
-			final String name = inst.getName();
-			output.format(  "        spc == spc_%s ? \"%s\" :\n", name, name );
-		}
-		output.format( "        \"?\"\n" );
-		output.format( "    );\n" );
-		output.format( "}\n\n" );
-		
-	}*/
-	
-	/*void generateClassify( final PrintWriter output ) {
-		output.format(  "static const char *classify( Special x ) {\n" );
-		for ( Instruction inst : this.instructions() ) {
-			if ( !"i".equals( inst.getType() ) ) {
-				output.format( "    if ( x == spc_%s ) return \"%s\";\n", inst.getName(), inst.getType() );
-			}
-		}
-		output.format( "    return \"i\";\n" );
-		output.format( "}\n\n" );
-		
-	}*/
 	
 	void generateInstructionSetHPP( final PrintWriter output ) {
 		for ( Instruction inst : this.instructions() ) {

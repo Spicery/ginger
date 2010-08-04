@@ -56,6 +56,7 @@ typedef enum Functor {
 	fnc_gte,
 	fnc_id,
 	fnc_if,
+	fnc_in,
 	fnc_incr,
 	fnc_incr_by,
 	fnc_int,
@@ -80,7 +81,7 @@ typedef enum Functor {
 } Functor;
 
 const char *functor_name( Functor fnc );
-Ref functor_value( enum Functor tag );
+//Ref functor_value( enum Functor tag );
 
 
 #endif

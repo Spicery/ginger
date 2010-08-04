@@ -31,7 +31,7 @@ extern void vmiPUSHQ( Plant plant, Ref obj );
 extern void vmiPUSHID( Plant plant, Ident id );
 extern void vmiPOPID( Plant plant, Ident id );
 extern void vmiINSTRUCTION( Plant plant, Instruction instr );
-extern void vmiSYS_CALL( Plant plant, Ref r );
+extern void vmiSYS_CALL( Plant plant, SysCall * r );
 extern void vmiSYS_RETURN( Plant plant );
 extern void vmiRETURN( Plant plant );
 extern void vmiENTER( Plant plant );
@@ -56,6 +56,11 @@ extern void vmiEND_CALL_ID( Plant plant, int var, Ident ident );
 extern void vmiSET_CALL_ID( Plant plant, int in_arity, Ident ident );
 extern void vmiSET( Plant plant, int A );
 extern void vmiNOT( Plant plant );
+extern void vmiIF_EQ_ID_CONSTANT( Plant plant, Ident id, Ref constant, DestinationClass & d );
+extern void vmiIF_EQ_ID_ID( Plant plant, Ident id1, Ident id2, DestinationClass & d );
+extern void vmiIF_NEQ_ID_CONSTANT( Plant plant, Ident id, Ref constant, DestinationClass & d );
+extern void vmiIF_NEQ_ID_ID( Plant plant, Ident id1, Ident id2, DestinationClass & d );
+
 
 class VmiRelOpFactory {
 private:

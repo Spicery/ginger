@@ -30,6 +30,7 @@
 #include "ident.hpp"
 #include "makesysfn.hpp"
 #include "objlayout.hpp"
+#include "sys.hpp"
 
 #ifndef NULL
 #define NULL 0
@@ -201,6 +202,20 @@ void PlantClass::compileQueryInit( Term query ) {
 			
 			break;
 		}
+		case fnc_in: {
+			InTermClass * q = dynamic_cast< InTermClass * >( query.get() );
+			
+			this->compile1( q->child( 1 ) );
+			vmiINSTRUCTION( this, vmc_getiterator );
+			q->next_fn = this->newTmpIdent();
+			q->context = this->newTmpIdent();
+			q->state = this->newTmpIdent();
+			vmiPOPID( this, q->next_fn );
+			vmiPOPID( this, q->context );
+			vmiPOPID( this, q->state );
+			
+			break;
+		}
 		default:
 			throw;
 	}
@@ -213,9 +228,16 @@ void PlantClass::compileQueryNext( Term query ) {
 			Term var = q->child( 0 );
 			if ( term_functor( var ) != fnc_var ) throw;
 			Ident & ident = term_named_ident( var );
+			
+			//	Obvious candidate for a merged instruction.
 			vmiPUSHID( this, ident );
 			vmiINSTRUCTION( this, vmc__incr );
 			vmiPOPID( this, ident );
+			
+			break;
+		}
+		case fnc_in: {
+			//	Nothing.
 			break;
 		}
 		default:
@@ -237,6 +259,25 @@ void PlantClass::compileQueryIfSo( Term query, DestinationClass & dst ) {
 			relop_factory.setRight( q->end_expr_ident );
 			relop_factory.ifSo( dst );
 
+			break;
+		}
+		case fnc_in: {
+			InTermClass * q = dynamic_cast< InTermClass * >( query.get() );
+			Term var = q->child( 0 );
+			if ( term_functor( var ) != fnc_var ) throw;
+			Ident & loopident = term_named_ident( var );
+
+			Ident & state = q->state;
+			Ident & context = q->context;
+			Ident & next_fn = q->next_fn;
+
+			vmiPUSHID( this, state );	
+			vmiPUSHID( this, context );	
+			vmiSET_CALL_ID( this, 2, next_fn );
+			vmiPOPID( this, state );
+			vmiPOPID( this, loopident );
+			vmiIF_NEQ_ID_CONSTANT( this, state, sys_termin, dst );
+			
 			break;
 		}
 		default:
@@ -378,7 +419,7 @@ void PlantClass::compileTerm( Term term ) {
 			break;
 		}
 		case fnc_syscall: {
-			Ref sc = term_ref_cont( term );
+			SysCall * sc = reinterpret_cast< SysCall * >( term_ref_cont( term ) );
 			int v = tmpvar( this );
 			vmiSTART( this, v );
 			this->compileArgs( term );

@@ -243,6 +243,13 @@ Term term_new_from( Term id, Term start_expr, Term end_expr ) {
 	return x;
 }
 
+Term term_new_in( Term id, Term expr ) {
+	Term x( new InTermClass() );
+	x->add( id );
+	x->add( expr );
+	return x;
+}
+
 Functor term_functor( Term term ) {
     return term->functor();
 }

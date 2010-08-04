@@ -27,6 +27,8 @@
 #include "heap.hpp"
 #include "appginger.hpp"
 
+
+
 class PlantClass;
 typedef PlantClass * Plant;
 
@@ -85,6 +87,7 @@ public:
 	
 public:
 	virtual Ref sysFastListIterator();
+	virtual Ref sysFastVectorIterator();
 	virtual Ref * setUpPC( Ref r );
 	virtual void execute( Ref r ) = 0;
 	virtual const InstructionSet & instructionSet() = 0;

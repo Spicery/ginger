@@ -6,6 +6,7 @@
 #include "common.hpp"
 #include "key.hpp"
 #include "sys.hpp"
+#include "vectorlayout.hpp"
 
 #include <cstdio>
 #include <cstdlib>

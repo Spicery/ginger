@@ -19,13 +19,8 @@
 #include "machine2.hpp"
 
 
-//	Now source the auto-generated C++ file. The 
-//	header files are provided here (for no very
-//	good reason.)
-#include "machine.hpp"
-#include "key.hpp"
-#include "sys.hpp"
-#include "mishap.hpp"
+//	Now source the auto-generated C++ file. 
+#include "instructions_context.hpp"
 
 Ref *pc;
 Machine vm;

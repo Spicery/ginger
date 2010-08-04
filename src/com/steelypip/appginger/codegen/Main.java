@@ -29,11 +29,7 @@ public class Main {
 		new FullRecordClassGenerator(
 			sysconsts, "Maplet", "mapletKey", "mapletValue"
 		).generate( outputFolder, "maplet" );
-		
-		new FullRecordClassGenerator(
-			sysconsts, "Map", "mapData", "mapCount"
-		).generate(  outputFolder, "map" );
-		
+				
 		new FullVectorClassGenerator(
 			sysconsts, "Vector"
 		).generate( outputFolder, "vector" );

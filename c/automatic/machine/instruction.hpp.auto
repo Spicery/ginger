@@ -22,6 +22,7 @@
     vmc_enter1,
     vmc_eq_si,
     vmc_eq_ss,
+    vmc_getiterator,
     vmc_goto,
     vmc_gt_si,
     vmc_gt_ss,
@@ -52,4 +53,5 @@
     vmc_set_calls,
     vmc_start,
     vmc_syscall,
-    vmc_sysreturn
+    vmc_sysreturn,
+    vmc_vectoriterate

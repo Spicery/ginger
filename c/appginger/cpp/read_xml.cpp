@@ -333,6 +333,8 @@ Term TermData::makeTerm() {
 		return term_new_basic2( fnc_for, kids[0], kids[1] );
 	} else if ( name == "from" && kids.size() == 3 ) {
 		return term_new_from( kids[0], kids[1], kids[2] );
+	} else if ( name == "in" && kids.size() == 2 ) {
+		return term_new_in( kids[ 0 ], kids[ 1 ] );
 	} else if ( name == "app" && kids.size() == 2 ) {
 		return term_new_basic2( fnc_app, kids[ 0 ], kids[ 1 ] );
 	} else {

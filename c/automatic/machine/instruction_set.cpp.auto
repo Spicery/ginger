@@ -24,6 +24,7 @@ const char * InstructionSet::name( Ref spc ) const {
         spc == spc_enter1 ? "enter1" :
         spc == spc_eq_si ? "eq_si" :
         spc == spc_eq_ss ? "eq_ss" :
+        spc == spc_getiterator ? "getiterator" :
         spc == spc_goto ? "goto" :
         spc == spc_gt_si ? "gt_si" :
         spc == spc_gt_ss ? "gt_ss" :
@@ -55,6 +56,7 @@ const char * InstructionSet::name( Ref spc ) const {
         spc == spc_start ? "start" :
         spc == spc_syscall ? "syscall" :
         spc == spc_sysreturn ? "sysreturn" :
+        spc == spc_vectoriterate ? "vectoriterate" :
         "?"
     );
 }
@@ -120,6 +122,7 @@ Ref InstructionSet::lookup( Instruction instr ) const {
     case vmc_enter1: return this->spc_enter1;
     case vmc_eq_si: return this->spc_eq_si;
     case vmc_eq_ss: return this->spc_eq_ss;
+    case vmc_getiterator: return this->spc_getiterator;
     case vmc_goto: return this->spc_goto;
     case vmc_gt_si: return this->spc_gt_si;
     case vmc_gt_ss: return this->spc_gt_ss;
@@ -151,6 +154,7 @@ Ref InstructionSet::lookup( Instruction instr ) const {
     case vmc_start: return this->spc_start;
     case vmc_syscall: return this->spc_syscall;
     case vmc_sysreturn: return this->spc_sysreturn;
+    case vmc_vectoriterate: return this->spc_vectoriterate;
     }
     throw Mishap( "Bad instruction" );
 }

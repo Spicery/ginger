@@ -30,9 +30,9 @@ void vmiINSTRUCTION( Plant plant, Instruction instr ) {
 	emitSPC( plant, instr );
 }
 
-void vmiSYS_CALL( Plant plant, Ref r ) {
+void vmiSYS_CALL( Plant plant, SysCall * r ) {
 	emitSPC( plant, vmc_syscall );
-	emitRef( plant, r );
+	emitRef( plant, ToRef( r ) );
 }
 
 void vmiSYS_RETURN( Plant plant ) {
@@ -248,6 +248,48 @@ void vmiIF( bool sense, Plant plant, DestinationClass & dst ) {
 void vmiGOTO( Plant plant, DestinationClass & d ) {
 	emitSPC( plant, vmc_goto );
 	d.destinationInsert();
+}
+
+static void vmiCMP_ID_CONSTANT( bool flag, Plant plant, Ident id, Ref r, DestinationClass & d ) {
+	emitSPC( plant, ( flag ? vmc_eq_si : vmc_neq_si ) );
+	if ( id->isLocal() ) {
+		emitRef( plant, ToRef( id->slot ) );
+	} else {
+		emitRef( plant, ToRef( id.get() ) );
+	}
+	emitRef( plant, r );
+	d.destinationInsert();
+}
+
+static void vmiCMP_ID_ID( bool flag, Plant plant, Ident id1, Ident id2, DestinationClass & d ) {
+	emitSPC( plant, flag ? vmc_eq_ss : vmc_neq_ss );
+	if ( id1->isLocal() ) {
+		emitRef( plant, ToRef( id1->slot ) );
+	} else {
+		emitRef( plant, ToRef( id1.get() ) );
+	}
+	if ( id2->isLocal() ) {
+		emitRef( plant, ToRef( id2->slot ) );
+	} else {
+		emitRef( plant, ToRef( id2.get() ) );
+	}
+	d.destinationInsert();
+}
+
+void vmiIF_EQ_ID_CONSTANT( Plant plant, Ident id, Ref constant, DestinationClass & d ) {
+	vmiCMP_ID_CONSTANT( true, plant, id, constant, d );
+}
+
+void vmiIF_EQ_ID_ID( Plant plant, Ident id1, Ident id2, DestinationClass & d ) {
+	vmiCMP_ID_ID( true, plant, id1, id2, d );
+}
+
+void vmiIF_NEQ_ID_CONSTANT( Plant plant, Ident id, Ref constant, DestinationClass & d ) {
+	vmiCMP_ID_CONSTANT( false, plant, id, constant, d );
+}
+
+void vmiIF_NEQ_ID_ID( Plant plant, Ident id1, Ident id2, DestinationClass & d ) {
+	vmiCMP_ID_ID( false, plant, id1, id2, d );
 }
 
 static bool eval_relop( char op, int a, int b ) {
@@ -467,3 +509,5 @@ void VmiRelOpFactory::ifNot( DestinationClass &dst ) {
 		vmiIFNOT( this->plant, dst );
 	}
 }
+
+

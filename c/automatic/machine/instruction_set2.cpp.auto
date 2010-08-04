@@ -271,6 +271,13 @@ static void spcfn_eq_ss( void ) {
     RETURN( ToLong( LOCAL( s ) ) == ToLong( LOCAL( t ) ) ? pc + d + 3 : pc + 4 );
 }
 
+static void spcfn_getiterator( void ) {
+    FREEZE;
+    pc = sysFastGetFastIterator( pc, vm );
+    MELT;
+    RETURN( pc + 1 );
+}
+
 static void spcfn_goto( void ) {
     long n = ToLong( *( ++pc ) );
     RETURN( pc + n );
@@ -505,6 +512,28 @@ static void spcfn_sysreturn( void ) {
     RETURN( VMLINK );
 }
 
+static void spcfn_vectoriterate( void ) {
+    //	This instruction implements the fast iterator for vectors.
+    //	It may assume that there 2 items on the stack (i:Small, v:Vector) on input.
+    //	Since there were 2 inputs, it may therefore safely return 2 items
+    //	without a stack check.
+    
+    Ref * vector = ObjToPtr4( VMVP[0] );
+    Ref len_as_small = vector[ VECTOR_LENGTH_OFFSET ];
+    Ref index = VMVP[-1];
+    
+    //	Is is safe to compare smalls this way.
+    if ( index > len_as_small ) {
+    	VMVP[0]	= sys_termin;
+    } else {
+    	VMVP[-1] = vector[ SmallToLong( index ) ];
+    	VMVP[0] = ToRef( (long)index + (long)LongToSmall( 1 ) );			//	It is safe to add smalls like this too.
+    }
+    
+    VMPCFUNC = VMLINKFUNC;
+    RETURN( VMLINK );
+}
+
 InstructionSet2::InstructionSet2() {
     this->spc__add = (Ref)spcfn__add;
     this->spc__decr = (Ref)spcfn__decr;
@@ -530,6 +559,7 @@ InstructionSet2::InstructionSet2() {
     this->spc_enter1 = (Ref)spcfn_enter1;
     this->spc_eq_si = (Ref)spcfn_eq_si;
     this->spc_eq_ss = (Ref)spcfn_eq_ss;
+    this->spc_getiterator = (Ref)spcfn_getiterator;
     this->spc_goto = (Ref)spcfn_goto;
     this->spc_gt_si = (Ref)spcfn_gt_si;
     this->spc_gt_ss = (Ref)spcfn_gt_ss;
@@ -561,5 +591,6 @@ InstructionSet2::InstructionSet2() {
     this->spc_start = (Ref)spcfn_start;
     this->spc_syscall = (Ref)spcfn_syscall;
     this->spc_sysreturn = (Ref)spcfn_sysreturn;
+    this->spc_vectoriterate = (Ref)spcfn_vectoriterate;
 }
 

@@ -233,6 +233,20 @@ Ref MachineClass::sysFastVectorIterator() {
 	return iterator;
 }
 
+Ref MachineClass::sysFastStringIterator() {
+	
+	//	Memoise.
+	static Ref iterator = NULL;
+	if ( iterator != NULL ) return iterator;
+	
+	PlantClass * plant = this->plant();
+	vmiFUNCTION( plant, 2, 2 );
+	vmiINSTRUCTION( plant, vmc_stringiterate );
+	iterator = vmiENDFUNCTION( plant, false );
+
+	return iterator;
+}
+
 // -----------------------------------------------------------------------------
 
 //	The following routines are a bit peculiar as they are really intended

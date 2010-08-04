@@ -1,12 +1,6 @@
 #include "instruction_set2.hpp"
 
-#include "machine.hpp"
-#include "callstacklayout.hpp"
-#include "mishap.hpp"
-#include "common.hpp"
-#include "key.hpp"
-#include "sys.hpp"
-#include "vectorlayout.hpp"
+#include "instructions_context.hpp"
 
 #include <cstdio>
 #include <cstdlib>

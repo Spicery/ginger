@@ -499,6 +499,28 @@ static Ref *spcfn_start( Ref *pc, Machine vm ) {
     RETURN( pc + 1 );
 }
 
+static Ref *spcfn_stringiterate( Ref *pc, Machine vm ) {
+    //	This instruction implements the fast iterator for vectors.
+    //	It may assume that there 2 items on the stack (i:Small, v:Vector) on input.
+    //	Since there were 2 inputs, it may therefore safely return 2 items
+    //	without a stack check.
+    
+    Ref * string = ObjToPtr4( VMVP[0] );
+    Ref len_as_small = string[ STRING_LENGTH_OFFSET ];
+    Ref index = VMVP[-1];
+    
+    //	Is is safe to compare smalls this way.
+    if ( index < len_as_small ) {
+    	VMVP[-1] = CharToCharacter( reinterpret_cast< unsigned char * >( string + 1 )[ SmallToLong( index ) ] );
+    	VMVP[0] = ToRef( (long)index + (long)LongToSmall( 1 ) );			//	It is safe to add smalls like this too.
+    } else {
+    	VMVP[0]	= sys_termin;
+    }
+    
+    VMPCFUNC = VMLINKFUNC;
+    RETURN( VMLINK );
+}
+
 static Ref *spcfn_syscall( Ref *pc, Machine vm ) {
     SysCall * sys = ToSysCall( *++pc );
     FREEZE;
@@ -589,6 +611,7 @@ InstructionSet1::InstructionSet1() {
     this->spc_set_call_global = (Ref)spcfn_set_call_global;
     this->spc_set_calls = (Ref)spcfn_set_calls;
     this->spc_start = (Ref)spcfn_start;
+    this->spc_stringiterate = (Ref)spcfn_stringiterate;
     this->spc_syscall = (Ref)spcfn_syscall;
     this->spc_sysreturn = (Ref)spcfn_sysreturn;
     this->spc_vectoriterate = (Ref)spcfn_vectoriterate;

@@ -64,11 +64,30 @@ Ref * sysFastGetFastIterator( Ref * pc, class MachineClass * vm ) {
 					break;
 				}
 				case STRING_KIND: {
-					throw ToBeDone();
+					vm->fastPush( LongToRef(0) );	//	Iteration state.
+					vm->fastPush( r );				//	Iteration context, a dummy.
+					vm->fastPush( vm->sysFastStringIterator() );
 					break;
 				}
 				case MAP_KIND: {
-					throw ToBeDone();
+				
+					//	Explode the map.
+					Ref * mark = vm->vp;
+					vm->fastPush( r );
+					vm->count = 1;
+					pc = sysMapExplode( pc, vm );
+					ptrdiff_t n = vm->vp - mark;
+
+					//	Gather the map as a vector.
+					vm->count = n;
+					pc = sysNewVector( pc, vm );
+					Ref x = vm->fastPop();
+					
+					//	Now treat it as a vector iteration.
+
+					vm->fastPush( LongToRef(1) );	//	Iteration state.
+					vm->fastPush( x );				//	Iteration context, a dummy.
+					vm->fastPush( vm->sysFastVectorIterator() );
 					break;
 				}
 				case VECTOR_KIND: {
@@ -135,7 +154,6 @@ Ref * sysExplode( Ref *pc, class MachineClass * vm ) {
 	if ( vm->count == 1 ) {
 		Ref r = vm->fastPeek();
 		if ( IsObj( r ) ) {
-			vm->fastPop();
 			Ref * obj_K = ObjToPtr4( r );
 			Ref key = *obj_K;
 			if ( IsFunctionKey( key ) ) {
@@ -151,6 +169,7 @@ Ref * sysExplode( Ref *pc, class MachineClass * vm ) {
 						break;
 					}
 					case RECORD_KIND: {
+						vm->fastDrop( 1 );
 						unsigned long n = sizeAfterKeyOfRecord( obj_K );
 						vm->checkStackRoom( n );
 						memcpy( vm->vp + 1, obj_K + 1, n * sizeof( Ref ) );

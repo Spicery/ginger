@@ -31,6 +31,7 @@
 #include "makesysfn.hpp"
 #include "objlayout.hpp"
 #include "sys.hpp"
+#include "dict.hpp"
 
 #ifndef NULL
 #define NULL 0
@@ -428,7 +429,8 @@ void PlantClass::compileTerm( Term term ) {
 			break;
 		}
 		case fnc_sysfn: {
-			Ident id = this->vm->dict()->lookup_or_add( term_sysfn_cont( term ) );
+			DictClass & d = this->vm->getPackage( "sys" )->dict;
+			Ident id = d.lookup_or_add( term_sysfn_cont( term ) );	
 			if ( id->valof == sys_absent ) {
 				id->valof = makeSysFn( this, term_sysfn_cont( term ) );
 			}

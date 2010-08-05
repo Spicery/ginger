@@ -265,6 +265,10 @@ public abstract class GeneralInstructionSet {
 		return new GenericInstruction();
 	}
 	
+	public Instruction stringiterate_i() {
+		return new GenericInstruction();	
+	}
+	
 	public Instruction syscall_ir() {
 		return new GenericInstruction();	
 	}

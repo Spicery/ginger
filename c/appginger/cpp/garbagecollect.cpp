@@ -30,6 +30,8 @@ using namespace std;
 #include "cagecrawl.hpp"
 #include "callstackcrawl.hpp"
 #include "fnobjcrawl.hpp"
+#include "package.hpp"
+#include "mishap.hpp"
 
 #define DBG_GC_LOG
 
@@ -388,8 +390,9 @@ private:
 public:	
 	void forward( Ref & current ) {
 		gclogger.atRef( current );
-		if( not IsObj( current ) ) return;
+		if ( not IsObj( current ) ) return;
 		Ref * obj = RefToPtr4( current );
+		if ( IsCoreFunctionKey( *obj ) ) return;
 		if ( IsFwd( *obj ) ) {
 			//	Already forwarded.
 			//	Pick up the to-space address.
@@ -443,13 +446,19 @@ public:
 		}
 	}
 	
-	void forwardDictionary() {
-		ScanDict scanner( this->vm->dict() );
-		for (;;) {
-			Ref * p = scanner.next();
-			if ( not p ) break;
-			gclogger.atVariable( scanner.variable() );
-			this->forward( *p );
+
+	void forwardAllDictionaries() {
+		PackageManager * pmgr = this->vm->package_mgr_aptr.get();
+		for ( map< string, Package * >::iterator it = pmgr->packages.begin(); it != pmgr->packages.end(); ++it ) {
+			Package * p = it->second;
+			DictClass & d = p->dict;
+			ScanDict scanner( &d );
+			for (;;) {
+				Ref * p = scanner.next();
+				if ( not p ) break;
+				gclogger.atVariable( scanner.variable() );
+				this->forward( *p );
+			}
 		}
 	}
 	
@@ -463,7 +472,7 @@ public:
 			gclogger.endCallStackAndPC();
 		}
 		gclogger.startDictionary();
-		this->forwardDictionary();
+		this->forwardAllDictionaries();
 		gclogger.endDictionary();
 	}
 	
@@ -482,6 +491,8 @@ public:
 					gclogger.endInstruction( fnobjcrawl );
 				}
 				gclogger.endFnObj();
+			} else {
+				throw Unreachable();
 			}
 		} else if ( IsSimpleKey( key ) ) {
 			switch ( KindOfSimpleKey( key ) ) {

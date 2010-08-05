@@ -6,7 +6,8 @@ CPPFLAGS=-g -I../hpp -I../../automatic/machine -I../../automatic/sys -I/usr/loca
 
 OBJS=mishap.o term.o read_xml.o \
 	functor.o plant.o cage.o vmi.o \
-	rcep.o arity.o lift.o ident.o dict.o \
+	rcep.o arity.o lift.o ident.o \
+	dict.o package.o \
 	sys.o syskey.o sysequals.o sysprint.o syslist.o sysvector.o sysstring.o sysmap.o \
 	destination.o heap.o \
 	key.o objlayout.o listlayout.o stringlayout.o maplayout.o vectorlayout.o \
@@ -22,7 +23,7 @@ OBJS=mishap.o term.o read_xml.o \
 	machine3.o \
 	instruction_set3.o \
 	appginger.o \
-	makesysfn.o
+	makesysfn.o 
 
 # $@ is make shorthand for the target.
 # $@ is make shorthand for the dependencies

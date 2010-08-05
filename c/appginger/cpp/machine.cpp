@@ -40,8 +40,9 @@ using namespace std;
 MachineClass::MachineClass( AppGinger & application ) :
 	appg( application ),
 	plant_aptr( new PlantClass( this ) ),
-	dict_aptr( new DictClass() ),
+	//dict_aptr( new DictClass() ),
 	heap_aptr( new HeapClass( this ) ),
+	package_mgr_aptr( new PackageManager() ),
 	program_counter( 0 )
 {
 	this->vp_base = new Ref[ RANDOM_SIZE ];
@@ -69,9 +70,9 @@ PlantClass * MachineClass::plant() {
 	return this->plant_aptr.get();
 }
 
-DictClass * MachineClass::dict() {
+/*DictClass * MachineClass::dict() {
 	return this->dict_aptr.get();
-}
+}*/
 
 HeapClass & MachineClass::heap() {
 	return *this->heap_aptr.get();
@@ -246,6 +247,11 @@ Ref MachineClass::sysFastStringIterator() {
 
 	return iterator;
 }
+
+Package * MachineClass::getPackage( std::string title ) {
+	return this->package_mgr_aptr->getPackage( title );
+}
+
 
 // -----------------------------------------------------------------------------
 

@@ -180,10 +180,13 @@ int main( int argc, char **argv, char **envp ) {
 #ifdef DBG_APPGINGER
 		clog << "RCEP ..." << endl;
 #endif
-		if ( appg.isTrappingMishap() ) {
-			while ( read_comp_exec_print( vm, std::cin ) ) {};
-		} else {
-			while ( unsafe_read_comp_exec_print( vm, std::cin ) ) {};
+		{
+			RCEP rcep( vm->getPackage( "interactive" ) );
+			if ( appg.isTrappingMishap() ) {
+				while ( rcep.read_comp_exec_print( vm, std::cin ) ) {};
+			} else {
+				while ( rcep.unsafe_read_comp_exec_print( vm, std::cin ) ) {};
+			}
 		}
     } else if ( appg.isCgiMode() ) {
 		cout << "Content-type: text/html\r\n\r\n";

@@ -35,7 +35,7 @@ using namespace std;
 #include <cstdio>
 
 //#define DBG_RCEP
-//#define DBG_CRAWL
+#define DBG_CRAWL
 
 #ifdef DBG_CRAWL
 
@@ -72,7 +72,7 @@ static void crawl( Machine vm, const char * logfname ) {
 	
 #endif
 
-bool unsafe_read_comp_exec_print( Machine vm, istream & input ) {
+bool RCEP::unsafe_read_comp_exec_print( Machine vm, istream & input ) {
     Plant plant;
     Ref r;
     Term term;
@@ -96,7 +96,8 @@ bool unsafe_read_comp_exec_print( Machine vm, istream & input ) {
 			fflush( stderr );
         #endif
 
-		term = lift_term( vm->dict(), term );
+		DictClass & d = this->current_package->dict;
+		term = lift_term( &d, term );
 
         #ifdef DBG_RCEP
 			fprintf( stderr, "After lifting\n" );
@@ -130,7 +131,7 @@ bool unsafe_read_comp_exec_print( Machine vm, istream & input ) {
 	return true;
 }
 
-bool read_comp_exec_print( Machine vm, istream & input ) {
+bool RCEP::read_comp_exec_print( Machine vm, istream & input ) {
 	for (;;) {
 		try {
 			return unsafe_read_comp_exec_print( vm, input );

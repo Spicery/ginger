@@ -16,26 +16,36 @@
     along with AppGinger.  If not, see <http://www.gnu.org/licenses/>.
 \******************************************************************************/
 
-#ifndef DICT_HPP
-#define DICT_HPP
+#ifndef PACKAGE_HPP
+#define PACKAGE_HPP
 
 #include <map>
+#include <string>
+#include "dict.hpp"
 
-#include "ident.hpp"
+class Package;
 
+class PackageManager {
+public:		//	Will need to make this private.
+	std::map< std::string, class Package * > packages;
+	
+public:
+	Package * getPackage( std::string title );
 
-class DictClass {
-friend class ScanDict;
-private:
-	std::map< std::string, Ident > table;
-    
-public:	
-	Ident lookup( const std::string & c );
-	Ident add( const std::string & c );
-	Ident lookup_or_add( const std::string & c );
 };
 
-typedef DictClass *Dict;
-
+class Package {
+private:
+	std::string		title;
+	
+public:	//	turn this into private later.	
+	DictClass		dict;
+	
+public:
+	Package( std::string title ) :
+		title( title )
+	{
+	}
+};
 
 #endif

@@ -26,6 +26,7 @@
 #include "instruction_set.hpp"
 #include "heap.hpp"
 #include "appginger.hpp"
+#include "package.hpp"
 
 
 
@@ -36,8 +37,14 @@ class MachineClass {
 private:
 	AppGinger &						appg;
 	std::auto_ptr<PlantClass>		plant_aptr;
-	std::auto_ptr<DictClass>		dict_aptr;
+	//std::auto_ptr<DictClass>		dict_aptr;
 	std::auto_ptr<HeapClass>		heap_aptr;
+	
+public:	//	Need to make this private. Or the garbage collector a friend.
+	std::auto_ptr<PackageManager>	package_mgr_aptr;
+	
+public:
+	Package * getPackage( std::string );
 	
 public:
 	//	Volatile! Only cached when a garbage collection
@@ -82,7 +89,7 @@ public:
 	Ref*			instructionShow( std::ostream & out, Ref * pc );
 	void			resetMachine();
 	PlantClass *	plant();		
-	DictClass *		dict();
+	//DictClass *		dict();
 	HeapClass &		heap();
 	
 public:

@@ -39,6 +39,37 @@ void ItemFactoryClass::unread() {
     this->peeked = true;
 }
 
+/*std::string ItemFactoryClass::readURL() {
+    int ch;
+
+    if ( this->peeked ) {
+        throw Mishap( "Trying to read URL after pushback" );
+    }
+    
+    //  Get rid of white space and comments.
+    for(;;) {
+        ch = getc( this->file );
+        if ( isspace( ch ) ) continue;
+        if ( ch == '#' || ( ch == '/' && this->trychar( '/' ) ) ) {
+            do
+                ch = getc( this->file );
+            while ( ch != '\n' && ch != '\r' );
+            continue;
+        }
+        break;
+    }
+	
+    this->text.clear();
+    this->text.push_back( (char)ch );
+
+    for(;;) {
+        ch = getc( this->file );
+        if ( isspace( ch ) ) break;
+        this->text.push_back( (char)ch );
+	}		
+	
+	return text;
+}*/
 
 Item ItemFactoryClass::read() {
     int ch;

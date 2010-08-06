@@ -27,6 +27,7 @@ private:
 	Node read_bindings();
 	Node read_conditions();
 	Node read_for();
+	std::string read_pkg_name();
 	
 public:
 	void setPatternMode() { this->pattern_mode = true; }

@@ -70,6 +70,7 @@ ItemMap::ItemMap() {
 	add( "endfn", 		tokty_endfn, 		PrF, 		0			);
 	add( "endfor", 		tokty_endfor, 		Clo, 		0			);
 	add( "endif", 		tokty_endif, 		PrF, 		0			);
+	add( "endpackage", 	tokty_endpackage, 	PrF, 		0			);
 	add( "endunless", 	tokty_endunless, 	PrF, 		0			);
 	add( "fn", 			tokty_fn, 			PrF, 		0			);
 	add( "for", 		tokty_for, 			PrF, 		0			);
@@ -89,6 +90,7 @@ ItemMap::ItemMap() {
 	add( "||", 			tokty_absor, 		BFo, 		1800		);
 	add( "}", 			tokty_cbrace, 		Clo, 		0			);
 	add( "%}", 			tokty_fat_cbrace, 	Clo, 		0			);
+	add( "package", 	tokty_package, 		PrF, 		0			);
 }
 	
 ItemClass * ItemMap::lookup( const char * name ) {

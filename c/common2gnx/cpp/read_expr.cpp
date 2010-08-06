@@ -13,6 +13,8 @@
 #include "role.hpp"
 #include "sysconst.hpp"
 
+using namespace std;
+
 
 static Node makeApp( Node lhs, Node rhs ) {
 	if ( lhs->elementName() == "sysfn" ) {
@@ -38,6 +40,11 @@ Node ReadStateClass::read_id() {
 	NodeFactory id( "id" );
 	id.putAttr( "name", it->nameString() );
 	return id.node();
+}
+
+string ReadStateClass::read_pkg_name() {
+	Item it = this->item_factory->read();
+	return it->nameString();
 }
 
 Item ReadStateClass::read_id_item() {
@@ -485,6 +492,15 @@ Node ReadStateClass::prefix_processing() {
 			fn.addNode( args );
 			fn.addNode( body );
 			return fn.node();
+		}
+		case tokty_package: {
+			NodeFactory pkg( "package" );
+			string url = this->read_pkg_name();
+			pkg.putAttr( "url", url );
+			this->check_token( tokty_semi );
+			Node body = this->read_stmnts_check( tokty_endpackage );
+			pkg.addNode( body );
+			return pkg.node();
 		}
 		default:
 			;

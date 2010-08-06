@@ -22,6 +22,7 @@ private:
 
 public:
 	Item read();
+	//std::string readURL();
 	void unread();
 	void drop();
 	Item peek();

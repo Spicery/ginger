@@ -44,6 +44,7 @@ const char *tok_type_name( TokType fnc ) {
 	case tokty_endfn : return "endfn";
 	case tokty_endfor : return "endfor";
 	case tokty_endif : return "endif";
+	case tokty_endpackage: return "endpackage";
 	case tokty_endunless : return "endunless";
 	case tokty_equal : return "equal";
 	case tokty_explode: return "explode";
@@ -69,6 +70,7 @@ const char *tok_type_name( TokType fnc ) {
 	case tokty_fat_obracket : return "fat_obracket";
 	case tokty_fat_oparen : return "fat_oparen";
 	case tokty_or : return "or";
+	case tokty_package: return "package";
 	case tokty_pow : return "pow";
 	case tokty_present : return "present";
 	case tokty_semi : return "semi";

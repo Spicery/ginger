@@ -17,13 +17,71 @@
 \******************************************************************************/
 
 #include "package.hpp"
+#include "sys.hpp"
+#include "key.hpp"
+#include "makesysfn.hpp"
+
+PackageManager::PackageManager( MachineClass * vm ) :
+	vm( vm )
+{
+	this->packages[ STANDARD_LIBRARY ] = new StandardLibraryPackage( this, std::string( STANDARD_LIBRARY  ) );
+}
 
 Package * PackageManager::getPackage( std::string title ) {
 	std::map< std::string, class Package * >::iterator it = this->packages.find( title );
 	if ( it == this->packages.end() ) {
-		return this->packages[ title ] = new Package( title );
+		return this->packages[ title ] = new OrdinaryPackage( this, title );
 	} else {
 		return it->second;
 	}
 }
-	
+
+Package * Package::getPackage( std::string title ) {
+	return this->pkgmgr->getPackage( title );
+}
+
+//	Lookup starts in the dictionary of the local package. It then scans all
+//	imports packages looking for a unique answer.
+Ident Package::lookup( const std::string & c ) {
+	//	Imports are not implemented yet, so this is simple.
+	Ident id = this->dict.lookup( c );
+	if ( not id ) {
+		id = this->autoload( c );
+	}
+	return id;
+}
+
+//	Additions always happen in the dictionary of the package itself.
+//	However it is necessary to check that there are no protected imports.
+Ident Package::add( const std::string & c ) {
+	//	Imports are not implemented yet, so this is simple.
+	return this->dict.add( c );
+}
+
+
+Ident Package::lookup_or_add( const std::string & c ) {
+    Ident id = this->lookup( c );
+	if ( not id ) {
+    	return this->add( c );
+    } else {
+    	return id;
+    }
+}
+
+
+Ident OrdinaryPackage::autoload( const std::string & c ) {
+	//	No autoloading implemented yet - just fail.
+	return shared< IdentClass >();
+}
+
+Ident StandardLibraryPackage::autoload( const std::string & c ) {
+	Ref r = makeSysFn( this->pkgmgr->vm->plant(), c, sys_undef );
+	if ( r == sys_undef ) {
+		//	Doesn't match a system call. Fail.
+		return shared< IdentClass >();
+	} else {
+		Ident id = this->add( c );
+		id->valof = r;
+		return id;
+	}
+}

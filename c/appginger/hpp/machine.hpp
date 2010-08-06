@@ -37,7 +37,6 @@ class MachineClass {
 private:
 	AppGinger &						appg;
 	std::auto_ptr<PlantClass>		plant_aptr;
-	//std::auto_ptr<DictClass>		dict_aptr;
 	std::auto_ptr<HeapClass>		heap_aptr;
 	
 public:	//	Need to make this private. Or the garbage collector a friend.

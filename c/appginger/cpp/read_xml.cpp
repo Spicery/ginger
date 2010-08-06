@@ -303,9 +303,9 @@ Term TermData::makeTerm() {
 		}
 	} else if ( has_attr( this, "name" ) ) {
 		if ( name == "id" ) {
-			return term_new_named( fnc_id, attrs[ "name" ] );
+			return term_new_named( fnc_id, attrs[ "pkg" ], attrs[ "name" ] );
 		} else if ( name == "var" ) {
-			return term_new_named( fnc_var, attrs[ "name" ] );
+			return term_new_named( fnc_var, attrs[ "pkg" ], attrs[ "name" ] );
 		} else if ( name == "sysapp" ) {
 			return makeSysApp( attrs[ "name" ], kids );
 		} else {

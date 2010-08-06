@@ -21,11 +21,11 @@
 #include "vmi.hpp"
 #include "mishap.hpp"
 
-Ref makeSysFn( Plant plant, std::string fn_name ) {
+Ref makeSysFn( Plant plant, std::string fn_name, Ref default_value ) {
 
 	SysMap::iterator smit = sysMap.find( fn_name );
 	if ( smit == sysMap.end() ) {
-		throw Mishap( "No such system call" ).culprit( "Name", fn_name );
+		return default_value;
 	}
 	SysInfo & info = smit->second;
 	

@@ -25,6 +25,8 @@
 #include "common.hpp"
 #include "arity.hpp"
 
+#define STANDARD_LIBRARY "std"
+
 class MachineClass;
 
 extern Ref * sysExplode( Ref *pc, class MachineClass * vm );

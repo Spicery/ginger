@@ -96,8 +96,7 @@ bool RCEP::unsafe_read_comp_exec_print( Machine vm, istream & input ) {
 			fflush( stderr );
         #endif
 
-		DictClass & d = this->current_package->dict;
-		term = lift_term( &d, term );
+		term = lift_term( this->current_package, term );
 
         #ifdef DBG_RCEP
 			fprintf( stderr, "After lifting\n" );

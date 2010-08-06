@@ -1,3 +1,21 @@
+/******************************************************************************\
+	Copyright (c) 2010 Stephen Leach. AppGinger is distributed under the terms 
+	of the GNU General Public License. This file is part of AppGinger.
+
+    AppGinger is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    AppGinger is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with AppGinger.  If not, see <http://www.gnu.org/licenses/>.
+\******************************************************************************/
+
 //  Lift is the scope analyser.  It combines two jobs, name resolution
 //	and conversion of outer-locals by a process akin to lambda lifting.
 //
@@ -7,6 +25,7 @@
 #include "lift.hpp"
 #include "mishap.hpp"
 #include "ident.hpp"
+#include "package.hpp"
 
 //#define DBG_LIFT
 #ifdef DBG_LIFT
@@ -46,13 +65,13 @@ public:
 
 class LiftStateClass {
 public:
-    Dict        	dict;
+    Package *		package;
     int         	level;
     FnTermClass * 	function;
     Env        		env;
     
 private:    
-    enum Lookup lookup( const std::string & c, Ident *id );
+    enum Lookup lookup( const std::string & pkg, const std::string & c, Ident *id );
 	Term general_lift( Term term );
 
 
@@ -60,15 +79,15 @@ public:
     Term lift( Term term );
     
 public:   
-	LiftStateClass( Dict dict, int level ) :
-		dict( dict ),
+	LiftStateClass( Package * pkg, int level ) :
+		package( pkg ),
 		level( level ),
 		function( NULL )
 	{	
 	}
 };
 
-enum Lookup LiftStateClass::lookup( const std::string & c, Ident *id ) {
+enum Lookup LiftStateClass::lookup( const std::string & pkg, const std::string & c, Ident *id ) {
 	for ( std::vector< Ident >::iterator it = this->env.data.begin(); it != this->env.data.end(); ++it ) {
 		Ident ident = *it;
         const std::string & ic = ident->getNameString();
@@ -83,7 +102,8 @@ enum Lookup LiftStateClass::lookup( const std::string & c, Ident *id ) {
             return ident->level >= this->level ? InnerLocal : OuterLocal;
         }		
 	}
-    *id = this->dict->lookup( c );
+	Package * p = pkg.empty() ? this->package : this->package->getPackage( pkg );
+    *id = p->lookup( c );
     if ( *id == 0 ) throw Mishap( "Undeclared variable" ).culprit( "Variable", c );
     #ifdef DBG_LIFT
         fprintf( stderr, "< lookup\n" );
@@ -179,7 +199,10 @@ Term LiftStateClass::lift( Term term ) {
             const std::string & c = term_named_string( term );
             if ( this->level == 0 ) {
                 //    printf( "GLOBAL VAR %s\n", c );
-                Ident id = this->dict->lookup_or_add( c );
+                //	Lookup or add is really only applicable to development mode.
+                //	When we implement a distinction between runtime and devtime
+                //	we'll have to plug this.
+                Ident id = this->package->lookup_or_add( c );
                 term_named_ident( term ) = id;
             } else {
             	FnTermClass * fn = this->function;
@@ -196,7 +219,7 @@ Term LiftStateClass::lift( Term term ) {
         }
          case fnc_id: {
             Ident id;
-            switch ( this->lookup( term_named_string( term ), &id ) ) {
+            switch ( this->lookup( term_named_pkg( term ), term_named_string( term ), &id ) ) {
                 case Global:
                 case InnerLocal: {
                     //    fprintf( stderr, "Found ident at %x\n", (unt)( id ) );
@@ -243,7 +266,7 @@ Term LiftStateClass::lift( Term term ) {
     throw;	//	Unreachable.
 }
 
-Term lift_term( Dict dict, Term term ) {
-    LiftStateClass state( dict, 0 );
+Term lift_term( Package * pkg, Term term ) {
+    LiftStateClass state( pkg, 0 );
     return state.lift( term );
 }

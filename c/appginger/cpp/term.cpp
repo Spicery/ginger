@@ -45,6 +45,11 @@ Ident & TermClass::ident() {
 	throw "No ident for this type";
 }
 
+const std::string & TermClass::pkg() {
+	cerr << this->type_name() << endl;
+	throw "No package name for this type";
+}
+
 const std::string & TermClass::name() {
 	cerr << this->type_name() << endl;
 	throw "No name for this type";
@@ -131,8 +136,12 @@ const char *term_sysfn_cont( Term term ) {
 
 
 
-Term term_new_named( Functor fnc, const std::string & name ) {
-	return shared< TermClass >( new NamedTermClass( fnc, name ) );
+Term term_new_named( Functor fnc, const std::string & pkg, const std::string & name ) {
+	return shared< TermClass >( new NamedTermClass( fnc, pkg, name ) );
+}
+
+const std::string & term_named_pkg( Term term ) {
+	return term->pkg();
 }
 
 const std::string & term_named_string( Term term ) {

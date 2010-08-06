@@ -22,30 +22,68 @@
 #include <map>
 #include <string>
 #include "dict.hpp"
+#include "ident.hpp"
 
 class Package;
 
 class PackageManager {
 public:		//	Will need to make this private.
+	MachineClass * vm;
 	std::map< std::string, class Package * > packages;
 	
 public:
 	Package * getPackage( std::string title );
-
+	
+public:
+	PackageManager( MachineClass * vm );
 };
 
 class Package {
-private:
-	std::string		title;
-	
-public:	//	turn this into private later.	
-	DictClass		dict;
+friend class GarbageCollect;	//	I would like to get rid of this soon.
+protected:
+	PackageManager * 	pkgmgr;
+	std::string			title;
+	DictClass			dict;
+
+	virtual Ident autoload( const std::string & c ) = 0;
 	
 public:
-	Package( std::string title ) :
+	Package * getPackage( std::string title );
+	Ident lookup( const std::string & c );
+	Ident add( const std::string & c );
+	Ident lookup_or_add( const std::string & c );
+	
+public:
+	Package( PackageManager * pkgmgr, std::string title ) :
+		pkgmgr( pkgmgr ),
 		title( title )
 	{
 	}
+	
+	~Package() {}
 };
+
+class OrdinaryPackage : public Package {
+protected:
+	virtual Ident autoload( const std::string & c );
+public:
+	OrdinaryPackage( PackageManager * pkgmgr, std::string title ) :
+		Package( pkgmgr, title )
+	{
+	}
+	~OrdinaryPackage() {}
+};
+
+class StandardLibraryPackage : public Package {
+protected:
+	virtual Ident autoload( const std::string & c );
+public:
+	StandardLibraryPackage( PackageManager * pkgmgr, std::string title ) :
+		Package( pkgmgr, title )
+	{
+	}
+	~StandardLibraryPackage() {}
+};
+
 
 #endif

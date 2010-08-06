@@ -429,10 +429,14 @@ void PlantClass::compileTerm( Term term ) {
 			break;
 		}
 		case fnc_sysfn: {
-			DictClass & d = this->vm->getPackage( "sys" )->dict;
-			Ident id = d.lookup_or_add( term_sysfn_cont( term ) );	
+			Package * p = this->vm->getPackage( STANDARD_LIBRARY );
+			Ident id = p->lookup_or_add( term_sysfn_cont( term ) );	
 			if ( id->valof == sys_absent ) {
-				id->valof = makeSysFn( this, term_sysfn_cont( term ) );
+				Ref r = makeSysFn( this, term_sysfn_cont( term ), sys_undef );
+				if ( r == sys_undef ) {
+					throw Mishap( "No such system function" ).culprit( "Function", term_sysfn_cont( term ) );
+				}
+				id->valof = r;
 			}
 			vmiPUSHID( this, id );
 			break;

@@ -42,7 +42,7 @@ MachineClass::MachineClass( AppGinger & application ) :
 	plant_aptr( new PlantClass( this ) ),
 	//dict_aptr( new DictClass() ),
 	heap_aptr( new HeapClass( this ) ),
-	package_mgr_aptr( new PackageManager() ),
+	package_mgr_aptr( new PackageManager( this ) ),
 	program_counter( 0 )
 {
 	this->vp_base = new Ref[ RANDOM_SIZE ];

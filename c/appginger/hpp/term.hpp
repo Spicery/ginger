@@ -29,6 +29,13 @@ typedef shared< class TermClass > Term;
 
 //-- general ------------------------------------------------------------
 
+enum NamedRefType {
+	LOCAL_REF_TYPE,
+	QUALIFIED_REF_TYPE,
+	ABSOLUTE_REF_TYPE
+};
+
+
 
 class TermClass {
 public:
@@ -48,6 +55,7 @@ public:
 	virtual void add( Term t );	
 	virtual Ref ref();	
 	virtual Ident & ident();
+	virtual enum NamedRefType refType();
 	virtual const std::string & pkg();
 	virtual const std::string & name();
 	
@@ -277,20 +285,23 @@ class NamedTermClass :
 	public NoChildrenTermMixin 
 {
 private:
+	enum NamedRefType	ref_type;
 	const std::string	pkg_data;
 	const std::string 	name_data;
 	Ident				ident_data;
 
 public:
-	NamedTermClass( Functor fnc, const char * p, const char * nm ) :
+	NamedTermClass( Functor fnc, enum NamedRefType r, const char * p, const char * nm ) :
 		FunctorTermMixin( fnc ),
+		ref_type( r ),
 		pkg_data( p ),
 		name_data( nm )
 	{
 	}
 	
-	NamedTermClass( Functor fnc, const std::string & p, const std::string & nm ) :
+	NamedTermClass( Functor fnc, enum NamedRefType r, const std::string & p, const std::string & nm ) :
 		FunctorTermMixin( fnc ),
+		ref_type( r ),
 		pkg_data( p ),
 		name_data( nm )
 	{	
@@ -316,6 +327,10 @@ public:
 	
 	const std::string & pkg() {
 		return this->pkg_data;
+	}
+	
+	enum NamedRefType refType() {
+		return this->ref_type;
 	}
 	
 };
@@ -501,7 +516,8 @@ const char *term_sysfn_cont( Term term );
 
 Term term_new_absent();
 
-Term term_new_named( Functor fnc, const std::string & pkg, const std::string & name );
+Term term_new_named( Functor fnc, enum NamedRefType, const std::string & pkg, const std::string & name );
+enum NamedRefType term_named_ref_type( Term );
 const std::string & term_named_pkg( Term );
 const std::string & term_named_string( Term );
 Ident & term_named_ident( Term term );

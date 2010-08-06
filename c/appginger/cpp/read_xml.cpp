@@ -303,9 +303,15 @@ Term TermData::makeTerm() {
 		}
 	} else if ( has_attr( this, "name" ) ) {
 		if ( name == "id" ) {
-			return term_new_named( fnc_id, attrs[ "pkg" ], attrs[ "name" ] );
+			if ( has_attr( this, "pkg" ) ) {
+				return term_new_named( fnc_id, ABSOLUTE_REF_TYPE, attrs[ "pkg" ], attrs[ "name" ] );
+			} else if ( has_attr( this, "alias" ) ){
+				return term_new_named( fnc_id, QUALIFIED_REF_TYPE, attrs[ "pkg" ], attrs[ "name" ] );
+			} else {
+				return term_new_named( fnc_id, LOCAL_REF_TYPE, attrs[ "pkg" ], attrs[ "name" ] );
+			}
 		} else if ( name == "var" ) {
-			return term_new_named( fnc_var, attrs[ "pkg" ], attrs[ "name" ] );
+			return term_new_named( fnc_var, LOCAL_REF_TYPE, attrs[ "pkg" ], attrs[ "name" ] );
 		} else if ( name == "sysapp" ) {
 			return makeSysApp( attrs[ "name" ], kids );
 		} else {

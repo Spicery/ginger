@@ -45,6 +45,11 @@ Ident & TermClass::ident() {
 	throw "No ident for this type";
 }
 
+enum NamedRefType TermClass::refType() {
+	cerr << this->type_name() << endl;
+	throw "No refType for this type";
+}
+
 const std::string & TermClass::pkg() {
 	cerr << this->type_name() << endl;
 	throw "No package name for this type";
@@ -131,13 +136,12 @@ const char *term_sysfn_cont( Term term ) {
 }
 
 
+Term term_new_named( Functor fnc, enum NamedRefType r, const std::string & pkg, const std::string & name ) {
+	return shared< TermClass >( new NamedTermClass( fnc, r, pkg, name ) );
+}
 
-
-
-
-
-Term term_new_named( Functor fnc, const std::string & pkg, const std::string & name ) {
-	return shared< TermClass >( new NamedTermClass( fnc, pkg, name ) );
+enum NamedRefType term_named_ref_type( Term term ) {
+	return term->refType();
 }
 
 const std::string & term_named_pkg( Term term ) {

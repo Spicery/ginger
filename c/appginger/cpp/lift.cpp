@@ -26,6 +26,7 @@
 #include "mishap.hpp"
 #include "ident.hpp"
 #include "package.hpp"
+#include "term.hpp"
 
 //#define DBG_LIFT
 #ifdef DBG_LIFT
@@ -71,7 +72,7 @@ public:
     Env        		env;
     
 private:    
-    enum Lookup lookup( const std::string & pkg, const std::string & c, Ident *id );
+    enum Lookup lookup( NamedRefType r, const std::string & pkg, const std::string & c, Ident *id );
 	Term general_lift( Term term );
 
 
@@ -87,7 +88,7 @@ public:
 	}
 };
 
-enum Lookup LiftStateClass::lookup( const std::string & pkg, const std::string & c, Ident *id ) {
+enum Lookup LiftStateClass::lookup( NamedRefType r, const std::string & pkg, const std::string & c, Ident *id ) {
 	for ( std::vector< Ident >::iterator it = this->env.data.begin(); it != this->env.data.end(); ++it ) {
 		Ident ident = *it;
         const std::string & ic = ident->getNameString();
@@ -102,7 +103,16 @@ enum Lookup LiftStateClass::lookup( const std::string & pkg, const std::string &
             return ident->level >= this->level ? InnerLocal : OuterLocal;
         }		
 	}
-	Package * p = pkg.empty() ? this->package : this->package->getPackage( pkg );
+	Package * p;
+	if ( r == LOCAL_REF_TYPE ) {
+		p = this->package;
+	} else if ( r == ABSOLUTE_REF_TYPE ) {
+		p = this->package->getPackage( pkg );
+	} else if ( r == QUALIFIED_REF_TYPE ) {
+		throw ToBeDone();
+	} else {
+		throw Unreachable();
+	}
     *id = p->lookup( c );
     if ( *id == 0 ) throw Mishap( "Undeclared variable" ).culprit( "Variable", c );
     #ifdef DBG_LIFT
@@ -219,7 +229,7 @@ Term LiftStateClass::lift( Term term ) {
         }
          case fnc_id: {
             Ident id;
-            switch ( this->lookup( term_named_pkg( term ), term_named_string( term ), &id ) ) {
+            switch ( this->lookup( term_named_ref_type( term ), term_named_pkg( term ), term_named_string( term ), &id ) ) {
                 case Global:
                 case InnerLocal: {
                     //    fprintf( stderr, "Found ident at %x\n", (unt)( id ) );

@@ -67,6 +67,7 @@ typedef enum Functor {
 	fnc_neq,
 	fnc_not,
 	fnc_or,
+	fnc_package,
 	fnc_pow,
 	fnc_present,
 	fnc_seq,

@@ -20,6 +20,7 @@
 #define TERM_HPP
 
 #include <vector>
+#include <iostream>
 #include "shared.hpp"
 
 #include "functor.hpp"
@@ -58,6 +59,7 @@ public:
 	virtual enum NamedRefType refType();
 	virtual const std::string & pkg();
 	virtual const std::string & name();
+	virtual const std::string url();
 	
 };
 
@@ -126,10 +128,29 @@ public:
 	virtual ~BasicTermClass() {}
 };
 
+class PackageTermClass : 
+	public BasicTermClass
+{
+private:
+	const std::string url_data;
+	
+public:
+	const std::string url();
+
+public:
+	PackageTermClass( const std::string & url ) :
+		BasicTermClass( fnc_package ),
+		url_data( url )
+	{
+	}
+	
+	virtual ~PackageTermClass() {}
+};
+
 class NoChildrenTermMixin : public virtual TermClass {
 public:
 	Term & child_ref( const int n ) {
-		fprintf( stderr, "Trying to find the child of %s\n", this->type_name() );
+		std::cerr << "Trying to find the child of " << this->type_name() << std::cerr;
 		throw "Invalid index";
 	}
 	
@@ -473,6 +494,9 @@ Term term_new_basic1( Functor fnc, Term x );
 Term term_new_basic2( Functor fnc, Term x, Term y );
 Term term_new_basic3( Functor fnc, Term x, Term y, Term z );
 Term term_add( Term t, Term x );
+
+Term term_new_package( const std::string s );
+const std::string term_package_url( Term term );
 
 //Term term_new_simple_item( Item kw );
 Ref term_item_extra_ref( Term term );

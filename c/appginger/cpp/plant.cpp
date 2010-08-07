@@ -340,6 +340,7 @@ void PlantClass::compileTerm( Term term ) {
 			vmiINCR( this, fnc == fnc_incr_by ? n : -n );
 			break;
 		}
+		case fnc_package:
 		case fnc_seq: {
 			int n = term_count( term );
 			for ( int i = 0; i < n ; i++ ) {

@@ -21,6 +21,8 @@
 #include "objlayout.hpp"
 #include "mishap.hpp"
 
+#include <string.h>
+
 static inline Ref FastPairHead( Ref r ) {
 	return ObjToPtr4( r )[ 1 ];
 }

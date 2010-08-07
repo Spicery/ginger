@@ -60,6 +60,16 @@ const std::string & TermClass::name() {
 	throw "No name for this type";
 }
 
+const std::string TermClass::url() {
+	cerr << this->type_name() << endl;
+	throw "No package name for this type";
+}
+
+const std::string PackageTermClass::url() { 
+	return this->url_data; 
+}
+
+
 
 Term TermClass::child( int n ) {
 	return this->child_ref( n );
@@ -218,6 +228,18 @@ Term term_new_basic3( Functor fnc, Term x, Term y, Term z ) {
 Term term_add( Term t, Term x ) {
 	t->add( x );
 	return t;
+}
+
+Term term_new_package( const std::string url ) {
+	return 
+		shared< TermClass >(
+			new PackageTermClass( url )
+		)
+	;
+}
+
+const std::string term_package_url( Term term ) {
+	return term->url();
 }
 
 Term term_new_int( const int n ) {

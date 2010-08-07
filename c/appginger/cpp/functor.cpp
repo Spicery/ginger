@@ -65,6 +65,7 @@ const char * functor_name( Functor tag ) {
 	case fnc_neq : return "neq";
 	case fnc_not : return "not";
 	case fnc_or : return "or";
+	case fnc_package : return "package";
 	case fnc_pow : return "pow";
 	case fnc_present : return "present";
 	case fnc_seq : return "seq";

@@ -140,6 +140,13 @@ Term LiftStateClass::lift( Term term ) {
         fprintf( stderr, "Lifting term with functor %s\n", functor_name( fnc ) );
     #endif
     switch ( fnc ) {
+    	case fnc_package: {
+    		Package * previous = this->package;
+    		this->package = this->package->getPackage( term_package_url( term ) );
+    		Term t = this->general_lift( term );
+    		this->package = previous;
+    		return t;
+    	}
         case fnc_define: {
             Term synthetic =
                 term_new_basic2(

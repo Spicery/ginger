@@ -25,6 +25,8 @@ OBJS=mishap.o term.o read_xml.o \
 	appginger.o \
 	makesysfn.o 
 
+all: appginger
+
 # $@ is make shorthand for the target.
 # $@ is make shorthand for the dependencies
 appginger: $(OBJS)

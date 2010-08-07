@@ -21,6 +21,8 @@
 #include "objlayout.hpp"
 #include "sysvector.hpp"
 
+#include <string.h>
+
 Ref * sysVectorAppend( Ref * pc, class MachineClass * vm ) {
 
 	//	Variables here would be unaffected by a GC.

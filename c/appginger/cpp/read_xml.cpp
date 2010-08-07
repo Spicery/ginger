@@ -343,6 +343,13 @@ Term TermData::makeTerm() {
 		return term_new_in( kids[ 0 ], kids[ 1 ] );
 	} else if ( name == "app" && kids.size() == 2 ) {
 		return term_new_basic2( fnc_app, kids[ 0 ], kids[ 1 ] );
+	} else if ( name == "package" ) {
+		Term t = term_new_package( attrs[ "url" ] );
+		const int n = kids.size();
+		for ( int i = 0; i < n; i++ ) {
+			term_add( t, kids[ i ] );
+		}
+		return t;
 	} else {
 		cerr << "name = " << name << endl;
 		cerr << "#kids = " << kids.size() << endl;

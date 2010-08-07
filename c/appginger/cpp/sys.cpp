@@ -21,6 +21,8 @@
 #include <iostream>
 
 #include <stdio.h>
+#include <string.h>
+
 
 #include "machine.hpp"
 #include "sys.hpp"

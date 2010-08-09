@@ -1,0 +1,18 @@
+Source: appginger
+Section: devel
+Priority: optional
+Maintainer: Graham Higgins <gjh@bel-epa.com>
+Build-Depends: debhelper (>= 7), autotools-dev, cdbs, debhelper (>= 4.0)
+Standards-Version: 3.8.3
+
+Package: appginger
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: AppGinger - a fast interpreter for Ginger
+ Development:
+  Stephen Leach <steve@steelypip.com>
+  
+ Design Team:
+  Stephen Leach <steve@steelypip.com>
+  Chris Dollin <eh@electric-hedgehog.com> 
+

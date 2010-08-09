@@ -1,0 +1,13 @@
+CC=@CXX@
+
+CXXFLAGS=-I../hpp -I../../automatic/machine -I../../automatic/sys -I../../appginger/hpp -I/usr/local/boost_1_43_0 -Wall -g
+CFLAGS=-Wmissing-prototypes 
+
+OBJS=common2gnx.o read_expr.o item.o item_map.o item_factory.o toktype.o node.o mishap.o role.o sysconst.o
+
+common2gnx: $(OBJS)
+	@CXX@ $(CXXFLAGS) $(BOOST_CPPFLAGS) -o common2gnx $(OBJS)
+	
+clean:
+	rm -f *.o
+	rm -f common2gnx

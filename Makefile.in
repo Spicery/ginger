@@ -10,6 +10,18 @@ clean:
 	rm -f bin/appginger
 	$(MAKE) -C c $@
 	
+distclean: clean
+	rm -f Makefile
+	rm -f c/Makefile
+	rm -f c/appginger/Makefile
+	rm -f c/appginger/cpp/Makefile
+	rm -f c/appginger/functests/Makefile
+	rm -f c/common2gnx/Makefile
+	rm -f c/common2gnx/cpp/Makefile
+	rm -f config.h
+	rm -f config.status
+	rm -f config.log
+
 check: all
 	$(MAKE) -C c $@
 

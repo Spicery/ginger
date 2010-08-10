@@ -200,7 +200,7 @@ static void spcfn_end1_calls( void ) {
 
 static void spcfn_end_call_global( void ) {
     long var = ToLong( pc[ 1 ] );
-    Ref r = ((IdentClass *)( pc[ 2 ] )) -> valof;
+    Ref r = ((Valof *)( pc[ 2 ] )) -> valof;
     VMCOUNT = VMVP - ToRefRef( LOCAL( var ) );
     {    
         Ref *ptr;
@@ -402,7 +402,7 @@ static void spcfn_not( void ) {
 }
 
 static void spcfn_pop_global( void ) {
-    IdentClass * id = (IdentClass *)( *( ++pc ) );
+    Valof * id = (Valof *)( *( ++pc ) );
     id->valof = *( VMVP-- );
     RETURN( pc + 1 );
 }
@@ -413,7 +413,7 @@ static void spcfn_pop_local( void ) {
 }
 
 static void spcfn_push_global( void ) {
-    IdentClass * id = (IdentClass *)( *( ++pc ) );
+    Valof * id = (Valof *)( *( ++pc ) );
     *( ++VMVP ) = id->valof;
     RETURN( pc + 1 );
 }
@@ -461,7 +461,7 @@ static void spcfn_set( void ) {
 }
 
 static void spcfn_set_call_global( void ) {
-    Ref r = ((IdentClass *)( pc[ 2 ] )) -> valof;
+    Ref r = ((Valof *)( pc[ 2 ] )) -> valof;
     VMCOUNT = ToLong( pc[ 1 ] );
     {    
         Ref *ptr;

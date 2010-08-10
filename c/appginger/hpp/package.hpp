@@ -21,10 +21,38 @@
 
 #include <map>
 #include <string>
+#include <vector>
 #include "dict.hpp"
 #include "ident.hpp"
 
 class Package;
+
+class Import {
+friend class Package;
+private:
+	const Facet *     	facet;			//	Never NULL.
+	Package *			from;			//	Never NULL.
+	std::string			alias;
+	bool				is_protected;
+	const Facet * 		into;			//	NULL = not into, the usual case.
+
+public:
+	Import(
+		const Facet *     	facet,
+		Package *			from,
+		std::string			alias,
+		bool				is_protected,
+		const Facet * 		into
+	) :
+		facet( facet ),
+		from( from ),
+		alias( alias ),
+		is_protected( is_protected ),
+		into( into )
+	{
+	}
+
+};
 
 class PackageManager {
 public:		//	Will need to make this private.
@@ -41,20 +69,25 @@ public:
 class Package {
 friend class GarbageCollect;	//	I would like to get rid of this soon.
 protected:
-	PackageManager * 	pkgmgr;
-	std::string			title;
-	DictClass			dict;
+	PackageManager * 		pkgmgr;
+	const std::string		title;
+	DictClass				dict;
+	std::vector< Import >	imports;
 
 	virtual Ident autoload( const std::string & c ) = 0;
 	
 public:
-	Package * getPackage( std::string title );
-	Ident lookup( const std::string & c );
-	Ident add( const std::string & c );
-	Ident lookup_or_add( const std::string & c );
+	void import( const Import & imp );		
 	
 public:
-	Package( PackageManager * pkgmgr, std::string title ) :
+	Package * getPackage( const std::string title );
+	Ident exported( const std::string & c, const Facet * facet );
+	Ident lookup( const std::string & c );
+	Ident add( const std::string & c, const Facet * facet );
+	Ident lookup_or_add( const std::string & c, const Facet * facet );
+	
+public:
+	Package( PackageManager * pkgmgr, const std::string title ) :
 		pkgmgr( pkgmgr ),
 		title( title )
 	{
@@ -67,10 +100,7 @@ class OrdinaryPackage : public Package {
 protected:
 	virtual Ident autoload( const std::string & c );
 public:
-	OrdinaryPackage( PackageManager * pkgmgr, std::string title ) :
-		Package( pkgmgr, title )
-	{
-	}
+	OrdinaryPackage( PackageManager * pkgmgr, const std::string title );
 	~OrdinaryPackage() {}
 };
 

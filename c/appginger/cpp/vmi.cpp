@@ -26,6 +26,10 @@ static void emitRef( Plant plant, Ref ref ) {
 	plant->plantRef( ref );
 }
 
+static void emitValof( Plant plant, Valof *v ) {
+	plant->plantRef( ToRef( v ) );
+}
+
 void vmiINSTRUCTION( Plant plant, Instruction instr ) {
 	emitSPC( plant, instr );
 }
@@ -85,7 +89,7 @@ void vmiPOPID( Plant plant, Ident id ) {
 		emitRef( plant, ToRef( id->slot ) );
 	} else {
 		emitSPC( plant, vmc_pop_global );
-		emitRef( plant, ToRef( id.get() ) );
+		emitValof( plant, id->value_of );
 	}
 }
 
@@ -104,7 +108,7 @@ void vmiPUSHID( Plant plant, Ident id ) {
 		}
 	} else {
 		emitSPC( plant, vmc_push_global );
-		emitRef( plant, ToRef( id.get() ) );
+		emitValof( plant, id->value_of );
 	}
 }
 
@@ -125,7 +129,7 @@ void vmiEND_CALL_ID( Plant plant, int var, Ident ident ) {
 	} else {
 		emitSPC( plant, vmc_end_call_global );
 		emitRef( plant, ToRef( var ) );
-		emitRef( plant, ToRef( ident.get() ) );
+		emitValof( plant, ident->value_of );
 	}
 }
 
@@ -137,7 +141,7 @@ void vmiSET_CALL_ID( Plant plant, int in_arity, Ident ident ) {
 	} else {
 		emitSPC( plant, vmc_set_call_global );
 		emitRef( plant, ToRef( in_arity ) );
-		emitRef( plant, ToRef( ident.get() ) );
+		emitValof( plant, ident->value_of );
 	}
 }
 
@@ -255,7 +259,7 @@ static void vmiCMP_ID_CONSTANT( bool flag, Plant plant, Ident id, Ref r, Destina
 	if ( id->isLocal() ) {
 		emitRef( plant, ToRef( id->slot ) );
 	} else {
-		emitRef( plant, ToRef( id.get() ) );
+		emitValof( plant, id->value_of );
 	}
 	emitRef( plant, r );
 	d.destinationInsert();
@@ -266,12 +270,12 @@ static void vmiCMP_ID_ID( bool flag, Plant plant, Ident id1, Ident id2, Destinat
 	if ( id1->isLocal() ) {
 		emitRef( plant, ToRef( id1->slot ) );
 	} else {
-		emitRef( plant, ToRef( id1.get() ) );
+		emitValof( plant, id1->value_of );
 	}
 	if ( id2->isLocal() ) {
 		emitRef( plant, ToRef( id2->slot ) );
 	} else {
-		emitRef( plant, ToRef( id2.get() ) );
+		emitValof( plant, id2->value_of );
 	}
 	d.destinationInsert();
 }

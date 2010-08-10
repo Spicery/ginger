@@ -16,45 +16,19 @@
     along with AppGinger.  If not, see <http://www.gnu.org/licenses/>.
 \******************************************************************************/
 
-#include <string>
+#ifndef VALOF_HPP
+#define VALOF_HPP
 
-#include "ident.hpp"
+#include "common.hpp"
 #include "key.hpp"
 
-IdentClass::IdentClass( const std::string & nm, const Facet * facet ) :
-	is_local( false ),
-	name( nm ),
-	facet( facet ),
-	slot( -1 ),
-	value_of( new Valof() ),
-	level( -1 ),
-	next( NULL )
-{
-}
+class Valof {
+public:
+	Ref valof;
+	
+public:
+	Valof() : valof( sys_absent ) {}
+	Valof( Ref r ) : valof( r ) {}
+};
 
-const std::string & IdentClass::getNameString() {
-	return this->name;
-}
-
-bool IdentClass::isSame( IdentClass * other ) {
-	return this->name == other->name;
-}
-
-Ident ident_new_local( const std::string & nm ) {
-	IdentClass * id = new IdentClass( nm, NULL );
-	id->setLocal();
-	return shared< IdentClass >( id );
-}
-
-Ident ident_new_tmp( const int n ) {
-	IdentClass * id = new IdentClass( std::string( "tmpvar" ), NULL );
-	id->setLocal();
-	id->slot = n;
-	return shared< IdentClass >( id );
-}
-
-Ident ident_new_global( const std::string & nm, const Facet * facet ) {
-	IdentClass * id = new IdentClass( nm, facet );
-	id->setGlobal();
-	return shared< IdentClass >( id );
-}
+#endif

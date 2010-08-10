@@ -16,45 +16,20 @@
     along with AppGinger.  If not, see <http://www.gnu.org/licenses/>.
 \******************************************************************************/
 
+#include "facet.hpp"
+
 #include <string>
+#include <map>
+using namespace std;
 
-#include "ident.hpp"
-#include "key.hpp"
+static std::map< std::string, Facet * > table;
 
-IdentClass::IdentClass( const std::string & nm, const Facet * facet ) :
-	is_local( false ),
-	name( nm ),
-	facet( facet ),
-	slot( -1 ),
-	value_of( new Valof() ),
-	level( -1 ),
-	next( NULL )
-{
-}
-
-const std::string & IdentClass::getNameString() {
-	return this->name;
-}
-
-bool IdentClass::isSame( IdentClass * other ) {
-	return this->name == other->name;
-}
-
-Ident ident_new_local( const std::string & nm ) {
-	IdentClass * id = new IdentClass( nm, NULL );
-	id->setLocal();
-	return shared< IdentClass >( id );
-}
-
-Ident ident_new_tmp( const int n ) {
-	IdentClass * id = new IdentClass( std::string( "tmpvar" ), NULL );
-	id->setLocal();
-	id->slot = n;
-	return shared< IdentClass >( id );
-}
-
-Ident ident_new_global( const std::string & nm, const Facet * facet ) {
-	IdentClass * id = new IdentClass( nm, facet );
-	id->setGlobal();
-	return shared< IdentClass >( id );
+const Facet * fetchFacet( const std::string & name ) {
+	map< string, Facet * >::iterator it = table.find( name );
+	if ( it != table.end() ) {
+		return it->second;
+	} else {
+		table[ name ] = new Facet( name );
+		return table[ name ];
+	}
 }

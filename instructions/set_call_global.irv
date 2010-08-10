@@ -1,4 +1,4 @@
-Ref r = ((IdentClass *)( pc[ 2 ] )) -> valof;
+Ref r = ((Valof *)( pc[ 2 ] )) -> valof;
 VMCOUNT = ToLong( pc[ 1 ] );
 {    
     Ref *ptr;

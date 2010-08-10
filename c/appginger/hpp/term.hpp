@@ -25,6 +25,7 @@
 
 #include "functor.hpp"
 #include "ident.hpp"
+#include "package.hpp"
 
 typedef shared< class TermClass > Term;
 
@@ -234,6 +235,7 @@ public:
 };
 
 //-- char ---------------------------------------------------------------
+
 class CharTermClass : 
 	public NoChildrenTermMixin 
 {
@@ -301,10 +303,7 @@ public:
 //		4.	valof (for globals)
 //		5.	slot allocated (for locals)
 
-class NamedTermClass : 
-	public FunctorTermMixin,
-	public NoChildrenTermMixin 
-{
+class NamedTermMixin : 	public NoChildrenTermMixin {
 private:
 	enum NamedRefType	ref_type;
 	const std::string	pkg_data;
@@ -312,23 +311,21 @@ private:
 	Ident				ident_data;
 
 public:
-	NamedTermClass( Functor fnc, enum NamedRefType r, const char * p, const char * nm ) :
-		FunctorTermMixin( fnc ),
+	NamedTermMixin( enum NamedRefType r, const char * p, const char * nm ) :
 		ref_type( r ),
 		pkg_data( p ),
 		name_data( nm )
 	{
 	}
 	
-	NamedTermClass( Functor fnc, enum NamedRefType r, const std::string & p, const std::string & nm ) :
-		FunctorTermMixin( fnc ),
+	NamedTermMixin( enum NamedRefType r, const std::string & p, const std::string & nm ) :
 		ref_type( r ),
 		pkg_data( p ),
 		name_data( nm )
 	{	
 	}
 	
-	virtual ~NamedTermClass() {
+	virtual ~NamedTermMixin() {
 	}
 
 public:
@@ -354,6 +351,59 @@ public:
 		return this->ref_type;
 	}
 	
+};
+
+
+class IdTermClass : public NamedTermMixin {
+public:
+	enum Functor functor() {
+		return fnc_id;
+	}
+	
+public:
+	IdTermClass( enum NamedRefType r, const char * p, const char * nm ) :
+		NamedTermMixin( r, p, nm )
+	{
+	}
+	
+	IdTermClass( enum NamedRefType r, const std::string & p, const std::string & nm ) :
+		NamedTermMixin( r, p, nm )
+	{	
+	}
+
+	virtual ~IdTermClass() {
+	}
+};
+
+class VarTermClass : public NamedTermMixin {
+private:
+	const Facet * facet_data;
+	
+public:
+	const Facet * facet() {
+		return this->facet_data;
+	}
+
+
+public:
+	enum Functor functor() {
+		return fnc_var;
+	}
+	
+public:
+	VarTermClass( enum NamedRefType r, const char * p, const char * nm ) :
+		NamedTermMixin( r, p, nm )
+	{
+	}
+	
+	VarTermClass( enum NamedRefType r, const std::string & p, const Facet * f, const std::string & nm ) :
+		NamedTermMixin( r, p, nm ),
+		facet_data( f )
+	{	
+	}
+	
+	virtual ~VarTermClass() {
+	}
 };
 
 //-- fn -----------------------------------------------------------------
@@ -481,6 +531,39 @@ public:
 	virtual ~InTermClass() {}
 };
 
+//-- from ---------------------------------------------------------------
+
+class ImportTermClass : public NoChildrenTermMixin {
+public:
+	const Facet * 		facet;
+	const std::string	from;
+	const std::string	alias;
+	bool				prot;
+	const Facet *		into;
+	
+public:
+	const char * type_name() { return "ImportTermClass"; }
+	enum Functor functor() { return fnc_import; }
+	
+public:
+	ImportTermClass( 
+		const Facet * 		facet,
+		const std::string	from,
+		const std::string	alias,
+		bool				prot,
+		const Facet *		into
+	) :
+		facet( facet ),
+		from( from ),
+		alias( alias ),
+		prot( prot ),
+		into( into )
+	{
+	}
+	
+	virtual ~ImportTermClass() {}
+};
+
 //------------------------------------------------------------------------------
 
 
@@ -539,13 +622,6 @@ Term term_new_sysfn( const std::string & s );
 const char *term_sysfn_cont( Term term );
 
 Term term_new_absent();
-
-Term term_new_named( Functor fnc, enum NamedRefType, const std::string & pkg, const std::string & name );
-enum NamedRefType term_named_ref_type( Term );
-const std::string & term_named_pkg( Term );
-const std::string & term_named_string( Term );
-Ident & term_named_ident( Term term );
-bool term_is_id( Term term );
 
 Term term_new_from( Term id, Term start_expr, Term end_expr );
 Term term_new_in( Term id, Term expr );

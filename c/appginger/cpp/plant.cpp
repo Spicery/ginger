@@ -148,8 +148,9 @@ void PlantClass::compileIf( bool sense, Term term, DestinationClass & dst ) {
 			Functor frhs = term_functor( rhs );
 			if ( op == '?' ) op = 'g';
 		    if ( flhs == fnc_id ) {
+		    	IdTermClass * t = dynamic_cast< IdTermClass * >( lhs.get() );
 				flag1 = 's';
-				arg1 = term_named_ident( lhs )->slot;
+				arg1 = t->ident()->slot;
 			} else if ( flhs == fnc_int ) {
 				flag1 = 'i';
 				arg1 = term_int_cont( lhs );
@@ -157,8 +158,9 @@ void PlantClass::compileIf( bool sense, Term term, DestinationClass & dst ) {
 				break;
 			}
 		    if ( frhs == fnc_id ) {
+		    	IdTermClass * t = dynamic_cast< IdTermClass * >( rhs.get() );
 				flag2 = 's';
-				arg2 = term_named_ident( rhs )->slot;
+				arg2 = t->ident()->slot;
 			} else if ( frhs == fnc_int ) {
 				flag2 = 'i';
 				arg2 = term_int_cont( rhs );
@@ -190,7 +192,8 @@ void PlantClass::compileQueryInit( Term query ) {
 			FromTermClass * q = dynamic_cast< FromTermClass * >( query.get() );
 			Term var = q->child( 0 );
 			if ( term_functor( var ) != fnc_var ) throw;
-			Ident & ident = term_named_ident( var );
+			VarTermClass * v = dynamic_cast< VarTermClass * >( var.get() );
+			Ident & ident = v->ident();
 			
 			Term start_expr = q->child( 1 );
 			this->compile1( start_expr );
@@ -228,7 +231,8 @@ void PlantClass::compileQueryNext( Term query ) {
 			FromTermClass * q = dynamic_cast< FromTermClass * >( query.get() );
 			Term var = q->child( 0 );
 			if ( term_functor( var ) != fnc_var ) throw;
-			Ident & ident = term_named_ident( var );
+			VarTermClass * v = dynamic_cast< VarTermClass * >( var.get() );
+			Ident & ident = v->ident();
 			
 			//	Obvious candidate for a merged instruction.
 			vmiPUSHID( this, ident );
@@ -252,7 +256,8 @@ void PlantClass::compileQueryIfSo( Term query, DestinationClass & dst ) {
 			FromTermClass * q = dynamic_cast< FromTermClass * >( query.get() );
 			Term var = q->child( 0 );
 			if ( term_functor( var ) != fnc_var ) throw;
-			Ident & ident = term_named_ident( var );
+			VarTermClass * v = dynamic_cast< VarTermClass * >( var.get() );
+			Ident & ident = v->ident();
 			
 			VmiRelOpFactory relop_factory( this );
 			relop_factory.setLeft( ident );
@@ -266,7 +271,8 @@ void PlantClass::compileQueryIfSo( Term query, DestinationClass & dst ) {
 			InTermClass * q = dynamic_cast< InTermClass * >( query.get() );
 			Term var = q->child( 0 );
 			if ( term_functor( var ) != fnc_var ) throw;
-			Ident & loopident = term_named_ident( var );
+			VarTermClass * v = dynamic_cast< VarTermClass * >( var.get() );
+			Ident & loopident = v->ident();
 
 			Ident & state = q->state;
 			Ident & context = q->context;
@@ -349,23 +355,25 @@ void PlantClass::compileTerm( Term term ) {
 			break;
 		}
 		case fnc_id: {
-			Ident id = term_named_ident( term );
+			IdTermClass * t = dynamic_cast< IdTermClass * >( term.get() );
+			Ident id = t->ident();
 			if ( id != NULL ) {
 				int slot = id->slot;
 				if ( slot >= 0 || !id->isLocal() ) {
 					vmiPUSHID( this, id );
 				} else {
-					throw Mishap( "Ident record not assigned slot" ).culprit( "Identifier",  term_named_string( term ).c_str() );
+					throw Mishap( "Ident record not assigned slot" ).culprit( "Identifier",  t->name().c_str() );
 				}
 			} else {
-				throw Mishap( "Unlifted identifier" ).culprit( "Identifier",  term_named_string( term ).c_str() );
+				throw Mishap( "Unlifted identifier" ).culprit( "Identifier",  t->name().c_str() );
 			}
 			break;
 		}
 		case fnc_dec: {
 			Term var = term_index( term, 0 );
 			if ( term_functor( var ) != fnc_var ) throw;
-			Ident & ident = term_named_ident( var );
+			VarTermClass * v = dynamic_cast< VarTermClass * >( var.get() );
+			Ident & ident = v->ident();
 			Term body = term_index( term, 1 );
 			this->compile1( body );
 			vmiPOPID( this, ident );
@@ -373,8 +381,9 @@ void PlantClass::compileTerm( Term term ) {
 		}
 		case fnc_assign: {
 			Term lhs = term_index( term, 0 );
-			if ( term_is_id( lhs ) ) {
-				Ident & ident = term_named_ident( lhs );
+			IdTermClass * t = dynamic_cast< IdTermClass * >( lhs.get() );
+			if ( t ) {
+				Ident & ident = t->ident();
 				Term rhs = term_index( term, 1 );
 				this->compile1( rhs );
 				vmiPOPID( this, ident );
@@ -397,15 +406,16 @@ void PlantClass::compileTerm( Term term ) {
 			Term args = term_index( term, 1 );
 			Arity aargs( args );
 			//	plant_count( plant, args );
-			if ( term_is_id( fn ) ) {
+			IdTermClass * iterm = dynamic_cast< IdTermClass * >( fn.get() );
+			if ( iterm ) {
 				if ( aargs.isntExact() ) { 
 					int v = tmpvar( this );
 		        	vmiSTART( this, v );
 					this->compileTerm( args );
-					vmiEND_CALL_ID( this, v, term_named_ident( fn ) );
+					vmiEND_CALL_ID( this, v, iterm->ident() );
 				} else {
 					this->compileTerm( args );
-					vmiSET_CALL_ID( this, aargs.count(), term_named_ident( fn ) );
+					vmiSET_CALL_ID( this, aargs.count(), iterm->ident() );
 				}
 			} else if ( aargs.isntExact() ) {
 				int v = tmpvar( this );
@@ -431,13 +441,13 @@ void PlantClass::compileTerm( Term term ) {
 		}
 		case fnc_sysfn: {
 			Package * p = this->vm->getPackage( STANDARD_LIBRARY );
-			Ident id = p->lookup_or_add( term_sysfn_cont( term ) );	
-			if ( id->valof == sys_absent ) {
+			Ident id = p->lookup_or_add( term_sysfn_cont( term ), fetchFacet( "public" ) );	
+			if ( id->value_of->valof == sys_absent ) {
 				Ref r = makeSysFn( this, term_sysfn_cont( term ), sys_undef );
 				if ( r == sys_undef ) {
 					throw Mishap( "No such system function" ).culprit( "Function", term_sysfn_cont( term ) );
 				}
-				id->valof = r;
+				id->value_of->valof = r;
 			}
 			vmiPUSHID( this, id );
 			break;
@@ -479,6 +489,10 @@ void PlantClass::compileTerm( Term term ) {
 			this->compile1( term_index( term, 0 ) );
 			vmiNOT( this );
 		 	break;
+		}
+		case fnc_import: {
+			//	Skip - is a pure environment effect.
+			break;
 		}
 		default: {
 			throw Mishap( "PLANT_TERM: Not implemented yet" ).culprit( "functor", functor_name( fnc ) );

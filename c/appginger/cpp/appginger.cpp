@@ -58,7 +58,21 @@ static struct option long_options[] =
         { 0, 0, 0, 0 }
     };
 
-int NFIB_ARG;
+
+static Package * setUpInteractivePackage( MachineClass * vm ) {
+	Package * interactive_pkg = vm->getPackage( "interactive" );
+	Package * std_pkg = vm->getPackage( "std" );
+	interactive_pkg->import( 
+		Import(
+			fetchFacet( "public" ),		//	Import the public facet from ...
+			std_pkg,					//	... the standard library.
+			std::string( "std" ),		//	Alias is std.
+			true,						//	Protected = nonmaskable.
+			NULL						//	Not into.
+		)
+	);
+	return interactive_pkg;
+}
 
 int main( int argc, char **argv, char **envp ) {
 	AppGinger appg;
@@ -176,12 +190,14 @@ int main( int argc, char **argv, char **envp ) {
         }
         
         MachineClass * vm = appg.newMachine();
+        Package * interactive_pkg = setUpInteractivePackage( vm );
+
  
 #ifdef DBG_APPGINGER
 		clog << "RCEP ..." << endl;
 #endif
 		{
-			RCEP rcep( vm->getPackage( "interactive" ) );
+			RCEP rcep( interactive_pkg );
 			if ( appg.isTrappingMishap() ) {
 				while ( rcep.read_comp_exec_print( vm, std::cin ) ) {};
 			} else {

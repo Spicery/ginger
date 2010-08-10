@@ -22,6 +22,7 @@
 #include <map>
 
 #include "ident.hpp"
+#include "facet.hpp"
 
 
 class DictClass {
@@ -31,8 +32,8 @@ private:
     
 public:	
 	Ident lookup( const std::string & c );
-	Ident add( const std::string & c );
-	Ident lookup_or_add( const std::string & c );
+	Ident add( const std::string & c, const Facet * facet );
+	Ident lookup_or_add( const std::string & c, const Facet * facet );
 };
 
 typedef DictClass *Dict;

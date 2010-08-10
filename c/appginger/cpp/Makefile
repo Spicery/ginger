@@ -23,7 +23,9 @@ OBJS=mishap.o term.o read_xml.o \
 	machine3.o \
 	instruction_set3.o \
 	appginger.o \
-	makesysfn.o 
+	makesysfn.o \
+	valof.o \
+	facet.o
 
 all: appginger
 

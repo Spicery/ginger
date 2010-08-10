@@ -1,5 +1,5 @@
 long var = ToLong( pc[ 1 ] );
-Ref r = ((IdentClass *)( pc[ 2 ] )) -> valof;
+Ref r = ((Valof *)( pc[ 2 ] )) -> valof;
 VMCOUNT = VMVP - ToRefRef( LOCAL( var ) );
 {    
     Ref *ptr;

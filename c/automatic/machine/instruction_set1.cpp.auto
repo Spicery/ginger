@@ -200,7 +200,7 @@ static Ref *spcfn_end1_calls( Ref *pc, Machine vm ) {
 
 static Ref *spcfn_end_call_global( Ref *pc, Machine vm ) {
     long var = ToLong( pc[ 1 ] );
-    Ref r = ((IdentClass *)( pc[ 2 ] )) -> valof;
+    Ref r = ((Valof *)( pc[ 2 ] )) -> valof;
     VMCOUNT = VMVP - ToRefRef( LOCAL( var ) );
     {    
         Ref *ptr;
@@ -402,7 +402,7 @@ static Ref *spcfn_not( Ref *pc, Machine vm ) {
 }
 
 static Ref *spcfn_pop_global( Ref *pc, Machine vm ) {
-    IdentClass * id = (IdentClass *)( *( ++pc ) );
+    Valof * id = (Valof *)( *( ++pc ) );
     id->valof = *( VMVP-- );
     RETURN( pc + 1 );
 }
@@ -413,7 +413,7 @@ static Ref *spcfn_pop_local( Ref *pc, Machine vm ) {
 }
 
 static Ref *spcfn_push_global( Ref *pc, Machine vm ) {
-    IdentClass * id = (IdentClass *)( *( ++pc ) );
+    Valof * id = (Valof *)( *( ++pc ) );
     *( ++VMVP ) = id->valof;
     RETURN( pc + 1 );
 }
@@ -461,7 +461,7 @@ static Ref *spcfn_set( Ref *pc, Machine vm ) {
 }
 
 static Ref *spcfn_set_call_global( Ref *pc, Machine vm ) {
-    Ref r = ((IdentClass *)( pc[ 2 ] )) -> valof;
+    Ref r = ((Valof *)( pc[ 2 ] )) -> valof;
     VMCOUNT = ToLong( pc[ 1 ] );
     {    
         Ref *ptr;

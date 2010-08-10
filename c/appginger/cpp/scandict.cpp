@@ -23,7 +23,7 @@ Ref * ScanDict::next() {
 	this->var = (*it).first;	//	debug
 	Ident id = (*it).second;
 	++it;
-	return &id->valof;
+	return &id->value_of->valof;
 }
 
 ScanDict::ScanDict( DictClass * d ) : 

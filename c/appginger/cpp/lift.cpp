@@ -147,6 +147,20 @@ Term LiftStateClass::lift( Term term ) {
     		this->package = previous;
     		return t;
     	}
+    	case fnc_import: {
+    		ImportTermClass * t = dynamic_cast< ImportTermClass * >( term.get() );
+			Package * from_pkg = this->package->getPackage( t->from );
+			this->package->import( 
+				Import( 
+					t->facet,
+					from_pkg,
+					t->alias,
+					t->prot,
+					t->into
+				)
+			);
+    		return term;
+    	}
         case fnc_define: {
             Term synthetic =
                 term_new_basic2(
@@ -180,8 +194,9 @@ Term LiftStateClass::lift( Term term ) {
             #endif
 
             for ( int i = 0; i < a; i++ ) {
-                Term arg = term_index( args, i );
-                const std::string & c = term_named_string( arg );
+            	NamedTermMixin * arg = dynamic_cast< NamedTermMixin * >( term_index( args, i ).get() );
+                //Term arg = term_index( args, i );
+                const std::string & c = arg->name(); //term_named_string( arg );
                 #ifdef DBG_LIFT
                     fprintf( stderr, "Processing %s\n", c );
                 #endif
@@ -191,7 +206,7 @@ Term LiftStateClass::lift( Term term ) {
                 id->slot = slot++;
                 //printf( "Function now has %d slots\n", fn->nlocals() );
                 id->level = this->level;
-                term_named_ident( arg ) = id;
+                arg->ident() = id;
             }
             #ifdef DBG_LIFT
                 fprintf( stderr, "Processed arguments\n" );
@@ -213,14 +228,16 @@ Term LiftStateClass::lift( Term term ) {
             return term;
         }
         case fnc_var : {
-            const std::string & c = term_named_string( term );
+        	VarTermClass * t = dynamic_cast< VarTermClass * >( term.get() );
+            const std::string & c = term->name();	//	term_named_string( term );
             if ( this->level == 0 ) {
                 //    printf( "GLOBAL VAR %s\n", c );
                 //	Lookup or add is really only applicable to development mode.
                 //	When we implement a distinction between runtime and devtime
                 //	we'll have to plug this.
-                Ident id = this->package->lookup_or_add( c );
-                term_named_ident( term ) = id;
+                const Facet * facet = t->facet();
+                Ident id = this->package->lookup_or_add( c, facet );
+                t->ident() = id;
             } else {
             	FnTermClass * fn = this->function;
             	int & slot = fn->nlocals();
@@ -229,18 +246,19 @@ Term LiftStateClass::lift( Term term ) {
                 this->env.add( id );
                 id->slot = slot++;
                 id->level = this->level;
-                term_named_ident( term ) = id;
+                t->ident() = id;
                 //printf( "Function now has %d slots\n", fn->nlocals() );
             }
  			return term;			        	
         }
          case fnc_id: {
+         	IdTermClass * t = dynamic_cast< IdTermClass * >( term.get() );
             Ident id;
-            switch ( this->lookup( term_named_ref_type( term ), term_named_pkg( term ), term_named_string( term ), &id ) ) {
+            switch ( this->lookup( t->refType(), t->pkg(), t->name(), &id ) ) {
                 case Global:
                 case InnerLocal: {
                     //    fprintf( stderr, "Found ident at %x\n", (unt)( id ) );
-                    term_named_ident( term ) = id;
+                    t->ident() = id;
                     //    fprintf( stderr, "Stuffed term with ident at %x\n", (unt)( term_id_ident( term ) ) );
                     return term;
                 }

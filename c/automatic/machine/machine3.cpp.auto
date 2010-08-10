@@ -187,7 +187,7 @@ void Machine3::core( bool init_mode, Ref *pc ) {
     }
     L_end_call_global: {
         long var = ToLong( pc[ 1 ] );
-        Ref r = ((IdentClass *)( pc[ 2 ] )) -> valof;
+        Ref r = ((Valof *)( pc[ 2 ] )) -> valof;
         VMCOUNT = VMVP - ToRefRef( LOCAL( var ) );
         {    
             Ref *ptr;
@@ -366,7 +366,7 @@ void Machine3::core( bool init_mode, Ref *pc ) {
         RETURN( pc + 1 );
     }
     L_pop_global: {
-        IdentClass * id = (IdentClass *)( *( ++pc ) );
+        Valof * id = (Valof *)( *( ++pc ) );
         id->valof = *( VMVP-- );
         RETURN( pc + 1 );
     }
@@ -375,7 +375,7 @@ void Machine3::core( bool init_mode, Ref *pc ) {
         RETURN( pc + 1 );
     }
     L_push_global: {
-        IdentClass * id = (IdentClass *)( *( ++pc ) );
+        Valof * id = (Valof *)( *( ++pc ) );
         *( ++VMVP ) = id->valof;
         RETURN( pc + 1 );
     }
@@ -415,7 +415,7 @@ void Machine3::core( bool init_mode, Ref *pc ) {
         RETURN( pc + 2 );
     }
     L_set_call_global: {
-        Ref r = ((IdentClass *)( pc[ 2 ] )) -> valof;
+        Ref r = ((Valof *)( pc[ 2 ] )) -> valof;
         VMCOUNT = ToLong( pc[ 1 ] );
         {    
             Ref *ptr;

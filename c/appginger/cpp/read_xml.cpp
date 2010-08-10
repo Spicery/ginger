@@ -28,6 +28,7 @@ using namespace std;
 
 #include "sys.hpp"
 #include "mishap.hpp"
+#include "facet.hpp"
 
 //- SAX Parser -----------------------------------------------------------------
 
@@ -304,14 +305,15 @@ Term TermData::makeTerm() {
 	} else if ( has_attr( this, "name" ) ) {
 		if ( name == "id" ) {
 			if ( has_attr( this, "pkg" ) ) {
-				return term_new_named( fnc_id, ABSOLUTE_REF_TYPE, attrs[ "pkg" ], attrs[ "name" ] );
+				return shared< TermClass >( new IdTermClass( ABSOLUTE_REF_TYPE, attrs[ "pkg" ], attrs[ "name" ] ) );
 			} else if ( has_attr( this, "alias" ) ){
-				return term_new_named( fnc_id, QUALIFIED_REF_TYPE, attrs[ "pkg" ], attrs[ "name" ] );
+				return shared< TermClass >( new IdTermClass(  QUALIFIED_REF_TYPE, attrs[ "pkg" ], attrs[ "name" ] ) );
 			} else {
-				return term_new_named( fnc_id, LOCAL_REF_TYPE, attrs[ "pkg" ], attrs[ "name" ] );
+				return shared< TermClass >( new IdTermClass( LOCAL_REF_TYPE, attrs[ "pkg" ], attrs[ "name" ] ) );
 			}
 		} else if ( name == "var" ) {
-			return term_new_named( fnc_var, LOCAL_REF_TYPE, attrs[ "pkg" ], attrs[ "name" ] );
+			const Facet * facet = has_attr( this, "facet" ) ? fetchFacet( attrs[ "facet" ] ) : NULL;
+			return shared< TermClass >( new VarTermClass(  LOCAL_REF_TYPE, attrs[ "pkg" ], facet, attrs[ "name" ] ) );
 		} else if ( name == "sysapp" ) {
 			return makeSysApp( attrs[ "name" ], kids );
 		} else {
@@ -350,6 +352,14 @@ Term TermData::makeTerm() {
 			term_add( t, kids[ i ] );
 		}
 		return t;
+	} else if ( name == "import" ) {
+		if ( !has_attr( this, "facet" ) || !has_attr( this, "from" ) || !has_attr( this, "alias" ) || !has_attr( this, "protected" ) ) throw Mishap( "Malformed import" );
+		const Facet * facet = fetchFacet( attrs[ "facet" ] );
+		string from = attrs[ "from" ];
+		string alias = attrs[ "alias" ];
+		bool prot = has_attr( this, "protected" ) && ( attrs[ "protected" ] == string( "true" ) );
+		const Facet * into = has_attr( this, "into" ) ? fetchFacet( attrs[ "into" ] ) : NULL;
+		return shared< TermClass >( new ImportTermClass( facet, from, alias, prot, into ) ); 
 	} else {
 		cerr << "name = " << name << endl;
 		cerr << "#kids = " << kids.size() << endl;

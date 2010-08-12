@@ -220,6 +220,24 @@ static bool has_attr( TermData * t, const char * v ) {
 	return t->attrs.find( v ) != t->attrs.end();
 }
 
+static bool startsWith( const std::string & a, const std::string & b ) {
+	return !a.compare( 0, b.length(), b );
+}
+
+static const FacetSet * makeFacetSet( TermData * t, const std::string & prefix ) {
+	set< string > tags;
+	for ( 
+		map<string,string>::iterator it = t->attrs.begin();
+		it != t->attrs.end();
+		++it 
+	) {
+		if ( startsWith( it->first, prefix ) ) {
+			tags.insert( it->second );
+		}
+	}
+	return fetchFacetSet( tags );
+}
+
 static Term makeIf( const int i, const int n, const std::vector< Term > & kids ) {
 	int d = n - i;
 	if ( d == 1 ) {
@@ -312,8 +330,10 @@ Term TermData::makeTerm() {
 				return shared< TermClass >( new IdTermClass( LOCAL_REF_TYPE, attrs[ "pkg" ], attrs[ "name" ] ) );
 			}
 		} else if ( name == "var" ) {
-			const Facet * facet = has_attr( this, "facet" ) ? fetchFacet( attrs[ "facet" ] ) : NULL;
-			return shared< TermClass >( new VarTermClass(  LOCAL_REF_TYPE, attrs[ "pkg" ], facet, attrs[ "name" ] ) );
+			//const Facet * facet = has_attr( this, "facet" ) ? fetchFacet( attrs[ "facet" ] ) : NULL;
+			const FacetSet * facets = makeFacetSet( this, "tag" );
+			//facets->debug();
+			return shared< TermClass >( new VarTermClass(  LOCAL_REF_TYPE, attrs[ "pkg" ], /*facet,*/ facets, attrs[ "name" ] ) );
 		} else if ( name == "sysapp" ) {
 			return makeSysApp( attrs[ "name" ], kids );
 		} else {
@@ -353,13 +373,15 @@ Term TermData::makeTerm() {
 		}
 		return t;
 	} else if ( name == "import" ) {
-		if ( !has_attr( this, "facet" ) || !has_attr( this, "from" ) || !has_attr( this, "alias" ) || !has_attr( this, "protected" ) ) throw Mishap( "Malformed import" );
-		const Facet * facet = fetchFacet( attrs[ "facet" ] );
+		if ( !has_attr( this, "tag" ) || !has_attr( this, "from" ) || !has_attr( this, "alias" ) || !has_attr( this, "protected" ) ) throw Mishap( "Malformed import" );
+		const Facet * facet = fetchFacet( attrs[ "tag" ] );
 		string from = attrs[ "from" ];
 		string alias = attrs[ "alias" ];
 		bool prot = has_attr( this, "protected" ) && ( attrs[ "protected" ] == string( "true" ) );
-		const Facet * into = has_attr( this, "into" ) ? fetchFacet( attrs[ "into" ] ) : NULL;
-		return shared< TermClass >( new ImportTermClass( facet, from, alias, prot, into ) ); 
+		//const Facet * into = has_attr( this, "into" ) ? fetchFacet( attrs[ "into" ] ) : NULL;
+		const FacetSet * intos = makeFacetSet( this, "into" );
+		//intos->debug();
+		return shared< TermClass >( new ImportTermClass( facet, from, alias, prot, /*into,*/ intos ) ); 
 	} else {
 		cerr << "name = " << name << endl;
 		cerr << "#kids = " << kids.size() << endl;

@@ -156,7 +156,8 @@ Term LiftStateClass::lift( Term term ) {
 					from_pkg,
 					t->alias,
 					t->prot,
-					t->into
+					//t->into,
+					t->intos
 				)
 			);
     		return term;
@@ -235,8 +236,9 @@ Term LiftStateClass::lift( Term term ) {
                 //	Lookup or add is really only applicable to development mode.
                 //	When we implement a distinction between runtime and devtime
                 //	we'll have to plug this.
-                const Facet * facet = t->facet();
-                Ident id = this->package->lookup_or_add( c, facet );
+                //const Facet * facet = t->facet();
+                const FacetSet * facets = t->facets();
+                Ident id = this->package->lookup_or_add( c, /*facet,*/ facets );
                 t->ident() = id;
             } else {
             	FnTermClass * fn = this->function;

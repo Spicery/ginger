@@ -31,15 +31,16 @@
 
 class IdentClass {
 private:
-	bool			is_local;
+	bool				is_local;
 
 public:
-	std::string		name;
-	const Facet * 	facet;			//	restricted to a single facet at the moment.
-	int				slot; 			//	used for local idents
-	Valof * 		value_of;		//	used for global idents
-	int 			level;			//	level of scope
-	IdentClass		*next;      	//	chain used for env linking
+	std::string			name;
+	//const Facet * 		facet;			//	restricted to a single facet at the moment.
+	const FacetSet * 	facets;
+	int					slot; 			//	used for local idents
+	Valof * 			value_of;		//	used for global idents
+	int 				level;			//	level of scope
+	IdentClass			*next;      	//	chain used for env linking
 
 public:
 	bool isSame( IdentClass * other );
@@ -49,7 +50,7 @@ public:
 	bool setGlobal() { return this->is_local = false; }
 	
 public:
-	IdentClass( const std::string & nm, const Facet * facet );
+	IdentClass( const std::string & nm, /*const Facet * facet,*/ const FacetSet * facets );
 	const std::string & getNameString();
 };
 
@@ -58,6 +59,6 @@ typedef shared< IdentClass > Ident;
 
 Ident ident_new_local( const std::string & nm );
 Ident ident_new_tmp( int n );
-Ident ident_new_global( const std::string & nm, const Facet * facet );
+Ident ident_new_global( const std::string & nm, /*const Facet * facet,*/ const FacetSet * facets );
 
 #endif

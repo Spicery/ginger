@@ -33,3 +33,38 @@ const Facet * fetchFacet( const std::string & name ) {
 		return table[ name ];
 	}
 }
+
+
+static map< set< string >, FacetSet * > table_set;
+
+const FacetSet * fetchFacetSet( set< string > & names ) {
+	map< set< string >, FacetSet * >::iterator it = table_set.find( names );
+	if ( it != table_set.end() ) {
+		return it->second;
+	} else {
+		return table_set[ names ] = new FacetSet( names );
+	}
+}
+
+const FacetSet * fetchFacetSet( string & name ) {
+	set< string > names;
+	names.insert( name );
+	return fetchFacetSet( names );
+}
+
+const FacetSet * fetchFacetSet( const char * name ) {
+	set< string > names;
+	names.insert( name );
+	return fetchFacetSet( names );
+}
+
+FacetSet::FacetSet( std::set< std::string > & names ) :
+	names_set( names )
+{
+	static int counter = 0;
+	this->id = counter++;
+}
+
+bool FacetSet::contains( const Facet * c ) const {
+	return c != NULL && this->names_set.find( c->name_data ) != this->names_set.end();
+}

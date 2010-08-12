@@ -441,7 +441,7 @@ void PlantClass::compileTerm( Term term ) {
 		}
 		case fnc_sysfn: {
 			Package * p = this->vm->getPackage( STANDARD_LIBRARY );
-			Ident id = p->lookup_or_add( term_sysfn_cont( term ), fetchFacet( "public" ) );	
+			Ident id = p->lookup_or_add( term_sysfn_cont( term ), /*fetchFacet( "public" ),*/ fetchFacetSet( "public" ) );	
 			if ( id->value_of->valof == sys_absent ) {
 				Ref r = makeSysFn( this, term_sysfn_cont( term ), sys_undef );
 				if ( r == sys_undef ) {

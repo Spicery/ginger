@@ -23,15 +23,15 @@ Ident DictClass::lookup( const std::string & s ) {
 	return it == this->table.end() ? shared< IdentClass >() : it->second;
 }
 
-Ident DictClass::add( const std::string & s, const Facet * facet ) {
-	Ident id = ident_new_global( s, facet );
+Ident DictClass::add( const std::string & s, /*const Facet * facet,*/ const FacetSet * facets ) {
+	Ident id = ident_new_global( s, /*facet,*/ facets );
     return this->table[ s ] = id;
 }
 
-Ident DictClass::lookup_or_add( const std::string & c, const Facet * facet ) {
+Ident DictClass::lookup_or_add( const std::string & c, /*const Facet * facet,*/ const FacetSet * facets ) {
     Ident id = this->lookup( c );
 	if ( not id ) {
-    	return this->add( c, facet );
+    	return this->add( c, /*facet,*/ facets );
     } else {
     	return id;
     }

@@ -377,11 +377,16 @@ public:
 
 class VarTermClass : public NamedTermMixin {
 private:
-	const Facet * facet_data;
+	//const Facet * facet_data;
+	const FacetSet * facets_data;
 	
 public:
-	const Facet * facet() {
+	/*const Facet * facet() {
 		return this->facet_data;
+	}*/
+
+	const FacetSet * facets() {
+		return this->facets_data;
 	}
 
 
@@ -396,9 +401,10 @@ public:
 	{
 	}
 	
-	VarTermClass( enum NamedRefType r, const std::string & p, const Facet * f, const std::string & nm ) :
+	VarTermClass( enum NamedRefType r, const std::string & p, /*const Facet * f,*/ const FacetSet * fs, const std::string & nm ) :
 		NamedTermMixin( r, p, nm ),
-		facet_data( f )
+		//facet_data( f ),
+		facets_data( fs )
 	{	
 	}
 	
@@ -539,7 +545,8 @@ public:
 	const std::string	from;
 	const std::string	alias;
 	bool				prot;
-	const Facet *		into;
+	//const Facet *		into;
+	const FacetSet *	intos;
 	
 public:
 	const char * type_name() { return "ImportTermClass"; }
@@ -551,13 +558,15 @@ public:
 		const std::string	from,
 		const std::string	alias,
 		bool				prot,
-		const Facet *		into
+		//const Facet *		into,
+		const FacetSet *	intos
 	) :
 		facet( facet ),
 		from( from ),
 		alias( alias ),
 		prot( prot ),
-		into( into )
+		//into( into ),
+		intos( intos )
 	{
 	}
 	

@@ -21,10 +21,11 @@
 #include "ident.hpp"
 #include "key.hpp"
 
-IdentClass::IdentClass( const std::string & nm, const Facet * facet ) :
+IdentClass::IdentClass( const std::string & nm, /*const Facet * facet,*/ const FacetSet * facets ) :
 	is_local( false ),
 	name( nm ),
-	facet( facet ),
+	//facet( facet ),
+	facets( facets ),
 	slot( -1 ),
 	value_of( new Valof() ),
 	level( -1 ),
@@ -53,8 +54,8 @@ Ident ident_new_tmp( const int n ) {
 	return shared< IdentClass >( id );
 }
 
-Ident ident_new_global( const std::string & nm, const Facet * facet ) {
-	IdentClass * id = new IdentClass( nm, facet );
+Ident ident_new_global( const std::string & nm, /*const Facet * facet,*/ const FacetSet * facets ) {
+	IdentClass * id = new IdentClass( nm, /*facet,*/ facets );
 	id->setGlobal();
 	return shared< IdentClass >( id );
 }

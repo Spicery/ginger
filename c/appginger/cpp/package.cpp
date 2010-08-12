@@ -25,12 +25,14 @@ using namespace std;
 #include "key.hpp"
 #include "makesysfn.hpp"
 
-#define DBG_PACKAGE
+//#define DBG_PACKAGE
 
 OrdinaryPackage::OrdinaryPackage( PackageManager * pkgmgr, const std::string title ) :
 	Package( pkgmgr, title )
 {
-	std::cout << "NEW ORDINARY PACKAGE: " << title << std::endl;
+	#ifdef DBG_PACKAGE
+		std::cout << "NEW ORDINARY PACKAGE: " << title << std::endl;
+	#endif
 }
 
 
@@ -62,7 +64,7 @@ Ident Package::exported( const std::string & name, const Facet * facet ) {
 		#ifdef DBG_PACKAGE
 			cout << "Found in local dictionary with facet: " << id->facet->name() << endl;
 		#endif
-		return id->facet == facet ? id : shared< IdentClass >( (IdentClass *)NULL );
+		return id->facets != NULL && id->facets->contains( facet ) ? id : shared< IdentClass >( (IdentClass *)NULL );
 	}
 	
 	for ( 
@@ -70,12 +72,14 @@ Ident Package::exported( const std::string & name, const Facet * facet ) {
 		it != this->imports.end();
 		++it
 	) {
-		if ( it->into != facet ) {
+		if ( it->intos != NULL && it->intos->contains( facet ) ) {
 			Package * from_pkg = it->from;
 			Ident id = from_pkg->exported( name, it->facet );
+			/*
 			if ( id ) {
-				return id->facet == facet ? id : shared< IdentClass >( (IdentClass *)NULL );
-			}
+				return id->facets.contain( facet ) ? id : shared< IdentClass >( (IdentClass *)NULL );
+			}*/
+			return id;
 		}
 	}	
 	
@@ -85,7 +89,7 @@ Ident Package::exported( const std::string & name, const Facet * facet ) {
 			cout << "Autoload: Exporting with facet: " << ( id->facet ? id->facet->name() : "<null>" ) << endl;
 			cout << "Autoload: Importing with facet: " << ( facet ? facet->name() : "<null>" ) << endl;
 		#endif
-		return id->facet == facet ? id : shared< IdentClass >( (IdentClass *)NULL );
+		return id->facets!= NULL && id->facets->contains( facet ) ? id : shared< IdentClass >( (IdentClass *)NULL );
 	}
 	return id;
 }
@@ -113,16 +117,16 @@ Ident Package::lookup( const std::string & c ) {
 
 //	Additions always happen in the dictionary of the package itself.
 //	However it is necessary to check that there are no protected imports.
-Ident Package::add( const std::string & c, const Facet * facet ) {
+Ident Package::add( const std::string & c, /*const Facet * facet,*/ const FacetSet * facets ) {
 	//	Imports are not implemented yet, so this is simple.
-	return this->dict.add( c, facet );
+	return this->dict.add( c, /*facet,*/ facets );
 }
 
 
-Ident Package::lookup_or_add( const std::string & c, const Facet * facet ) {
+Ident Package::lookup_or_add( const std::string & c, /*const Facet * facet,*/ const FacetSet * facets ) {
     Ident id = this->lookup( c );
 	if ( not id ) {
-    	return this->add( c, facet );
+    	return this->add( c, /*facet,*/ facets );
     } else {
     	return id;
     }
@@ -140,7 +144,7 @@ Ident StandardLibraryPackage::autoload( const std::string & c ) {
 		//	Doesn't match a system call. Fail.
 		return shared< IdentClass >();
 	} else {
-		Ident id = this->add( c, fetchFacet( "public" ) );
+		Ident id = this->add( c, /*fetchFacet( "public"  ),*/ fetchFacetSet( "public" ) );
 		id->value_of->valof = r;
 		return id;
 	}

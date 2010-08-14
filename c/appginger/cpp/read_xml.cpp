@@ -352,7 +352,7 @@ Term TermData::makeTerm() {
 		} else {
 			throw;
 		}
-	} else if ( name == "dec" && kids.size() == 2 ) {
+	} else if ( name == "bind" && kids.size() == 2 ) {
 		return term_new_basic2( fnc_dec, kids[ 0 ], kids[ 1 ] );
 	} else if ( name == "seq" ) {
 		Term seq = term_new_basic0( fnc_seq );
@@ -387,14 +387,14 @@ Term TermData::makeTerm() {
 		return t;
 	} else if ( name == "import" ) {
 		if ( !has_attr( this, "from" ) ) throw Mishap( "Malformed import" );
-		const Facet * facet = fetchFacet( attrs[ "tag" ] );
+		const FacetSet * match_tags = makeFacetSet( this, "match" );
 		string from = attrs[ "from" ];
 		string alias = has_attr( this, "alias" ) ? attrs[ "alias" ] : from;
 		bool prot = has_attr( this, "protected" ) && ( attrs[ "protected" ] == string( "true" ) );
 		//const Facet * into = has_attr( this, "into" ) ? fetchFacet( attrs[ "into" ] ) : NULL;
 		const FacetSet * intos = makeFacetSet( this, "into" );
 		//intos->debug();
-		return shared< TermClass >( new ImportTermClass( facet, from, alias, prot, /*into,*/ intos ) ); 
+		return shared< TermClass >( new ImportTermClass( match_tags, from, alias, prot, /*into,*/ intos ) ); 
 	} else {
 		cerr << "name = " << name << endl;
 		cerr << "#kids = " << kids.size() << endl;

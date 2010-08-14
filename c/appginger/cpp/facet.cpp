@@ -69,6 +69,24 @@ bool FacetSet::contains( const Facet * c ) const {
 	return c != NULL && this->names_set.find( c->name_data ) != this->names_set.end();
 }
 
+bool FacetSet::isntEmptyIntersection( const FacetSet * fs ) const {
+	std::set< std::string >::iterator left = this->names_set.begin();
+	std::set< std::string >::iterator left_end = this->names_set.end();
+	std::set< std::string >::iterator right = fs->names_set.begin();
+	std::set< std::string >::iterator right_end = fs->names_set.end();
+	while ( left != left_end && right != right_end ) {
+		if ( *left < *right ) { 
+			++left; 
+		} else if ( *right < *left ) {
+			++right;
+		} else {
+			return true;
+		}
+	}
+	return false;
+}
+
+
 ostream& operator<<( ostream & out, const FacetSet & facets ) {	
 	out << "{";
 	const char * gap = "";

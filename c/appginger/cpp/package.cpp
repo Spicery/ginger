@@ -69,7 +69,7 @@ Import * Package::getAlias( const std::string alias ) {
 	return NULL;
 }
 
-Ident Package::exported( const std::string & name, const Facet * facet ) {
+Ident Package::exported( const std::string & name, const FacetSet * facets ) {
 	#ifdef DBG_PACKAGE
 		cout << "Looking up an exported ID: " << name << " from package: " << this->title << endl;
 	#endif
@@ -78,7 +78,7 @@ Ident Package::exported( const std::string & name, const Facet * facet ) {
 		#ifdef DBG_PACKAGE
 			cout << "Found in local dictionary with facet: " << id->facet->name() << endl;
 		#endif
-		return id->facets != NULL && id->facets->contains( facet ) ? id : shared< IdentClass >( (IdentClass *)NULL );
+		return id->facets != NULL && id->facets->isntEmptyIntersection( facets ) ? id : shared< IdentClass >( (IdentClass *)NULL );
 	}
 	
 	for ( 
@@ -86,9 +86,9 @@ Ident Package::exported( const std::string & name, const Facet * facet ) {
 		it != this->imports.end();
 		++it
 	) {
-		if ( it->intos != NULL && it->intos->contains( facet ) ) {
+		if ( it->intos != NULL && it->intos->isntEmptyIntersection( facets ) ) {
 			Package * from_pkg = it->from;
-			Ident id = from_pkg->exported( name, it->facet );
+			Ident id = from_pkg->exported( name, it->matchingTags() );
 			/*
 			if ( id ) {
 				return id->facets.contain( facet ) ? id : shared< IdentClass >( (IdentClass *)NULL );
@@ -103,7 +103,7 @@ Ident Package::exported( const std::string & name, const Facet * facet ) {
 			cout << "Autoload: Exporting with facet: " << ( id->facet ? id->facet->name() : "<null>" ) << endl;
 			cout << "Autoload: Importing with facet: " << ( facet ? facet->name() : "<null>" ) << endl;
 		#endif
-		return id->facets!= NULL && id->facets->contains( facet ) ? id : shared< IdentClass >( (IdentClass *)NULL );
+		return id->facets!= NULL && id->facets->isntEmptyIntersection( facets ) ? id : shared< IdentClass >( (IdentClass *)NULL );
 	}
 	return id;
 }
@@ -122,7 +122,7 @@ Ident Package::lookup( const std::string & c, bool search ) {
 			++it
 		) {
 			Package * from_pkg = it->from;
-			Ident id = from_pkg->exported( c, it->facet );
+			Ident id = from_pkg->exported( c, it->matchingTags() );
 			if ( id ) return id;
 		}	
 	}
@@ -142,7 +142,7 @@ Ident Package::add( const std::string & c, const FacetSet * facets ) {
 		//cout << "Checking that " << it->from->title << "is protected? " << it->is_protected << endl;
 		if ( it->is_protected ) {
 			Package * from_pkg = it->from;			
-			Ident id = from_pkg->exported( c, it->facet );
+			Ident id = from_pkg->exported( c, it->matchingTags() );
 			if ( id ) {
 				throw Mishap( "Trying to shadow a protected import" );
 			}
@@ -192,7 +192,7 @@ void Package::import( const Import & imp ) {
 		++it
 	) {
 		if ( 
-			it->facet == imp.facet &&
+			it->matching_tags == imp.matching_tags &&
 			it->from == imp.from &&
 			it->alias == imp.alias
 		) {
@@ -204,8 +204,8 @@ void Package::import( const Import & imp ) {
 	this->imports.push_back( imp );
 }
 
-const Facet * Import::matchTag() { 
-	return this->facet;
+const FacetSet * Import::matchingTags() { 
+	return this->matching_tags;
 }
 
 Package * Import::package() { 

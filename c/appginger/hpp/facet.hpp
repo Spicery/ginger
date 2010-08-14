@@ -48,6 +48,7 @@ private:
 
 public:
 	bool contains( const Facet * c ) const;
+	bool isntEmptyIntersection( const FacetSet * fs ) const;
 		
 public:
 	FacetSet( std::set< std::string > & names );

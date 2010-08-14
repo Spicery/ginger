@@ -134,7 +134,7 @@ Node ReadStateClass::postfix_processing( Node lhs, Item item, int prec ) {
 		switch ( fnc ) {
 			case tokty_bind: {
 				Node rhs = this->read_expr_prec( prec );
-				NodeFactory bind( "dec" );
+				NodeFactory bind( "bind" );
 				bind.addNode( lhs );
 				bind.addNode( rhs );
 				return bind.node();
@@ -407,15 +407,15 @@ Node ReadStateClass::prefix_processing() {
         case tokty_var : {
 	        Item item = this->read_id_item();
 	        this->check_token( tokty_bind );
-	        NodeFactory dec( "dec" );
-	        dec.start( "var" );
-	        dec.putAttr( "name", item->nameString() );
+	        NodeFactory bind( "bind" );
+	        bind.start( "var" );
+	        bind.putAttr( "name", item->nameString() );
 	        if ( fnc == tokty_val ) {
-	        	dec.putAttr( "protected", "true" );
+	        	bind.putAttr( "protected", "true" );
 	        }
-	        dec.end();
-	        dec.addNode( this->read_expr() );
-	        return dec.node();
+	        bind.end();
+	        bind.addNode( this->read_expr() );
+	        return bind.node();
         }
 		case tokty_oparen: {
 			return this->read_stmnts_check( tokty_cparen );
@@ -468,7 +468,7 @@ Node ReadStateClass::prefix_processing() {
 			const std::string name = fn->get( "name" );
 			this->check_token( tokty_arrow );
 			Node body = this->read_stmnts_check( tokty_enddefine );
-			NodeFactory def( "dec" );
+			NodeFactory def( "bind" );
 			def.start( "var" );
 			def.putAttr( "name", name );
 			def.putAttr( "protected", "true" );

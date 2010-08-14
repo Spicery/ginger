@@ -108,13 +108,13 @@ static void lookupAndAddGlobal( Package * current, VarTermClass * t ) {
 		}
 		case ALIAS_REF_TYPE: {
 			Import * imp = current->getAlias( t->alias() );
-			const Facet * m = imp->matchTag();
+			const FacetSet * m = imp->matchingTags();
 		
 			//cout << "ALIAS DECLARATION" << endl;
 			//cout << "Import facet : " << *m << endl;
 			//cout << "Declaration facets: " << *facets << endl;
 		
-			if ( imp != NULL && facets->contains( m ) ) {
+			if ( imp != NULL && facets->isntEmptyIntersection( m ) ) {
 				Ident id = imp->package()->lookup_or_add( c, facets );
 				t->ident() = id;
 			} else if ( imp != NULL ) {
@@ -142,8 +142,8 @@ static Ident lookupGlobal( Package * current, IdTermClass * t ) {
 			Import * imp = current->getAlias( t->alias() );
 			if ( imp != NULL ) {
 				Ident id = imp->package()->lookup( c, true );
-				const Facet * m = imp->matchTag();
-				if ( id->facets->contains( m ) ) {
+				const FacetSet * m = imp->matchingTags();
+				if ( id->facets->isntEmptyIntersection( m ) ) {
 					return id;
 				} else {
 					throw Mishap( "Aliased variable not exported" );
@@ -213,7 +213,7 @@ Term LiftStateClass::lift( Term term ) {
 			Package * from_pkg = this->package->getPackage( t->from );
 			this->package->import( 
 				Import( 
-					t->facet,
+					t->matchTags(),
 					from_pkg,
 					t->alias,
 					t->prot,

@@ -30,25 +30,25 @@ class Package;
 class Import {
 friend class Package;
 private:
-	const Facet *     	facet;			//	Never NULL.
+	const FacetSet *    matching_tags;	//	Never NULL.
 	Package *			from;			//	Never NULL.
 	std::string			alias;
 	bool				is_protected;
 	const FacetSet * 	intos;			//	NULL = not into, the usual case.
 	
 public:
-	const Facet *		matchTag();
+	const FacetSet *	matchingTags();
 	Package *			package();
 
 public:
 	Import(
-		const Facet *     	facet,
+		const FacetSet *    matches,
 		Package *			from,
 		std::string			alias,
 		bool				is_protected,
 		const FacetSet *	intos
 	) :
-		facet( facet ),
+		matching_tags( matches ),
 		from( from ),
 		alias( alias ),
 		is_protected( is_protected ),
@@ -86,7 +86,7 @@ public:
 public:
 	Package * getPackage( const std::string title );
 	Import * getAlias( const std::string title );
-	Ident exported( const std::string & c, const Facet * facet );
+	Ident exported( const std::string & c, const FacetSet * facets );
 	Ident lookup( const std::string & c, bool search );
 	Ident add( const std::string & c, const FacetSet * facets );
 	Ident lookup_or_add( const std::string & c, const FacetSet * facets );

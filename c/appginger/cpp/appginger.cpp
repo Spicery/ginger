@@ -64,7 +64,7 @@ static Package * setUpInteractivePackage( MachineClass * vm ) {
 	Package * std_pkg = vm->getPackage( "std" );
 	interactive_pkg->import( 
 		Import(
-			fetchFacet( "public" ),		//	Import the public facet from ...
+			fetchFacetSet( "public" ),	//	Import the public facet from ...
 			std_pkg,					//	... the standard library.
 			std::string( "std" ),		//	Alias is std.
 			true,						//	Protected = nonmaskable.

@@ -541,8 +541,9 @@ public:
 //-- from ---------------------------------------------------------------
 
 class ImportTermClass : public NoChildrenTermMixin {
+private:
+	const FacetSet * 	match_tags;
 public:
-	const Facet * 		facet;
 	const std::string	from;
 	const std::string	alias;
 	bool				prot;
@@ -552,17 +553,18 @@ public:
 public:
 	const char * type_name() { return "ImportTermClass"; }
 	enum Functor functor() { return fnc_import; }
+	const FacetSet *	matchTags() { return this->match_tags; }
 	
 public:
 	ImportTermClass( 
-		const Facet * 		facet,
+		const FacetSet * 	facets,
 		const std::string	from,
 		const std::string	alias,
 		bool				prot,
 		//const Facet *		into,
 		const FacetSet *	intos
 	) :
-		facet( facet ),
+		match_tags( facets ),
 		from( from ),
 		alias( alias ),
 		prot( prot ),

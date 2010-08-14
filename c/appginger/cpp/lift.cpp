@@ -22,6 +22,9 @@
 //    Lifting is a non-trivial task so I am deferring that in order to
 //    make progress on more basic issues.
 
+#include <iostream>
+using namespace std;
+
 #include "lift.hpp"
 #include "mishap.hpp"
 #include "ident.hpp"
@@ -72,7 +75,7 @@ public:
     Env        		env;
     
 private:    
-    enum Lookup lookup( NamedRefType r, const std::string & pkg, const std::string & c, Ident *id );
+    enum Lookup lookup( IdTermClass * t, Ident *id );
 	Term general_lift( Term term );
 
 
@@ -88,7 +91,75 @@ public:
 	}
 };
 
-enum Lookup LiftStateClass::lookup( NamedRefType r, const std::string & pkg, const std::string & c, Ident *id ) {
+static void lookupAndAddGlobal( Package * current, VarTermClass * t ) {
+	const std::string & pkg = t->pkg();
+	const std::string & c = t->name();
+	const FacetSet * facets = t->facets();
+	switch ( t->refType() ) {
+		case LOCAL_REF_TYPE: {
+			Package * p = current;
+			t->ident() = p->lookup_or_add( c, facets );
+			break;
+		}
+		case ABSOLUTE_REF_TYPE: {
+			Package * p = current->getPackage( pkg );
+			t->ident() = p->lookup_or_add( c, facets );
+			break;
+		}
+		case ALIAS_REF_TYPE: {
+			Import * imp = current->getAlias( t->alias() );
+			const Facet * m = imp->matchTag();
+		
+			//cout << "ALIAS DECLARATION" << endl;
+			//cout << "Import facet : " << *m << endl;
+			//cout << "Declaration facets: " << *facets << endl;
+		
+			if ( imp != NULL && facets->contains( m ) ) {
+				Ident id = imp->package()->lookup_or_add( c, facets );
+				t->ident() = id;
+			} else if ( imp != NULL ) {
+				throw Mishap( "Declaration in package referenced by alias of an import would not be exported" );
+			} else {
+				throw Mishap( "No such alias" );
+			}
+			break;
+		}
+	}
+}
+
+static Ident lookupGlobal( Package * current, IdTermClass * t ) {
+	const std::string & pkg = t->pkg();
+	const std::string & c = t->name();
+	switch ( t->refType() ) {
+		case LOCAL_REF_TYPE: {
+			return current->lookup( c, true );
+		}
+		case ABSOLUTE_REF_TYPE: {
+			Package * p = current->getPackage( pkg );
+			return p->lookup( c, true );
+		}
+		case ALIAS_REF_TYPE: {
+			Import * imp = current->getAlias( t->alias() );
+			if ( imp != NULL ) {
+				Ident id = imp->package()->lookup( c, true );
+				const Facet * m = imp->matchTag();
+				if ( id->facets->contains( m ) ) {
+					return id;
+				} else {
+					throw Mishap( "Aliased variable not exported" );
+				}
+			} else {
+				throw Mishap( "No such alias" );
+			}
+			throw Unreachable();
+		}
+		default:
+			throw Unreachable();
+	}
+}
+
+enum Lookup LiftStateClass::lookup( IdTermClass * t, Ident *id ) {
+	const std::string & c = t->name();
 	for ( std::vector< Ident >::iterator it = this->env.data.begin(); it != this->env.data.end(); ++it ) {
 		Ident ident = *it;
         const std::string & ic = ident->getNameString();
@@ -103,17 +174,7 @@ enum Lookup LiftStateClass::lookup( NamedRefType r, const std::string & pkg, con
             return ident->level >= this->level ? InnerLocal : OuterLocal;
         }		
 	}
-	Package * p;
-	if ( r == LOCAL_REF_TYPE ) {
-		p = this->package;
-	} else if ( r == ABSOLUTE_REF_TYPE ) {
-		p = this->package->getPackage( pkg );
-	} else if ( r == QUALIFIED_REF_TYPE ) {
-		throw ToBeDone();
-	} else {
-		throw Unreachable();
-	}
-    *id = p->lookup( c );
+	*id = lookupGlobal( this->package, t );
     if ( *id == 0 ) throw Mishap( "Undeclared variable" ).culprit( "Variable", c );
     #ifdef DBG_LIFT
         fprintf( stderr, "< lookup\n" );
@@ -230,16 +291,13 @@ Term LiftStateClass::lift( Term term ) {
         }
         case fnc_var : {
         	VarTermClass * t = dynamic_cast< VarTermClass * >( term.get() );
-            const std::string & c = term->name();	//	term_named_string( term );
+            const std::string & c = term->name();
             if ( this->level == 0 ) {
                 //    printf( "GLOBAL VAR %s\n", c );
-                //	Lookup or add is really only applicable to development mode.
+                //	Lookup/add is really only applicable to development mode.
                 //	When we implement a distinction between runtime and devtime
                 //	we'll have to plug this.
-                //const Facet * facet = t->facet();
-                const FacetSet * facets = t->facets();
-                Ident id = this->package->lookup_or_add( c, /*facet,*/ facets );
-                t->ident() = id;
+                lookupAndAddGlobal( this->package, t );
             } else {
             	FnTermClass * fn = this->function;
             	int & slot = fn->nlocals();
@@ -249,14 +307,13 @@ Term LiftStateClass::lift( Term term ) {
                 id->slot = slot++;
                 id->level = this->level;
                 t->ident() = id;
-                //printf( "Function now has %d slots\n", fn->nlocals() );
             }
  			return term;			        	
         }
          case fnc_id: {
          	IdTermClass * t = dynamic_cast< IdTermClass * >( term.get() );
             Ident id;
-            switch ( this->lookup( t->refType(), t->pkg(), t->name(), &id ) ) {
+            switch ( this->lookup( t, &id ) ) {
                 case Global:
                 case InnerLocal: {
                     //    fprintf( stderr, "Found ident at %x\n", (unt)( id ) );

@@ -21,10 +21,11 @@
 
 #include <string>
 #include <set>
-#include <iostream>
+#include <ostream>
 
 class Facet {
 friend class FacetSet;
+friend std::ostream & operator<<( std::ostream & output, const Facet & p );
 private:
 	const std::string name_data;
 	
@@ -40,26 +41,14 @@ public:
 extern const Facet * fetchFacet( const std::string & string );
 
 class FacetSet {
+friend std::ostream & operator<<( std::ostream & output, const FacetSet & p );
 private:
 	std::set< std::string > names_set;
 	int id;
 
 public:
 	bool contains( const Facet * c ) const;
-	
-/*public:
-	void debug() const {
-		std::cout << "Debug facetset (" << id << "," << names_set.size() << "): ";
-		for ( 
-			std::set< std::string >::iterator it = names_set.begin();
-			it != names_set.end();
-			++it
-		) {
-			std::cout << " " << *it;
-		}
-		std::cout << std::endl;
-	}*/
-	
+		
 public:
 	FacetSet( std::set< std::string > & names );
 };
@@ -67,5 +56,7 @@ public:
 extern const FacetSet * fetchFacetSet( std::set< std::string > & names );
 extern const FacetSet * fetchFacetSet( std::string & name );
 extern const FacetSet * fetchFacetSet( const char * name );
+extern std::ostream& operator<<( std::ostream & out, const FacetSet & facets ); 
+extern std::ostream& operator<<( std::ostream & out, const Facet & facets );
 
 #endif

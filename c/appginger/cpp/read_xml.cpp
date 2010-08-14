@@ -282,6 +282,22 @@ static Term makeSysApp( string & name, vector< Term > & kids ) {
 	return t;
 }
 
+static void packageContext( TermData * t, string & pkg_name, string & alias_name, enum NamedRefType & r  ) {
+	if ( has_attr( t, "pkg" ) ) {
+		r = ABSOLUTE_REF_TYPE;
+	} else if ( has_attr( t, "alias" ) ){
+		r = ALIAS_REF_TYPE;
+	} else {
+		r = LOCAL_REF_TYPE;
+	}
+	
+	//	Note how these assignments come last as they are side
+	//	effecting on the attrs map.
+	pkg_name = t->attrs[ "pkg" ];
+	alias_name = t->attrs[ "alias" ];
+}
+
+
 Term TermData::makeTerm() {
 	if ( name == "fn" && kids.size() == 2 ) {
 		//	NAME is discarded for the moment, until we know how to use it.
@@ -290,7 +306,6 @@ Term TermData::makeTerm() {
 		if ( name == "int" ) {
 			int i;
 			istringstream s( this->attrs[ "value" ] );
-			//cout << "value = " << this->attrs[ "value" ] << endl;
 			if ( not ( s >> i ) ) throw;
 			return term_new_int( i );
 		} else if ( name == "bool" ) {
@@ -322,18 +337,16 @@ Term TermData::makeTerm() {
 		}
 	} else if ( has_attr( this, "name" ) ) {
 		if ( name == "id" ) {
-			if ( has_attr( this, "pkg" ) ) {
-				return shared< TermClass >( new IdTermClass( ABSOLUTE_REF_TYPE, attrs[ "pkg" ], attrs[ "name" ] ) );
-			} else if ( has_attr( this, "alias" ) ){
-				return shared< TermClass >( new IdTermClass(  QUALIFIED_REF_TYPE, attrs[ "pkg" ], attrs[ "name" ] ) );
-			} else {
-				return shared< TermClass >( new IdTermClass( LOCAL_REF_TYPE, attrs[ "pkg" ], attrs[ "name" ] ) );
-			}
+			enum NamedRefType r;
+			std::string pkg_name, alias_name;
+			packageContext( this, pkg_name, alias_name, r );
+			return shared< TermClass >( new IdTermClass( r, pkg_name, alias_name, attrs[ "name" ] ) );
 		} else if ( name == "var" ) {
-			//const Facet * facet = has_attr( this, "facet" ) ? fetchFacet( attrs[ "facet" ] ) : NULL;
+			enum NamedRefType r;
+			std::string pkg_name, alias_name;
+			packageContext( this, pkg_name, alias_name, r );
 			const FacetSet * facets = makeFacetSet( this, "tag" );
-			//facets->debug();
-			return shared< TermClass >( new VarTermClass(  LOCAL_REF_TYPE, attrs[ "pkg" ], /*facet,*/ facets, attrs[ "name" ] ) );
+			return shared< TermClass >( new VarTermClass( r, pkg_name, alias_name, facets, attrs[ "name" ] ) );
 		} else if ( name == "sysapp" ) {
 			return makeSysApp( attrs[ "name" ], kids );
 		} else {
@@ -373,10 +386,10 @@ Term TermData::makeTerm() {
 		}
 		return t;
 	} else if ( name == "import" ) {
-		if ( !has_attr( this, "tag" ) || !has_attr( this, "from" ) || !has_attr( this, "alias" ) || !has_attr( this, "protected" ) ) throw Mishap( "Malformed import" );
+		if ( !has_attr( this, "from" ) ) throw Mishap( "Malformed import" );
 		const Facet * facet = fetchFacet( attrs[ "tag" ] );
 		string from = attrs[ "from" ];
-		string alias = attrs[ "alias" ];
+		string alias = has_attr( this, "alias" ) ? attrs[ "alias" ] : from;
 		bool prot = has_attr( this, "protected" ) && ( attrs[ "protected" ] == string( "true" ) );
 		//const Facet * into = has_attr( this, "into" ) ? fetchFacet( attrs[ "into" ] ) : NULL;
 		const FacetSet * intos = makeFacetSet( this, "into" );

@@ -68,3 +68,23 @@ FacetSet::FacetSet( std::set< std::string > & names ) :
 bool FacetSet::contains( const Facet * c ) const {
 	return c != NULL && this->names_set.find( c->name_data ) != this->names_set.end();
 }
+
+ostream& operator<<( ostream & out, const FacetSet & facets ) {	
+	out << "{";
+	const char * gap = "";
+	for ( 
+		std::set< std::string >::iterator it = facets.names_set.begin();
+		it != facets.names_set.end();
+		++it
+	) {
+		out << gap << "@" << *it;
+		gap = ",";
+	}
+	out << "}";
+	return out;
+}
+
+ostream& operator<<( ostream & out, const Facet & facet ) {	
+	out << "@" << facet.name_data;
+	return out;
+}

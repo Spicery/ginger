@@ -34,8 +34,11 @@ private:
 	Package *			from;			//	Never NULL.
 	std::string			alias;
 	bool				is_protected;
-	//const Facet * 		into;			//	NULL = not into, the usual case.
 	const FacetSet * 	intos;			//	NULL = not into, the usual case.
+	
+public:
+	const Facet *		matchTag();
+	Package *			package();
 
 public:
 	Import(
@@ -43,14 +46,12 @@ public:
 		Package *			from,
 		std::string			alias,
 		bool				is_protected,
-		//const Facet * 		into,
 		const FacetSet *	intos
 	) :
 		facet( facet ),
 		from( from ),
 		alias( alias ),
 		is_protected( is_protected ),
-		//into( into ),
 		intos( intos )
 	{
 	}
@@ -84,10 +85,11 @@ public:
 	
 public:
 	Package * getPackage( const std::string title );
+	Import * getAlias( const std::string title );
 	Ident exported( const std::string & c, const Facet * facet );
-	Ident lookup( const std::string & c );
-	Ident add( const std::string & c, /*const Facet * facet,*/ const FacetSet * facets );
-	Ident lookup_or_add( const std::string & c, /*const Facet * facet,*/ const FacetSet * facets );
+	Ident lookup( const std::string & c, bool search );
+	Ident add( const std::string & c, const FacetSet * facets );
+	Ident lookup_or_add( const std::string & c, const FacetSet * facets );
 	
 public:
 	Package( PackageManager * pkgmgr, const std::string title ) :

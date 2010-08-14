@@ -145,35 +145,6 @@ const char *term_sysfn_cont( Term term ) {
 	return dynamic_cast< StringTermClass * >( term.get() )->charArray();
 }
 
-/*
-Term term_new_named( Functor fnc, enum NamedRefType r, const std::string & pkg, const std::string & name ) {
-	return shared< TermClass >( new NamedTermClass( fnc, r, pkg, name ) );
-}
-
-enum NamedRefType term_named_ref_type( Term term ) {
-	return term->refType();
-}
-
-const std::string & term_named_pkg( Term term ) {
-	return term->pkg();
-}
-
-const std::string & term_named_string( Term term ) {
-	return term->name();
-}
-
-Ident & term_named_ident( Term term ) {
-	return term->ident();
-}
-
-bool term_is_id( Term term ) {
-	return term->functor() == fnc_id;
-}
-*/
-
-
-
-
 
 Term term_new_fn( Term args, Term body ) {
 	return shared< TermClass >( new FnTermClass( args, body ) );

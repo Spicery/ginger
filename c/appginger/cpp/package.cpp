@@ -24,6 +24,7 @@ using namespace std;
 #include "sys.hpp"
 #include "key.hpp"
 #include "makesysfn.hpp"
+#include "mishap.hpp"
 
 //#define DBG_PACKAGE
 
@@ -53,6 +54,19 @@ Package * PackageManager::getPackage( std::string title ) {
 
 Package * Package::getPackage( std::string title ) {
 	return this->pkgmgr->getPackage( title );
+}
+
+Import * Package::getAlias( const std::string alias ) {
+	for ( 
+		vector< Import >::iterator it = this->imports.begin(); 
+		it != this->imports.end();
+		++it
+	) {
+		if ( alias == it->alias ) {
+			return &*it;
+		}
+	}	
+	return NULL;
 }
 
 Ident Package::exported( const std::string & name, const Facet * facet ) {
@@ -96,20 +110,22 @@ Ident Package::exported( const std::string & name, const Facet * facet ) {
 
 //	Lookup starts in the dictionary of the local package. It then scans all
 //	imports packages looking for a unique answer.
-Ident Package::lookup( const std::string & c ) {
+Ident Package::lookup( const std::string & c, bool search ) {
 	//	Imports are not implemented yet, so this is simple.
 	Ident id = this->dict.lookup( c );
 	if ( id ) return id;
 
-	for ( 
-		vector< Import >::iterator it = this->imports.begin(); 
-		it != this->imports.end();
-		++it
-	) {
-		Package * from_pkg = it->from;
-		Ident id = from_pkg->exported( c, it->facet );
-		if ( id ) return id;
-	}	
+	if ( search ) {
+		for ( 
+			vector< Import >::iterator it = this->imports.begin(); 
+			it != this->imports.end();
+			++it
+		) {
+			Package * from_pkg = it->from;
+			Ident id = from_pkg->exported( c, it->facet );
+			if ( id ) return id;
+		}	
+	}
 	
 	id = this->autoload( c );
 	return id;
@@ -117,16 +133,29 @@ Ident Package::lookup( const std::string & c ) {
 
 //	Additions always happen in the dictionary of the package itself.
 //	However it is necessary to check that there are no protected imports.
-Ident Package::add( const std::string & c, /*const Facet * facet,*/ const FacetSet * facets ) {
-	//	Imports are not implemented yet, so this is simple.
+Ident Package::add( const std::string & c, const FacetSet * facets ) {
+	for ( 
+		vector< Import >::iterator it = this->imports.begin(); 
+		it != this->imports.end();
+		++it
+	) {
+		//cout << "Checking that " << it->from->title << "is protected? " << it->is_protected << endl;
+		if ( it->is_protected ) {
+			Package * from_pkg = it->from;			
+			Ident id = from_pkg->exported( c, it->facet );
+			if ( id ) {
+				throw Mishap( "Trying to shadow a protected import" );
+			}
+		}
+	}	
 	return this->dict.add( c, /*facet,*/ facets );
 }
 
 
-Ident Package::lookup_or_add( const std::string & c, /*const Facet * facet,*/ const FacetSet * facets ) {
-    Ident id = this->lookup( c );
+Ident Package::lookup_or_add( const std::string & c, const FacetSet * facets ) {
+    Ident id = this->lookup( c, false );
 	if ( not id ) {
-    	return this->add( c, /*facet,*/ facets );
+    	return this->add( c, facets );
     } else {
     	return id;
     }
@@ -144,7 +173,7 @@ Ident StandardLibraryPackage::autoload( const std::string & c ) {
 		//	Doesn't match a system call. Fail.
 		return shared< IdentClass >();
 	} else {
-		Ident id = this->add( c, /*fetchFacet( "public"  ),*/ fetchFacetSet( "public" ) );
+		Ident id = this->add( c, fetchFacetSet( "public" ) );
 		id->value_of->valof = r;
 		return id;
 	}
@@ -175,3 +204,10 @@ void Package::import( const Import & imp ) {
 	this->imports.push_back( imp );
 }
 
+const Facet * Import::matchTag() { 
+	return this->facet;
+}
+
+Package * Import::package() { 
+	return this->from; 
+}

@@ -33,7 +33,7 @@ typedef shared< class TermClass > Term;
 
 enum NamedRefType {
 	LOCAL_REF_TYPE,
-	QUALIFIED_REF_TYPE,
+	ALIAS_REF_TYPE,
 	ABSOLUTE_REF_TYPE
 };
 
@@ -307,20 +307,23 @@ class NamedTermMixin : 	public NoChildrenTermMixin {
 private:
 	enum NamedRefType	ref_type;
 	const std::string	pkg_data;
+	const std::string	alias_data;
 	const std::string 	name_data;
 	Ident				ident_data;
 
 public:
-	NamedTermMixin( enum NamedRefType r, const char * p, const char * nm ) :
+	NamedTermMixin( enum NamedRefType r, const char * p, const char * a, const char * nm ) :
 		ref_type( r ),
 		pkg_data( p ),
+		alias_data( a ),
 		name_data( nm )
 	{
 	}
 	
-	NamedTermMixin( enum NamedRefType r, const std::string & p, const std::string & nm ) :
+	NamedTermMixin( enum NamedRefType r, const std::string & p, const std::string a, const std::string & nm ) :
 		ref_type( r ),
 		pkg_data( p ),
+		alias_data( a ),
 		name_data( nm )
 	{	
 	}
@@ -347,6 +350,10 @@ public:
 		return this->pkg_data;
 	}
 	
+	const std::string & alias() {
+		return this->alias_data;
+	}
+	
 	enum NamedRefType refType() {
 		return this->ref_type;
 	}
@@ -361,13 +368,13 @@ public:
 	}
 	
 public:
-	IdTermClass( enum NamedRefType r, const char * p, const char * nm ) :
-		NamedTermMixin( r, p, nm )
+	IdTermClass( enum NamedRefType r, const char * p, const char * a, const char * nm ) :
+		NamedTermMixin( r, p, a, nm )
 	{
 	}
 	
-	IdTermClass( enum NamedRefType r, const std::string & p, const std::string & nm ) :
-		NamedTermMixin( r, p, nm )
+	IdTermClass( enum NamedRefType r, const std::string & p, const std::string & a, const std::string & nm ) :
+		NamedTermMixin( r, p, a, nm )
 	{	
 	}
 
@@ -377,14 +384,9 @@ public:
 
 class VarTermClass : public NamedTermMixin {
 private:
-	//const Facet * facet_data;
 	const FacetSet * facets_data;
 	
 public:
-	/*const Facet * facet() {
-		return this->facet_data;
-	}*/
-
 	const FacetSet * facets() {
 		return this->facets_data;
 	}
@@ -396,14 +398,13 @@ public:
 	}
 	
 public:
-	VarTermClass( enum NamedRefType r, const char * p, const char * nm ) :
-		NamedTermMixin( r, p, nm )
+	VarTermClass( enum NamedRefType r, const char * p, const char * a, const char * nm ) :
+		NamedTermMixin( r, p, a, nm )
 	{
 	}
 	
-	VarTermClass( enum NamedRefType r, const std::string & p, /*const Facet * f,*/ const FacetSet * fs, const std::string & nm ) :
-		NamedTermMixin( r, p, nm ),
-		//facet_data( f ),
+	VarTermClass( enum NamedRefType r, const std::string & p, const std::string & a, const FacetSet * fs, const std::string & nm ) :
+		NamedTermMixin( r, p, a, nm ),
 		facets_data( fs )
 	{	
 	}

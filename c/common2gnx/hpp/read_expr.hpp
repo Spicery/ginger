@@ -16,11 +16,9 @@ private:
 	Node postfix_processing();
 	Node postfix_processing( Node lhs, Item item, int prec );
 	Node read_stmnts_check( TokType fnc );
-	bool try_token( TokType fnc );
 	Node read_stmnts();
 	Node read_id();
 	Item read_id_item();
-	void check_token( TokType fnc );
 	Node read_expr_check( TokType fnc );
 	Node read_if( TokType sense, TokType closer );
 	Node read_syscall();
@@ -40,6 +38,9 @@ public:
 	Node read_opt_expr();
 	Node read_opt_expr_prec( int prec );
 	void checkSemi();
+	void check_token( TokType fnc );
+	bool try_token( TokType fnc );
+	bool try_name( const char * name );
 	
 public:
 	ReadStateClass( ItemFactory ifact ) :

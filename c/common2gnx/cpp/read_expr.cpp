@@ -1,5 +1,6 @@
 #include <stdexcept>
 #include <string>
+#include <sstream>
 
 #include <stdio.h>
 #include <assert.h>
@@ -79,6 +80,17 @@ void ReadStateClass::check_token( TokType fnc ) {
 
 void ReadStateClass::checkSemi() {
 	this->check_token( tokty_semi );
+}
+
+bool ReadStateClass::try_name( const char * name ) {
+	ItemFactory ifact = this->item_factory;
+	Item it = ifact->peek();
+	if ( it->nameString() == name ) {
+		ifact->drop();
+		return true;
+	} else {
+		return false;
+	}
 }
 
 bool ReadStateClass::try_token( TokType fnc ) {
@@ -276,7 +288,6 @@ Node ReadStateClass::read_syscall() {
 	ItemFactory ifact = this->item_factory;	
 	Item it = ifact->read();
 	if ( it->tok_type == tokty_id ) {
-		//const std::string & name = it->nameString();
 		NodeFactory sc( "sysfn" );
 		sc.putAttr( "value", it->nameString() );
 		return sc.node();	//term_new_ref( tokty_syscall, (Ref)sc );
@@ -306,12 +317,6 @@ static void squash( NodeFactory acc, Node rhs ) {
 		}
 	} else if ( name == "var" ) {
 		acc.addNode( rhs );
-	/*} else if ( name == "id" ) {
-		const std::string nm = rhs->get( "name" );
-		acc.start( "var" );
-		acc.putAttr( "name", nm );
-		acc.end();
-		return;*/
 	} else {
 		throw Mishap( "Invalid form for definition" );
 	}
@@ -336,11 +341,56 @@ static void flatten( Node & ap, Node & fn, Node & args ) {
 	}
 }
 
-/*static Node just_args( Node args ) {
-	NodeFactory acc( "seq" );
-	squash( acc, args );
-	return acc.node();
-}*/
+
+static void readImportQualifiers( ReadStateClass & r, bool & pervasive, bool & qualified ) {
+	pervasive = true;
+	qualified = false;
+	for (;;) {
+		if ( r.try_name( "pervasive" ) ) {
+			pervasive = true;
+		} else if ( r.try_name( "nonpervasive" ) ) {
+			pervasive = false;
+		} else if ( r.try_name( "qualified" ) ) {
+			qualified = true;
+		} else if ( r.try_name( "unqualified" ) ) {
+			qualified = false;
+		} else {
+			break;
+		}
+	}
+}
+
+
+static void readTags( ReadStateClass & r, NodeFactory & imp, const char * prefix, const bool add_default ) {
+	if ( r.try_token( tokty_oparen ) ) {
+		ItemFactory ifact = r.item_factory;
+		if ( ifact->peek()->tok_type != tokty_cparen ) {
+			for ( int i = 0; true; i++ ) {
+				Item item = ifact->read();
+				ostringstream s;
+				s << prefix << i;
+				imp.putAttr( s.str(), item->nameString() );
+				
+				item = ifact->read();
+				if ( item->tok_type != tokty_comma ) {
+					if ( item->tok_type != tokty_cparen ) throw Mishap( "Expecting close parenthesis" );
+					break;
+				}
+			}	
+		}
+	} else if ( add_default ) {
+		imp.putAttr( prefix, "public" );
+	}
+}
+
+static void readImportMatch( ReadStateClass & r, NodeFactory & imp ) {
+	readTags( r, imp, "match", true );
+}
+
+static void readImportInto( ReadStateClass & r, NodeFactory & imp ) {
+	readTags( r, imp, "into", false );
+}
+
 
 Node ReadStateClass::prefix_processing() {
 	ItemFactory ifact = this->item_factory;
@@ -501,6 +551,31 @@ Node ReadStateClass::prefix_processing() {
 			Node body = this->read_stmnts_check( tokty_endpackage );
 			pkg.addNode( body );
 			return pkg.node();
+		}
+		case tokty_import: {
+			NodeFactory imp( "import" );
+			bool pervasive, qualified;
+			
+			readImportQualifiers( *this, pervasive, qualified );
+			imp.putAttr( "pervasive", pervasive ? "true" : "false" );
+			imp.putAttr( "qualified", qualified ? "true" : "false" );
+			
+			readImportMatch( *this, imp );
+			
+			this->check_token( tokty_from );
+			string url = this->read_pkg_name();
+			imp.putAttr( "from", url );
+
+			if ( this->try_name( "alias" ) ) {
+	        	Item item = this->read_id_item();
+				imp.putAttr( "alias", item->nameString() );
+			}
+			
+			if ( this->try_name( "into" ) ) {
+				readImportInto( *this, imp );
+			}
+			
+			return imp.node();
 		}
 		default:
 			;

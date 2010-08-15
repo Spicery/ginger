@@ -75,8 +75,9 @@ ItemMap::ItemMap() {
 	add( "fn", 			tokty_fn, 			PrF, 		0			);
 	add( "for", 		tokty_for, 			PrF, 		0			);
 	add( "from",		tokty_from, 		Pat,		2000		);
-	add( "in",			tokty_in,    		Pat,		2000		);
 	add( "if", 			tokty_if, 			PrF, 		0			);
+	add( "import",		tokty_import, 		PrF,		0			);
+	add( "in",			tokty_in,    		Pat,		2000		);
 	add( "or", 			tokty_or, 			BFo, 		1800		);
 	add( "then", 		tokty_then, 		PrF, 		0			);
 	add( "to",			tokty_to, 			PrF,		0			);

@@ -55,6 +55,7 @@ typedef enum TokType {
      tokty_id,
      tokty_identical,
      tokty_if,
+     tokty_import,
      tokty_in,
      tokty_int,
      tokty_lt,

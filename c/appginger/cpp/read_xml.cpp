@@ -352,8 +352,12 @@ Term TermData::makeTerm() {
 		} else {
 			throw;
 		}
-	} else if ( name == "bind" && kids.size() == 2 ) {
-		return term_new_basic2( fnc_dec, kids[ 0 ], kids[ 1 ] );
+	} else if ( name == "bind" ) {
+		if ( kids.size() == 2 ) {
+			return term_new_basic2( fnc_dec, kids[ 0 ], kids[ 1 ] );
+		} else {
+			throw Mishap( "Malformed bind" );
+		}
 	} else if ( name == "seq" ) {
 		Term seq = term_new_basic0( fnc_seq );
 		for ( std::vector< Term >::iterator it = kids.begin(); it != kids.end(); ++it ) {
@@ -362,7 +366,6 @@ Term TermData::makeTerm() {
 		return seq;
 	} else if ( name == "if" ) {
 		int n = kids.size();
-		
 		if ( n == 0 ) { 					// 	unusual but defined.
 			return term_new_basic0( fnc_seq );
 		} else if ( n == 1 ) {				//	unusual but defined.
@@ -391,9 +394,7 @@ Term TermData::makeTerm() {
 		string from = attrs[ "from" ];
 		string alias = has_attr( this, "alias" ) ? attrs[ "alias" ] : from;
 		bool prot = has_attr( this, "protected" ) && ( attrs[ "protected" ] == string( "true" ) );
-		//const Facet * into = has_attr( this, "into" ) ? fetchFacet( attrs[ "into" ] ) : NULL;
 		const FacetSet * intos = makeFacetSet( this, "into" );
-		//intos->debug();
 		return shared< TermClass >( new ImportTermClass( match_tags, from, alias, prot, /*into,*/ intos ) ); 
 	} else {
 		cerr << "name = " << name << endl;

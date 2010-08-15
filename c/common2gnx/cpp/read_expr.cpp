@@ -455,15 +455,16 @@ Node ReadStateClass::prefix_processing() {
 		}
 		case tokty_val:
         case tokty_var : {
-	        Item item = this->read_id_item();
-	        this->check_token( tokty_bind );
 	        NodeFactory bind( "bind" );
-	        bind.start( "var" );
-	        bind.putAttr( "name", item->nameString() );
+	        NodeFactory var( "var" );
+	        readTags( *this, var, "tag", true );
+	        Item item = this->read_id_item();
+	        var.putAttr( "name", item->nameString() );
 	        if ( fnc == tokty_val ) {
-	        	bind.putAttr( "protected", "true" );
+	        	var.putAttr( "protected", "true" );
 	        }
-	        bind.end();
+	        bind.addNode( var.node() );
+	        this->check_token( tokty_bind );
 	        bind.addNode( this->read_expr() );
 	        return bind.node();
         }

@@ -24,3 +24,4 @@ unsigned long fastStringLength( Ref str ) {
 	return ToULong( ObjToPtr4( str )[ STRING_LENGTH_OFFSET ] ) >> TAG;
 }
 
+

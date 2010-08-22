@@ -26,3 +26,4 @@ extern Ref * sysObjectKey( Ref * pc, MachineClass * vm );
 extern Ref refKey( Ref r );
 
 #endif
+

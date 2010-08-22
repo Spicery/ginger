@@ -114,3 +114,4 @@ Machine machine_new( int n );
 void machine_reset( Machine vm );
 
 #endif
+

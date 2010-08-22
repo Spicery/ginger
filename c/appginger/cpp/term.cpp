@@ -334,3 +334,4 @@ void term_print( Term term ) {
 Term term_skip( new EmptyTermClass( fnc_seq ) );
 Term term_anon( new EmptyTermClass( fnc_anon ) );
 
+

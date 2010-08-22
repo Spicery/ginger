@@ -31,3 +31,4 @@ ScanDict::ScanDict( DictClass * d ) :
 	it( d->table.begin() )
 {
 }
+

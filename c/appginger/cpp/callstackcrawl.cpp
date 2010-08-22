@@ -26,3 +26,4 @@ Ref * CallStackCrawl::next() {
 	this->sp = ToRefRef( sp[ SP_PREV_SP ] );
 	return answer;
 }
+

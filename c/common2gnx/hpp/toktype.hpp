@@ -94,3 +94,4 @@ const char *tok_type_as_type( TokType fnc );
 //const char *functor_as_value( Functor fnc );
 
 #endif
+

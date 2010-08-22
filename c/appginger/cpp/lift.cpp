@@ -364,3 +364,4 @@ Term lift_term( Package * pkg, Term term ) {
     LiftStateClass state( pkg, 0 );
     return state.lift( term );
 }
+

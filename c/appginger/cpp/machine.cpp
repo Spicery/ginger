@@ -280,3 +280,4 @@ void MachineClass::check_call_stack_integrity() {
 	}
 }
 
+

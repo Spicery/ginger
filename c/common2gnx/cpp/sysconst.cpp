@@ -60,3 +60,4 @@ public:
 SysConst * lookupSysConst( std::string key ) {
 	return theSysConstTable.lookup( key );
 }
+

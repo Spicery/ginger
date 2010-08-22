@@ -644,3 +644,4 @@ int term_count( Term term );
 void term_print( Term term );
 
 #endif
+

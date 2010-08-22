@@ -61,3 +61,4 @@ extern std::ostream& operator<<( std::ostream & out, const FacetSet & facets );
 extern std::ostream& operator<<( std::ostream & out, const Facet & facets );
 
 #endif
+

@@ -57,3 +57,4 @@ typedef std::map< std::string, SysInfo > SysMap;
 extern SysMap sysMap;
 
 #endif
+

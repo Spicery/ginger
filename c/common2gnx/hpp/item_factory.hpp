@@ -54,3 +54,4 @@ typedef class ItemFactoryClass *ItemFactory;
 //void item_factory_reset( ItemFactory tok );
 
 #endif
+

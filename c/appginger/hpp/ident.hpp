@@ -62,3 +62,4 @@ Ident ident_new_tmp( int n );
 Ident ident_new_global( const std::string & nm, /*const Facet * facet,*/ const FacetSet * facets );
 
 #endif
+

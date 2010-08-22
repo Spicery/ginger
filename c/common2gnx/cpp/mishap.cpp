@@ -30,3 +30,4 @@ Mishap::Mishap( const std::string & msg ) :
 	message( msg ) 
 {
 }
+

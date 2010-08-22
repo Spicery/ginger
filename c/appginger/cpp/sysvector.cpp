@@ -103,3 +103,4 @@ Ref * sysFastVectorLength( Ref *pc, class MachineClass * vm ) {
 	return pc;
 }
 
+

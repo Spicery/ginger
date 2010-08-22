@@ -25,3 +25,4 @@
 Term lift_term( Package * pkg, Term term );
 
 #endif
+

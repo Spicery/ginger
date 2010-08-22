@@ -30,3 +30,4 @@ extern Ref * sysFastVectorLength( Ref *pc, class MachineClass * vm );
 
 
 #endif
+

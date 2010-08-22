@@ -44,3 +44,4 @@ public:
 typedef DestinationClass * Destination;
 
 #endif
+

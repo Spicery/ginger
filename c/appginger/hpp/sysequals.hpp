@@ -28,3 +28,4 @@ extern bool refEquals( Ref x, Ref y );
 extern unsigned long refHash( Ref r );
 
 #endif
+

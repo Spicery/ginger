@@ -141,3 +141,4 @@ unsigned long lengthAfterObjectKey( Ref * obj_K ) {
 		throw;
 	}
 }
+

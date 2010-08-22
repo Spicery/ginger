@@ -21,3 +21,4 @@ void print_results( Machine vm, float time_taken ) {
 	printf( "\n" );
 	vm->vp = vm->vp_base;
 }
+

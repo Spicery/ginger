@@ -37,3 +37,4 @@ typedef Ref * SysCall( Ref * pc, MachineClass * );
 #define ToSysCall( x ) 	( (SysCall *)( x ) )
 
 #endif
+

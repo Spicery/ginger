@@ -31,3 +31,4 @@ typedef enum Functor {
 const char *functor_name( Functor fnc );
 
 #endif
+

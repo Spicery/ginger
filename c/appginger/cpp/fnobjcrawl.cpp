@@ -52,3 +52,4 @@ FnObjCrawl::FnObjCrawl( MachineClass * vm, Ref * obj_K ) :
 	this->obj_Z1 = this->pc + sizeAfterKeyOfFn( obj_K );
 }
 
+

@@ -35,3 +35,4 @@ CageClass * HeapCrawl::next() {
 	this->cages = h.zoo.begin();
 	this->end = h.zoo.end();
 }
+

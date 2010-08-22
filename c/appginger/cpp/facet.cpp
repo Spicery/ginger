@@ -106,3 +106,4 @@ ostream& operator<<( ostream & out, const Facet & facet ) {
 	out << "@" << facet.name_data;
 	return out;
 }
+

@@ -233,3 +233,4 @@ Ref * sysEquals( Ref * pc, class MachineClass * vm ) {
 		throw Mishap( "Wrong number of arguments for =" );
 	}
 }
+

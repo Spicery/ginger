@@ -1,18 +1,22 @@
 How to Install AppGinger
 ========================
 
-There is not really any installation script as yet. You unpack and make the 
-system.
+* Unpack the appginger tarball into a local folder $APPGINGER.
 
-* Unpack the appginger tarball into a local folder e.g. $INSTALL/appginger
-* Change directory to that folder e.g. cd $INSTALL/appginger
-* Make the binaries e.g. make
+	$ APPGINGER=~/appginger
+	$ mkdir $APPGINGER
+	$ tar zxf appginger.tgz
 
-If all goes well you will find the $INSTALL/appginger/bin has two binaries
+* Change directory to that folder.
 
-* appginger
-* common2gnx
+	$ cd $APPGINGER
 
-Update to Include Graham Higgin's Packaging Work
-================================================
+* Run configure	and make
 
+	$ ./configure
+	$ make
+	
+If all goes well you will find the $APPGINGER/bin folder has two executables
+
+	* appginger
+	* common2gnx

@@ -1,0 +1,27 @@
+#!/usr/bin/make -f
+# example debian/rules for cdbs packages
+
+include /usr/share/cdbs/1/rules/debhelper.mk
+include /usr/share/cdbs/1/class/autotools.mk
+# add dpatch to the build-depends for the next rule
+#include /usr/share/cdbs/1/rules/dpatch.mk
+
+# Using gcc 4.x and mudflap support: build-depend on libmudflap0-dev, gcc (>= 4:4.0)
+# if debug is set, add mudflap support
+ifneq (,$(findstring debug,$(DEB_BUILD_OPTIONS)))
+# use libmudflap, but not on mips/mipsel
+ifeq (,$(findstring mips, $(DEB_HOST_ARCH)))
+#CFLAGS += -fmudflap
+#LDFLAGS += -lmudflap
+#DEB_CONFIGURE_SCRIPT_ENV += LDFLAGS="$(LDFLAGS)"
+endif
+endif
+# available custom targets are for example
+#binary-post-install/appginger::
+#	install -m 0644 debian/bts debian/appginger/usr/share/bug/appginger
+# install debian/appginger.{linda,lintian}
+#	perl debian/dh_installoverrides
+
+# workaround for a dpatch bug calling "debian/rules unpatch"
+# instead of "dpatch deapply-all"
+unpatch::

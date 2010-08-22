@@ -12,3 +12,7 @@ If all goes well you will find the $INSTALL/appginger/bin has two binaries
 
 * appginger
 * common2gnx
+
+Update to Include Graham Higgin's Packaging Work
+================================================
+

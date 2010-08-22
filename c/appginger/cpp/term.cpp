@@ -296,7 +296,7 @@ static void tprint( Term term, int level ) {
 			Ident & id = term->ident();
     		splevel( level + 1 );
             printf(
-				"%s, length = %lu, ",
+				"%s, length = %Zu, ",
 				c.c_str(), c.size()
 			);
 			if ( id == NULL ) {

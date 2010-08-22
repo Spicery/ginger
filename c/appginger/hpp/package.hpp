@@ -94,11 +94,12 @@ public:
 public:
 	Package( PackageManager * pkgmgr, const std::string title ) :
 		pkgmgr( pkgmgr ),
-		title( title )
+		title( title ),
+		dict()
 	{
 	}
 	
-	~Package() {}
+	virtual ~Package() {}
 };
 
 class OrdinaryPackage : public Package {
@@ -106,7 +107,7 @@ protected:
 	virtual Ident autoload( const std::string & c );
 public:
 	OrdinaryPackage( PackageManager * pkgmgr, const std::string title );
-	~OrdinaryPackage() {}
+	virtual ~OrdinaryPackage() {}
 };
 
 class StandardLibraryPackage : public Package {
@@ -117,7 +118,7 @@ public:
 		Package( pkgmgr, title )
 	{
 	}
-	~StandardLibraryPackage() {}
+	virtual ~StandardLibraryPackage() {}
 };
 
 

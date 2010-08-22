@@ -34,6 +34,9 @@ public:
 	Ident lookup( const std::string & c );
 	Ident add( const std::string & c, /*const Facet * facet,*/ const FacetSet * facets );
 	Ident lookup_or_add( const std::string & c, /*const Facet * facet,*/ const FacetSet * facets );
+	
+public:
+	DictClass() : table() {}
 };
 
 typedef DictClass *Dict;

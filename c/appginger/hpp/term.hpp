@@ -62,6 +62,9 @@ public:
 	virtual const std::string & name();
 	virtual const std::string url();
 	
+public:
+	virtual ~TermClass() {}
+	
 };
 
 class KidsTermMixin : public virtual TermClass {
@@ -84,7 +87,8 @@ public:
 			
 public:
 
-	KidsTermMixin() 
+	KidsTermMixin() :
+		children()
 	{
 	}
 	

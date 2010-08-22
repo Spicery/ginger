@@ -40,11 +40,13 @@ void to_be_done( charseq msg );
 class Throwable {
 protected:
 	Throwable() {}
+	virtual ~Throwable() {}
 };
 
 class NormalExit : public Throwable {
 public:
 	NormalExit() {}
+	virtual ~NormalExit() {}
 };
 
 //	Abstract
@@ -59,7 +61,8 @@ public:
 	void report();
 	
 protected:
-	Problem( const std::string & msg ) : message( msg ) {}
+	Problem( const std::string & msg ) : message( msg ), culprits() {}
+	virtual ~Problem() {}
 };
 
 class SystemError : public Problem {
@@ -67,6 +70,7 @@ public:
 	SystemError & culprit( const std::string reason, const std::string arg ) { this->Problem::culprit( reason, arg ); return *this; }
 	SystemError & culprit( const std::string arg ) { this->Problem::culprit( arg ); return *this; }
 	SystemError( const std::string & msg ) : Problem( msg ) {}
+	virtual ~SystemError() {}
 };
 
 class Mishap : public Problem {
@@ -74,16 +78,19 @@ public:
 	Mishap & culprit( const std::string reason, const std::string arg ) { this->Problem::culprit( reason, arg ); return *this; }
 	Mishap & culprit( const std::string arg ) { this->Problem::culprit( arg ); return *this; }
 	Mishap( const std::string & msg ) : Problem( msg ) {}
+	virtual ~Mishap() {}
 };
 
 class ToBeDone : public Mishap {
 public:
 	ToBeDone() :  Mishap( "To be done" ) {}
+	virtual ~ToBeDone() {}
 };
 
 class Unreachable : public SystemError {
 public:
 	Unreachable() : SystemError( "Unreachable" ) {}
+	virtual ~Unreachable() {}
 };
 
 

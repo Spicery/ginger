@@ -1,0 +1,3 @@
+#!/bin/sh
+GUILE_LOAD_PATH=""
+exec guile -l lisp2gnx.lsp -e lisp2gnx

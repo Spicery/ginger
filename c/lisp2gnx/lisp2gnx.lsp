@@ -1,11 +1,35 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; (lisp2gnx)
+;;;		Reads s-expressions from standard input
+;;;		Writes GingerXML to standard output
+;;;		Error reported - undecided as yet
+;;;
+;;;	The implementation uses an intermediate form, the GNX-tree. This has the
+;;; following shape:
+;;;		( <element-name> <attributes> <subtree1> <subtree2>... )
+;;;		where attributes has the form
+;;;			((<key1> <value1>) (<key2> <value2>) ... )
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(define (lisp2gnx args)
+	(run))
+
+(define (run)
+	(let
+		((sexp (read)))
+		(if (eof-object? sexp)
+			(exit)
+			(begin
+				(gnx2output (sexp2gnx sexp))
+				(run)))))
+				
+				
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; ( gnx2output g-tree )
 ;;;		g-tree is a GNX-tree
 ;;;		result is unused
 ;;;		effect is to print the GNX-tree in GingerXML format on standard output
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-
 
 (define (gnx2output x)
 	(gnx2out x)
@@ -93,6 +117,17 @@
 				,(sexp2gnx f)
 				,(gnx-seq (map sexp2gnx args))))))
 
+;;; args = ( (f params...) body... )
+(define (define2gnx f args)
+	(if (and (pair? args) (pair? (car args)))
+		(let
+			(	(f (caar args))
+				(gf (gnx-var f))
+				(params (gnx-seq (map gnx-var (cdar args))))
+				(body (gnx-seq (map sexp2gnx (cdr args)))))
+			`(bind () ,gf (fn ((name ,f)) ,params ,body)))
+		(throw 'basexp (cons f args))))
+
 (define (quote2gnx sexp)
 	(if (pair? sexp)
 		(quote-sexp sexp)
@@ -124,4 +159,7 @@
 
 (define (gnx-cons x y)
 	`(sysapp ((name newPair)) ,x ,y))
+
+(define (gnx-var name)
+	`(var ((name ,name))))
 	

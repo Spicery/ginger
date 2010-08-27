@@ -159,17 +159,31 @@
 			(args (cdr attr)))
 		(cond
 			((eq? 'match tag)
-				(throw 'tbd))	;;;	 <- got here
+				(generate-tags 0 tag args))
 			((eq? 'alias tag)
-				(list attr))	;;;	 <- got here
+				(list attr))
 			((eq? 'qualified)
-				(list attr))	;;;	 <- got here
+				(list attr))
 			((eq? 'protected)
-				(list attr))	;;;	 <- got here
+				(list attr))
 			((eq? 'into)
-				(throw 'tbd))	;;;	 <- got here
+				(generate-tags 0 tag args))	
 			(else (throw 'bad-import)))))
-	
+
+(define (generate-tags n root-tag args)
+	(if (null? args)
+		'()
+		(let
+			(	(tag-value (car args))
+				(rest (cdr args)))
+			(cons
+				(list (glue root-tag n) tag-value)
+				(generate-tags (+ n 1) root-tag rest)))))
+				
+(define (glue root num)
+	(string-append (symbol->string root) (number->string num)))
+				
+
 ;;; ( for QUERY EXPR* )
 (define (for2gnx f args)
 	`(for () ,(query2gnx (car args)) ,(gnx-seq (map sexp2expr (cdr args)))))
@@ -181,9 +195,9 @@
 			((eq? op 'bind) 
 				(binding2gnx rest))
 			((eq? op 'in)
-				(in2gnx op rest))		;;; <- got here
+				(in2gnx op rest))
 			((eq? op 'from)
-				(from2gnx op rest))		;;; <- got here
+				(from2gnx op rest))
 			(else (throw 'bad-sexp)))))
 
 (define (in2gnx f args)

@@ -364,6 +364,12 @@ Term TermData::makeTerm() {
 			term_add( seq, *it );
 		}
 		return seq;
+	} else if ( name == "block" ) {
+		Term seq = term_new_basic0( fnc_block );
+		for ( std::vector< Term >::iterator it = kids.begin(); it != kids.end(); ++it ) {
+			term_add( seq, *it );
+		}
+		return seq;
 	} else if ( name == "if" ) {
 		int n = kids.size();
 		if ( n == 0 ) { 					// 	unusual but defined.

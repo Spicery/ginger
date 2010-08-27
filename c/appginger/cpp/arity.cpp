@@ -124,6 +124,7 @@ Arity::Arity( Term term ) {
 			this->more = false;
 			break;
 		}
+		case fnc_block:
 		case fnc_seq: {
 			int n = term_count( term );
 			Arity k( 0 );

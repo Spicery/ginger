@@ -62,6 +62,14 @@ public:
 	Ident & top() {
 		return this->data.back();
 	}
+	
+	size_t size() {
+		return this->data.size();
+	}
+	
+	void resize( size_t t ) {
+		return this->data.resize( t );
+	}
 };
 
 
@@ -243,6 +251,7 @@ Term LiftStateClass::lift( Term term ) {
             //    fn( args( id( _ ), ... ), Body )
             this->level += 1;
             FnTermClass * old_function = this->function;
+            size_t old_size = this->env.size();
             
             FnTermClass * fn = dynamic_cast< FnTermClass * >( term.get() );
             this->function = fn;
@@ -287,7 +296,18 @@ Term LiftStateClass::lift( Term term ) {
             
             this->level -= 1;
             this->function = old_function;
+            this->env.resize( old_size );
             return term;
+        }
+        case fnc_block: {
+        	const size_t old_size = this->env.size();
+        	Term t = term_new_basic0( fnc_seq );
+			int A = term_count( term );
+			for ( int i = 0; i < A; i++ ) {
+				term_add( t, this->lift( *term_index_ref( term, i ) ) );
+			}
+            this->env.resize( old_size );
+			return t;        	
         }
         case fnc_var : {
         	VarTermClass * t = dynamic_cast< VarTermClass * >( term.get() );

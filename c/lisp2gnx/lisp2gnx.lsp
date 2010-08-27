@@ -20,7 +20,7 @@
 		(if (eof-object? sexp)
 			(exit)
 			(begin
-				(gnx2output (sexp2gnx sexp))
+				(gnx2output (sexp2expr sexp))
 				(run)))))
 				
 				
@@ -62,18 +62,30 @@
 	(display "\""))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; ( sexp2gnx x )
+;;; ( sexp2gnx x mode )
 ;;;		x is an s-expression
+;;;		mode is either 'expr or 'pattern
 ;;;		returns a GNX-tree
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(define (sexp2gnx sexp)
+(define (sexp2gnx sexp mode)
 	(if (list? sexp) 
-		(list2gnx sexp)
-		(atomic2gnx sexp)))
-
+		(list2gnx sexp mode)
+		(atomic2gnx sexp mode)))
+		
+(define (sexp2expr sexp)
+	(sexp2gnx sexp 'expr))
 	
-(define (atomic2gnx x) 
+(define (sexp2pattern sexp)
+	(sexp2gnx sexp 'pattern))
+
+;;;	Curried version of sexp2gnx.
+(define (sexp2gnx-mode mode)
+	(if (eq? mode 'expr)
+		sexp2expr
+		sexp2pattern))
+	
+(define (atomic2gnx x mode) 
 	(if (symbol? x) 
 		(cond
 			((eq? x 'absent) 
@@ -81,8 +93,150 @@
 			((eq? x 'nil) 
 				'(list ((value empty))))
 			(else 
-				`(id ((name ,x)))))
+				((if (eq? mode 'expr) gnx-id gnx-var) x)))
 		(quote-atom x)))
+		
+(define (list2gnx sexp mode)
+	(if (null? sexp) 
+		'(list ((value empty)))
+		(form2gnx (car sexp) (cdr sexp) mode)))
+
+(define (form2gnx f args mode)
+	(cond
+		((eq? f 'quote) 
+			(quote2gnx (car args)))
+		((eq? f 'quasiquote) 
+			(sexp2gnx (expand-quasiquote (car args)) mode))
+		((eq? f 'begin)
+			(gnx-seq (map (sexp2gnx-mode mode) args)))
+		((eq? f 'define) 
+			(if (not (eq? mode 'expr)) (throw 'define-in-pattern))
+			(define2gnx f args))
+		((eq? f 'if) 
+			`(if () ,@(map sexp2gnx-expr args)))
+		((eq? f 'let)
+			(let2gnx f args))
+		((eq? f 'for)
+			(for2gnx f args))
+		((eq? f 'package)
+			(package2gnx f args))
+		((eq? f 'import)
+			(import2gnx f args))
+		(else 
+			`(app ()
+				,(sexp2gnx f 'expr)
+				,(gnx-seq (map (sexp2gnx-mode mode) args))))))
+
+;;; ( package URL ( IMPORT* ) EXPR* )
+(define (package2gnx f args)
+	(let
+		(	(url (car args))
+			(imports (cadr args))
+			(stmnts (cddr args)))
+		`(package ((name ,url))
+			,@(map sexp2expr imports)
+			,@(map sexp2expr stmnts))))
+
+(define (import2gnx f args)
+	(let
+		(	(name (car args))
+			(attrs (cdr args)))
+		`(import 
+			(	(name ,name)
+				,@(flatten (map impattr2gnx attrs))))))
+			
+(define (flatten list)
+	(if (null? list)
+		'()
+		(append
+			(car list)
+			(flatten (cdr list)))))
+
+;;;	MUST RETURN A LIST OF key-values PAIRS
+(define (impattr2gnx attr)
+	(let
+		(	(tag (car attr))
+			(args (cdr attr)))
+		(cond
+			((eq? 'match tag)
+				(throw 'tbd))	;;;	 <- got here
+			((eq? 'alias tag)
+				(list attr))	;;;	 <- got here
+			((eq? 'qualified)
+				(list attr))	;;;	 <- got here
+			((eq? 'protected)
+				(list attr))	;;;	 <- got here
+			((eq? 'into)
+				(throw 'tbd))	;;;	 <- got here
+			(else (throw 'bad-import)))))
+	
+;;; ( for QUERY EXPR* )
+(define (for2gnx f args)
+	`(for () ,(query2gnx (car args)) ,(gnx-seq (map sexp2expr (cdr args)))))
+
+(define (query2gnx q)
+	(let (	(op (car q))
+			(rest (cdr q)))
+		(cond
+			((eq? op 'bind) 
+				(binding2gnx rest))
+			((eq? op 'in)
+				(in2gnx op rest))		;;; <- got here
+			((eq? op 'from)
+				(from2gnx op rest))		;;; <- got here
+			(else (throw 'bad-sexp)))))
+
+(define (in2gnx f args)
+	(let
+		( 	(pat (sexp2pattern (car args)))
+			(e (sexp2expr (cadr args))))
+		`(,f () ,pat ,e)))
+
+(define (from2gnx f args)
+	(let
+		(	(pat (sexp2pattern (car args)))
+			(from-e (sexp2expr (cadr args)))
+			(to-e (sexp2expr (caddr args))))
+		`(,f () ,pat ,from-e ,to-e)))
+		
+	
+(define (let2gnx f args)
+	(let
+		(	(bindings (car args))
+			(body (cdr args)))
+		`(block ()
+			,@(map binding2gnx bindings)
+			,@(map sexp2expr body))))
+
+(define (binding2gnx b)
+	`(bind () ,(sexp2pattern (car b)) ,(sexp2expr (cadr b))))
+
+;;; args = ( (f params...) body... )
+(define (define2gnx f args)
+	(if (and (pair? args) (pair? (car args)))
+		(let
+			(	(f (caar args))
+				(gf (gnx-var f))
+				(params (gnx-seq (map gnx-var (cdar args))))
+				(body (gnx-seq (map sexp2expr (cdr args)))))
+			`(bind () ,gf (fn ((name ,f)) ,params ,body)))
+		(throw 'basexp (cons f args))))
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;	Quoted
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;;;	mode is passed for consistency, but is not required.
+(define (quote2gnx sexp)
+	(if (pair? sexp)
+		(quote-sexp sexp)
+		(quote-atom sexp)))
+	
+(define (quote-sexp sexp)
+	(if (pair? sexp)
+		`(sysapp ((name newPair)) ,(quote-sexp (car sexp)) ,(quote-sexp (cdr sexp)))
+		(quote-atom sexp)))
 		
 (define (quote-atom sexp)
 	(let ((val `((value ,sexp))))
@@ -95,48 +249,9 @@
 			((null? sexp) '(list ((value empty))))
 			(else (throw 'badsexp sexp)))))
 
-(define (list2gnx sexp)
-	(if (null? sexp) 
-		'(list ((value empty)))
-		(form2gnx (car sexp) (cdr sexp))))
-
-(define (form2gnx f args)
-	(cond
-		((eq? f 'quote) 
-			(quote2gnx (car args)))
-		((eq? f 'quasiquote) 
-			(sexp2gnx (expand-quasiquote (car args))))
-		((eq? f 'begin)
-			(gnx-seq (map sexp2gnx args)))
-		((eq? f 'define) 
-			(define2gnx f args))
-		((eq? f 'if) 
-			`(if () ,@(map sexp2gnx args)))
-		(else 
-			`(app ()
-				,(sexp2gnx f)
-				,(gnx-seq (map sexp2gnx args))))))
-
-;;; args = ( (f params...) body... )
-(define (define2gnx f args)
-	(if (and (pair? args) (pair? (car args)))
-		(let
-			(	(f (caar args))
-				(gf (gnx-var f))
-				(params (gnx-seq (map gnx-var (cdar args))))
-				(body (gnx-seq (map sexp2gnx (cdr args)))))
-			`(bind () ,gf (fn ((name ,f)) ,params ,body)))
-		(throw 'basexp (cons f args))))
-
-(define (quote2gnx sexp)
-	(if (pair? sexp)
-		(quote-sexp sexp)
-		(quote-atom sexp)))
-	
-(define (quote-sexp sexp)
-	(if (pair? sexp)
-		`(sysapp ((name newPair)) ,(quote-sexp (car sexp)) ,(quote-sexp (cdr sexp)))
-		(quote-atom sexp)))
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;	Quasiquoting
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 	
 (define (expand-quasiquote x)
 	(if (pair? x)
@@ -151,6 +266,11 @@
                 	(expand-quasiquote (car x))
                 	(expand-quasiquote (cdr x)))))
       (list 'quote x)))
+      
+      
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;	Utility routines for constructing GNX fragments
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 	
 (define (gnx-seq list)
 	(if (and (pair? list) (null? (cdr list)))
@@ -162,4 +282,7 @@
 
 (define (gnx-var name)
 	`(var ((name ,name))))
+	
+(define (gnx-id name)
+	`(id ((name ,name))))
 	

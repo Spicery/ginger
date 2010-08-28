@@ -72,6 +72,9 @@ AC_CONFIG_FILES([Makefile
                  c/appginger/Makefile
                  c/appginger/cpp/Makefile
                  c/appginger/functests/Makefile
+                 c/lisp2gnx/Makefile
+                 c/lisp2gnx/lsp/Makefile
+                 c/lisp2gnx/functests/Makefile
                  c/common2gnx/Makefile
                  c/common2gnx/cpp/Makefile])
 AC_OUTPUT

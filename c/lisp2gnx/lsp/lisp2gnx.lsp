@@ -226,9 +226,9 @@
 	`(bind () ,(sexp2pattern (car b)) ,(sexp2expr (cadr b))))
 
 ;;; args = ( (f params...) body... )
-(define (define2gnx f args)
+(define (define2gnx _ args)
 	(if (and (pair? args) (pair? (car args)))
-		(let
+		(let*
 			(	(f (caar args))
 				(gf (gnx-var f))
 				(params (gnx-seq (map gnx-var (cdar args))))

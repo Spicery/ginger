@@ -33,7 +33,22 @@ Ref makeSysFn( Plant plant, std::string fn_name, Ref default_value ) {
 	if ( x != NULL ) return x;
 
 	vmiFUNCTION( plant, info.in_arity.count(), info.out_arity.count() );
-	vmiSYS_CALL( plant, info.syscall );	
+	
+	//	We have two different kinds of system functions. Those that are
+	//	implemented as native instructions and those that are implemented
+	//	by hand-written functions.
+	//
+	//	The test that distinguishes them is unsatidfactory because it fails
+	//	to distinguish my stupidity in leaving something out from a genuine choice.
+	//	REFACTOR.
+	//
+	if ( info.syscall != NULL ) {
+		//	Hand-written function.
+		vmiSYS_CALL( plant, info.syscall );	
+	} else {
+		//	Native instruction.
+		vmiOPERATOR( plant, info.functor );
+	}
 	vmiSYS_RETURN( plant );
 	Ref r = vmiENDFUNCTION( plant, false );
 	

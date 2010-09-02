@@ -6,7 +6,7 @@ all:
 check: smoke.pass literals.pass
 
 .tests.pass:
-	java -cp ../../../classes com.steelypip.appginger.functest.FuncTestMain $< 
+	java -cp ../../../classes com.steelypip.appginger.functest.FuncTestMain "../cpp/appginger -B" $< 
 	
 clean:
 	rm -f *.pass

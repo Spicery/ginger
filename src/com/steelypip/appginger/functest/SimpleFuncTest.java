@@ -15,14 +15,16 @@ import java.util.List;
 public class SimpleFuncTest implements FuncTest {
 	
 	private final String title;
+	private final String command;
 	private final String input;
 	private final String expected;
 	private boolean passed = false;
 	private final List< String > reasons = new ArrayList< String >(); 
 	
-	public SimpleFuncTest( String title, String input, String expected ) {
+	public SimpleFuncTest( String title, String command, String input, String expected ) {
 		super();
 		this.title = title;
+		this.command = command;
 		this.input = input;
 		this.expected = expected;
 	}
@@ -41,7 +43,7 @@ public class SimpleFuncTest implements FuncTest {
 
 	public void run() {
 		try {
-			Process p = Runtime.getRuntime().exec( "../cpp/appginger -B" );
+			Process p = Runtime.getRuntime().exec( this.command ); //"../cpp/appginger -B" );
 			
 			OutputStream stdin = p.getOutputStream();
 			InputStream stdout = p.getInputStream();

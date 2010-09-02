@@ -20,7 +20,7 @@ public class GenericInstruction extends Instruction {
 	
 	@Override
 	public void generateBody( PrintWriter output, final int indents ) {
-		final File instFolder = new File( "instructions" );
+		final File instFolder = new File( "instruction_set" );
 		final File instFile = new File( instFolder, this.getName() + "." + this.getType() );
 		try {
 			final BufferedReader r = new BufferedReader( new FileReader( instFile ) );

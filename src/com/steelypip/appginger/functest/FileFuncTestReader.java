@@ -11,12 +11,14 @@ import java.util.List;
 
 public class FileFuncTestReader {
 	
+	private final String command;
 	private final File source;
 	private LineNumberReader reader;
 	
-	public FileFuncTestReader( File source ) throws FileNotFoundException {
+	public FileFuncTestReader( File source, final String command ) throws FileNotFoundException {
 		super();
 		this.source = source;
+		this.command = command;
 		this.reader = new LineNumberReader( new BufferedReader( new FileReader( source ) ) );
 	}
 	
@@ -76,7 +78,7 @@ public class FileFuncTestReader {
 			expected.append( '\n' );
 		}
 		
-		return new SimpleFuncTest( title, input.toString(), expected.toString() );
+		return new SimpleFuncTest( title, this.command, input.toString(), expected.toString() );
 	}
 	
 		

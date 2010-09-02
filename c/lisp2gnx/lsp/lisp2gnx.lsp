@@ -113,11 +113,13 @@
 			(if (not (eq? mode 'expr)) (throw 'define-in-pattern))
 			(define2gnx f args))
 		((eq? f 'if) 
-			`(if () ,@(map sexp2gnx-expr args)))
+			`(if () ,@(map sexp2expr args)))
 		((eq? f 'let)
 			(let2gnx f args))
 		((eq? f 'for)
 			(for2gnx f args))
+		((eq? f 'sysapp)
+			`(sysapp ,(car args) ,@(map (sexp2gnx-mode mode) (cdr args))))
 		((eq? f 'package)
 			(package2gnx f args))
 		((eq? f 'import)
@@ -227,14 +229,19 @@
 
 ;;; args = ( (f params...) body... )
 (define (define2gnx _ args)
-	(if (and (pair? args) (pair? (car args)))
-		(let*
-			(	(f (caar args))
-				(gf (gnx-var f))
-				(params (gnx-seq (map gnx-var (cdar args))))
-				(body (gnx-seq (map sexp2expr (cdr args)))))
-			`(bind () ,gf (fn ((name ,f)) ,params ,body)))
-		(throw 'basexp (cons f args))))
+	(if (pair? args)
+		(if (pair? (car args))
+			(let*
+				(	(f (caar args))
+					(gf (gnx-var f))
+					(params (gnx-seq (map gnx-var (cdar args))))
+					(body (gnx-seq (map sexp2expr (cdr args)))))
+				`(bind () ,gf (fn ((name ,f)) ,params ,body)))
+			(let
+				(	(var (gnx-var (car args)))
+					(value (sexp2expr (cadr args))))
+				`(bind () ,var ,value)))
+		(throw 'basexp (cons 'define args))))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -273,10 +280,15 @@
 			((eq? 'unquote (car x)) 
 				(cadr x))
 			((and (pair? (car x)) (eq? 'unquote-splicing (caar x))) 
-				(list 'append (cadar x) (expand-quasiquote (cdr x))))
+				(list 
+					'sysapp 
+					'((name append)) 
+					(cadar x) 
+					(expand-quasiquote (cdr x))))
 			(else 
 				(list 
-					'cons 
+					'sysapp
+					'((name newPair))
                 	(expand-quasiquote (car x))
                 	(expand-quasiquote (cdr x)))))
       (list 'quote x)))

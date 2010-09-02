@@ -42,7 +42,7 @@ const char * keyName( Ref key ) {
 			case 4: return "Pair";
 			case 5: return "Vector";
 			case 6: return "String";
-			case 7: return "Word";
+			case 7: return "Symbol";
 			case 8: return "Small";
 			case 9: return "Float";
 			case 10: return "Key";

@@ -100,7 +100,10 @@ public:
 	virtual Ref * setUpPC( Ref r );
 	virtual void execute( Ref r ) = 0;
 	virtual const InstructionSet & instructionSet() = 0;
+	
+public:
 	bool getShowCode();
+	bool isGCTrace();
 	
 
 public:

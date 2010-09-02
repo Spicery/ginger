@@ -133,6 +133,18 @@ const char *term_string_cont( Term term ) {
 	return dynamic_cast< StringTermClass * >( term.get() )->charArray();
 }
 
+Term term_new_symbol( const char *str ) {
+	return shared< TermClass >( new StringTermClass( fnc_symbol, str ) );
+}
+
+Term term_new_symbol( const std::string & str ) {
+	return shared< TermClass >( new StringTermClass( fnc_symbol, str.c_str() ) );
+}
+
+const char *term_symbol_cont( Term term ) {
+	return dynamic_cast< StringTermClass * >( term.get() )->charArray();
+}
+
 Term term_new_sysfn( const char *str ) {
 	return shared< TermClass >( new StringTermClass( fnc_sysfn, str ) );
 }

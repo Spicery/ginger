@@ -101,37 +101,47 @@ const char * keyName( Ref key );
 //  probably outweighs any small efficiency loss.
 ////////////////////////////////////////////////////////////////////////
 
+/*
+KEYLESS_KIND 
+	means that it is a simple key for a type of value that does not include 
+	a reference to the key, typically because it does not appear in the heap.
+*/
+
+
 #define KIND_WIDTH				3
 #define KIND_MASK				0x7 << TAGG
 #define IsSimpleKey( r )		( ( ToULong( r ) & TAGG_MASK ) == KEY_TAGG )
 #define KindOfSimpleKey( k )	( ( ToULong( k ) & KIND_MASK ) >> TAGG )
-#define PRIMITIVE_KIND			0
+#define KEYLESS_KIND			0
 #define RECORD_KIND				1
 #define VECTOR_KIND				2
 #define STRING_KIND				3
 #define PAIR_KIND				4
 #define MAP_KIND				5
+#define UNUSED_KIND				6
 #define OTHER_KIND				7
 	
-#define LEN_WIDTH					8
-#define LENGTH_MASK					( 0xFF << KIND_WIDTH << TAGG )
+#define LEN_WIDTH				8
+#define LENGTH_OFFSET 			( KIND_WIDTH + TAGG )
+#define LENGTH_MASK				( 0xFF << LENGTH_OFFSET )
 
 #define SimpleKeyID( k ) 		( ToULong(k) >> LEN_WIDTH >> KIND_WIDTH >> TAGG )
 
 #define MAKE_KEY( id, n, flav )		ToRef( ( ( id << LEN_WIDTH | n ) << KIND_WIDTH | flav ) << TAGG | KEY_TAGG )
-#define sysAbsentKey    		MAKE_KEY( 0, 0, PRIMITIVE_KIND )
-#define sysBoolKey      		MAKE_KEY( 1, 0, PRIMITIVE_KIND )
-#define sysTerminKey    		MAKE_KEY( 2, 0, PRIMITIVE_KIND )
-#define sysNilKey       		MAKE_KEY( 3, 0, PRIMITIVE_KIND )
+#define sysAbsentKey    		MAKE_KEY( 0, 0, KEYLESS_KIND )
+#define sysBoolKey      		MAKE_KEY( 1, 0, KEYLESS_KIND )
+#define sysTerminKey    		MAKE_KEY( 2, 0, KEYLESS_KIND )
+#define sysNilKey       		MAKE_KEY( 3, 0, KEYLESS_KIND )
 #define sysPairKey      		MAKE_KEY( 4, 2, PAIR_KIND )
 #define sysVectorKey    		MAKE_KEY( 5, 0, VECTOR_KIND )
 #define sysStringKey    		MAKE_KEY( 6, 0, STRING_KIND )
-#define sysWordKey      		MAKE_KEY( 7, 0, OTHER_KIND )
-#define sysSmallKey				MAKE_KEY( 8, 0, PRIMITIVE_KIND )
-#define sysFloatKey				MAKE_KEY( 9, 0, OTHER_KIND )
+#define sysSymbolKey      		MAKE_KEY( 7, 1, KEYLESS_KIND )
+#define sysSmallKey				MAKE_KEY( 8, 0, KEYLESS_KIND )
+#define sysFloatKey				MAKE_KEY( 9, 0, KEYLESS_KIND )
+//	the key-key is just a placeholder at present.
 #define sysKeyKey				MAKE_KEY( 10, 0, OTHER_KIND )
-#define sysUnicodeKey			MAKE_KEY( 11, 0, PRIMITIVE_KIND )
-#define sysCharKey				MAKE_KEY( 12, 0, PRIMITIVE_KIND )
+#define sysUnicodeKey			MAKE_KEY( 11, 0, KEYLESS_KIND )
+#define sysCharKey				MAKE_KEY( 12, 0, KEYLESS_KIND )
 #define sysMapletKey			MAKE_KEY( 13, 2, RECORD_KIND )
 #define sysMapKey				MAKE_KEY( 14, 2, MAP_KIND )
 #define sysMapEntryKey			MAKE_KEY( 15, 3, RECORD_KIND )
@@ -142,6 +152,7 @@ const char * keyName( Ref key );
 #define IsMap( x ) 				( IsObj( x ) && ( *RefToPtr4( x ) == sysMapKey ) )
 #define IsMaplet( x ) 			( IsObj( x ) && ( *RefToPtr4( x ) == sysMapletKey ) )
 #define IsMapEntry( x ) 		( IsObj( x ) && ( *RefToPtr4( x ) == sysMapEntry ) )
+#define IsString( x )			( IsObj( x ) && ( *RefToPtr4( x ) == sysStringKey ) )
 
 #define IsVectorKind( x )		( IsObj( x ) && KindOfSimpleKey( *RefToPtr4( x ) ) == VECTOR_KIND )
 #define IsRecordKind( x )		( IsObj( x ) && KindOfSimpleKey( *RefToPtr4( x ) ) == RECORD_KIND )
@@ -160,7 +171,7 @@ const char * keyName( Ref key );
 #define RGB_TAGGG   	( 1 << TAGG | ESC_TAGG )
 #define CHAR_TAGGG   	( 2 << TAGG | ESC_TAGG )
 #define FUNC_LEN_TAGGG  ( 3 << TAGG | ESC_TAGG )
-#define UNUSED4_TAGGG   ( 4 << TAGG | ESC_TAGG )
+#define SYMBOL_TAGGG   	( 4 << TAGG | ESC_TAGG )
 #define UNUSED5_TAGGG   ( 5 << TAGG | ESC_TAGG )
 #define UNUSED6_TAGGG   ( 6 << TAGG | ESC_TAGG )
 #define UNUSED7_TAGGG   ( 7 << TAGG | ESC_TAGG )
@@ -172,6 +183,7 @@ const char * keyName( Ref key );
 	( (char)( ToULong(r) >> TAGGG ) )
 	
 #define IsFnLength( k )	( ( ToULong(k) & TAGGG_MASK ) == FUNC_LEN_TAGGG )
+#define IsSymbol( k )	( ( ToULong(k) & TAGGG_MASK ) == SYMBOL_TAGGG )
 
 
 ////////////////////////////////////////////////////////////////////////

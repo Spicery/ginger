@@ -8,7 +8,8 @@ OBJS=mishap.o term.o read_xml.o \
 	functor.o plant.o cage.o vmi.o \
 	rcep.o arity.o lift.o ident.o \
 	dict.o package.o \
-	sys.o syskey.o sysequals.o sysprint.o syslist.o sysvector.o sysstring.o sysmap.o \
+	sys.o syskey.o sysequals.o sysprint.o syslist.o sysvector.o sysstring.o \
+	syssymbol.o sysmap.o \
 	destination.o heap.o \
 	key.o objlayout.o listlayout.o stringlayout.o maplayout.o vectorlayout.o \
 	heapcrawl.o cagecrawl.o callstackcrawl.o fnobjcrawl.o \

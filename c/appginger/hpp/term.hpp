@@ -633,6 +633,10 @@ Term term_new_string( const char *name );
 Term term_new_string( const std::string & s );
 const char *term_string_cont( Term term );
 
+Term term_new_symbol( const char *name );
+Term term_new_symbol( const std::string & s );
+const char *term_symbol_cont( Term term );
+
 Term term_new_sysfn( const char *name );
 Term term_new_sysfn( const std::string & s );
 const char *term_sysfn_cont( Term term );

@@ -15,50 +15,18 @@
     You should have received a copy of the GNU General Public License
     along with AppGinger.  If not, see <http://www.gnu.org/licenses/>.
 \******************************************************************************/
-
-#ifndef SYS_HPP
-#define SYS_HPP
-
-#include <map>
-#include <iostream>
+#ifndef SYS_SYMBOL_HPP
+#define SYS_SYMBOL_HPP
 
 #include "common.hpp"
-#include "arity.hpp"
+#include "machine.hpp"
+#include <string>
 
-#define STANDARD_LIBRARY "std"
-
-class MachineClass;
-
-extern Ref * sysExplode( Ref *pc, class MachineClass * vm );
-extern Ref * sysLength( Ref *pc, class MachineClass * vm );
-extern Ref * sysHash( Ref *pc, class MachineClass * vm );
-extern Ref * sysAppend( Ref *pc, class MachineClass * vm );
-extern Ref * sysFastGetFastIterator( Ref * pc, class MachineClass * vm );
-
-#include "datatypes.hpp.auto"
-
-struct SysInfo { 
-	Functor functor; 
-	Arity in_arity;
-	Arity out_arity; 
-	SysCall * syscall; 
-	const char * docstring;
-	Ref coreFunctionObject;
-	
-	SysInfo( Functor f, Arity in, Arity out, SysCall * s, const char * ds ) :
-		functor( f ),
-		in_arity( in ),
-		out_arity( out ),
-		syscall( s ),
-		docstring( ds ),
-		coreFunctionObject( NULL )
-	{
-	}
-	
-	
-};
-typedef std::map< std::string, SysInfo > SysMap;
-extern SysMap sysMap;
+extern void preGCSymbolTable( const bool gctrace );
+extern void postGCSymbolTable( const bool gctrace );
+extern void gcTouchSymbol( Ref r );
+extern Ref * sysMakeSymbol( Ref *pc, MachineClass * vm );
+extern const std::string & symbolToStdString( Ref r );
+extern Ref refMakeSymbol( const std::string & );
 
 #endif
-

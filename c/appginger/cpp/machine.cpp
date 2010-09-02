@@ -62,6 +62,10 @@ bool MachineClass::getShowCode() {
 	return this->appg.getShowCode();
 }
 
+bool MachineClass::isGCTrace() {
+	return this->appg.isGCTrace();
+}
+
 void MachineClass::resetMachine() {
 	this->plant_aptr.reset( new PlantClass( this ) );
 }
@@ -70,9 +74,6 @@ PlantClass * MachineClass::plant() {
 	return this->plant_aptr.get();
 }
 
-/*DictClass * MachineClass::dict() {
-	return this->dict_aptr.get();
-}*/
 
 HeapClass & MachineClass::heap() {
 	return *this->heap_aptr.get();

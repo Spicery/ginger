@@ -322,6 +322,8 @@ Term TermData::makeTerm() {
 			return term_new_char( t[ 0 ] );
 		} else if ( name == "string" ) {
 			return term_new_string( this->attrs[ "value" ] );
+		} else if ( name == "symbol" ) {
+			return term_new_symbol( this->attrs[ "value" ] );
 		} else if ( name == "absent" ) {
 			return term_new_absent();
 		} else if ( name == "list" ) {

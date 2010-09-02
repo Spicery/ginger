@@ -198,7 +198,7 @@ unsigned long refHash( Ref r ) {
 						e.add( obj_K1[ n - 1 ] );						
 					}
 					return e.hash();
-				}				
+				}
 				default: {
 					return 0;
 				}

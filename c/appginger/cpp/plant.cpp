@@ -32,6 +32,7 @@
 #include "objlayout.hpp"
 #include "sys.hpp"
 #include "dict.hpp"
+#include "syssymbol.hpp"
 
 #ifndef NULL
 #define NULL 0
@@ -323,6 +324,10 @@ void PlantClass::compileTerm( Term term ) {
 					term_string_cont( term )
 				)
 			);
+			break;
+		}
+		case fnc_symbol: {
+			vmiPUSHQ( this, refMakeSymbol( term_symbol_cont( term ) ) );
 			break;
 		}
         case fnc_eq:

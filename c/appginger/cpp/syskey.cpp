@@ -34,6 +34,7 @@ Ref refKey( Ref r ) {
 	if ( tagg == KEY_TAGG ) return sysKeyKey;
 	taggg = u & TAGGG_MASK;
 	if ( taggg == CHAR_TAGGG ) return sysCharKey;
+	if ( taggg == SYMBOL_TAGGG ) return sysSymbolKey;
 	if ( taggg == MISC_TAGGG ) {
 		if ( r == sys_nil ) {
 			return sysNilKey; 

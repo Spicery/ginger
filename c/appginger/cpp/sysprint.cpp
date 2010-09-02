@@ -21,6 +21,8 @@
 #include "objlayout.hpp"
 #include "mishap.hpp"
 #include "sysmap.hpp"
+#include "syssymbol.hpp"
+#include <string>
 
 
 void refPrint( Ref r ) {
@@ -123,6 +125,8 @@ void refPrint( std::ostream & out, Ref r ) {
 			out << "absent";
 		} else if ( k == sysCharKey ) {
 			out << CharacterToChar( r );
+		} else if ( k == sysSymbolKey ) {
+			out << symbolToStdString( r );
 		} else if ( k == sysNilKey ) {
 			refListPrint( out, r );
 		} else if ( k == sysVectorKey ) {

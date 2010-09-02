@@ -30,6 +30,7 @@
 #include "appginger.hpp"
 #include "term.hpp"
 #include "mishap.hpp"
+#include "sys.hpp"
 #include "machine1.hpp"
 #include "machine2.hpp"
 #include "machine3.hpp"
@@ -52,6 +53,7 @@ static struct option long_options[] =
 		{ "batch",			no_argument,			0, 'B' },
         { "help", 			optional_argument, 		0, 'h' },
         { "machine",		required_argument, 		0, 'm' },
+        { "std",			no_argument,			0, 's' },
         { "version", 		no_argument, 			0, 'v' },
         { "debug",			required_argument,		0, 'd' },
         { "license",		optional_argument,		0, 'l' },
@@ -80,7 +82,7 @@ int main( int argc, char **argv, char **envp ) {
 
     for(;;) {
         int option_index = 0;
-        int c = getopt_long( argc, argv, "CIBhm:vd:l", long_options, &option_index );
+        int c = getopt_long( argc, argv, "CIBhm:vd:ls", long_options, &option_index );
         if ( c == -1 ) break;
         switch ( c ) {
 			case 'C': {
@@ -101,6 +103,8 @@ int main( int argc, char **argv, char **envp ) {
 					appg.setShowCode();
 				} else if ( std::string( optarg ) == std::string( "notrap" ) ) {
 					appg.setTrappingMishap( false );
+				} else if ( std::string( optarg ) == std::string( "gctrace" ) ) {
+					appg.setGCTrace( true );
 				} else {
 					std::cerr << "Invalid debug option: " << optarg << std::endl;
 					exit( EXIT_FAILURE );
@@ -121,6 +125,7 @@ int main( int argc, char **argv, char **envp ) {
 					printf( "-d, --debug           add debug option (see --help=debug)\n" );
 					printf( "-h, --help            print out this help info\n" );
 					printf( "-m<n>                 run using machine #n\n" );
+					printf( "-s, --std             print out variables in std\n" );
 					printf( "-v, --version         print out version information and exit\n" );
 					printf( "-l, --license         print out license information and exit\n" );
 					printf( "\n" );
@@ -161,6 +166,25 @@ int main( int argc, char **argv, char **envp ) {
             		exit( EXIT_FAILURE );
             	}
                 exit( EXIT_SUCCESS );   //  Is that right?            	
+            }
+            case 's': {
+            	for (
+            		SysMap::iterator it = sysMap.begin();
+            		it != sysMap.end();
+            		++it
+            	) {
+            		std::cout << it->first;
+            		for ( int i = it->first.size(); i < 15; i++ ) {
+            			std::cout << " ";
+            		}
+            		std::cout << "\t";
+            		if ( it->second.docstring != NULL ) {
+	            		std::cout << it->second.docstring << std::endl;
+	            	} else {
+	            		std::cout << "-" << std::endl;
+	            	}
+            	}
+                exit( EXIT_SUCCESS );   //  Is that right?
             }
             case '?': {
                 break;

@@ -32,6 +32,7 @@ using namespace std;
 #include "fnobjcrawl.hpp"
 #include "package.hpp"
 #include "mishap.hpp"
+#include "syssymbol.hpp"
 
 #define DBG_GC_LOG
 
@@ -390,19 +391,24 @@ private:
 public:	
 	void forward( Ref & current ) {
 		gclogger.atRef( current );
-		if ( not IsObj( current ) ) return;
-		Ref * obj = RefToPtr4( current );
-		if ( IsCoreFunctionKey( *obj ) ) return;
-		if ( IsFwd( *obj ) ) {
-			//	Already forwarded.
-			//	Pick up the to-space address.
-			current = Ptr4ToRef( FwdToPtr4( *obj ) );
+		if ( not IsObj( current ) ) {
+			if ( IsSymbol( current ) ) {
+				gcTouchSymbol( current );
+			}
 		} else {
-			Ref * half_copied_obj  = copier.copy( obj );
-			current = Ptr4ToRef( half_copied_obj );
-			
-			//	We stomp on the key with a forwarded value.
-			*obj = Ptr4ToFwd( half_copied_obj );
+			Ref * obj = RefToPtr4( current );
+			if ( IsCoreFunctionKey( *obj ) ) return;
+			if ( IsFwd( *obj ) ) {
+				//	Already forwarded.
+				//	Pick up the to-space address.
+				current = Ptr4ToRef( FwdToPtr4( *obj ) );
+			} else {
+				Ref * half_copied_obj  = copier.copy( obj );
+				current = Ptr4ToRef( half_copied_obj );
+				
+				//	We stomp on the key with a forwarded value.
+				*obj = Ptr4ToFwd( half_copied_obj );
+			}
 		}
 	}
 
@@ -521,7 +527,7 @@ public:
 					gclogger.atString( obj_K );
 					//	Non-full. Can stop.
 					break;
-				}				
+				}
 				default: {
 					throw "unimplemented (other)";
 				}
@@ -537,9 +543,12 @@ public:
 
 	
 	void collectGarbage() {
-		cerr << "### Garbage collection " << ( this->scan_call_stack ? "" : " (quiescent)" ) << endl;
+		if ( this->vm->isGCTrace() ) {
+			cerr << "### Garbage collection " << ( this->scan_call_stack ? "" : " (quiescent)" ) << endl;	
+		}
 		this->vm->check_call_stack_integrity();		//	debug
 		gclogger.startGarbageCollection();
+		preGCSymbolTable( this->vm->isGCTrace() );
 		this->forwardRoots( scan_call_stack );
 		for (;;) {
 			Ref * obj = copier.next();
@@ -547,6 +556,7 @@ public:
 			if ( not obj ) break;
 			this->forwardContents( obj );
 		}
+		postGCSymbolTable( this->vm->isGCTrace() );
 		gclogger.endGarbageCollection();
 		this->vm->check_call_stack_integrity();		//	debug
 	}

@@ -23,7 +23,7 @@
 #include "mishap.hpp"
 
 unsigned long sizeAfterKeyOfRecord( Ref * key ) {
-	return ( ToULong( *key ) & LENGTH_MASK ) >> KIND_WIDTH >> TAGG;
+	return ( ToULong( *key ) & LENGTH_MASK ) >> LENGTH_OFFSET;
 }
 
 unsigned long lengthOfRecord( Ref * key ) {

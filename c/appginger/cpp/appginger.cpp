@@ -136,6 +136,7 @@ int main( int argc, char **argv, char **envp ) {
 				} else if ( std::string( optarg ) == "debug" ) {
 					cout << "--debug=showcode      Causes the generated instructions to be displayed." << endl;
 					cout << "--debug=notrap        Prevents mishaps being caught, for use with gdb." << endl;
+					cout << "--debug=gctrace       Causes the garbage collector to emit debugging statistics." << endl;
 				} else if ( std::string( optarg ) == "license" ) {
 					cout << "Displays key sections of the GNU Public License." << endl;
 					cout << "--license=warranty    Shows warranty." << endl;

@@ -21,6 +21,7 @@
 			(exit)
 			(begin
 				(gnx2output (sexp2expr sexp))
+				(force-output)
 				(run)))))
 				
 				

@@ -53,7 +53,6 @@ static struct option long_options[] =
 		{ "batch",			no_argument,			0, 'B' },
         { "help", 			optional_argument, 		0, 'h' },
         { "machine",		required_argument, 		0, 'm' },
-        { "std",			no_argument,			0, 's' },
         { "version", 		no_argument, 			0, 'v' },
         { "debug",			required_argument,		0, 'd' },
         { "license",		optional_argument,		0, 'l' },
@@ -82,7 +81,7 @@ int main( int argc, char **argv, char **envp ) {
 
     for(;;) {
         int option_index = 0;
-        int c = getopt_long( argc, argv, "CIBhm:vd:ls", long_options, &option_index );
+        int c = getopt_long( argc, argv, "CIBhm:vd:l", long_options, &option_index );
         if ( c == -1 ) break;
         switch ( c ) {
 			case 'C': {
@@ -123,9 +122,8 @@ int main( int argc, char **argv, char **envp ) {
 					printf( "-I, --interactive     run interactively\n" );
 					printf( "-T, --terminate       stop on mishap\n" );
 					printf( "-d, --debug           add debug option (see --help=debug)\n" );
-					printf( "-h, --help            print out this help info\n" );
+					printf( "-h, --help            print out this help info (see --help=help)\n" );
 					printf( "-m<n>                 run using machine #n\n" );
-					printf( "-s, --std             print out variables in std\n" );
 					printf( "-v, --version         print out version information and exit\n" );
 					printf( "-l, --license         print out license information and exit\n" );
 					printf( "\n" );
@@ -133,6 +131,7 @@ int main( int argc, char **argv, char **envp ) {
 					cout << "--help=debug          help on the debugging options available" << endl;
 					cout << "--help=help           this short help" << endl;
 					cout << "--help=licence        help on displaying license information" << endl;
+					cout << "--help=std            print out variables in std" << endl;
 				} else if ( std::string( optarg ) == "debug" ) {
 					cout << "--debug=showcode      Causes the generated instructions to be displayed." << endl;
 					cout << "--debug=notrap        Prevents mishaps being caught, for use with gdb." << endl;
@@ -141,6 +140,23 @@ int main( int argc, char **argv, char **envp ) {
 					cout << "Displays key sections of the GNU Public License." << endl;
 					cout << "--license=warranty    Shows warranty." << endl;
 					cout << "--license=conditions  Shows terms and conditions." << endl;
+            	} else if ( std::string( optarg ) == std::string( "std" ) ) {
+					for (
+						SysMap::iterator it = sysMap.begin();
+						it != sysMap.end();
+						++it
+					) {
+						std::cout << it->first;
+						for ( int i = it->first.size(); i < 15; i++ ) {
+							std::cout << " ";
+						}
+						std::cout << "\t";
+						if ( it->second.docstring != NULL ) {
+							std::cout << it->second.docstring << std::endl;
+						} else {
+							std::cout << "-" << std::endl;
+						}
+					}
                 } else {
                 	printf( "Unknown help topic %s\n", optarg );
                 }
@@ -167,25 +183,6 @@ int main( int argc, char **argv, char **envp ) {
             		exit( EXIT_FAILURE );
             	}
                 exit( EXIT_SUCCESS );   //  Is that right?            	
-            }
-            case 's': {
-            	for (
-            		SysMap::iterator it = sysMap.begin();
-            		it != sysMap.end();
-            		++it
-            	) {
-            		std::cout << it->first;
-            		for ( int i = it->first.size(); i < 15; i++ ) {
-            			std::cout << " ";
-            		}
-            		std::cout << "\t";
-            		if ( it->second.docstring != NULL ) {
-	            		std::cout << it->second.docstring << std::endl;
-	            	} else {
-	            		std::cout << "-" << std::endl;
-	            	}
-            	}
-                exit( EXIT_SUCCESS );   //  Is that right?
             }
             case '?': {
                 break;

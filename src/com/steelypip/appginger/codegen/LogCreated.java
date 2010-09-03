@@ -12,6 +12,10 @@ public class LogCreated {
 	final Map< String, SysInfo > mapping = new HashMap< String, SysInfo >();
 	
 	public void addSysConst( final String ginger_name, final Arity in_arity, final Arity out_arity, final String internal_name ) {
+		this.addSysConst( ginger_name, in_arity, out_arity, internal_name, null );
+	}
+
+	public void addSysConst( final String ginger_name, final Arity in_arity, final Arity out_arity, final String internal_name ) {
 		final SysInfo nm = this.mapping.get( ginger_name );
 		if ( nm == null ) {
 			this.mapping.put( ginger_name, new SysInfo( internal_name, in_arity, out_arity ) );
@@ -37,7 +41,7 @@ public class LogCreated {
 		for ( String ginger_name : mapping.keySet() ) {
 			SysInfo p = this.mapping.get( ginger_name );
 			inc.format( 
-				"SysMap::value_type( \"%s\", SysInfo( fnc_syscall, %s, %s, %s ) ),\n",
+				"SysMap::value_type( \"%s\", SysInfo( fnc_syscall, %s, %s, %s, NULL ) ),\n",
 				ginger_name,
 				p.getInArity(),
 				p.getOutArity(),

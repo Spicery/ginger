@@ -31,6 +31,14 @@ public class FolderFuncTest implements FuncTest {
 		return tname;
 	}
 
+	public String getKnownDefect() {
+		return null;
+	}
+
+	public boolean hasKnownDefect() {
+		return false;
+	}
+
 	public boolean passed() {
 		return this.pass;
 	}

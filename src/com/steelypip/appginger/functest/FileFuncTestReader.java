@@ -45,6 +45,7 @@ public class FileFuncTestReader {
 		
 		//	Read introduction.
 		String title = null;
+		String known_defect = null;
 		int nlines = this.reader.getLineNumber();
 		for ( String line = this.reader.readLine(); line != null; line = this.reader.readLine() ) {
 			if ( isMinorSeparator( line ) ) break;
@@ -55,6 +56,8 @@ public class FileFuncTestReader {
 				final String value = line.substring( split + 1 );
 				if ( key.compareToIgnoreCase( "title" ) == 0 ) {
 					title = value;
+				} else if ( key.compareToIgnoreCase( "known" ) == 0 ) {
+					known_defect = value;
 				}
 			}
  		}
@@ -78,7 +81,7 @@ public class FileFuncTestReader {
 			expected.append( '\n' );
 		}
 		
-		return new SimpleFuncTest( title, this.command, input.toString(), expected.toString() );
+		return new SimpleFuncTest( title, known_defect, this.command, input.toString(), expected.toString() );
 	}
 	
 		

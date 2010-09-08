@@ -57,13 +57,19 @@ public class FuncTestMain {
 		List< FuncTest > tests = this.tests( new File( fname ), command );
 		List< FuncTest > failed = new ArrayList< FuncTest >();
 		int npasses = 0;
+		int nknown = 0;
 		int nfails = 0;
 		for ( FuncTest ft : tests ) {
 			ft.run();
 			if ( ft.passed() ) {
 				npasses += 1;
 			} else {
-				nfails += 1;
+				if ( ft.getKnownDefect() != null ) {
+					nknown += 1;
+				} else {
+					nfails += 1;	
+				}
+				
 				failed.add(  ft );
 			}
 		}
@@ -72,7 +78,7 @@ public class FuncTestMain {
 		} else {
 			needNewLine = true;
 		}
-		System.out.format( "TEST SUMMARY for %s\n\t%s/%s, %s failures\n", fname, npasses, npasses+nfails, nfails );
+		System.out.format( "TEST SUMMARY for %s\n\t%s/%s\n\t%s known defects\n\t%s failures\n", fname, npasses, npasses+nfails, nknown, nfails );
 		for ( FuncTest fail : failed ) {
 			System.out.format( "Test '%s' failed\n", fail.name() );
 			for ( String r : fail.reasons() ) {

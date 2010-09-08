@@ -15,15 +15,17 @@ import java.util.List;
 public class SimpleFuncTest implements FuncTest {
 	
 	private final String title;
+	private final String known_defect;
 	private final String command;
 	private final String input;
 	private final String expected;
 	private boolean passed = false;
 	private final List< String > reasons = new ArrayList< String >(); 
 	
-	public SimpleFuncTest( String title, String command, String input, String expected ) {
+	public SimpleFuncTest( String title, String known_defect, String command, String input, String expected ) {
 		super();
 		this.title = title;
+		this.known_defect = known_defect;
 		this.command = command;
 		this.input = input;
 		this.expected = expected;
@@ -31,6 +33,14 @@ public class SimpleFuncTest implements FuncTest {
 
 	public String name() {
 		return title;
+	}
+	
+	public boolean hasKnownDefect() {
+		return this.known_defect != null;
+	}
+	
+	public String getKnownDefect() {
+		return this.known_defect;
 	}
 
 	public boolean passed() {

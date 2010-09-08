@@ -15,10 +15,10 @@ public class LogCreated {
 		this.addSysConst( ginger_name, in_arity, out_arity, internal_name, null );
 	}
 
-	public void addSysConst( final String ginger_name, final Arity in_arity, final Arity out_arity, final String internal_name ) {
+	public void addSysConst( final String ginger_name, final Arity in_arity, final Arity out_arity, final String internal_name, final String doc_string ) {
 		final SysInfo nm = this.mapping.get( ginger_name );
 		if ( nm == null ) {
-			this.mapping.put( ginger_name, new SysInfo( internal_name, in_arity, out_arity ) );
+			this.mapping.put( ginger_name, new SysInfo( internal_name, in_arity, out_arity, doc_string ) );
 		} else { 
 			throw new RuntimeException( "Repeated name" );
 		}

@@ -84,8 +84,8 @@ void SaxClass::readAttributeValue( std::string & attr ) {
 			while ( ch = this->nextChar(), ch != ';' ) {
 				//std::cout << "char " << ch << endl;
 				esc.push_back( ch );
-				if ( esc.size() > 3 ) {
-					throw;
+				if ( esc.size() > 4 ) {
+					throw Mishap( "Malformed escape" );
 				}
 			}
 			if ( esc == "lt" ) {
@@ -94,6 +94,10 @@ void SaxClass::readAttributeValue( std::string & attr ) {
 				attr.push_back( '>' );
 			} else if ( esc == "amp" ) {
 				attr.push_back( '&' );
+			} else if ( esc == "quot" ) {
+				attr.push_back( '"' );
+			} else if ( esc == "apos" ) {
+				attr.push_back( '\'' );
 			} else {
 				throw;
 			}

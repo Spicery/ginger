@@ -10,6 +10,7 @@ OBJS=mishap.o term.o read_xml.o \
 	dict.o package.o \
 	sys.o syskey.o sysequals.o sysprint.o syslist.o sysvector.o sysstring.o \
 	syssymbol.o sysmap.o \
+	sysfunction.o \
 	destination.o heap.o \
 	key.o objlayout.o listlayout.o stringlayout.o maplayout.o vectorlayout.o \
 	heapcrawl.o cagecrawl.o callstackcrawl.o fnobjcrawl.o \

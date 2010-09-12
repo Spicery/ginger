@@ -168,7 +168,7 @@ int main( int argc, char **argv, char **envp ) {
             	break;
             }
             case 'v': {
-            	cout << "appginger: version " << appg.version() << endl;
+            	cout << "appginger: version " << appg.version() << " (" << __TIMESTAMP__ << ")" << endl;
                 exit( EXIT_SUCCESS );   //  Is that right?
             }
             case 'l': {

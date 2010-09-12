@@ -3,70 +3,74 @@ package com.steelypip.appginger.codegen;
 public abstract class GeneralInstructionSet {
 
 
-	public Instruction _add_i() {
+	public Instruction add_i() {
 		return new GenericInstruction();
 	}
 
 
-	public Instruction _decr_i() {
+	public Instruction decr_i() {
 		return new GenericInstruction();
 	}
 
 
-	public Instruction _div_i() {
+	public Instruction div_i() {
 		return new GenericInstruction();
 	}
 
 
-	public Instruction _eq_i() {
+	public Instruction eq_i() {
 		return new GenericInstruction();
 	}
 
-	public Instruction _neq_i() {
-		return new GenericInstruction();
-	}
-
-
-	public Instruction _gt_i() {
+	public Instruction neq_i() {
 		return new GenericInstruction();
 	}
 
 
-	public Instruction _gte_i() {
+	public Instruction gt_i() {
 		return new GenericInstruction();
 	}
 
 
-	public Instruction _incr_by_ir() {
+	public Instruction gte_i() {
 		return new GenericInstruction();
 	}
 
 
-	public Instruction _incr_i() {
+	public Instruction incr_by_ir() {
 		return new GenericInstruction();
 	}
 
 
-	public Instruction _lt_i() {
+	public Instruction incr_i() {
 		return new GenericInstruction();
 	}
 
 
-	public Instruction _lte_i() {
+	public Instruction lt_i() {
 		return new GenericInstruction();
 	}
 
 
-	public Instruction _mul_i() {
+	public Instruction lte_i() {
 		return new GenericInstruction();
 	}
 
-	public Instruction _sub_i() {
+
+	public Instruction mul_i() {
+		return new GenericInstruction();
+	}
+
+	public Instruction sub_i() {
 		return new GenericInstruction();
 	}
 
 
 	public Instruction calls_i() {
+		return new GenericInstruction();
+	}
+	
+	public Instruction chainlite_icr() {
 		return new GenericInstruction();
 	}
 

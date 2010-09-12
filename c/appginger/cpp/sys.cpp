@@ -39,6 +39,7 @@
 #include "syskey.hpp"
 #include "sysequals.hpp"
 #include "sysprint.hpp"
+#include "sysfunction.hpp"
 
 //#define DBG_SYS
 
@@ -51,7 +52,7 @@ Ref * sysFastGetFastIterator( Ref * pc, class MachineClass * vm ) {
 	Ref r = vm->fastPop();
 	vm->checkStackRoom( 3 );
 	if ( IsObj( r ) ) {
-		Ref * obj_K = ObjToPtr4( r );
+		Ref * obj_K = RefToPtr4( r );
 		Ref key = *obj_K;
 		if ( IsSimpleKey( key ) ) {
 			switch ( KindOfSimpleKey( key ) ) {
@@ -125,8 +126,8 @@ Ref * sysAppend( Ref * pc, class MachineClass * vm ) {
 		Ref rhs = vm->fastPeek();
 		Ref lhs = vm->fastPeek( 1 );
 		if ( IsObj( lhs ) && IsObj( rhs ) ) {
-			Ref * lhs_K = ObjToPtr4( lhs );
-			Ref * rhs_K = ObjToPtr4( rhs );
+			Ref * lhs_K = RefToPtr4( lhs );
+			Ref * rhs_K = RefToPtr4( rhs );
 			Ref lhs_key = *lhs_K;
 			Ref rhs_key = *rhs_K;
 			if ( lhs_key == rhs_key ) {	
@@ -156,7 +157,7 @@ Ref * sysExplode( Ref *pc, class MachineClass * vm ) {
 	if ( vm->count == 1 ) {
 		Ref r = vm->fastPeek();
 		if ( IsObj( r ) ) {
-			Ref * obj_K = ObjToPtr4( r );
+			Ref * obj_K = RefToPtr4( r );
 			Ref key = *obj_K;
 			if ( IsFunctionKey( key ) ) {
 				throw Mishap( "Trying to explode (...) a function object" );
@@ -211,7 +212,7 @@ Ref * sysLength( Ref *pc, class MachineClass * vm ) {
 	if ( vm->count == 1 ) {
 		Ref r = vm->fastPeek();
 		if ( IsObj( r ) ) {
-			Ref * obj_K = ObjToPtr4( r );
+			Ref * obj_K = RefToPtr4( r );
 			Ref key = *obj_K;
 			if ( IsFunctionKey( key ) ) {
 				throw Mishap( "Trying to explode (...) a function object" );
@@ -295,6 +296,9 @@ const SysMap::value_type rawData[] = {
 	SysMap::value_type( "newList", SysInfo( fnc_syscall, Arity( 0, true ), Arity( 1 ), sysNewList, "Builds a list from the arguments" ) ),
 	SysMap::value_type( "newListOnto", SysInfo( fnc_syscall, Arity( 1, true ), Arity( 1 ), sysNewListOnto, "Builds a list from the first N-1 args and appends that to the last argument" ) ),
 	SysMap::value_type( "newMap", SysInfo( fnc_syscall, Arity( 0, true ), Arity( 1 ), sysNewMap, "Builds a new map from maps and maplets" ) ),
+	SysMap::value_type( "partApply", SysInfo( fnc_syscall, Arity( 1, true ), Arity( 1 ), sysPartApply, "Freezes arguments and a function together to make a new function" ) ),
+	SysMap::value_type( "functionInArity", SysInfo( fnc_syscall, Arity( 1  ), Arity( 1 ), sysFunctionInArity, "Input arity of a function" ) ),
+	SysMap::value_type( "functionOutArity", SysInfo( fnc_syscall, Arity( 1  ), Arity( 1 ), sysFunctionOutArity, "Output arity of a function" ) ),
 	#include "sysmap.inc.auto"
 };
 const int numElems = sizeof rawData / sizeof rawData[0];

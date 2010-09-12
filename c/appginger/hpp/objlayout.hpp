@@ -35,6 +35,7 @@
 \******************************************************************************/
 
 #include "common.hpp"
+#include "functionlayout.hpp"
 
 ////////////////////////////////////////////////////////////////////////////////
 //	Generic layout parameters
@@ -67,19 +68,6 @@ unsigned long sizeAfterKeyOfVector( Ref * key );
 unsigned long sizeAfterKeyOfString( Ref * key );
 unsigned long lengthOfString( Ref * key );
 
-
-
-////////////////////////////////////////////////////////////////////////////////
-//	Function Objects
-////////////////////////////////////////////////////////////////////////////////
-
-// field before the function key.
-#define OFFSET_TO_NSLOTS_FROM_PC			-2
-#define OFFSET_TO_NSLOTS_TO_KEY				1
-
-#define OFFSET_FROM_FN_LENGTH_TO_KEY		4
-
-unsigned long sizeAfterKeyOfFn( Ref * key );
 
 ////////////////////////////////////////////////////////////////////////////////
 //	Objects

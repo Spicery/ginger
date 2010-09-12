@@ -21,29 +21,29 @@
 #include "key.hpp"
 
 Ref & fastMapData( Ref r ) {
-	return ObjToPtr4( r )[ MAP_DATA_OFFSET ];
+	return RefToPtr4( r )[ MAP_DATA_OFFSET ];
 }
 
 Ref & fastMapCount( Ref r ) {
-	return ObjToPtr4( r )[ MAP_COUNT_OFFSET ];
+	return RefToPtr4( r )[ MAP_COUNT_OFFSET ];
 }
 
 Ref & fastMapletKey( Ref r ) {
-	return ObjToPtr4( r )[ MAPLET_KEY_OFFSET ];
+	return RefToPtr4( r )[ MAPLET_KEY_OFFSET ];
 }
 
 Ref & fastMapletValue( Ref r ) {
-	return ObjToPtr4( r )[ MAPLET_VALUE_OFFSET ];
+	return RefToPtr4( r )[ MAPLET_VALUE_OFFSET ];
 }
 
 Ref & fastMapEntryKey( Ref r ) {
-	return ObjToPtr4( r )[ BUCKET_KEY_OFFSET ];
+	return RefToPtr4( r )[ BUCKET_KEY_OFFSET ];
 }
 
 Ref & fastMapEntryValue( Ref r ) {
-	return ObjToPtr4( r )[ BUCKET_VALUE_OFFSET ];
+	return RefToPtr4( r )[ BUCKET_VALUE_OFFSET ];
 }
 
 Ref & fastMapEntryNext( Ref r ) {
-	return ObjToPtr4( r )[ BUCKET_NEXT_OFFSET ];
+	return RefToPtr4( r )[ BUCKET_NEXT_OFFSET ];
 }

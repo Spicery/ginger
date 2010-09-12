@@ -1,0 +1,10 @@
+Ref * fn_K = RefToPtr4( pc[ 1 ] );
+VMCOUNT += ToLong( pc[2] );
+
+//	Leave VMLINK & VMLINKFUNC alone.
+//	The lite function has not stashed them into the callstack.
+//	As a consequence we can chain directly without meddling with
+//	them.
+
+VMPCFUNC = fn_K;
+RETURN( fn_K + 1 );

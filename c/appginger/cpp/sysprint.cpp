@@ -79,10 +79,10 @@ static void refRecordPrint( std::ostream & out, Ref * rec_K ) {
 
 void refPrint( std::ostream & out, Ref r ) {
 	if ( IsObj( r ) ) {
-		Ref * obj_K = ObjToPtr4( r );
+		Ref * obj_K = RefToPtr4( r );
 		Ref key = *obj_K;
 		if ( IsFunctionKey( key ) ) {
-			out << "<function>";
+			out << "<function " << numInputsOfFn( obj_K ) << ":" << numOutputsOfFn( obj_K ) << ">";
 		} else if ( IsSimpleKey( key ) ) {
 			switch ( KindOfSimpleKey( key ) ) {
 				case VECTOR_KIND: {

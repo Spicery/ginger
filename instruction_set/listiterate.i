@@ -5,8 +5,8 @@
 
 Ref list = VMVP[-1];	//	Ignore VMVP[0], which is a dummy value.
 if ( IsPair( list ) ) {
-	VMVP[0] = ObjToPtr4( list )[ PAIR_TAIL_OFFSET ];
-	VMVP[-1] = ObjToPtr4( list )[ PAIR_HEAD_OFFSET ];
+	VMVP[0] = RefToPtr4( list )[ PAIR_TAIL_OFFSET ];
+	VMVP[-1] = RefToPtr4( list )[ PAIR_HEAD_OFFSET ];
 } else {
 	VMVP[0] = sys_termin;	//	Signals exit.
 }

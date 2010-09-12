@@ -75,7 +75,7 @@ private:
 public:
 	Ref * nextBucket() { 
 		if ( this->bucket != sys_absent ) {
-			Ref * x = ObjToPtr4( this->bucket );
+			Ref * x = RefToPtr4( this->bucket );
 			this->bucket = x[ BUCKET_NEXT_OFFSET ];
 			return x;
 		} else {
@@ -91,7 +91,7 @@ public:
 	MapCrawl( Ref * map_K ) :
 		size_of_data( SmallToLong( map_K[ MAP_COUNT_OFFSET ] ) ),
 		index_of_data( 0 ),
-		data( ObjToPtr4( map_K[1] ) + 1 ),
+		data( RefToPtr4( map_K[1] ) + 1 ),
 		bucket( sys_absent )
 	{}
 	
@@ -144,7 +144,7 @@ private:
 	}
 	
 	void addMap( Ref r ) {
-		MapCrawl map_crawl( ObjToPtr4( r ) );
+		MapCrawl map_crawl( RefToPtr4( r ) );
 		for (;;) {
 			Ref * bucket = map_crawl.nextBucket();
 			if ( bucket == NULL ) break;
@@ -220,7 +220,7 @@ Ref * sysNewMap( Ref *pc, MachineClass * vm ) {
 		args.add( r );
 	}
 	
-	ObjToPtr4( map_ref )[ MAP_COUNT_OFFSET ] = LongToSmall( args.numBuckets() );
+	RefToPtr4( map_ref )[ MAP_COUNT_OFFSET ] = LongToSmall( args.numBuckets() );
 	
 	vm->vp -= vm->count;
 	*( ++vm->vp ) = map_ref;
@@ -234,7 +234,7 @@ Ref * sysMapExplode( Ref *pc, class MachineClass * vm ) {
 	if ( vm->count == 1 ) {
 		Ref r = vm->fastPop();
 		if ( IsMap( r ) ) {
-			Ref * map_K = ObjToPtr4( r );
+			Ref * map_K = RefToPtr4( r );
 			long len = SmallToLong( map_K[ MAP_COUNT_OFFSET ] );
 			vm->checkStackRoom( len );
 			

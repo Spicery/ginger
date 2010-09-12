@@ -19,10 +19,11 @@
 #ifndef SYS_FUNCTION_HPP
 #define SYS_FUNCTION_HPP
 
+#include "machine.hpp"
 
-
-
-
+extern Ref * sysPartApply( Ref *pc, class MachineClass * vm );
+extern Ref * sysFunctionInArity( Ref *pc, class MachineClass * vm );
+extern Ref * sysFunctionOutArity( Ref *pc, class MachineClass * vm );
 
 
 #endif

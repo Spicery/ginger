@@ -40,6 +40,7 @@ extern Ref vmiENDFUNCTION( Plant plant );
 extern Ref vmiENDFUNCTION( Plant plant, bool in_heap );
 extern void vmiSTART( Plant plant, int N );
 extern void vmiEND( Plant plant, int N );
+extern void vmiCHAIN_LITE( Plant plant, Ref fn, long N );
 extern void vmiCHECK1( Plant plant, int N );
 extern void vmiCHECK0( Plant plant, int N );
 extern void vmiCALLS( Plant plant );

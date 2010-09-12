@@ -43,10 +43,6 @@ unsigned long lengthOfString( Ref * key ) {
 	return sizeAfterKeyOfVector( key );
 }
 
-unsigned long sizeAfterKeyOfFn( Ref * key ) {
-	return ToULong( *( key - OFFSET_FROM_FN_LENGTH_TO_KEY ) ) >> TAGGG;
-}
-
 //
 //	This computes obj_A and obj_Z1 from obj_K
 void findObjectLimits( Ref * obj_K, Ref * & obj_A, Ref * & obj_Z1 ) {

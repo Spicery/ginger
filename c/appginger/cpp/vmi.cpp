@@ -46,19 +46,19 @@ void vmiSYS_RETURN( Plant plant ) {
 void vmiOPERATOR( Plant plant, Functor fnc ) {
 	vmiINSTRUCTION(
 		plant,
-        fnc == fnc_eq ? vmc__eq :
-        fnc == fnc_lt ? vmc__lt :
-        fnc == fnc_lte ? vmc__lte :
-        fnc == fnc_gt ? vmc__gt :
-        fnc == fnc_gte ? vmc__gte :
-        fnc == fnc_mul ? vmc__mul :
-        fnc == fnc_div ? vmc__div :
-        fnc == fnc_sub ? vmc__sub :
-        fnc == fnc_add ? vmc__add :
-        fnc == fnc_decr ? vmc__decr :
-        fnc == fnc_incr ? vmc__incr :
+        fnc == fnc_eq ? vmc_eq :
+        fnc == fnc_lt ? vmc_lt :
+        fnc == fnc_lte ? vmc_lte :
+        fnc == fnc_gt ? vmc_gt :
+        fnc == fnc_gte ? vmc_gte :
+        fnc == fnc_mul ? vmc_mul :
+        fnc == fnc_div ? vmc_div :
+        fnc == fnc_sub ? vmc_sub :
+        fnc == fnc_add ? vmc_add :
+        fnc == fnc_decr ? vmc_decr :
+        fnc == fnc_incr ? vmc_incr :
         fnc == fnc_not ? vmc_not :
-        fnc == fnc_neq ? vmc__neq :
+        fnc == fnc_neq ? vmc_neq :
         ( this_never_happens(), (Instruction)0 )
 	);
 }
@@ -69,18 +69,24 @@ void vmiINCR( Plant plant, int n ) {
 			return;
 		}
 		case 1: {
-			emitSPC( plant, vmc__incr );
+			emitSPC( plant, vmc_incr );
 			return;
 		}
 		case -1: {
-			emitSPC( plant, vmc__decr );
+			emitSPC( plant, vmc_decr );
 			return;
 		}
 		default: {
-			emitSPC( plant, vmc__incr_by );
+			emitSPC( plant, vmc_incr_by );
 			emitRef( plant, ToRef( LongToSmall( n ) ) );
 		}
 	}
+}
+
+void vmiCHAIN_LITE( Plant plant, Ref fn, long N ) {
+	emitSPC( plant, vmc_chainlite );
+	emitRef( plant, fn );
+	emitRef( plant, ToRef( N ) );
 }
 
 void vmiPOPID( Plant plant, Ident id ) {

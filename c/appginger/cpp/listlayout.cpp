@@ -25,11 +25,11 @@ bool isList( Ref r ) {
 }
 
 Ref fastPairHead( Ref r ) {
-	return ObjToPtr4( r )[ PAIR_HEAD_OFFSET ];
+	return RefToPtr4( r )[ PAIR_HEAD_OFFSET ];
 }
 
 Ref fastPairTail( Ref r ) {
-	return ObjToPtr4( r )[ PAIR_TAIL_OFFSET ];
+	return RefToPtr4( r )[ PAIR_TAIL_OFFSET ];
 }
 
 

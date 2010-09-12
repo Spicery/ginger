@@ -1,4 +1,4 @@
-static Ref *spcfn__add( Ref *pc, Machine vm ) {
+static Ref *spcfn_add( Ref *pc, Machine vm ) {
     Ref ry = *( VMVP-- );
     Ref rx = *( VMVP );
     if ( IsSmall( rx ) && IsSmall( ry ) ) {
@@ -16,7 +16,7 @@ static Ref *spcfn__add( Ref *pc, Machine vm ) {
     } 
 }
 
-static Ref *spcfn__decr( Ref *pc, Machine vm ) {
+static Ref *spcfn_decr( Ref *pc, Machine vm ) {
     Ref rx = *VMVP;
     if ( IsSmall( rx ) ) {
     	long x = (long)rx;
@@ -34,37 +34,37 @@ static Ref *spcfn__decr( Ref *pc, Machine vm ) {
     //RETURN( pc + 1 );
 }
 
-static Ref *spcfn__div( Ref *pc, Machine vm ) {
+static Ref *spcfn_div( Ref *pc, Machine vm ) {
     long b = ToLong( *( VMVP-- ) );
     *( VMVP ) = ToRef( ToLong( *( VMVP ) ) / b );
     RETURN( pc + 1 );
 }
 
-static Ref *spcfn__eq( Ref *pc, Machine vm ) {
+static Ref *spcfn_eq( Ref *pc, Machine vm ) {
     Ref r = *( VMVP-- );
     *( VMVP ) = *( VMVP ) == r ? sys_true : sys_false;
     RETURN( pc + 1 );
 }
 
-static Ref *spcfn__neq( Ref *pc, Machine vm ) {
+static Ref *spcfn_neq( Ref *pc, Machine vm ) {
     Ref r = *( VMVP-- );
     *( VMVP ) = *( VMVP ) == r ? sys_false : sys_true;
     RETURN( pc + 1 );
 }
 
-static Ref *spcfn__gt( Ref *pc, Machine vm ) {
+static Ref *spcfn_gt( Ref *pc, Machine vm ) {
     long b = ToLong( *( VMVP-- ) );
     *( VMVP ) = ToLong( *( VMVP ) ) > b ? sys_true : sys_false;
     RETURN( pc + 1 );
 }
 
-static Ref *spcfn__gte( Ref *pc, Machine vm ) {
+static Ref *spcfn_gte( Ref *pc, Machine vm ) {
     long b = ToLong( *( VMVP-- ) );
     *( VMVP ) = ToLong( *( VMVP ) ) >= b ? sys_true : sys_false;
     RETURN( pc + 1 );
 }
 
-static Ref *spcfn__incr( Ref *pc, Machine vm ) {
+static Ref *spcfn_incr( Ref *pc, Machine vm ) {
     Ref rx = *VMVP;
     if ( IsSmall( rx ) ) {
     	long x = (long)rx;
@@ -81,7 +81,7 @@ static Ref *spcfn__incr( Ref *pc, Machine vm ) {
     
 }
 
-static Ref *spcfn__incr_by( Ref *pc, Machine vm ) {
+static Ref *spcfn_incr_by( Ref *pc, Machine vm ) {
     Ref ry = ToRef( pc[ 1 ] );
     Ref rx = *( VMVP );
     if ( IsSmall( rx ) && IsSmall( ry ) ) {
@@ -99,26 +99,26 @@ static Ref *spcfn__incr_by( Ref *pc, Machine vm ) {
     } 
 }
 
-static Ref *spcfn__lt( Ref *pc, Machine vm ) {
+static Ref *spcfn_lt( Ref *pc, Machine vm ) {
     long b = ToLong( *( VMVP-- ) );
     *( VMVP ) = ToLong( *( VMVP ) ) < b ? sys_true : sys_false;
     RETURN( pc + 1 );
 }
 
-static Ref *spcfn__lte( Ref *pc, Machine vm ) {
+static Ref *spcfn_lte( Ref *pc, Machine vm ) {
     long b = ToLong( *( VMVP-- ) );
     *( VMVP ) = ToLong( *( VMVP ) ) <= b ? sys_true : sys_false;
     RETURN( pc + 1 );
 }
 
-static Ref *spcfn__mul( Ref *pc, Machine vm ) {
+static Ref *spcfn_mul( Ref *pc, Machine vm ) {
     //  This needs to be given overflow detection!
     long b = ToLong( *( VMVP-- ) );
     *( VMVP ) = ToRef( ToLong( *( VMVP ) ) * ( b >> TAG ) );
     RETURN( pc + 1 );
 }
 
-static Ref *spcfn__sub( Ref *pc, Machine vm ) {
+static Ref *spcfn_sub( Ref *pc, Machine vm ) {
     //  This needs to be given overflow detection!
     long b = ToLong( *( VMVP-- ) );
     *( VMVP ) = ToRef( ToLong( *( VMVP ) ) - b );
@@ -137,6 +137,19 @@ static Ref *spcfn_calls( Ref *pc, Machine vm ) {
         VMPCFUNC = ptr;
         RETURN( ptr + 1 );
     }
+}
+
+static Ref *spcfn_chainlite( Ref *pc, Machine vm ) {
+    Ref * fn_K = RefToPtr4( pc[ 1 ] );
+    VMCOUNT += ToLong( pc[2] );
+    
+    //	Leave VMLINK & VMLINKFUNC alone.
+    //	The lite function has not stashed them into the callstack.
+    //	As a consequence we can chain directly without meddling with
+    //	them.
+    
+    VMPCFUNC = fn_K;
+    RETURN( fn_K + 1 );
 }
 
 static Ref *spcfn_check0( Ref *pc, Machine vm ) {
@@ -344,8 +357,8 @@ static Ref *spcfn_listiterate( Ref *pc, Machine vm ) {
     
     Ref list = VMVP[-1];	//	Ignore VMVP[0], which is a dummy value.
     if ( IsPair( list ) ) {
-    	VMVP[0] = ObjToPtr4( list )[ PAIR_TAIL_OFFSET ];
-    	VMVP[-1] = ObjToPtr4( list )[ PAIR_HEAD_OFFSET ];
+    	VMVP[0] = RefToPtr4( list )[ PAIR_TAIL_OFFSET ];
+    	VMVP[-1] = RefToPtr4( list )[ PAIR_HEAD_OFFSET ];
     } else {
     	VMVP[0] = sys_termin;	//	Signals exit.
     }
@@ -505,7 +518,7 @@ static Ref *spcfn_stringiterate( Ref *pc, Machine vm ) {
     //	Since there were 2 inputs, it may therefore safely return 2 items
     //	without a stack check.
     
-    Ref * string = ObjToPtr4( VMVP[0] );
+    Ref * string = RefToPtr4( VMVP[0] );
     Ref len_as_small = string[ STRING_LENGTH_OFFSET ];
     Ref index = VMVP[-1];
     
@@ -540,7 +553,7 @@ static Ref *spcfn_vectoriterate( Ref *pc, Machine vm ) {
     //	Since there were 2 inputs, it may therefore safely return 2 items
     //	without a stack check.
     
-    Ref * vector = ObjToPtr4( VMVP[0] );
+    Ref * vector = RefToPtr4( VMVP[0] );
     Ref len_as_small = vector[ VECTOR_LENGTH_OFFSET ];
     Ref index = VMVP[-1];
     
@@ -557,20 +570,21 @@ static Ref *spcfn_vectoriterate( Ref *pc, Machine vm ) {
 }
 
 InstructionSet1::InstructionSet1() {
-    this->spc__add = (Ref)spcfn__add;
-    this->spc__decr = (Ref)spcfn__decr;
-    this->spc__div = (Ref)spcfn__div;
-    this->spc__eq = (Ref)spcfn__eq;
-    this->spc__neq = (Ref)spcfn__neq;
-    this->spc__gt = (Ref)spcfn__gt;
-    this->spc__gte = (Ref)spcfn__gte;
-    this->spc__incr = (Ref)spcfn__incr;
-    this->spc__incr_by = (Ref)spcfn__incr_by;
-    this->spc__lt = (Ref)spcfn__lt;
-    this->spc__lte = (Ref)spcfn__lte;
-    this->spc__mul = (Ref)spcfn__mul;
-    this->spc__sub = (Ref)spcfn__sub;
+    this->spc_add = (Ref)spcfn_add;
+    this->spc_decr = (Ref)spcfn_decr;
+    this->spc_div = (Ref)spcfn_div;
+    this->spc_eq = (Ref)spcfn_eq;
+    this->spc_neq = (Ref)spcfn_neq;
+    this->spc_gt = (Ref)spcfn_gt;
+    this->spc_gte = (Ref)spcfn_gte;
+    this->spc_incr = (Ref)spcfn_incr;
+    this->spc_incr_by = (Ref)spcfn_incr_by;
+    this->spc_lt = (Ref)spcfn_lt;
+    this->spc_lte = (Ref)spcfn_lte;
+    this->spc_mul = (Ref)spcfn_mul;
+    this->spc_sub = (Ref)spcfn_sub;
     this->spc_calls = (Ref)spcfn_calls;
+    this->spc_chainlite = (Ref)spcfn_chainlite;
     this->spc_check0 = (Ref)spcfn_check0;
     this->spc_check1 = (Ref)spcfn_check1;
     this->spc_end = (Ref)spcfn_end;

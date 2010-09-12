@@ -16,10 +16,22 @@
     along with AppGinger.  If not, see <http://www.gnu.org/licenses/>.
 \******************************************************************************/
 
-#include "vectorlayout.hpp"
-
+#include "functionlayout.hpp"
 #include "key.hpp"
 
-Ref fastVectorLength( Ref r ) {
-	return RefToPtr4( r )[ VECTOR_LENGTH_OFFSET ];
+unsigned long sizeAfterKeyOfFn( Ref * key ) {
+	return ToULong( *( key - OFFSET_FROM_FN_LENGTH_TO_KEY ) ) >> TAGGG;
 }
+
+long numOutputsOfFn( Ref * key ) {
+	return ToLong( key[ OFFSET_TO_NUM_OUTPUTS ] );
+}
+
+long numSlotsOfFn( Ref * key ) {
+	return ToLong( key[ OFFSET_TO_NUM_SLOTS ] );
+}
+
+long numInputsOfFn( Ref * key ) {
+	return ToLong( key[ OFFSET_TO_NUM_INPUTS ] );
+}
+

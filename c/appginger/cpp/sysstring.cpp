@@ -37,8 +37,8 @@ Ref * sysStringAppend( Ref * pc, class MachineClass * vm ) {
 		
 		if ( !IsObj( lhs ) || !IsObj( rhs ) ) throw Mishap( "Invalid arguments in stringAppend" );
 		
-		Ref * lhs_K = ObjToPtr4( lhs );
-		Ref * rhs_K = ObjToPtr4( rhs );
+		Ref * lhs_K = RefToPtr4( lhs );
+		Ref * rhs_K = RefToPtr4( rhs );
 		Ref lhs_key = *lhs_K;
 		Ref rhs_key = *rhs_K;
 		
@@ -53,8 +53,8 @@ Ref * sysStringAppend( Ref * pc, class MachineClass * vm ) {
 	XfrClass xfr( vm->heap().preflight( pc, N + 2 ) );
 
 	//	No risk of GC so safe to pop.
-	Ref * rhs_K = ObjToPtr4( vm->fastPop() );
-	Ref * lhs_K = ObjToPtr4( vm->fastPop() );
+	Ref * rhs_K = RefToPtr4( vm->fastPop() );
+	Ref * lhs_K = RefToPtr4( vm->fastPop() );
 
 	xfr.xfrRef( LongToSmall( lhs_n + rhs_n ) );
 	xfr.setOrigin();
@@ -70,7 +70,7 @@ Ref * sysStringExplode( Ref *pc, class MachineClass * vm ) {
 	if ( vm->count != 1 ) throw Mishap( "Wrong number of arguments for stringExplode" );
 	Ref r = vm->fastPop();
 	if ( !IsStringKind( r ) ) throw Mishap( "Argument mismatch for stringExplode" );
-	Ref *obj_K = ObjToPtr4( r );
+	Ref *obj_K = RefToPtr4( r );
 	
 	unsigned long n = sizeAfterKeyOfVector( obj_K );
 	vm->checkStackRoom( n );
@@ -86,7 +86,7 @@ Ref * sysStringLength( Ref *pc, class MachineClass * vm ) {
 	if ( vm->count != 1 ) throw Mishap( "Wrong number of arguments for stringLength" );
 	Ref r = vm->fastPop();
 	if ( !IsStringKind( r ) ) throw Mishap( "Argument mismatch for stringLength" );
-	Ref *obj_K = ObjToPtr4( r );
+	Ref *obj_K = RefToPtr4( r );
 	
 	vm->fastPeek() = LongToSmall( sizeAfterKeyOfVector( obj_K ) );
 	return pc;

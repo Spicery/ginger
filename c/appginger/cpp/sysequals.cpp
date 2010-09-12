@@ -24,11 +24,11 @@
 #include <string.h>
 
 static inline Ref FastPairHead( Ref r ) {
-	return ObjToPtr4( r )[ 1 ];
+	return RefToPtr4( r )[ 1 ];
 }
 
 static inline Ref FastPairTail( Ref r ) {
-	return ObjToPtr4( r )[ 2 ];
+	return RefToPtr4( r )[ 2 ];
 }
 
 
@@ -52,7 +52,7 @@ public:
 
 static unsigned long trivHash( Ref r ) {
 	if ( IsObj( r ) ) {
-		Ref * obj_K = ObjToPtr4( r );
+		Ref * obj_K = RefToPtr4( r );
 		Ref key = *obj_K;
 		if ( IsObj( key ) ) {
 			return 0;			//	To be improved.
@@ -117,8 +117,8 @@ bool refEquals( Ref x, Ref y ) {
 		if ( !IsObj( y ) ) {
 			return false;
 		} else {
-			Ref * x_K = ObjToPtr4( x );
-			Ref * y_K = ObjToPtr4( y );
+			Ref * x_K = RefToPtr4( x );
+			Ref * y_K = RefToPtr4( y );
 			Ref xkey = *x_K;
 			Ref ykey = *y_K;
 			
@@ -154,7 +154,7 @@ bool refEquals( Ref x, Ref y ) {
 
 unsigned long refHash( Ref r ) {
 	if ( IsObj( r ) ) {
-		Ref * obj_K = ObjToPtr4( r );
+		Ref * obj_K = RefToPtr4( r );
 		Ref key = *obj_K;
 		if ( IsFunctionKey( key ) ) {
 			HashEngine e( ToULong( key ) );

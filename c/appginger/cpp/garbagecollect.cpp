@@ -419,9 +419,9 @@ public:
 	}
 	
 	Ref * forwardPtr4( Ref * ptr ) {
-		Ref r = Ptr4ToObj( ptr );
+		Ref r = Ptr4ToRef( ptr );
 		this->forward( r );
-		return ObjToPtr4( r );
+		return RefToPtr4( r );
 	}
 	
 	

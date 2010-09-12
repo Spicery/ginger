@@ -1,4 +1,4 @@
-static void spcfn__add( void ) {
+static void spcfn_add( void ) {
     Ref ry = *( VMVP-- );
     Ref rx = *( VMVP );
     if ( IsSmall( rx ) && IsSmall( ry ) ) {
@@ -16,7 +16,7 @@ static void spcfn__add( void ) {
     } 
 }
 
-static void spcfn__decr( void ) {
+static void spcfn_decr( void ) {
     Ref rx = *VMVP;
     if ( IsSmall( rx ) ) {
     	long x = (long)rx;
@@ -34,37 +34,37 @@ static void spcfn__decr( void ) {
     //RETURN( pc + 1 );
 }
 
-static void spcfn__div( void ) {
+static void spcfn_div( void ) {
     long b = ToLong( *( VMVP-- ) );
     *( VMVP ) = ToRef( ToLong( *( VMVP ) ) / b );
     RETURN( pc + 1 );
 }
 
-static void spcfn__eq( void ) {
+static void spcfn_eq( void ) {
     Ref r = *( VMVP-- );
     *( VMVP ) = *( VMVP ) == r ? sys_true : sys_false;
     RETURN( pc + 1 );
 }
 
-static void spcfn__neq( void ) {
+static void spcfn_neq( void ) {
     Ref r = *( VMVP-- );
     *( VMVP ) = *( VMVP ) == r ? sys_false : sys_true;
     RETURN( pc + 1 );
 }
 
-static void spcfn__gt( void ) {
+static void spcfn_gt( void ) {
     long b = ToLong( *( VMVP-- ) );
     *( VMVP ) = ToLong( *( VMVP ) ) > b ? sys_true : sys_false;
     RETURN( pc + 1 );
 }
 
-static void spcfn__gte( void ) {
+static void spcfn_gte( void ) {
     long b = ToLong( *( VMVP-- ) );
     *( VMVP ) = ToLong( *( VMVP ) ) >= b ? sys_true : sys_false;
     RETURN( pc + 1 );
 }
 
-static void spcfn__incr( void ) {
+static void spcfn_incr( void ) {
     Ref rx = *VMVP;
     if ( IsSmall( rx ) ) {
     	long x = (long)rx;
@@ -81,7 +81,7 @@ static void spcfn__incr( void ) {
     
 }
 
-static void spcfn__incr_by( void ) {
+static void spcfn_incr_by( void ) {
     Ref ry = ToRef( pc[ 1 ] );
     Ref rx = *( VMVP );
     if ( IsSmall( rx ) && IsSmall( ry ) ) {
@@ -99,26 +99,26 @@ static void spcfn__incr_by( void ) {
     } 
 }
 
-static void spcfn__lt( void ) {
+static void spcfn_lt( void ) {
     long b = ToLong( *( VMVP-- ) );
     *( VMVP ) = ToLong( *( VMVP ) ) < b ? sys_true : sys_false;
     RETURN( pc + 1 );
 }
 
-static void spcfn__lte( void ) {
+static void spcfn_lte( void ) {
     long b = ToLong( *( VMVP-- ) );
     *( VMVP ) = ToLong( *( VMVP ) ) <= b ? sys_true : sys_false;
     RETURN( pc + 1 );
 }
 
-static void spcfn__mul( void ) {
+static void spcfn_mul( void ) {
     //  This needs to be given overflow detection!
     long b = ToLong( *( VMVP-- ) );
     *( VMVP ) = ToRef( ToLong( *( VMVP ) ) * ( b >> TAG ) );
     RETURN( pc + 1 );
 }
 
-static void spcfn__sub( void ) {
+static void spcfn_sub( void ) {
     //  This needs to be given overflow detection!
     long b = ToLong( *( VMVP-- ) );
     *( VMVP ) = ToRef( ToLong( *( VMVP ) ) - b );
@@ -137,6 +137,19 @@ static void spcfn_calls( void ) {
         VMPCFUNC = ptr;
         RETURN( ptr + 1 );
     }
+}
+
+static void spcfn_chainlite( void ) {
+    Ref * fn_K = RefToPtr4( pc[ 1 ] );
+    VMCOUNT += ToLong( pc[2] );
+    
+    //	Leave VMLINK & VMLINKFUNC alone.
+    //	The lite function has not stashed them into the callstack.
+    //	As a consequence we can chain directly without meddling with
+    //	them.
+    
+    VMPCFUNC = fn_K;
+    RETURN( fn_K + 1 );
 }
 
 static void spcfn_check0( void ) {
@@ -344,8 +357,8 @@ static void spcfn_listiterate( void ) {
     
     Ref list = VMVP[-1];	//	Ignore VMVP[0], which is a dummy value.
     if ( IsPair( list ) ) {
-    	VMVP[0] = ObjToPtr4( list )[ PAIR_TAIL_OFFSET ];
-    	VMVP[-1] = ObjToPtr4( list )[ PAIR_HEAD_OFFSET ];
+    	VMVP[0] = RefToPtr4( list )[ PAIR_TAIL_OFFSET ];
+    	VMVP[-1] = RefToPtr4( list )[ PAIR_HEAD_OFFSET ];
     } else {
     	VMVP[0] = sys_termin;	//	Signals exit.
     }
@@ -505,7 +518,7 @@ static void spcfn_stringiterate( void ) {
     //	Since there were 2 inputs, it may therefore safely return 2 items
     //	without a stack check.
     
-    Ref * string = ObjToPtr4( VMVP[0] );
+    Ref * string = RefToPtr4( VMVP[0] );
     Ref len_as_small = string[ STRING_LENGTH_OFFSET ];
     Ref index = VMVP[-1];
     
@@ -540,7 +553,7 @@ static void spcfn_vectoriterate( void ) {
     //	Since there were 2 inputs, it may therefore safely return 2 items
     //	without a stack check.
     
-    Ref * vector = ObjToPtr4( VMVP[0] );
+    Ref * vector = RefToPtr4( VMVP[0] );
     Ref len_as_small = vector[ VECTOR_LENGTH_OFFSET ];
     Ref index = VMVP[-1];
     
@@ -557,20 +570,21 @@ static void spcfn_vectoriterate( void ) {
 }
 
 InstructionSet2::InstructionSet2() {
-    this->spc__add = (Ref)spcfn__add;
-    this->spc__decr = (Ref)spcfn__decr;
-    this->spc__div = (Ref)spcfn__div;
-    this->spc__eq = (Ref)spcfn__eq;
-    this->spc__neq = (Ref)spcfn__neq;
-    this->spc__gt = (Ref)spcfn__gt;
-    this->spc__gte = (Ref)spcfn__gte;
-    this->spc__incr = (Ref)spcfn__incr;
-    this->spc__incr_by = (Ref)spcfn__incr_by;
-    this->spc__lt = (Ref)spcfn__lt;
-    this->spc__lte = (Ref)spcfn__lte;
-    this->spc__mul = (Ref)spcfn__mul;
-    this->spc__sub = (Ref)spcfn__sub;
+    this->spc_add = (Ref)spcfn_add;
+    this->spc_decr = (Ref)spcfn_decr;
+    this->spc_div = (Ref)spcfn_div;
+    this->spc_eq = (Ref)spcfn_eq;
+    this->spc_neq = (Ref)spcfn_neq;
+    this->spc_gt = (Ref)spcfn_gt;
+    this->spc_gte = (Ref)spcfn_gte;
+    this->spc_incr = (Ref)spcfn_incr;
+    this->spc_incr_by = (Ref)spcfn_incr_by;
+    this->spc_lt = (Ref)spcfn_lt;
+    this->spc_lte = (Ref)spcfn_lte;
+    this->spc_mul = (Ref)spcfn_mul;
+    this->spc_sub = (Ref)spcfn_sub;
     this->spc_calls = (Ref)spcfn_calls;
+    this->spc_chainlite = (Ref)spcfn_chainlite;
     this->spc_check0 = (Ref)spcfn_check0;
     this->spc_check1 = (Ref)spcfn_check1;
     this->spc_end = (Ref)spcfn_end;

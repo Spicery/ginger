@@ -3,7 +3,7 @@
 //	Since there were 2 inputs, it may therefore safely return 2 items
 //	without a stack check.
 
-Ref * string = ObjToPtr4( VMVP[0] );
+Ref * string = RefToPtr4( VMVP[0] );
 Ref len_as_small = string[ STRING_LENGTH_OFFSET ];
 Ref index = VMVP[-1];
 

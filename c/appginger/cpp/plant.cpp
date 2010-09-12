@@ -83,6 +83,7 @@ Ref PlantClass::detach( const bool in_heap ) {
 		xfr.xfrRef( ToRef( this->nresults ) );		//	raw R
 		xfr.xfrRef( ToRef( this->nlocals ) );		//	raw N
 		xfr.xfrRef( ToRef( this->ninputs ) );		//	raw A
+		
 	
 		xfr.setOrigin();
 		xfr.xfrRef( sysFunctionKey );
@@ -104,6 +105,7 @@ Ref PlantClass::detach( const bool in_heap ) {
 		*p++ = ToRef( ( L << TAGGG ) | FUNC_LEN_TAGGG );
 		*p++ = ToRef( this->nresults );
 		*p++ = ToRef( this->nlocals );
+		*p++ = ToRef( this->ninputs );
 		Ref * func = p;
 		*p++ = sysCoreFunctionKey;
 		for ( std::vector< Ref >::iterator it = this->code_data->begin(); it != this->code_data->end(); ++it ) {
@@ -237,7 +239,7 @@ void PlantClass::compileQueryNext( Term query ) {
 			
 			//	Obvious candidate for a merged instruction.
 			vmiPUSHID( this, ident );
-			vmiINSTRUCTION( this, vmc__incr );
+			vmiINSTRUCTION( this, vmc_incr );
 			vmiPOPID( this, ident );
 			
 			break;

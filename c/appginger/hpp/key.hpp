@@ -39,8 +39,8 @@ const char * keyName( Ref key );
 //	Synonyms
 #define RefToPtr4( r )  	ToRefRef( ToULong( r ) & ~OBJ_TAG )
 #define Ptr4ToRef( p ) 		ToRef( ToULong( p ) | OBJ_TAG )
-#define ObjToPtr4( r )  	ToRefRef( ToULong( r ) & ~OBJ_TAG )
-#define Ptr4ToObj( p ) 		ToRef( ToULong( p ) | OBJ_TAG )
+//#define ObjToPtr4( r )  	ToRefRef( ToULong( r ) & ~OBJ_TAG )
+//#define Ptr4ToObj( p ) 		ToRef( ToULong( p ) | OBJ_TAG )
 
 #define LongToRef( i )		( (Ref)( ToULong( i ) << TAG | INT_TAG ) )
 #define LongToSmall( i ) 	( (Ref)( ToULong( i ) << TAG | INT_TAG ) )

@@ -30,9 +30,9 @@ void this_never_happens() {
 	throw Mishap( "This never happens" );
 }
 
-void to_be_done( charseq msg ) {
+/*void to_be_done( charseq msg ) {
 	throw Mishap( "To be done" ).culprit( "Message", msg );
-}
+}*/
 
 Problem & Problem::culprit( const std::string reason, const std::string arg ) {
 	this->culprits.push_back( pair< const string, const string >( reason, arg ) );

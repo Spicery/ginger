@@ -49,26 +49,35 @@ enum Lookup {
 class Env {
 public:
 	std::vector< Ident > data;
+	std::vector< size_t > marks;
 	
 public:
 	void add( Ident id ) {
 		this->data.push_back( id );
 	}
 	
-	bool isNull() {
-		return this->data.empty();
+	Ident search( const std::string & c ) {
+		for ( std::vector< Ident >::iterator it = this->data.begin(); it != this->data.end(); ++it ) {
+			Ident ident = *it;
+			const std::string & ic = ident->getNameString();
+			#ifdef DBG_LIFT
+				fprintf( stderr, "Comparing %s with %s\n", c.c_str(), ic.c_str() );
+			#endif
+			if ( c == ic ) {
+				return ident;
+			}		
+		}
+		return shared< IdentClass >();
+	}	
+	
+	void mark() {
+		this->marks.push_back( this->data.size() );
 	}
 	
-	Ident & top() {
-		return this->data.back();
-	}
-	
-	size_t size() {
-		return this->data.size();
-	}
-	
-	void resize( size_t t ) {
-		return this->data.resize( t );
+	void cutToMark() {
+		size_t n = this->marks.back();
+		this->marks.pop_back();
+		this->data.resize( n );
 	}
 };
 
@@ -166,7 +175,7 @@ static Ident lookupGlobal( Package * current, IdTermClass * t ) {
 	}
 }
 
-enum Lookup LiftStateClass::lookup( IdTermClass * t, Ident *id ) {
+/*enum Lookup LiftStateClass::lookup( IdTermClass * t, Ident *id ) {
 	const std::string & c = t->name();
 	for ( std::vector< Ident >::iterator it = this->env.data.begin(); it != this->env.data.end(); ++it ) {
 		Ident ident = *it;
@@ -188,6 +197,25 @@ enum Lookup LiftStateClass::lookup( IdTermClass * t, Ident *id ) {
         fprintf( stderr, "< lookup\n" );
     #endif
     return Global;
+}*/
+
+enum Lookup LiftStateClass::lookup( IdTermClass * t, Ident *id ) {
+	const std::string & c = t->name();
+	Ident ident = this->env.search( c ); 
+	if ( ident ) {
+		*id = ident;
+		#ifdef DBG_LIFT
+			fprintf( stderr, "< lookup\n" );
+		#endif
+		return ident->level >= this->level ? InnerLocal : OuterLocal;
+	} else {
+		*id = lookupGlobal( this->package, t );
+		if ( *id == 0 ) throw Mishap( "Undeclared variable" ).culprit( "Variable", c );
+		#ifdef DBG_LIFT
+			fprintf( stderr, "< lookup\n" );
+		#endif
+		return Global;
+	}
 }
 
 Term LiftStateClass::general_lift( Term term ) {
@@ -248,10 +276,10 @@ Term LiftStateClass::lift( Term term ) {
             return this->lift( synthetic );
         }
         case fnc_fn : {
-            //    fn( args( id( _ ), ... ), Body )
+            //    fn( seq( id( _ ), ... ), Body )
             this->level += 1;
             FnTermClass * old_function = this->function;
-            size_t old_size = this->env.size();
+         	this->env.mark();
             
             FnTermClass * fn = dynamic_cast< FnTermClass * >( term.get() );
             this->function = fn;
@@ -266,8 +294,7 @@ Term LiftStateClass::lift( Term term ) {
 
             for ( int i = 0; i < a; i++ ) {
             	NamedTermMixin * arg = dynamic_cast< NamedTermMixin * >( term_index( args, i ).get() );
-                //Term arg = term_index( args, i );
-                const std::string & c = arg->name(); //term_named_string( arg );
+                const std::string & c = arg->name();
                 #ifdef DBG_LIFT
                     fprintf( stderr, "Processing %s\n", c );
                 #endif
@@ -291,22 +318,20 @@ Term LiftStateClass::lift( Term term ) {
                 fprintf( stderr, "Returning term\n" );
             #endif
     		fn->ninputs() = a;
-            //*term_fn_nlocals_ref( term ) = ( this->env.isNull() ? 0 : this->env.top()->slot + 1 );
-            //*term_fn_ninputs_ref( term ) = a;
             
             this->level -= 1;
             this->function = old_function;
-            this->env.resize( old_size );
+            this->env.cutToMark();
             return term;
         }
         case fnc_block: {
-        	const size_t old_size = this->env.size();
+        	this->env.mark();
         	Term t = term_new_basic0( fnc_seq );
 			int A = term_count( term );
 			for ( int i = 0; i < A; i++ ) {
 				term_add( t, this->lift( *term_index_ref( term, i ) ) );
 			}
-            this->env.resize( old_size );
+			this->env.cutToMark();
 			return t;        	
         }
         case fnc_var : {
@@ -342,10 +367,10 @@ Term LiftStateClass::lift( Term term ) {
                     return term;
                 }
                 case OuterLocal: {
-                    to_be_done( "LIFT: outer locals" );
+                    throw ToBeDone();
                 }
             }
-            throw;	//	Unreachable.
+            throw Unreachable();
         }
        case fnc_add: {
             //Pool scratch = state.pools->scratch;
@@ -377,7 +402,7 @@ Term LiftStateClass::lift( Term term ) {
             }
         }
     }
-    throw;	//	Unreachable.
+    throw Unreachable();
 }
 
 Term lift_term( Package * pkg, Term term ) {

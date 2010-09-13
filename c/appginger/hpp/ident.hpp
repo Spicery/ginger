@@ -35,12 +35,11 @@ private:
 
 public:
 	std::string			name;
-	//const Facet * 		facet;			//	restricted to a single facet at the moment.
 	const FacetSet * 	facets;
 	int					slot; 			//	used for local idents
 	Valof * 			value_of;		//	used for global idents
 	int 				level;			//	level of scope
-	IdentClass			*next;      	//	chain used for env linking
+	//IdentClass			*next;      	//	chain used for env linking
 
 public:
 	bool isSame( IdentClass * other );

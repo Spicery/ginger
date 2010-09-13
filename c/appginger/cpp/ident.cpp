@@ -21,15 +21,14 @@
 #include "ident.hpp"
 #include "key.hpp"
 
-IdentClass::IdentClass( const std::string & nm, /*const Facet * facet,*/ const FacetSet * facets ) :
+IdentClass::IdentClass( const std::string & nm, const FacetSet * facets ) :
 	is_local( false ),
 	name( nm ),
 	//facet( facet ),
 	facets( facets ),
 	slot( -1 ),
 	value_of( new Valof() ),
-	level( -1 ),
-	next( NULL )
+	level( -1 )
 {
 }
 

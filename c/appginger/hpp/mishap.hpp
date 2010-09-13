@@ -29,7 +29,7 @@
 #include "common.hpp"
 
 void this_never_happens( void );
-void to_be_done( charseq msg );
+//void to_be_done( charseq msg );
 //void mishap( charseq msg, ... );
 //void reset( charseq msg, ... );
 //void warning( charseq msg, ... );

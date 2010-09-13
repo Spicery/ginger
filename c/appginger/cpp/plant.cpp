@@ -438,7 +438,10 @@ void PlantClass::compileTerm( Term term ) {
 			break;
 		}
 		case fnc_syscall: {
-			SysCall * sc = reinterpret_cast< SysCall * >( term_ref_cont( term ) );
+			//	Note that reinterpret_cast falls foul of the ISO C++ rule that
+			//	forbids interconversion between void* and function pointers.
+			SysCall * sc = (SysCall *)( term_ref_cont( term ) );
+			
 			int v = tmpvar( this );
 			vmiSTART( this, v );
 			this->compileArgs( term );

@@ -149,6 +149,7 @@ private:
 
 
 public:    
+	void addIdent( NamedTermMixin * arg, FnTermClass * fn, int & slot );
     Term lift( Term term );
     
 public:   
@@ -260,6 +261,19 @@ Term LiftStateClass::general_lift( Term term ) {
     return term;
 }
 
+void LiftStateClass::addIdent( NamedTermMixin * arg, FnTermClass * fn, int & slot ) {
+	//cerr << "Argument " << arg->nameString() << " in " << fn->name() << endl;
+	const std::string & c = arg->name();
+	#ifdef DBG_LIFT
+		fprintf( stderr, "Processing %s\n", c );
+	#endif
+	Ident id = ident_new_local( c, fn );
+	this->env.add( id );
+	id->setSlot( slot++ );
+	id->level = this->level;
+	arg->ident() = id;
+}
+
 Term LiftStateClass::lift( Term term ) {
     Functor fnc = term_functor( term );
     #ifdef DBG_LIFT
@@ -298,34 +312,41 @@ Term LiftStateClass::lift( Term term ) {
             this->function = fn;
             int & slot = fn->nlocals();
             Term args = fn->child( 0 );
-            int a = term_count( args );
             
-            //int slot = 0;
-            #ifdef DBG_LIFT
-                fprintf( stderr, "Arity = %d\n", a );
-            #endif
-
-            fn->ninputs() = a;
-			for ( int i = 0; i < a; i++ ) {
-            	NamedTermMixin * arg = dynamic_cast< NamedTermMixin * >( term_index( args, i ).get() );
-            	//cerr << "Argument " << arg->nameString() << " in " << fn->name() << endl;
-                const std::string & c = arg->name();
-                #ifdef DBG_LIFT
-                    fprintf( stderr, "Processing %s\n", c );
-                #endif
-                Ident id = ident_new_local( c, fn );
-                this->env.add( id );
-                //printf( "Function now has %d slots\n", fn->nlocals() );
-                id->setSlot( slot++ );
-                //printf( "Function now has %d slots\n", fn->nlocals() );
-                id->level = this->level;
-                arg->ident() = id;
+            // There are two cases that we handle at present.
+            //	A single variable var(x) or 
+            //	a sequence of variables seq( var(x1), var(x2)... )
+            
+            switch ( args->functor() ) {
+				case fnc_var: {
+					fn->ninputs() = 1;
+					NamedTermMixin * arg = dynamic_cast< NamedTermMixin * >( args.get() );
+					this->addIdent( arg, fn, slot );
+					break;
+				}
+				case fnc_seq: {
+					int A = term_count( args );
+					
+					#ifdef DBG_LIFT
+						fprintf( stderr, "Arity = %d\n", A );
+					#endif
+		
+					fn->ninputs() = A;
+					for ( int i = 0; i < A; i++ ) {
+						NamedTermMixin * arg = dynamic_cast< NamedTermMixin * >( term_index( args, i ).get() );
+						this->addIdent( arg, fn, slot );
+					}
+					break;
+				}
+				default: throw ToBeDone();          
             }
+            
             #ifdef DBG_LIFT
                 fprintf( stderr, "Processed arguments\n" );
                 term_print( term );
             #endif
             {
+            	//	Now we lift the body.
                 Term *r = term_index_ref( term, 1 );
                 *r = this->lift( *r );
             }

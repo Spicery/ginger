@@ -411,7 +411,7 @@ void PlantClass::compileTerm( Term term ) {
 				}
 			}
 			
-			vmiFUNCTION( this, ftc->nlocals(), ftc->ninputs() ); //term_fn_nlocals( term ), term_fn_ninputs( term ) );
+			vmiFUNCTION( this, ftc->nlocals(), ftc->ninputs() );
 			vmiENTER( this );
 			this->compileTerm( body );
 			vmiRETURN( this );

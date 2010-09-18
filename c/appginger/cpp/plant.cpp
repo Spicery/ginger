@@ -18,6 +18,9 @@
 
 #include "plant.hpp"
 
+#include <iostream>
+using namespace std;
+
 #include "destination.hpp"
 #include "term.hpp"
 #include "vmi.hpp"
@@ -153,7 +156,7 @@ void PlantClass::compileIf( bool sense, Term term, DestinationClass & dst ) {
 		    if ( flhs == fnc_id ) {
 		    	IdTermClass * t = dynamic_cast< IdTermClass * >( lhs.get() );
 				flag1 = 's';
-				arg1 = t->ident()->slot;
+				arg1 = t->ident()->getFinalSlot();
 			} else if ( flhs == fnc_int ) {
 				flag1 = 'i';
 				arg1 = term_int_cont( lhs );
@@ -163,7 +166,7 @@ void PlantClass::compileIf( bool sense, Term term, DestinationClass & dst ) {
 		    if ( frhs == fnc_id ) {
 		    	IdTermClass * t = dynamic_cast< IdTermClass * >( rhs.get() );
 				flag2 = 's';
-				arg2 = t->ident()->slot;
+				arg2 = t->ident()->getFinalSlot();
 			} else if ( frhs == fnc_int ) {
 				flag2 = 'i';
 				arg2 = term_int_cont( rhs );
@@ -365,12 +368,10 @@ void PlantClass::compileTerm( Term term ) {
 			IdTermClass * t = dynamic_cast< IdTermClass * >( term.get() );
 			Ident id = t->ident();
 			if ( id != NULL ) {
-				int slot = id->slot;
-				if ( slot >= 0 || !id->isLocal() ) {
-					vmiPUSHID( this, id );
-				} else {
+				if ( id->isLocal() && id->getFinalSlot() < 0 ) {
 					throw Mishap( "Ident record not assigned slot" ).culprit( "Identifier",  t->name().c_str() );
 				}
+				vmiPUSHID( this, id );
 			} else {
 				throw Mishap( "Unlifted identifier" ).culprit( "Identifier",  t->name().c_str() );
 			}
@@ -400,12 +401,26 @@ void PlantClass::compileTerm( Term term ) {
 			break;
 		}
 		case fnc_fn: {
-			Term body = term_index( term, 1 );
-			vmiFUNCTION( this, term_fn_nlocals( term ), term_fn_ninputs( term ) );
+			FnTermClass * ftc = dynamic_cast< FnTermClass * >( term.get() );
+			Term body = ftc->child( 1 );
+			
+			if ( ftc->hasOuters() ) {
+				int N = ftc->sizeOuters();
+				for ( int i = 0; i < N; i++ ) {
+					vmiPUSHID( this, ftc->outer( i ) );
+				}
+			}
+			
+			vmiFUNCTION( this, ftc->nlocals(), ftc->ninputs() ); //term_fn_nlocals( term ), term_fn_ninputs( term ) );
 			vmiENTER( this );
 			this->compileTerm( body );
 			vmiRETURN( this );
 			vmiPUSHQ( this, vmiENDFUNCTION( this ) );
+			
+			if ( ftc->hasOuters() ) {
+				vmiSET_SYS_CALL( this, sysPartApply, ftc->sizeOuters() + 1 );
+			}
+			
 			break;
 		}
 		case fnc_app: {

@@ -304,8 +304,7 @@ static void packageContext( TermData * t, string & pkg_name, string & alias_name
 
 Term TermData::makeTerm() {
 	if ( name == "fn" && kids.size() == 2 ) {
-		//	NAME is discarded for the moment, until we know how to use it.
-		return term_new_fn( kids[ 0 ], kids[ 1 ] );
+		return term_new_fn( this->attrs[ "name" ], kids[ 0 ], kids[ 1 ] );
 	} else if ( has_attr( this, "value" ) ) {
 		if ( name == "int" ) {
 			int i;

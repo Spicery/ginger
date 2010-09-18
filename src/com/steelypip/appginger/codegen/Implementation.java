@@ -65,6 +65,7 @@ public abstract class Implementation extends GeneralInstructionSet {
 		answer.add( this.set_ir().init( "set", "ir" ) );
 		answer.add( this.set_call_global_irv().init( "set_call_global", "irv" ) );
 		answer.add( this.set_calls_ir().init( "set_calls", "ir" ) );
+		answer.add( this.set_syscall_irr().init( "set_syscall", "irr" ) );
 		answer.add( this.start_ir().init( "start", "ir" ) );
 		answer.add( this.stringiterate_i().init( "stringiterate", "i" ) );
 		answer.add( this.syscall_ir().init( "syscall", "ir" ) );

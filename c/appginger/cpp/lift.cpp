@@ -23,6 +23,8 @@
 //    make progress on more basic issues.
 
 #include <iostream>
+#include <vector>
+#include <list>
 using namespace std;
 
 #include "lift.hpp"
@@ -46,39 +48,89 @@ enum Lookup {
 
 //- environment --------------------------------------------------------
 
-class Env {
-public:
-	std::vector< Ident > data;
-	std::vector< size_t > marks;
+struct Scope { 
+	std::vector< Ident > 	data;
+	FnTermClass *			fn;
 	
-public:
+	Scope( FnTermClass * f ) : fn( f ) {
+	}
+};
+
+class Env {
+private:
+	std::vector< Scope > idents;
+
+public:	
 	void add( Ident id ) {
-		this->data.push_back( id );
+		this->idents.back().data.push_back( id );
+	}
+	
+	FnTermClass * getFunction( const int n ) const {
+		return this->idents[ n ].fn;
+	}
+	
+	void setAsFinalInput( int from_index, Ident new_input ) {
+		FnTermClass * f = this->idents[ from_index ].fn;
+		int & nin = f->ninputs();
+	
+		nin += 1;
+		int slot = new_input->getFinalSlot();
+		cerr << "Bumping #inputs for " << f->name() << " from " << nin-1 << " to " << nin << endl;
+		
+		//	Now we need to swap nin and slot. Check there is a need to make
+		//	changes!
+		if ( nin != slot ) {	
+			int N = this->idents.size();
+			for ( int i = from_index; i < N; i++ ) {
+				Scope & le = this->idents[ i ];
+				if ( le.fn != NULL && i > from_index ) break;
+				
+				std::vector< Ident > & v = le.data;
+				for ( std::vector< Ident >::iterator it = v.begin(); it != v.end(); ++it ) {
+					it->get()->swapSlot( nin, slot );
+				}
+			}
+		}
+	}
+		
+	void capturingFunctions( Ident & outer, std::list< int >  & index_of_functions ) {
+		for ( int i = this->idents.size() - 1; i >= 0; i-- ) {
+			Scope & le = this->idents[ i ];
+			FnTermClass * f = le.fn;
+			if ( f ) {
+				index_of_functions.push_front( i );
+			}
+			if ( f == outer->function() ) return;
+		}		
+		throw Unreachable();
 	}
 	
 	Ident search( const std::string & c ) {
-		for ( std::vector< Ident >::iterator it = this->data.begin(); it != this->data.end(); ++it ) {
-			Ident ident = *it;
-			const std::string & ic = ident->getNameString();
-			#ifdef DBG_LIFT
-				fprintf( stderr, "Comparing %s with %s\n", c.c_str(), ic.c_str() );
-			#endif
-			if ( c == ic ) {
-				return ident;
-			}		
+		for ( std::vector< Scope >::reverse_iterator it = this->idents.rbegin(); it != this->idents.rend(); ++it ) {
+			Scope & le = *it;
+			std::vector< Ident > & v = le.data;
+			for ( std::vector< Ident >::reverse_iterator jt = v.rbegin(); jt != v.rend(); ++jt ) {
+				Ident ident = *jt;
+				const std::string & ic = ident->getNameString();
+				#ifdef DBG_LIFT
+					fprintf( stderr, "Comparing %s with %s\n", c.c_str(), ic.c_str() );
+				#endif
+				if ( c == ic ) {
+					return ident;
+				}		
+			}
 		}
 		return shared< IdentClass >();
-	}	
+	}
 	
-	void mark() {
-		this->marks.push_back( this->data.size() );
+	void mark( FnTermClass * fn ) {
+		this->idents.push_back( Scope( fn ) );
 	}
 	
 	void cutToMark() {
-		size_t n = this->marks.back();
-		this->marks.pop_back();
-		this->data.resize( n );
+		this->idents.pop_back();
 	}
+
 };
 
 
@@ -175,29 +227,6 @@ static Ident lookupGlobal( Package * current, IdTermClass * t ) {
 	}
 }
 
-/*enum Lookup LiftStateClass::lookup( IdTermClass * t, Ident *id ) {
-	const std::string & c = t->name();
-	for ( std::vector< Ident >::iterator it = this->env.data.begin(); it != this->env.data.end(); ++it ) {
-		Ident ident = *it;
-        const std::string & ic = ident->getNameString();
-        #ifdef DBG_LIFT
-            fprintf( stderr, "Comparing %s with %s\n", c.c_str(), ic.c_str() );
-        #endif
-        if ( c == ic ) {
-            *id = ident;
-            #ifdef DBG_LIFT
-                fprintf( stderr, "< lookup\n" );
-            #endif
-            return ident->level >= this->level ? InnerLocal : OuterLocal;
-        }		
-	}
-	*id = lookupGlobal( this->package, t );
-    if ( *id == 0 ) throw Mishap( "Undeclared variable" ).culprit( "Variable", c );
-    #ifdef DBG_LIFT
-        fprintf( stderr, "< lookup\n" );
-    #endif
-    return Global;
-}*/
 
 enum Lookup LiftStateClass::lookup( IdTermClass * t, Ident *id ) {
 	const std::string & c = t->name();
@@ -253,35 +282,19 @@ Term LiftStateClass::lift( Term term ) {
 					from_pkg,
 					t->alias,
 					t->prot,
-					//t->into,
 					t->intos
 				)
 			);
     		return term;
     	}
-        case fnc_define: {
-            Term synthetic =
-                term_new_basic2(
-                    fnc_var,
-                    term_index( term, 0 ),
-                    term_new_fn(
-                        term_index( term, 1 ),
-                        term_index( term, 2 )
-                    )
-                );
-            #ifdef DBG_LIFT
-                fprintf( stderr, "SYNTHETIC\n " ) ;
-                term_print( synthetic );
-            #endif
-            return this->lift( synthetic );
-        }
         case fnc_fn : {
             //    fn( seq( id( _ ), ... ), Body )
             this->level += 1;
             FnTermClass * old_function = this->function;
-         	this->env.mark();
-            
+
             FnTermClass * fn = dynamic_cast< FnTermClass * >( term.get() );
+         	this->env.mark( fn );
+            
             this->function = fn;
             int & slot = fn->nlocals();
             Term args = fn->child( 0 );
@@ -292,16 +305,18 @@ Term LiftStateClass::lift( Term term ) {
                 fprintf( stderr, "Arity = %d\n", a );
             #endif
 
-            for ( int i = 0; i < a; i++ ) {
+            fn->ninputs() = a;
+			for ( int i = 0; i < a; i++ ) {
             	NamedTermMixin * arg = dynamic_cast< NamedTermMixin * >( term_index( args, i ).get() );
+            	//cerr << "Argument " << arg->nameString() << " in " << fn->name() << endl;
                 const std::string & c = arg->name();
                 #ifdef DBG_LIFT
                     fprintf( stderr, "Processing %s\n", c );
                 #endif
-                Ident id = ident_new_local( c );
+                Ident id = ident_new_local( c, fn );
                 this->env.add( id );
                 //printf( "Function now has %d slots\n", fn->nlocals() );
-                id->slot = slot++;
+                id->setSlot( slot++ );
                 //printf( "Function now has %d slots\n", fn->nlocals() );
                 id->level = this->level;
                 arg->ident() = id;
@@ -317,7 +332,6 @@ Term LiftStateClass::lift( Term term ) {
             #ifdef DBG_LIFT
                 fprintf( stderr, "Returning term\n" );
             #endif
-    		fn->ninputs() = a;
             
             this->level -= 1;
             this->function = old_function;
@@ -325,7 +339,7 @@ Term LiftStateClass::lift( Term term ) {
             return term;
         }
         case fnc_block: {
-        	this->env.mark();
+        	this->env.mark( NULL );
         	Term t = term_new_basic0( fnc_seq );
 			int A = term_count( term );
 			for ( int i = 0; i < A; i++ ) {
@@ -347,32 +361,60 @@ Term LiftStateClass::lift( Term term ) {
             	FnTermClass * fn = this->function;
             	int & slot = fn->nlocals();
                 //    printf( "LOCAL VAR %s\n", c );
-                Ident id = ident_new_local( c );
+                Ident id = ident_new_local( c, fn );
                 this->env.add( id );
-                id->slot = slot++;
+                id->setSlot( slot++ );
                 id->level = this->level;
                 t->ident() = id;
             }
  			return term;			        	
         }
-         case fnc_id: {
+        case fnc_id: {
          	IdTermClass * t = dynamic_cast< IdTermClass * >( term.get() );
             Ident id;
             switch ( this->lookup( t, &id ) ) {
                 case Global:
                 case InnerLocal: {
-                    //    fprintf( stderr, "Found ident at %x\n", (unt)( id ) );
                     t->ident() = id;
-                    //    fprintf( stderr, "Stuffed term with ident at %x\n", (unt)( term_id_ident( term ) ) );
                     return term;
                 }
                 case OuterLocal: {
-                    throw ToBeDone();
+                	std::list< int > index_of_functions;
+                	this->env.capturingFunctions( id, index_of_functions );
+                	
+                	Ident prev_id;
+					for ( std::list< int >::iterator it = index_of_functions.begin(); it != index_of_functions.end(); ++it ) {
+						int index = *it;
+						if ( !prev_id ) {
+							prev_id = id;
+						} else {
+							FnTermClass * this_fn = this->env.getFunction( index );
+							int & slot = this_fn->nlocals();
+
+							// Stuff is going to be put here.
+							cerr << "outer detected for " << this_fn->name() << endl;
+							cerr << "Outer ident is " << (prev_id)->getNameString() << "@" << (prev_id)->function()->name() << endl;							
+							Ident new_input = ident_new_local( t->nameString(), this_fn );
+							new_input->setSlot( slot++ );
+							cerr << "Inner ident is " << new_input->getFinalSlot() << endl;
+							
+							//	Now set the new_input as the last parameter and
+							//	add the outer to the function-term.
+							this->env.setAsFinalInput( index, new_input );		
+							this_fn->addOuter( prev_id );
+							
+							prev_id = new_input;
+						}
+                	}
+                	
+                	//	At this point prev_id is bound to the correct IdTermClass
+                	t->ident() = prev_id;
+                	return term;
                 }
             }
             throw Unreachable();
         }
-       case fnc_add: {
+        case fnc_add: {
             //Pool scratch = state.pools->scratch;
             Term arg0 = term_index( term, 0 );
             Term arg1 = term_index( term, 1 );

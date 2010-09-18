@@ -52,6 +52,7 @@
     vmc_set,
     vmc_set_call_global,
     vmc_set_calls,
+    vmc_set_syscall,
     vmc_start,
     vmc_stringiterate,
     vmc_syscall,

@@ -28,6 +28,7 @@
 #include "instruction_set.hpp"
 #include "destination.hpp"
 #include "term.hpp"
+#include "sysfunction.hpp"
 
 class MachineClass;
 typedef MachineClass * Machine;

@@ -421,13 +421,20 @@ public:
 
 class FnTermClass : public TermClass {
 private:
-	Term 	arg_data;
-	Term	body_data;
-	int 	nlocals_data;
-	int 	ninputs_data;
+	const std::string		name_data;
+	Term 					arg_data;
+	Term					body_data;
+	int 					nlocals_data;
+	int 					ninputs_data;
+	std::vector< Ident >	outers;
+	
+public:
+	const std::string & name() { return this->name_data; }
+	void addOuter( Ident id );
 
 public:
-	FnTermClass( Term arg, Term body ) :
+	FnTermClass( std::string name, Term arg, Term body ) :
+		name_data( name ),
 		arg_data( arg ),
 		body_data( body ),
 		nlocals_data( 0 ),
@@ -439,6 +446,18 @@ public:
 	}
 
 public:
+
+	bool hasOuters() const {
+		return !this->outers.empty();
+	}
+	
+	size_t sizeOuters() const {
+		return this->outers.size();
+	}
+	
+	Ident & outer( const int n ) {
+		return this->outers[ n ];
+	}
 
 	int count() {
 		return 2;
@@ -615,7 +634,7 @@ extern Term term_absent;
 extern Term term_skip;
 extern Term term_anon;
 
-Term term_new_fn( Term args, Term body );
+Term term_new_fn( const std::string name, Term args, Term body );
 int term_fn_nlocals( Term term );
 int term_fn_ninputs( Term term );
 int * term_fn_ninputs_ref( Term term );

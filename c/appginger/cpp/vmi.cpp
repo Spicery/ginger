@@ -39,6 +39,12 @@ void vmiSYS_CALL( Plant plant, SysCall * r ) {
 	emitRef( plant, ToRef( r ) );
 }
 
+void vmiSET_SYS_CALL( Plant plant, SysCall * r, int A ) {
+	emitSPC( plant, vmc_set_syscall );
+	emitRef( plant, ToRef( A ) );
+	emitRef( plant, ToRef( r ) );
+}
+
 void vmiSYS_RETURN( Plant plant ) {
 	emitSPC( plant, vmc_sysreturn );
 }
@@ -92,7 +98,7 @@ void vmiCHAIN_LITE( Plant plant, Ref fn, long N ) {
 void vmiPOPID( Plant plant, Ident id ) {
 	if ( id->isLocal() ) {
 		emitSPC( plant, vmc_pop_local );
-		emitRef( plant, ToRef( id->slot ) );
+		emitRef( plant, ToRef( id->getFinalSlot() ) );
 	} else {
 		emitSPC( plant, vmc_pop_global );
 		emitValof( plant, id->value_of );
@@ -101,7 +107,7 @@ void vmiPOPID( Plant plant, Ident id ) {
 
 void vmiPUSHID( Plant plant, Ident id ) {
 	if ( id->isLocal() ) {
-		switch ( id->slot ) {
+		switch ( id->getFinalSlot() ) {
 		case 0:
 			emitSPC( plant, vmc_push_local0 );
 			return;
@@ -110,7 +116,7 @@ void vmiPUSHID( Plant plant, Ident id ) {
 			return;
 		default:	
 			emitSPC( plant, vmc_push_local );
-			emitRef( plant, ToRef( id->slot ) );
+			emitRef( plant, ToRef( id->getFinalSlot() ) );
 		}
 	} else {
 		emitSPC( plant, vmc_push_global );
@@ -263,7 +269,7 @@ void vmiGOTO( Plant plant, DestinationClass & d ) {
 static void vmiCMP_ID_CONSTANT( bool flag, Plant plant, Ident id, Ref r, DestinationClass & d ) {
 	emitSPC( plant, ( flag ? vmc_eq_si : vmc_neq_si ) );
 	if ( id->isLocal() ) {
-		emitRef( plant, ToRef( id->slot ) );
+		emitRef( plant, ToRef( id->getFinalSlot() ) );
 	} else {
 		emitValof( plant, id->value_of );
 	}
@@ -274,12 +280,12 @@ static void vmiCMP_ID_CONSTANT( bool flag, Plant plant, Ident id, Ref r, Destina
 static void vmiCMP_ID_ID( bool flag, Plant plant, Ident id1, Ident id2, DestinationClass & d ) {
 	emitSPC( plant, flag ? vmc_eq_ss : vmc_neq_ss );
 	if ( id1->isLocal() ) {
-		emitRef( plant, ToRef( id1->slot ) );
+		emitRef( plant, ToRef( id1->getFinalSlot() ) );
 	} else {
 		emitValof( plant, id1->value_of );
 	}
 	if ( id2->isLocal() ) {
-		emitRef( plant, ToRef( id2->slot ) );
+		emitRef( plant, ToRef( id2->getFinalSlot() ) );
 	} else {
 		emitValof( plant, id2->value_of );
 	}
@@ -488,8 +494,8 @@ void VmiRelOpFactory::ifSo( DestinationClass &dst ) {
 		( this->flag1 != 's' || this->ident1->isLocal() ) &&
 		( this->flag2 != 's' || !this->ident2->isLocal() )
 	) {
-		int arg1 = this->flag1 == 'i' ? this->int1 : this->ident1->slot;
-		int arg2 = this->flag1 == 'i' ? this->int2 : this->ident2->slot;
+		int arg1 = this->flag1 == 'i' ? this->int1 : this->ident1->getFinalSlot();
+		int arg2 = this->flag1 == 'i' ? this->int2 : this->ident2->getFinalSlot();
 		vmiIFSO_RELOP( this->plant, this->flag1, arg1, this->op, this->flag2, arg2, dst );
 	} else {
 		this->compilePushLeft();
@@ -509,8 +515,8 @@ void VmiRelOpFactory::ifNot( DestinationClass &dst ) {
 		( this->flag1 != 's' || this->ident1->isLocal() ) &&
 		( this->flag2 != 's' || !this->ident2->isLocal() )
 	) {
-		int arg1 = this->flag1 == 'i' ? this->int1 : this->ident1->slot;
-		int arg2 = this->flag1 == 'i' ? this->int2 : this->ident2->slot;
+		int arg1 = this->flag1 == 'i' ? this->int1 : this->ident1->getFinalSlot();
+		int arg2 = this->flag1 == 'i' ? this->int2 : this->ident2->getFinalSlot();
 		vmiIFNOT_RELOP( this->plant, this->flag1, arg1, this->op, this->flag2, arg2, dst );
 	} else {
 		this->compilePushLeft();

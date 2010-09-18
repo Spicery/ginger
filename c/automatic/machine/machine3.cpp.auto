@@ -213,6 +213,10 @@ void Machine3::core( bool init_mode, Ref *pc ) {
         }
     }
     L_enter: {
+        //
+        //	ENTER only works as the 1st instruction of a function.
+        //	It uses -ve offsets to access the fields before the key.
+        //
         long A = ToLong( pc[ -2 ] ); // field before the function key.
         Ref *prev = VMSP;
         VMSP -= SP_OVERHEAD + ToULong( pc[ -3 ] );
@@ -230,6 +234,7 @@ void Machine3::core( bool init_mode, Ref *pc ) {
         RETURN( pc + 1 );
     }
     L_enter0: {
+        //	ENTER0 only works as the 1st instruction of a function.
         Ref *prev = VMSP;
         VMSP -= SP_OVERHEAD + ToULong( pc[ -3 ] );
         VMSP[ SP_PREV_SP ] = prev;
@@ -241,6 +246,7 @@ void Machine3::core( bool init_mode, Ref *pc ) {
         RETURN( pc + 1 );
     }
     L_enter1: {
+        //	ENTER1 only works as the 1st instruction of a function.
         Ref *prev = VMSP;
         VMSP -= SP_OVERHEAD + ToULong( pc[ -3 ] );
         VMSP[ SP_PREV_SP ] = prev;
@@ -454,6 +460,14 @@ void Machine3::core( bool init_mode, Ref *pc ) {
             RETURN( ptr + 1 );
         }
     }
+    L_set_syscall: {
+        VMCOUNT = ToLong( pc[ 1 ] );
+        SysCall * sys = ToSysCall( pc[ 2 ] );
+        FREEZE;
+        pc = (*sys)( pc + 3, vm );
+        MELT;
+        RETURN( pc );
+    }
     L_start: {
         long n = ToLong( *( ++pc ) );
         #ifdef DBG_SPECIAL
@@ -571,6 +585,7 @@ void Machine3::core( bool init_mode, Ref *pc ) {
         ins.spc_set = &&L_set;
         ins.spc_set_call_global = &&L_set_call_global;
         ins.spc_set_calls = &&L_set_calls;
+        ins.spc_set_syscall = &&L_set_syscall;
         ins.spc_start = &&L_start;
         ins.spc_stringiterate = &&L_stringiterate;
         ins.spc_syscall = &&L_syscall;

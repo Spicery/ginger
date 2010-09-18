@@ -22,6 +22,7 @@
 #include "shared.hpp"
 #include "valof.hpp"
 #include "facet.hpp"
+class FnTermClass;
 
 #include <string>
 #include <memory>
@@ -31,15 +32,15 @@
 
 class IdentClass {
 private:
+	const std::string	name_data;
 	bool				is_local;
+	int					slot;
+	FnTermClass *		func;
 
 public:
-	std::string			name;
 	const FacetSet * 	facets;
-	int					slot; 			//	used for local idents
 	Valof * 			value_of;		//	used for global idents
 	int 				level;			//	level of scope
-	//IdentClass			*next;      	//	chain used for env linking
 
 public:
 	bool isSame( IdentClass * other );
@@ -49,16 +50,31 @@ public:
 	bool setGlobal() { return this->is_local = false; }
 	
 public:
-	IdentClass( const std::string & nm, /*const Facet * facet,*/ const FacetSet * facets );
-	const std::string & getNameString();
+	void setSlot( int n ) { this->slot = n; }
+	int getFinalSlot() const { return this->slot; }
+	void swapSlot( const int a, const int b ) {
+		if ( this->slot == a ) {
+			this->slot = b;
+		} else if ( this->slot == b ) {
+			this->slot = a;
+		}
+	}
+	
+public:
+	FnTermClass * function() { return this->func; }
+	
+public:
+	IdentClass( const std::string & nm, const FacetSet * facets );		//	Global
+	IdentClass( const std::string & nm, FnTermClass * fn ); //	Local
+	const std::string & getNameString() const;
 };
 
 typedef shared< IdentClass > Ident;
 
 
-Ident ident_new_local( const std::string & nm );
+Ident ident_new_local( const std::string & nm, FnTermClass * fn );
 Ident ident_new_tmp( int n );
-Ident ident_new_global( const std::string & nm, /*const Facet * facet,*/ const FacetSet * facets );
+Ident ident_new_global( const std::string & nm, const FacetSet * facets );
 
 #endif
 

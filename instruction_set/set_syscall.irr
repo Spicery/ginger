@@ -1,0 +1,6 @@
+VMCOUNT = ToLong( pc[ 1 ] );
+SysCall * sys = ToSysCall( pc[ 2 ] );
+FREEZE;
+pc = (*sys)( pc + 3, vm );
+MELT;
+RETURN( pc );

@@ -228,6 +228,10 @@ static void spcfn_end_call_global( void ) {
 }
 
 static void spcfn_enter( void ) {
+    //
+    //	ENTER only works as the 1st instruction of a function.
+    //	It uses -ve offsets to access the fields before the key.
+    //
     long A = ToLong( pc[ -2 ] ); // field before the function key.
     Ref *prev = VMSP;
     VMSP -= SP_OVERHEAD + ToULong( pc[ -3 ] );
@@ -246,6 +250,7 @@ static void spcfn_enter( void ) {
 }
 
 static void spcfn_enter0( void ) {
+    //	ENTER0 only works as the 1st instruction of a function.
     Ref *prev = VMSP;
     VMSP -= SP_OVERHEAD + ToULong( pc[ -3 ] );
     VMSP[ SP_PREV_SP ] = prev;
@@ -258,6 +263,7 @@ static void spcfn_enter0( void ) {
 }
 
 static void spcfn_enter1( void ) {
+    //	ENTER1 only works as the 1st instruction of a function.
     Ref *prev = VMSP;
     VMSP -= SP_OVERHEAD + ToULong( pc[ -3 ] );
     VMSP[ SP_PREV_SP ] = prev;
@@ -503,6 +509,15 @@ static void spcfn_set_calls( void ) {
     }
 }
 
+static void spcfn_set_syscall( void ) {
+    VMCOUNT = ToLong( pc[ 1 ] );
+    SysCall * sys = ToSysCall( pc[ 2 ] );
+    FREEZE;
+    pc = (*sys)( pc + 3, vm );
+    MELT;
+    RETURN( pc );
+}
+
 static void spcfn_start( void ) {
     long n = ToLong( *( ++pc ) );
     #ifdef DBG_SPECIAL
@@ -624,6 +639,7 @@ InstructionSet2::InstructionSet2() {
     this->spc_set = (Ref)spcfn_set;
     this->spc_set_call_global = (Ref)spcfn_set_call_global;
     this->spc_set_calls = (Ref)spcfn_set_calls;
+    this->spc_set_syscall = (Ref)spcfn_set_syscall;
     this->spc_start = (Ref)spcfn_start;
     this->spc_stringiterate = (Ref)spcfn_stringiterate;
     this->spc_syscall = (Ref)spcfn_syscall;

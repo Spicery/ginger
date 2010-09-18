@@ -22,39 +22,50 @@
 #include "key.hpp"
 
 IdentClass::IdentClass( const std::string & nm, const FacetSet * facets ) :
+	name_data( nm ),
 	is_local( false ),
-	name( nm ),
-	//facet( facet ),
-	facets( facets ),
 	slot( -1 ),
+	func( NULL ),
+	facets( facets ),
 	value_of( new Valof() ),
 	level( -1 )
 {
 }
 
-const std::string & IdentClass::getNameString() {
-	return this->name;
+IdentClass::IdentClass( const std::string & nm, FnTermClass * fn ) :
+	name_data( nm ),
+	is_local( false ),
+	slot( -1 ),
+	func( fn ),
+	facets( NULL ),
+	value_of( new Valof() ),
+	level( -1 )
+{
+}
+
+const std::string & IdentClass::getNameString() const {
+	return this->name_data;
 }
 
 bool IdentClass::isSame( IdentClass * other ) {
-	return this->name == other->name;
+	return this->name_data == other->name_data;
 }
 
-Ident ident_new_local( const std::string & nm ) {
-	IdentClass * id = new IdentClass( nm, NULL );
+Ident ident_new_local( const std::string & nm, FnTermClass * fn ) {
+	IdentClass * id = new IdentClass( nm, fn );
 	id->setLocal();
 	return shared< IdentClass >( id );
 }
 
 Ident ident_new_tmp( const int n ) {
-	IdentClass * id = new IdentClass( std::string( "tmpvar" ), NULL );
+	IdentClass * id = new IdentClass( std::string( "tmpvar" ), (FnTermClass *)NULL );
 	id->setLocal();
-	id->slot = n;
+	id->setSlot( n );
 	return shared< IdentClass >( id );
 }
 
-Ident ident_new_global( const std::string & nm, /*const Facet * facet,*/ const FacetSet * facets ) {
-	IdentClass * id = new IdentClass( nm, /*facet,*/ facets );
+Ident ident_new_global( const std::string & nm, const FacetSet * facets ) {
+	IdentClass * id = new IdentClass( nm, facets );
 	id->setGlobal();
 	return shared< IdentClass >( id );
 }

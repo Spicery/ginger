@@ -52,6 +52,7 @@
 	Ref spc_set;
 	Ref spc_set_call_global;
 	Ref spc_set_calls;
+	Ref spc_set_syscall;
 	Ref spc_start;
 	Ref spc_stringiterate;
 	Ref spc_syscall;

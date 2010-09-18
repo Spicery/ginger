@@ -158,8 +158,8 @@ const char *term_sysfn_cont( Term term ) {
 }
 
 
-Term term_new_fn( Term args, Term body ) {
-	return shared< TermClass >( new FnTermClass( args, body ) );
+Term term_new_fn( const std::string name, Term args, Term body ) {
+	return shared< TermClass >( new FnTermClass( name, args, body ) );
 }
 
 int term_fn_nlocals( Term term ) {
@@ -277,6 +277,14 @@ int term_count( Term term ) {
     return term->count();
 }
 
+
+// -- fn
+
+void FnTermClass::addOuter( Ident id ) {
+	this->outers.push_back( id );
+}
+
+
 //-- printing -----------------------------------------------------------
 
 static void splevel( int level ) {
@@ -314,7 +322,7 @@ static void tprint( Term term, int level ) {
 			if ( id == NULL ) {
 				printf( "slot = <null>" );
 			} else if ( id->isLocal() ) {
-				printf( "slot = %d", id->slot );
+				printf( "slot = %d", id->getFinalSlot() );
 			} else {
 				printf( "global" );
 			}

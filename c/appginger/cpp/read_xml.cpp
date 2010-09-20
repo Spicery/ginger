@@ -359,9 +359,15 @@ Term TermData::makeTerm() {
 		}
 	} else if ( name == "bind" ) {
 		if ( kids.size() == 2 ) {
-			return term_new_basic2( fnc_dec, kids[ 0 ], kids[ 1 ] );
+			return term_new_basic2( fnc_bind, kids[ 0 ], kids[ 1 ] );
 		} else {
 			throw Mishap( "Malformed bind" );
+		}
+	} else if ( name == "set" ) {
+		if ( kids.size() == 2 ) {
+			return term_new_basic2( fnc_assign, kids[ 0 ], kids[ 1 ] );
+		} else {
+			throw Mishap( "Malformed assignment" );
 		}
 	} else if ( name == "seq" ) {
 		Term seq = term_new_basic0( fnc_seq );

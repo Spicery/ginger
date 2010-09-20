@@ -24,6 +24,8 @@
 IdentClass::IdentClass( const std::string & nm, const FacetSet * facets ) :
 	name_data( nm ),
 	is_local( false ),
+	is_outer( false ),
+	is_assigned( false ),
 	slot( -1 ),
 	func( NULL ),
 	facets( facets ),
@@ -35,6 +37,8 @@ IdentClass::IdentClass( const std::string & nm, const FacetSet * facets ) :
 IdentClass::IdentClass( const std::string & nm, FnTermClass * fn ) :
 	name_data( nm ),
 	is_local( false ),
+	is_outer( false ),
+	is_assigned( false ),
 	slot( -1 ),
 	func( fn ),
 	facets( NULL ),

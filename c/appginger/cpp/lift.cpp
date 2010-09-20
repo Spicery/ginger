@@ -237,7 +237,11 @@ enum Lookup LiftStateClass::lookup( IdTermClass * t, Ident *id ) {
 		#ifdef DBG_LIFT
 			fprintf( stderr, "< lookup\n" );
 		#endif
-		return ident->level >= this->level ? InnerLocal : OuterLocal;
+		Lookup result = ident->level >= this->level ? InnerLocal : OuterLocal;
+		if ( result == OuterLocal ) {
+			ident->setOuter();
+		}
+		return result;
 	} else {
 		*id = lookupGlobal( this->package, t );
 		if ( *id == 0 ) throw Mishap( "Undeclared variable" ).culprit( "Variable", c );
@@ -456,6 +460,11 @@ Term LiftStateClass::lift( Term term ) {
                 return this->lift( term_new_basic2( fnc_decr_by, arg0, arg1 ) );
             }
             return this->general_lift( term );
+        }
+        case fnc_assign: {
+        	this->general_lift( term );
+        	VarTermClass * t = dynamic_cast< VarTermClass * >( term->child(1).get() );
+        	t->ident()->setAssigned();
         }
         default: {
             if ( term_count( term ) == 0 ) {

@@ -34,6 +34,8 @@ class IdentClass {
 private:
 	const std::string	name_data;
 	bool				is_local;
+	bool 				is_outer;
+	bool				is_assigned;
 	int					slot;
 	FnTermClass *		func;
 
@@ -45,9 +47,16 @@ public:
 public:
 	bool isSame( IdentClass * other );
 	bool isLocal() { return this->is_local; }
-	bool setLocal() { return this->is_local = true; }
+	void setLocal() { this->is_local = true; }
 	bool isGlobal() { return !this->is_local; }
-	bool setGlobal() { return this->is_local = false; }
+	void setGlobal() { this->is_local = false; }
+	
+	void setAssigned() { this->is_assigned = true; }
+	bool isAssigned() { return this->is_assigned; }
+	void setOuter() { this->is_outer = true; }
+	bool isOuter() { return this->is_outer; }
+	bool isInner() { return this->is_local && !this->is_outer; }
+	bool isShared() { return this->is_outer && this->is_assigned; }
 	
 public:
 	void setSlot( int n ) { this->slot = n; }

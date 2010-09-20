@@ -95,6 +95,36 @@ void vmiCHAIN_LITE( Plant plant, Ref fn, long N ) {
 	emitRef( plant, ToRef( N ) );
 }
 
+/*
+	vmiNEWID only affects mutable outer variables. If a
+	variable is determined to be mutable and outer it is
+	potentially shareable between different nested functions.
+	
+	If the shared flag is set, then the variable is implemented
+	as a pointer to a special type of heap object, an Indirection.
+	
+	vmiNEWID allocates the Indirection, initialises its value to
+	the constant -undef-, and assigns that to the slot.
+*/
+void vmiNEWID( Plant plant, Ident id ) {
+	//	Not implemented yet.
+}
+
+/*
+	vmiCOPYID only affects mutable outer variables. If the
+	shared flag is set then the variable will be implemented
+	as a pointer to an Indirection.
+	
+	vmiCOPYID causes the Indirection to be copied. The new
+	copy is inserted into the variable's slot. This is useful
+	in from-to loops where the outer variable is used to 
+	maintain state information, which is really an optimisation.
+*/
+void vmiCOPYID( Plant plant, Ident id ) {
+	//	Not implemented yet.
+}
+
+
 void vmiPOPID( Plant plant, Ident id ) {
 	if ( id->isLocal() ) {
 		emitSPC( plant, vmc_pop_local );

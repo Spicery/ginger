@@ -377,7 +377,7 @@ void PlantClass::compileTerm( Term term ) {
 			}
 			break;
 		}
-		case fnc_dec: {
+		case fnc_bind: {
 			Term var = term_index( term, 0 );
 			if ( term_functor( var ) != fnc_var ) throw;
 			VarTermClass * v = dynamic_cast< VarTermClass * >( var.get() );
@@ -388,15 +388,15 @@ void PlantClass::compileTerm( Term term ) {
 			break;
 		}
 		case fnc_assign: {
-			Term lhs = term_index( term, 0 );
-			IdTermClass * t = dynamic_cast< IdTermClass * >( lhs.get() );
+			Term target = term_index( term, 1 );
+			IdTermClass * t = dynamic_cast< IdTermClass * >( target.get() );
 			if ( t ) {
 				Ident & ident = t->ident();
-				Term rhs = term_index( term, 1 );
-				this->compile1( rhs );
+				Term source = term_index( term, 0 );
+				this->compile1( source );
 				vmiPOPID( this, ident );
 			} else {
-				throw ToBeDone().culprit( "Term", functor_name( term_functor( lhs ) ) );
+				throw ToBeDone().culprit( "Term", functor_name( term_functor( target ) ) );
 			}
 			break;
 		}

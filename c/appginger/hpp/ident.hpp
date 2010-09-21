@@ -73,8 +73,8 @@ public:
 	FnTermClass * function() { return this->func; }
 	
 public:
-	IdentClass( const std::string & nm, const FacetSet * facets );		//	Global
-	IdentClass( const std::string & nm, FnTermClass * fn ); //	Local
+	IdentClass( const std::string & nm, const FacetSet * facets );	//	Global
+	IdentClass( const std::string & nm, FnTermClass * fn ); 		//	Local
 	const std::string & getNameString() const;
 };
 

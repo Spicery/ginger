@@ -95,8 +95,7 @@ void vmiCHAIN_LITE( Plant plant, Ref fn, long N ) {
 	emitRef( plant, ToRef( N ) );
 }
 
-/*
-	vmiNEWID only affects mutable outer variables. If a
+/** vmiNEWID only affects mutable outer variables. If a
 	variable is determined to be mutable and outer it is
 	potentially shareable between different nested functions.
 	
@@ -105,13 +104,16 @@ void vmiCHAIN_LITE( Plant plant, Ref fn, long N ) {
 	
 	vmiNEWID allocates the Indirection, initialises its value to
 	the constant -undef-, and assigns that to the slot.
+	
+	@param plant a code-planter
+    @param id an ident-record 
+
 */
 void vmiNEWID( Plant plant, Ident id ) {
 	//	Not implemented yet.
 }
 
-/*
-	vmiCOPYID only affects mutable outer variables. If the
+/** vmiCOPYID only affects mutable outer variables. If the
 	shared flag is set then the variable will be implemented
 	as a pointer to an Indirection.
 	
@@ -119,6 +121,9 @@ void vmiNEWID( Plant plant, Ident id ) {
 	copy is inserted into the variable's slot. This is useful
 	in from-to loops where the outer variable is used to 
 	maintain state information, which is really an optimisation.
+	
+ 	@param plant a code-planter
+    @param id an ident-record 
 */
 void vmiCOPYID( Plant plant, Ident id ) {
 	//	Not implemented yet.

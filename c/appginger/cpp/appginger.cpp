@@ -1,6 +1,6 @@
 /******************************************************************************\
-	Copyright (c) 2010 Stephen Leach. AppGinger is distributed under the terms 
-	of the GNU General Public License. This file is part of AppGinger.
+    Copyright (c) 2010 Stephen Leach. AppGinger is distributed under the terms 
+    of the GNU General Public License. This file is part of AppGinger.
 
     AppGinger is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -15,6 +15,19 @@
     You should have received a copy of the GNU General Public License
     along with AppGinger.  If not, see <http://www.gnu.org/licenses/>.
 \******************************************************************************/
+
+/** \mainpage AppGinger Internal Documentation
+*//*
+ *
+ * \section intro_sec Introduction
+ *
+ * This is the introduction.
+ *
+ * \section install_sec Installation
+ *
+ * \subsection step1 Step 1: Opening the box
+*/
+
 
 #include <iostream>
 #include <fstream>
@@ -48,141 +61,141 @@ using namespace std;
 extern char * optarg;
 static struct option long_options[] =
     {
-		{ "cgi", 			no_argument, 			0, 'C' },
-		{ "interactive",	no_argument,			0, 'I' },
-		{ "batch",			no_argument,			0, 'B' },
-        { "help", 			optional_argument, 		0, 'h' },
-        { "machine",		required_argument, 		0, 'm' },
-        { "version", 		no_argument, 			0, 'v' },
-        { "debug",			required_argument,		0, 'd' },
-        { "license",		optional_argument,		0, 'l' },
+        { "cgi",            no_argument,            0, 'C' },
+        { "interactive",    no_argument,            0, 'I' },
+        { "batch",          no_argument,            0, 'B' },
+        { "help",           optional_argument,      0, 'h' },
+        { "machine",        required_argument,      0, 'm' },
+        { "version",        no_argument,            0, 'v' },
+        { "debug",          required_argument,      0, 'd' },
+        { "license",        optional_argument,      0, 'l' },
         { 0, 0, 0, 0 }
     };
 
 
 static Package * setUpInteractivePackage( MachineClass * vm ) {
-	Package * interactive_pkg = vm->getPackage( "interactive" );
-	Package * std_pkg = vm->getPackage( "std" );
-	interactive_pkg->import( 
-		Import(
-			fetchFacetSet( "public" ),	//	Import the public facet from ...
-			std_pkg,					//	... the standard library.
-			std::string( "std" ),		//	Alias is std.
-			true,						//	Protected = nonmaskable.
-			//NULL,						//	Not into.
-			NULL						//	Not into - or should it be the empty FacetSet???
-		)
-	);
-	return interactive_pkg;
+    Package * interactive_pkg = vm->getPackage( "interactive" );
+    Package * std_pkg = vm->getPackage( "std" );
+    interactive_pkg->import( 
+        Import(
+            fetchFacetSet( "public" ),  //  Import the public facet from ...
+            std_pkg,                    //  ... the standard library.
+            std::string( "std" ),       //  Alias is std.
+            true,                       //  Protected = nonmaskable.
+            //NULL,                     //  Not into.
+            NULL                        //  Not into - or should it be the empty FacetSet???
+        )
+    );
+    return interactive_pkg;
 }
 
 int main( int argc, char **argv, char **envp ) {
-	AppGinger appg;
+    AppGinger appg;
 
     for(;;) {
         int option_index = 0;
         int c = getopt_long( argc, argv, "CIBhm:vd:l", long_options, &option_index );
         if ( c == -1 ) break;
         switch ( c ) {
-			case 'C': {
+            case 'C': {
                 appg.setCgiMode();
-				break;
-			}
-			case 'I': {
-				appg.setInteractiveMode();
-				break;
-			}
-			case 'B': {
-				appg.setBatchMode();
-				break;
-			}
-			case 'd': {
-				//std::string option( optarg );
-				if ( std::string( optarg ) == std::string( "showcode" ) ) {
-					appg.setShowCode();
-				} else if ( std::string( optarg ) == std::string( "notrap" ) ) {
-					appg.setTrappingMishap( false );
-				} else if ( std::string( optarg ) == std::string( "gctrace" ) ) {
-					appg.setGCTrace( true );
-				} else {
-					std::cerr << "Invalid debug option: " << optarg << std::endl;
-					exit( EXIT_FAILURE );
-				}
-				break;
-			}
-            case 'h': {
-            	//	Eventually we will have a "home" for our auxillary
-            	//	files and this will simply go there. Or run a web
-            	//	browser pointed there.
-            	if ( optarg == NULL ) {
-					printf( "Usage :  appginger [options] [files]\n\n" );
-					printf( "OPTION                SUMMARY\n" );
-					printf( "-B, --batch           run in batch mode\n" );
-					printf( "-C, --cgi             run as CGI script\n" );
-					printf( "-I, --interactive     run interactively\n" );
-					printf( "-T, --terminate       stop on mishap\n" );
-					printf( "-d, --debug           add debug option (see --help=debug)\n" );
-					printf( "-h, --help            print out this help info (see --help=help)\n" );
-					printf( "-m<n>                 run using machine #n\n" );
-					printf( "-v, --version         print out version information and exit\n" );
-					printf( "-l, --license         print out license information and exit\n" );
-					printf( "\n" );
-				} else if ( std::string( optarg ) == "help" ) {
-					cout << "--help=debug          help on the debugging options available" << endl;
-					cout << "--help=help           this short help" << endl;
-					cout << "--help=licence        help on displaying license information" << endl;
-					cout << "--help=std            print out variables in std" << endl;
-				} else if ( std::string( optarg ) == "debug" ) {
-					cout << "--debug=showcode      Causes the generated instructions to be displayed." << endl;
-					cout << "--debug=notrap        Prevents mishaps being caught, for use with gdb." << endl;
-					cout << "--debug=gctrace       Causes the garbage collector to emit debugging statistics." << endl;
-				} else if ( std::string( optarg ) == "license" ) {
-					cout << "Displays key sections of the GNU Public License." << endl;
-					cout << "--license=warranty    Shows warranty." << endl;
-					cout << "--license=conditions  Shows terms and conditions." << endl;
-            	} else if ( std::string( optarg ) == std::string( "std" ) ) {
-					for (
-						SysMap::iterator it = sysMap.begin();
-						it != sysMap.end();
-						++it
-					) {
-						std::cout << it->first;
-						for ( int i = it->first.size(); i < 15; i++ ) {
-							std::cout << " ";
-						}
-						std::cout << "\t";
-						if ( it->second.docstring != NULL ) {
-							std::cout << it->second.docstring << std::endl;
-						} else {
-							std::cout << "-" << std::endl;
-						}
-					}
+                break;
+            }
+            case 'I': {
+                appg.setInteractiveMode();
+                break;
+            }
+            case 'B': {
+                appg.setBatchMode();
+                break;
+            }
+            case 'd': {
+                //std::string option( optarg );
+                if ( std::string( optarg ) == std::string( "showcode" ) ) {
+                    appg.setShowCode();
+                } else if ( std::string( optarg ) == std::string( "notrap" ) ) {
+                    appg.setTrappingMishap( false );
+                } else if ( std::string( optarg ) == std::string( "gctrace" ) ) {
+                    appg.setGCTrace( true );
                 } else {
-                	printf( "Unknown help topic %s\n", optarg );
+                    std::cerr << "Invalid debug option: " << optarg << std::endl;
+                    exit( EXIT_FAILURE );
+                }
+                break;
+            }
+            case 'h': {
+                //  Eventually we will have a "home" for our auxillary
+                //  files and this will simply go there. Or run a web
+                //  browser pointed there.
+                if ( optarg == NULL ) {
+                    printf( "Usage :  appginger [options] [files]\n\n" );
+                    printf( "OPTION                SUMMARY\n" );
+                    printf( "-B, --batch           run in batch mode\n" );
+                    printf( "-C, --cgi             run as CGI script\n" );
+                    printf( "-I, --interactive     run interactively\n" );
+                    printf( "-T, --terminate       stop on mishap\n" );
+                    printf( "-d, --debug           add debug option (see --help=debug)\n" );
+                    printf( "-h, --help            print out this help info (see --help=help)\n" );
+                    printf( "-m<n>                 run using machine #n\n" );
+                    printf( "-v, --version         print out version information and exit\n" );
+                    printf( "-l, --license         print out license information and exit\n" );
+                    printf( "\n" );
+                } else if ( std::string( optarg ) == "help" ) {
+                    cout << "--help=debug          help on the debugging options available" << endl;
+                    cout << "--help=help           this short help" << endl;
+                    cout << "--help=licence        help on displaying license information" << endl;
+                    cout << "--help=std            print out variables in std" << endl;
+                } else if ( std::string( optarg ) == "debug" ) {
+                    cout << "--debug=showcode      Causes the generated instructions to be displayed." << endl;
+                    cout << "--debug=notrap        Prevents mishaps being caught, for use with gdb." << endl;
+                    cout << "--debug=gctrace       Causes the garbage collector to emit debugging statistics." << endl;
+                } else if ( std::string( optarg ) == "license" ) {
+                    cout << "Displays key sections of the GNU Public License." << endl;
+                    cout << "--license=warranty    Shows warranty." << endl;
+                    cout << "--license=conditions  Shows terms and conditions." << endl;
+                } else if ( std::string( optarg ) == std::string( "std" ) ) {
+                    for (
+                        SysMap::iterator it = sysMap.begin();
+                        it != sysMap.end();
+                        ++it
+                    ) {
+                        std::cout << it->first;
+                        for ( int i = it->first.size(); i < 15; i++ ) {
+                            std::cout << " ";
+                        }
+                        std::cout << "\t";
+                        if ( it->second.docstring != NULL ) {
+                            std::cout << it->second.docstring << std::endl;
+                        } else {
+                            std::cout << "-" << std::endl;
+                        }
+                    }
+                } else {
+                    printf( "Unknown help topic %s\n", optarg );
                 }
                 exit( EXIT_SUCCESS );   //  Is that right?
             }
             case 'm' : {
-            	appg.setMachineImplNum( atoi( optarg ) );
-       			//printf( "Machine #%d (%s)\n", machine_impl_num, optarg );
-            	break;
+                appg.setMachineImplNum( atoi( optarg ) );
+                //printf( "Machine #%d (%s)\n", machine_impl_num, optarg );
+                break;
             }
             case 'v': {
-            	cout << "appginger: version " << appg.version() << " (" << __DATE__ << " " << __TIME__ << ")" << endl;
+                cout << "appginger: version " << appg.version() << " (" << __DATE__ << " " << __TIME__ << ")" << endl;
                 exit( EXIT_SUCCESS );   //  Is that right?
             }
             case 'l': {
-            	if ( optarg == NULL || std::string( optarg ) == std::string( "all" ) ) {
-            		appg.printGPL( NULL, NULL );
-            	} else if ( std::string( optarg ) == std::string( "warranty" ) ) {
-             		appg.printGPL( "Disclaimer of Warranty.", "Limitation of Liability." );           		
-            	} else if ( std::string( optarg ) == std::string( "conditions" ) ) {
-            		appg.printGPL( "TERMS AND CONDITIONS", "END OF TERMS AND CONDITIONS" );
-            	} else {
-                	std::cerr << "Unknown license option: " << optarg << std::endl;
-            		exit( EXIT_FAILURE );
-            	}
-                exit( EXIT_SUCCESS );   //  Is that right?            	
+                if ( optarg == NULL || std::string( optarg ) == std::string( "all" ) ) {
+                    appg.printGPL( NULL, NULL );
+                } else if ( std::string( optarg ) == std::string( "warranty" ) ) {
+                    appg.printGPL( "Disclaimer of Warranty.", "Limitation of Liability." );                 
+                } else if ( std::string( optarg ) == std::string( "conditions" ) ) {
+                    appg.printGPL( "TERMS AND CONDITIONS", "END OF TERMS AND CONDITIONS" );
+                } else {
+                    std::cerr << "Unknown license option: " << optarg << std::endl;
+                    exit( EXIT_FAILURE );
+                }
+                exit( EXIT_SUCCESS );   //  Is that right?              
             }
             case '?': {
                 break;
@@ -193,17 +206,17 @@ int main( int argc, char **argv, char **envp ) {
         }
     }
 
-	if ( appg.isInteractiveMode() ) {
-		//cout << "Welcome to AppGinger (" << VERSION << ")\n";
-		cout << "AppGinger " << VERSION << ", Copyright (c) 2010  Stephen Leach" << endl;
-		cout << "  +----------------------------------------------------------------------+" << endl;
-    	cout << "  | This program comes with ABSOLUTELY NO WARRANTY. It is free software, |" << endl;
-    	cout << "  | and you are welcome to redistribute it under certain conditions      |" << endl;
-    	cout << "  | it under certain conditions. Use option --help=license for details.  |" << endl;
-		cout << "  +----------------------------------------------------------------------+" << endl;
-	}
+    if ( appg.isInteractiveMode() ) {
+        //cout << "Welcome to AppGinger (" << VERSION << ")\n";
+        cout << "AppGinger " << VERSION << ", Copyright (c) 2010  Stephen Leach" << endl;
+        cout << "  +----------------------------------------------------------------------+" << endl;
+        cout << "  | This program comes with ABSOLUTELY NO WARRANTY. It is free software, |" << endl;
+        cout << "  | and you are welcome to redistribute it under certain conditions      |" << endl;
+        cout << "  | it under certain conditions. Use option --help=license for details.  |" << endl;
+        cout << "  +----------------------------------------------------------------------+" << endl;
+    }
 
-	if ( appg.isInteractiveMode() || appg.isBatchMode() ) {
+    if ( appg.isInteractiveMode() || appg.isBatchMode() ) {
         if ( optind < argc ) {
              cout << "non-option ARGV-elements: ";
              while ( optind < argc ) {
@@ -217,56 +230,56 @@ int main( int argc, char **argv, char **envp ) {
 
  
 #ifdef DBG_APPGINGER
-		clog << "RCEP ..." << endl;
+        clog << "RCEP ..." << endl;
 #endif
-		{
-			RCEP rcep( interactive_pkg );
-			if ( appg.isTrappingMishap() ) {
-				while ( rcep.read_comp_exec_print( vm, std::cin ) ) {};
-			} else {
-				while ( rcep.unsafe_read_comp_exec_print( vm, std::cin ) ) {};
-			}
-		}
+        {
+            RCEP rcep( interactive_pkg );
+            if ( appg.isTrappingMishap() ) {
+                while ( rcep.read_comp_exec_print( vm, std::cin ) ) {};
+            } else {
+                while ( rcep.unsafe_read_comp_exec_print( vm, std::cin ) ) {};
+            }
+        }
     } else if ( appg.isCgiMode() ) {
-		cout << "Content-type: text/html\r\n\r\n";
-		cout << "<html><head><title>AppGinger</title></head><body>\n";
-		cout << "<H1>AppGinger Version " << VERSION << "</H1>\n";
-		cout << "</body></html>\n";
-	} else {
-		fprintf( stderr, "Invalid execute mode" );
-		exit( EXIT_FAILURE );
-	}
+        cout << "Content-type: text/html\r\n\r\n";
+        cout << "<html><head><title>AppGinger</title></head><body>\n";
+        cout << "<H1>AppGinger Version " << VERSION << "</H1>\n";
+        cout << "</body></html>\n";
+    } else {
+        fprintf( stderr, "Invalid execute mode" );
+        exit( EXIT_FAILURE );
+    }
     return EXIT_SUCCESS;
 }
 
 MachineClass * AppGinger::newMachine() {
    switch ( this->machine_impl_num ) {
-		case 1: return new Machine1( *this );
-		case 2: return new Machine2( *this );
-		case 3: return new Machine3( *this );
-		default: {
-			cerr <<  "Invalid implementation (" << this->machine_impl_num << ") using implementation 1" << endl;
-			return new Machine1( *this );
-			break;
-		}
-	}
+        case 1: return new Machine1( *this );
+        case 2: return new Machine2( *this );
+        case 3: return new Machine3( *this );
+        default: {
+            cerr <<  "Invalid implementation (" << this->machine_impl_num << ") using implementation 1" << endl;
+            return new Machine1( *this );
+            break;
+        }
+    }
 }
 
-/*	N.B. The assumption that LICENSE.TXT lives in the same directory as the
-	appginger application is not correct. This is just a temporary fudge.
+/*  N.B. The assumption that LICENSE.TXT lives in the same directory as the
+    appginger application is not correct. This is just a temporary fudge.
 */
 void AppGinger::printGPL( const char * start, const char * end ) {
-	bool printing = false;
-	ifstream license( "LICENSE.TXT" );
-	std::string line;
-	while ( getline( license, line ) )  {
-		if ( !printing && ( start == NULL || line.find( start ) != string::npos ) ) {
-			printing = true;
-		} else if ( printing && end != NULL && line.find( end ) != string::npos ) {
-			printing = false;
-		}
-		if ( printing ) {
-			std::cout << line << std::endl;
-		}
-	}
+    bool printing = false;
+    ifstream license( "LICENSE.TXT" );
+    std::string line;
+    while ( getline( license, line ) )  {
+        if ( !printing && ( start == NULL || line.find( start ) != string::npos ) ) {
+            printing = true;
+        } else if ( printing && end != NULL && line.find( end ) != string::npos ) {
+            printing = false;
+        }
+        if ( printing ) {
+            std::cout << line << std::endl;
+        }
+    }
 }

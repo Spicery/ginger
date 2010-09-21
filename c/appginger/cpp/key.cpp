@@ -51,6 +51,7 @@ const char * keyName( Ref key ) {
 			case 13: return "Maplet";
 			case 14: return "Map";
 			case 15: return "MapEntry";
+			case 16: return "Indirection";
 			default: throw ToBeDone();
 		}
 	} else if ( IsFunctionKey( key ) ) {

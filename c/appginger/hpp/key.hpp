@@ -145,6 +145,7 @@ KEYLESS_KIND
 #define sysMapletKey			MAKE_KEY( 13, 2, RECORD_KIND )
 #define sysMapKey				MAKE_KEY( 14, 2, MAP_KIND )
 #define sysMapEntryKey			MAKE_KEY( 15, 3, RECORD_KIND )
+#define sysIndirectionKey		MAKE_KEY( 16, 1, RECORD_KIND )
 
 //	Recognisers
 #define IsPair( x )				( IsObj( x ) && ( *RefToPtr4( x ) == sysPairKey ) )

@@ -504,6 +504,14 @@ void Machine3::core( bool init_mode, Ref *pc ) {
         MELT;
         RETURN( pc );
     }
+    L_syscall_arg: {
+        SysCall * sys = ToSysCall( pc[ 1 ] );
+        FREEZE;
+        //	Skip the arg. The system call picks it up via pc[-1].
+        pc = (*sys)( pc + 3, vm );
+        MELT;
+        RETURN( pc );
+    }
     L_sysreturn: {
         VMPCFUNC = VMLINKFUNC;
         RETURN( VMLINK );
@@ -589,6 +597,7 @@ void Machine3::core( bool init_mode, Ref *pc ) {
         ins.spc_start = &&L_start;
         ins.spc_stringiterate = &&L_stringiterate;
         ins.spc_syscall = &&L_syscall;
+        ins.spc_syscall_arg = &&L_syscall_arg;
         ins.spc_sysreturn = &&L_sysreturn;
         ins.spc_vectoriterate = &&L_vectoriterate;
         return;

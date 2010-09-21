@@ -34,6 +34,7 @@ extern void vmiPUSHID( Plant plant, Ident id );
 extern void vmiPOPID( Plant plant, Ident id );
 extern void vmiINSTRUCTION( Plant plant, Instruction instr );
 extern void vmiSYS_CALL( Plant plant, SysCall * r );
+extern void vmiSYS_CALL_ARG( Plant plant, SysCall * r, void * data );
 extern void vmiSET_SYS_CALL( Plant plant, SysCall * r, int A );
 extern void vmiSYS_RETURN( Plant plant );
 extern void vmiRETURN( Plant plant );

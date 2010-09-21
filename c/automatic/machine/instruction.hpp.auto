@@ -56,5 +56,6 @@
     vmc_start,
     vmc_stringiterate,
     vmc_syscall,
+    vmc_syscall_arg,
     vmc_sysreturn,
     vmc_vectoriterate

@@ -557,6 +557,15 @@ static void spcfn_syscall( void ) {
     RETURN( pc );
 }
 
+static void spcfn_syscall_arg( void ) {
+    SysCall * sys = ToSysCall( pc[ 1 ] );
+    FREEZE;
+    //	Skip the arg. The system call picks it up via pc[-1].
+    pc = (*sys)( pc + 3, vm );
+    MELT;
+    RETURN( pc );
+}
+
 static void spcfn_sysreturn( void ) {
     VMPCFUNC = VMLINKFUNC;
     RETURN( VMLINK );
@@ -643,6 +652,7 @@ InstructionSet2::InstructionSet2() {
     this->spc_start = (Ref)spcfn_start;
     this->spc_stringiterate = (Ref)spcfn_stringiterate;
     this->spc_syscall = (Ref)spcfn_syscall;
+    this->spc_syscall_arg = (Ref)spcfn_syscall_arg;
     this->spc_sysreturn = (Ref)spcfn_sysreturn;
     this->spc_vectoriterate = (Ref)spcfn_vectoriterate;
 }

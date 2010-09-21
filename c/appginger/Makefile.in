@@ -1,5 +1,8 @@
 all:
 	$(MAKE) -C cpp $@
+	
+dox:
+	doxygen
 
 clean:
 	$(MAKE) -C cpp $@

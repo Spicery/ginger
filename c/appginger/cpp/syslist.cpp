@@ -25,7 +25,7 @@ Ref * sysNewList( Ref * pc, class MachineClass * vm ) {
 	Ref sofar = sys_nil;
 	int n = vm->count;
 	//std::cerr << "Count " << n << std::endl;
-	XfrClass xfr( vm->heap().preflight( pc, 3 * n ) );
+	XfrClass xfr( vm->heap().preflight( pc, PAIR_SIZE * n ) );
 	for ( int i = 0; i < n; i++ ) {
 		xfr.setOrigin();
 		xfr.xfrRef( sysPairKey );
@@ -48,7 +48,7 @@ Ref * sysNewListOnto( Ref * pc, class MachineClass * vm ) {
 	if ( n < 0 ) throw "Too few arguments";
 	Ref sofar = vm->fastPop();
 	//std::cerr << "Count " << n << std::endl;
-	XfrClass xfr( vm->heap().preflight( pc, 3 * n ) );
+	XfrClass xfr( vm->heap().preflight( pc, PAIR_SIZE * n ) );
 	for ( int i = 0; i < n; i++ ) {
 		xfr.setOrigin();
 		xfr.xfrRef( sysPairKey );

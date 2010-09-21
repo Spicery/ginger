@@ -1,6 +1,6 @@
 /******************************************************************************\
-	Copyright (c) 2010 Stephen Leach. AppGinger is distributed under the terms 
-	of the GNU General Public License. This file is part of AppGinger.
+    Copyright (c) 2010 Stephen Leach. AppGinger is distributed under the terms 
+    of the GNU General Public License. This file is part of AppGinger.
 
     AppGinger is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -16,17 +16,14 @@
     along with AppGinger.  If not, see <http://www.gnu.org/licenses/>.
 \******************************************************************************/
 
-#ifndef LIST_LAYOUT_HPP
-#define LIST_LAYOUT_HPP
+#ifndef INDIRECTION_LAYOUT_HPP
+#define INDIRECTION_LAYOUT_HPP
 
 #include "common.hpp"
 
-#define PAIR_HEAD_OFFSET 1
-#define PAIR_TAIL_OFFSET 2
-#define PAIR_SIZE 3
+#define INDIRECTION_CONT_OFFSET 1
 
-extern bool isList( Ref r );
-extern Ref fastPairHead( Ref r );
-extern Ref fastPairTail( Ref r );
+///	Argument for preflight of an indirection
+#define INDIRECTION_SIZE 2
 
 #endif

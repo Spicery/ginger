@@ -9,7 +9,7 @@ OBJS=mishap.o term.o read_xml.o \
 	rcep.o arity.o lift.o ident.o \
 	dict.o package.o \
 	sys.o syskey.o sysequals.o sysprint.o syslist.o sysvector.o sysstring.o \
-	syssymbol.o sysmap.o \
+	syssymbol.o sysmap.o sysindirection.o \
 	sysfunction.o \
 	destination.o heap.o \
 	key.o \

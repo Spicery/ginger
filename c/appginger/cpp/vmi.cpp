@@ -6,6 +6,7 @@
 #include "mishap.hpp"
 #include "printfn.hpp"
 #include "instruction.hpp"
+#include "sysindirection.hpp"
 
 #include <stdio.h>
 
@@ -38,6 +39,20 @@ void vmiSYS_CALL( Plant plant, SysCall * r ) {
 	emitSPC( plant, vmc_syscall );
 	emitRef( plant, ToRef( r ) );
 }
+
+/**
+	Plants a non-garbage collectable reference as extra data for
+	the system call, to be accessed via pc[-1].
+	@param plant the code-planter
+	@param r the system call
+	@param data arbitrary data, size compatible with void*
+*/
+void vmiSYS_CALL_ARG( Plant plant, SysCall * r, void* data ) {
+	emitSPC( plant, vmc_syscall_arg );
+	emitRef( plant, ToRef( r ) );
+	emitRef( plant, ToRef( data ) );
+}
+
 
 void vmiSET_SYS_CALL( Plant plant, SysCall * r, int A ) {
 	emitSPC( plant, vmc_set_syscall );
@@ -110,7 +125,9 @@ void vmiCHAIN_LITE( Plant plant, Ref fn, long N ) {
 
 */
 void vmiNEWID( Plant plant, Ident id ) {
-	//	Not implemented yet.
+	if ( id->isShared() ) {
+		vmiSYS_CALL_ARG( plant, sysMakeIndirection, (void *)id->getFinalSlot() );
+	}
 }
 
 /** vmiCOPYID only affects mutable outer variables. If the
@@ -126,12 +143,16 @@ void vmiNEWID( Plant plant, Ident id ) {
     @param id an ident-record 
 */
 void vmiCOPYID( Plant plant, Ident id ) {
-	//	Not implemented yet.
+	if ( id->isShared() ) {
+		vmiSYS_CALL_ARG( plant, sysCopyIndirection, (void*)id->getFinalSlot() );
+	}
 }
 
 
 void vmiPOPID( Plant plant, Ident id ) {
-	if ( id->isLocal() ) {
+	if ( id->isShared() ) {
+		vmiSYS_CALL_ARG( plant, sysPopIndirection, (void *)id->getFinalSlot() );
+	} else if ( id->isLocal() ) {
 		emitSPC( plant, vmc_pop_local );
 		emitRef( plant, ToRef( id->getFinalSlot() ) );
 	} else {
@@ -141,7 +162,9 @@ void vmiPOPID( Plant plant, Ident id ) {
 }
 
 void vmiPUSHID( Plant plant, Ident id ) {
-	if ( id->isLocal() ) {
+	if ( id->isShared() ) {
+		vmiSYS_CALL_ARG( plant, sysPushIndirection, (void *)id->getFinalSlot() );
+	} else if ( id->isLocal() ) {
 		switch ( id->getFinalSlot() ) {
 		case 0:
 			emitSPC( plant, vmc_push_local0 );

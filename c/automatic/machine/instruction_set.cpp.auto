@@ -58,6 +58,7 @@ const char * InstructionSet::name( Ref spc ) const {
         spc == spc_start ? "start" :
         spc == spc_stringiterate ? "stringiterate" :
         spc == spc_syscall ? "syscall" :
+        spc == spc_syscall_arg ? "syscall_arg" :
         spc == spc_sysreturn ? "sysreturn" :
         spc == spc_vectoriterate ? "vectoriterate" :
         "?"
@@ -98,6 +99,7 @@ const char * InstructionSet::signature( Ref x ) const {
     if ( x == spc_set_syscall ) return "irr";
     if ( x == spc_start ) return "ir";
     if ( x == spc_syscall ) return "ir";
+    if ( x == spc_syscall_arg ) return "irr";
     return "i";
 }
 
@@ -161,6 +163,7 @@ Ref InstructionSet::lookup( Instruction instr ) const {
     case vmc_start: return this->spc_start;
     case vmc_stringiterate: return this->spc_stringiterate;
     case vmc_syscall: return this->spc_syscall;
+    case vmc_syscall_arg: return this->spc_syscall_arg;
     case vmc_sysreturn: return this->spc_sysreturn;
     case vmc_vectoriterate: return this->spc_vectoriterate;
     }

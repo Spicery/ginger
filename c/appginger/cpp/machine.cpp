@@ -154,8 +154,8 @@ Ref * MachineClass::instructionShow( ostream & out, Ref *pc ) {
 				break;
 			}
 			case 'v': {
-				IdentClass *id = (IdentClass *)RefToPtr4( *pc );
-				out << id->getNameString() << " ";
+				Valof * valof = (Valof *)( *pc );
+				out << "valof@" << valof;
 				break;
 			}
 			default:

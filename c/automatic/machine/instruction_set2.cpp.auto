@@ -196,9 +196,9 @@ static void spcfn_end( void ) {
 }
 
 static void spcfn_end1_calls( void ) {
-    Ref r = *( VMVP-- );
+    Ref r = *( VMVP-- );							//	Reduce stack by 1, safely.
     long var = ToLong( pc[ 1 ] );
-    VMCOUNT = ( VMVP - ToRefRef( LOCAL( var ) ) ) - 1;
+    VMCOUNT = ( VMVP - ToRefRef( LOCAL( var ) ) );	//	Stack reduced by 1 already, don't redo.
     {    
         Ref *ptr;
         if ( !IsObj( r ) ) call_error( r );
@@ -560,7 +560,8 @@ static void spcfn_syscall( void ) {
 static void spcfn_syscall_arg( void ) {
     SysCall * sys = ToSysCall( pc[ 1 ] );
     FREEZE;
-    //	Skip the arg. The system call picks it up via pc[-1].
+    //	Skip the data arg. The system call picks it up via pc[-1]. Note that
+    //	it is NOT garbage collected. That means it cannot be an object.
     pc = (*sys)( pc + 3, vm );
     MELT;
     RETURN( pc );

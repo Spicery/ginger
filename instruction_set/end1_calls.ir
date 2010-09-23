@@ -1,6 +1,6 @@
-Ref r = *( VMVP-- );
+Ref r = *( VMVP-- );							//	Reduce stack by 1, safely.
 long var = ToLong( pc[ 1 ] );
-VMCOUNT = ( VMVP - ToRefRef( LOCAL( var ) ) ) - 1;
+VMCOUNT = ( VMVP - ToRefRef( LOCAL( var ) ) );	//	Stack reduced by 1 already, don't redo.
 {    
     Ref *ptr;
     if ( !IsObj( r ) ) call_error( r );

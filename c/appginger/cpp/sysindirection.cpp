@@ -16,6 +16,8 @@
     along with AppGinger.  If not, see <http://www.gnu.org/licenses/>.
 \******************************************************************************/
 
+#include "debug.hpp"
+
 #include <iostream>
 using namespace std;
 
@@ -26,7 +28,6 @@ using namespace std;
 #include "machine.hpp"
 #include "mishap.hpp"
 
-//#define DBG_LIFTING
 
 /**
 	sysMakeIndirection will be called with pc[-1] storing the

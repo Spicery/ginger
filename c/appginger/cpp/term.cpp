@@ -16,6 +16,8 @@
     along with AppGinger.  If not, see <http://www.gnu.org/licenses/>.
 \******************************************************************************/
 
+#include "debug.hpp"
+
 #include <iostream>
 #include <vector>
 #include <cstdarg>

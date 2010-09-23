@@ -183,9 +183,9 @@ void Machine3::core( bool init_mode, Ref *pc ) {
         RETURN( pc + 1 );
     }
     L_end1_calls: {
-        Ref r = *( VMVP-- );
+        Ref r = *( VMVP-- );							//	Reduce stack by 1, safely.
         long var = ToLong( pc[ 1 ] );
-        VMCOUNT = ( VMVP - ToRefRef( LOCAL( var ) ) ) - 1;
+        VMCOUNT = ( VMVP - ToRefRef( LOCAL( var ) ) );	//	Stack reduced by 1 already, don't redo.
         {    
             Ref *ptr;
             if ( !IsObj( r ) ) call_error( r );
@@ -507,7 +507,8 @@ void Machine3::core( bool init_mode, Ref *pc ) {
     L_syscall_arg: {
         SysCall * sys = ToSysCall( pc[ 1 ] );
         FREEZE;
-        //	Skip the arg. The system call picks it up via pc[-1].
+        //	Skip the data arg. The system call picks it up via pc[-1]. Note that
+        //	it is NOT garbage collected. That means it cannot be an object.
         pc = (*sys)( pc + 3, vm );
         MELT;
         RETURN( pc );

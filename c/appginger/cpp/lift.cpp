@@ -22,6 +22,8 @@
 //    Lifting is a non-trivial task so I am deferring that in order to
 //    make progress on more basic issues.
 
+#include "debug.hpp"
+
 #include <iostream>
 #include <vector>
 #include <list>

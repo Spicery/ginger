@@ -16,6 +16,8 @@
     along with AppGinger.  If not, see <http://www.gnu.org/licenses/>.
 \******************************************************************************/
 
+#include "debug.hpp"
+
 #include <iostream>
 #include <fstream>
 using namespace std;
@@ -36,8 +38,7 @@ using namespace std;
 #include <cstdio>
 
 //#define DBG_RCEP
-//#define DBG_CRAWL
-//#define DBG_LIFTING
+
 
 #ifdef DBG_CRAWL
 

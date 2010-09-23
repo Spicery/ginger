@@ -16,6 +16,8 @@
     along with AppGinger.  If not, see <http://www.gnu.org/licenses/>.
 \******************************************************************************/
 
+#include "debug.hpp"
+
 #include "plant.hpp"
 
 #include <iostream>
@@ -40,7 +42,6 @@ using namespace std;
 #ifndef NULL
 #define NULL 0
 #endif
-
 
 PlantClass::PlantClass( Machine vm ) {
 	this->nlocals = 0;
@@ -406,7 +407,9 @@ void PlantClass::compileTerm( Term term ) {
 			Term body = ftc->child( 1 );
 			
 			if ( ftc->hasOuters() ) {
-				cerr << "Function " << ftc->name() << " has outers" << endl;
+				#ifdef DBG_LIFTING
+					cerr << "Function " << ftc->name() << " has outers" << endl;
+				#endif
 				int N = ftc->sizeOuters();
 				for ( int i = 0; i < N; i++ ) {
 					vmiPUSH_INNER_SLOT( this, ftc->outer( i )->getFinalSlot() );

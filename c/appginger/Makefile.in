@@ -2,7 +2,7 @@ all:
 	$(MAKE) -C cpp $@
 	
 dox:
-	doxygen
+	doxygen Doxyfile
 
 clean:
 	$(MAKE) -C cpp $@

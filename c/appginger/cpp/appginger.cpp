@@ -82,7 +82,6 @@ static Package * setUpInteractivePackage( MachineClass * vm ) {
             std_pkg,                    //  ... the standard library.
             std::string( "std" ),       //  Alias is std.
             true,                       //  Protected = nonmaskable.
-            //NULL,                     //  Not into.
             NULL                        //  Not into - or should it be the empty FacetSet???
         )
     );

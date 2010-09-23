@@ -31,6 +31,7 @@ extern void vmiPUSHQ( Plant plant, Ref obj );
 extern void vmiNEWID( Plant plant, Ident id );
 extern void vmiCOPYID( Plant plant, Ident id );
 extern void vmiPUSHID( Plant plant, Ident id );
+extern void vmiPUSH_INNER_SLOT( Plant plant, int slot );
 extern void vmiPOPID( Plant plant, Ident id );
 extern void vmiINSTRUCTION( Plant plant, Instruction instr );
 extern void vmiSYS_CALL( Plant plant, SysCall * r );

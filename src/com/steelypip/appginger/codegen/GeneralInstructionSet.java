@@ -283,6 +283,10 @@ public abstract class GeneralInstructionSet {
 		return new GenericInstruction();	
 	}
 	
+	public Instruction syscall_arg_irr() {
+		return new GenericInstruction();	
+	}
+	
 	public Instruction sysreturn_i() {
 		return new GenericInstruction();	
 	}

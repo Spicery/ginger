@@ -69,6 +69,7 @@ public abstract class Implementation extends GeneralInstructionSet {
 		answer.add( this.start_ir().init( "start", "ir" ) );
 		answer.add( this.stringiterate_i().init( "stringiterate", "i" ) );
 		answer.add( this.syscall_ir().init( "syscall", "ir" ) );
+		answer.add( this.syscall_arg_irr().init( "syscall_arg", "irr" ) );
 		answer.add( this.sysreturn_i().init( "sysreturn", "i" ) );
 		answer.add( this.vectoriterate_i().init( "vectoriterate", "i" ) );
 		return this.cached = answer;

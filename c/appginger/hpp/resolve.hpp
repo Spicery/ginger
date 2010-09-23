@@ -16,13 +16,13 @@
     along with AppGinger.  If not, see <http://www.gnu.org/licenses/>.
 \******************************************************************************/
 
-#ifndef LIFT_HPP
-#define LIFT_HPP
+#ifndef RESOLVE_HPP
+#define RESOLVE_HPP
 
 #include "term.hpp"
 #include "package.hpp"
 
-Term liftTerm( Package * pkg, Term term );		
+Term resolveTerm( Package * pkg, Term term, bool & needs_lifting );
 
 #endif
 

@@ -36,6 +36,7 @@ private:
 	bool				is_local;
 	bool 				is_outer;
 	bool				is_assigned;
+	bool				is_shared;
 	int					slot;
 	FnTermClass *		func;
 
@@ -56,7 +57,8 @@ public:
 	void setOuter() { this->is_outer = true; }
 	bool isOuter() { return this->is_outer; }
 	bool isInner() { return this->is_local && !this->is_outer; }
-	bool isShared() { return this->is_outer && this->is_assigned; }
+	bool isShared() { return this->is_shared || ( this->is_outer && this->is_assigned ); }
+	void setShared() { this->is_shared = true; }
 	
 public:
 	void setSlot( int n ) { this->slot = n; }
@@ -82,8 +84,9 @@ typedef shared< IdentClass > Ident;
 
 
 Ident ident_new_local( const std::string & nm, FnTermClass * fn );
+Ident ident_new_last_arg( const std::string & nm, FnTermClass * fn );
 Ident ident_new_tmp( int n );
-Ident ident_new_global( const std::string & nm, const FacetSet * facets );
+Ident ident_new_global( const std::string nm, const FacetSet * facets );
 
 #endif
 

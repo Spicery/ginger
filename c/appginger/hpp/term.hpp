@@ -314,13 +314,15 @@ private:
 	const std::string	alias_data;
 	const std::string 	name_data;
 	Ident				ident_data;
+	bool				is_outer_ref;		
 
 public:
 	NamedTermMixin( enum NamedRefType r, const char * p, const char * a, const char * nm ) :
 		ref_type( r ),
 		pkg_data( p ),
 		alias_data( a ),
-		name_data( nm )
+		name_data( nm ),
+		is_outer_ref( false )
 	{
 	}
 	
@@ -328,7 +330,8 @@ public:
 		ref_type( r ),
 		pkg_data( p ),
 		alias_data( a ),
-		name_data( nm )
+		name_data( nm ),
+		is_outer_ref( false )
 	{	
 	}
 	
@@ -339,6 +342,9 @@ public:
 	Ident & ident() {
 		return this->ident_data;
 	}
+	
+	bool isOuterReference() { return this->is_outer_ref; }
+	void setOuterReference() { this->is_outer_ref = true; }
 	
 	const char * type_name() { return "NamedTermClass"; }
 
@@ -361,6 +367,8 @@ public:
 	enum NamedRefType refType() {
 		return this->ref_type;
 	}
+	
+	
 	
 };
 
@@ -427,10 +435,12 @@ private:
 	int 					nlocals_data;
 	int 					ninputs_data;
 	std::vector< Ident >	outers;
+	std::vector< Ident >	inners;
 	
 public:
 	const std::string & name() { return this->name_data; }
 	void addOuter( Ident id );
+	void addInner( Ident id );
 
 public:
 	FnTermClass( std::string name, Term arg, Term body ) :
@@ -480,6 +490,9 @@ public:
 	}
 	
 	const char * type_name() { return "FnTermClass"; }
+	
+	void setAsFinalInput( Ident new_input );
+
 
 	
 public:

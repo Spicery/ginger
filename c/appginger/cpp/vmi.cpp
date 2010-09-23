@@ -148,16 +148,33 @@ void vmiCOPYID( Plant plant, Ident id ) {
 	}
 }
 
+void vmiPOP_INNER_SLOT( Plant plant, int slot ) {
+	emitSPC( plant, vmc_pop_local );
+	emitRef( plant, ToRef( slot ) );	
+}
 
 void vmiPOPID( Plant plant, Ident id ) {
 	if ( id->isShared() ) {
 		vmiSYS_CALL_ARG( plant, sysPopIndirection, (void *)id->getFinalSlot() );
 	} else if ( id->isLocal() ) {
-		emitSPC( plant, vmc_pop_local );
-		emitRef( plant, ToRef( id->getFinalSlot() ) );
+		vmiPOP_INNER_SLOT( plant, id->getFinalSlot() );
 	} else {
 		emitSPC( plant, vmc_pop_global );
 		emitValof( plant, id->value_of );
+	}
+}
+
+void vmiPUSH_INNER_SLOT( Plant plant, int slot ) {
+	switch ( slot ) {
+	case 0:
+		emitSPC( plant, vmc_push_local0 );
+		return;
+	case 1:
+		emitSPC( plant, vmc_push_local1 );
+		return;
+	default:	
+		emitSPC( plant, vmc_push_local );
+		emitRef( plant, ToRef( slot ) );
 	}
 }
 
@@ -165,17 +182,7 @@ void vmiPUSHID( Plant plant, Ident id ) {
 	if ( id->isShared() ) {
 		vmiSYS_CALL_ARG( plant, sysPushIndirection, (void *)id->getFinalSlot() );
 	} else if ( id->isLocal() ) {
-		switch ( id->getFinalSlot() ) {
-		case 0:
-			emitSPC( plant, vmc_push_local0 );
-			return;
-		case 1:
-			emitSPC( plant, vmc_push_local1 );
-			return;
-		default:	
-			emitSPC( plant, vmc_push_local );
-			emitRef( plant, ToRef( id->getFinalSlot() ) );
-		}
+		vmiPUSH_INNER_SLOT( plant, id->getFinalSlot() );
 	} else {
 		emitSPC( plant, vmc_push_global );
 		emitValof( plant, id->value_of );

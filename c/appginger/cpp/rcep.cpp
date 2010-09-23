@@ -28,6 +28,7 @@ using namespace std;
 #include "vmi.hpp"
 #include "mishap.hpp"
 #include "lift.hpp"
+#include "resolve.hpp"
 
 #include <setjmp.h>
 #include <time.h>
@@ -36,6 +37,7 @@ using namespace std;
 
 //#define DBG_RCEP
 //#define DBG_CRAWL
+//#define DBG_LIFTING
 
 #ifdef DBG_CRAWL
 
@@ -96,7 +98,15 @@ bool RCEP::unsafe_read_comp_exec_print( Machine vm, istream & input ) {
 			fflush( stderr );
         #endif
 
-		term = lift_term( this->current_package, term );
+		bool needs_lifting;
+		term = resolveTerm( this->current_package, term, needs_lifting );
+		
+		#ifdef DBG_LIFTING
+			cerr << "Lifting needed? " << needs_lifting << endl;
+		#endif
+		if ( needs_lifting ) {
+			term = liftTerm( this->current_package, term );	
+		}
 
         #ifdef DBG_RCEP
 			fprintf( stderr, "After lifting\n" );

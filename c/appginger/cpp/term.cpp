@@ -29,29 +29,31 @@ using namespace std;
 
 #include <stdio.h>
 
+//#define DBG_LIFTING
+
 
 void TermClass::add( Term t ) {
-	cerr << this->type_name() << endl;
+	std::cerr << this->type_name() << std::endl;
 	throw "No add for this type";
 }
 
 Ref TermClass::ref() {
-	cerr << this->type_name() << endl;
+	std::cerr << this->type_name() << std::endl;
 	throw "No ref for this type";
 }
 
 Ident & TermClass::ident() {
-	cerr << this->type_name() << endl;
+	std::cerr << this->type_name() << std::endl;
 	throw "No ident for this type";
 }
 
 enum NamedRefType TermClass::refType() {
-	cerr << this->type_name() << endl;
+	std::cerr << this->type_name() << std::endl;
 	throw "No refType for this type";
 }
 
 const std::string & TermClass::pkg() {
-	cerr << this->type_name() << endl;
+	std::cerr << this->type_name() << std::endl;
 	throw "No package name for this type";
 }
 
@@ -61,7 +63,7 @@ const std::string & TermClass::name() {
 }
 
 const std::string TermClass::url() {
-	cerr << this->type_name() << endl;
+	std::cerr << this->type_name() << std::endl;
 	throw "No package name for this type";
 }
 
@@ -283,6 +285,29 @@ int term_count( Term term ) {
 void FnTermClass::addOuter( Ident id ) {
 	this->outers.push_back( id );
 }
+
+void FnTermClass::addInner( Ident id ) {
+	this->inners.push_back( id );
+}
+
+void FnTermClass::setAsFinalInput( Ident new_input ) {
+	int N = this->ninputs_data++;
+
+	#ifdef DBG_LIFTING
+		cerr << "Bumping #inputs for " << this->name() << " from " << this->ninputs_data-1 << " to " << this->ninputs_data << endl;
+	#endif
+	
+	//	Now we need to swap nin and slot. Check there is a need to make
+	//	changes!
+	int slot = new_input->getFinalSlot();
+	if ( N != slot ) {
+		for ( std::vector< Ident >::iterator it = this->inners.begin(); it != this->inners.end(); ++it ) {
+			it->get()->swapSlot( N, slot );
+		}
+	
+	}
+}
+
 
 
 //-- printing -----------------------------------------------------------

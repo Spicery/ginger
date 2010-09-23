@@ -16,12 +16,17 @@
     along with AppGinger.  If not, see <http://www.gnu.org/licenses/>.
 \******************************************************************************/
 
+#include <iostream>
+using namespace std;
+
 #include "sysindirection.hpp"
 #include "indirectionlayout.hpp"
 #include "key.hpp"
 #include "cage.hpp"
 #include "machine.hpp"
 #include "mishap.hpp"
+
+//#define DBG_LIFTING
 
 /**
 	sysMakeIndirection will be called with pc[-1] storing the
@@ -33,7 +38,11 @@ Ref * sysMakeIndirection( Ref * pc, class MachineClass * vm ) {
 	xfr.setOrigin();
 	xfr.xfrRef( sysIndirectionKey );
 	xfr.xfrRef( sys_absent );
-	vm->sp[ ToULong( pc[-1] ) ] = xfr.makeRef();
+	Ref r = xfr.makeRef();
+	vm->sp[ ToULong( pc[-1] ) ] = r;
+	#ifdef DBG_LIFTING
+		cerr << "Made indirection " << r << endl;
+	#endif
 	return pc;
 }
 
@@ -50,7 +59,7 @@ Ref & fastIndirectionCont( Ref indirection ) {
 	fast and dangerous!
 */
 Ref * sysCopyIndirection( Ref * pc, class MachineClass * vm ) {
-	Ref & var = vm->sp[ ToULong( pc[-1] ) ];
+	Ref & var = vm->vp[ ToULong( pc[-1] ) ];
 	XfrClass xfr( vm->heap().preflight( pc, INDIRECTION_SIZE ) );
 	xfr.setOrigin();
 	xfr.xfrRef( sysIndirectionKey );
@@ -65,7 +74,7 @@ Ref * sysCopyIndirection( Ref * pc, class MachineClass * vm ) {
 	fast and dangerous!
 */
 Ref * sysPushIndirection( Ref * pc, class MachineClass * vm ) {
-	Ref & var = vm->sp[ ToULong( pc[-1] ) ];
+	Ref var = vm->sp[ ToULong( pc[-1] ) ];
 	vm->fastPush( fastIndirectionCont( var ) );
 	return pc;
 }
@@ -76,7 +85,7 @@ Ref * sysPushIndirection( Ref * pc, class MachineClass * vm ) {
 	fast and dangerous!
 */
 Ref * sysPopIndirection( Ref * pc, class MachineClass * vm ) {
-	Ref & var = vm->sp[ ToULong( pc[-1] ) ];
-	var = fastIndirectionCont( vm->fastPop() );
+	Ref var = vm->sp[ ToULong( pc[-1] ) ];
+	fastIndirectionCont( var ) = vm->fastPop();
 	return pc;
 }

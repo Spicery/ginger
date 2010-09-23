@@ -38,221 +38,56 @@ using namespace std;
     #include <stdio.h>
 #endif
 
-//----------------------------------------------------------------------
-
-enum Lookup {
-    Global,
-    InnerLocal,
-    OuterLocal
-};
-
-//- environment --------------------------------------------------------
-
-struct Scope { 
-	std::vector< Ident > 	data;
-	FnTermClass *			fn;
-	
-	Scope( FnTermClass * f ) : fn( f ) {
-	}
-};
-
-class Env {
-private:
-	std::vector< Scope > idents;
-
-public:	
-	void add( Ident id ) {
-		this->idents.back().data.push_back( id );
-	}
-	
-	FnTermClass * getFunction( const int n ) const {
-		return this->idents[ n ].fn;
-	}
-	
-	void setAsFinalInput( int from_index, Ident new_input ) {
-		FnTermClass * f = this->idents[ from_index ].fn;
-		int & nin = f->ninputs();
-	
-		nin += 1;
-		int slot = new_input->getFinalSlot();
-		cerr << "Bumping #inputs for " << f->name() << " from " << nin-1 << " to " << nin << endl;
-		
-		//	Now we need to swap nin and slot. Check there is a need to make
-		//	changes!
-		if ( nin != slot ) {	
-			int N = this->idents.size();
-			for ( int i = from_index; i < N; i++ ) {
-				Scope & le = this->idents[ i ];
-				if ( le.fn != NULL && i > from_index ) break;
-				
-				std::vector< Ident > & v = le.data;
-				for ( std::vector< Ident >::iterator it = v.begin(); it != v.end(); ++it ) {
-					it->get()->swapSlot( nin, slot );
-				}
-			}
-		}
-	}
-		
-	void capturingFunctions( Ident & outer, std::list< int >  & index_of_functions ) {
-		for ( int i = this->idents.size() - 1; i >= 0; i-- ) {
-			Scope & le = this->idents[ i ];
-			FnTermClass * f = le.fn;
-			if ( f ) {
-				index_of_functions.push_front( i );
-			}
-			if ( f == outer->function() ) return;
-		}		
-		throw Unreachable();
-	}
-	
-	Ident search( const std::string & c ) {
-		for ( std::vector< Scope >::reverse_iterator it = this->idents.rbegin(); it != this->idents.rend(); ++it ) {
-			Scope & le = *it;
-			std::vector< Ident > & v = le.data;
-			for ( std::vector< Ident >::reverse_iterator jt = v.rbegin(); jt != v.rend(); ++jt ) {
-				Ident ident = *jt;
-				const std::string & ic = ident->getNameString();
-				#ifdef DBG_LIFT
-					fprintf( stderr, "Comparing %s with %s\n", c.c_str(), ic.c_str() );
-				#endif
-				if ( c == ic ) {
-					return ident;
-				}		
-			}
-		}
-		return shared< IdentClass >();
-	}
-	
-	void mark( FnTermClass * fn ) {
-		this->idents.push_back( Scope( fn ) );
-	}
-	
-	void cutToMark() {
-		this->idents.pop_back();
-	}
-
-};
-
 
 //-- lift state --------------------------------------------------------
 
 class LiftStateClass {
 public:
-    Package *		package;
-    int         	level;
-    FnTermClass * 	function;
-    Env        		env;
+    vector< FnTermClass * > ancestors;
+    vector< list< Ident > > substitutes;
     
 private:    
-    enum Lookup lookup( IdTermClass * t, Ident *id );
-	Term general_lift( Term term );
-
+	void capturingFunctions( Ident & outer, list< int > & index_of_functions );
+    Ident lookup( const string & name );
+	Term generalLift( Term term );
 
 public:    
-	void addIdent( NamedTermMixin * arg, FnTermClass * fn, int & slot );
     Term lift( Term term );
     
 public:   
-	LiftStateClass( Package * pkg, int level ) :
-		package( pkg ),
-		level( level ),
-		function( NULL )
-	{	
-	}
+	LiftStateClass() {}
 };
 
-static void lookupAndAddGlobal( Package * current, VarTermClass * t ) {
-	const std::string & pkg = t->pkg();
-	const std::string & c = t->name();
-	const FacetSet * facets = t->facets();
-	switch ( t->refType() ) {
-		case LOCAL_REF_TYPE: {
-			Package * p = current;
-			t->ident() = p->lookup_or_add( c, facets );
-			break;
-		}
-		case ABSOLUTE_REF_TYPE: {
-			Package * p = current->getPackage( pkg );
-			t->ident() = p->lookup_or_add( c, facets );
-			break;
-		}
-		case ALIAS_REF_TYPE: {
-			Import * imp = current->getAlias( t->alias() );
-			const FacetSet * m = imp->matchingTags();
-		
-			//cout << "ALIAS DECLARATION" << endl;
-			//cout << "Import facet : " << *m << endl;
-			//cout << "Declaration facets: " << *facets << endl;
-		
-			if ( imp != NULL && facets->isntEmptyIntersection( m ) ) {
-				Ident id = imp->package()->lookup_or_add( c, facets );
-				t->ident() = id;
-			} else if ( imp != NULL ) {
-				throw Mishap( "Declaration in package referenced by alias of an import would not be exported" );
-			} else {
-				throw Mishap( "No such alias" );
-			}
-			break;
-		}
-	}
-}
 
-static Ident lookupGlobal( Package * current, IdTermClass * t ) {
-	const std::string & pkg = t->pkg();
-	const std::string & c = t->name();
-	switch ( t->refType() ) {
-		case LOCAL_REF_TYPE: {
-			return current->lookup( c, true );
-		}
-		case ABSOLUTE_REF_TYPE: {
-			Package * p = current->getPackage( pkg );
-			return p->lookup( c, true );
-		}
-		case ALIAS_REF_TYPE: {
-			Import * imp = current->getAlias( t->alias() );
-			if ( imp != NULL ) {
-				Ident id = imp->package()->lookup( c, true );
-				const FacetSet * m = imp->matchingTags();
-				if ( id->facets->isntEmptyIntersection( m ) ) {
-					return id;
-				} else {
-					throw Mishap( "Aliased variable not exported" );
-				}
-			} else {
-				throw Mishap( "No such alias" );
-			}
-			throw Unreachable();
-		}
-		default:
-			throw Unreachable();
-	}
+void LiftStateClass::capturingFunctions( Ident & outer, std::list< int >  & index_of_functions ) {
+	for ( int i = this->ancestors.size() - 1; i >= 0; i-- ) {
+		FnTermClass * f = this->ancestors[ i ];
+		index_of_functions.push_front( i );
+		if ( f == outer->function() ) return;
+	}		
+	throw Unreachable();
 }
 
 
-enum Lookup LiftStateClass::lookup( IdTermClass * t, Ident *id ) {
-	const std::string & c = t->name();
-	Ident ident = this->env.search( c ); 
-	if ( ident ) {
-		*id = ident;
-		#ifdef DBG_LIFT
-			fprintf( stderr, "< lookup\n" );
+Ident LiftStateClass::lookup( const std::string & name ) {
+	#ifdef DBG_LIFTING
+		cerr << "lookup ... ";
+	#endif
+	list< Ident > & idlist = this->substitutes.back();
+	for ( list< Ident >::iterator it = idlist.begin(); it != idlist.end(); ++it ) {
+		#ifdef DBG_LIFTING
+			cerr << " check... ";
 		#endif
-		Lookup result = ident->level >= this->level ? InnerLocal : OuterLocal;
-		if ( result == OuterLocal ) {
-			ident->setOuter();
-		}
-		return result;
-	} else {
-		*id = lookupGlobal( this->package, t );
-		if ( *id == 0 ) throw Mishap( "Undeclared variable" ).culprit( "Variable", c );
-		#ifdef DBG_LIFT
-			fprintf( stderr, "< lookup\n" );
-		#endif
-		return Global;
+		if ( (*it)->getNameString() == name ) return *it;
 	}
+	#ifdef DBG_LIFTING
+		cerr << endl;
+	#endif
+	return shared< IdentClass >();
 }
 
-Term LiftStateClass::general_lift( Term term ) {
+
+Term LiftStateClass::generalLift( Term term ) {
     int i;
     int A = term_count( term );
     for ( i = 0; i < A; i++ ) {
@@ -265,220 +100,91 @@ Term LiftStateClass::general_lift( Term term ) {
     return term;
 }
 
-void LiftStateClass::addIdent( NamedTermMixin * arg, FnTermClass * fn, int & slot ) {
-	//cerr << "Argument " << arg->nameString() << " in " << fn->name() << endl;
-	const std::string & c = arg->name();
-	#ifdef DBG_LIFT
-		fprintf( stderr, "Processing %s\n", c );
-	#endif
-	Ident id = ident_new_local( c, fn );
-	this->env.add( id );
-	id->setSlot( slot++ );
-	id->level = this->level;
-	arg->ident() = id;
-}
-
 Term LiftStateClass::lift( Term term ) {
     Functor fnc = term_functor( term );
     #ifdef DBG_LIFT
         fprintf( stderr, "Lifting term with functor %s\n", functor_name( fnc ) );
     #endif
     switch ( fnc ) {
-    	case fnc_package: {
-    		Package * previous = this->package;
-    		this->package = this->package->getPackage( term_package_url( term ) );
-    		Term t = this->general_lift( term );
-    		this->package = previous;
-    		return t;
-    	}
-    	case fnc_import: {
-    		ImportTermClass * t = dynamic_cast< ImportTermClass * >( term.get() );
-			Package * from_pkg = this->package->getPackage( t->from );
-			this->package->import( 
-				Import( 
-					t->matchTags(),
-					from_pkg,
-					t->alias,
-					t->prot,
-					t->intos
-				)
-			);
-    		return term;
-    	}
         case fnc_fn : {
-            //    fn( seq( id( _ ), ... ), Body )
-            this->level += 1;
-            FnTermClass * old_function = this->function;
-
             FnTermClass * fn = dynamic_cast< FnTermClass * >( term.get() );
-         	this->env.mark( fn );
-            
-            this->function = fn;
-            int & slot = fn->nlocals();
-            Term args = fn->child( 0 );
-            
-            // There are two cases that we handle at present.
-            //	A single variable var(x) or 
-            //	a sequence of variables seq( var(x1), var(x2)... )
-            
-            switch ( args->functor() ) {
-				case fnc_var: {
-					fn->ninputs() = 1;
-					NamedTermMixin * arg = dynamic_cast< NamedTermMixin * >( args.get() );
-					this->addIdent( arg, fn, slot );
-					break;
-				}
-				case fnc_seq: {
-					int A = term_count( args );
-					
-					#ifdef DBG_LIFT
-						fprintf( stderr, "Arity = %d\n", A );
-					#endif
-		
-					fn->ninputs() = A;
-					for ( int i = 0; i < A; i++ ) {
-						NamedTermMixin * arg = dynamic_cast< NamedTermMixin * >( term_index( args, i ).get() );
-						this->addIdent( arg, fn, slot );
-					}
-					break;
-				}
-				default: throw ToBeDone();          
-            }
-            
-            #ifdef DBG_LIFT
-                fprintf( stderr, "Processed arguments\n" );
-                term_print( term );
-            #endif
-            {
-            	//	Now we lift the body.
-                Term *r = term_index_ref( term, 1 );
-                *r = this->lift( *r );
-            }
-            #ifdef DBG_LIFT
-                fprintf( stderr, "Returning term\n" );
-            #endif
-            
-            this->level -= 1;
-            this->function = old_function;
-            this->env.cutToMark();
+            this->ancestors.push_back( fn );
+            this->substitutes.push_back( std::list< Ident >() );
+
+			//	Now we lift the body.
+			Term *body = term_index_ref( term, 1 );
+			*body = this->lift( *body );
+
+			this->ancestors.pop_back();            
+            this->substitutes.pop_back();
             return term;
-        }
-        case fnc_block: {
-        	this->env.mark( NULL );
-        	Term t = term_new_basic0( fnc_seq );
-			int A = term_count( term );
-			for ( int i = 0; i < A; i++ ) {
-				term_add( t, this->lift( *term_index_ref( term, i ) ) );
-			}
-			this->env.cutToMark();
-			return t;        	
-        }
-        case fnc_var : {
-        	VarTermClass * t = dynamic_cast< VarTermClass * >( term.get() );
-            const std::string & c = term->name();
-            if ( this->level == 0 ) {
-                //    printf( "GLOBAL VAR %s\n", c );
-                //	Lookup/add is really only applicable to development mode.
-                //	When we implement a distinction between runtime and devtime
-                //	we'll have to plug this.
-                lookupAndAddGlobal( this->package, t );
-            } else {
-            	FnTermClass * fn = this->function;
-            	int & slot = fn->nlocals();
-                //    printf( "LOCAL VAR %s\n", c );
-                Ident id = ident_new_local( c, fn );
-                this->env.add( id );
-                id->setSlot( slot++ );
-                id->level = this->level;
-                t->ident() = id;
-            }
- 			return term;			        	
         }
         case fnc_id: {
          	IdTermClass * t = dynamic_cast< IdTermClass * >( term.get() );
-            Ident id;
-            switch ( this->lookup( t, &id ) ) {
-                case Global:
-                case InnerLocal: {
-                    t->ident() = id;
-                    return term;
-                }
-                case OuterLocal: {
-                	std::list< int > index_of_functions;
-                	this->env.capturingFunctions( id, index_of_functions );
-                	
-                	Ident prev_id;
+         	if ( t->isOuterReference() ) {
+         		Ident subst_id = this->lookup( t->nameString() );
+         		if ( subst_id ) {
+         			#ifdef DBG_LIFTING
+						cerr << "Found previous use " << subst_id->getNameString();
+						cerr << "@";
+						cerr << subst_id->function() ->name();
+						cerr << endl;
+					#endif
+         			t->ident() = subst_id; 
+         		} else {
+					std::list< int > index_of_functions;
+					this->capturingFunctions( t->ident(), index_of_functions );
+					
+					Ident prev_id;
 					for ( std::list< int >::iterator it = index_of_functions.begin(); it != index_of_functions.end(); ++it ) {
 						int index = *it;
 						if ( !prev_id ) {
-							prev_id = id;
+							prev_id = t->ident();
 						} else {
-							FnTermClass * this_fn = this->env.getFunction( index );
-							int & slot = this_fn->nlocals();
-
+							FnTermClass * this_fn = this->ancestors[ index ];
+	
 							// Stuff is going to be put here.
-							cerr << "outer detected for " << this_fn->name() << endl;
-							cerr << "Outer ident is " << (prev_id)->getNameString() << "@" << (prev_id)->function()->name() << endl;							
+							#ifdef DBG_LIFTING
+								cerr << "Outer detected for " << this_fn->name() << endl;
+								cerr << "  Index level " << index << endl;
+								cerr << "  Outer ident is " << (prev_id)->getNameString() << "@" << (prev_id)->function()->name() << endl;							
+							#endif
 							Ident new_input = ident_new_local( t->nameString(), this_fn );
-							new_input->setSlot( slot++ );
-							cerr << "Inner ident is " << new_input->getFinalSlot() << endl;
+							if ( prev_id->isShared() ) { new_input->setShared(); }
+							#ifdef DBG_LIFTING
+								cerr << "  Inner ident is " << new_input->getFinalSlot() << endl;
+							#endif
 							
 							//	Now set the new_input as the last parameter and
 							//	add the outer to the function-term.
-							this->env.setAsFinalInput( index, new_input );		
+							this_fn->setAsFinalInput( new_input );		
 							this_fn->addOuter( prev_id );
+							this->substitutes[ index ].push_back( new_input );
 							
 							prev_id = new_input;
 						}
-                	}
-                	
-                	//	At this point prev_id is bound to the correct IdTermClass
-                	t->ident() = prev_id;
-                	return term;
-                }
+					}
+					
+					//	At this point prev_id is bound to the correct IdTermClass
+					t->ident() = prev_id;
+				}
+				return term;
             }
-            throw Unreachable();
-        }
-        case fnc_add: {
-            //Pool scratch = state.pools->scratch;
-            Term arg0 = term_index( term, 0 );
-            Term arg1 = term_index( term, 1 );
-            Functor fnc0 = term_functor( arg0 );
-            Functor fnc1 = term_functor( arg1 );
-            if ( fnc0 == fnc_int ) {
-                return this->lift( term_new_basic2( fnc_incr_by, arg1, arg0 ) );
-            } else if ( fnc1 == fnc_int ) {
-                return this->lift( term_new_basic2( fnc_incr_by, arg0, arg1 ) );
-            }
-            return this->general_lift( term );
-        }
-        case fnc_sub: {
-            Term arg0 = term_index( term, 0 );
-            Term arg1 = term_index( term, 1 );
-            Functor fnc1 = term_functor( arg1 );
-            if ( fnc1 == fnc_int ) {
-                return this->lift( term_new_basic2( fnc_decr_by, arg0, arg1 ) );
-            }
-            return this->general_lift( term );
-        }
-        case fnc_assign: {
-        	this->general_lift( term );
-        	VarTermClass * t = dynamic_cast< VarTermClass * >( term->child(1).get() );
-        	t->ident()->setAssigned();
+            return term;
         }
         default: {
             if ( term_count( term ) == 0 ) {
                 return term;
             } else {
-                return this->general_lift( term );
+                return this->generalLift( term );
             }
         }
     }
     throw Unreachable();
 }
 
-Term lift_term( Package * pkg, Term term ) {
-    LiftStateClass state( pkg, 0 );
+Term liftTerm( Package * pkg, Term term ) {
+    LiftStateClass state;
     return state.lift( term );
 }
 

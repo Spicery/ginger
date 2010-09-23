@@ -384,6 +384,7 @@ void PlantClass::compileTerm( Term term ) {
 			Ident & ident = v->ident();
 			Term body = term_index( term, 1 );
 			this->compile1( body );
+			vmiNEWID( this, ident );
 			vmiPOPID( this, ident );
 			break;
 		}
@@ -405,9 +406,10 @@ void PlantClass::compileTerm( Term term ) {
 			Term body = ftc->child( 1 );
 			
 			if ( ftc->hasOuters() ) {
+				cerr << "Function " << ftc->name() << " has outers" << endl;
 				int N = ftc->sizeOuters();
 				for ( int i = 0; i < N; i++ ) {
-					vmiPUSHID( this, ftc->outer( i ) );
+					vmiPUSH_INNER_SLOT( this, ftc->outer( i )->getFinalSlot() );
 				}
 			}
 			

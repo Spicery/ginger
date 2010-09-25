@@ -145,10 +145,22 @@ void SaxClass::read() {
 		this->mustReadChar( '>' );
 		this->parent.endTag( end_tag );
 		return;
-	} else if ( ch == '!' || ch == '?' ) {
+	} else if ( ch == '!' ) {
+		if ( '-' != nextChar() || '-' != nextChar() ) throw Mishap( "Invalid XML comment syntax" );
+		char ch = nextChar();
 		for (;;) {
+			char prev_ch = ch;
 			ch = nextChar();
-			if ( ch == '>' ) break;
+			if ( prev_ch == '-' && ch == '-' ) break;
+		}
+		if ( '>' != nextChar() ) throw Mishap( "Invalid XML comment syntax" );
+		this->read();
+		return;
+	} else if ( ch == '?' ) {
+		for (;;) {
+			char prev = ch;
+			ch = nextChar();
+			if ( prev == '?' && ch == '>' ) break;
 		}
 		this->read();
 		return;

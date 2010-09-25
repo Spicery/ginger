@@ -28,7 +28,7 @@ public class SimpleFuncTest implements FuncTest {
 		this.known_defect = known_defect;
 		this.command = command;
 		this.input = input;
-		this.expected = expected;
+		this.expected = expected.trim();
 	}
 
 	public String name() {
@@ -108,11 +108,14 @@ public class SimpleFuncTest implements FuncTest {
 				might_pass = false;
 			}
 			
-			if ( ! outstring.trim().equals( expected.trim() ) ) {
-				this.reasons.add( "Unexpected output" );
-				this.reasons.add( "  Actual:   " + outstring );
-				this.reasons.add( "  Expected: " + expected );
-				might_pass = false;
+			{
+				String actual = outstring.trim();
+				if ( ! actual.equals( expected ) ) {
+					this.reasons.add( "Unexpected output" );
+					this.reasons.add( "  Actual:   <" + actual + ">" );
+					this.reasons.add( "  Expected: <" + expected + ">" );
+					might_pass = false;
+				}
 			}
 			
 			this.passed = might_pass;

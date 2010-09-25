@@ -28,6 +28,7 @@ class CaptureStream extends Thread {
 			}
         	if ( line == null ) break;
         	out.append( line );
+        	out.append( '\n' );
         }
     }
 

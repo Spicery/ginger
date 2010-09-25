@@ -71,3 +71,11 @@ Title: KK, checking intermediate functions do capture
 foo
 gort
 ================================================================================
+Title: Check multiple captures
+--------------------------------------------------------------------------------
+<bind><var name="f" protected="true"/><fn name="f"><seq><var name="x"/></seq><seq><bind><var name="y" protected="true" tag="public"/><sysapp name="*"><int value="2"/><id name="x"/></sysapp></bind><fn><var name="z"/><sysapp name="newList"><seq><seq><id name="z"/><id name="y"/></seq><id name="x"/></seq></sysapp></fn></seq></fn></bind>
+
+<app><app><id name="f"/><int value="99"/></app><string value="frog"/></app>
+--------------------------------------------------------------------------------
+[frog,198,99]
+================================================================================

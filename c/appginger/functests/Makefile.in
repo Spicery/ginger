@@ -3,7 +3,7 @@
 all:
 	
 #	This is the top-level make
-check: smoke.pass literals.pass full_lexical_binding.pass
+check: smoke.pass literals.pass full_lexical_binding.pass records.pass
 
 .tests.pass:
 	java -cp ../../../classes com.steelypip.appginger.functest.FuncTestMain "../cpp/appginger -B" $< 

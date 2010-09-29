@@ -1,0 +1,78 @@
+================================================================================
+Title: nfib
+--------------------------------------------------------------------------------
+<bind>
+	<var name="K" protected="true" tag="public" /> 
+	<app>
+		<id name="newRecordClass" />
+		<seq>
+			<string value="K" />
+			<int value="2" />
+		</seq>
+	</app>
+</bind>
+<bind>
+	<var name="C" protected="true" tag="public" /> 
+	<app>
+		<id name="newClassConstructor" />
+		<id name="K" />
+	</app>
+</bind>
+<bind>
+	<var name="R" protected="true" tag="public" />
+	<app>
+		<id name="newClassRecogniser" />
+		<id name="K" />
+	</app>
+</bind>
+<bind>
+	<var name="A" protected="true" tag="public" />
+	<app>
+		<id name="newClassAccessor" />
+		<seq>
+			<id name="K" />
+			<int value="1" />
+		</seq>
+	</app>
+</bind>
+<bind>
+	<var name="B" protected="true" tag="public" />
+	<app>
+		<id name="newClassAccessor" />
+		<seq>
+			<id name="K" />
+			<int value="2" />
+		</seq>
+	</app>
+</bind>
+<bind>
+	<var name="E" protected="true" tag="public" />
+	<app>
+		<id name="newClassExploder" />
+		<seq>
+			<id name="K" />
+		</seq>
+	</app>
+</bind>
+<bind>
+	<var name="X" protected="true" tag="public" />
+	<app>
+		<id name="C" />
+		<seq>
+			<int value="99" />
+			<string value="foo" />
+		</seq>
+	</app>
+</bind>
+<sysapp name="newVector">
+	<app><id name="R"/><id name="X"/></app>
+	<app><id name="R"/><int value="-7"/></app>
+	<app><id name="A"/><id name="X"/></app>
+	<app><id name="B"/><id name="X"/></app>
+	<sysapp name="newList">
+		<app><id name="E"/><id name="X"/></app>
+	</sysapp>
+</sysapp>
+--------------------------------------------------------------------------------
+{true,false,99,foo,[99,foo]}
+================================================================================

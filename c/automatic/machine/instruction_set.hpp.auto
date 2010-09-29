@@ -2,7 +2,6 @@
 	Ref spc_decr;
 	Ref spc_div;
 	Ref spc_eq;
-	Ref spc_eqq;
 	Ref spc_neq;
 	Ref spc_gt;
 	Ref spc_gte;

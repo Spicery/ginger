@@ -46,12 +46,6 @@ static void spcfn_eq( void ) {
     RETURN( pc + 1 );
 }
 
-static void spcfn_eqq( void ) {
-    Ref r = *++pc;
-    *( VMVP ) = *( VMVP ) == r ? sys_true : sys_false;
-    RETURN( pc + 1 );
-}
-
 static void spcfn_neq( void ) {
     Ref r = *( VMVP-- );
     *( VMVP ) = *( VMVP ) == r ? sys_false : sys_true;
@@ -641,7 +635,6 @@ InstructionSet2::InstructionSet2() {
     this->spc_decr = (Ref)spcfn_decr;
     this->spc_div = (Ref)spcfn_div;
     this->spc_eq = (Ref)spcfn_eq;
-    this->spc_eqq = (Ref)spcfn_eqq;
     this->spc_neq = (Ref)spcfn_neq;
     this->spc_gt = (Ref)spcfn_gt;
     this->spc_gte = (Ref)spcfn_gte;

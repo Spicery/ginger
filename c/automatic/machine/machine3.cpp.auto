@@ -47,11 +47,6 @@ void Machine3::core( bool init_mode, Ref *pc ) {
         *( VMVP ) = *( VMVP ) == r ? sys_true : sys_false;
         RETURN( pc + 1 );
     }
-    L_eqq: {
-        Ref r = *++pc;
-        *( VMVP ) = *( VMVP ) == r ? sys_true : sys_false;
-        RETURN( pc + 1 );
-    }
     L_neq: {
         Ref r = *( VMVP-- );
         *( VMVP ) = *( VMVP ) == r ? sys_false : sys_true;
@@ -582,7 +577,6 @@ void Machine3::core( bool init_mode, Ref *pc ) {
         ins.spc_decr = &&L_decr;
         ins.spc_div = &&L_div;
         ins.spc_eq = &&L_eq;
-        ins.spc_eqq = &&L_eqq;
         ins.spc_neq = &&L_neq;
         ins.spc_gt = &&L_gt;
         ins.spc_gte = &&L_gte;

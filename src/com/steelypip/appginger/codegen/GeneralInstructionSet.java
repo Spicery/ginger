@@ -22,9 +22,9 @@ public abstract class GeneralInstructionSet {
 		return new GenericInstruction();
 	}
 
-	public Instruction eqq_ir() {
-		return new GenericInstruction();
-	}
+//	public Instruction eqq_ir() {
+//		return new GenericInstruction();
+//	}
 
 	public Instruction neq_i() {
 		return new GenericInstruction();

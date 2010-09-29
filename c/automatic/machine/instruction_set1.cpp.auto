@@ -46,12 +46,6 @@ static Ref *spcfn_eq( Ref *pc, Machine vm ) {
     RETURN( pc + 1 );
 }
 
-static Ref *spcfn_eqq( Ref *pc, Machine vm ) {
-    Ref r = *++pc;
-    *( VMVP ) = *( VMVP ) == r ? sys_true : sys_false;
-    RETURN( pc + 1 );
-}
-
 static Ref *spcfn_neq( Ref *pc, Machine vm ) {
     Ref r = *( VMVP-- );
     *( VMVP ) = *( VMVP ) == r ? sys_false : sys_true;
@@ -641,7 +635,6 @@ InstructionSet1::InstructionSet1() {
     this->spc_decr = (Ref)spcfn_decr;
     this->spc_div = (Ref)spcfn_div;
     this->spc_eq = (Ref)spcfn_eq;
-    this->spc_eqq = (Ref)spcfn_eqq;
     this->spc_neq = (Ref)spcfn_neq;
     this->spc_gt = (Ref)spcfn_gt;
     this->spc_gte = (Ref)spcfn_gte;

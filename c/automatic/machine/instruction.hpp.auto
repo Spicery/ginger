@@ -2,7 +2,6 @@
     vmc_decr,
     vmc_div,
     vmc_eq,
-    vmc_eqq,
     vmc_neq,
     vmc_gt,
     vmc_gte,

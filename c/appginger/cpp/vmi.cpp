@@ -391,10 +391,10 @@ void vmiIF_NEQ_ID_ID( Plant plant, Ident id1, Ident id2, DestinationClass & d ) 
 	vmiCMP_ID_ID( false, plant, id1, id2, d );
 }
 
-void vmiEQQ( Plant plant, Ref ref ) {
-	emitSPC( plant, vmc_eqq );
-	emitRef( plant, ref );
-}
+//void vmiEQQ( Plant plant, Ref ref ) {
+//	emitSPC( plant, vmc_eqq );
+//	emitRef( plant, ref );
+//}
 
 static bool eval_relop( char op, int a, int b ) {
 	return(

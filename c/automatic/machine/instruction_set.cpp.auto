@@ -4,7 +4,6 @@ const char * InstructionSet::name( Ref spc ) const {
         spc == spc_decr ? "decr" :
         spc == spc_div ? "div" :
         spc == spc_eq ? "eq" :
-        spc == spc_eqq ? "eqq" :
         spc == spc_neq ? "neq" :
         spc == spc_gt ? "gt" :
         spc == spc_gte ? "gte" :
@@ -70,7 +69,6 @@ const char * InstructionSet::name( Ref spc ) const {
 }
 
 const char * InstructionSet::signature( Ref x ) const {
-    if ( x == spc_eqq ) return "ir";
     if ( x == spc_incr_by ) return "ir";
     if ( x == spc_chainlite ) return "icr";
     if ( x == spc_check_count ) return "ir";
@@ -117,7 +115,6 @@ Ref InstructionSet::lookup( Instruction instr ) const {
     case vmc_decr: return this->spc_decr;
     case vmc_div: return this->spc_div;
     case vmc_eq: return this->spc_eq;
-    case vmc_eqq: return this->spc_eqq;
     case vmc_neq: return this->spc_neq;
     case vmc_gt: return this->spc_gt;
     case vmc_gte: return this->spc_gte;

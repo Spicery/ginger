@@ -16,7 +16,7 @@
     along with AppGinger.  If not, see <http://www.gnu.org/licenses/>.
 \******************************************************************************/
 
-#include "objlayout.hpp"
+#include "misclayout.hpp"
 
 #include "common.hpp"
 #include "key.hpp"

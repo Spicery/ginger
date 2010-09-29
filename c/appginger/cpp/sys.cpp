@@ -30,7 +30,7 @@
 #include "cage.hpp"
 #include "mishap.hpp"
 #include "garbagecollect.hpp"
-#include "objlayout.hpp"
+#include "misclayout.hpp"
 
 #include "syslist.hpp"
 #include "sysvector.hpp"
@@ -274,6 +274,10 @@ const SysMap::value_type rawData[] = {
 	SysMap::value_type( ">", SysInfo( fnc_gt, Arity( 2 ), Arity( 1 ), 0, "Greater than, compares two real numbers" ) ),
 	SysMap::value_type( ">=", SysInfo( fnc_gte, Arity( 2 ), Arity( 1 ), 0, "Greater than or equal to, compares two real numbers" ) ),	
 	SysMap::value_type( "objectKey", SysInfo( fnc_syscall, Arity( 1 ), Arity( 1 ), sysObjectKey, "Returns the key of any value" ) ),
+	SysMap::value_type( "newRecordClass", SysInfo( fnc_syscall, Arity( 1 ), Arity( 1 ), sysNewRecordClass, "Returns a new class object for record instances" ) ),
+	SysMap::value_type( "newClassRecogniser", SysInfo( fnc_syscall, Arity( 1 ), Arity( 1 ), sysClassRecogniser, "Returns a function that recognises a given class" ) ),
+	SysMap::value_type( "newClassConstructor", SysInfo( fnc_syscall, Arity( 1 ), Arity( 1 ), sysClassConstructor, "Returns the constructor for a given class" ) ),
+	SysMap::value_type( "newClassAccessor", SysInfo( fnc_syscall, Arity( 1 ), Arity( 1 ), sysClassAccessor, "Returns the accessor for a given class" ) ),
 	SysMap::value_type( "=", SysInfo( fnc_syscall, Arity( 2 ), Arity( 1 ), sysEquals, "Compare any two values as equal" ) ),
 	SysMap::value_type( "gc", SysInfo( fnc_syscall, Arity( 0 ), Arity( 0 ), sysGarbageCollect, "Forces a garbage collection - useful for tests" ) ),
 	SysMap::value_type( "hash", SysInfo( fnc_syscall, Arity( 1 ), Arity( 1 ), sysHash, "Computes a hash code for any value, returns a positive Small" ) ),

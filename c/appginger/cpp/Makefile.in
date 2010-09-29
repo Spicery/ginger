@@ -9,11 +9,11 @@ OBJS=mishap.o term.o read_xml.o \
 	rcep.o arity.o resolve.o lift.o ident.o \
 	dict.o package.o \
 	sys.o syskey.o sysequals.o sysprint.o syslist.o sysvector.o sysstring.o \
-	syssymbol.o sysmap.o sysindirection.o \
+	syssymbol.o sysmap.o sysindirection.o sysobject.o \
 	sysfunction.o \
 	destination.o heap.o \
 	key.o \
-	objlayout.o listlayout.o stringlayout.o \
+	misclayout.o listlayout.o stringlayout.o \
 	maplayout.o vectorlayout.o functionlayout.o \
 	heapcrawl.o cagecrawl.o callstackcrawl.o fnobjcrawl.o \
 	garbagecollect.o \

@@ -1,0 +1,13 @@
+long n = ToLong( *( ++pc ) );
+#ifdef DBG_SPECIAL
+fprintf(
+	stderr,
+	"Difference between %lu and %lu (held in %ld)\n",
+	ToULong( VMVP ),
+	ToULong( LOCAL(n) ),
+	n
+);
+#endif
+if ( VMCOUNT == n ) RETURN( pc + 1 );
+throw Mishap( "Wrong number of results (needed 0)" ).culprit( "#Results", "" + ( VMVP - ToRefRef( LOCAL(n) ) ) );
+RETURN( NULL );	// stupid compiler

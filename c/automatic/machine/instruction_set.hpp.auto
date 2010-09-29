@@ -2,6 +2,7 @@
 	Ref spc_decr;
 	Ref spc_div;
 	Ref spc_eq;
+	Ref spc_eqq;
 	Ref spc_neq;
 	Ref spc_gt;
 	Ref spc_gte;
@@ -13,9 +14,10 @@
 	Ref spc_sub;
 	Ref spc_calls;
 	Ref spc_chainlite;
-	Ref spc_check0;
-	Ref spc_check1;
-	Ref spc_end;
+	Ref spc_check_count;
+	Ref spc_check_mark0;
+	Ref spc_check_mark1;
+	Ref spc_end_mark;
 	Ref spc_end1_calls;
 	Ref spc_end_call_global;
 	Ref spc_enter;
@@ -53,9 +55,11 @@
 	Ref spc_set_call_global;
 	Ref spc_set_calls;
 	Ref spc_set_syscall;
-	Ref spc_start;
+	Ref spc_start_mark;
 	Ref spc_stringiterate;
 	Ref spc_syscall;
 	Ref spc_syscall_arg;
+	Ref spc_syscall_dat;
+	Ref spc_syscall_argdat;
 	Ref spc_sysreturn;
 	Ref spc_vectoriterate;

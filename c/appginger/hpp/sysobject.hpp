@@ -16,18 +16,13 @@
     along with AppGinger.  If not, see <http://www.gnu.org/licenses/>.
 \******************************************************************************/
 
-#ifndef SYS_KEY_HPP
-#define SYS_KEY_HPP
+#ifndef SYS_OBJECT_HPP
+#define SYS_OBJECT_HPP
 
 #include "common.hpp"
-#include "machine.hpp"
 
-extern Ref * sysObjectKey( Ref * pc, MachineClass * vm );
-extern Ref * sysNewRecordClass( Ref * pc, MachineClass * vm );
-extern Ref * sysClassConstructor( Ref * pc, MachineClass * vm );
-extern Ref * sysClassRecogniser( Ref * pc, MachineClass *vm );
-extern Ref * sysClassAccessor( Ref * pc, MachineClass *vm );
-extern Ref refKey( Ref r );
+extern unsigned long lengthOfObject( Ref * obj_K );
+extern Ref titleOfObject( Ref * obj_K );
+
 
 #endif
-

@@ -19,7 +19,7 @@
 #include "sysstring.hpp"
 #include "sysvector.hpp"
 #include "key.hpp"
-#include "objlayout.hpp"
+#include "misclayout.hpp"
 
 Ref * sysStringAppend( Ref * pc, class MachineClass * vm ) {
 

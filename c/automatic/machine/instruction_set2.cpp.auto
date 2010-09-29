@@ -46,6 +46,12 @@ static void spcfn_eq( void ) {
     RETURN( pc + 1 );
 }
 
+static void spcfn_eqq( void ) {
+    Ref r = *++pc;
+    *( VMVP ) = *( VMVP ) == r ? sys_true : sys_false;
+    RETURN( pc + 1 );
+}
+
 static void spcfn_neq( void ) {
     Ref r = *( VMVP-- );
     *( VMVP ) = *( VMVP ) == r ? sys_false : sys_true;
@@ -152,7 +158,23 @@ static void spcfn_chainlite( void ) {
     RETURN( fn_K + 1 );
 }
 
-static void spcfn_check0( void ) {
+static void spcfn_check_count( void ) {
+    long n = ToLong( *( ++pc ) );
+    #ifdef DBG_SPECIAL
+    fprintf(
+    	stderr,
+    	"Difference between %lu and %lu (held in %ld)\n",
+    	ToULong( VMVP ),
+    	ToULong( LOCAL(n) ),
+    	n
+    );
+    #endif
+    if ( VMCOUNT == n ) RETURN( pc + 1 );
+    throw Mishap( "Wrong number of results (needed 0)" ).culprit( "#Results", "" + ( VMVP - ToRefRef( LOCAL(n) ) ) );
+    RETURN( NULL );	// stupid compiler
+}
+
+static void spcfn_check_mark0( void ) {
     long n = ToLong( *( ++pc ) );
     #ifdef DBG_SPECIAL
     fprintf(
@@ -168,7 +190,7 @@ static void spcfn_check0( void ) {
     RETURN( NULL );	// stupid compiler
 }
 
-static void spcfn_check1( void ) {
+static void spcfn_check_mark1( void ) {
     long n = ToLong( *( ++pc ) );
     unsigned long d;
     #ifdef DBG_SPECIAL
@@ -182,7 +204,7 @@ static void spcfn_check1( void ) {
     RETURN( NULL );	// stupid compiler
 }
 
-static void spcfn_end( void ) {
+static void spcfn_end_mark( void ) {
     Ref r;
     long n = ToLong( *( ++pc ) );
     #ifdef DBG_SPECIAL
@@ -518,7 +540,7 @@ static void spcfn_set_syscall( void ) {
     RETURN( pc );
 }
 
-static void spcfn_start( void ) {
+static void spcfn_start_mark( void ) {
     long n = ToLong( *( ++pc ) );
     #ifdef DBG_SPECIAL
     fprintf( stderr, "Storing %u in %d\n", ToULong( ToRef( VMVP ) ), n );
@@ -567,6 +589,26 @@ static void spcfn_syscall_arg( void ) {
     RETURN( pc );
 }
 
+static void spcfn_syscall_dat( void ) {
+    SysCall * sys = ToSysCall( pc[ 1 ] );
+    FREEZE;
+    //	Skip the data arg. The system call picks it up via pc[-1]. Note that
+    //	it is NOT garbage collected. That means it cannot be an object.
+    pc = (*sys)( pc + 3, vm );
+    MELT;
+    RETURN( pc );
+}
+
+static void spcfn_syscall_argdat( void ) {
+    SysCall * sys = ToSysCall( pc[ 1 ] );
+    FREEZE;
+    //	Skip the data arg. The system call picks it up via pc[-1]. Note that
+    //	it is NOT garbage collected. That means it cannot be an object.
+    pc = (*sys)( pc + 4, vm );
+    MELT;
+    RETURN( pc );
+}
+
 static void spcfn_sysreturn( void ) {
     VMPCFUNC = VMLINKFUNC;
     RETURN( VMLINK );
@@ -599,6 +641,7 @@ InstructionSet2::InstructionSet2() {
     this->spc_decr = (Ref)spcfn_decr;
     this->spc_div = (Ref)spcfn_div;
     this->spc_eq = (Ref)spcfn_eq;
+    this->spc_eqq = (Ref)spcfn_eqq;
     this->spc_neq = (Ref)spcfn_neq;
     this->spc_gt = (Ref)spcfn_gt;
     this->spc_gte = (Ref)spcfn_gte;
@@ -610,9 +653,10 @@ InstructionSet2::InstructionSet2() {
     this->spc_sub = (Ref)spcfn_sub;
     this->spc_calls = (Ref)spcfn_calls;
     this->spc_chainlite = (Ref)spcfn_chainlite;
-    this->spc_check0 = (Ref)spcfn_check0;
-    this->spc_check1 = (Ref)spcfn_check1;
-    this->spc_end = (Ref)spcfn_end;
+    this->spc_check_count = (Ref)spcfn_check_count;
+    this->spc_check_mark0 = (Ref)spcfn_check_mark0;
+    this->spc_check_mark1 = (Ref)spcfn_check_mark1;
+    this->spc_end_mark = (Ref)spcfn_end_mark;
     this->spc_end1_calls = (Ref)spcfn_end1_calls;
     this->spc_end_call_global = (Ref)spcfn_end_call_global;
     this->spc_enter = (Ref)spcfn_enter;
@@ -650,10 +694,12 @@ InstructionSet2::InstructionSet2() {
     this->spc_set_call_global = (Ref)spcfn_set_call_global;
     this->spc_set_calls = (Ref)spcfn_set_calls;
     this->spc_set_syscall = (Ref)spcfn_set_syscall;
-    this->spc_start = (Ref)spcfn_start;
+    this->spc_start_mark = (Ref)spcfn_start_mark;
     this->spc_stringiterate = (Ref)spcfn_stringiterate;
     this->spc_syscall = (Ref)spcfn_syscall;
     this->spc_syscall_arg = (Ref)spcfn_syscall_arg;
+    this->spc_syscall_dat = (Ref)spcfn_syscall_dat;
+    this->spc_syscall_argdat = (Ref)spcfn_syscall_argdat;
     this->spc_sysreturn = (Ref)spcfn_sysreturn;
     this->spc_vectoriterate = (Ref)spcfn_vectoriterate;
 }

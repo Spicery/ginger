@@ -5,9 +5,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 public class Main {
 
@@ -21,7 +19,7 @@ public class Main {
 		final File aFolder = new File( new File( "c" ), "automatic" );
 		final File outputFolder = new File( aFolder, "sys" );
 		final LogCreated sysconsts = new LogCreated();
-		
+				
 		new FullRecordClassGenerator(
 			sysconsts, "Pair", "head", "tail"
 		).generate( outputFolder, "pair" );

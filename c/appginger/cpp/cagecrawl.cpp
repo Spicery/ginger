@@ -20,7 +20,7 @@
 
 #include "mishap.hpp"
 #include "key.hpp"
-#include "objlayout.hpp"
+#include "misclayout.hpp"
 
 Ref * CageCrawl::next() {
 	if ( this->current < this->cage->top ) {

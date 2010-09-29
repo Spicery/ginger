@@ -15,6 +15,7 @@ public abstract class Implementation extends GeneralInstructionSet {
 		answer.add( this.decr_i().init( "decr", "i" ) );
 		answer.add( this.div_i().init( "div", "i" ) );
 		answer.add( this.eq_i().init( "eq", "i" ) );
+		answer.add( this.eqq_ir().init( "eqq", "ir" ) );
 		answer.add( this.neq_i().init( "neq", "i" ) );
 		answer.add( this.gt_i().init( "gt", "i" ) );
 		answer.add( this.gte_i().init( "gte","i" ) );
@@ -26,9 +27,10 @@ public abstract class Implementation extends GeneralInstructionSet {
 		answer.add( this.sub_i().init( "sub", "i" ) );
 		answer.add( this.calls_i().init( "calls", "i" ) );
 		answer.add( this.chainlite_icr().init( "chainlite", "icr" )  );
-		answer.add( this.check0_ir().init( "check0", "ir" ) );
-		answer.add( this.check1_ir().init( "check1", "ir" ) );
-		answer.add( this.end_ir().init( "end", "ir" ) );
+		answer.add( this.check_count_ir().init( "check_count", "ir" ) );
+		answer.add( this.check_mark0_ir().init( "check_mark0", "ir" ) );
+		answer.add( this.check_mark1_ir().init( "check_mark1", "ir" ) );
+		answer.add( this.end_mark_ir().init( "end_mark", "ir" ) );
 		answer.add( this.end1_calls_ir().init( "end1_calls", "ir" ) );
 		answer.add( this.end_call_global_irv().init( "end_call_global", "irv" ) );
 		answer.add( this.enter_i().init( "enter", "i" ) );
@@ -66,10 +68,12 @@ public abstract class Implementation extends GeneralInstructionSet {
 		answer.add( this.set_call_global_irv().init( "set_call_global", "irv" ) );
 		answer.add( this.set_calls_ir().init( "set_calls", "ir" ) );
 		answer.add( this.set_syscall_irr().init( "set_syscall", "irr" ) );
-		answer.add( this.start_ir().init( "start", "ir" ) );
+		answer.add( this.start_mark_ir().init( "start_mark", "ir" ) );
 		answer.add( this.stringiterate_i().init( "stringiterate", "i" ) );
 		answer.add( this.syscall_ir().init( "syscall", "ir" ) );
-		answer.add( this.syscall_arg_irr().init( "syscall_arg", "irr" ) );
+		answer.add( this.syscall_arg_irc().init( "syscall_arg", "irc" ) );
+		answer.add( this.syscall_dat_irr().init( "syscall_dat", "irr" ) );
+		answer.add( this.syscall_argdat_ircr().init( "syscall_argdat", "ircr" ) );
 		answer.add( this.sysreturn_i().init( "sysreturn", "i" ) );
 		answer.add( this.vectoriterate_i().init( "vectoriterate", "i" ) );
 		return this.cached = answer;

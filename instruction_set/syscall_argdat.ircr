@@ -1,0 +1,7 @@
+SysCall * sys = ToSysCall( pc[ 1 ] );
+FREEZE;
+//	Skip the data arg. The system call picks it up via pc[-1]. Note that
+//	it is NOT garbage collected. That means it cannot be an object.
+pc = (*sys)( pc + 4, vm );
+MELT;
+RETURN( pc );

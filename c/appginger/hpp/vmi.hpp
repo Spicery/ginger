@@ -35,7 +35,9 @@ extern void vmiPUSH_INNER_SLOT( Plant plant, int slot );
 extern void vmiPOPID( Plant plant, Ident id );
 extern void vmiINSTRUCTION( Plant plant, Instruction instr );
 extern void vmiSYS_CALL( Plant plant, SysCall * r );
-extern void vmiSYS_CALL_ARG( Plant plant, SysCall * r, void * data );
+extern void vmiSYS_CALL_ARG( Plant plant, SysCall * r, Ref ref );
+extern void vmiSYS_CALL_DAT( Plant plant, SysCall * r, unsigned long data );
+extern void vmiSYS_CALL_ARGDAT( Plant plant, SysCall * r, Ref ref, unsigned long data );
 extern void vmiSET_SYS_CALL( Plant plant, SysCall * r, int A );
 extern void vmiSYS_RETURN( Plant plant );
 extern void vmiRETURN( Plant plant );
@@ -43,11 +45,12 @@ extern void vmiENTER( Plant plant );
 extern void vmiFUNCTION( Plant plant, int N, int A );
 extern Ref vmiENDFUNCTION( Plant plant );
 extern Ref vmiENDFUNCTION( Plant plant, bool in_heap );
-extern void vmiSTART( Plant plant, int N );
-extern void vmiEND( Plant plant, int N );
+extern void vmiSTART_MARK( Plant plant, int N );
+extern void vmiEND_MARK( Plant plant, int N );
 extern void vmiCHAIN_LITE( Plant plant, Ref fn, long N );
-extern void vmiCHECK1( Plant plant, int N );
-extern void vmiCHECK0( Plant plant, int N );
+extern void vmiCHECK_COUNT( Plant plant, int N );
+extern void vmiCHECK_MARK1( Plant plant, int N );
+extern void vmiCHECK_MARK0( Plant plant, int N );
 extern void vmiCALLS( Plant plant );
 extern void vmiIFNOT( Plant plant, DestinationClass & d );
 extern void vmiIFSO( Plant plant, DestinationClass & d );
@@ -66,6 +69,7 @@ extern void vmiIF_EQ_ID_CONSTANT( Plant plant, Ident id, Ref constant, Destinati
 extern void vmiIF_EQ_ID_ID( Plant plant, Ident id1, Ident id2, DestinationClass & d );
 extern void vmiIF_NEQ_ID_CONSTANT( Plant plant, Ident id, Ref constant, DestinationClass & d );
 extern void vmiIF_NEQ_ID_ID( Plant plant, Ident id1, Ident id2, DestinationClass & d );
+extern void vmiEQQ( Plant plant, Ref r );
 
 
 class VmiRelOpFactory {

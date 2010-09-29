@@ -47,9 +47,22 @@ void vmiSYS_CALL( Plant plant, SysCall * r ) {
 	@param r the system call
 	@param data arbitrary data, size compatible with void*
 */
-void vmiSYS_CALL_ARG( Plant plant, SysCall * r, void* data ) {
+void vmiSYS_CALL_ARG( Plant plant, SysCall * sys, Ref ref ) {
 	emitSPC( plant, vmc_syscall_arg );
-	emitRef( plant, ToRef( r ) );
+	emitRef( plant, ToRef( sys ) );
+	emitRef( plant, ref );
+}
+
+void vmiSYS_CALL_DAT( Plant plant, SysCall * sys, unsigned long data ) {
+	emitSPC( plant, vmc_syscall_dat );
+	emitRef( plant, ToRef( sys ) );
+	emitRef( plant, ToRef( data ) );
+}
+
+void vmiSYS_CALL_ARGDAT( Plant plant, SysCall * sys, Ref ref, unsigned long data ) {
+	emitSPC( plant, vmc_syscall_argdat );
+	emitRef( plant, ToRef( sys ) );
+	emitRef( plant, ref );
 	emitRef( plant, ToRef( data ) );
 }
 
@@ -126,7 +139,7 @@ void vmiCHAIN_LITE( Plant plant, Ref fn, long N ) {
 */
 void vmiNEWID( Plant plant, Ident id ) {
 	if ( id->isShared() ) {
-		vmiSYS_CALL_ARG( plant, sysMakeIndirection, (void *)id->getFinalSlot() );
+		vmiSYS_CALL_DAT( plant, sysMakeIndirection, id->getFinalSlot() );
 	}
 }
 
@@ -144,7 +157,7 @@ void vmiNEWID( Plant plant, Ident id ) {
 */
 void vmiCOPYID( Plant plant, Ident id ) {
 	if ( id->isShared() ) {
-		vmiSYS_CALL_ARG( plant, sysCopyIndirection, (void*)id->getFinalSlot() );
+		vmiSYS_CALL_DAT( plant, sysCopyIndirection, id->getFinalSlot() );
 	}
 }
 
@@ -155,7 +168,7 @@ void vmiPOP_INNER_SLOT( Plant plant, int slot ) {
 
 void vmiPOPID( Plant plant, Ident id ) {
 	if ( id->isShared() ) {
-		vmiSYS_CALL_ARG( plant, sysPopIndirection, (void *)id->getFinalSlot() );
+		vmiSYS_CALL_DAT( plant, sysPopIndirection, id->getFinalSlot() );
 	} else if ( id->isLocal() ) {
 		vmiPOP_INNER_SLOT( plant, id->getFinalSlot() );
 	} else {
@@ -180,7 +193,7 @@ void vmiPUSH_INNER_SLOT( Plant plant, int slot ) {
 
 void vmiPUSHID( Plant plant, Ident id ) {
 	if ( id->isShared() ) {
-		vmiSYS_CALL_ARG( plant, sysPushIndirection, (void *)id->getFinalSlot() );
+		vmiSYS_CALL_DAT( plant, sysPushIndirection, id->getFinalSlot() );
 	} else if ( id->isLocal() ) {
 		vmiPUSH_INNER_SLOT( plant, id->getFinalSlot() );
 	} else {
@@ -200,7 +213,7 @@ void vmiCALLS( Plant plant ) {
 
 void vmiEND_CALL_ID( Plant plant, int var, Ident ident ) {
 	if ( ident->isLocal() ) {
-		vmiEND( plant, var );
+		vmiEND_MARK( plant, var );
 		vmiPUSHID( plant, ident );
 		emitSPC( plant, vmc_calls );
 	} else {
@@ -232,24 +245,29 @@ void vmiSET_CALLS( Plant plant, int in_arity ) {
 	emitRef( plant, ToRef( in_arity ) );
 }
 
-void vmiSTART( Plant plant, int v ) {
-	emitSPC( plant, vmc_start );
+void vmiSTART_MARK( Plant plant, int v ) {
+	emitSPC( plant, vmc_start_mark );
 	emitRef( plant, ToRef( v ) );
 }
 
-void vmiEND( Plant plant, int v ) {
-	emitSPC( plant, vmc_end );
+void vmiEND_MARK( Plant plant, int v ) {
+	emitSPC( plant, vmc_end_mark );
 	emitRef( plant, ToRef( v ) );
 }
 
-void vmiCHECK1( Plant plant, int v ) {
-	emitSPC( plant, vmc_check1 );
+void vmiCHECK_COUNT( Plant plant, int v ) {
+	emitSPC( plant, vmc_check_count );
+	emitRef( plant, ToRef( v ) );
+}
+
+void vmiCHECK_MARK1( Plant plant, int v ) {
+	emitSPC( plant, vmc_check_mark1 );
 	emitRef( plant, ToRef( v ) );
 }
 
 //	Do we ever generate this?
-void vmiCHECK0( Plant plant, int v ) {
-	emitSPC( plant, vmc_check0 );
+void vmiCHECK_MARK0( Plant plant, int v ) {
+	emitSPC( plant, vmc_check_mark0 );
 	emitRef( plant, ToRef( v ) );
 }
 
@@ -371,6 +389,11 @@ void vmiIF_NEQ_ID_CONSTANT( Plant plant, Ident id, Ref constant, DestinationClas
 
 void vmiIF_NEQ_ID_ID( Plant plant, Ident id1, Ident id2, DestinationClass & d ) {
 	vmiCMP_ID_ID( false, plant, id1, id2, d );
+}
+
+void vmiEQQ( Plant plant, Ref ref ) {
+	emitSPC( plant, vmc_eqq );
+	emitRef( plant, ref );
 }
 
 static bool eval_relop( char op, int a, int b ) {

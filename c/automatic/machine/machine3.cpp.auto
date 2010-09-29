@@ -47,6 +47,11 @@ void Machine3::core( bool init_mode, Ref *pc ) {
         *( VMVP ) = *( VMVP ) == r ? sys_true : sys_false;
         RETURN( pc + 1 );
     }
+    L_eqq: {
+        Ref r = *++pc;
+        *( VMVP ) = *( VMVP ) == r ? sys_true : sys_false;
+        RETURN( pc + 1 );
+    }
     L_neq: {
         Ref r = *( VMVP-- );
         *( VMVP ) = *( VMVP ) == r ? sys_false : sys_true;
@@ -142,7 +147,22 @@ void Machine3::core( bool init_mode, Ref *pc ) {
         VMPCFUNC = fn_K;
         RETURN( fn_K + 1 );
     }
-    L_check0: {
+    L_check_count: {
+        long n = ToLong( *( ++pc ) );
+        #ifdef DBG_SPECIAL
+        fprintf(
+        	stderr,
+        	"Difference between %lu and %lu (held in %ld)\n",
+        	ToULong( VMVP ),
+        	ToULong( LOCAL(n) ),
+        	n
+        );
+        #endif
+        if ( VMCOUNT == n ) RETURN( pc + 1 );
+        throw Mishap( "Wrong number of results (needed 0)" ).culprit( "#Results", "" + ( VMVP - ToRefRef( LOCAL(n) ) ) );
+        RETURN( NULL );	// stupid compiler
+    }
+    L_check_mark0: {
         long n = ToLong( *( ++pc ) );
         #ifdef DBG_SPECIAL
         fprintf(
@@ -157,7 +177,7 @@ void Machine3::core( bool init_mode, Ref *pc ) {
         throw Mishap( "Wrong number of results (needed 0)" ).culprit( "#Results", "" + ( VMVP - ToRefRef( LOCAL(n) ) ) );
         RETURN( NULL );	// stupid compiler
     }
-    L_check1: {
+    L_check_mark1: {
         long n = ToLong( *( ++pc ) );
         unsigned long d;
         #ifdef DBG_SPECIAL
@@ -170,7 +190,7 @@ void Machine3::core( bool init_mode, Ref *pc ) {
         throw Mishap( "Wrong number of results (needed 1)" ).culprit( "#results", "" + d );
         RETURN( NULL );	// stupid compiler
     }
-    L_end: {
+    L_end_mark: {
         Ref r;
         long n = ToLong( *( ++pc ) );
         #ifdef DBG_SPECIAL
@@ -468,7 +488,7 @@ void Machine3::core( bool init_mode, Ref *pc ) {
         MELT;
         RETURN( pc );
     }
-    L_start: {
+    L_start_mark: {
         long n = ToLong( *( ++pc ) );
         #ifdef DBG_SPECIAL
         fprintf( stderr, "Storing %u in %d\n", ToULong( ToRef( VMVP ) ), n );
@@ -513,6 +533,24 @@ void Machine3::core( bool init_mode, Ref *pc ) {
         MELT;
         RETURN( pc );
     }
+    L_syscall_dat: {
+        SysCall * sys = ToSysCall( pc[ 1 ] );
+        FREEZE;
+        //	Skip the data arg. The system call picks it up via pc[-1]. Note that
+        //	it is NOT garbage collected. That means it cannot be an object.
+        pc = (*sys)( pc + 3, vm );
+        MELT;
+        RETURN( pc );
+    }
+    L_syscall_argdat: {
+        SysCall * sys = ToSysCall( pc[ 1 ] );
+        FREEZE;
+        //	Skip the data arg. The system call picks it up via pc[-1]. Note that
+        //	it is NOT garbage collected. That means it cannot be an object.
+        pc = (*sys)( pc + 4, vm );
+        MELT;
+        RETURN( pc );
+    }
     L_sysreturn: {
         VMPCFUNC = VMLINKFUNC;
         RETURN( VMLINK );
@@ -544,6 +582,7 @@ void Machine3::core( bool init_mode, Ref *pc ) {
         ins.spc_decr = &&L_decr;
         ins.spc_div = &&L_div;
         ins.spc_eq = &&L_eq;
+        ins.spc_eqq = &&L_eqq;
         ins.spc_neq = &&L_neq;
         ins.spc_gt = &&L_gt;
         ins.spc_gte = &&L_gte;
@@ -555,9 +594,10 @@ void Machine3::core( bool init_mode, Ref *pc ) {
         ins.spc_sub = &&L_sub;
         ins.spc_calls = &&L_calls;
         ins.spc_chainlite = &&L_chainlite;
-        ins.spc_check0 = &&L_check0;
-        ins.spc_check1 = &&L_check1;
-        ins.spc_end = &&L_end;
+        ins.spc_check_count = &&L_check_count;
+        ins.spc_check_mark0 = &&L_check_mark0;
+        ins.spc_check_mark1 = &&L_check_mark1;
+        ins.spc_end_mark = &&L_end_mark;
         ins.spc_end1_calls = &&L_end1_calls;
         ins.spc_end_call_global = &&L_end_call_global;
         ins.spc_enter = &&L_enter;
@@ -595,10 +635,12 @@ void Machine3::core( bool init_mode, Ref *pc ) {
         ins.spc_set_call_global = &&L_set_call_global;
         ins.spc_set_calls = &&L_set_calls;
         ins.spc_set_syscall = &&L_set_syscall;
-        ins.spc_start = &&L_start;
+        ins.spc_start_mark = &&L_start_mark;
         ins.spc_stringiterate = &&L_stringiterate;
         ins.spc_syscall = &&L_syscall;
         ins.spc_syscall_arg = &&L_syscall_arg;
+        ins.spc_syscall_dat = &&L_syscall_dat;
+        ins.spc_syscall_argdat = &&L_syscall_argdat;
         ins.spc_sysreturn = &&L_sysreturn;
         ins.spc_vectoriterate = &&L_vectoriterate;
         return;

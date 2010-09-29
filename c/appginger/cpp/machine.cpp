@@ -178,7 +178,6 @@ void MachineClass::print_results( float time_taken ) {
 void MachineClass::print_results( std::ostream & out, float time_taken ) {
 	const bool quiet = this->appg.isBatchMode();
 
-
 	int n = this->vp - this->vp_base;
 
 	if ( !quiet ) {
@@ -196,6 +195,7 @@ void MachineClass::print_results( std::ostream & out, float time_taken ) {
 	if ( !quiet ) {
 		out << endl;
 	}
+	
 	this->vp = this->vp_base;
 }
 

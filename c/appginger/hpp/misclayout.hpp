@@ -16,8 +16,8 @@
     along with AppGinger.  If not, see <http://www.gnu.org/licenses/>.
 \******************************************************************************/
 
-#ifndef OBJ_LAYOUT_HPP
-#define OBJ_LAYOUT_HPP
+#ifndef MISC_LAYOUT_HPP
+#define MISC_LAYOUT_HPP
 
 /******************************************************************************\
 |

@@ -22,6 +22,10 @@ public abstract class GeneralInstructionSet {
 		return new GenericInstruction();
 	}
 
+	public Instruction eqq_ir() {
+		return new GenericInstruction();
+	}
+
 	public Instruction neq_i() {
 		return new GenericInstruction();
 	}
@@ -75,12 +79,16 @@ public abstract class GeneralInstructionSet {
 	}
 
 
-	public Instruction check0_ir() {
+	public Instruction check_mark0_ir() {
 		return new GenericInstruction();
 	}
 
 
-	public Instruction check1_ir() {
+	public Instruction check_count_ir() {
+		return new GenericInstruction();
+	}
+
+	public Instruction check_mark1_ir() {
 		return new GenericInstruction();
 	}
 
@@ -95,7 +103,7 @@ public abstract class GeneralInstructionSet {
 	}
 
 
-	public Instruction end_ir() {
+	public Instruction end_mark_ir() {
 		return new GenericInstruction();
 	}
 
@@ -271,7 +279,7 @@ public abstract class GeneralInstructionSet {
 
 
 
-	public Instruction start_ir() {
+	public Instruction start_mark_ir() {
 		return new GenericInstruction();
 	}
 	
@@ -283,7 +291,15 @@ public abstract class GeneralInstructionSet {
 		return new GenericInstruction();	
 	}
 	
-	public Instruction syscall_arg_irr() {
+	public Instruction syscall_arg_irc() {
+		return new GenericInstruction();	
+	}
+	
+	public Instruction syscall_dat_irr() {
+		return new GenericInstruction();	
+	}
+	
+	public Instruction syscall_argdat_ircr() {
 		return new GenericInstruction();	
 	}
 	

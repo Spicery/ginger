@@ -33,7 +33,7 @@ public class GenericInstruction extends Instruction {
 				output.println( line );
 			}
 		} catch ( IOException e ) {
-			throw new RuntimeException();
+			throw new RuntimeException( this.getName() );
 		}
 	}
 	

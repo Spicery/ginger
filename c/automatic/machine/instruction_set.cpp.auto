@@ -4,6 +4,7 @@ const char * InstructionSet::name( Ref spc ) const {
         spc == spc_decr ? "decr" :
         spc == spc_div ? "div" :
         spc == spc_eq ? "eq" :
+        spc == spc_eqq ? "eqq" :
         spc == spc_neq ? "neq" :
         spc == spc_gt ? "gt" :
         spc == spc_gte ? "gte" :
@@ -15,9 +16,10 @@ const char * InstructionSet::name( Ref spc ) const {
         spc == spc_sub ? "sub" :
         spc == spc_calls ? "calls" :
         spc == spc_chainlite ? "chainlite" :
-        spc == spc_check0 ? "check0" :
-        spc == spc_check1 ? "check1" :
-        spc == spc_end ? "end" :
+        spc == spc_check_count ? "check_count" :
+        spc == spc_check_mark0 ? "check_mark0" :
+        spc == spc_check_mark1 ? "check_mark1" :
+        spc == spc_end_mark ? "end_mark" :
         spc == spc_end1_calls ? "end1_calls" :
         spc == spc_end_call_global ? "end_call_global" :
         spc == spc_enter ? "enter" :
@@ -55,10 +57,12 @@ const char * InstructionSet::name( Ref spc ) const {
         spc == spc_set_call_global ? "set_call_global" :
         spc == spc_set_calls ? "set_calls" :
         spc == spc_set_syscall ? "set_syscall" :
-        spc == spc_start ? "start" :
+        spc == spc_start_mark ? "start_mark" :
         spc == spc_stringiterate ? "stringiterate" :
         spc == spc_syscall ? "syscall" :
         spc == spc_syscall_arg ? "syscall_arg" :
+        spc == spc_syscall_dat ? "syscall_dat" :
+        spc == spc_syscall_argdat ? "syscall_argdat" :
         spc == spc_sysreturn ? "sysreturn" :
         spc == spc_vectoriterate ? "vectoriterate" :
         "?"
@@ -66,11 +70,13 @@ const char * InstructionSet::name( Ref spc ) const {
 }
 
 const char * InstructionSet::signature( Ref x ) const {
+    if ( x == spc_eqq ) return "ir";
     if ( x == spc_incr_by ) return "ir";
     if ( x == spc_chainlite ) return "icr";
-    if ( x == spc_check0 ) return "ir";
-    if ( x == spc_check1 ) return "ir";
-    if ( x == spc_end ) return "ir";
+    if ( x == spc_check_count ) return "ir";
+    if ( x == spc_check_mark0 ) return "ir";
+    if ( x == spc_check_mark1 ) return "ir";
+    if ( x == spc_end_mark ) return "ir";
     if ( x == spc_end1_calls ) return "ir";
     if ( x == spc_end_call_global ) return "irv";
     if ( x == spc_eq_si ) return "irrr";
@@ -97,9 +103,11 @@ const char * InstructionSet::signature( Ref x ) const {
     if ( x == spc_set_call_global ) return "irv";
     if ( x == spc_set_calls ) return "ir";
     if ( x == spc_set_syscall ) return "irr";
-    if ( x == spc_start ) return "ir";
+    if ( x == spc_start_mark ) return "ir";
     if ( x == spc_syscall ) return "ir";
-    if ( x == spc_syscall_arg ) return "irr";
+    if ( x == spc_syscall_arg ) return "irc";
+    if ( x == spc_syscall_dat ) return "irr";
+    if ( x == spc_syscall_argdat ) return "ircr";
     return "i";
 }
 
@@ -109,6 +117,7 @@ Ref InstructionSet::lookup( Instruction instr ) const {
     case vmc_decr: return this->spc_decr;
     case vmc_div: return this->spc_div;
     case vmc_eq: return this->spc_eq;
+    case vmc_eqq: return this->spc_eqq;
     case vmc_neq: return this->spc_neq;
     case vmc_gt: return this->spc_gt;
     case vmc_gte: return this->spc_gte;
@@ -120,9 +129,10 @@ Ref InstructionSet::lookup( Instruction instr ) const {
     case vmc_sub: return this->spc_sub;
     case vmc_calls: return this->spc_calls;
     case vmc_chainlite: return this->spc_chainlite;
-    case vmc_check0: return this->spc_check0;
-    case vmc_check1: return this->spc_check1;
-    case vmc_end: return this->spc_end;
+    case vmc_check_count: return this->spc_check_count;
+    case vmc_check_mark0: return this->spc_check_mark0;
+    case vmc_check_mark1: return this->spc_check_mark1;
+    case vmc_end_mark: return this->spc_end_mark;
     case vmc_end1_calls: return this->spc_end1_calls;
     case vmc_end_call_global: return this->spc_end_call_global;
     case vmc_enter: return this->spc_enter;
@@ -160,10 +170,12 @@ Ref InstructionSet::lookup( Instruction instr ) const {
     case vmc_set_call_global: return this->spc_set_call_global;
     case vmc_set_calls: return this->spc_set_calls;
     case vmc_set_syscall: return this->spc_set_syscall;
-    case vmc_start: return this->spc_start;
+    case vmc_start_mark: return this->spc_start_mark;
     case vmc_stringiterate: return this->spc_stringiterate;
     case vmc_syscall: return this->spc_syscall;
     case vmc_syscall_arg: return this->spc_syscall_arg;
+    case vmc_syscall_dat: return this->spc_syscall_dat;
+    case vmc_syscall_argdat: return this->spc_syscall_argdat;
     case vmc_sysreturn: return this->spc_sysreturn;
     case vmc_vectoriterate: return this->spc_vectoriterate;
     }

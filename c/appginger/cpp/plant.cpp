@@ -34,7 +34,7 @@ using namespace std;
 #include "arity.hpp"
 #include "ident.hpp"
 #include "makesysfn.hpp"
-#include "objlayout.hpp"
+#include "misclayout.hpp"
 #include "sys.hpp"
 #include "dict.hpp"
 #include "syssymbol.hpp"
@@ -437,7 +437,7 @@ void PlantClass::compileTerm( Term term ) {
 			if ( iterm ) {
 				if ( aargs.isntExact() ) { 
 					int v = tmpvar( this );
-		        	vmiSTART( this, v );
+		        	vmiSTART_MARK( this, v );
 					this->compileTerm( args );
 					vmiEND_CALL_ID( this, v, iterm->ident() );
 				} else {
@@ -446,7 +446,7 @@ void PlantClass::compileTerm( Term term ) {
 				}
 			} else if ( aargs.isntExact() ) {
 				int v = tmpvar( this );
-		        vmiSTART( this, v );
+		        vmiSTART_MARK( this, v );
 		        this->compileTerm(  args );
 				this->compile1( fn );
 				vmiEND1_CALLS( this, v );
@@ -463,7 +463,7 @@ void PlantClass::compileTerm( Term term ) {
 			SysCall * sc = (SysCall *)( term_ref_cont( term ) );
 			
 			int v = tmpvar( this );
-			vmiSTART( this, v );
+			vmiSTART_MARK( this, v );
 			this->compileArgs( term );
 			vmiSET( this, v );
 			vmiSYS_CALL( this, sc );
@@ -542,9 +542,9 @@ void PlantClass::compile1( Term term ) {
 	if ( a.isntExact() ) {
 		int n = this->slot;
 		int v = tmpvar( this );
-		vmiSTART( this, v );
+		vmiSTART_MARK( this, v );
 		this->compileTerm( term );
-		vmiCHECK1( this, v );
+		vmiCHECK_MARK1( this, v );
 		this->slot = n;
 	} else if ( a.count() == 1 ) {
 		this->compileTerm( term );
@@ -558,9 +558,9 @@ void PlantClass::compile0( Term term ) {
 	if ( a.isntExact() ) {
 		int n = this->slot;
 		int v = tmpvar( this );
-		vmiSTART( this, v );
+		vmiSTART_MARK( this, v );
 		this->compileTerm( term );
-		vmiCHECK0( this, v );
+		vmiCHECK_MARK0( this, v );
 		this->slot = n;
 	} else if ( a.count() == 0 ) {
 		this->compileTerm( term );

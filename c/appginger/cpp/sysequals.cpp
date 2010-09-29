@@ -18,7 +18,7 @@
 
 #include "sysequals.hpp"
 #include "key.hpp"
-#include "objlayout.hpp"
+#include "misclayout.hpp"
 #include "mishap.hpp"
 
 #include <string.h>

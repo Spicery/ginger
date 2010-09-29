@@ -16,18 +16,29 @@
     along with AppGinger.  If not, see <http://www.gnu.org/licenses/>.
 \******************************************************************************/
 
-#ifndef SYS_KEY_HPP
-#define SYS_KEY_HPP
+#include "sysobject.hpp"
 
-#include "common.hpp"
-#include "machine.hpp"
+#include "key.hpp"
+#include "keylayout.hpp"
+#include "mishap.hpp"
 
-extern Ref * sysObjectKey( Ref * pc, MachineClass * vm );
-extern Ref * sysNewRecordClass( Ref * pc, MachineClass * vm );
-extern Ref * sysClassConstructor( Ref * pc, MachineClass * vm );
-extern Ref * sysClassRecogniser( Ref * pc, MachineClass *vm );
-extern Ref * sysClassAccessor( Ref * pc, MachineClass *vm );
-extern Ref refKey( Ref r );
+unsigned long lengthOfObject( Ref * obj_K ) {
+	Ref key = *obj_K;
+	if ( IsObj( key ) && *RefToPtr4( key ) == sysKeyKey ) {
+		Ref * key_K = RefToPtr4( key );
+		int N = SmallToLong( key_K[ KEY_OFFSET_NFIELDS ] );
+		return N;
+	} else {	
+		throw Mishap( "Object needed" );
+	}
+}
 
-#endif
-
+Ref titleOfObject( Ref * obj_K ) {
+	Ref key = *obj_K;
+	if ( IsObj( key ) && *RefToPtr4( key ) == sysKeyKey ) {
+		Ref * key_K = RefToPtr4( key );
+		return key_K[ KEY_OFFSET_TITLE ];
+	} else {	
+		throw Mishap( "Object needed" );
+	}
+}

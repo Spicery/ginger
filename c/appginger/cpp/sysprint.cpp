@@ -16,14 +16,15 @@
     along with AppGinger.  If not, see <http://www.gnu.org/licenses/>.
 \******************************************************************************/
 
+#include <string>
+
 #include "sysprint.hpp"
 #include "syskey.hpp"
-#include "objlayout.hpp"
+#include "misclayout.hpp"
 #include "mishap.hpp"
 #include "sysmap.hpp"
 #include "syssymbol.hpp"
-#include <string>
-
+#include "sysobject.hpp"
 
 void refPrint( Ref r ) {
 	refPrint( std::cout, r );
@@ -77,10 +78,23 @@ static void refRecordPrint( std::ostream & out, Ref * rec_K ) {
 	out << "}";
 }
 
-void refPrint( std::ostream & out, Ref r ) {
+static void refObjectPrint( std::ostream & out, Ref * rec_K ) {
+	unsigned long len = lengthOfObject( rec_K );
+	//std::cout << "Length of object " << len << std::endl;
+	bool sep = false;
+	refPrint( out, titleOfObject( rec_K ) );
+	out << "[" << len << "]{";
+	for ( unsigned long i = 1; i <= len; i++ ) {
+		if ( sep ) { out << ","; } else { sep = true; }
+		refPrint( rec_K[ i ] ); 
+	}
+	out << "}";
+}
+
+void refPrint( std::ostream & out, const Ref r ) {
 	if ( IsObj( r ) ) {
 		Ref * obj_K = RefToPtr4( r );
-		Ref key = *obj_K;
+		const Ref key = * obj_K;
 		if ( IsFunctionKey( key ) ) {
 			out << "<function " << numInputsOfFn( obj_K ) << ":" << numOutputsOfFn( obj_K ) << ">";
 		} else if ( IsSimpleKey( key ) ) {
@@ -106,14 +120,15 @@ void refPrint( std::ostream & out, Ref r ) {
 					break;
 				}				
 				default: {
-					throw "unimplemented (other)";
+					out << "<printing undefined>";
+					break;
 				}
 			}
 		} else if ( IsObj( key ) ) {
 			//	Compound keys not implemented yet.
-			throw "unimplemented (compound keys)";
+			refObjectPrint( out, obj_K );
 		} else {
-			throw "unimplemented";
+			out << "<printing undefined>";
 		}
 	} else {
 		Ref k = refKey( r );

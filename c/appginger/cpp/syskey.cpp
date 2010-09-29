@@ -163,30 +163,32 @@ Ref * sysClassAccessor( Ref * pc, MachineClass *vm ) {
 	return pc;
 }
 
-/* GOT HERE - commented out for the commit
 static Ref * sysargExplode( Ref * pc, MachineClass * vm ) {
 	Ref the_key = pc[-1];
+	long nfields = SmallToLong( RefToPtr4( the_key )[ KEY_OFFSET_NFIELDS ] );
 	if ( vm->count != 1 ) throw Mishap( "Wrong number of arguments" );
 	Ref obj = vm->fastPop();
 	if ( !IsObj( obj ) ) throw Mishap( "Object needed" );
 	Ref * obj_K = RefToPtr4( obj );
-	if ( *obj_K != the_key ) throw Mishap( "Wrong type of Object" );
-	
+	if ( obj_K[ 0 ] != the_key ) throw Mishap( "Wrong type of Object" );
+	for ( int i = 1; i <= nfields; i++ ) {
+		vm->fastPush( obj_K[ i ] );
+	}
+	return pc;
 }
 
 Ref * sysClassExploder( Ref * pc, MachineClass * vm ) {
 	if ( vm->count != 1 ) throw Mishap( "Wrong number of arguments" );
 	Ref key = vm->fastPeek();
 	if ( !IsObj( key ) ) throw Mishap( "Class of object needed" );
-	Ref * key_K = RefToPtr4( obj );
+	Ref * key_K = RefToPtr4( key );
 	if ( *key_K != sysKeyKey ) throw Mishap( "Class of object needed" );
-	const long N = SmallToLong( obj_K[ KEY_OFFSET_NFIELDS ] );
+	const long N = SmallToLong( key_K[ KEY_OFFSET_NFIELDS ] );
 
 	Plant plant = vm->plant();
 	vmiFUNCTION( plant, 1, N );
-	vmiSYS_CALL_ARGDAT( plant, sysargExplode, key );
+	vmiSYS_CALL_ARG( plant, sysargExplode, key );
 	vmiSYS_RETURN( plant );
 	vm->fastPeek() = vmiENDFUNCTION( plant );
 	return pc;
 }
-*/

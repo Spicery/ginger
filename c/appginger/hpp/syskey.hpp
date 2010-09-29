@@ -27,6 +27,7 @@ extern Ref * sysNewRecordClass( Ref * pc, MachineClass * vm );
 extern Ref * sysClassConstructor( Ref * pc, MachineClass * vm );
 extern Ref * sysClassRecogniser( Ref * pc, MachineClass *vm );
 extern Ref * sysClassAccessor( Ref * pc, MachineClass *vm );
+extern Ref * sysClassExploder( Ref * pc, MachineClass *vm );
 extern Ref refKey( Ref r );
 
 #endif

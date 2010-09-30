@@ -168,9 +168,9 @@ static Ref * sysargExplode( Ref * pc, MachineClass * vm ) {
 	long nfields = SmallToLong( RefToPtr4( the_key )[ KEY_OFFSET_NFIELDS ] );
 	if ( vm->count != 1 ) throw Mishap( "Wrong number of arguments" );
 	Ref obj = vm->fastPop();
-	if ( !IsObj( obj ) ) throw Mishap( "Object needed" );
+	if ( !IsObj( obj ) ) throw Mishap( "Object needed" ).culprit( "Argument", obj );
 	Ref * obj_K = RefToPtr4( obj );
-	if ( obj_K[ 0 ] != the_key ) throw Mishap( "Wrong type of Object" );
+	if ( obj_K[ 0 ] != the_key ) throw Mishap( "Wrong type of Object" ).culprit( "Object", obj );
 	for ( int i = 1; i <= nfields; i++ ) {
 		vm->fastPush( obj_K[ i ] );
 	}

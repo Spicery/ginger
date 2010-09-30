@@ -24,17 +24,9 @@
 #include <utility>
 #include <stdexcept>
 
-
-//#include <setjmp.h>
 #include "common.hpp"
 
 void this_never_happens( void );
-//void to_be_done( charseq msg );
-//void mishap( charseq msg, ... );
-//void reset( charseq msg, ... );
-//void warning( charseq msg, ... );
-
-//extern jmp_buf mishap_jump_buffer;
 
 //	Abstract.
 class Throwable {
@@ -58,6 +50,7 @@ private:
 public:
 	Problem & culprit( const std::string reason, const std::string arg );
 	Problem & culprit( const std::string arg );
+	Problem & culprit( const std::string reason, Ref ref );
 	void report();
 	
 protected:
@@ -77,6 +70,10 @@ class Mishap : public Problem {
 public:
 	Mishap & culprit( const std::string reason, const std::string arg ) { this->Problem::culprit( reason, arg ); return *this; }
 	Mishap & culprit( const std::string arg ) { this->Problem::culprit( arg ); return *this; }
+	Mishap & culprit( const std::string reason, Ref ref ) { 
+		this->Problem::culprit( reason, ref ); 
+		return *this; 
+	}
 	Mishap( const std::string & msg ) : Problem( msg ) {}
 	virtual ~Mishap() {}
 };

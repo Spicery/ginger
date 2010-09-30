@@ -17,6 +17,7 @@
 \******************************************************************************/
 
 #include <iostream>
+#include <sstream>
 using namespace std;
 
 
@@ -24,18 +25,24 @@ using namespace std;
 #include <stdarg.h>
 #include <stdlib.h>
 
+#include "sysprint.hpp"
 #include "mishap.hpp"
 
 void this_never_happens() {
 	throw Mishap( "This never happens" );
 }
 
-/*void to_be_done( charseq msg ) {
-	throw Mishap( "To be done" ).culprit( "Message", msg );
-}*/
-
 Problem & Problem::culprit( const std::string reason, const std::string arg ) {
 	this->culprits.push_back( pair< const string, const string >( reason, arg ) );
+	return *this;
+}
+
+Problem & Problem::culprit( const std::string reason, Ref ref ) {
+	std::ostringstream s;
+	refPrint( s, ref );
+	const std::string result( s.str() );
+	//this->culprits( reason, result );
+	this->culprits.push_back( pair< const string, const string >( reason, result ) );
 	return *this;
 }
 

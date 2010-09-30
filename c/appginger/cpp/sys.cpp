@@ -37,6 +37,7 @@
 #include "sysstring.hpp"
 #include "sysmap.hpp"
 #include "syskey.hpp"
+#include "sysclass.hpp"
 #include "sysequals.hpp"
 #include "sysprint.hpp"
 #include "sysfunction.hpp"

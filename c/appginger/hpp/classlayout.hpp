@@ -16,13 +16,12 @@
     along with AppGinger.  If not, see <http://www.gnu.org/licenses/>.
 \******************************************************************************/
 
-#ifndef SYS_OBJECT_HPP
-#define SYS_OBJECT_HPP
+#ifndef CLASS_LAYOUT_HPP
+#define CLASS_LAYOUT_HPP
 
-#include "common.hpp"
+#define CLASS_OFFSET_TITLE 		1
+#define CLASS_OFFSET_NFIELDS 		2
 
-extern unsigned long lengthOfObject( Ref * obj_K );
-extern Ref titleOfObject( Ref * obj_K );
-
+#define sizeAfterKeyOfInstance( obj_K ) SmallToLong(RefToPtr4((obj_K)[0])[CLASS_OFFSET_NFIELDS])
 
 #endif

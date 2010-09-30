@@ -36,7 +36,6 @@ const char * keyName( Ref key );
 #define FWD_TAG         2
 #define SIM_TAG         3
 
-//	Synonyms
 #define RefToPtr4( r )  	ToRefRef( ToULong( r ) & ~OBJ_TAG )
 #define Ptr4ToRef( p ) 		ToRef( ToULong( p ) | OBJ_TAG )
 

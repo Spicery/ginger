@@ -24,7 +24,7 @@
 #include "mishap.hpp"
 #include "sysmap.hpp"
 #include "syssymbol.hpp"
-#include "sysobject.hpp"
+#include "sysinstance.hpp"
 
 void refPrint( Ref r ) {
 	refPrint( std::cout, r );
@@ -78,11 +78,11 @@ static void refRecordPrint( std::ostream & out, Ref * rec_K ) {
 	out << "}";
 }
 
-static void refObjectPrint( std::ostream & out, Ref * rec_K ) {
-	unsigned long len = lengthOfObject( rec_K );
+static void refInstancePrint( std::ostream & out, Ref * rec_K ) {
+	unsigned long len = lengthOfInstance( rec_K );
 	//std::cout << "Length of object " << len << std::endl;
 	bool sep = false;
-	refPrint( out, titleOfObject( rec_K ) );
+	refPrint( out, titleOfInstance( rec_K ) );
 	out << "[" << len << "]{";
 	for ( unsigned long i = 1; i <= len; i++ ) {
 		if ( sep ) { out << ","; } else { sep = true; }
@@ -126,7 +126,7 @@ void refPrint( std::ostream & out, const Ref r ) {
 			}
 		} else if ( IsObj( key ) ) {
 			//	Compound keys not implemented yet.
-			refObjectPrint( out, obj_K );
+			refInstancePrint( out, obj_K );
 		} else {
 			out << "<printing undefined>";
 		}

@@ -17,6 +17,7 @@
 \******************************************************************************/
 
 #include "misclayout.hpp"
+#include "classlayout.hpp"
 
 #include "common.hpp"
 #include "key.hpp"
@@ -76,8 +77,8 @@ void findObjectLimits( Ref * obj_K, Ref * & obj_A, Ref * & obj_Z1 ) {
 		obj_Z1 = obj_K1 + sizeAfterKeyOfFn( obj_K );
 		return;
 	} else if ( IsObj( key ) ) {
-		//	Compound keys not implemented yet.
-		throw "unimplemented";
+		obj_A = obj_K;
+		obj_Z1 = obj_K1 + sizeAfterKeyOfInstance( obj_K );
 	} else {
 		throw;
 	}
@@ -131,8 +132,7 @@ unsigned long lengthAfterObjectKey( Ref * obj_K ) {
 	} else if ( IsFunctionKey( key ) ) {
 		return sizeAfterKeyOfFn( obj_K );
 	} else if ( IsObj( key ) ) {
-		//	Compound keys not implemented yet.
-		throw "unimplemented";
+		return sizeAfterKeyOfInstance( obj_K );
 	} else {
 		throw;
 	}

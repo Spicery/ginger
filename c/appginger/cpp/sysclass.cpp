@@ -25,40 +25,7 @@
 #include "machine.hpp"
 #include "classlayout.hpp"
 
-Ref refKey( Ref r ) {
-	unsigned long u = ( unsigned long )r;
-	unsigned long tag, tagg, taggg;
-	tag = u & TAG_MASK;
-	if ( tag == INT_TAG ) return sysSmallKey;
-	if ( tag == OBJ_TAG ) return *RefToPtr4(r);
-	tagg = u & TAGG_MASK;
-	if ( tagg == ( 0 | SIM_TAG ) ) return sysAbsentKey;
-	if ( tagg == ToULong( sys_false ) || tagg == ToULong( sys_true ) ) return sysBoolKey;
-	if ( tagg == FN_TAGG ) return sysFunctionKey;
-	if ( tagg == KEY_TAGG ) return sysKeyKey;
-	taggg = u & TAGGG_MASK;
-	if ( taggg == CHAR_TAGGG ) return sysCharKey;
-	if ( taggg == SYMBOL_TAGGG ) return sysSymbolKey;
-	if ( taggg == MISC_TAGGG ) {
-		if ( r == sys_nil ) {
-			return sysNilKey; 
-		} else {
-			throw;
-		}
-	}
-	throw;
-}
-
-Ref * sysObjectKey( Ref * pc, MachineClass * vm ) {
-	if ( vm->count == 1 ) {
-		vm->fastPeek() = refKey( vm->fastPeek() );
-		return pc;
-	} else {
-		throw Mishap( "Wrong number of arguments for objectKey" );
-	}
-}
-
-/*Ref * sysNewRecordClass( Ref * pc, MachineClass * vm ) {
+Ref * sysNewRecordClass( Ref * pc, MachineClass * vm ) {
 	if ( vm->count == 2 ) {
 		Ref nfields = vm->fastPop();
 		Ref title = vm->fastPop();
@@ -119,7 +86,7 @@ Ref * sysClassConstructor( Ref * pc, MachineClass *vm ) {
 	Ref kk = vm->fastPeek();
 	if ( !IsObj( kk ) || *RefToPtr4( kk ) != sysKeyKey ) throw Mishap( "Key needed" );
 	Ref * obj_K = RefToPtr4( kk );
-	long n = SmallToLong( obj_K[ KEY_OFFSET_NFIELDS ] );
+	long n = SmallToLong( obj_K[ CLASS_OFFSET_NFIELDS ] );
 	Plant plant = vm->plant();
 	vmiFUNCTION( plant, n, 1 );
 	//vmiCHECK_COUNT( plant, n );
@@ -149,7 +116,7 @@ Ref * sysClassAccessor( Ref * pc, MachineClass *vm ) {
 	if ( !IsSmall( N ) ) throw Mishap( "Integer index needed" );
 	Ref kk = vm->fastPeek();
 	if ( !isKey( kk ) ) throw Mishap( "Key needed" );
-	long nargs = SmallToLong( RefToPtr4( kk )[ KEY_OFFSET_NFIELDS ] );
+	long nargs = SmallToLong( RefToPtr4( kk )[ CLASS_OFFSET_NFIELDS ] );
 	long index = SmallToLong( N );
 	if ( 1 <= index && index <= nargs ) {
 		Plant plant = vm->plant();
@@ -165,7 +132,7 @@ Ref * sysClassAccessor( Ref * pc, MachineClass *vm ) {
 
 static Ref * sysargExplode( Ref * pc, MachineClass * vm ) {
 	Ref the_key = pc[-1];
-	long nfields = SmallToLong( RefToPtr4( the_key )[ KEY_OFFSET_NFIELDS ] );
+	long nfields = SmallToLong( RefToPtr4( the_key )[ CLASS_OFFSET_NFIELDS ] );
 	if ( vm->count != 1 ) throw Mishap( "Wrong number of arguments" );
 	Ref obj = vm->fastPop();
 	if ( !IsObj( obj ) ) throw Mishap( "Object needed" ).culprit( "Argument", obj );
@@ -183,7 +150,7 @@ Ref * sysClassExploder( Ref * pc, MachineClass * vm ) {
 	if ( !IsObj( key ) ) throw Mishap( "Class of object needed" );
 	Ref * key_K = RefToPtr4( key );
 	if ( *key_K != sysKeyKey ) throw Mishap( "Class of object needed" );
-	const long N = SmallToLong( key_K[ KEY_OFFSET_NFIELDS ] );
+	const long N = SmallToLong( key_K[ CLASS_OFFSET_NFIELDS ] );
 
 	Plant plant = vm->plant();
 	vmiFUNCTION( plant, 1, N );
@@ -192,4 +159,3 @@ Ref * sysClassExploder( Ref * pc, MachineClass * vm ) {
 	vm->fastPeek() = vmiENDFUNCTION( plant );
 	return pc;
 }
-*/

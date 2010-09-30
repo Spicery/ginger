@@ -16,10 +16,13 @@
     along with AppGinger.  If not, see <http://www.gnu.org/licenses/>.
 \******************************************************************************/
 
-#ifndef KEY_LAYOUT_HPP
-#define KEY_LAYOUT_HPP
+#ifndef SYS_INSTANCE_HPP
+#define SYS_INSTANCE_HPP
 
-#define KEY_OFFSET_TITLE 		1
-#define KEY_OFFSET_NFIELDS 		2
+#include "common.hpp"
+
+extern unsigned long lengthOfInstance( Ref * obj_K );
+extern Ref titleOfInstance( Ref * obj_K );
+
 
 #endif

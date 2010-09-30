@@ -24,6 +24,7 @@ using namespace std;
 
 #include "key.hpp"
 #include "misclayout.hpp"
+#include "classlayout.hpp"
 #include "scandict.hpp"
 #include "machine.hpp"
 #include "heapcrawl.hpp"
@@ -182,6 +183,17 @@ public:
 	}
 					
 	void endRecord( Ref * obj_K ) {
+		if ( gc_logging ) {
+		}		
+	}
+			
+	void startObject( Ref * obj_K ) {
+		if ( gc_logging ) {
+			gclog << "  (Object)" << endl;
+		}		
+	}
+					
+	void endObject( Ref * obj_K ) {
 		if ( gc_logging ) {
 		}		
 	}
@@ -533,8 +545,12 @@ public:
 				}
 			}
 		} else if ( IsObj( key ) ) {
-			//	Compound keys not implemented yet.
-			throw "unimplemented (compound keys)";
+			gclogger.startObject( obj_K );
+			unsigned long n = sizeAfterKeyOfInstance( obj_K );
+			for ( unsigned long i = 1; i <= n; i++ ) {
+				this->forward( obj_K[ i ] );
+			}
+			gclogger.endObject( obj_K );
 		} else {
 			throw "unimplemented";
 		}

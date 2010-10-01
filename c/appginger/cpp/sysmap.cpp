@@ -76,7 +76,7 @@ public:
 	Ref * nextBucket() { 
 		if ( this->bucket != sys_absent ) {
 			Ref * x = RefToPtr4( this->bucket );
-			this->bucket = x[ BUCKET_NEXT_OFFSET ];
+			this->bucket = x[ ASSOC_NEXT_OFFSET ];
 			return x;
 		} else {
 			while ( index_of_data < size_of_data ) {
@@ -119,18 +119,18 @@ private:
 		Ref bucket = bucket0;
 		
 		while ( bucket != sys_absent ) {
-			Ref k1 = fastMapEntryKey( bucket );
+			Ref k1 = fastAssocKey( bucket );
 			if ( refEquals( k, k1 ) ) {
 				//	Overwrite.
-				fastMapEntryValue( bucket ) = v;
+				fastAssocValue( bucket ) = v;
 				return;
 			} else {
-				bucket = fastMapEntryNext( bucket );
+				bucket = fastAssocNext( bucket );
 			}
 		}
 		
 		xfr.setOrigin();
-		xfr.xfrRef( sysMapEntryKey );
+		xfr.xfrRef( sysAssocKey );
 		xfr.xfrRef( k );
 		xfr.xfrRef( v );
 		xfr.xfrRef( bucket0 );
@@ -148,7 +148,7 @@ private:
 		for (;;) {
 			Ref * bucket = map_crawl.nextBucket();
 			if ( bucket == NULL ) break;
-			this->addKeyValue( bucket[ BUCKET_KEY_OFFSET ], bucket[ BUCKET_VALUE_OFFSET ] );
+			this->addKeyValue( bucket[ ASSOC_KEY_OFFSET ], bucket[ ASSOC_VALUE_OFFSET ] );
 		}
 	}
 
@@ -242,7 +242,7 @@ Ref * sysMapExplode( Ref *pc, class MachineClass * vm ) {
 			for (;;) {
 				Ref * bucket_K = map_crawl.nextBucket();
 				if ( bucket_K == NULL ) break;
-				Ref v = bucket_K[ BUCKET_VALUE_OFFSET ];
+				Ref v = bucket_K[ ASSOC_VALUE_OFFSET ];
 				vm->fastPush( v );
 			}
 			
@@ -263,8 +263,8 @@ void refMapPrint( std::ostream & out, Ref * map_K ) {
 		Ref * bucket_K = map_crawl.nextBucket();
 		if ( bucket_K == NULL ) break;
 		if ( sep ) { out << ","; } else { sep = true; }
-		Ref k = bucket_K[ BUCKET_KEY_OFFSET ];
-		Ref v = bucket_K[ BUCKET_VALUE_OFFSET ];
+		Ref k = bucket_K[ ASSOC_KEY_OFFSET ];
+		Ref v = bucket_K[ ASSOC_VALUE_OFFSET ];
 		refPrint( out, k );
 		out << ":-";
 		refPrint( out, v );

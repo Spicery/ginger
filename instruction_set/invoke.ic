@@ -1,0 +1,50 @@
+//
+//	INVOKE only works as the 1st instruction of a function.
+//	It uses -ve offsets to access the fields before the key.
+//
+//	The purpose of INVOKE is to dispatch a core method on an
+//	object and its arguments.
+//
+
+//	Get the arity from the field before the function key.
+long A = ToLong( pc[ -2 ] );
+//	Check the arguments.
+if ( VMCOUNT != A ) {
+	enter_error( VMCOUNT, A );
+}
+//	Get the subject.
+Ref subject = VMSP[ A - 1 ];
+//	Select the method fragment to call.
+if ( IsObj( subject ) ) {
+	Ref * subject_K = RefToPtr4( subject );
+	Ref key = subject_K[ 0 ];
+	if ( IsObj( key ) ) {
+		Ref * key_K = RefToPtr4( key );
+		Ref method = Ptr4ToRef( pc );	//	Self pointer (tagged) !!!!
+		Ref dispatch_table = key_K[ CLASS_OFFSET_DISPATCH_TABLE ];
+		while ( dispatch_table != sys_absent ) {
+			Ref * entry_K = RefToPtr4( dispatch_table );
+			if ( method == entry_K[ ASSOC_KEY_OFFSET ] ) {	
+				Ref fn = entry_K[ ASSOC_VALUE_OFFSET ];
+				
+				//	Now we chain into the fragment we have recovered, utilising the
+				//	fact that this is a lightweight call.
+				
+				Ref * fn_K = RefToPtr4( fn );
+				
+				//	Leave VMLINK & VMLINKFUNC alone.
+				//	The lite function has not stashed them into the callstack.
+				//	As a consequence we can chain directly without meddling with
+				//	them.
+				
+				VMPCFUNC = fn_K;
+				RETURN( fn_K + 1 );
+			} else {
+				dispatch_table = entry_K[ ASSOC_NEXT_OFFSET ];
+			}
+		}	
+		/* Failed to find a matching method */
+	}
+}
+invoke_error();
+RETURN( pc );	// IDIOT COMPILER.

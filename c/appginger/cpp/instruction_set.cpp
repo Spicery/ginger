@@ -10,5 +10,9 @@ void call_error( Ref r ) {
 	throw Mishap( "Function needed - got something else" );
 }
 
+void invoke_error() {
+	throw Mishap( "Error in method dispatch" );
+}
+
 
 #include "instruction_set.cpp.auto"

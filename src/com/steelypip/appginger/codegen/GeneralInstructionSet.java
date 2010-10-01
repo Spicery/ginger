@@ -175,6 +175,10 @@ public abstract class GeneralInstructionSet {
 		return new GenericInstruction();
 	}
 	
+	public Instruction invoke_ic() {
+		return new GenericInstruction();
+	}
+	
 	public Instruction listiterate_i() {
 		return new GenericInstruction();
 	}

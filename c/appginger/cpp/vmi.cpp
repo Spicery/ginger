@@ -207,6 +207,11 @@ void vmiSET( Plant plant, int A ) {
 	emitRef( plant, ToRef( A ) );
 }
 
+void vmiINVOKE( Plant plant ) {
+	emitSPC( plant, vmc_invoke );
+	emitRef( plant, sys_absent );	//	Cache.
+}
+
 void vmiCALLS( Plant plant ) {
 	emitSPC( plant, vmc_calls );
 }
@@ -294,10 +299,10 @@ void vmiFUNCTION( Plant plant, int N, int A ) {
 	plant->save( N, A );
 }
 
-Ref vmiENDFUNCTION( Plant plant, bool in_heap ) {
+Ref vmiENDFUNCTION( Plant plant, bool in_heap, Ref fnkey ) {
 	Ref r;
 
-	r = plant->detach( in_heap );
+	r = plant->detach( in_heap, fnkey );
 	#ifndef DBG_VMI
 		if ( plant->vm->getShowCode() ) {
 			plant->vm->printfn( std::clog, r );
@@ -319,7 +324,15 @@ Ref vmiENDFUNCTION( Plant plant, bool in_heap ) {
 }
 
 Ref vmiENDFUNCTION( Plant plant ) {
-	return vmiENDFUNCTION( plant, true );
+	return vmiENDFUNCTION( plant, true, sysFunctionKey );
+}
+
+Ref vmiENDFUNCTION( Plant plant, Ref fnkey ) {
+	return vmiENDFUNCTION( plant, true, fnkey );
+}
+
+Ref vmiENDFUNCTION( Plant plant, bool in_heap ) {
+	return vmiENDFUNCTION( plant, in_heap, in_heap ? sysFunctionKey : sysCoreFunctionKey );
 }
 
 void vmiNOT( Plant plant ) {

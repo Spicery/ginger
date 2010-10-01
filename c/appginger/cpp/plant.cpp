@@ -62,7 +62,7 @@ DestinationClass & PlantClass::newDestination() {
 
 #define REFBITS ( 8 * sizeof( Ref ) )
 
-Ref PlantClass::detach( const bool in_heap ) {
+Ref PlantClass::detach( const bool in_heap, Ref fnkey ) {
 	unsigned long L = this->code_data->size();
 	unsigned long preflight_size = OFFSET_FROM_FN_LENGTH_TO_KEY + 1 + L /* + M */;
 	
@@ -90,7 +90,7 @@ Ref PlantClass::detach( const bool in_heap ) {
 		
 	
 		xfr.setOrigin();
-		xfr.xfrRef( sysFunctionKey );
+		xfr.xfrRef( fnkey );
 	
 		xfr.xfrVector( *this->code_data );	//	alt
 	
@@ -111,6 +111,7 @@ Ref PlantClass::detach( const bool in_heap ) {
 		*p++ = ToRef( this->nlocals );
 		*p++ = ToRef( this->ninputs );
 		Ref * func = p;
+		if ( fnkey != sysCoreFunctionKey ) throw Unreachable();
 		*p++ = sysCoreFunctionKey;
 		for ( std::vector< Ref >::iterator it = this->code_data->begin(); it != this->code_data->end(); ++it ) {
 			*p++ = *it;

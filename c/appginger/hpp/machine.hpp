@@ -88,7 +88,6 @@ public:
 	Ref*			instructionShow( std::ostream & out, Ref * pc );
 	void			resetMachine();
 	PlantClass *	plant();		
-	//DictClass *		dict();
 	HeapClass &		heap();
 	
 public:
@@ -104,6 +103,13 @@ public:
 public:
 	bool getShowCode();
 	bool isGCTrace();
+	
+	
+public:
+	//	TO BE IMPLEMENTED.
+	void gcUnnecessary() {}		//	GC not supposed to be required. Will only grow but issues complaint.
+	void gcSuspended() {}		//	Always grow.
+	void gcNormal() {}			//	Makes decision to grow/shrink.
 	
 
 public:

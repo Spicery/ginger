@@ -4,6 +4,8 @@
 #include "common.hpp"
 #include "instruction.hpp"
 #include "listlayout.hpp"
+#include "classlayout.hpp"
+#include "maplayout.hpp"
 
 class InstructionSet {
 public:
@@ -16,6 +18,7 @@ public:
 
 void enter_error( int B, int A );
 void call_error( Ref r ) ;
+void invoke_error() ;
 void results_error( int d );
 void arith_error( int x, int y );
 void arith_error( int x );

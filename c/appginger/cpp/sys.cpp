@@ -41,6 +41,7 @@
 #include "sysequals.hpp"
 #include "sysprint.hpp"
 #include "sysfunction.hpp"
+#include "sysmethod.hpp"
 
 //#define DBG_SYS
 
@@ -280,6 +281,7 @@ const SysMap::value_type rawData[] = {
 	SysMap::value_type( "newClassConstructor", SysInfo( fnc_syscall, Arity( 1 ), Arity( 1 ), sysClassConstructor, "Returns the constructor for a given class" ) ),
 	SysMap::value_type( "newClassAccessor", SysInfo( fnc_syscall, Arity( 1 ), Arity( 1 ), sysClassAccessor, "Returns the accessor for a given class" ) ),
 	SysMap::value_type( "newClassExploder", SysInfo( fnc_syscall, Arity( 1 ), Arity( 0, true ), sysClassExploder, "Returns the exploder for a given class" ) ),
+	SysMap::value_type( "newMethod", SysInfo( fnc_syscall, Arity( 3 ), Arity( 1 ), sysNewMethod, "Constructs a new empty method" ) ),
 	SysMap::value_type( "=", SysInfo( fnc_syscall, Arity( 2 ), Arity( 1 ), sysEquals, "Compare any two values as equal" ) ),
 	SysMap::value_type( "gc", SysInfo( fnc_syscall, Arity( 0 ), Arity( 0 ), sysGarbageCollect, "Forces a garbage collection - useful for tests" ) ),
 	SysMap::value_type( "hash", SysInfo( fnc_syscall, Arity( 1 ), Arity( 1 ), sysHash, "Computes a hash code for any value, returns a positive Small" ) ),

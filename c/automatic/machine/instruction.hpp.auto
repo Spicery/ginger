@@ -33,6 +33,7 @@
     vmc_halt,
     vmc_ifnot,
     vmc_ifso,
+    vmc_invoke,
     vmc_listiterate,
     vmc_lt_si,
     vmc_lt_ss,

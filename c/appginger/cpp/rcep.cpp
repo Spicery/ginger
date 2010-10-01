@@ -123,6 +123,7 @@ bool RCEP::unsafe_read_comp_exec_print( Machine vm, istream & input ) {
 	    vmiRETURN( plant );
 	    r = vmiENDFUNCTION( plant );
 	    start = clock();
+	    vm->gcNormal();
     	vm->execute( r );
 	} catch ( NormalExit ) {
 	}

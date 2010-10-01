@@ -84,10 +84,13 @@ const char * keyName( Ref key );
 //	Functions
 #define sysFunctionKey				ToRef( 0 << TAGG | FN_TAGG )
 #define sysCoreFunctionKey			ToRef( 1 << TAGG | FN_TAGG )
+#define sysMethodKey				ToRef( 2 << TAGG | FN_TAGG )
 #define IsFunctionKey( key )		( ( TAGG_MASK & ToULong( key ) ) == FN_TAGG )
 #define IsHeapFunctionKey( key )	( ( key ) == sysFunctionKey )
 #define IsCoreFunctionKey( key ) 	( ( key ) == sysCoreFunctionKey )
-
+#define IsMethodKey( key ) 			( ( key ) == sysMethodKey )
+#define IsFunction( ref )			( IsObj( ref ) && IsFunctionKey( *RefToPtr4( ref ) ) )
+#define IsMethod( ref )				( IsObj( ref ) && IsMethodKey( *RefToPtr4( ref ) ) )
 
 
 ////////////////////////////////////////////////////////////////////////
@@ -127,8 +130,8 @@ KEYLESS_KIND
 #define MAKE_KEY( id, n, flav )		ToRef( ( ( id << LEN_WIDTH | n ) << KIND_WIDTH | flav ) << TAGG | KEY_TAGG )
 #define sysAbsentKey    		MAKE_KEY( 0, 0, KEYLESS_KIND )
 #define sysBoolKey      		MAKE_KEY( 1, 0, KEYLESS_KIND )
-#define sysTerminKey    		MAKE_KEY( 2, 0, KEYLESS_KIND )
-#define sysKeyKey				MAKE_KEY( 3, 2, RECORD_KIND )
+#define sysKeyKey				MAKE_KEY( 2, 3, RECORD_KIND )
+#define sysTerminKey    		MAKE_KEY( 3, 0, KEYLESS_KIND )
 #define sysNilKey       		MAKE_KEY( 4, 0, KEYLESS_KIND )
 #define sysPairKey      		MAKE_KEY( 5, 2, PAIR_KIND )
 #define sysVectorKey    		MAKE_KEY( 6, 0, VECTOR_KIND )
@@ -140,7 +143,7 @@ KEYLESS_KIND
 #define sysCharKey				MAKE_KEY( 12, 0, KEYLESS_KIND )
 #define sysMapletKey			MAKE_KEY( 13, 2, RECORD_KIND )
 #define sysMapKey				MAKE_KEY( 14, 2, MAP_KIND )
-#define sysMapEntryKey			MAKE_KEY( 15, 3, RECORD_KIND )
+#define sysAssocKey				MAKE_KEY( 15, 3, RECORD_KIND )
 #define sysIndirectionKey		MAKE_KEY( 16, 1, RECORD_KIND )
 
 //	Recognisers
@@ -148,13 +151,14 @@ KEYLESS_KIND
 #define IsVector( x )			( IsObj( x ) && ( *RefToPtr4( x ) == sysVectorKey ) )
 #define IsMap( x ) 				( IsObj( x ) && ( *RefToPtr4( x ) == sysMapKey ) )
 #define IsMaplet( x ) 			( IsObj( x ) && ( *RefToPtr4( x ) == sysMapletKey ) )
-#define IsMapEntry( x ) 		( IsObj( x ) && ( *RefToPtr4( x ) == sysMapEntry ) )
+#define IsAssoc( x ) 			( IsObj( x ) && ( *RefToPtr4( x ) == sysAssocKey ) )
 #define IsString( x )			( IsObj( x ) && ( *RefToPtr4( x ) == sysStringKey ) )
 
 #define IsVectorKind( x )		( IsObj( x ) && KindOfSimpleKey( *RefToPtr4( x ) ) == VECTOR_KIND )
 #define IsRecordKind( x )		( IsObj( x ) && KindOfSimpleKey( *RefToPtr4( x ) ) == RECORD_KIND )
 #define IsStringKind( x )		( IsObj( x ) && KindOfSimpleKey( *RefToPtr4( x ) ) == STRING_KIND )
 
+#define IsClass( ref )			( IsObj( ref ) && IsObj( *RefToPtr4( ref ) ) )
 
 ////////////////////////////////////////////////////////////////////////
 // zzz.101.11 tags

@@ -16,34 +16,14 @@
     along with AppGinger.  If not, see <http://www.gnu.org/licenses/>.
 \******************************************************************************/
 
-#include "maplayout.hpp"
+#ifndef SYS_METHOD_HPP
+#define SYS_METHOD_HPP
 
-#include "key.hpp"
+#include "common.hpp"
+#include "machine.hpp"
 
-Ref & fastMapData( Ref r ) {
-	return RefToPtr4( r )[ MAP_DATA_OFFSET ];
-}
+extern Ref * sysNewMethod( Ref * pc, MachineClass * vm );
+extern Ref * sysSetMethod( Ref * pc, MachineClass * vm );
 
-Ref & fastMapCount( Ref r ) {
-	return RefToPtr4( r )[ MAP_COUNT_OFFSET ];
-}
 
-Ref & fastMapletKey( Ref r ) {
-	return RefToPtr4( r )[ MAPLET_KEY_OFFSET ];
-}
-
-Ref & fastMapletValue( Ref r ) {
-	return RefToPtr4( r )[ MAPLET_VALUE_OFFSET ];
-}
-
-Ref & fastAssocKey( Ref r ) {
-	return RefToPtr4( r )[ ASSOC_KEY_OFFSET ];
-}
-
-Ref & fastAssocValue( Ref r ) {
-	return RefToPtr4( r )[ ASSOC_VALUE_OFFSET ];
-}
-
-Ref & fastAssocNext( Ref r ) {
-	return RefToPtr4( r )[ ASSOC_NEXT_OFFSET ];
-}
+#endif

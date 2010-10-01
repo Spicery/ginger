@@ -23,18 +23,22 @@
 
 #define MAP_DATA_OFFSET 		1
 #define MAP_COUNT_OFFSET 		2
+
 #define MAPLET_KEY_OFFSET 		1
 #define MAPLET_VALUE_OFFSET 	2
-#define BUCKET_KEY_OFFSET 		1
-#define BUCKET_VALUE_OFFSET 	2
-#define BUCKET_NEXT_OFFSET 		3
+#define MAPLET_SIZE				3
+
+#define ASSOC_KEY_OFFSET 		1
+#define ASSOC_VALUE_OFFSET 	2
+#define ASSOC_NEXT_OFFSET 		3
+#define ASSOC_SIZE				4
 
 extern Ref & fastMapData( Ref r );
 extern Ref & fastMapCount( Ref r );
 extern Ref & fastMapletKey( Ref r );
 extern Ref & fastMapletValue( Ref r );
-extern Ref & fastMapEntryKey( Ref r );
-extern Ref & fastMapEntryValue( Ref r );
-extern Ref & fastMapEntryNext( Ref r );
+extern Ref & fastAssocKey( Ref r );
+extern Ref & fastAssocValue( Ref r );
+extern Ref & fastAssocNext( Ref r );
 
 #endif

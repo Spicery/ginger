@@ -19,8 +19,10 @@
 #ifndef CLASS_LAYOUT_HPP
 #define CLASS_LAYOUT_HPP
 
-#define CLASS_OFFSET_TITLE 		1
-#define CLASS_OFFSET_NFIELDS 		2
+#define CLASS_OFFSET_TITLE 				1
+#define CLASS_OFFSET_NFIELDS 			2
+#define CLASS_OFFSET_DISPATCH_TABLE		3
+
 
 #define sizeAfterKeyOfInstance( obj_K ) SmallToLong(RefToPtr4((obj_K)[0])[CLASS_OFFSET_NFIELDS])
 

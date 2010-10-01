@@ -35,6 +35,7 @@ Ref * sysNewRecordClass( Ref * pc, MachineClass * vm ) {
 		xfr.xfrRef( sysKeyKey );
 		xfr.xfrRef( title );
 		xfr.xfrRef( nfields );
+		xfr.xfrRef( sys_absent );
 		vm->fastPush( xfr.makeRef() );
 		return pc;
 	} else {

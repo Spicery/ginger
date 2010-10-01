@@ -307,10 +307,18 @@ public:
 			if ( not c ) return NULL;
 			this->currentQueueCage = c;
 		}
+		
+		Ref * obj_K = findObjectKey( this->currentQueueCage->queue_base );
+		unsigned long len = lengthAfterObjectKey( obj_K );
+		this->currentQueueCage->queue_base = obj_K + len + 1;
+		
+		/*
 		CageCrawl crawl( this->currentQueueCage, this->currentQueueCage->queue_base );
 		Ref * obj = crawl.next();
 		this->currentQueueCage->queue_base = crawl.currentObjA();
-		return obj;
+		*/
+		
+		return obj_K;
 	}
 	
 public:

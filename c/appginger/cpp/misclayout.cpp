@@ -45,7 +45,8 @@ unsigned long lengthOfString( Ref * key ) {
 }
 
 //
-//	This computes obj_A and obj_Z1 from obj_K
+//	This computes obj_A and obj_Z1 from obj_K. 
+//
 void findObjectLimits( Ref * obj_K, Ref * & obj_A, Ref * & obj_Z1 ) {
 	//	Keys fall into the following categories: FunctionKey, SimpleKey, Pointer to Keys
 	Ref key = *obj_K;
@@ -85,7 +86,7 @@ void findObjectLimits( Ref * obj_K, Ref * & obj_A, Ref * & obj_Z1 ) {
 }
 
 //
-//	This computes obj_K from obj_A
+//	This computes obj_K from obj_A. 
 //
 Ref * findObjectKey( Ref * obj_A ) {
 	//	Cases are that 'obj_A' is pointing at
@@ -97,7 +98,34 @@ Ref * findObjectKey( Ref * obj_A ) {
 		return obj_A + OFFSET_FROM_FN_LENGTH_TO_KEY;
 	} else {
 		for ( int n = 0; n < MAX_OFFSET_FROM_START_TO_KEY; n++, obj_A++ ) {
-			if ( isKey( *obj_A ) ) {
+			//
+			//	Note that this function is called on objects that have been
+			//	forwarded but not yet scanned by the GC. So the test for the
+			//	key has to be capable of coping with a forwarded key. This
+			//	test is stupider and restricts values in front of the key to
+			//	simple values.
+			//
+			//	A smarter test is 
+			//		1. 	Are you a simple key? Job done. A: yes
+			//		2.	Are you an object? Define K = *you
+			//			2a.	Is *K the keykey? If so job done. A: yes
+			//			2b. Is *K forwarded? Define F = *K
+			//			2c.	Is *F the keykey? If so A: yes
+			//		3. 	Otherwise done A: no
+			//	
+			/*	I think the code would look like this.
+			if ( IsSimpleKey( *obj_A ) ) return obj_A;
+			if ( IsObj( *obj_A ) ) {
+				if ( *RefToPtr4( *obj_A ) == sysKeyKey ) return obj_A;
+			}
+			if ( IsFwd( *obj_A ) ) {
+				Ref K = *FwdToPtr4( *obj_A );
+				if ( IsObj( K ) ) {
+					if ( *RefToPtr4( K ) == sysKeyKey ) return obj_A;
+				}
+			} 
+			*/
+			if ( IsObj( *obj_A ) ) {
 				return obj_A;
 			}
 		}

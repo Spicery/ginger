@@ -132,6 +132,10 @@ public abstract class GeneralInstructionSet {
 		return new GenericInstruction();
 	}
 
+	public Instruction field_ir() {
+		return new GenericInstruction();
+	}
+
 
 	public Instruction goto_ir() {
 		return new GenericInstruction();

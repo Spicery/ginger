@@ -24,6 +24,7 @@
 	Ref spc_enter1;
 	Ref spc_eq_si;
 	Ref spc_eq_ss;
+	Ref spc_field;
 	Ref spc_getiterator;
 	Ref spc_goto;
 	Ref spc_gt_si;

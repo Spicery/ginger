@@ -1,0 +1,3 @@
+unsigned long N = ToULong( *++pc );
+VMVP[0] = RefToPtr4( VMVP[0] )[ N ];
+RETURN( pc + 1 );

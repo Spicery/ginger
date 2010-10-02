@@ -26,6 +26,7 @@ const char * InstructionSet::name( Ref spc ) const {
         spc == spc_enter1 ? "enter1" :
         spc == spc_eq_si ? "eq_si" :
         spc == spc_eq_ss ? "eq_ss" :
+        spc == spc_field ? "field" :
         spc == spc_getiterator ? "getiterator" :
         spc == spc_goto ? "goto" :
         spc == spc_gt_si ? "gt_si" :
@@ -80,6 +81,7 @@ const char * InstructionSet::signature( Ref x ) const {
     if ( x == spc_end_call_global ) return "irv";
     if ( x == spc_eq_si ) return "irrr";
     if ( x == spc_eq_ss ) return "irrr";
+    if ( x == spc_field ) return "ir";
     if ( x == spc_goto ) return "ir";
     if ( x == spc_gt_si ) return "irrr";
     if ( x == spc_gt_ss ) return "irrr";
@@ -139,6 +141,7 @@ Ref InstructionSet::lookup( Instruction instr ) const {
     case vmc_enter1: return this->spc_enter1;
     case vmc_eq_si: return this->spc_eq_si;
     case vmc_eq_ss: return this->spc_eq_ss;
+    case vmc_field: return this->spc_field;
     case vmc_getiterator: return this->spc_getiterator;
     case vmc_goto: return this->spc_goto;
     case vmc_gt_si: return this->spc_gt_si;

@@ -158,7 +158,8 @@ KEYLESS_KIND
 #define IsRecordKind( x )		( IsObj( x ) && KindOfSimpleKey( *RefToPtr4( x ) ) == RECORD_KIND )
 #define IsStringKind( x )		( IsObj( x ) && KindOfSimpleKey( *RefToPtr4( x ) ) == STRING_KIND )
 
-#define IsClass( ref )			( IsObj( ref ) && IsObj( *RefToPtr4( ref ) ) )
+#define IsClassKind( ref )		( IsObj( ref ) && IsObj( *RefToPtr4( ref ) ) )
+#define IsClass( ref )			( IsObj( ref ) && ( *RefToPtr4( ref ) == sysKeyKey ) )
 
 ////////////////////////////////////////////////////////////////////////
 // zzz.101.11 tags

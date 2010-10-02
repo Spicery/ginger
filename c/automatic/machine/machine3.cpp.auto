@@ -285,6 +285,11 @@ void Machine3::core( bool init_mode, Ref *pc ) {
         long d = ToLong( pc[3] );
         RETURN( ToLong( LOCAL( s ) ) == ToLong( LOCAL( t ) ) ? pc + d + 3 : pc + 4 );
     }
+    L_field: {
+        unsigned long N = ToULong( *++pc );
+        VMVP[0] = RefToPtr4( VMVP[0] )[ N ];
+        RETURN( pc + 1 );
+    }
     L_getiterator: {
         FREEZE;
         pc = sysFastGetFastIterator( pc, vm );
@@ -357,14 +362,14 @@ void Machine3::core( bool init_mode, Ref *pc ) {
         	enter_error( VMCOUNT, A );
         }
         //	Get the subject.
-        Ref subject = VMSP[ A - 1 ];
+        Ref subject = VMVP[ A - 1 ];
         //	Select the method fragment to call.
         if ( IsObj( subject ) ) {
         	Ref * subject_K = RefToPtr4( subject );
         	Ref key = subject_K[ 0 ];
         	if ( IsObj( key ) ) {
         		Ref * key_K = RefToPtr4( key );
-        		Ref method = Ptr4ToRef( pc );	//	Self pointer (tagged) !!!!
+        		Ref method = Ptr4ToRef( pc - 1 );	//	Self pointer (tagged) !!!!
         		Ref dispatch_table = key_K[ CLASS_OFFSET_DISPATCH_TABLE ];
         		while ( dispatch_table != sys_absent ) {
         			Ref * entry_K = RefToPtr4( dispatch_table );
@@ -651,6 +656,7 @@ void Machine3::core( bool init_mode, Ref *pc ) {
         ins.spc_enter1 = &&L_enter1;
         ins.spc_eq_si = &&L_eq_si;
         ins.spc_eq_ss = &&L_eq_ss;
+        ins.spc_field = &&L_field;
         ins.spc_getiterator = &&L_getiterator;
         ins.spc_goto = &&L_goto;
         ins.spc_gt_si = &&L_gt_si;

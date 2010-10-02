@@ -26,6 +26,7 @@
 #include "instruction.hpp"
 
 extern void vmiOPERATOR( Plant plant, Functor fnc );
+extern void vmiFIELD( Plant plant, long index );
 extern void vmiINCR( Plant plant, int n );
 extern void vmiPUSHQ( Plant plant, Ref obj );
 extern void vmiNEWID( Plant plant, Ident id );

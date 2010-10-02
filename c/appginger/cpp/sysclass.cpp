@@ -110,7 +110,6 @@ static Ref * sysargdatAccess( Ref * pc, MachineClass *vm ) {
 	return pc;
 }
 
-
 Ref * sysClassAccessor( Ref * pc, MachineClass *vm ) {
 	if ( vm->count != 2 ) throw Mishap( "Wrong number of arguments" );
 	Ref N = vm->fastPop();
@@ -123,6 +122,26 @@ Ref * sysClassAccessor( Ref * pc, MachineClass *vm ) {
 		Plant plant = vm->plant();
 		vmiFUNCTION( plant, 1, 1 );
 		vmiSYS_CALL_ARGDAT( plant, sysargdatAccess, kk, index );
+		vmiSYS_RETURN( plant );
+		vm->fastPeek() = vmiENDFUNCTION( plant );
+	} else {
+		throw ToBeDone();
+	}
+	return pc;
+}
+
+Ref * sysClassUnsafeAccessor( Ref * pc, MachineClass *vm ) {
+	if ( vm->count != 2 ) throw Mishap( "Wrong number of arguments" );
+	Ref N = vm->fastPop();
+	if ( !IsSmall( N ) ) throw Mishap( "Integer index needed" );
+	Ref kk = vm->fastPeek();
+	if ( !isKey( kk ) ) throw Mishap( "Key needed" );
+	long nargs = SmallToLong( RefToPtr4( kk )[ CLASS_OFFSET_NFIELDS ] );
+	long index = SmallToLong( N );
+	if ( 1 <= index && index <= nargs ) {
+		Plant plant = vm->plant();
+		vmiFUNCTION( plant, 1, 1 );
+		vmiFIELD( plant, index );
 		vmiSYS_RETURN( plant );
 		vm->fastPeek() = vmiENDFUNCTION( plant );
 	} else {

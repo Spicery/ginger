@@ -27,14 +27,17 @@
 Ref * sysNewMethod( Ref * pc, MachineClass * vm ) {
 	//	newMethod( name:String, ninputs:Small, noutputs:Small ) -> m:Method
 	if ( vm->count != 3 ) throw Mishap( "Wrong number of arguments" );
-	long noutputs = ToLong( vm->fastPop() );
-	long ninputs = ToLong( vm->fastPop() );
+	
+	Ref noutputs = vm->fastPop();
+	Ref ninputs = vm->fastPop();
 	/*Ref name =*/ vm->fastPop();	//	Currently discarded.
 	
+	if ( !IsSmall( noutputs ) || !IsSmall( ninputs ) ) throw Mishap( "Invalid arguments" ).culprit( "#Outputs", noutputs ).culprit( "Inputs", ninputs );
+	
 	Plant plant = vm->plant();
-	vmiFUNCTION( plant, ninputs, noutputs );
+	vmiFUNCTION( plant, SmallToLong( ninputs ), SmallToLong( noutputs ) );
 	vmiINVOKE( plant );
-	Ref r = vmiENDFUNCTION( plant );
+	Ref r = vmiENDFUNCTION( plant, sysMethodKey );
 	vm->fastPush( r );	//	No check needed, as stack has room for 3.
 	return pc;
 }

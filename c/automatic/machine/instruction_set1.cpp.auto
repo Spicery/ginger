@@ -306,6 +306,12 @@ static Ref *spcfn_eq_ss( Ref *pc, Machine vm ) {
     RETURN( ToLong( LOCAL( s ) ) == ToLong( LOCAL( t ) ) ? pc + d + 3 : pc + 4 );
 }
 
+static Ref *spcfn_field( Ref *pc, Machine vm ) {
+    unsigned long N = ToULong( *++pc );
+    VMVP[0] = RefToPtr4( VMVP[0] )[ N ];
+    RETURN( pc + 1 );
+}
+
 static Ref *spcfn_getiterator( Ref *pc, Machine vm ) {
     FREEZE;
     pc = sysFastGetFastIterator( pc, vm );
@@ -387,14 +393,14 @@ static Ref *spcfn_invoke( Ref *pc, Machine vm ) {
     	enter_error( VMCOUNT, A );
     }
     //	Get the subject.
-    Ref subject = VMSP[ A - 1 ];
+    Ref subject = VMVP[ A - 1 ];
     //	Select the method fragment to call.
     if ( IsObj( subject ) ) {
     	Ref * subject_K = RefToPtr4( subject );
     	Ref key = subject_K[ 0 ];
     	if ( IsObj( key ) ) {
     		Ref * key_K = RefToPtr4( key );
-    		Ref method = Ptr4ToRef( pc );	//	Self pointer (tagged) !!!!
+    		Ref method = Ptr4ToRef( pc - 1 );	//	Self pointer (tagged) !!!!
     		Ref dispatch_table = key_K[ CLASS_OFFSET_DISPATCH_TABLE ];
     		while ( dispatch_table != sys_absent ) {
     			Ref * entry_K = RefToPtr4( dispatch_table );
@@ -710,6 +716,7 @@ InstructionSet1::InstructionSet1() {
     this->spc_enter1 = (Ref)spcfn_enter1;
     this->spc_eq_si = (Ref)spcfn_eq_si;
     this->spc_eq_ss = (Ref)spcfn_eq_ss;
+    this->spc_field = (Ref)spcfn_field;
     this->spc_getiterator = (Ref)spcfn_getiterator;
     this->spc_goto = (Ref)spcfn_goto;
     this->spc_gt_si = (Ref)spcfn_gt_si;

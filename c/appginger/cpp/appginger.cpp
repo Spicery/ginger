@@ -169,6 +169,35 @@ int main( int argc, char **argv, char **envp ) {
                             std::cout << "-" << std::endl;
                         }
                     }
+                } else if ( std::string( optarg ) == std::string( "hex" ) ) {
+                	cout << hex;
+                    cout << "absent         :\t" << sys_absent << endl;
+                    cout << "true           :\t" << sys_true << endl;
+                    cout << "false          :\t" << sys_false << endl;
+                    cout << "nil            :\t" << sys_nil << endl;
+					cout << "termin         :\t" << sys_termin << endl;
+					cout << "underflow      :\t" << sys_underflow << endl;
+					cout << "undef          :\t" << sys_undef << endl;
+					cout << "Function       :\t" << sysFunctionKey << endl;
+                    cout << "CoreFunction   :\t" << sysCoreFunctionKey << endl;
+					cout << "Method         :\t" << sysMethodKey << endl;
+					cout << "AbsentKey      :\t" << sysAbsentKey << endl;
+					cout << "BoolKey        :\t" << sysBoolKey << endl;
+					cout << "KeyKey         :\t" << sysKeyKey << endl;
+					cout << "TerminKey      :\t" << sysTerminKey << endl;
+					cout << "NilKey         :\t" << sysNilKey << endl;
+					cout << "PairKey        :\t" << sysPairKey << endl;
+					cout << "VectorKey      :\t" << sysVectorKey << endl;
+					cout << "StringKey      :\t" << sysStringKey << endl;
+					cout << "SymbolKey      :\t" << sysSymbolKey << endl;
+					cout << "SmallKey       :\t" << sysSmallKey << endl;
+					cout << "FloatKey       :\t" << sysFloatKey << endl;
+					cout << "UnicodeKey     :\t" << sysUnicodeKey << endl;
+					cout << "CharKey        :\t" << sysCharKey << endl;
+					cout << "MapletKey      :\t" << sysMapletKey << endl;
+					cout << "MapKey         :\t" << sysMapKey << endl;
+					cout << "AssocKey       :\t" << sysAssocKey << endl;
+					cout << "IndirectionKey :\t" << sysIndirectionKey << endl;
                 } else {
                     printf( "Unknown help topic %s\n", optarg );
                 }

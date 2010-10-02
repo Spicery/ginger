@@ -13,14 +13,14 @@ if ( VMCOUNT != A ) {
 	enter_error( VMCOUNT, A );
 }
 //	Get the subject.
-Ref subject = VMSP[ A - 1 ];
+Ref subject = VMVP[ A - 1 ];
 //	Select the method fragment to call.
 if ( IsObj( subject ) ) {
 	Ref * subject_K = RefToPtr4( subject );
 	Ref key = subject_K[ 0 ];
 	if ( IsObj( key ) ) {
 		Ref * key_K = RefToPtr4( key );
-		Ref method = Ptr4ToRef( pc );	//	Self pointer (tagged) !!!!
+		Ref method = Ptr4ToRef( pc - 1 );	//	Self pointer (tagged) !!!!
 		Ref dispatch_table = key_K[ CLASS_OFFSET_DISPATCH_TABLE ];
 		while ( dispatch_table != sys_absent ) {
 			Ref * entry_K = RefToPtr4( dispatch_table );

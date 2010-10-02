@@ -38,6 +38,7 @@ public abstract class Implementation extends GeneralInstructionSet {
 		answer.add( this.enter1_i().init( "enter1", "i" ) );
 		answer.add( this.eq_si_irrr().init( "eq_si", "irrr" ) );
 		answer.add( this.eq_ss_irrr().init( "eq_ss", "irrr" ) );
+		answer.add( this.field_ir().init( "field", "ir" ) );
 		answer.add( this.getiterator_i().init( "getiterator", "i" ) );
 		answer.add( this.goto_ir().init( "goto", "ir" ) );
 		answer.add( this.gt_si_irrr().init( "gt_si", "irrr" ) );

@@ -97,6 +97,12 @@ void vmiOPERATOR( Plant plant, Functor fnc ) {
 	);
 }
 
+void vmiFIELD( Plant plant, long index ) {
+	emitSPC( plant, vmc_field );
+	emitRef( plant, ToRef( index ) );
+}
+
+
 void vmiINCR( Plant plant, int n ) {
 	switch ( n ) {
 		case 0: {

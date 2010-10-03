@@ -97,7 +97,7 @@ Ref * findObjectKey( Ref * obj_A ) {
 		//	It has a fixed offset to the key.
 		return obj_A + OFFSET_FROM_FN_LENGTH_TO_KEY;
 	} else {
-		for ( int n = 0; n < MAX_OFFSET_FROM_START_TO_KEY; n++, obj_A++ ) {
+		for ( int n = 0; n < MAX_OFFSET_FROM_START_TO_KEY; n++ ) {
 			//
 			//	Note that this function is called on objects that have been
 			//	forwarded but not yet scanned by the GC. So the test for the
@@ -125,8 +125,10 @@ Ref * findObjectKey( Ref * obj_A ) {
 				}
 			} 
 			*/
-			if ( IsObj( *obj_A ) ) {
-				return obj_A;
+			Ref * x = obj_A + n;
+			Ref k = *x;
+			if ( IsSimpleKey( k ) || IsObj( k ) || IsFwd( k ) ) {
+				return x;
 			}
 		}
 		throw Unreachable();

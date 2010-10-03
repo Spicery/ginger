@@ -34,8 +34,8 @@ using namespace std;
 #include "package.hpp"
 #include "mishap.hpp"
 #include "syssymbol.hpp"
+#include "functionlayout.hpp"
 
-#define DBG_GC_LOG
 
 
 /******************************************************************************\
@@ -65,6 +65,13 @@ public:
 			gclog << "      Forwarding ref = 0x" << hex << ToULong( current ) << endl;
 			gclog.flush();
 			gclog << "        Is obj? " << IsObj( current ) << endl;
+			gclog.flush();
+		}
+	}
+	
+	void afterAtRef( Ref current ) {
+		if ( gc_logging ) {
+			gclog << "        Forwarded to ref = 0x" << hex << ToULong( current ) << endl;
 			gclog.flush();
 		}
 	}
@@ -129,7 +136,7 @@ public:
 	
 	void startContents( Ref * obj_K ) {
 		if ( gc_logging ) {
-			gclog << "Forwarding contents for 0x" << std::hex << ToULong( *obj_K ) << endl;
+			gclog << "  Advance contents for " << keyName( *obj_K ) << endl;
 		}
 	}
 
@@ -187,13 +194,13 @@ public:
 		}		
 	}
 			
-	void startObject( Ref * obj_K ) {
+	void startInstance( Ref * obj_K ) {
 		if ( gc_logging ) {
-			gclog << "  (Object)" << endl;
+			gclog << "  (Instance)" << endl;
 		}		
 	}
 					
-	void endObject( Ref * obj_K ) {
+	void endInstance( Ref * obj_K ) {
 		if ( gc_logging ) {
 		}		
 	}
@@ -417,19 +424,21 @@ public:
 			}
 		} else {
 			Ref * obj = RefToPtr4( current );
-			if ( IsCoreFunctionKey( *obj ) ) return;
-			if ( IsFwd( *obj ) ) {
-				//	Already forwarded.
-				//	Pick up the to-space address.
-				current = Ptr4ToRef( FwdToPtr4( *obj ) );
-			} else {
-				Ref * half_copied_obj  = copier.copy( obj );
-				current = Ptr4ToRef( half_copied_obj );
-				
-				//	We stomp on the key with a forwarded value.
-				*obj = Ptr4ToFwd( half_copied_obj );
+			if ( not IsCoreFunctionKey( *obj ) ) {
+				if ( IsFwd( *obj ) ) {
+					//	Already forwarded.
+					//	Pick up the to-space address.
+					current = Ptr4ToRef( FwdToPtr4( *obj ) );
+				} else {
+					Ref * half_copied_obj  = copier.copy( obj );
+					current = Ptr4ToRef( half_copied_obj );
+					
+					//	We stomp on the key with a forwarded value.
+					*obj = Ptr4ToFwd( half_copied_obj );
+				}
 			}
 		}
+		gclogger.afterAtRef( current );
 	}
 
 	void forwardValueStack() {
@@ -506,20 +515,24 @@ public:
 		gclogger.startContents( obj_K );
 		Ref key = *obj_K;
 		if ( IsFunctionKey( key ) ) {
-			if ( IsHeapFunctionKey( key ) ) {
-				gclogger.startFnObj();
-				FnObjCrawl fnobjcrawl( vm, obj_K );
-				for ( ;; ) {
-					Ref * p = fnobjcrawl.next();
-					if ( p == NULL ) break;
-					gclogger.startInstruction( fnobjcrawl );
-					this->forward( *p );
-					gclogger.endInstruction( fnobjcrawl );
-				}
-				gclogger.endFnObj();
-			} else {
+			if ( IsCoreFunctionKey( key ) ) {
 				throw Unreachable();
 			}
+			gclogger.startFnObj();
+			if ( IsMethodKey( key ) ) {
+				//	This is a temporary hack that works around not having
+				//	weak pointers.
+				obj_K[ FUNCTION_OFFSET_OF_METHOD_CACHE ] = sys_absent;
+			}
+			FnObjCrawl fnobjcrawl( vm, obj_K );
+			for ( ;; ) {
+				Ref * p = fnobjcrawl.next();
+				if ( p == NULL ) break;
+				gclogger.startInstruction( fnobjcrawl );
+				this->forward( *p );
+				gclogger.endInstruction( fnobjcrawl );
+			}
+			gclogger.endFnObj();
 		} else if ( IsSimpleKey( key ) ) {
 			switch ( KindOfSimpleKey( key ) ) {
 				case PAIR_KIND:
@@ -552,13 +565,13 @@ public:
 					throw "unimplemented (other)";
 				}
 			}
-		} else if ( IsObj( key ) ) {
-			gclogger.startObject( obj_K );
+		} else if ( IsFwd( key ) || IsObj( key ) ) {
+			gclogger.startInstance( obj_K );
 			unsigned long n = sizeAfterKeyOfInstance( obj_K );
-			for ( unsigned long i = 1; i <= n; i++ ) {
+			for ( unsigned long i = 0; i <= n; i++ ) {
 				this->forward( obj_K[ i ] );
 			}
-			gclogger.endObject( obj_K );
+			gclogger.endInstance( obj_K );
 		} else {
 			throw "unimplemented";
 		}

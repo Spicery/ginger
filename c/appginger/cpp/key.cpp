@@ -37,30 +37,32 @@ const char * keyName( Ref key ) {
 		switch ( SimpleKeyID( key ) ) {
 			case 0: return "Absent";
 			case 1: return "Bool";
-			case 2: return "Termin";
-			case 3: return "Nil";
-			case 4: return "Pair";
-			case 5: return "Vector";
-			case 6: return "String";
-			case 7: return "Symbol";
-			case 8: return "Small";
-			case 9: return "Float";
-			case 10: return "Key";
+			case 2: return "Key";
+			case 3: return "Termin";
+			case 4: return "Nil";
+			case 5: return "Pair";
+			case 6: return "Vector";
+			case 7: return "String";
+			case 8: return "Symbol";
+			case 9: return "Small";
+			case 10: return "Float";
 			case 11: return "Unicode";
 			case 12: return "Char";
 			case 13: return "Maplet";
 			case 14: return "Map";
 			case 15: return "Assoc";
 			case 16: return "Indirection";
-			default: throw ToBeDone();
+			default: return "<Unknown>";
 		}
 	} else if ( IsFunctionKey( key ) ) {
 		return "Function";
 	} else if ( IsObj( key ) ) {
 		//	Compound keys not implemented yet.
-		throw "unimplemented";
-	} else {
+		return "Instance";
+	} else if ( IsFwd( key ) ) {
 		//	In fact can be reached if any 
-		throw Unreachable();
+		return "<Forwarded!>";
+	} else {
+		return "<Also Unknown>";
 	}
 }

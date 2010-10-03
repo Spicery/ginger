@@ -27,6 +27,9 @@
 #define OFFSET_TO_NUM_OUTPUTS				-3
 #define OFFSET_TO_FUNCTION_LENGTH			-4
 
+//	The offset from the key to the method cache.
+#define FUNCTION_OFFSET_OF_METHOD_CACHE		2
+
 
 // Non-standard offsets (from PC or to-the-key)
 #define OFFSET_TO_NSLOTS_FROM_PC			-2

@@ -1,5 +1,5 @@
 ================================================================================
-Title: nfib
+Title: Record
 --------------------------------------------------------------------------------
 <bind>
 	<var name="K" protected="true" tag="public" /> 
@@ -75,4 +75,29 @@ Title: nfib
 </sysapp>
 --------------------------------------------------------------------------------
 {true,false,99,foo,[99,foo]}
+================================================================================
+Title: Method
+--------------------------------------------------------------------------------
+<!-- val Foo := newRecordClass( "Foo", 1 ); -->
+<bind><var name="Foo" protected="true" tag="public"/><app><id name="newRecordClass"/><seq><string value="Foo"/><int value="1"/></seq></app></bind>
+
+<!-- val FooCont := newClassAccessor( Foo, 1 ); -->
+<bind><var name="FooCont" protected="true" tag="public"/><app><id name="newClassAccessor"/><seq><id name="Foo"/><int value="1"/></seq></app></bind>
+
+<!-- val M := newMethod( "M", 1, 1 ); -->
+<bind><var name="M" protected="true" tag="public"/><app><id name="newMethod"/><seq><seq><string value="M"/><int value="1"/></seq><int value="1"/></seq></app></bind>
+
+<!-- setMethod( Foo, M, FooCont ); -->
+<app><id name="setMethod"/><seq><seq><id name="Foo"/><id name="M"/></seq><id name="FooCont"/></seq></app>
+
+<!-- val newFoo := newClassConstructor( Foo ); -->
+<bind><var name="newFoo" protected="true" tag="public"/><app><id name="newClassConstructor"/><id name="Foo"/></app></bind>
+
+
+<!-- val X := newFoo( "yay" ); -->
+<bind><var name="X" protected="true" tag="public"/><app><id name="newFoo"/><string value="yay"/></app></bind>
+<!-- M( X ); -->
+<app><id name="M"/><id name="X"/></app>
+--------------------------------------------------------------------------------
+yay
 ================================================================================

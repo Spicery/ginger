@@ -66,7 +66,6 @@ private:
     
 public:
 	bool checkRoom( int );
-	//bool checkRoomCopy( int );
 	
 public:	
 	ptrdiff_t nboxesInUse() { return this->top - this->start; }

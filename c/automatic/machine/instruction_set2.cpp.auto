@@ -392,20 +392,65 @@ static void spcfn_invoke( void ) {
     if ( VMCOUNT != A ) {
     	enter_error( VMCOUNT, A );
     }
+    
     //	Get the subject.
     Ref subject = VMVP[ A - 1 ];
+    
+    //	Get the method.
+    Ref method = Ptr4ToRef( pc - 1 );	//	Self pointer (tagged) !!!!
+    		
     //	Select the method fragment to call.
     if ( IsObj( subject ) ) {
     	Ref * subject_K = RefToPtr4( subject );
     	Ref key = subject_K[ 0 ];
+    	
+    	//	Does the method cache contain this key?
+    	{
+    		Ref method_table = pc[ 1 ];
+    		while ( method_table != sys_absent ) {
+    			Ref * entry_K = RefToPtr4( method_table );
+    			if ( key == entry_K[ ASSOC_KEY_OFFSET ] ) {
+    				Ref fn = entry_K[ ASSOC_VALUE_OFFSET ];
+    				//	Now chain out.
+    				Ref * fn_K = RefToPtr4( fn );
+    				VMPCFUNC = fn_K;
+    				RETURN( fn_K + 1 );
+    			}
+    		}
+    	}
+    	
+    	{
+    		//	Ensure that there is enough room to add into the method
+    		//	cache.
+    		if ( vm->heap().wouldGC( ASSOC_SIZE ) ) {
+    			vm->heap().preflight( pc, ASSOC_SIZE );
+    			//	This will have trashed the local variables so we simply
+    			//	retry! It's not efficient but it is exceedingly rare.
+    			RETURN( pc );	//	<---- Loop!!
+    		}
+    	}
+    	
+    	//	Not in the method cache. Attempt to look it up in the object.
     	if ( IsObj( key ) ) {
-    		Ref * key_K = RefToPtr4( key );
-    		Ref method = Ptr4ToRef( pc - 1 );	//	Self pointer (tagged) !!!!
+    		Ref * key_K = RefToPtr4( key );	
     		Ref dispatch_table = key_K[ CLASS_OFFSET_DISPATCH_TABLE ];
     		while ( dispatch_table != sys_absent ) {
     			Ref * entry_K = RefToPtr4( dispatch_table );
     			if ( method == entry_K[ ASSOC_KEY_OFFSET ] ) {	
     				Ref fn = entry_K[ ASSOC_VALUE_OFFSET ];
+    				
+    				//	Add to the method cache.
+    				{
+    					vm->gcSuspended();
+    					XfrClass xfr( vm->heap().preflight( pc, ASSOC_SIZE ) );
+    					xfr.setOrigin();
+    					xfr.xfrRef( sysAssocKey );
+    					xfr.xfrRef( key );
+    					xfr.xfrRef( fn );
+    					xfr.xfrRef( pc[1] );	//	Reference to the current method table entry.
+    					pc[1] = xfr.makeRef();
+    					vm->gcNormal();
+    				}
     				
     				//	Now we chain into the fragment we have recovered, utilising the
     				//	fact that this is a lightweight call.

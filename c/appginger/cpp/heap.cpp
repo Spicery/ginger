@@ -30,16 +30,8 @@ using namespace std;
 
 #define ARBITRARY_SIZE 1048576
 
-
-CageClass * HeapClass::preflight( int size ) {
-	#ifdef DBG_HEAP 
-		cerr << "Preflight " << size << endl;
-	#endif
-	if ( this->current->checkRoom( size ) ) {
-		return this->current;
-	} else {
-		return static_cast< CageClass * >( 0 );
-	}
+bool HeapClass::wouldGC( int size ) {
+	return not this->current->checkRoom( size );
 }
 
 CageClass * HeapClass::preflight( Ref * & pc, int size ) {

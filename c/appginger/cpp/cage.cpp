@@ -145,6 +145,12 @@ void XfrClass::xfrSubstringFinish( int offset ) {
 	this->tmptop += ( offset + sizeof( Ref ) - 1 ) / sizeof( Ref );
 }
 
+void XfrClass::xfrDup( Ref x, int n ) {
+	for ( int i = 0; i < n; i++ ) {
+		*( this->tmptop++ ) = x;		
+	}
+}
+
 void XfrClass::xfrCopy( Ref * words, int n ) {
 	memcpy( this->tmptop, words, n * sizeof( Ref ) );
 	this->tmptop += n;

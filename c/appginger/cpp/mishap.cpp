@@ -46,6 +46,14 @@ Problem & Problem::culprit( const std::string reason, Ref ref ) {
 	return *this;
 }
 
+Problem & Problem::culprit( const std::string reason, const long N ) {
+	std::ostringstream s;
+	s << N;
+	const std::string result( s.str() );
+	this->culprits.push_back( pair< const string, const string >( reason, result ) );
+	return *this;
+}
+
 Problem & Problem::culprit( const std::string arg ) {
 	this->culprits.push_back( std::pair< const string, const string >( "Argument", arg ) );
 	return *this;

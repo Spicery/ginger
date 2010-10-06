@@ -130,7 +130,7 @@ KEYLESS_KIND
 #define MAKE_KEY( id, n, flav )		ToRef( ( ( id << LEN_WIDTH | n ) << KIND_WIDTH | flav ) << TAGG | KEY_TAGG )
 #define sysAbsentKey    		MAKE_KEY( 0, 0, KEYLESS_KIND )
 #define sysBoolKey      		MAKE_KEY( 1, 0, KEYLESS_KIND )
-#define sysKeyKey				MAKE_KEY( 2, 3, RECORD_KIND )
+#define sysKeyKey				MAKE_KEY( 2, 4, RECORD_KIND )
 #define sysTerminKey    		MAKE_KEY( 3, 0, KEYLESS_KIND )
 #define sysNilKey       		MAKE_KEY( 4, 0, KEYLESS_KIND )
 #define sysPairKey      		MAKE_KEY( 5, 2, PAIR_KIND )
@@ -161,6 +161,8 @@ KEYLESS_KIND
 #define IsClassKind( ref )		IsInstance( ref )
 #define IsInstance( ref )		( IsObj( ref ) && IsObj( *RefToPtr4( ref ) ) )
 #define IsClass( ref )			( IsObj( ref ) && ( *RefToPtr4( ref ) == sysKeyKey ) )
+
+#define INDEX( rv, offset )		( RefToPtr4( rv )[ offset ] )
 
 ////////////////////////////////////////////////////////////////////////
 // zzz.101.11 tags
@@ -196,7 +198,11 @@ KEYLESS_KIND
 
 #define sys_nil					ToRef( 0 << TAGGG | MISC_TAGGG )
 #define sys_termin				ToRef( 1 << TAGGG | MISC_TAGGG )
-#define sys_underflow			ToRef( 2 << TAGGG | MISC_TAGGG )
+
+//	sys_system_only is a system version of sys_absent. User 
+//	programmers never see this.
+#define sys_system_only			ToRef( 2 << TAGGG | MISC_TAGGG )
+
 #define sys_undef				ToRef( 3 << TAGGG | MISC_TAGGG )
 
 //	Nil

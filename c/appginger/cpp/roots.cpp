@@ -16,15 +16,20 @@
     along with AppGinger.  If not, see <http://www.gnu.org/licenses/>.
 \******************************************************************************/
 
-#ifndef SYS_METHOD_HPP
-#define SYS_METHOD_HPP
+#include "roots.hpp"
 
-#include "common.hpp"
-#include "machine.hpp"
+Roots::Roots( MachineClass * vm ) :
+	registers( vm->registers ),
+	mask( 0 ),
+	count( 0 )
+{
+}
 
-extern Ref * sysNewMethod( Ref * pc, MachineClass * vm );
-extern Ref * sysSetMethod( Ref * pc, MachineClass * vm );
-extern Ref * sysSetSlot( Ref * pc, MachineClass * vm );
+Roots::~Roots() {
+	this->registers.release( this->count, this->mask );
+}
 
-
-#endif
+Ref & Roots::ref( Ref r ) {
+	this->count += 1;
+	return this->registers.reserve( this->mask ) = r;
+}

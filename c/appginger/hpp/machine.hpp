@@ -27,55 +27,60 @@
 #include "heap.hpp"
 #include "appginger.hpp"
 #include "package.hpp"
-
-
+#include "registers.hpp"
 
 class PlantClass;
 typedef PlantClass * Plant;
 
 class MachineClass {
+friend class GarbageCollect;
+
 private:
 	AppGinger &						appg;
 	std::auto_ptr<PlantClass>		plant_aptr;
 	std::auto_ptr<HeapClass>		heap_aptr;
+
+public:
+	Registers						registers;
 	
-public:	//	Need to make this private. Or the garbage collector a friend.
+private:
 	std::auto_ptr<PackageManager>	package_mgr_aptr;
 	
 public:
-	Package * getPackage( std::string );
+	Package * 		getPackage( std::string );
 	
 public:
 	//	Volatile! Only cached when a garbage collection
 	//	might be triggered.
-	Ref *		program_counter;
-	Ref *		func_of_program_counter;
+	Ref *			program_counter;
+	Ref *			func_of_program_counter;
 
 public:
-	void check_call_stack_integrity();	//	debug
+	void 			check_call_stack_integrity();	//	debug
 
 		
 public:
-	long		count;			//	Args count
-	Ref	*		link;			//	Return address
-	Ref	*		func_of_link;
-	Ref	*		sp;
-	Ref *		sp_base;
-	Ref	*		sp_end;
-	Ref	*		vp;
-	Ref	*		vp_base;
-	Ref	*		vp_end;
+	long			count;			//	Args count
+	Ref	*			link;			//	Return address
+	Ref	*			func_of_link;
+	Ref	*			sp;
+	Ref *			sp_base;
+	Ref	*			sp_end;
+	Ref	*			vp;
+	Ref	*			vp_base;
+	Ref	*			vp_end;
+	
 	
 public:
-	Ref	&		fastPeek() { return *vp; }
-	Ref &		fastPeek( int n ) { return *( vp - n ); } 
-	Ref			fastPop() { return *vp--; }
-	Ref			fastSet( Ref r ) { return *vp = r; }
-	void		fastPush( Ref r ) { *++vp = r; }
-	Ref			fastSubscr( int n ) { return *( vp - n ); }
-	void 		fastDrop( int n ) { vp -= n; }
-	ptrdiff_t	stackLength() { return this->vp - this->vp_base; }
-	void		checkStackRoom( long n );
+	Ref	&			fastPeek() { return *vp; }
+	Ref &			fastPeek( int n ) { return *( vp - n ); } 
+	Ref				fastPop() { return *vp--; }
+	Ref				fastSet( Ref r ) { return *vp = r; }
+	void			fastPush( Ref r ) { *++vp = r; }
+	Ref				fastSubscr( int n ) { return *( vp - n ); }
+	void 			fastDrop( int n ) { vp -= n; }
+	ptrdiff_t		stackLength() { return this->vp - this->vp_base; }
+	void			checkStackRoom( long n );
 	
 public:
 
@@ -104,12 +109,16 @@ public:
 	bool getShowCode();
 	bool isGCTrace();
 	
+private:
+	int veto_count;
 	
 public:
 	//	TO BE IMPLEMENTED.
-	void gcUnnecessary() {}		//	GC not supposed to be required. Will only grow but issues complaint.
-	void gcSuspended() {}		//	Always grow.
-	void gcNormal() {}			//	Makes decision to grow/shrink.
+	void gcLiftAllVetoes();				//	Makes decision to grow/shrink, level = 0.
+	void gcVeto();  					//	Inhibit moving, bump +1 for nesting.
+	void gcLiftVeto();					//	bump -1, moving allowed if level = 0.
+	bool gcMoveEnabled();
+	void log( std::string msg ) {}	
 	
 
 public:

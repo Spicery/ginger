@@ -441,7 +441,7 @@ static void spcfn_invoke( void ) {
     				
     				//	Add to the method cache.
     				{
-    					vm->gcSuspended();
+    					vm->gcVeto();
     					XfrClass xfr( vm->heap().preflight( pc, ASSOC_SIZE ) );
     					xfr.setOrigin();
     					xfr.xfrRef( sysAssocKey );
@@ -449,7 +449,7 @@ static void spcfn_invoke( void ) {
     					xfr.xfrRef( fn );
     					xfr.xfrRef( pc[1] );	//	Reference to the current method table entry.
     					pc[1] = xfr.makeRef();
-    					vm->gcNormal();
+    					vm->gcLiftVeto();
     				}
     				
     				//	Now we chain into the fragment we have recovered, utilising the

@@ -51,6 +51,7 @@ public:
 	Problem & culprit( const std::string reason, const std::string arg );
 	Problem & culprit( const std::string arg );
 	Problem & culprit( const std::string reason, Ref ref );
+	Problem & culprit( const std::string reason, const long N );
 	void report();
 	
 protected:
@@ -70,6 +71,7 @@ class Mishap : public Problem {
 public:
 	Mishap & culprit( const std::string reason, const std::string arg ) { this->Problem::culprit( reason, arg ); return *this; }
 	Mishap & culprit( const std::string arg ) { this->Problem::culprit( arg ); return *this; }
+	Mishap & culprit( const std::string arg, const long N ) { this->Problem::culprit( arg, N ); return *this; }
 	Mishap & culprit( const std::string reason, Ref ref ) { 
 		this->Problem::culprit( reason, ref ); 
 		return *this; 
@@ -90,6 +92,17 @@ public:
 	virtual ~Unreachable() {}
 };
 
+class ArgsMismatch : public Mishap {
+public:
+	ArgsMismatch() :  Mishap( "Argument mismatch (wrong number of args?)" ) {}
+	virtual ~ArgsMismatch() {}
+};
+
+class TypeError : public Mishap {
+public:
+	TypeError( const std::string arg ) :  Mishap( arg ) {}
+	virtual ~TypeError() {}
+};
 
 #endif
 

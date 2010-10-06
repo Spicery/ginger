@@ -16,15 +16,32 @@
     along with AppGinger.  If not, see <http://www.gnu.org/licenses/>.
 \******************************************************************************/
 
-#ifndef SYS_METHOD_HPP
-#define SYS_METHOD_HPP
+#ifndef REGISTERS_HPP
+#define REGISTERS_HPP
 
 #include "common.hpp"
-#include "machine.hpp"
 
-extern Ref * sysNewMethod( Ref * pc, MachineClass * vm );
-extern Ref * sysSetMethod( Ref * pc, MachineClass * vm );
-extern Ref * sysSetSlot( Ref * pc, MachineClass * vm );
+class Registers {
+friend class GarbageCollect;
+friend class Roots;
+private:
+	static const int NREG = 8;
+	static const int NREG_MASK = 0x7;
+	int				free_hint;
+	unsigned long	in_use;
+	Ref				regs[ NREG ];
+	
+private:	
+	//	Functions for garbage collection.
+	void 		clearUnusedRegisters();
+	Ref &		get( int n ) { return this->regs[ n ]; }
 
+public:
+	Ref &		reserve( unsigned long & mask );
+	void		release( int count, unsigned long mask );
+
+public:
+	Registers();
+};
 
 #endif

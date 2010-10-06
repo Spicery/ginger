@@ -40,10 +40,10 @@ using namespace std;
 MachineClass::MachineClass( AppGinger & application ) :
 	appg( application ),
 	plant_aptr( new PlantClass( this ) ),
-	//dict_aptr( new DictClass() ),
 	heap_aptr( new HeapClass( this ) ),
 	package_mgr_aptr( new PackageManager( this ) ),
-	program_counter( 0 )
+	program_counter( 0 ),
+	veto_count( 0 )
 {
 	this->vp_base = new Ref[ RANDOM_SIZE ];
 	this->vp_end = this->vp_base + RANDOM_SIZE;
@@ -57,6 +57,27 @@ MachineClass::~MachineClass() {
 	delete[] this->sp_base;
 	delete[] this->vp_base;
 }
+
+void MachineClass::gcLiftAllVetoes() {
+	this->veto_count = 0;
+}
+
+void MachineClass::gcVeto() {
+	this->veto_count += 1;
+}
+
+void MachineClass::gcLiftVeto() {
+	if ( this->veto_count > 0 ) {
+		this->veto_count -= 1;
+	} else {
+		throw SystemError( "Trying to decrement veto-count less than zero!" );
+	}
+}
+
+bool MachineClass::gcMoveEnabled() {
+	return this->veto_count <= 0;
+}
+
 
 bool MachineClass::getShowCode() {
 	return this->appg.getShowCode();
@@ -90,9 +111,9 @@ Ref * MachineClass::setUpPC( Ref r ) {
 
 	this->sp = this->sp_base;
 	this->vp = this->vp_base;
-	*this->vp = sys_underflow;
+	*this->vp = sys_system_only;
 
-	*this->sp = sys_underflow;
+	*this->sp = sys_system_only;
 	//	And the previous stack point is additionally set to null.
 	this->sp[ SP_PREV_SP ] = 0;
 	//	The previous link address should be set to null too.

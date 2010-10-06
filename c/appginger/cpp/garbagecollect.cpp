@@ -115,6 +115,17 @@ public:
 		}		
 	}
 	
+	void startRegisters() {
+		if ( gc_logging ) {
+			gclog << "Forward registers" << endl;
+		}
+	}
+	
+	void endRegisters() {
+		if ( gc_logging ) {
+		}		
+	}
+	
 	void startGarbageCollection() {
 		if ( gc_logging ) {
 			gclog << "### " << ( scan_call_stack ? "" : "Quiescent " ) << "GC" << endl;	
@@ -497,6 +508,13 @@ public:
 		}
 	}
 	
+	void forwardRegisters() {
+		this->vm->registers.clearUnusedRegisters();
+		for ( int i = 0; i < Registers::NREG; i++ ) { 
+			this->forward( this->vm->registers.get( i ) );
+		}
+	}
+	
 	void forwardRoots( const bool scan_call_stack ) {
 		gclogger.startValueStack();
 		this->forwardValueStack();
@@ -509,6 +527,9 @@ public:
 		gclogger.startDictionary();
 		this->forwardAllDictionaries();
 		gclogger.endDictionary();
+		gclogger.startRegisters();
+		this->forwardRegisters();
+		gclogger.endRegisters();
 	}
 	
 	void forwardContents( Ref * obj_K ) {

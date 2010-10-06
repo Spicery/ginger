@@ -22,6 +22,7 @@
 #include "common.hpp"
 #include "machine.hpp"
 
+extern Ref * sysNewClass( Ref * pc, MachineClass * vm );
 extern Ref * sysNewRecordClass( Ref * pc, MachineClass * vm );
 extern Ref * sysClassConstructor( Ref * pc, MachineClass * vm );
 extern Ref * sysClassRecogniser( Ref * pc, MachineClass *vm );

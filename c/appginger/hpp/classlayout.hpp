@@ -22,6 +22,8 @@
 #define CLASS_OFFSET_TITLE 				1
 #define CLASS_OFFSET_NFIELDS 			2
 #define CLASS_OFFSET_DISPATCH_TABLE		3
+#define CLASS_OFFSET_SLOTS				4
+#define CLASS_SIZE						5
 
 
 #define sizeAfterKeyOfInstance( obj_K ) SmallToLong(RefToPtr4((obj_K)[0])[CLASS_OFFSET_NFIELDS])

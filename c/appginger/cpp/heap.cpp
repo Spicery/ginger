@@ -41,15 +41,27 @@ CageClass * HeapClass::preflight( Ref * & pc, int size ) {
 	if ( this->current->checkRoom( size ) ) {
 		return this->current;
 	} else {
-		pc = sysGarbageCollect( pc, this->machine_ptr );
-		if ( this->current->checkRoom( size ) ) {
-			return this->current;
-		} else {
-			CageClass * new_cage = new CageClass( max( ARBITRARY_SIZE, size ) );
-			this->zoo.push_back( this->current );
-			this->current = new_cage;
-			return this->current;
+		if ( this->machine_ptr->gcMoveEnabled() ) {
+			pc = sysGarbageCollect( pc, this->machine_ptr );
+			if ( this->current->checkRoom( size ) ) {
+				return this->current;
+			}
 		}
+		return this->preflight( size );
+	}
+}
+
+CageClass * HeapClass::preflight( int size ) {
+	#ifdef DBG_HEAP 
+		cerr << "Preflight " << size << endl;
+	#endif
+	if ( this->current->checkRoom( size ) ) {
+		return this->current;
+	} else {
+		CageClass * new_cage = new CageClass( max( ARBITRARY_SIZE, size ) );
+		this->zoo.push_back( this->current );
+		this->current = new_cage;
+		return this->current;		
 	}
 }
 

@@ -302,6 +302,7 @@ void vmiENTER( Plant plant ) {
 }
 
 void vmiFUNCTION( Plant plant, int N, int A ) {
+	plant->vm->gcVeto();
 	plant->save( N, A );
 }
 
@@ -326,6 +327,7 @@ Ref vmiENDFUNCTION( Plant plant, bool in_heap, Ref fnkey ) {
 	#endif
 	plant->restore();
 	
+	plant->vm->gcLiftVeto();
 	return r;
 }
 

@@ -42,7 +42,72 @@ Ref * sysNewMethod( Ref * pc, MachineClass * vm ) {
 	return pc;
 }
 
-Ref * sysSetMethod( Ref * pc, MachineClass * vm ) {
+/**
+	setSlot( CLASS:Class, POSITION:Small, METHOD:Method )
+	
+	1. 	The method is inserted into the correct position in the class's
+		slot array. To start with, only one method per slot will be
+		permitted.
+		
+	2.	A call to setMethod is then made with an unsafe access function
+		as the method's function. The values are passed on the stack. 
+		No stack checks are needed as the size of the argument lists of
+		the two functions are the same.
+*/
+Ref * sysSetSlot( Ref * pc, MachineClass * vm ) {
+	if ( vm->count != 3 ) throw Mishap( "Wrong number of arguments" );
+
+	Ref method = vm->fastPop();
+	Ref position = vm->fastPop();
+	Ref gclass = vm->fastPop();
+
+	if ( !IsMethod( method ) ) throw Mishap( "Method needed" ).culprit( "Method", method );
+	if ( !IsSmall( position ) ) throw Mishap( "Small needed" ).culprit( "Position", position );
+	if ( !IsClass( gclass ) ) throw Mishap( "Class needed" ).culprit( "Class", gclass );
+	
+	long pos = SmallToLong( position );
+	long nfields = SmallToLong( RefToPtr4( gclass )[ CLASS_OFFSET_NFIELDS ] );
+	if ( not( 1 <= pos && pos <= nfields ) ) {
+		throw 
+			Mishap( "Position out of range" ).
+			culprit( "Position", position ).
+			culprit( "Number of fields", nfields )
+		;
+	}
+	
+	//	Update the class-slot.
+	INDEX( INDEX( gclass, CLASS_OFFSET_SLOTS ), pos ) = method;
+
+	//	Push onto the stack to get protection from garbage collection.
+	vm->fastPush( gclass );
+	vm->fastPush( method );
+
+	//	ENDFUNCTION does not in fact cause a garbage collection, as it
+	//	forces the heap to grow. However this is a more accurate way
+	//	to write the code. 
+	//
+	//	The following block should not be in-lined but extracted as a 
+	//	service function.
+	{
+		Plant plant = vm->plant();
+		vmiFUNCTION( plant, 1, 1 );
+		vmiFIELD( plant, pos );
+		vmiSYS_RETURN( plant );
+		vm->fastPush( vmiENDFUNCTION( plant ) );
+	}
+
+	//	We do not need to modify vm->count, it's already 3.
+	//	Simply chain into sysSetMethod. 
+	return sysSetMethod( pc, vm );
+}
+
+/*
+	Expects the stack to consist of 
+		class : Class, method : Method, function : Function
+	Garbage collection is suspended during this call to permit
+	variables to be held in non-root values.
+*/
+static Ref * gngSetMethod( Ref * pc, MachineClass * vm, const bool override ) {
 	
 	//	setMethod( Class, Method, Function )
 	if ( vm->count != 3 ) throw Mishap( "Wrong number of arguments" );
@@ -51,10 +116,12 @@ Ref * sysSetMethod( Ref * pc, MachineClass * vm ) {
 	//	this at an inconvenient time we will preflight enough store.
 	//	This is a last chance to GC for a bit.
 	vm->heap().preflight( pc, ASSOC_SIZE );
-	vm->gcUnnecessary();
+	vm->gcVeto();
 	
 	//	These 3 variables are the reason we do not want a GC. These
-	//	are not known roots.
+	//	are not known roots. GC suspension could be avoided by indexing 
+	//	the value-stack instead of popping it and then cutting the 
+	//	stack on exit.
 	Ref function = vm->fastPop();
 	Ref method = vm->fastPop();
 	Ref gclass = vm->fastPop();
@@ -69,7 +136,7 @@ Ref * sysSetMethod( Ref * pc, MachineClass * vm ) {
 		Ref * bucket_K = RefToPtr4( dispatch_table );
 		if ( method == bucket_K[ ASSOC_KEY_OFFSET ] ) {	
 			bucket_K[ ASSOC_VALUE_OFFSET ] = function;
-			vm->gcNormal();
+			vm->gcLiftVeto();
 			return pc;
 		} else {
 			dispatch_table = bucket_K[ ASSOC_NEXT_OFFSET ];
@@ -86,7 +153,16 @@ Ref * sysSetMethod( Ref * pc, MachineClass * vm ) {
 	xfr.xfrRef( function );
 	xfr.xfrRef( gclass_K[ CLASS_OFFSET_DISPATCH_TABLE ] );
 	gclass_K[ CLASS_OFFSET_DISPATCH_TABLE ] = xfr.makeRef();
-	
-	vm->gcNormal();
+		
+	vm->gcLiftVeto();
 	return pc;
 }
+
+Ref * sysSetMethod( Ref * pc, MachineClass * vm ) {
+	return gngSetMethod( pc, vm, false );
+}
+
+Ref * sysOverrideMethod( Ref * pc, MachineClass * vm ) {
+	return gngSetMethod( pc, vm, true );
+}
+

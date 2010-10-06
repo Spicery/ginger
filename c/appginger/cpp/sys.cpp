@@ -42,6 +42,7 @@
 #include "sysprint.hpp"
 #include "sysfunction.hpp"
 #include "sysmethod.hpp"
+#include "sysclass.hpp"
 
 //#define DBG_SYS
 
@@ -275,14 +276,16 @@ const SysMap::value_type rawData[] = {
 	SysMap::value_type( "==", SysInfo( fnc_eq, Arity( 2 ), Arity( 1 ), 0, "Identity two two values, result is boolean" ) ),
 	SysMap::value_type( ">", SysInfo( fnc_gt, Arity( 2 ), Arity( 1 ), 0, "Greater than, compares two real numbers" ) ),
 	SysMap::value_type( ">=", SysInfo( fnc_gte, Arity( 2 ), Arity( 1 ), 0, "Greater than or equal to, compares two real numbers" ) ),	
-	SysMap::value_type( "objectKey", SysInfo( fnc_syscall, Arity( 1 ), Arity( 1 ), sysObjectKey, "Returns the key of any value" ) ),
-	SysMap::value_type( "newRecordClass", SysInfo( fnc_syscall, Arity( 1 ), Arity( 1 ), sysNewRecordClass, "Returns a new class object for record instances" ) ),
+	SysMap::value_type( "instanceClass", SysInfo( fnc_syscall, Arity( 1 ), Arity( 1 ), sysObjectKey, "Returns the key of any value" ) ),
+	SysMap::value_type( "newRecordClass", SysInfo( fnc_syscall, Arity( 2 ), Arity( 1 ), sysNewRecordClass, "Returns a new class object for records" ) ),
+	SysMap::value_type( "newClass", SysInfo( fnc_syscall, Arity( 4 ), Arity( 1 ), sysNewClass, "Returns a new class object for instances" ) ),
 	SysMap::value_type( "newClassRecogniser", SysInfo( fnc_syscall, Arity( 1 ), Arity( 1 ), sysClassRecogniser, "Returns a function that recognises a given class" ) ),
 	SysMap::value_type( "newClassConstructor", SysInfo( fnc_syscall, Arity( 1 ), Arity( 1 ), sysClassConstructor, "Returns the constructor for a given class" ) ),
 	SysMap::value_type( "newClassAccessor", SysInfo( fnc_syscall, Arity( 1 ), Arity( 1 ), sysClassAccessor, "Returns the accessor for a given class" ) ),
 	SysMap::value_type( "newClassExploder", SysInfo( fnc_syscall, Arity( 1 ), Arity( 0, true ), sysClassExploder, "Returns the exploder for a given class" ) ),
 	SysMap::value_type( "newMethod", SysInfo( fnc_syscall, Arity( 3 ), Arity( 1 ), sysNewMethod, "Constructs a new empty method" ) ),
 	SysMap::value_type( "setMethod", SysInfo( fnc_syscall, Arity( 3 ), Arity( 0 ), sysSetMethod, "Sets the function for a method on an object" ) ),
+	SysMap::value_type( "setSlot", SysInfo( fnc_syscall, Arity( 3 ), Arity( 0 ), sysSetSlot, "Sets a method as the Nth slot of a class" ) ),
 	SysMap::value_type( "=", SysInfo( fnc_syscall, Arity( 2 ), Arity( 1 ), sysEquals, "Compare any two values as equal" ) ),
 	SysMap::value_type( "gc", SysInfo( fnc_syscall, Arity( 0 ), Arity( 0 ), sysGarbageCollect, "Forces a garbage collection - useful for tests" ) ),
 	SysMap::value_type( "hash", SysInfo( fnc_syscall, Arity( 1 ), Arity( 1 ), sysHash, "Computes a hash code for any value, returns a positive Small" ) ),

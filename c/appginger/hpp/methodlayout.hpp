@@ -16,30 +16,10 @@
     along with AppGinger.  If not, see <http://www.gnu.org/licenses/>.
 \******************************************************************************/
 
-#ifndef FUNCTION_LAYOUT_HPP
-#define FUNCTION_LAYOUT_HPP
+#ifndef METHOD_LAYOUT_HPP
+#define METHOD_LAYOUT_HPP
 
-#include "common.hpp"
-#include "methodlayout.hpp"
-
-//	Standard offsets from the key.
-#define OFFSET_TO_NUM_INPUTS				-1
-#define OFFSET_TO_NUM_SLOTS					-2
-#define OFFSET_TO_NUM_OUTPUTS				-3
-#define OFFSET_TO_FUNCTION_LENGTH			-4
-
-
-// Non-standard offsets (from PC or to-the-key)
-#define OFFSET_TO_NSLOTS_FROM_PC			-2
-#define OFFSET_TO_NSLOTS_TO_KEY				(-OFFSET_TO_NUM_INPUTS)
-#define OFFSET_FROM_FN_LENGTH_TO_KEY		(-OFFSET_TO_FUNCTION_LENGTH)
-
-extern unsigned long sizeAfterKeyOfFn( Ref * key );
-
-//	Not sure whether the correct choice is signed or unsigned or what. I
-//	strongly suspect the correct choice is for them to be an Arity!
-extern long numOutputsOfFn( Ref * key );
-extern long numSlotsOfFn( Ref * key );
-extern long numInputsOfFn( Ref * key );
+#define METHOD_OFFSET_CACHE				2
+#define METHOD_OFFSET_DISPATCH_TABLE 	3
 
 #endif

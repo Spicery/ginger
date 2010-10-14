@@ -5,6 +5,7 @@
 #include "instruction.hpp"
 #include "listlayout.hpp"
 #include "classlayout.hpp"
+#include "methodlayout.hpp"
 #include "maplayout.hpp"
 
 class InstructionSet {

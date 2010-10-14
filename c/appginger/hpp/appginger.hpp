@@ -21,6 +21,7 @@
 
 #define VERSION "0.6.1"
 
+class MachineClass;
 
 class AppGinger {
 private:
@@ -54,6 +55,7 @@ public:
 public:
 	void printGPL( const char * start, const char * end );
 	MachineClass * newMachine();
+	int main( int argc, char **argv, char **envp );
 
 
 public:

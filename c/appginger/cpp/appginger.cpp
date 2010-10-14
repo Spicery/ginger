@@ -88,34 +88,32 @@ static Package * setUpInteractivePackage( MachineClass * vm ) {
     return interactive_pkg;
 }
 
-int main( int argc, char **argv, char **envp ) {
-    AppGinger appg;
-
+int AppGinger::main( int argc, char **argv, char **envp ) {
     for(;;) {
         int option_index = 0;
         int c = getopt_long( argc, argv, "CIBhm:vd:l", long_options, &option_index );
         if ( c == -1 ) break;
         switch ( c ) {
             case 'C': {
-                appg.setCgiMode();
+                this->setCgiMode();
                 break;
             }
             case 'I': {
-                appg.setInteractiveMode();
+                this->setInteractiveMode();
                 break;
             }
             case 'B': {
-                appg.setBatchMode();
+                this->setBatchMode();
                 break;
             }
             case 'd': {
                 //std::string option( optarg );
                 if ( std::string( optarg ) == std::string( "showcode" ) ) {
-                    appg.setShowCode();
+                    this->setShowCode();
                 } else if ( std::string( optarg ) == std::string( "notrap" ) ) {
-                    appg.setTrappingMishap( false );
+                    this->setTrappingMishap( false );
                 } else if ( std::string( optarg ) == std::string( "gctrace" ) ) {
-                    appg.setGCTrace( true );
+                    this->setGCTrace( true );
                 } else {
                     std::cerr << "Invalid debug option: " << optarg << std::endl;
                     exit( EXIT_FAILURE );
@@ -204,21 +202,21 @@ int main( int argc, char **argv, char **envp ) {
                 exit( EXIT_SUCCESS );   //  Is that right?
             }
             case 'm' : {
-                appg.setMachineImplNum( atoi( optarg ) );
+                this->setMachineImplNum( atoi( optarg ) );
                 //printf( "Machine #%d (%s)\n", machine_impl_num, optarg );
                 break;
             }
             case 'v': {
-                cout << "appginger: version " << appg.version() << " (" << __DATE__ << " " << __TIME__ << ")" << endl;
+                cout << "appginger: version " << this->version() << " (" << __DATE__ << " " << __TIME__ << ")" << endl;
                 exit( EXIT_SUCCESS );   //  Is that right?
             }
             case 'l': {
                 if ( optarg == NULL || std::string( optarg ) == std::string( "all" ) ) {
-                    appg.printGPL( NULL, NULL );
+                    this->printGPL( NULL, NULL );
                 } else if ( std::string( optarg ) == std::string( "warranty" ) ) {
-                    appg.printGPL( "Disclaimer of Warranty.", "Limitation of Liability." );                 
+                    this->printGPL( "Disclaimer of Warranty.", "Limitation of Liability." );                 
                 } else if ( std::string( optarg ) == std::string( "conditions" ) ) {
-                    appg.printGPL( "TERMS AND CONDITIONS", "END OF TERMS AND CONDITIONS" );
+                    this->printGPL( "TERMS AND CONDITIONS", "END OF TERMS AND CONDITIONS" );
                 } else {
                     std::cerr << "Unknown license option: " << optarg << std::endl;
                     exit( EXIT_FAILURE );
@@ -234,7 +232,7 @@ int main( int argc, char **argv, char **envp ) {
         }
     }
 
-    if ( appg.isInteractiveMode() ) {
+    if ( this->isInteractiveMode() ) {
         //cout << "Welcome to AppGinger (" << VERSION << ")\n";
         cout << "AppGinger " << VERSION << ", Copyright (c) 2010  Stephen Leach" << endl;
         cout << "  +----------------------------------------------------------------------+" << endl;
@@ -244,7 +242,7 @@ int main( int argc, char **argv, char **envp ) {
         cout << "  +----------------------------------------------------------------------+" << endl;
     }
 
-    if ( appg.isInteractiveMode() || appg.isBatchMode() ) {
+    if ( this->isInteractiveMode() || this->isBatchMode() ) {
         if ( optind < argc ) {
              cout << "non-option ARGV-elements: ";
              while ( optind < argc ) {
@@ -253,7 +251,7 @@ int main( int argc, char **argv, char **envp ) {
              cout << endl;
         }
         
-        MachineClass * vm = appg.newMachine();
+        MachineClass * vm = this->newMachine();
         Package * interactive_pkg = setUpInteractivePackage( vm );
 
  
@@ -262,13 +260,13 @@ int main( int argc, char **argv, char **envp ) {
 #endif
         {
             RCEP rcep( interactive_pkg );
-            if ( appg.isTrappingMishap() ) {
+            if ( this->isTrappingMishap() ) {
                 while ( rcep.read_comp_exec_print( vm, std::cin ) ) {};
             } else {
                 while ( rcep.unsafe_read_comp_exec_print( vm, std::cin ) ) {};
             }
         }
-    } else if ( appg.isCgiMode() ) {
+    } else if ( this->isCgiMode() ) {
         cout << "Content-type: text/html\r\n\r\n";
         cout << "<html><head><title>AppGinger</title></head><body>\n";
         cout << "<H1>AppGinger Version " << VERSION << "</H1>\n";

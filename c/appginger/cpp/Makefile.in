@@ -35,8 +35,8 @@ all: appginger
 
 # $@ is make shorthand for the target.
 # $@ is make shorthand for the dependencies
-appginger: $(OBJS)
-	@CXX@ $(CXXFLAGS) $(BOOST_CPPFLAGS) -o $@ $+ 
+appginger: libappginger.a main.o
+	@CXX@ $(CXXFLAGS) $(BOOST_CPPFLAGS) -o $@ main.o libappginger.a 
 	
 clean:
 	rm -f *.o

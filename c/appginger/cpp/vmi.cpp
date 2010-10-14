@@ -216,6 +216,7 @@ void vmiSET( Plant plant, int A ) {
 void vmiINVOKE( Plant plant ) {
 	emitSPC( plant, vmc_invoke );
 	emitRef( plant, sys_absent );	//	Cache.
+	emitRef( plant, sys_absent );	//	Method table.
 }
 
 void vmiCALLS( Plant plant ) {

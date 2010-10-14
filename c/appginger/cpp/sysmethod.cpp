@@ -130,11 +130,11 @@ static Ref * gngSetMethod( Ref * pc, MachineClass * vm, const bool override ) {
 	if ( !IsMethod( method ) ) throw Mishap( "Method needed" );
 	if ( !IsClass( gclass ) ) throw Mishap( "Class needed" );
 	
-	Ref * gclass_K = RefToPtr4( gclass );
-	Ref dispatch_table = gclass_K[ CLASS_OFFSET_DISPATCH_TABLE ];
+	//Ref * gclass_K = RefToPtr4( gclass );
+	Ref dispatch_table = INDEX( method, METHOD_OFFSET_DISPATCH_TABLE );
 	while ( dispatch_table != sys_absent ) {
 		Ref * bucket_K = RefToPtr4( dispatch_table );
-		if ( method == bucket_K[ ASSOC_KEY_OFFSET ] ) {	
+		if ( gclass == bucket_K[ ASSOC_KEY_OFFSET ] ) {	
 			bucket_K[ ASSOC_VALUE_OFFSET ] = function;
 			vm->gcLiftVeto();
 			return pc;
@@ -149,10 +149,10 @@ static Ref * gngSetMethod( Ref * pc, MachineClass * vm, const bool override ) {
 	XfrClass xfr( vm->heap().preflight( pc, ASSOC_SIZE ) );
 	xfr.setOrigin();
 	xfr.xfrRef( sysAssocKey );
-	xfr.xfrRef( method );
+	xfr.xfrRef( gclass );
 	xfr.xfrRef( function );
-	xfr.xfrRef( gclass_K[ CLASS_OFFSET_DISPATCH_TABLE ] );
-	gclass_K[ CLASS_OFFSET_DISPATCH_TABLE ] = xfr.makeRef();
+	xfr.xfrRef( INDEX( method, METHOD_OFFSET_DISPATCH_TABLE ) );
+	INDEX( method, METHOD_OFFSET_DISPATCH_TABLE ) = xfr.makeRef();
 		
 	vm->gcLiftVeto();
 	return pc;

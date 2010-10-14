@@ -20,6 +20,8 @@
 
 #include <iostream>
 #include <fstream>
+#include <vector>
+#include <set>
 using namespace std;
 
 #include "key.hpp"
@@ -248,6 +250,7 @@ private:
 	CageClass *				currentQueueCage;
 	vector< CageClass * > 	fromSpace;
 	vector< CageClass * > 	toSpace;
+	int						copier_changed;
 
 private:
 	
@@ -281,10 +284,20 @@ private:
 	}
 
 public:
+	int changed() {
+		return this->copier_changed;
+	}
+	
+	void resetChanged() {
+		this->copier_changed = 0;
+	}
+
 	Ref * copy( Ref * obj ) {
 		Ref * obj_A;
 		Ref * obj_Z1;
 		findObjectLimits( obj, obj_A, obj_Z1 );
+		
+		this->copier_changed += 1;
 
 		//	Is there room in the currentToSpace?
 		ptrdiff_t d = obj_Z1 - obj_A;
@@ -329,20 +342,15 @@ public:
 		Ref * obj_K = findObjectKey( this->currentQueueCage->queue_base );
 		unsigned long len = lengthAfterObjectKey( obj_K );
 		this->currentQueueCage->queue_base = obj_K + len + 1;
-		
-		/*
-		CageCrawl crawl( this->currentQueueCage, this->currentQueueCage->queue_base );
-		Ref * obj = crawl.next();
-		this->currentQueueCage->queue_base = crawl.currentObjA();
-		*/
-		
+				
 		return obj_K;
 	}
 	
 public:
 	ToSpaceCopier( MachineClass * vm ) :
 		vm( vm ),
-		heap( vm->heap() )
+		heap( vm->heap() ),
+		copier_changed( 0 )
 	{
 		//	Prepare heap for start of GC.
 
@@ -426,7 +434,20 @@ private:
 	ToSpaceCopier 			copier;
 	ptrdiff_t				pc_delta;
 	
-public:	
+	size_t					prev_num_assoc_chains;
+	vector< Ref * >			assoc_chains;
+	set< Ref * >			weak_roots;
+	
+public:
+	GarbageCollect( MachineClass * virtual_machine, bool scan_call_stack ) :
+		gclogger( scan_call_stack ),
+		vm( virtual_machine ),
+		copier( virtual_machine ),
+		prev_num_assoc_chains( 0 )
+	{
+	}
+	
+private:	
 	void forward( Ref & current ) {
 		gclogger.atRef( current );
 		if ( not IsObj( current ) ) {
@@ -543,15 +564,17 @@ public:
 			if ( IsMethodKey( key ) ) {
 				//	This is a temporary hack that works around not having
 				//	weak pointers.
-				obj_K[ FUNCTION_OFFSET_OF_METHOD_CACHE ] = sys_absent;
-			}
-			FnObjCrawl fnobjcrawl( vm, obj_K );
-			for ( ;; ) {
-				Ref * p = fnobjcrawl.next();
-				if ( p == NULL ) break;
-				gclogger.startInstruction( fnobjcrawl );
-				this->forward( *p );
-				gclogger.endInstruction( fnobjcrawl );
+				obj_K[ METHOD_OFFSET_CACHE ] = sys_absent;
+				this->assoc_chains.push_back( &obj_K[ METHOD_OFFSET_DISPATCH_TABLE ] );
+			} else {
+				FnObjCrawl fnobjcrawl( vm, obj_K );
+				for ( ;; ) {
+					Ref * p = fnobjcrawl.next();
+					if ( p == NULL ) break;
+					gclogger.startInstruction( fnobjcrawl );
+					this->forward( *p );
+					gclogger.endInstruction( fnobjcrawl );
+				}
 			}
 			gclogger.endFnObj();
 		} else if ( IsSimpleKey( key ) ) {
@@ -594,12 +617,93 @@ public:
 			}
 			gclogger.endInstance( obj_K );
 		} else {
-			throw "unimplemented";
+			throw ToBeDone();
 		}
 		gclogger.endContents();
 	}
 
+	//	Scan the dispatch tables that were added to collect up the new
+	//	weak roots that might be eligible for garbage collection.
+	void scanAddedWeakAssocChainToCollectWeakRoots() {
+		for ( size_t i = prev_num_assoc_chains; i < assoc_chains.size(); ++i ) {
+			Ref chain = *this->assoc_chains[ i ];
+			while ( chain != sys_absent ) {
+				Ref * assoc_K = RefToPtr4( chain );
+				Ref key = assoc_K[ ASSOC_KEY_OFFSET ];
+				Ref & val = assoc_K[ ASSOC_VALUE_OFFSET ];
+				
+				if ( IsPrimitive( key ) || IsFwdObj( key ) ) {
+					//	The key has been traced (or is non-pointer).
+					this->forward( val );
+				} else {
+					//	This is a candidate for GC.
+					this->weak_roots.insert( assoc_K );
+				}
+				
+				chain = assoc_K[ ASSOC_NEXT_OFFSET ];
+			}			
+		}
+		this->prev_num_assoc_chains = this->assoc_chains.size();
+	}
 	
+	//	As a result of forwarding any weak roots, have new weak roots been
+	//	eliminated as candidates.
+	void scanWeakRoots() {
+		//	Take a copy 'cos it is not too smart to mix updates and iteration.
+		vector< Ref * > w( this->weak_roots.begin(), this->weak_roots.end() );
+		
+		for ( vector< Ref * >::iterator it = w.begin(); it != w.end(); ++it ) {
+			Ref * wroot_K = *it;
+			Ref key = wroot_K[ ASSOC_KEY_OFFSET ];
+			Ref & val = wroot_K[ ASSOC_VALUE_OFFSET ];
+			if ( IsPrimitive( key ) || IsFwdObj( key ) ) {
+				//	The key has been traced (or is non-pointer).
+				this->forward( val );
+			}
+		}
+	}
+	
+	//	Now we patch up the assoc chains so that the untraced keys are
+	//	snipped out.
+	void pruneWeakAssocChains() {
+		for ( vector< Ref * >::iterator it = assoc_chains.begin(); it != assoc_chains.end(); ++ it ) {
+			Ref * chain = *it;
+			while ( *chain != sys_absent ) {
+				Ref * assoc_K = RefToPtr4( *chain );
+
+				//	The key has not been traced and the assoc item
+				//	is eligible for garbage collection.
+				if ( this->weak_roots.find( assoc_K ) != this->weak_roots.end() ) {
+					*chain = *RefToPtr4( assoc_K[ ASSOC_NEXT_OFFSET ] );
+				} else {
+					chain = &assoc_K[ ASSOC_NEXT_OFFSET ];
+				}
+			}			
+		}		
+	}
+	
+	void copyWeakAssocChains() {
+		for ( vector< Ref * >::iterator it = assoc_chains.begin(); it != assoc_chains.end(); ++ it ) {
+			Ref * chain = *it;
+			this->forward( *chain );
+		}
+		
+		//	Then for debugging we want to check that the forwarded 
+		this->copier.resetChanged();
+		this->copyPhase();
+		cerr << "Copied " << this->copier.changed() << " records" << endl;
+	}
+
+	void copyPhase() {
+		for (;;) {
+			Ref * obj = copier.next();
+			gclogger.pickedObjectToCopy( obj );
+			if ( not obj ) break;
+			this->forwardContents( obj );
+		}
+	}				
+	
+public:
 	void collectGarbage() {
 		if ( this->vm->isGCTrace() ) {
 			cerr << "### Garbage collection " << ( this->scan_call_stack ? "" : " (quiescent)" ) << endl;	
@@ -608,24 +712,24 @@ public:
 		gclogger.startGarbageCollection();
 		preGCSymbolTable( this->vm->isGCTrace() );
 		this->forwardRoots( scan_call_stack );
+		this->copyPhase();
+		
 		for (;;) {
-			Ref * obj = copier.next();
-			gclogger.pickedObjectToCopy( obj );
-			if ( not obj ) break;
-			this->forwardContents( obj );
+			this->copier.resetChanged();
+			this->scanAddedWeakAssocChainToCollectWeakRoots();
+			this->scanWeakRoots();
+			if ( not( this->copier.changed() > 0 ) ) break;
+			this->copyPhase();
 		}
+		
+		this->pruneWeakAssocChains();
+		this->copyWeakAssocChains();
+
 		postGCSymbolTable( this->vm->isGCTrace() );
 		gclogger.endGarbageCollection();
 		this->vm->check_call_stack_integrity();		//	debug
 	}
 	
-public:
-	GarbageCollect( MachineClass * virtual_machine, bool scan_call_stack ) :
-		gclogger( scan_call_stack ),
-		vm( virtual_machine ),
-		copier( virtual_machine )
-	{
-	}
 	
 };
 

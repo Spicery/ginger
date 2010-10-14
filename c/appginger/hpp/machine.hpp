@@ -25,7 +25,7 @@
 #include "plant.hpp"
 #include "instruction_set.hpp"
 #include "heap.hpp"
-#include "appginger.hpp"
+#include "appcontext.hpp"
 #include "package.hpp"
 #include "registers.hpp"
 
@@ -36,7 +36,7 @@ class MachineClass {
 friend class GarbageCollect;
 
 private:
-	AppGinger &						appg;
+	AppContext &						appg;
 	std::auto_ptr<PlantClass>		plant_aptr;
 	std::auto_ptr<HeapClass>		heap_aptr;
 
@@ -122,7 +122,7 @@ public:
 	
 
 public:
-	MachineClass( AppGinger & appg );
+	MachineClass( AppContext & appg );
 	virtual ~MachineClass();
 };
 

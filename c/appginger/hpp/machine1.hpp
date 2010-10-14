@@ -23,7 +23,7 @@
 #include "callstacklayout.hpp"
 #include "listlayout.hpp"
 #include "instruction_set1.hpp"
-#include "appginger.hpp"
+#include "appcontext.hpp"
 
 class Machine1 : public MachineClass {
 
@@ -37,7 +37,7 @@ public:
 	}
 
 public:
-	Machine1( AppGinger & g );
+	Machine1( AppContext & g );
 	virtual ~Machine1() {}
 
 };

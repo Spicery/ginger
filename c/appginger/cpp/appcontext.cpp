@@ -16,7 +16,7 @@
     along with AppGinger.  If not, see <http://www.gnu.org/licenses/>.
 \******************************************************************************/
 
-/** \mainpage AppGinger Internal Documentation
+/** \mainpage AppContext Internal Documentation
 *//*
  *
  * \section intro_sec Introduction
@@ -40,7 +40,7 @@
 
 //#include "cgi.hpp"
 #include "rcep.hpp"
-#include "appginger.hpp"
+#include "appcontext.hpp"
 #include "term.hpp"
 #include "mishap.hpp"
 #include "sys.hpp"
@@ -88,7 +88,7 @@ static Package * setUpInteractivePackage( MachineClass * vm ) {
     return interactive_pkg;
 }
 
-int AppGinger::main( int argc, char **argv, char **envp ) {
+int AppContext::main( int argc, char **argv, char **envp ) {
     for(;;) {
         int option_index = 0;
         int c = getopt_long( argc, argv, "CIBhm:vd:l", long_options, &option_index );
@@ -255,7 +255,7 @@ int AppGinger::main( int argc, char **argv, char **envp ) {
         Package * interactive_pkg = setUpInteractivePackage( vm );
 
  
-#ifdef DBG_APPGINGER
+#ifdef DBG_APPCONTEXT
         clog << "RCEP ..." << endl;
 #endif
         {
@@ -278,7 +278,7 @@ int AppGinger::main( int argc, char **argv, char **envp ) {
     return EXIT_SUCCESS;
 }
 
-MachineClass * AppGinger::newMachine() {
+MachineClass * AppContext::newMachine() {
    switch ( this->machine_impl_num ) {
         case 1: return new Machine1( *this );
         case 2: return new Machine2( *this );
@@ -294,7 +294,7 @@ MachineClass * AppGinger::newMachine() {
 /*  N.B. The assumption that LICENSE.TXT lives in the same directory as the
     appginger application is not correct. This is just a temporary fudge.
 */
-void AppGinger::printGPL( const char * start, const char * end ) {
+void AppContext::printGPL( const char * start, const char * end ) {
     bool printing = false;
     ifstream license( "LICENSE.TXT" );
     std::string line;

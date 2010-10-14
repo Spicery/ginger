@@ -7,7 +7,7 @@
 typedef Ref *SpecialFn( Ref *pc, Machine vm );
 typedef SpecialFn *Special;
 
-Machine1::Machine1( AppGinger & g ) :
+Machine1::Machine1( AppContext & g ) :
 	MachineClass( g )
 {
 }

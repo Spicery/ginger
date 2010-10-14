@@ -37,7 +37,7 @@ using namespace std;
 
 #define RANDOM_SIZE 100000
 
-MachineClass::MachineClass( AppGinger & application ) :
+MachineClass::MachineClass( AppContext & application ) :
 	appg( application ),
 	plant_aptr( new PlantClass( this ) ),
 	heap_aptr( new HeapClass( this ) ),

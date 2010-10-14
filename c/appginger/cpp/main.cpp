@@ -1,6 +1,6 @@
-#include "appginger.hpp"
+#include "appcontext.hpp"
 
 int main( int argc, char **argv, char **envp ) {
-	AppGinger appg;
+	AppContext appg;
 	return appg.main( argc, argv, envp );
 }

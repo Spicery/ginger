@@ -26,7 +26,7 @@
 #include "instructions_context.hpp"
 
 
-Machine3::Machine3( AppGinger & g ) :
+Machine3::Machine3( AppContext & g ) :
 	MachineClass( g )
 {
 	this->core( true, 0 );

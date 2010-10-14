@@ -16,14 +16,14 @@
     along with AppGinger.  If not, see <http://www.gnu.org/licenses/>.
 \******************************************************************************/
 
-#ifndef APPGINGER_HPP
-#define APPGINGER_HPP
+#ifndef APP_CONTEXT_HPP
+#define APP_CONTEXT_HPP
 
 #define VERSION "0.6.1"
 
 class MachineClass;
 
-class AppGinger {
+class AppContext {
 private:
 	enum Mode {
 		InteractiveMode,
@@ -59,7 +59,7 @@ public:
 
 
 public:
-	AppGinger() :
+	AppContext() :
 		mode( InteractiveMode ),
 		machine_impl_num( 1 ),
 		dbg_show_code( false ),

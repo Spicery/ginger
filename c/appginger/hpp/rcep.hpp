@@ -29,12 +29,13 @@ private:
 	Package * current_package;
 
 public:
+	MachineClass * getMachine() { return this->current_package->getMachine(); } 
 	
 	//	Does not trap mishap.
-	bool unsafe_read_comp_exec_print( Machine vm, std::istream & input );
+	bool unsafe_read_comp_exec_print( std::istream & input );
 	
 	//	Traps mishap.
-	bool read_comp_exec_print( Machine vm, std::istream & input );
+	bool read_comp_exec_print( std::istream & input );
 
 public:
 	RCEP( Package * current_package ) :

@@ -75,7 +75,8 @@ static void crawl( Machine vm, const char * logfname ) {
 	
 #endif
 
-bool RCEP::unsafe_read_comp_exec_print( Machine vm, istream & input ) {
+bool RCEP::unsafe_read_comp_exec_print( istream & input ) {
+	Machine vm = this->getMachine();
     Plant plant;
     Ref r;
     Term term;
@@ -142,10 +143,10 @@ bool RCEP::unsafe_read_comp_exec_print( Machine vm, istream & input ) {
 	return true;
 }
 
-bool RCEP::read_comp_exec_print( Machine vm, istream & input ) {
+bool RCEP::read_comp_exec_print( istream & input ) {
 	for (;;) {
 		try {
-			return unsafe_read_comp_exec_print( vm, input );
+			return unsafe_read_comp_exec_print( input );
 		} catch ( Mishap & m ) {
 			m.report();
 		} catch ( SystemError & m ) {

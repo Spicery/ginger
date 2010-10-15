@@ -22,6 +22,7 @@
 #define VERSION "0.6.1"
 
 class MachineClass;
+class Package;
 
 class AppContext {
 private:
@@ -53,10 +54,8 @@ public:
 	bool getShowCode() { return this->dbg_show_code; }
 
 public:
-	void printGPL( const char * start, const char * end );
 	MachineClass * newMachine();
-	int main( int argc, char **argv, char **envp );
-
+	Package * initInteractivePackage( MachineClass * vm );
 
 public:
 	AppContext() :

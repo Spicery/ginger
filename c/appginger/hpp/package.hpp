@@ -84,6 +84,7 @@ public:
 	void import( const Import & imp );		
 	
 public:
+	MachineClass * getMachine() { return this->pkgmgr->vm; }
 	Package * getPackage( const std::string title );
 	Import * getAlias( const std::string title );
 	Ident exported( const std::string & c, const FacetSet * facets );

@@ -179,7 +179,7 @@ public abstract class GeneralInstructionSet {
 		return new GenericInstruction();
 	}
 	
-	public Instruction invoke_ic() {
+	public Instruction invoke_icc() {
 		return new GenericInstruction();
 	}
 	

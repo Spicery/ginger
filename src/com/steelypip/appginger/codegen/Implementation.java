@@ -48,7 +48,7 @@ public abstract class Implementation extends GeneralInstructionSet {
 		answer.add( this.halt_i().init( "halt", "i" ) );
 		answer.add( this.ifnot_ir().init( "ifnot", "ir" ) );
 		answer.add( this.ifso_ir().init( "ifso", "ir" ) );
-		answer.add( this.invoke_ic().init( "invoke", "ic" ) );
+		answer.add( this.invoke_icc().init( "invoke", "icc" ) );
 		answer.add( this.listiterate_i().init( "listiterate", "i" ) );
 		answer.add( this.lt_si_irrr().init( "lt_si", "irrr" ) );
 		answer.add( this.lt_ss_irrr().init( "lt_ss", "irrr" ) );

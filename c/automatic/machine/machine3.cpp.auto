@@ -366,7 +366,7 @@ void Machine3::core( bool init_mode, Ref *pc ) {
         Ref subject = VMVP[ A - 1 ];
         
         //	Get the method.
-        Ref method = Ptr4ToRef( pc - 1 );	//	Self pointer (tagged) !!!!
+        //	Ref method = Ptr4ToRef( pc - 1 );	//	Self pointer (tagged) !!!!
         		
         //	Select the method fragment to call.
         if ( IsObj( subject ) ) {
@@ -384,6 +384,8 @@ void Machine3::core( bool init_mode, Ref *pc ) {
         				Ref * fn_K = RefToPtr4( fn );
         				VMPCFUNC = fn_K;
         				RETURN( fn_K + 1 );
+        			} else {
+        				method_table = entry_K[ ASSOC_NEXT_OFFSET ];
         			}
         		}
         	}
@@ -399,13 +401,13 @@ void Machine3::core( bool init_mode, Ref *pc ) {
         		}
         	}
         	
-        	//	Not in the method cache. Attempt to look it up in the object.
+        	//	Not in the method cache. Attempt to look it up in the method-table.
         	if ( IsObj( key ) ) {
-        		Ref * key_K = RefToPtr4( key );	
-        		Ref dispatch_table = key_K[ CLASS_OFFSET_DISPATCH_TABLE ];
+        		//Ref * key_K = RefToPtr4( key );	
+        		Ref dispatch_table = pc[2];
         		while ( dispatch_table != sys_absent ) {
         			Ref * entry_K = RefToPtr4( dispatch_table );
-        			if ( method == entry_K[ ASSOC_KEY_OFFSET ] ) {	
+        			if ( key == entry_K[ ASSOC_KEY_OFFSET ] ) {	
         				Ref fn = entry_K[ ASSOC_VALUE_OFFSET ];
         				
         				//	Add to the method cache.
@@ -441,7 +443,7 @@ void Machine3::core( bool init_mode, Ref *pc ) {
         	}
         }
         invoke_error();
-        RETURN( pc );	// IDIOT COMPILER.
+        RETURN( pc );	// IDIOT COMPILER. Only here to suppress daft complaints.
     }
     L_listiterate: {
         //	This instruction implements the fast iterator for lists.

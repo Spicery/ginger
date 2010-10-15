@@ -89,7 +89,7 @@ const char * InstructionSet::signature( Ref x ) const {
     if ( x == spc_gte_ss ) return "irrr";
     if ( x == spc_ifnot ) return "ir";
     if ( x == spc_ifso ) return "ir";
-    if ( x == spc_invoke ) return "ic";
+    if ( x == spc_invoke ) return "icc";
     if ( x == spc_lt_si ) return "irrr";
     if ( x == spc_lt_ss ) return "irrr";
     if ( x == spc_lte_si ) return "irrr";

@@ -21,6 +21,14 @@ public class Main {
 		final LogCreated sysconsts = new LogCreated();
 				
 		new FullRecordClassGenerator(
+			sysconsts, "Ref", "refCont"
+		).generate( outputFolder, "ref" );
+			
+		new FullRecordClassGenerator(
+			sysconsts, "WeakRef", "weakRefCont"
+		).generate( outputFolder, "weakRef" );
+			
+		new FullRecordClassGenerator(
 			sysconsts, "Pair", "head", "tail"
 		).generate( outputFolder, "pair" );
 		

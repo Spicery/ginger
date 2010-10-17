@@ -1,0 +1,38 @@
+Ref * sysNewRef( Ref * pc, class MachineClass * vm ) {
+    if ( vm->count == 1 ) {
+        XfrClass xfr( vm->heap().preflight( pc, 2 ) );
+        xfr.setOrigin();
+        xfr.xfrRef( sysRefKey );
+        Ref f0 = vm->fastPop();
+        xfr.xfrRef( f0 );
+        vm->fastPush( xfr.makeRef() );
+        return pc;
+    } else {
+        throw Mishap( "Wrong number of arguments for sysNewRef" );
+    }
+}
+
+Ref * sysIsRef( Ref * pc, class MachineClass * vm ) {
+    if ( vm->count == 1 ) {
+        Ref r = vm->fastPeek();
+        vm->fastPeek() = IsObj( r ) && ( *RefToPtr4( r ) == sysRefKey ) ? sys_true : sys_false;
+        return pc;
+    } else {
+        throw Mishap( "Wrong number of arguments for head" );
+    }
+}
+
+Ref * sysRefContField( Ref * pc, class MachineClass * vm ) {
+    if ( vm->count == 1 ) {
+        Ref x = vm->fastPeek();
+        if ( refKey( x ) == sysRefKey ) {
+            vm->fastPeek() = RefToPtr4( x )[ 1 ];
+        } else {
+            throw Mishap( "Trying to take the refCont of non-Ref" );
+        }
+        return pc;
+    } else {
+        throw Mishap( "Wrong number of arguments" );
+    }
+}
+

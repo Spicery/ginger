@@ -51,7 +51,7 @@ public class FullRecordClassGenerator extends DataClassGenerator {
 		final String constructorName = this.consName();
 		final String keyName = this.keyName();
 		cpp.format( "Ref * %s( Ref * pc, class MachineClass * vm ) {\n", constructorName );
-		cpp.format( "    if ( vm->count == 2 ) {\n" );
+		cpp.format( "    if ( vm->count == %s ) {\n", this.fieldNames.length );
 		cpp.format( "        XfrClass xfr( vm->heap().preflight( pc, %s ) );\n", this.fieldNames.length + 1 );
 		cpp.format( "        xfr.setOrigin();\n" );
 		cpp.format( "        xfr.xfrRef( %s );\n", keyName );

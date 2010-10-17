@@ -38,6 +38,7 @@ using namespace std;
 #include "mishap.hpp"
 #include "syssymbol.hpp"
 #include "functionlayout.hpp"
+#include "weakreflayout.hpp"
 
 //#define DBG_GC
 
@@ -252,6 +253,7 @@ private:
 	size_t					prev_num_assoc_chains;
 	vector< Ref * >			assoc_chains;
 	set< Ref * >			weak_roots;
+	set< Ref * >			weak_refs;
 	
 public:
 	GarbageCollect( MachineClass * virtual_machine, bool scan_call_stack ) :
@@ -373,6 +375,16 @@ private:
 		if ( this->tracker ) this->tracker->endRegisters();
 	}
 	
+	static bool isTargetForwarded( Ref r ) {
+		return IsPrimitive( r ) || IsFwdObj( r );
+	}
+	
+	static bool isntTargetForwarded( Ref r ) {
+		return not( IsPrimitive( r ) || IsFwdObj( r ) );
+	}
+	
+
+	
 	void forwardContents( Ref * obj_K ) {
 		if ( this->tracker ) this->tracker->startContents( obj_K );
 		Ref key = *obj_K;
@@ -403,9 +415,14 @@ private:
 				case MAP_KIND:
 				case RECORD_KIND: {
 					if ( this->tracker ) this->tracker->startRecord( obj_K );
-					unsigned long n = sizeAfterKeyOfRecord( obj_K );
-					for ( unsigned long i = 1; i <= n; i++ ) {
-						this->forward( obj_K[ i ] );
+					//cerr << "Record: " << keyName( key ) << endl;
+					if ( key == sysWeakRefKey && !this->isTargetForwarded( obj_K[ WEAK_REF_OFFSET_CONT ] ) ) {
+						this->weak_refs.insert( &obj_K[ WEAK_REF_OFFSET_CONT ] );
+					} else {
+						unsigned long n = sizeAfterKeyOfRecord( obj_K );
+						for ( unsigned long i = 1; i <= n; i++ ) {
+							this->forward( obj_K[ i ] );
+						}
 					}
 					if ( this->tracker ) this->tracker->endRecord( obj_K );
 					break;
@@ -440,14 +457,6 @@ private:
 			throw ToBeDone();
 		}
 		if ( this->tracker ) this->tracker->endContents();
-	}
-	
-	static bool isTargetForwarded( Ref r ) {
-		return IsPrimitive( r ) || IsFwdObj( r );
-	}
-	
-	static bool isntTargetForwarded( Ref r ) {
-		return not( IsPrimitive( r ) || IsFwdObj( r ) );
 	}
 	
 	//	This is a form of forwarding in which the original ref is
@@ -564,6 +573,17 @@ private:
 		}
 	}
 
+	void updateWeakRefs() {
+		for ( set< Ref * >::iterator it = this->weak_refs.begin(); it != this->weak_refs.end(); ++it ) {
+			Ref * ptr = *it;
+			if ( this->isTargetForwarded( *ptr ) ) {
+				this->forward( *ptr );
+			} else {
+				*ptr = sys_absent;
+			}
+		}
+	}
+	
 	void copyPhase() {
 		for (;;) {
 			Ref * obj = copier.next();
@@ -596,9 +616,13 @@ public:
 		this->pruneWeakAssocChains();
 		this->copyWeakAssocChains();
 		
+		this->updateWeakRefs();
+		
 		//	Then for debugging we want to check that there is no further copying.
 		this->copier.resetChanged();
 		this->copyPhase();
+		
+		
 		
 		postGCSymbolTable( this->vm->isGCTrace() );
 		if ( this->tracker ) this->tracker->endGarbageCollection();

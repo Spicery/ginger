@@ -52,6 +52,8 @@ const char * keyName( Ref key ) {
 			case 14: return "Map";
 			case 15: return "Assoc";
 			case 16: return "Indirection";
+			case 17: return "Ref";
+			case 18: return "WeakRef";
 			default: return "<Unknown>";
 		}
 	} else if ( IsFunctionKey( key ) ) {

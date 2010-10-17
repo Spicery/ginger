@@ -1,3 +1,5 @@
+#include "ref.cpp.auto"
+#include "weakRef.cpp.auto"
 #include "pair.cpp.auto"
 #include "maplet.cpp.auto"
 #include "vector.cpp.auto"

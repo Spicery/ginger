@@ -212,3 +212,8 @@ Package * Import::package() {
 	return this->from; 
 }
 
+Valof * Package::valof( const std::string & c ) {
+	Ident id = this->lookup( c, true );
+	if ( not id ) return NULL;
+	return id->value_of;
+}

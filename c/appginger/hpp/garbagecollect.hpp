@@ -21,7 +21,9 @@
 
 #include "machine.hpp"
 
+#include "gctracker.hpp"
+
 extern Ref * sysGarbageCollect( Ref * pc, MachineClass * vm );
-extern void sysQuiescentGarbageCollect( MachineClass * vm );
+extern void sysQuiescentGarbageCollect( MachineClass * vm, GCTracker * );
 
 #endif

@@ -16,14 +16,15 @@
     along with AppGinger.  If not, see <http://www.gnu.org/licenses/>.
 \******************************************************************************/
 
-#include "garbagecollect.hpp"
-
 #include <iostream>
 #include <fstream>
 #include <vector>
 #include <set>
 using namespace std;
 
+#include "garbagecollect.hpp"
+
+#include "gctracker.hpp"
 #include "key.hpp"
 #include "misclayout.hpp"
 #include "classlayout.hpp"
@@ -38,7 +39,7 @@ using namespace std;
 #include "syssymbol.hpp"
 #include "functionlayout.hpp"
 
-
+//#define DBG_GC
 
 /******************************************************************************\
 
@@ -48,200 +49,6 @@ the A* algorithm configured to do a breadth first search.
 
 \******************************************************************************/
 
-//#define DBG_GC
-
-/******************************************************************************\
-A callback class for the garbage collector.
-\******************************************************************************/
-
-static const bool gc_logging = false;
-
-class GCLogger {
-private:
-	bool 					scan_call_stack;
-	std::ofstream			gclog;
-
-public:
-	void atRef( Ref current ) {	
-		if ( gc_logging ) {
-			gclog << "      Forwarding ref = 0x" << hex << ToULong( current ) << endl;
-			gclog.flush();
-			gclog << "        Is obj? " << IsObj( current ) << endl;
-			gclog.flush();
-		}
-	}
-	
-	void afterAtRef( Ref current ) {
-		if ( gc_logging ) {
-			gclog << "        Forwarded to ref = 0x" << hex << ToULong( current ) << endl;
-			gclog.flush();
-		}
-	}
-
-	void atVariable( std::string var ) {	
-		if ( gc_logging ) {
-			gclog << "Forwarding " << var << endl;
-		}
-	}
-	
-	void startValueStack() {
-		if ( gc_logging ) {
-			gclog << "Forwarding value stack" << endl;
-		}
-	}
-	
-	void endValueStack() {
-		if ( gc_logging ) {
-		}
-	}
-	
-	void startCallStackAndPC() {
-		if ( gc_logging ) {
-			gclog << "Forwarding call stack and pc" << endl;
-		}
-	}
-			
-	void endCallStackAndPC() {
-		if ( gc_logging ) {
-		}
-	}
-	
-	void startDictionary() {
-		if ( gc_logging ) {
-			gclog << "Forward dictionary" << endl;
-		}
-	}
-	
-	void endDictionary() {
-		if ( gc_logging ) {
-		}		
-	}
-	
-	void startRegisters() {
-		if ( gc_logging ) {
-			gclog << "Forward registers" << endl;
-		}
-	}
-	
-	void endRegisters() {
-		if ( gc_logging ) {
-		}		
-	}
-	
-	void startGarbageCollection() {
-		if ( gc_logging ) {
-			gclog << "### " << ( scan_call_stack ? "" : "Quiescent " ) << "GC" << endl;	
-		}
-	}
-	
-	void endGarbageCollection() {
-		if ( gc_logging ) {
-			gclog << "Finished GC (" << ( scan_call_stack ? "" : "Quiescent " ) << ")" << endl;	
-		}
-	}
-	
-	void pickedObjectToCopy( Ref * obj ) {
-		if ( gc_logging ) {
-			gclog << "Picked " << obj << endl;
-			gclog.flush();
-		}
-	}
-	
-	void startContents( Ref * obj_K ) {
-		if ( gc_logging ) {
-			gclog << "  Advance contents for " << keyName( *obj_K ) << endl;
-		}
-	}
-
-	void endContents() {
-		if ( gc_logging ) {
-			gclog << "  Finished forwarding contents" << endl;
-			gclog.flush();
-		}
-	}
-	
-	void startFnObj() {
-		if ( gc_logging ) {
-			gclog << "  (Function object)" << endl;
-		}
-	}
-
-	void endFnObj() {
-		if ( gc_logging ) {
-			gclog << "  (Function object)" << endl;
-		}
-	}
-
-	void startInstruction( FnObjCrawl & fnobjcrawl ) {
-		if ( gc_logging ) {
-			gclog << "    At instruction " << fnobjcrawl.getName() << endl;
-			gclog << "       position    " << fnobjcrawl.getPosn() << endl;
-		}
-	}
-
-	void endInstruction( FnObjCrawl & fnobjcrawl ) {
-		if ( gc_logging ) {
-			gclog << "    Forwarded " << fnobjcrawl.getName() << endl;
-		}
-	}
-
-	void startVector( Ref * obj_K ) {
-		if ( gc_logging ) {
-			gclog << "  (Vector)" << endl;
-		}
-	}
-					
-	void endVector( Ref * obj_K ) {
-		if ( gc_logging ) {
-		}		
-	}
-					
-	void startRecord( Ref * obj_K ) {
-		if ( gc_logging ) {
-			gclog << "  (Record)" << endl;
-		}		
-	}
-					
-	void endRecord( Ref * obj_K ) {
-		if ( gc_logging ) {
-		}		
-	}
-			
-	void startInstance( Ref * obj_K ) {
-		if ( gc_logging ) {
-			gclog << "  (Instance)" << endl;
-		}		
-	}
-					
-	void endInstance( Ref * obj_K ) {
-		if ( gc_logging ) {
-		}		
-	}
-			
-	void atString( Ref * obj_K ) {
-		if ( gc_logging ) {
-			gclog << "  (String)" << endl;
-		}		
-	}
-	
-public:
-	GCLogger( const bool scs ) :
-		scan_call_stack( scs )
-	{
-		if ( gc_logging ) {
-			gclog.open( "gc.log", ios_base::app | ios_base::out );
-		}
-	}
-	
-	~GCLogger() {
-		if ( gc_logging ) {
-			gclog.close();
-		}
-	}
-		
-};
-
-
 class ToSpaceCopier {
 private:
 	MachineClass * 			vm;
@@ -250,7 +57,7 @@ private:
 	CageClass *				currentQueueCage;
 	vector< CageClass * > 	fromSpace;
 	vector< CageClass * > 	toSpace;
-	int						copier_changed;
+	GCTracker *				tracker;
 
 private:
 	
@@ -283,21 +90,31 @@ private:
 		return new_obj;
 	}
 
+private:
+	bool changed_flag;
+
+	void copy1() {
+		this->changed_flag = true;
+		if ( this->tracker ) this->tracker->copy1();
+	}
+	
 public:
-	int changed() {
-		return this->copier_changed;
+	bool changed() {
+		return this->changed_flag;
 	}
 	
 	void resetChanged() {
-		this->copier_changed = 0;
+		this->changed_flag = false;
+		if ( this->tracker ) this->tracker->reset();
 	}
-
+	
+public:
 	Ref * copy( Ref * obj ) {
 		Ref * obj_A;
 		Ref * obj_Z1;
 		findObjectLimits( obj, obj_A, obj_Z1 );
 		
-		this->copier_changed += 1;
+		this->copy1();
 
 		//	Is there room in the currentToSpace?
 		ptrdiff_t d = obj_Z1 - obj_A;
@@ -347,10 +164,10 @@ public:
 	}
 	
 public:
-	ToSpaceCopier( MachineClass * vm ) :
+	ToSpaceCopier( MachineClass * vm, GCTracker * tracker ) :
 		vm( vm ),
 		heap( vm->heap() ),
-		copier_changed( 0 )
+		tracker( tracker )
 	{
 		//	Prepare heap for start of GC.
 
@@ -426,9 +243,7 @@ The Garbage Collector implements a stop-and-copy algorithm.
 
 class GarbageCollect {
 private:
-	GCLogger				gclogger;
-
-private:
+	GCTracker *				tracker;
 	MachineClass * 			vm;
 	bool 					scan_call_stack;
 	ToSpaceCopier 			copier;
@@ -440,16 +255,21 @@ private:
 	
 public:
 	GarbageCollect( MachineClass * virtual_machine, bool scan_call_stack ) :
-		gclogger( scan_call_stack ),
+		tracker( NULL ),
 		vm( virtual_machine ),
-		copier( virtual_machine ),
+		copier( virtual_machine, NULL ),
 		prev_num_assoc_chains( 0 )
 	{
 	}
 	
+public:
+	void setGCTracker( GCTracker * t ) {
+		this->tracker = t;
+	}
+	
 private:	
 	void forward( Ref & current ) {
-		gclogger.atRef( current );
+		if ( this->tracker ) this->tracker->atRef( current );
 		if ( not IsObj( current ) ) {
 			if ( IsSymbol( current ) ) {
 				gcTouchSymbol( current );
@@ -470,7 +290,7 @@ private:
 				}
 			}
 		}
-		gclogger.afterAtRef( current );
+		if ( this->tracker ) this->tracker->afterAtRef( current );
 	}
 
 	void forwardValueStack() {
@@ -523,7 +343,7 @@ private:
 			for (;;) {
 				Ref * p = scanner.next();
 				if ( not p ) break;
-				gclogger.atVariable( scanner.variable() );
+				if ( this->tracker ) this->tracker->atVariable( scanner.variable() );
 				this->forward( *p );
 			}
 		}
@@ -537,30 +357,30 @@ private:
 	}
 	
 	void forwardRoots( const bool scan_call_stack ) {
-		gclogger.startValueStack();
+		if ( this->tracker ) this->tracker->startValueStack();
 		this->forwardValueStack();
-		gclogger.endValueStack();
+		if ( this->tracker ) this->tracker->endValueStack();
 		if ( scan_call_stack ) {
-			gclogger.startCallStackAndPC();
+			if ( this->tracker ) this->tracker->startCallStackAndPC();
 			this->forwardCallStackAndPC();
-			gclogger.endCallStackAndPC();
+			if ( this->tracker ) this->tracker->endCallStackAndPC();
 		}
-		gclogger.startDictionary();
+		if ( this->tracker ) this->tracker->startDictionary();
 		this->forwardAllDictionaries();
-		gclogger.endDictionary();
-		gclogger.startRegisters();
+		if ( this->tracker ) this->tracker->endDictionary();
+		if ( this->tracker ) this->tracker->startRegisters();
 		this->forwardRegisters();
-		gclogger.endRegisters();
+		if ( this->tracker ) this->tracker->endRegisters();
 	}
 	
 	void forwardContents( Ref * obj_K ) {
-		gclogger.startContents( obj_K );
+		if ( this->tracker ) this->tracker->startContents( obj_K );
 		Ref key = *obj_K;
 		if ( IsFunctionKey( key ) ) {
 			if ( IsCoreFunctionKey( key ) ) {
 				throw Unreachable();
 			}
-			gclogger.startFnObj();
+			if ( this->tracker ) this->tracker->startFnObj();
 			if ( IsMethodKey( key ) ) {
 				//	This is a temporary hack that works around not having
 				//	weak pointers.
@@ -571,37 +391,37 @@ private:
 				for ( ;; ) {
 					Ref * p = fnobjcrawl.next();
 					if ( p == NULL ) break;
-					gclogger.startInstruction( fnobjcrawl );
+					if ( this->tracker ) this->tracker->startInstruction( fnobjcrawl );
 					this->forward( *p );
-					gclogger.endInstruction( fnobjcrawl );
+					if ( this->tracker ) this->tracker->endInstruction( fnobjcrawl );
 				}
 			}
-			gclogger.endFnObj();
+			if ( this->tracker ) this->tracker->endFnObj();
 		} else if ( IsSimpleKey( key ) ) {
 			switch ( KindOfSimpleKey( key ) ) {
 				case PAIR_KIND:
 				case MAP_KIND:
 				case RECORD_KIND: {
-					gclogger.startRecord( obj_K );
+					if ( this->tracker ) this->tracker->startRecord( obj_K );
 					unsigned long n = sizeAfterKeyOfRecord( obj_K );
 					for ( unsigned long i = 1; i <= n; i++ ) {
 						this->forward( obj_K[ i ] );
 					}
-					gclogger.endRecord( obj_K );
+					if ( this->tracker ) this->tracker->endRecord( obj_K );
 					break;
 				}
 				case VECTOR_KIND: {
-					gclogger.startVector( obj_K );
+					if ( this->tracker ) this->tracker->startVector( obj_K );
 					long n = sizeAfterKeyOfVector( obj_K );
 					Ref * obj_K1 = obj_K + 1;
 					for ( long i = 0; i < n; i++ ) {
 						this->forward( obj_K1[ i ] );
 					}
-					gclogger.endVector( obj_K );
+					if ( this->tracker ) this->tracker->endVector( obj_K );
 					break;
 				}
 				case STRING_KIND: {
-					gclogger.atString( obj_K );
+					if ( this->tracker ) this->tracker->atString( obj_K );
 					//	Non-full. Can stop.
 					break;
 				}
@@ -610,16 +430,30 @@ private:
 				}
 			}
 		} else if ( IsFwd( key ) || IsObj( key ) ) {
-			gclogger.startInstance( obj_K );
+			if ( this->tracker ) this->tracker->startInstance( obj_K );
 			unsigned long n = sizeAfterKeyOfInstance( obj_K );
 			for ( unsigned long i = 0; i <= n; i++ ) {
 				this->forward( obj_K[ i ] );
 			}
-			gclogger.endInstance( obj_K );
+			if ( this->tracker ) this->tracker->endInstance( obj_K );
 		} else {
 			throw ToBeDone();
 		}
-		gclogger.endContents();
+		if ( this->tracker ) this->tracker->endContents();
+	}
+	
+	static bool isTargetForwarded( Ref r ) {
+		return IsPrimitive( r ) || IsFwdObj( r );
+	}
+	
+	static bool isntTargetForwarded( Ref r ) {
+		return not( IsPrimitive( r ) || IsFwdObj( r ) );
+	}
+	
+	//	This is a form of forwarding in which the original ref is
+	//	not stamped on.
+	void forwardTarget( Ref x ) {
+		this->forward( x );
 	}
 
 	//	Scan the dispatch tables that were added to collect up the new
@@ -629,12 +463,16 @@ private:
 			Ref chain = *this->assoc_chains[ i ];
 			while ( chain != sys_absent ) {
 				Ref * assoc_K = RefToPtr4( chain );
-				Ref key = assoc_K[ ASSOC_KEY_OFFSET ];
-				Ref & val = assoc_K[ ASSOC_VALUE_OFFSET ];
+				Ref lhs = assoc_K[ ASSOC_KEY_OFFSET ];
 				
-				if ( IsPrimitive( key ) || IsFwdObj( key ) ) {
+				if ( isTargetForwarded( lhs ) ) {
 					//	The key has been traced (or is non-pointer).
-					this->forward( val );
+					//	We want to forward the assoc object.
+					this->forwardTarget( assoc_K[ ASSOC_VALUE_OFFSET ] );
+					if ( isntTargetForwarded( assoc_K[ ASSOC_VALUE_OFFSET ] ) ) {
+						cerr << "Target[1] not forwarded!" << endl;
+						throw Unreachable();
+					}
 				} else {
 					//	This is a candidate for GC.
 					this->weak_roots.insert( assoc_K );
@@ -648,17 +486,27 @@ private:
 	
 	//	As a result of forwarding any weak roots, have new weak roots been
 	//	eliminated as candidates.
+	//
+	//	COMMENT - it might make more sense to clear the weak-root table each
+	//	time and rebuild it from here.
+	//
 	void scanWeakRoots() {
 		//	Take a copy 'cos it is not too smart to mix updates and iteration.
 		vector< Ref * > w( this->weak_roots.begin(), this->weak_roots.end() );
 		
 		for ( vector< Ref * >::iterator it = w.begin(); it != w.end(); ++it ) {
 			Ref * wroot_K = *it;
-			Ref key = wroot_K[ ASSOC_KEY_OFFSET ];
-			Ref & val = wroot_K[ ASSOC_VALUE_OFFSET ];
-			if ( IsPrimitive( key ) || IsFwdObj( key ) ) {
+			Ref lhs = wroot_K[ ASSOC_KEY_OFFSET ];
+			if ( isTargetForwarded( lhs ) ) {
 				//	The key has been traced (or is non-pointer).
-				this->forward( val );
+				this->forwardTarget( wroot_K[ ASSOC_VALUE_OFFSET ] );
+				if ( isntTargetForwarded( wroot_K[ ASSOC_VALUE_OFFSET ] ) ) {
+					cerr << "Target[2] not forwarded!" << endl;
+					throw Unreachable();
+				}
+				cout << "Nudge" << endl;
+				
+				this->weak_roots.erase( this->weak_roots.find( wroot_K ) );
 			}
 		}
 	}
@@ -669,14 +517,41 @@ private:
 		for ( vector< Ref * >::iterator it = assoc_chains.begin(); it != assoc_chains.end(); ++ it ) {
 			Ref * chain = *it;
 			while ( *chain != sys_absent ) {
+			
+				/*if ( IsObj( *chain ) ) {
+					cerr << "Chain: " << keyName( RefToPtr4( *chain ) ) << endl;
+				} else {
+					cerr << "Chain is simple" << endl;
+				}*/
+			
 				Ref * assoc_K = RefToPtr4( *chain );
-
-				//	The key has not been traced and the assoc item
-				//	is eligible for garbage collection.
-				if ( this->weak_roots.find( assoc_K ) != this->weak_roots.end() ) {
-					*chain = *RefToPtr4( assoc_K[ ASSOC_NEXT_OFFSET ] );
+				
+				const bool traced1 = (this->weak_roots.find( assoc_K ) == this->weak_roots.end() );
+				
+				Ref k  = assoc_K[ ASSOC_KEY_OFFSET ];
+				const bool traced2 = isTargetForwarded( k );
+				
+				if ( traced1 != traced2 ) {
+					//cerr << "Key invariant violated" << endl;
+					throw SystemError( "GC weak assoc invariant [1] violated" );
+				}
+				
+				const bool traced3 = isTargetForwarded( assoc_K[ ASSOC_VALUE_OFFSET ] );
+				if ( traced1 && not( traced3 ) ) {
+					//cerr << "All very wrong" << endl;
+					throw SystemError( "GC weak assoc invariant [2] violated" );
+				}
+				
+				if ( not traced1 ) {
+					//	The key has not been traced and the assoc item
+					//	is eligible for garbage collection.
+					*chain = assoc_K[ ASSOC_NEXT_OFFSET ];
+					if ( this->tracker ) this->tracker->prune1();
+					//cerr << "Prune" << endl;
 				} else {
 					chain = &assoc_K[ ASSOC_NEXT_OFFSET ];
+					if ( this->tracker ) this->tracker->retain1();
+					//cerr << "Skip" << endl;
 				}
 			}			
 		}		
@@ -687,17 +562,12 @@ private:
 			Ref * chain = *it;
 			this->forward( *chain );
 		}
-		
-		//	Then for debugging we want to check that the forwarded 
-		this->copier.resetChanged();
-		this->copyPhase();
-		cerr << "Copied " << this->copier.changed() << " records" << endl;
 	}
 
 	void copyPhase() {
 		for (;;) {
 			Ref * obj = copier.next();
-			gclogger.pickedObjectToCopy( obj );
+			if ( this->tracker ) this->tracker->pickedObjectToCopy( obj );
 			if ( not obj ) break;
 			this->forwardContents( obj );
 		}
@@ -709,7 +579,7 @@ public:
 			cerr << "### Garbage collection " << ( this->scan_call_stack ? "" : " (quiescent)" ) << endl;	
 		}
 		this->vm->check_call_stack_integrity();		//	debug
-		gclogger.startGarbageCollection();
+		if ( this->tracker ) this->tracker->startGarbageCollection();
 		preGCSymbolTable( this->vm->isGCTrace() );
 		this->forwardRoots( scan_call_stack );
 		this->copyPhase();
@@ -717,19 +587,23 @@ public:
 		for (;;) {
 			this->copier.resetChanged();
 			this->scanAddedWeakAssocChainToCollectWeakRoots();
-			this->scanWeakRoots();
-			if ( not( this->copier.changed() > 0 ) ) break;
 			this->copyPhase();
+			this->scanWeakRoots();
+			this->copyPhase();
+			if ( not( this->copier.changed() ) ) break;
 		}
 		
 		this->pruneWeakAssocChains();
 		this->copyWeakAssocChains();
-
+		
+		//	Then for debugging we want to check that there is no further copying.
+		this->copier.resetChanged();
+		this->copyPhase();
+		
 		postGCSymbolTable( this->vm->isGCTrace() );
-		gclogger.endGarbageCollection();
+		if ( this->tracker ) this->tracker->endGarbageCollection();
 		this->vm->check_call_stack_integrity();		//	debug
-	}
-	
+	}	
 	
 };
 
@@ -740,7 +614,8 @@ Ref * sysGarbageCollect( Ref * pc, MachineClass * vm ) {
 	return vm->program_counter;
 }
 
-void sysQuiescentGarbageCollect( MachineClass *vm ) {
+void sysQuiescentGarbageCollect( MachineClass *vm, GCTracker * stats ) {
 	GarbageCollect gc( vm, false );
+	gc.setGCTracker( stats );
 	gc.collectGarbage();
 }

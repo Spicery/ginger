@@ -91,6 +91,7 @@ public:
 	Ident lookup( const std::string & c, bool search );
 	Ident add( const std::string & c, const FacetSet * facets );
 	Ident lookup_or_add( const std::string & c, const FacetSet * facets );
+	Valof * valof( const std::string & c );
 	
 public:
 	Package( PackageManager * pkgmgr, const std::string title ) :

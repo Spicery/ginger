@@ -235,9 +235,9 @@ int Main::run( int argc, char **argv, char **envp ) {
         {
             RCEP rcep( interactive_pkg );
             if ( appg.isTrappingMishap() ) {
-                while ( rcep.read_comp_exec_print( std::cin ) ) {};
+                while ( rcep.read_comp_exec_print( std::cin, std::cout ) ) {};
             } else {
-                while ( rcep.unsafe_read_comp_exec_print( std::cin ) ) {};
+                while ( rcep.unsafe_read_comp_exec_print( std::cin, std::cout ) ) {};
             }
         }
     } else if ( appg.isCgiMode() ) {

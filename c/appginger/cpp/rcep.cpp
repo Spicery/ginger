@@ -75,7 +75,7 @@ static void crawl( Machine vm, const char * logfname ) {
 	
 #endif
 
-bool RCEP::unsafe_read_comp_exec_print( istream & input ) {
+bool RCEP::unsafe_read_comp_exec_print( istream & input, std::ostream & output ) {
 	Machine vm = this->getMachine();
     Plant plant;
     Ref r;
@@ -136,17 +136,17 @@ bool RCEP::unsafe_read_comp_exec_print( istream & input ) {
 
 
 	finish = clock();
-    vm->print_results( static_cast<float>( finish - start ) / CLOCKS_PER_SEC );
+    vm->print_results( output, static_cast<float>( finish - start ) / CLOCKS_PER_SEC );
     fflush( stdout );
 	fflush( stderr );
 	
 	return true;
 }
 
-bool RCEP::read_comp_exec_print( istream & input ) {
+bool RCEP::read_comp_exec_print( istream & input, std::ostream & output ) {
 	for (;;) {
 		try {
-			return unsafe_read_comp_exec_print( input );
+			return unsafe_read_comp_exec_print( input, output );
 		} catch ( Mishap & m ) {
 			m.report();
 		} catch ( SystemError & m ) {

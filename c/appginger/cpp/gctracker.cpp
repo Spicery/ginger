@@ -16,33 +16,5 @@
     along with AppGinger.  If not, see <http://www.gnu.org/licenses/>.
 \******************************************************************************/
 
-#ifndef RCEP_HPP
-#define RCEP_HPP
-
-#include <istream>
-
-#include "machine.hpp"
-#include "package.hpp"
-
-class RCEP {
-private:
-	Package * current_package;
-
-public:
-	MachineClass * getMachine() { return this->current_package->getMachine(); } 
-	
-	//	Does not trap mishap.
-	bool unsafe_read_comp_exec_print( std::istream & input, std::ostream & output );
-	
-	//	Traps mishap.
-	bool read_comp_exec_print( std::istream & input, std::ostream & output );
-
-public:
-	RCEP( Package * current_package ) :
-		current_package( current_package )
-	{
-	}
-};
-
-#endif
+#include "gctracker.hpp"
 

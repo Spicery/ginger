@@ -16,9 +16,9 @@
     along with AppGinger.  If not, see <http://www.gnu.org/licenses/>.
 \******************************************************************************/
 
-#ifndef WEAK_REF_LAYOUT_HPP
-#define WEAK_REF_LAYOUT_HPP
+#ifndef REF_LAYOUT_HPP
+#define REF_LAYOUT_HPP
 
-#define WEAK_REF_OFFSET_CONT 	1
+#define REF_OFFSET_CONT 	1
 
 #endif

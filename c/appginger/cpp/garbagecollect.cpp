@@ -38,7 +38,7 @@ using namespace std;
 #include "mishap.hpp"
 #include "syssymbol.hpp"
 #include "functionlayout.hpp"
-#include "weakreflayout.hpp"
+#include "reflayout.hpp"
 
 //#define DBG_GC
 
@@ -415,9 +415,14 @@ private:
 				case MAP_KIND:
 				case RECORD_KIND: {
 					if ( this->tracker ) this->tracker->startRecord( obj_K );
-					//cerr << "Record: " << keyName( key ) << endl;
-					if ( key == sysWeakRefKey && !this->isTargetForwarded( obj_K[ WEAK_REF_OFFSET_CONT ] ) ) {
-						this->weak_refs.insert( &obj_K[ WEAK_REF_OFFSET_CONT ] );
+					if ( IsRefSimpleKey( key ) ) {
+						if ( key == sysWeakRefKey && !this->isTargetForwarded( obj_K[ REF_OFFSET_CONT ] ) ) {
+							this->weak_refs.insert( &obj_K[ REF_OFFSET_CONT ] );
+						} else if ( key == sysSoftRefKey ) {
+							obj_K[ REF_OFFSET_CONT ] = sys_absent;
+						} else {
+							this->forward( obj_K[ REF_OFFSET_CONT ] );
+						} 
 					} else {
 						unsigned long n = sizeAfterKeyOfRecord( obj_K );
 						for ( unsigned long i = 1; i <= n; i++ ) {

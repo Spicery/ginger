@@ -1,0 +1,3 @@
+extern Ref * sysNewSoftRef( Ref * pc, MachineClass * vm );
+extern Ref * sysIsSoftRef( Ref * pc, MachineClass * vm );
+extern Ref * sysSoftRefContField( Ref * pc, MachineClass * vm );

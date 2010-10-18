@@ -1,3 +1,0 @@
-extern Ref * sysNewRef( Ref * pc, MachineClass * vm );
-extern Ref * sysIsRef( Ref * pc, MachineClass * vm );
-extern Ref * sysRefContField( Ref * pc, MachineClass * vm );

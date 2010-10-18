@@ -78,6 +78,7 @@ private:
 			std::cout << "Could not find a cage big enough to hold " << d << " words." << std::endl;
 		#endif
 		CageClass * p = this->heap.newCageClass();
+		this->vm->getPressure().increasePressure();
 		this->toSpace.push_back( p );
 		return p;
 	}
@@ -204,6 +205,7 @@ public:
 				std::cout << "No available toSpaces" << std::endl;
 			#endif
 			this->currentToSpaceCage = heap.newCageClass();
+			this->vm->getPressure().increasePressure();
 		} else {
 			this->currentToSpaceCage = this->toSpace.back();
 		}
@@ -383,6 +385,16 @@ private:
 		return not( IsPrimitive( r ) || IsFwdObj( r ) );
 	}
 	
+	bool isUnderPressure() {
+		return this->vm->getPressure().isUnderPressure();
+	}
+
+	bool isEffectivelyWeakRef( Ref key, Ref * obj_K ) {
+		return(
+			( key == sysWeakRefKey || ( key == sysSoftRefKey && this->isUnderPressure() ) ) &&
+			( !this->isTargetForwarded( obj_K[ REF_OFFSET_CONT ] ) )
+		);
+	}
 
 	
 	void forwardContents( Ref * obj_K ) {
@@ -416,10 +428,8 @@ private:
 				case RECORD_KIND: {
 					if ( this->tracker ) this->tracker->startRecord( obj_K );
 					if ( IsRefSimpleKey( key ) ) {
-						if ( key == sysWeakRefKey && !this->isTargetForwarded( obj_K[ REF_OFFSET_CONT ] ) ) {
+						if ( this->isEffectivelyWeakRef( key, obj_K ) ) {
 							this->weak_refs.insert( &obj_K[ REF_OFFSET_CONT ] );
-						} else if ( key == sysSoftRefKey ) {
-							obj_K[ REF_OFFSET_CONT ] = sys_absent;
 						} else {
 							this->forward( obj_K[ REF_OFFSET_CONT ] );
 						} 
@@ -630,6 +640,7 @@ public:
 		
 		
 		postGCSymbolTable( this->vm->isGCTrace() );
+		this->vm->getPressure().decreasePressure();
 		if ( this->tracker ) this->tracker->endGarbageCollection();
 		this->vm->check_call_stack_integrity();		//	debug
 	}	

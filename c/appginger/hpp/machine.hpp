@@ -32,13 +32,36 @@
 class PlantClass;
 typedef PlantClass * Plant;
 
+class Pressure {
+private:
+	float pressure;
+	
+public:
+	bool isUnderPressure() {
+		return this->pressure >= 1.0;
+	}
+	
+	void increasePressure() {
+		this->pressure += 1.0;
+	}
+	
+	void decreasePressure() {
+		this->pressure *= 0.5;
+	}
+	
+public:
+	Pressure() : pressure( 0.0 ) {}
+};
+
+
 class MachineClass {
 friend class GarbageCollect;
 
 private:
-	AppContext &						appg;
+	AppContext &					appg;
 	std::auto_ptr<PlantClass>		plant_aptr;
 	std::auto_ptr<HeapClass>		heap_aptr;
+	Pressure						pressure;
 
 public:
 	Registers						registers;
@@ -48,6 +71,7 @@ private:
 	
 public:
 	Package * 		getPackage( std::string );
+	Pressure &		getPressure();
 	
 public:
 	//	Volatile! Only cached when a garbage collection

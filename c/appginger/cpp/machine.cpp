@@ -303,3 +303,6 @@ void MachineClass::check_call_stack_integrity() {
 }
 
 
+Pressure & MachineClass::getPressure() { 
+	return this->pressure; 
+}

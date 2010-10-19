@@ -20,7 +20,7 @@ public class LogCreated {
 		if ( nm == null ) {
 			this.mapping.put( ginger_name, new SysInfo( internal_name, in_arity, out_arity, doc_string ) );
 		} else { 
-			throw new RuntimeException( "Repeated name" );
+			throw new RuntimeException( "Repeated name: " + nm );
 		}
 	}
 

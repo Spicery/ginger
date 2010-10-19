@@ -17,7 +17,7 @@ Ref * sysNewPair( Ref * pc, class MachineClass * vm ) {
 Ref * sysIsPair( Ref * pc, class MachineClass * vm ) {
     if ( vm->count == 1 ) {
         Ref r = vm->fastPeek();
-        vm->fastPeek() = IsObj( r ) && ( *RefToPtr4( r ) == sysPairKey ) ? sys_true : sys_false;
+        vm->fastPeek() = IsPair( r ) ? sys_true : sys_false;
         return pc;
     } else {
         throw Mishap( "Wrong number of arguments for head" );
@@ -27,7 +27,7 @@ Ref * sysIsPair( Ref * pc, class MachineClass * vm ) {
 Ref * sysHeadField( Ref * pc, class MachineClass * vm ) {
     if ( vm->count == 1 ) {
         Ref x = vm->fastPeek();
-        if ( refKey( x ) == sysPairKey ) {
+        if ( IsPair( x ) ) {
             vm->fastPeek() = RefToPtr4( x )[ 1 ];
         } else {
             throw Mishap( "Trying to take the head of non-Pair" );
@@ -41,7 +41,7 @@ Ref * sysHeadField( Ref * pc, class MachineClass * vm ) {
 Ref * sysTailField( Ref * pc, class MachineClass * vm ) {
     if ( vm->count == 1 ) {
         Ref x = vm->fastPeek();
-        if ( refKey( x ) == sysPairKey ) {
+        if ( IsPair( x ) ) {
             vm->fastPeek() = RefToPtr4( x )[ 2 ];
         } else {
             throw Mishap( "Trying to take the tail of non-Pair" );

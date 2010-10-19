@@ -21,15 +21,34 @@
 
 #include "common.hpp"
 
+/*
++-------------+-------------+----------+
+|  sysMapKey  | AssocChain  |  Count   |
++-------------+-------------+----------+
+*/
+
 #define MAP_DATA_OFFSET 		1
 #define MAP_COUNT_OFFSET 		2
+#define MAP_SIZE				3
+
+/*
++----------------+-------------+-------------+
+|  sysMapletKey  |  LHS (Key)  | RHS (Value) |
++----------------+-------------+-------------+
+*/
 
 #define MAPLET_KEY_OFFSET 		1
 #define MAPLET_VALUE_OFFSET 	2
 #define MAPLET_SIZE				3
 
+/*
++---------------+-------------+-------------+----------+
+|  sysAssocKey  |  LHS (Key)  | RHS (Value) |   Next   |
++---------------+-------------+-------------+----------+
+*/
+
 #define ASSOC_KEY_OFFSET 		1
-#define ASSOC_VALUE_OFFSET 	2
+#define ASSOC_VALUE_OFFSET 		2
 #define ASSOC_NEXT_OFFSET 		3
 #define ASSOC_SIZE				4
 

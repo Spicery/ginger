@@ -4,10 +4,13 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.List;
 
 public abstract class DataClassGenerator {
 
 	protected final String dataKeyRoot;
+	private List< String > altKeyRoots = new ArrayList< String >();
 	private final LogCreated log;
 	
 	public DataClassGenerator( final LogCreated sysconsts, final String className ) {
@@ -15,12 +18,37 @@ public abstract class DataClassGenerator {
 		this.log = sysconsts;
 	}
 	
+	public List< String > alternativeKeyRoots() {
+		if ( this.altKeyRoots.isEmpty() ) {
+			this.altKeyRoots.add( "" ); 
+		}
+		return this.altKeyRoots;
+	}
+	
+	public void addKeyRoots( final String... alt ) {
+		for ( String a : alt ) {
+			this.altKeyRoots.add( a );
+		}
+	}
+	
 	public String keyName() {
 		return "sys" + this.dataKeyRoot + "Key";
+	}
+
+	public String altKeyName( final String aname ) {
+		return "sys" + aname + this.dataKeyRoot + "Key";
+	}
+
+	public String isName() {
+		return "Is" + this.dataKeyRoot;
 	}
 	
 	public String consName() {
 		return "sysNew" + this.dataKeyRoot;
+	}
+	
+	public String altConsName( final String aname ) {
+		return "sysNew" + aname + this.dataKeyRoot;
 	}
 	
 	public String indexName() {
@@ -54,7 +82,7 @@ public abstract class DataClassGenerator {
 		cpp.format( "Ref * %s( Ref * pc, class MachineClass * vm ) {\n", recogniserName );
 		cpp.format( "    if ( vm->count == 1 ) {\n" );
 		cpp.format( "        Ref r = vm->fastPeek();\n" );
-		cpp.format( "        vm->fastPeek() = IsObj( r ) && ( *RefToPtr4( r ) == %s ) ? sys_true : sys_false;\n", this.keyName() );
+		cpp.format( "        vm->fastPeek() = %s( r ) ? sys_true : sys_false;\n", this.isName() );
 		cpp.format( "        return pc;\n" );
 		cpp.format( "    } else {\n" );
 		cpp.format( "        throw Mishap( \"Wrong number of arguments for head\" );\n" );

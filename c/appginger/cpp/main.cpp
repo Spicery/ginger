@@ -185,9 +185,14 @@ int Main::run( int argc, char **argv, char **envp ) {
 					cout << "UnicodeKey     :\t" << sysUnicodeKey << endl;
 					cout << "CharKey        :\t" << sysCharKey << endl;
 					cout << "MapletKey      :\t" << sysMapletKey << endl;
-					cout << "MapKey         :\t" << sysMapKey << endl;
+					cout << "HardMapKey     :\t" << sysHardMapKey << endl;
+					cout << "WeakMapKey     :\t" << sysWeakMapKey << endl;
+					cout << "CacheMapKey    :\t" << sysCacheMapKey << endl;
 					cout << "AssocKey       :\t" << sysAssocKey << endl;
 					cout << "IndirectionKey :\t" << sysIndirectionKey << endl;
+					cout << "HardRefKey     :\t" << sysHardRefKey << endl;
+					cout << "WeakRefKey     :\t" << sysWeakRefKey << endl;
+					cout << "SoftRefKey     :\t" << sysSoftRefKey << endl;
                 } else {
                     printf( "Unknown help topic %s\n", optarg );
                 }

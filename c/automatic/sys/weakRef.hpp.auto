@@ -1,3 +1,0 @@
-extern Ref * sysNewWeakRef( Ref * pc, MachineClass * vm );
-extern Ref * sysIsWeakRef( Ref * pc, MachineClass * vm );
-extern Ref * sysWeakRefContField( Ref * pc, MachineClass * vm );

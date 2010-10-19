@@ -115,7 +115,6 @@ KEYLESS_KIND
 #define KIND_MASK				0x7 << TAGG
 #define IsSimpleKey( r )		( ( ToULong( r ) & TAGG_MASK ) == KEY_TAGG )
 #define KindOfSimpleKey( k )	( ( ToULong( k ) & KIND_MASK ) >> TAGG )
-#define IsRefSimpleKey( k )		( ( SimpleKeyID( k ) >> 2 ) == 4 )
 #define KEYLESS_KIND			0
 #define RECORD_KIND				1
 #define VECTOR_KIND				2
@@ -146,22 +145,35 @@ KEYLESS_KIND
 #define sysUnicodeKey			MAKE_KEY( 11, 0, KEYLESS_KIND )
 #define sysCharKey				MAKE_KEY( 12, 0, KEYLESS_KIND )
 #define sysMapletKey			MAKE_KEY( 13, 2, RECORD_KIND )
-#define sysMapKey				MAKE_KEY( 14, 2, MAP_KIND )
+#define sysIndirectionKey		MAKE_KEY( 14, 1, RECORD_KIND )
 #define sysAssocKey				MAKE_KEY( 15, 3, RECORD_KIND )
 //	Do NOT move references with changing IsRefSimpleKey
 #define sysHardRefKey			MAKE_KEY( 16, 1, RECORD_KIND )
 #define sysSoftRefKey			MAKE_KEY( 17, 1, RECORD_KIND )
 #define sysWeakRefKey			MAKE_KEY( 18, 1, RECORD_KIND )
 #define sysReservedRefKey		MAKE_KEY( 19, 1, RECORD_KIND )
-#define sysIndirectionKey		MAKE_KEY( 20, 1, RECORD_KIND )
+//	Do NOT move references with changing IsMapSimpleKey
+#define sysHardMapKey			MAKE_KEY( 20, 2, MAP_KIND )
+#define sysWeakMapKey			MAKE_KEY( 21, 2, MAP_KIND )
+#define sysCacheMapKey			MAKE_KEY( 22, 2, MAP_KIND )
+#define sysReservedMapKey		MAKE_KEY( 23, 2, MAP_KIND )
+
+
+#define IsRefSimpleKey( k )		( ( SimpleKeyID( k ) >> 2 ) == 4 )
+#define IsRefKey( k )			( IsSimpleKey( k ) && IsRefSimpleKey( k ) )
+
+#define IsMapSimpleKey( k )		( ( SimpleKeyID( k ) >> 2 ) == 5 )
+#define IsMapKey( k )			( IsSimpleKey( k ) && IsMapSimpleKey( k ) )
+
 
 //	Recognisers
 #define IsPair( x )				( IsObj( x ) && ( *RefToPtr4( x ) == sysPairKey ) )
 #define IsVector( x )			( IsObj( x ) && ( *RefToPtr4( x ) == sysVectorKey ) )
-#define IsMap( x ) 				( IsObj( x ) && ( *RefToPtr4( x ) == sysMapKey ) )
 #define IsMaplet( x ) 			( IsObj( x ) && ( *RefToPtr4( x ) == sysMapletKey ) )
 #define IsAssoc( x ) 			( IsObj( x ) && ( *RefToPtr4( x ) == sysAssocKey ) )
 #define IsString( x )			( IsObj( x ) && ( *RefToPtr4( x ) == sysStringKey ) )
+#define IsRef( x )				( IsObj( x ) && IsRefKey( *RefToPtr4( x ) ) )
+#define IsMap( x ) 				( IsObj( x ) && IsMapKey( *RefToPtr4( x ) ) )
 
 #define IsVectorKind( x )		( IsObj( x ) && KindOfSimpleKey( *RefToPtr4( x ) ) == VECTOR_KIND )
 #define IsRecordKind( x )		( IsObj( x ) && KindOfSimpleKey( *RefToPtr4( x ) ) == RECORD_KIND )

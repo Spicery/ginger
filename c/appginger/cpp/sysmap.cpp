@@ -207,7 +207,7 @@ Ref * sysNewMap( Ref *pc, MachineClass * vm ) {
 	Ref * data_refref = xfr.makeRefRef();
 	
 	xfr.setOrigin();
-	xfr.xfrRef( sysMapKey );	
+	xfr.xfrRef( sysHardMapKey );	
 	xfr.xfrRef( Ptr4ToRef( data_refref ) );
 	xfr.xfrRef( LongToSmall( count ) );
 	Ref map_ref = xfr.makeRef();

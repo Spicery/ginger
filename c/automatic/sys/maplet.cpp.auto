@@ -17,7 +17,7 @@ Ref * sysNewMaplet( Ref * pc, class MachineClass * vm ) {
 Ref * sysIsMaplet( Ref * pc, class MachineClass * vm ) {
     if ( vm->count == 1 ) {
         Ref r = vm->fastPeek();
-        vm->fastPeek() = IsObj( r ) && ( *RefToPtr4( r ) == sysMapletKey ) ? sys_true : sys_false;
+        vm->fastPeek() = IsMaplet( r ) ? sys_true : sys_false;
         return pc;
     } else {
         throw Mishap( "Wrong number of arguments for head" );
@@ -27,7 +27,7 @@ Ref * sysIsMaplet( Ref * pc, class MachineClass * vm ) {
 Ref * sysMapletKeyField( Ref * pc, class MachineClass * vm ) {
     if ( vm->count == 1 ) {
         Ref x = vm->fastPeek();
-        if ( refKey( x ) == sysMapletKey ) {
+        if ( IsMaplet( x ) ) {
             vm->fastPeek() = RefToPtr4( x )[ 1 ];
         } else {
             throw Mishap( "Trying to take the mapletKey of non-Maplet" );
@@ -41,7 +41,7 @@ Ref * sysMapletKeyField( Ref * pc, class MachineClass * vm ) {
 Ref * sysMapletValueField( Ref * pc, class MachineClass * vm ) {
     if ( vm->count == 1 ) {
         Ref x = vm->fastPeek();
-        if ( refKey( x ) == sysMapletKey ) {
+        if ( IsMaplet( x ) ) {
             vm->fastPeek() = RefToPtr4( x )[ 2 ];
         } else {
             throw Mishap( "Trying to take the mapletValue of non-Maplet" );

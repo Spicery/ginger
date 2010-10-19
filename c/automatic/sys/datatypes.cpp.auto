@@ -1,6 +1,4 @@
-#include "hardRef.cpp.auto"
-#include "softRef.cpp.auto"
-#include "weakRef.cpp.auto"
+#include "ref.cpp.auto"
 #include "pair.cpp.auto"
 #include "maplet.cpp.auto"
 #include "vector.cpp.auto"

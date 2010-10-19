@@ -19,19 +19,15 @@ public class Main {
 		final File aFolder = new File( new File( "c" ), "automatic" );
 		final File outputFolder = new File( aFolder, "sys" );
 		final LogCreated sysconsts = new LogCreated();
+		
+		final FullRecordClassGenerator ref = (
+			new FullRecordClassGenerator(
+				sysconsts, "Ref", "refCont"
+			)
+		);
+		ref.addKeyRoots( "Hard", "Soft", "Weak" );
+		ref.generate( outputFolder, "ref" );
 				
-		new FullRecordClassGenerator(
-			sysconsts, "HardRef", "hardRefCont"
-		).generate( outputFolder, "hardRef" );
-			
-		new FullRecordClassGenerator(
-			sysconsts, "SoftRef", "softRefCont"
-		).generate( outputFolder, "softRef" );
-				
-		new FullRecordClassGenerator(
-			sysconsts, "WeakRef", "weakRefCont"
-		).generate( outputFolder, "weakRef" );
-			
 		new FullRecordClassGenerator(
 			sysconsts, "Pair", "head", "tail"
 		).generate( outputFolder, "pair" );

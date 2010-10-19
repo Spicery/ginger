@@ -1,3 +1,0 @@
-extern Ref * sysNewHardRef( Ref * pc, MachineClass * vm );
-extern Ref * sysIsHardRef( Ref * pc, MachineClass * vm );
-extern Ref * sysHardRefContField( Ref * pc, MachineClass * vm );

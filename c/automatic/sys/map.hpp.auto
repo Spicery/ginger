@@ -1,4 +1,0 @@
-extern Ref * sysNewMap( Ref * pc, MachineClass * vm );
-extern Ref * sysIsMap( Ref * pc, MachineClass * vm );
-extern Ref * sysMapDataField( Ref * pc, MachineClass * vm );
-extern Ref * sysMapCountField( Ref * pc, MachineClass * vm );

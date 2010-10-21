@@ -21,7 +21,7 @@ using namespace std;
 
 #include <cppunit/TestAssert.h>
 
-#include "methodtest.hpp"
+#include "gctest.hpp"
 #include "appcontext.hpp"
 #include "rcep.hpp"
 #include "key.hpp"
@@ -52,7 +52,25 @@ static void checkAlpha( Package * interactive, int N ) {
 	CPPUNIT_ASSERT_EQUAL( N, lengthOfAssocChain( achain ) );
 }
 
-void MethodTest::testMethod() {
+void GCTest::testCacheMap() {
+	AppContext context;
+	MachineClass * vm = context.newMachine();
+	Package * interactive = context.initInteractivePackage( vm );
+	RCEP rcep( interactive );
+	
+	std::stringstream program;
+	
+	//	val cmap := newCacheMap( "a" :- 1, "b" :- 2 );
+	program << "<bind><var name=\"cmap\" protected=\"true\" tag=\"public\"/><app><id name=\"newCacheMap\"/><seq><sysapp name=\"newMaplet\"><string value=\"a\"/><int value=\"1\"/></sysapp><sysapp name=\"newMaplet\"><string value=\"b\"/><int value=\"2\"/></sysapp></seq></app></bind>";
+	
+	std::ostringstream output;
+	while ( rcep.unsafe_read_comp_exec_print( program, output ) ) {};
+
+	sysQuiescentGarbageCollect( vm, NULL );		
+
+}
+
+void GCTest::testMethod() {
 	AppContext context;
 	MachineClass * vm = context.newMachine();
 	Package * interactive = context.initInteractivePackage( vm );
@@ -91,5 +109,5 @@ void MethodTest::testMethod() {
 	
 }
 
-CPPUNIT_TEST_SUITE_REGISTRATION( MethodTest );
+CPPUNIT_TEST_SUITE_REGISTRATION( GCTest );
 

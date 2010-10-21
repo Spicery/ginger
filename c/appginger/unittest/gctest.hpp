@@ -22,14 +22,16 @@
 #include <cppunit/extensions/HelperMacros.h>
 #include <cppunit/TestFixture.h>
 
-class MethodTest : public CppUnit::TestFixture {
+class GCTest : public CppUnit::TestFixture {
 
-	CPPUNIT_TEST_SUITE( MethodTest );
+	CPPUNIT_TEST_SUITE( GCTest );
 	CPPUNIT_TEST( testMethod );
+	CPPUNIT_TEST( testCacheMap );
 	CPPUNIT_TEST_SUITE_END();
 	
 protected:
 	void testMethod();
+	void testCacheMap();
 };
 
 #endif

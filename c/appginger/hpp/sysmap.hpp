@@ -23,8 +23,10 @@
 #include "machine.hpp"
 #include <ostream>
 
-extern Ref * sysNewMap( Ref * pc, MachineClass * vm );
+extern Ref * sysNewHardEqMap( Ref * pc, MachineClass * vm );
+extern Ref * sysNewCacheEqMap( Ref * pc, MachineClass * vm );
 extern Ref * sysMapExplode( Ref *pc, class MachineClass * vm );
+extern Ref * sysMapIndex( Ref *pc, class MachineClass * vm );
 extern void refMapPrint( std::ostream & out, Ref * r );
 
 #endif

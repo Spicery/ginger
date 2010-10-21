@@ -1,0 +1,66 @@
+Ref * sysNewHardRef( Ref * pc, class MachineClass * vm ) {
+    if ( vm->count == 1 ) {
+        XfrClass xfr( vm->heap().preflight( pc, 2 ) );
+        xfr.setOrigin();
+        xfr.xfrRef( sysHardRefKey );
+        Ref f0 = vm->fastPop();
+        xfr.xfrRef( f0 );
+        vm->fastPush( xfr.makeRef() );
+        return pc;
+    } else {
+        throw Mishap( "Wrong number of arguments for sysNewHardRef" );
+    }
+}
+
+Ref * sysNewSoftRef( Ref * pc, class MachineClass * vm ) {
+    if ( vm->count == 1 ) {
+        XfrClass xfr( vm->heap().preflight( pc, 2 ) );
+        xfr.setOrigin();
+        xfr.xfrRef( sysSoftRefKey );
+        Ref f0 = vm->fastPop();
+        xfr.xfrRef( f0 );
+        vm->fastPush( xfr.makeRef() );
+        return pc;
+    } else {
+        throw Mishap( "Wrong number of arguments for sysNewSoftRef" );
+    }
+}
+
+Ref * sysNewWeakRef( Ref * pc, class MachineClass * vm ) {
+    if ( vm->count == 1 ) {
+        XfrClass xfr( vm->heap().preflight( pc, 2 ) );
+        xfr.setOrigin();
+        xfr.xfrRef( sysWeakRefKey );
+        Ref f0 = vm->fastPop();
+        xfr.xfrRef( f0 );
+        vm->fastPush( xfr.makeRef() );
+        return pc;
+    } else {
+        throw Mishap( "Wrong number of arguments for sysNewWeakRef" );
+    }
+}
+
+Ref * sysIsRef( Ref * pc, class MachineClass * vm ) {
+    if ( vm->count == 1 ) {
+        Ref r = vm->fastPeek();
+        vm->fastPeek() = IsRef( r ) ? sys_true : sys_false;
+        return pc;
+    } else {
+        throw Mishap( "Wrong number of arguments for head" );
+    }
+}
+
+Ref * sysRefContField( Ref * pc, class MachineClass * vm ) {
+    if ( vm->count == 1 ) {
+        Ref x = vm->fastPeek();
+        if ( IsRef( x ) ) {
+            vm->fastPeek() = RefToPtr4( x )[ 1 ];
+        } else {
+            throw Mishap( "Trying to take the refCont of non-Ref" );
+        }
+        return pc;
+    } else {
+        throw Mishap( "Wrong number of arguments" );
+    }
+}
+

@@ -185,9 +185,10 @@ int Main::run( int argc, char **argv, char **envp ) {
 					cout << "UnicodeKey     :\t" << sysUnicodeKey << endl;
 					cout << "CharKey        :\t" << sysCharKey << endl;
 					cout << "MapletKey      :\t" << sysMapletKey << endl;
-					cout << "HardMapKey     :\t" << sysHardMapKey << endl;
-					cout << "WeakMapKey     :\t" << sysWeakMapKey << endl;
-					cout << "CacheMapKey    :\t" << sysCacheMapKey << endl;
+					cout << "HardEqMapKey   :\t" << sysHardEqMapKey << endl;
+					cout << "HardIdMapKey   :\t" << sysHardIdMapKey << endl;
+					cout << "WeakIdMapKey   :\t" << sysWeakIdMapKey << endl;
+					cout << "CacheEqMapKey  :\t" << sysCacheEqMapKey << endl;
 					cout << "AssocKey       :\t" << sysAssocKey << endl;
 					cout << "IndirectionKey :\t" << sysIndirectionKey << endl;
 					cout << "HardRefKey     :\t" << sysHardRefKey << endl;

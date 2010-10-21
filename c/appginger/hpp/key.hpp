@@ -153,10 +153,10 @@ KEYLESS_KIND
 #define sysWeakRefKey			MAKE_KEY( 18, 1, RECORD_KIND )
 #define sysReservedRefKey		MAKE_KEY( 19, 1, RECORD_KIND )
 //	Do NOT move references with changing IsMapSimpleKey
-#define sysHardMapKey			MAKE_KEY( 20, 2, MAP_KIND )
-#define sysWeakMapKey			MAKE_KEY( 21, 2, MAP_KIND )
-#define sysCacheMapKey			MAKE_KEY( 22, 2, MAP_KIND )
-#define sysReservedMapKey		MAKE_KEY( 23, 2, MAP_KIND )
+#define sysHardEqMapKey			MAKE_KEY( 20, 2, MAP_KIND )
+#define sysHardIdMapKey			MAKE_KEY( 21, 2, MAP_KIND )
+#define sysWeakIdMapKey			MAKE_KEY( 22, 2, MAP_KIND )
+#define sysCacheEqMapKey		MAKE_KEY( 23, 2, MAP_KIND )
 
 
 #define IsRefSimpleKey( k )		( ( SimpleKeyID( k ) >> 2 ) == 4 )

@@ -89,7 +89,7 @@ public:
 
 public:
 	MapCrawl( Ref * map_K ) :
-		size_of_data( SmallToLong( map_K[ MAP_COUNT_OFFSET ] ) ),
+		size_of_data( SmallToLong( map_K[ MAP_OFFSET_COUNT ] ) ),
 		index_of_data( 0 ),
 		data( RefToPtr4( map_K[1] ) + 1 ),
 		bucket( sys_absent )
@@ -176,12 +176,11 @@ public:
 
 /*
 	- Takes N arguments.
-	- Estimates size for an initial map by making a preliminary pass 
-	over the N arguments.
+	- Estimates size for an initial map by making a preliminary pass over the N arguments.
 	- Builds the initial map.
 	- Then adds the entries in a second pass over the N arguments.
 */
-Ref * sysNewMap( Ref *pc, MachineClass * vm ) {
+static Ref * newMap( Ref *pc, MachineClass * vm, Ref map_key ) {
 	long count = estimateMapSize( vm );
 	//std::cout << "Estimated size is " << count << std::endl;
 	
@@ -190,7 +189,7 @@ Ref * sysNewMap( Ref *pc, MachineClass * vm ) {
 	//	records (each 4 long words).
 	long width = 1 + log2( count );
 	long data_size = 1 << width;
-	long preflight = 3 + ( 2 + data_size ) + ( 4 * count );
+	long preflight = MAP_SIZE + ( 2 + data_size ) + ( ASSOC_SIZE * count );
 	//std::cout << "Estimated preflight size as " << preflight << std::endl;
 
 	XfrClass xfr( vm->heap().preflight( pc, preflight ) );
@@ -207,9 +206,10 @@ Ref * sysNewMap( Ref *pc, MachineClass * vm ) {
 	Ref * data_refref = xfr.makeRefRef();
 	
 	xfr.setOrigin();
-	xfr.xfrRef( sysHardMapKey );	
+	xfr.xfrRef( map_key );	
 	xfr.xfrRef( Ptr4ToRef( data_refref ) );
 	xfr.xfrRef( LongToSmall( count ) );
+	xfr.xfrRef( LongToSmall( width ) );			//	FLAGS.
 	Ref map_ref = xfr.makeRef();
 	
 	//	Now add all the members. Need to perform the update in LEFT to RIGHT
@@ -220,7 +220,7 @@ Ref * sysNewMap( Ref *pc, MachineClass * vm ) {
 		args.add( r );
 	}
 	
-	RefToPtr4( map_ref )[ MAP_COUNT_OFFSET ] = LongToSmall( args.numBuckets() );
+	RefToPtr4( map_ref )[ MAP_OFFSET_COUNT ] = LongToSmall( args.numBuckets() );
 	
 	vm->vp -= vm->count;
 	*( ++vm->vp ) = map_ref;
@@ -228,31 +228,71 @@ Ref * sysNewMap( Ref *pc, MachineClass * vm ) {
 	return pc;
 }
 
+Ref * sysNewHardEqMap( Ref *pc, MachineClass * vm ) {
+	return newMap( pc, vm, sysHardEqMapKey );
+}
+
+Ref * sysNewWeakIdMap( Ref *pc, MachineClass * vm ) {
+	return newMap( pc, vm, sysWeakIdMapKey );
+}
+
+Ref * sysNewHardIdMap( Ref *pc, MachineClass * vm ) {
+	return newMap( pc, vm, sysHardIdMapKey );
+}
+
+Ref * sysNewCacheEqMap( Ref *pc, MachineClass * vm ) {
+	return newMap( pc, vm, sysCacheEqMapKey );
+}
+
+
 
 
 Ref * sysMapExplode( Ref *pc, class MachineClass * vm ) {
-	if ( vm->count == 1 ) {
-		Ref r = vm->fastPop();
-		if ( IsMap( r ) ) {
-			Ref * map_K = RefToPtr4( r );
-			long len = SmallToLong( map_K[ MAP_COUNT_OFFSET ] );
-			vm->checkStackRoom( len );
-			
-			MapCrawl map_crawl( map_K );
-			for (;;) {
-				Ref * bucket_K = map_crawl.nextBucket();
-				if ( bucket_K == NULL ) break;
-				Ref v = bucket_K[ ASSOC_VALUE_OFFSET ];
-				vm->fastPush( v );
-			}
-			
+	if ( vm->count != 1 ) throw ArgsMismatch();
+	Ref r = vm->fastPop();
+	if ( !IsMap( r ) ) throw TypeError( "Map needed" ).culprit( "Object", r );
+	Ref * map_K = RefToPtr4( r );
+	long len = SmallToLong( map_K[ MAP_OFFSET_COUNT ] );
+	vm->checkStackRoom( len );
+	
+	MapCrawl map_crawl( map_K );
+	for (;;) {
+		Ref * bucket_K = map_crawl.nextBucket();
+		if ( bucket_K == NULL ) break;
+		Ref v = bucket_K[ ASSOC_VALUE_OFFSET ];
+		vm->fastPush( v );
+	}
+	
+	return pc;
+}
+
+Ref * sysMapIndex( Ref * pc, class MachineClass * vm ) {
+	if ( vm->count != 2 ) throw ArgsMismatch();
+	Ref idx = vm->fastPop();
+	Ref map = vm->fastPop();
+	if ( !IsMap( map ) ) throw TypeError( "Map needed" ).culprit( "Object", map );
+	Ref * map_K = RefToPtr4( map );
+
+	long width = SmallToLong( map_K[ MAP_OFFSET_FLAGS ] );
+
+	
+	unsigned long hk = refHash( idx ) & ( ( 1 << width ) - 1 );
+	Ref data = RefToPtr4( map )[ MAP_OFFSET_DATA ];
+	Ref bucket = RefToPtr4( data )[ hk + 1 ];
+	
+	while ( bucket != sys_absent ) {
+		Ref k1 = fastAssocKey( bucket );
+		if ( refEquals( idx, k1 ) ) {
+			//	Found it.
+			vm->fastPush( fastAssocValue( bucket ) );
 			return pc;
 		} else {
-			throw Mishap( "Map needed for mapExplode" );
+			bucket = fastAssocNext( bucket );
 		}
-	} else {
-		throw Mishap( "Wrong number of arguments for mapExplode" );
 	}
+	
+	vm->fastPush( sys_absent );
+	return pc;
 }
 
 void refMapPrint( std::ostream & out, Ref * map_K ) {

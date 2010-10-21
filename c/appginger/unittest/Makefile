@@ -4,7 +4,7 @@ CC=g++
 CXXFLAGS=-g -I../hpp -L/opt/local/lib -L../cpp -I/opt/local/include -I../../automatic/machine -I../../automatic/sys -I/usr/local/boost_1_43_0 -Wall -Wnon-virtual-dtor # -Weffc++
 CFLAGS=-Wmissing-prototypes 
 
-OBJS=example.o testrunner.o methodtest.o gcstats.o archtest.o
+OBJS=example.o testrunner.o gctest.o gcstats.o archtest.o
 
 all: testrunner
 

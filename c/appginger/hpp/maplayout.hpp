@@ -27,9 +27,10 @@
 +-------------+-------------+----------+
 */
 
-#define MAP_DATA_OFFSET 		1
-#define MAP_COUNT_OFFSET 		2
-#define MAP_SIZE				3
+#define MAP_OFFSET_DATA 		1
+#define MAP_OFFSET_COUNT 		2
+#define MAP_OFFSET_FLAGS		3
+#define MAP_SIZE				4
 
 /*
 +----------------+-------------+-------------+

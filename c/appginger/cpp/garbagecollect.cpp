@@ -395,6 +395,13 @@ private:
 			( !this->isTargetForwarded( obj_K[ REF_OFFSET_CONT ] ) )
 		);
 	}
+	
+	void advanceRecord( Ref * obj_K ) {
+		unsigned long n = sizeAfterKeyOfRecord( obj_K );
+		for ( unsigned long i = 1; i <= n; i++ ) {
+			this->forward( obj_K[ i ] );
+		}
+	}
 
 	
 	void forwardContents( Ref * obj_K ) {
@@ -432,12 +439,15 @@ private:
 							this->weak_refs.insert( &obj_K[ REF_OFFSET_CONT ] );
 						} else {
 							this->forward( obj_K[ REF_OFFSET_CONT ] );
-						} 
-					} else {
-						unsigned long n = sizeAfterKeyOfRecord( obj_K );
-						for ( unsigned long i = 1; i <= n; i++ ) {
-							this->forward( obj_K[ i ] );
 						}
+					} else if ( IsMapSimpleKey( key ) ) {
+						if ( key == sysCacheEqMapKey && this->isUnderPressure() ) {
+							obj_K[ MAP_OFFSET_DATA ] = sys_absent;
+							obj_K[ MAP_OFFSET_COUNT ] = LongToSmall( 0 );
+						}
+						this->advanceRecord( obj_K );
+					} else {
+						this->advanceRecord( obj_K );
 					}
 					if ( this->tracker ) this->tracker->endRecord( obj_K );
 					break;

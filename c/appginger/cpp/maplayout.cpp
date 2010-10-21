@@ -21,11 +21,11 @@
 #include "key.hpp"
 
 Ref & fastMapData( Ref r ) {
-	return RefToPtr4( r )[ MAP_DATA_OFFSET ];
+	return RefToPtr4( r )[ MAP_OFFSET_DATA ];
 }
 
 Ref & fastMapCount( Ref r ) {
-	return RefToPtr4( r )[ MAP_COUNT_OFFSET ];
+	return RefToPtr4( r )[ MAP_OFFSET_COUNT ];
 }
 
 Ref & fastMapletKey( Ref r ) {

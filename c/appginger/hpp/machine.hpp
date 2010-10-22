@@ -20,7 +20,8 @@
 #define MACHINE_HPP
 
 #include <memory>
-#include <iostream> 
+#include <iostream>
+
 #include "dict.hpp"
 #include "plant.hpp"
 #include "instruction_set.hpp"
@@ -37,16 +38,27 @@ private:
 	float pressure;
 	
 public:
+	void setUnderPressure() {
+		this->pressure = 2.0;
+	}
+	
+	void clearUnderPressure() {
+		this->pressure = 0.0;
+	}
+
 	bool isUnderPressure() {
-		return this->pressure >= 1.0;
+		//std::cout << "test pressure (" << ( this->pressure > 1.0 ? "yes" : "no" ) << ")" << std::endl;
+		return this->pressure > 1.0;
 	}
 	
 	void increasePressure() {
 		this->pressure += 1.0;
+		//std::cout << "pressure(up) " << this->pressure << std::endl;
 	}
 	
 	void decreasePressure() {
 		this->pressure *= 0.5;
+		//std::cout << "pressure(down) " << this->pressure << std::endl;
 	}
 	
 public:

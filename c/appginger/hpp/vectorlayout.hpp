@@ -21,7 +21,7 @@
 
 #include "common.hpp"
 
-#define VECTOR_LENGTH_OFFSET -1
+#define VECTOR_OFFSET_LENGTH -1
 
 Ref fastVectorLength( Ref r );
 

@@ -27,6 +27,8 @@ using namespace std;
 #include "key.hpp"
 #include "garbagecollect.hpp"
 #include "gcstats.hpp"
+#include "vectorlayout.hpp"
+
 
 static int lengthOfAssocChain( Ref achain ) {
 	int count = 0;
@@ -66,7 +68,31 @@ void GCTest::testCacheMap() {
 	std::ostringstream output;
 	while ( rcep.unsafe_read_comp_exec_print( program, output ) ) {};
 
-	sysQuiescentGarbageCollect( vm, NULL );		
+	{
+		Valof * cmap = safeValof( interactive, "cmap" );
+		CPPUNIT_ASSERT( IsObj( cmap->valof ) );
+		CPPUNIT_ASSERT( IsMap( cmap->valof ) );
+		CPPUNIT_ASSERT_EQUAL( 2L, SmallToLong( RefToPtr4( cmap->valof )[ MAP_OFFSET_COUNT ] ) );
+
+	}	
+
+	vm->getPressure().setUnderPressure();
+	sysQuiescentGarbageCollect( vm, NULL );
+	
+	//	The first garbage collect should not affect the cache map.
+	
+	{
+		Valof * cmap = safeValof( interactive, "cmap" );
+		CPPUNIT_ASSERT( IsMap( cmap->valof ) );
+		CPPUNIT_ASSERT_EQUAL( 0L, SmallToLong( RefToPtr4( cmap->valof )[ MAP_OFFSET_COUNT ] ) );
+		CPPUNIT_ASSERT( IsVector( RefToPtr4( cmap->valof )[ MAP_OFFSET_DATA ] ) );
+		Ref * data_K = RefToPtr4( RefToPtr4( cmap->valof )[ MAP_OFFSET_DATA ] );
+		const long N = SmallToLong( data_K[ VECTOR_OFFSET_LENGTH ]	);
+		CPPUNIT_ASSERT( N > 1 );
+		for ( long i = 1; i < N; i++ ) {
+			CPPUNIT_ASSERT_EQUAL( sys_absent, data_K[ i ] );
+		}
+	}
 
 }
 

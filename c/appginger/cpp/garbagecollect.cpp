@@ -39,6 +39,7 @@ using namespace std;
 #include "syssymbol.hpp"
 #include "functionlayout.hpp"
 #include "reflayout.hpp"
+#include "vectorlayout.hpp"
 
 //#define DBG_GC
 
@@ -403,7 +404,15 @@ private:
 		}
 	}
 
-	
+	void clearCacheMap( Ref * obj_K ) {
+		obj_K[ MAP_OFFSET_COUNT ] = LongToSmall( 0 );
+		Ref * data_K = RefToPtr4( obj_K[ MAP_OFFSET_DATA ] );
+		const long N = SmallToLong( data_K[ VECTOR_OFFSET_LENGTH ] );
+		for ( long i = 1; i <= N; i++ ) {
+			data_K[ i ] = sys_absent;
+		}
+	}
+
 	void forwardContents( Ref * obj_K ) {
 		if ( this->tracker ) this->tracker->startContents( obj_K );
 		Ref key = *obj_K;
@@ -442,8 +451,7 @@ private:
 						}
 					} else if ( IsMapSimpleKey( key ) ) {
 						if ( key == sysCacheEqMapKey && this->isUnderPressure() ) {
-							obj_K[ MAP_OFFSET_DATA ] = sys_absent;
-							obj_K[ MAP_OFFSET_COUNT ] = LongToSmall( 0 );
+							this->clearCacheMap( obj_K );
 						}
 						this->advanceRecord( obj_K );
 					} else {

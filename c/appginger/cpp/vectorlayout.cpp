@@ -21,5 +21,5 @@
 #include "key.hpp"
 
 Ref fastVectorLength( Ref r ) {
-	return RefToPtr4( r )[ VECTOR_LENGTH_OFFSET ];
+	return RefToPtr4( r )[ VECTOR_OFFSET_LENGTH ];
 }

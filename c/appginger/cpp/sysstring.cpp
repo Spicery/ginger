@@ -74,7 +74,7 @@ Ref * sysStringIndex( Ref *pc, class MachineClass * vm ) {
 	Ref str = vm->fastPeek();
 	if ( !IsString( str ) ) throw TypeError();
 	Ref * str_K = RefToPtr4( str );
-	char * data = reinterpret_cast< char * >( str_K );
+	char * data = reinterpret_cast< char * >( str_K + 1 ) - 1;
 	
 	const long I = SmallToLong( idx );
 	const long N = SmallToLong( str_K[ STRING_OFFSET_LENGTH ] );

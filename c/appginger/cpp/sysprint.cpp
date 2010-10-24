@@ -139,6 +139,7 @@ void refPrint( std::ostream & out, const Ref r ) {
 		} else if ( k == sysAbsentKey ) {
 			out << "absent";
 		} else if ( k == sysCharKey ) {
+			//out << "<char " << r  << ">";
 			out << CharacterToChar( r );
 		} else if ( k == sysSymbolKey ) {
 			out << symbolToStdString( r );

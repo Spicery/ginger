@@ -167,8 +167,8 @@ Ref * sysIndex( Ref *pc, class MachineClass * vm ) {
 	
 	if ( IsObj( map ) ) {
 		Ref * map_K = RefToPtr4( map );
-		if ( IsSimpleKey( map_K ) ) {
-			switch ( KindOfSimpleKey( map_K ) ) {
+		if ( IsSimpleKey( *map_K ) ) {
+			switch ( KindOfSimpleKey( *map_K ) ) {
 				case VECTOR_KIND: return pc = sysVectorIndex( pc, vm );
 				case PAIR_KIND: return pc = sysListIndex( pc, vm );
 				case STRING_KIND: return pc = sysStringIndex( pc, vm );

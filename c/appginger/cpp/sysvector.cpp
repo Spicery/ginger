@@ -20,6 +20,7 @@
 #include "common.hpp"
 #include "misclayout.hpp"
 #include "sysvector.hpp"
+#include "vectorlayout.hpp"
 
 #include <string.h>
 
@@ -68,6 +69,26 @@ Ref * sysVectorAppend( Ref * pc, class MachineClass * vm ) {
 	vm->fastPush( xfr.makeRef() );
 	return pc;
 
+}
+
+Ref * sysVectorIndex( Ref *pc, class MachineClass * vm ) {
+	if ( vm->count != 2 ) throw ArgsMismatch();
+	Ref idx = vm->fastPop();
+	if ( !IsSmall( idx ) ) throw TypeError();
+	Ref vec = vm->fastPeek();
+	if ( !IsVector( vec ) ) throw TypeError();
+	Ref * vec_K = RefToPtr4( vec );
+	
+	const long I = SmallToLong( idx );
+	const long N = SmallToLong( vec_K[ VECTOR_OFFSET_LENGTH ] );
+	
+	if ( 1 <= I && I <= N ) {
+		vm->fastPeek() = vec_K[ I ];
+	} else {
+		throw OutOfRange();
+	}
+	
+	return pc;
 }
 
 Ref * sysVectorExplode( Ref *pc, class MachineClass * vm ) {

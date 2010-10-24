@@ -126,6 +126,32 @@ Ref * sysListAppend( Ref * pc, class MachineClass * vm ) {
 	return pc;
 }
 
+Ref * sysListIndex( Ref *pc, class MachineClass * vm ) {
+	if ( vm->count != 2 ) throw ArgsMismatch();
+	Ref idx = vm->fastPop();
+	if ( !IsSmall( idx ) ) throw TypeError();
+	Ref list = vm->fastPeek();
+	
+	long I = SmallToLong( idx );
+	if ( I <= 0 ) throw OutOfRange();
+	
+	while ( IsPair( list ) && --I > 0 ) {
+		list = fastPairTail( list );
+	}
+	
+	if ( IsPair( list ) ) {
+		vm->fastPeek() = fastPairHead( list );
+	} else if ( IsNil( list ) ) {
+		throw OutOfRange();
+	} else {
+		throw TypeError();
+	}
+	
+	return pc;
+}
+
+
+
 Ref * sysListExplode( Ref *pc, class MachineClass * vm ) {
 	if ( vm->count != 1 ) throw Mishap( "Wrong number of arguments for listExplode" );
 	Ref r = vm->fastPop();

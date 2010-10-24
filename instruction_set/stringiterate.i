@@ -4,7 +4,7 @@
 //	without a stack check.
 
 Ref * string = RefToPtr4( VMVP[0] );
-Ref len_as_small = string[ STRING_LENGTH_OFFSET ];
+Ref len_as_small = string[ STRING_OFFSET_LENGTH ];
 Ref index = VMVP[-1];
 
 //	Is is safe to compare smalls this way.

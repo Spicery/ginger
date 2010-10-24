@@ -21,7 +21,7 @@
 #include "key.hpp"
 
 unsigned long fastStringLength( Ref str ) {
-	return ToULong( RefToPtr4( str )[ STRING_LENGTH_OFFSET ] ) >> TAG;
+	return ToULong( RefToPtr4( str )[ STRING_OFFSET_LENGTH ] ) >> TAG;
 }
 
 

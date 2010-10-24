@@ -156,6 +156,36 @@ Ref * sysAppend( Ref * pc, class MachineClass * vm ) {
 	throw Mishap( "Invalid arguments for append (++)" );
 }
 
+/*
+	index( map_like, idx )
+*/
+Ref * sysIndex( Ref *pc, class MachineClass * vm ) {
+	if ( vm->count != 2 ) throw ArgsMismatch();
+	Ref idx = vm->fastPop();
+	Ref map = vm->fastPeek();
+	vm->fastPush( idx );
+	
+	if ( IsObj( map ) ) {
+		Ref * map_K = RefToPtr4( map );
+		if ( IsSimpleKey( map_K ) ) {
+			switch ( KindOfSimpleKey( map_K ) ) {
+				case VECTOR_KIND: return pc = sysVectorIndex( pc, vm );
+				case PAIR_KIND: return pc = sysListIndex( pc, vm );
+				case STRING_KIND: return pc = sysStringIndex( pc, vm );
+				case MAP_KIND: return pc = sysMapIndex( pc, vm );
+				default: throw ToBeDone();
+			}
+		} else {
+			throw ToBeDone();
+		}
+	} else if ( IsNil( map ) ) {
+		return sysListIndex( pc, vm );
+	} else {
+		throw ToBeDone();
+	}
+	return pc;
+}
+
 Ref * sysExplode( Ref *pc, class MachineClass * vm ) {
 	if ( vm->count == 1 ) {
 		Ref r = vm->fastPeek();
@@ -291,6 +321,11 @@ const SysMap::value_type rawData[] = {
 	SysMap::value_type( "hash", SysInfo( fnc_syscall, Arity( 1 ), Arity( 1 ), sysHash, "Computes a hash code for any value, returns a positive Small" ) ),
 	SysMap::value_type( "refPrint", SysInfo( fnc_syscall, Arity( 1 ), Arity( 0 ), sysRefPrint, "Prints any value in basic format" ) ),
 	SysMap::value_type( "refPrintln", SysInfo( fnc_syscall, Arity( 1 ), Arity( 0 ), sysRefPrintln, "Prints any value and then adds a new line" ) ),
+	SysMap::value_type( "index", SysInfo( fnc_syscall, Arity( 2 ), Arity( 1 ), sysIndex, "Indexes any sequence" ) ),
+	SysMap::value_type( "vectorIndex", SysInfo( fnc_syscall, Arity( 2 ), Arity( 1 ), sysVectorIndex, "Indexes a vector" ) ),
+	SysMap::value_type( "mapIndex", SysInfo( fnc_syscall, Arity( 2 ), Arity( 1 ), sysMapIndex, "Indexes a map" ) ),
+	SysMap::value_type( "stringIndex", SysInfo( fnc_syscall, Arity( 2 ), Arity( 1 ), sysStringIndex, "Indexes a string" ) ),
+	SysMap::value_type( "listIndex", SysInfo( fnc_syscall, Arity( 2 ), Arity( 1 ), sysListIndex, "Indexes a list" ) ),
 	SysMap::value_type( "explode", SysInfo( fnc_syscall, Arity( 1 ), Arity( 0, true ), sysExplode, "Explodes any sequence into its members" ) ),
 	SysMap::value_type( "listExplode", SysInfo( fnc_syscall, Arity( 1 ), Arity( 0, true ), sysListExplode, "Explodes a list into its members" ) ),
 	SysMap::value_type( "vectorExplode", SysInfo( fnc_syscall, Arity( 1 ), Arity( 0, true ), sysVectorExplode, "Explodes a vector into its members" ) ),

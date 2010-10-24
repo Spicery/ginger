@@ -17,6 +17,7 @@
 \******************************************************************************/
 
 #include "sysstring.hpp"
+#include "stringlayout.hpp"
 #include "sysvector.hpp"
 #include "key.hpp"
 #include "misclayout.hpp"
@@ -63,6 +64,27 @@ Ref * sysStringAppend( Ref * pc, class MachineClass * vm ) {
 	xfr.xfrSubstringStep( lhs_n, (char *)(rhs_K + 1), 0, rhs_n );	//	Capture the null byte
 	xfr.xfrSubstringFinish( lhs_n + rhs_n + 1 );
 	vm->fastPush( xfr.makeRef() );
+	return pc;
+}
+
+Ref * sysStringIndex( Ref *pc, class MachineClass * vm ) {
+	if ( vm->count != 2 ) throw ArgsMismatch();
+	Ref idx = vm->fastPop();
+	if ( !IsSmall( idx ) ) throw TypeError();
+	Ref str = vm->fastPeek();
+	if ( !IsString( str ) ) throw TypeError();
+	Ref * str_K = RefToPtr4( str );
+	char * data = reinterpret_cast< char * >( str_K );
+	
+	const long I = SmallToLong( idx );
+	const long N = SmallToLong( str_K[ STRING_OFFSET_LENGTH ] );
+	
+	if ( 1 <= I && I <= N ) {
+		vm->fastPeek() = CharToCharacter( data[ I ] );
+	} else {
+		throw OutOfRange();
+	}
+	
 	return pc;
 }
 

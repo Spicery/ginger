@@ -101,7 +101,15 @@ public:
 class TypeError : public Mishap {
 public:
 	TypeError( const std::string arg ) :  Mishap( arg ) {}
+	TypeError() : Mishap( "Type Error" ) {}
 	virtual ~TypeError() {}
+};
+
+class OutOfRange : public Mishap {
+public:
+	OutOfRange( const std::string arg ) :  Mishap( arg ) {}
+	OutOfRange() : Mishap( "Out of Range" ) {}
+	virtual ~OutOfRange() {}
 };
 
 #endif

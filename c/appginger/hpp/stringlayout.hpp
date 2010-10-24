@@ -21,7 +21,7 @@
 
 #include "common.hpp"
 
-#define STRING_LENGTH_OFFSET -1
+#define STRING_OFFSET_LENGTH -1
 
 extern unsigned long fastStringLength( Ref r );
 

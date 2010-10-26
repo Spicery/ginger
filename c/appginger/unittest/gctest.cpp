@@ -54,6 +54,9 @@ static void checkAlpha( Package * interactive, int N ) {
 	CPPUNIT_ASSERT_EQUAL( N, lengthOfAssocChain( achain ) );
 }
 
+void GCTest::testHardRef() {
+}
+
 void GCTest::testCacheMap() {
 	AppContext context;
 	MachineClass * vm = context.newMachine();

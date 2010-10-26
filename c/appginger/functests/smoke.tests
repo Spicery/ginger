@@ -15,10 +15,11 @@ Title: Identity
 ================================================================================
 Title: Index
 --------------------------------------------------------------------------------
-<!-- "abc".index(2);
-["abc".explode].index(3);
-{"abc".explode}.index(1);
-{% 'p' :- 'a', 'q' :- 'b', 'r' :- 'c' %}.index( 'q' );
+<!-- 
+	"abc".index(2);
+	["abc".explode].index(3);
+	{"abc".explode}.index(1);
+	{% 'p' :- 'a', 'q' :- 'b', 'r' :- 'c' %}.index( 'q' );
 -->
 <app><id name="index"/><seq><string value="abc"/><int value="2"/></seq></app>
 <app><id name="index"/><seq><sysapp name="newList"><sysapp name="explode"><seq><string value="abc"/></seq></sysapp></sysapp><int value="3"/></seq></app>

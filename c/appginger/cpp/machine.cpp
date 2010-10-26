@@ -54,7 +54,6 @@ MachineClass::MachineClass( AppContext & application ) :
 }
 
 MachineClass::~MachineClass() {
-	delete[] this->sp_base;
 	delete[] this->vp_base;
 }
 

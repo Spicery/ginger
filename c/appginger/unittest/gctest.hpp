@@ -25,17 +25,16 @@
 #include "appcontext.hpp"
 #include "rcep.hpp"
 
-
 class GCTest : public CppUnit::TestFixture {
 
 	CPPUNIT_TEST_SUITE( GCTest );
-	CPPUNIT_TEST( testHardRef );
+	CPPUNIT_TEST( testRef );
 	CPPUNIT_TEST( testMethod );
 	CPPUNIT_TEST( testCacheMap );
 	CPPUNIT_TEST_SUITE_END();
 	
 protected:
-	void testHardRef();
+	void testRef();
 	void testMethod();
 	void testCacheMap();
 
@@ -45,7 +44,13 @@ protected:
 	Package * interactive;
 	RCEP * rcep;
 
+protected:
+	void checkAlpha( int N );
+
+
 public:
+	Valof * safeValof(  const char * name );
+
 	void setUp() {
 		this->vm = context.newMachine();
 		this->interactive = context.initInteractivePackage( vm );

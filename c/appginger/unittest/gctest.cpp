@@ -28,7 +28,8 @@ using namespace std;
 #include "garbagecollect.hpp"
 #include "gcstats.hpp"
 #include "vectorlayout.hpp"
-
+#include "listlayout.hpp"
+#include "reflayout.hpp"
 
 static int lengthOfAssocChain( Ref achain ) {
 	int count = 0;
@@ -39,14 +40,14 @@ static int lengthOfAssocChain( Ref achain ) {
 	return count;
 }
 
-static Valof * safeValof( Package * interactive, const char * name ) {
-	Valof * v = interactive->valof( name );
+Valof * GCTest::safeValof( const char * name ) {
+	Valof * v = this->interactive->valof( name );
 	CPPUNIT_ASSERT( v != NULL );
 	return v;
 }
 
-static void checkAlpha( Package * interactive, int N ) {
-	Valof * v = safeValof( interactive, "alpha" );
+void GCTest::checkAlpha( int N ) {
+	Valof * v = this->safeValof( "alpha" );
 	CPPUNIT_ASSERT( IsMethod( v->valof ) );
 	
 	Ref achain = RefToPtr4( v->valof )[ METHOD_OFFSET_DISPATCH_TABLE ];
@@ -54,7 +55,66 @@ static void checkAlpha( Package * interactive, int N ) {
 	CPPUNIT_ASSERT_EQUAL( N, lengthOfAssocChain( achain ) );
 }
 
-void GCTest::testHardRef() {
+void GCTest::testRef() {
+	stringstream program;
+	
+	//	val h := newHardRef( [ "unique ref" ] );
+	//	val w := newWeakRef( [ "unique ref" ] );
+	//	val s := newSoftRef( [ "unique ref" ] );
+	
+	program << "<bind><var name=\"h\" protected=\"true\" tag=\"public\"/><app><id name=\"newHardRef\"/><sysapp name=\"newList\"><string value=\"unique ref\"/></sysapp></app></bind>";
+	program << "<bind><var name=\"w\" protected=\"true\" tag=\"public\"/><app><id name=\"newWeakRef\"/><sysapp name=\"newList\"><string value=\"unique ref\"/></sysapp></app></bind>";
+	program << "<bind><var name=\"s\" protected=\"true\" tag=\"public\"/><app><id name=\"newSoftRef\"/><sysapp name=\"newList\"><string value=\"unique ref\"/></sysapp></app></bind>";
+	
+	std::ostringstream output;
+	while ( rcep->unsafe_read_comp_exec_print( program, output ) ) {};
+
+	//	Force an unpressured GC.
+
+	vm->getPressure().clearUnderPressure();
+	sysQuiescentGarbageCollect( vm, NULL );
+	
+	//	HardRef not garbage-collected.
+	{	
+		Ref h = this->safeValof( "h" )->valof;
+		CPPUNIT_ASSERT( IsRef( h ) );
+		CPPUNIT_ASSERT( isList( RefToPtr4( h )[ REF_OFFSET_CONT ] ) );
+	}	
+	//	WeakRef is garbage-collected.
+	{
+		Ref w =  this->safeValof( "w" )->valof;
+		CPPUNIT_ASSERT( IsRef( w ) );
+		CPPUNIT_ASSERT_EQUAL( sys_absent, RefToPtr4( w )[ REF_OFFSET_CONT ] );
+	}
+	//	SoftRef is not garbage-collected (no pressure).
+	{	
+		Ref s = this->safeValof( "s" )->valof;
+		CPPUNIT_ASSERT( IsRef( s ) );
+		CPPUNIT_ASSERT( isList( RefToPtr4( s )[ REF_OFFSET_CONT ] ) );
+	}	
+
+	//	Force pressurised garbage collection.
+	vm->getPressure().setUnderPressure();
+	sysQuiescentGarbageCollect( vm, NULL );
+
+	//	HardRef survives pressure.
+	{	
+		Ref h = this->safeValof( "h" )->valof;
+		CPPUNIT_ASSERT( IsRef( h ) );
+		CPPUNIT_ASSERT( isList( RefToPtr4( h )[ REF_OFFSET_CONT ] ) );
+	}	
+	//	WeakRef was already collected.
+	{
+		Ref w =  this->safeValof( "w" )->valof;
+		CPPUNIT_ASSERT( IsRef( w ) );
+		CPPUNIT_ASSERT_EQUAL( sys_absent, RefToPtr4( w )[ REF_OFFSET_CONT ] );
+	}
+	//	SoftRef is forced to be weak & therefore collected.
+	{
+		Ref s =  this->safeValof( "s" )->valof;
+		CPPUNIT_ASSERT( IsRef( s ) );
+		CPPUNIT_ASSERT_EQUAL( sys_absent, RefToPtr4( s )[ REF_OFFSET_CONT ] );
+	}	
 }
 
 void GCTest::testCacheMap() {
@@ -67,7 +127,7 @@ void GCTest::testCacheMap() {
 	while ( rcep->unsafe_read_comp_exec_print( program, output ) ) {};
 
 	{
-		Valof * cmap = safeValof( interactive, "cmap" );
+		Valof * cmap = this->safeValof( "cmap" );
 		CPPUNIT_ASSERT( IsObj( cmap->valof ) );
 		CPPUNIT_ASSERT( IsMap( cmap->valof ) );
 		CPPUNIT_ASSERT_EQUAL( 2L, SmallToLong( RefToPtr4( cmap->valof )[ MAP_OFFSET_COUNT ] ) );
@@ -80,7 +140,7 @@ void GCTest::testCacheMap() {
 	//	The first garbage collect should not affect the cache map.
 	
 	{
-		Valof * cmap = safeValof( interactive, "cmap" );
+		Valof * cmap = this->safeValof( "cmap" );
 		CPPUNIT_ASSERT( IsMap( cmap->valof ) );
 		CPPUNIT_ASSERT_EQUAL( 0L, SmallToLong( RefToPtr4( cmap->valof )[ MAP_OFFSET_COUNT ] ) );
 		CPPUNIT_ASSERT( IsVector( RefToPtr4( cmap->valof )[ MAP_OFFSET_DATA ] ) );
@@ -109,22 +169,22 @@ void GCTest::testMethod() {
 	std::ostringstream output;
 	while ( rcep->unsafe_read_comp_exec_print( program, output ) ) {};
 	
-	checkAlpha( interactive, 2 );
+	this->checkAlpha( 2 );
 	
 	//cerr << "GC[1]" << endl;
 	GCStats stats1;
 	sysQuiescentGarbageCollect( vm, &stats1 );		
 	
-	checkAlpha( interactive, 2 );
+	this->checkAlpha( 2 );
 	
-	Valof * b = safeValof( interactive, "B" );
+	Valof * b = this->safeValof( "B" );
 	b->valof = sys_absent;
 	
 	//cerr << "GC[2]" << endl;
 	GCStats stats2;
 	sysQuiescentGarbageCollect( vm, &stats2 );
 	
-	checkAlpha( interactive, 1 );
+	this->checkAlpha( 1 );
 	
 }
 

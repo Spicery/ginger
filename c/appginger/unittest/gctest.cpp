@@ -58,18 +58,13 @@ void GCTest::testHardRef() {
 }
 
 void GCTest::testCacheMap() {
-	AppContext context;
-	MachineClass * vm = context.newMachine();
-	Package * interactive = context.initInteractivePackage( vm );
-	RCEP rcep( interactive );
-	
 	std::stringstream program;
 	
 	//	val cmap := newCacheMap( "a" :- 1, "b" :- 2 );
 	program << "<bind><var name=\"cmap\" protected=\"true\" tag=\"public\"/><app><id name=\"newCacheMap\"/><seq><sysapp name=\"newMaplet\"><string value=\"a\"/><int value=\"1\"/></sysapp><sysapp name=\"newMaplet\"><string value=\"b\"/><int value=\"2\"/></sysapp></seq></app></bind>";
 	
 	std::ostringstream output;
-	while ( rcep.unsafe_read_comp_exec_print( program, output ) ) {};
+	while ( rcep->unsafe_read_comp_exec_print( program, output ) ) {};
 
 	{
 		Valof * cmap = safeValof( interactive, "cmap" );
@@ -99,12 +94,7 @@ void GCTest::testCacheMap() {
 
 }
 
-void GCTest::testMethod() {
-	AppContext context;
-	MachineClass * vm = context.newMachine();
-	Package * interactive = context.initInteractivePackage( vm );
-	RCEP rcep( interactive );
-	
+void GCTest::testMethod() {	
 	std::stringstream program;
 
 	//	val alpha := newMethod( "alpha", 1, 1 ); 
@@ -117,7 +107,7 @@ void GCTest::testMethod() {
 	program << "<bind><var name=\"B\" protected=\"true\" tag=\"public\"/><app><id name=\"newClass\"/><seq><seq><seq><string value=\"B\"/><sysapp name=\"newVector\"><id name=\"alpha\"/></sysapp></seq><sysapp name=\"newVector\"><seq/></sysapp></seq><sysapp name=\"newVector\"><seq/></sysapp></seq></app></bind>";
 	
 	std::ostringstream output;
-	while ( rcep.unsafe_read_comp_exec_print( program, output ) ) {};
+	while ( rcep->unsafe_read_comp_exec_print( program, output ) ) {};
 	
 	checkAlpha( interactive, 2 );
 	

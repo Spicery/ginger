@@ -40,6 +40,7 @@ using namespace std;
 #include "functionlayout.hpp"
 #include "reflayout.hpp"
 #include "vectorlayout.hpp"
+#include "sysmap.hpp"
 
 //#define DBG_GC
 
@@ -257,6 +258,7 @@ private:
 	vector< Ref * >			assoc_chains;
 	set< Ref * >			weak_roots;
 	set< Ref * >			weak_refs;
+	set< Ref * >			rehash_needed;
 	
 public:
 	GarbageCollect( MachineClass * virtual_machine, bool scan_call_stack ) :
@@ -450,8 +452,13 @@ private:
 							this->forward( obj_K[ REF_OFFSET_CONT ] );
 						}
 					} else if ( IsMapSimpleKey( key ) ) {
-						if ( key == sysCacheEqMapKey && this->isUnderPressure() ) {
-							this->clearCacheMap( obj_K );
+						if ( true || MapKeyEq( key ) ) {
+							if ( key == sysCacheEqMapKey && this->isUnderPressure() ) {
+								//std::cerr << "MapKeyEq( key ) = " << MapKeyEq( key ) << std::endl;
+								this->clearCacheMap( obj_K );
+							}
+						} else {
+							this->rehash_needed.insert( obj_K );
 						}
 						this->advanceRecord( obj_K );
 					} else {
@@ -626,6 +633,13 @@ private:
 		}
 	}				
 	
+	void postGCRehash() {
+		for ( set< Ref * >::iterator it = this->rehash_needed.begin(); it != this->rehash_needed.end(); ++it ) {
+			gngRehashMapPtr( *it );
+		}
+		this->rehash_needed.clear();
+	}
+	
 public:
 	void collectGarbage() {
 		if ( this->vm->isGCTrace() ) {
@@ -634,6 +648,7 @@ public:
 		this->vm->check_call_stack_integrity();		//	debug
 		if ( this->tracker ) this->tracker->startGarbageCollection();
 		preGCSymbolTable( this->vm->isGCTrace() );
+		this->rehash_needed.clear();
 		this->forwardRoots( scan_call_stack );
 		this->copyPhase();
 		
@@ -655,9 +670,8 @@ public:
 		this->copier.resetChanged();
 		this->copyPhase();
 		
-		
-		
 		postGCSymbolTable( this->vm->isGCTrace() );
+		this->postGCRehash();
 		this->vm->getPressure().decreasePressure();
 		if ( this->tracker ) this->tracker->endGarbageCollection();
 		this->vm->check_call_stack_integrity();		//	debug

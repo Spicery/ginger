@@ -55,6 +55,53 @@ void GCTest::checkAlpha( int N ) {
 	CPPUNIT_ASSERT_EQUAL( N, lengthOfAssocChain( achain ) );
 }
 
+void GCTest::testRehashing() {
+	std::stringstream program;
+	
+	/*
+	% val a := "alpha";
+	% val b := "beta";
+	% val c := "gamma";
+	*/
+	program << "<bind><var name=\"a\" protected=\"true\" tag=\"public\"/><string value=\"alpha\"/></bind>";
+	program << "<bind><var name=\"b\" protected=\"true\" tag=\"public\"/><string value=\"beta\"/></bind>";
+	program << "<bind><var name=\"c\" protected=\"true\" tag=\"public\"/><string value=\"gamma\"/></bind>";
+	//	val map := newHardIdMap( a :- 11, b :- 22, c :- 33 );
+	program << "<bind><var name=\"map\" protected=\"true\" tag=\"public\"/><app><id name=\"newHardIdMap\"/><seq><seq><sysapp name=\"newMaplet\"><id name=\"a\"/><int value=\"11\"/></sysapp><sysapp name=\"newMaplet\"><id name=\"b\"/><int value=\"22\"/></sysapp></seq><sysapp name=\"newMaplet\"><id name=\"c\"/><int value=\"33\"/></sysapp></seq></app></bind>";
+
+	
+	//	% val ma := map.index( a );
+	//	% val mb := map.index( b );
+	//	% val mc := map.index( c );
+	program << "<bind><var name=\"ma\" protected=\"true\" tag=\"public\"/><app><id name=\"index\"/><seq><id name=\"map\"/><id name=\"a\"/></seq></app></bind>";
+	program << "<bind><var name=\"mb\" protected=\"true\" tag=\"public\"/><app><id name=\"index\"/><seq><id name=\"map\"/><id name=\"b\"/></seq></app></bind>";
+	program << "<bind><var name=\"mc\" protected=\"true\" tag=\"public\"/><app><id name=\"index\"/><seq><id name=\"map\"/><id name=\"c\"/></seq></app></bind>";
+
+	//	% val mav := map.index( "alpha" );
+	//	% val mbv := map.index( "beta" );
+	//	% val mcv := map.index( "gamma" );
+	program << "<bind><var name=\"mav\" protected=\"true\" tag=\"public\"/><app><id name=\"index\"/><seq><id name=\"map\"/><string value=\"alpha\"/></seq></app></bind>";
+	program << "<bind><var name=\"mbv\" protected=\"true\" tag=\"public\"/><app><id name=\"index\"/><seq><id name=\"map\"/><string value=\"beta\"/></seq></app></bind>";
+	program << "<bind><var name=\"mcv\" protected=\"true\" tag=\"public\"/><app><id name=\"index\"/><seq><id name=\"map\"/><string value=\"gamma\"/></seq></app></bind>";
+
+
+	std::ostringstream output;
+	while ( rcep->unsafe_read_comp_exec_print( program, output ) ) {};
+
+	{
+		Valof * ma = this->safeValof( "ma" );
+		CPPUNIT_ASSERT_EQUAL( LongToSmall( 11 ), ma->valof );
+
+	}	
+
+	//vm->getPressure().setUnderPressure();
+	//sysQuiescentGarbageCollect( vm, NULL );
+	
+
+}
+
+
+
 void GCTest::testRef() {
 	stringstream program;
 	

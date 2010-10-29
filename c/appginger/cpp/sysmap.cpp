@@ -104,6 +104,7 @@ private:
 	XfrClass & xfr;
 	Ref * data_refref;
 	long data_size;
+	bool eq;
 	long width;
 	long num_buckets;
 	
@@ -113,8 +114,12 @@ public:
 	}
 	
 private:
+	unsigned long hash( Ref k ) {
+		return ( this->eq ? refHash( k ) : ToULong( k ) ) & ( ( 1 << width ) - 1 );
+	}
+
 	void addKeyValue( Ref k, Ref v ) {
-		unsigned long hk = refHash( k ) & ( ( 1 << width ) - 1 );
+		unsigned long hk = this->hash( k ); 	//refHash( k ) & ( ( 1 << width ) - 1 );
 		Ref bucket0 = data_refref[ hk ];
 		Ref bucket = bucket0;
 		
@@ -163,10 +168,11 @@ public:
 		}
 	}
 
-	AddArgument( XfrClass & xfr, Ref * data_refref, long data_size, long width ) :
+	AddArgument( XfrClass & xfr, Ref * data_refref, long data_size, bool eq, long width ) :
 		xfr( xfr ),
 		data_refref( data_refref ),
 		data_size( data_size ),
+		eq( eq ),
 		width( width ),
 		num_buckets( 0 )
 	{
@@ -214,7 +220,7 @@ static Ref * newMap( Ref *pc, MachineClass * vm, Ref map_key ) {
 	
 	//	Now add all the members. Need to perform the update in LEFT to RIGHT
 	//	order, from vm->vp[ -( vm->count - 1 ) ] to vm->vp[ 0 ]
-	AddArgument args( xfr, data_refref + 1, data_size, width );
+	AddArgument args( xfr, data_refref + 1, data_size, MapKeyEq( map_key ), width );
 	for ( long i = vm->count - 1; i >= 0; i-- ) {
 		Ref r = *( vm->vp - i );
 		args.add( r );
@@ -268,21 +274,23 @@ Ref * sysMapExplode( Ref *pc, class MachineClass * vm ) {
 
 Ref * sysMapIndex( Ref * pc, class MachineClass * vm ) {
 	if ( vm->count != 2 ) throw ArgsMismatch();
-	Ref idx = vm->fastPop();
-	Ref map = vm->fastPop();
+	const Ref idx = vm->fastPop();
+	const Ref map = vm->fastPop();
+	
 	if ( !IsMap( map ) ) throw TypeError( "Map needed" ).culprit( "Object", map );
 	Ref * map_K = RefToPtr4( map );
-
-	long width = SmallToLong( map_K[ MAP_OFFSET_FLAGS ] );
-
+	const Ref map_key = *map_K;
 	
-	unsigned long hk = refHash( idx ) & ( ( 1 << width ) - 1 );
-	Ref data = RefToPtr4( map )[ MAP_OFFSET_DATA ];
+	const long width = fastMapPtrWidth( map_K );
+	const bool eq = MapKeyEq( map_key );
+		
+	const unsigned long hk = ( eq ? refHash( idx ) : ToULong( idx ) ) & ( ( 1 << width ) - 1 );
+	const Ref data = RefToPtr4( map )[ MAP_OFFSET_DATA ];
 	Ref bucket = RefToPtr4( data )[ hk + 1 ];
 	
 	while ( bucket != sys_absent ) {
 		Ref k1 = fastAssocKey( bucket );
-		if ( refEquals( idx, k1 ) ) {
+		if ( eq ? refEquals( idx, k1 ) : idx == k1 ) {
 			//	Found it.
 			vm->fastPush( fastAssocValue( bucket ) );
 			return pc;
@@ -295,7 +303,7 @@ Ref * sysMapIndex( Ref * pc, class MachineClass * vm ) {
 	return pc;
 }
 
-void refMapPrint( std::ostream & out, Ref * map_K ) {
+void gngPrintMapPtr( std::ostream & out, Ref * map_K ) {
 	MapCrawl map_crawl( map_K );
 	bool sep = false;
 	out << "{%";
@@ -312,7 +320,11 @@ void refMapPrint( std::ostream & out, Ref * map_K ) {
 	out << "%}";
 }
 
+void gngRehashMapPtr( Ref * map_K ) {
 
+	//GOT HERE
+
+}
 
 
 

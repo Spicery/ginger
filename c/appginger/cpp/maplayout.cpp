@@ -18,6 +18,7 @@
 
 #include "maplayout.hpp"
 
+#include "common.hpp"
 #include "key.hpp"
 
 Ref & fastMapData( Ref r ) {
@@ -46,4 +47,46 @@ Ref & fastAssocValue( Ref r ) {
 
 Ref & fastAssocNext( Ref r ) {
 	return RefToPtr4( r )[ ASSOC_NEXT_OFFSET ];
+}
+
+/*
+	Layout of the flags field.
+	
+		+-----------+--------------+-----------+
+		|   Bit 8   |   Bits 2-7   |  Bit 0-1  |
+		+-----------+--------------+-----------+
+		| Dirty Bit | Width (0-63) | 2-bit tag |
+		+-----------+--------------+-----------+
+*/
+
+unsigned long fastMapWidth( Ref map ) {
+	return fastMapPtrWidth( RefToPtr4( map ) );
+}
+
+unsigned long fastMapPtrWidth( Ref * map_K ) {
+	unsigned long flags = SmallToLong( map_K[ MAP_OFFSET_FLAGS ] );
+	return flags & 0x3F;
+}
+
+bool fastMapDirtyBit( Ref map ) {
+	return fastMapPtrDirtyBit( RefToPtr4( map ) );
+}
+
+bool fastMapPtrDirtyBit( Ref * map_K ) {
+	unsigned long flags = SmallToLong( map_K[ MAP_OFFSET_FLAGS ] );
+	return flags & 0x40;
+}
+
+void fastSetMapDirtyBit( Ref map, bool db ) {
+	fastSetMapPtrDirtyBit( RefToPtr4( map ), db );
+}
+
+void fastSetMapPtrDirtyBit( Ref * map_K, bool db ) {
+	Ref * loc = &map_K[ MAP_OFFSET_FLAGS ];
+	if ( db ) {
+		//*( unsigned long * )( loc ) |= 0x100;
+		*reinterpret_cast< unsigned long * >( loc ) |= 0x100;
+	} else {
+		*reinterpret_cast< unsigned long * >( loc ) &= ~0x100;
+	}
 }

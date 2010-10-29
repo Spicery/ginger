@@ -24,9 +24,14 @@
 #include <ostream>
 
 extern Ref * sysNewHardEqMap( Ref * pc, MachineClass * vm );
+extern Ref * sysNewHardIdMap( Ref * pc, MachineClass * vm );
+extern Ref * sysNewWeakIdMap( Ref * pc, MachineClass * vm );
 extern Ref * sysNewCacheEqMap( Ref * pc, MachineClass * vm );
 extern Ref * sysMapExplode( Ref *pc, class MachineClass * vm );
 extern Ref * sysMapIndex( Ref *pc, class MachineClass * vm );
-extern void refMapPrint( std::ostream & out, Ref * r );
+
+extern void gngPrintMapPtr( std::ostream & out, Ref * r );
+void gngRehashMapPtr( Ref * map_K );
+
 
 #endif

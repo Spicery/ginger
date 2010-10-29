@@ -61,4 +61,14 @@ extern Ref & fastAssocKey( Ref r );
 extern Ref & fastAssocValue( Ref r );
 extern Ref & fastAssocNext( Ref r );
 
+//
+//	Access to the packed Map Flags field.
+//
+extern unsigned long fastMapWidth( Ref map );
+extern unsigned long fastMapPtrWidth( Ref * map_K );
+extern bool fastMapDirtyBit( Ref map );
+extern bool fastMapPtrDirtyBit( Ref * map_K );
+extern void fastSetMapDirtyBit( Ref map, bool db );
+extern void fastSetMapPtrDirtyBit( Ref * map_K, bool db );
+
 #endif

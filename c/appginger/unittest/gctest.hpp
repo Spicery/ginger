@@ -31,12 +31,14 @@ class GCTest : public CppUnit::TestFixture {
 	CPPUNIT_TEST( testRef );
 	CPPUNIT_TEST( testMethod );
 	CPPUNIT_TEST( testCacheMap );
+	CPPUNIT_TEST( testRehashing );
 	CPPUNIT_TEST_SUITE_END();
 	
 protected:
 	void testRef();
 	void testMethod();
 	void testCacheMap();
+	void testRehashing();
 
 protected:	
 	AppContext context;

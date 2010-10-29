@@ -108,7 +108,7 @@ void refPrint( std::ostream & out, const Ref r ) {
 					break;
 				}
 				case MAP_KIND: {
-					refMapPrint( out, obj_K );
+					gngPrintMapPtr( out, obj_K );
 					break;
 				}
 				case RECORD_KIND: {

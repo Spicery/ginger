@@ -29,5 +29,7 @@ extern Ref * sysClassRecogniser( Ref * pc, MachineClass *vm );
 extern Ref * sysClassAccessor( Ref * pc, MachineClass *vm );
 extern Ref * sysClassExploder( Ref * pc, MachineClass *vm );
 
+void gngRehashMapPtr( Ref * map_K );
+
 #endif
 

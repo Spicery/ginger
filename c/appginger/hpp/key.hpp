@@ -115,14 +115,6 @@ KEYLESS_KIND
 #define KIND_MASK				0x7 << TAGG
 #define IsSimpleKey( r )		( ( ToULong( r ) & TAGG_MASK ) == KEY_TAGG )
 #define KindOfSimpleKey( k )	( ( ToULong( k ) & KIND_MASK ) >> TAGG )
-#define KEYLESS_KIND			0
-#define RECORD_KIND				1
-#define VECTOR_KIND				2
-#define STRING_KIND				3
-#define PAIR_KIND				4
-#define MAP_KIND				5
-#define UNUSED_KIND				6
-#define OTHER_KIND				7
 	
 #define LEN_WIDTH				8
 #define LENGTH_OFFSET 			( KIND_WIDTH + TAGG )
@@ -131,36 +123,9 @@ KEYLESS_KIND
 #define SimpleKeyID( k ) 		( ToULong(k) >> LEN_WIDTH >> KIND_WIDTH >> TAGG )
 
 #define MAKE_KEY( id, n, flav )		ToRef( ( ( id << LEN_WIDTH | n ) << KIND_WIDTH | flav ) << TAGG | KEY_TAGG )
-#define sysAbsentKey    		MAKE_KEY( 0, 0, KEYLESS_KIND )
-#define sysBoolKey      		MAKE_KEY( 1, 0, KEYLESS_KIND )
-#define sysKeyKey				MAKE_KEY( 2, 4, RECORD_KIND )
-#define sysTerminKey    		MAKE_KEY( 3, 0, KEYLESS_KIND )
-#define sysNilKey       		MAKE_KEY( 4, 0, KEYLESS_KIND )
-#define sysPairKey      		MAKE_KEY( 5, 2, PAIR_KIND )
-#define sysVectorKey    		MAKE_KEY( 6, 0, VECTOR_KIND )
-#define sysStringKey    		MAKE_KEY( 7, 0, STRING_KIND )
-#define sysSymbolKey      		MAKE_KEY( 8, 1, KEYLESS_KIND )
-#define sysSmallKey				MAKE_KEY( 9, 0, KEYLESS_KIND )
-#define sysFloatKey				MAKE_KEY( 10, 0, KEYLESS_KIND )
-#define sysUnicodeKey			MAKE_KEY( 11, 0, KEYLESS_KIND )
-#define sysCharKey				MAKE_KEY( 12, 0, KEYLESS_KIND )
-#define sysMapletKey			MAKE_KEY( 13, 2, RECORD_KIND )
-#define sysIndirectionKey		MAKE_KEY( 14, 1, RECORD_KIND )
-#define sysAssocKey				MAKE_KEY( 15, 3, RECORD_KIND )
-//	Do NOT move references with changing IsRefSimpleKey
-#define sysHardRefKey			MAKE_KEY( 16, 1, RECORD_KIND )
-#define sysSoftRefKey			MAKE_KEY( 17, 1, RECORD_KIND )
-#define sysWeakRefKey			MAKE_KEY( 18, 1, RECORD_KIND )
-#define sysReservedRefKey		MAKE_KEY( 19, 1, RECORD_KIND )
-//	Do NOT move references with changing IsMapSimpleKey
-#define CacheEqMapID			20
-#define sysCacheEqMapKey		MAKE_KEY( CacheEqMapID, 2, MAP_KIND )
-#define HardEqMapID				21
-#define sysHardEqMapKey			MAKE_KEY( HardEqMapID, 2, MAP_KIND )
-#define HardIdMapID				22
-#define sysHardIdMapKey			MAKE_KEY( HardIdMapID, 2, MAP_KIND )
-#define WeakIdMapID				23
-#define sysWeakIdMapKey			MAKE_KEY( WeakIdMapID, 2, MAP_KIND )
+
+//	Include the definitions for the Kinds, the ${SimpleKey}ID and sys${SimpleKey}Key's
+#include "simplekey.hpp.auto"
 
 
 #define IsRefSimpleKey( k )		( ( SimpleKeyID( k ) >> 2 ) == 4 )

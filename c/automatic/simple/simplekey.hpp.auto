@@ -1,0 +1,56 @@
+#define KEYLESS_KIND 0
+#define RECORD_KIND 1
+#define VECTOR_KIND 2
+#define STRING_KIND 3
+#define PAIR_KIND 4
+#define MAP_KIND 5
+#define UNUSED_KIND 6
+#define OTHER_KIND 7
+#define AbsentID 0
+#define sysAbsentKey MAKE_KEY( 0, 0, KEYLESS_KIND )
+#define BoolID 1
+#define sysBoolKey MAKE_KEY( 1, 0, KEYLESS_KIND )
+#define KeyID 2
+#define sysKeyKey MAKE_KEY( 2, 4, RECORD_KIND )
+#define TerminID 3
+#define sysTerminKey MAKE_KEY( 3, 0, KEYLESS_KIND )
+#define NilID 4
+#define sysNilKey MAKE_KEY( 4, 0, KEYLESS_KIND )
+#define PairID 5
+#define sysPairKey MAKE_KEY( 5, 2, PAIR_KIND )
+#define VectorID 6
+#define sysVectorKey MAKE_KEY( 6, 0, VECTOR_KIND )
+#define StringID 7
+#define sysStringKey MAKE_KEY( 7, 0, STRING_KIND )
+#define SymbolID 8
+#define sysSymbolKey MAKE_KEY( 8, 1, KEYLESS_KIND )
+#define SmallID 9
+#define sysSmallKey MAKE_KEY( 9, 0, KEYLESS_KIND )
+#define FloatID 10
+#define sysFloatKey MAKE_KEY( 10, 0, KEYLESS_KIND )
+#define UnicodeID 11
+#define sysUnicodeKey MAKE_KEY( 11, 0, KEYLESS_KIND )
+#define CharID 12
+#define sysCharKey MAKE_KEY( 12, 0, KEYLESS_KIND )
+#define MapletID 13
+#define sysMapletKey MAKE_KEY( 13, 2, RECORD_KIND )
+#define IndirectionID 14
+#define sysIndirectionKey MAKE_KEY( 14, 1, RECORD_KIND )
+#define AssocID 15
+#define sysAssocKey MAKE_KEY( 15, 3, RECORD_KIND )
+#define HardRefID 16
+#define sysHardRefKey MAKE_KEY( 16, 1, RECORD_KIND )
+#define SoftRefID 17
+#define sysSoftRefKey MAKE_KEY( 17, 1, RECORD_KIND )
+#define WeakRefID 18
+#define sysWeakRefKey MAKE_KEY( 18, 1, RECORD_KIND )
+#define ReservedRefID 19
+#define sysReservedRefKey MAKE_KEY( 19, 1, RECORD_KIND )
+#define CacheEqMapID 20
+#define sysCacheEqMapKey MAKE_KEY( 20, 3, MAP_KIND )
+#define HardEqMapID 21
+#define sysHardEqMapKey MAKE_KEY( 21, 3, MAP_KIND )
+#define HardIdMapID 22
+#define sysHardIdMapKey MAKE_KEY( 22, 3, MAP_KIND )
+#define WeakIdMapID 23
+#define sysWeakIdMapKey MAKE_KEY( 23, 3, MAP_KIND )

@@ -13,6 +13,13 @@ public class Main {
 		Main main = new Main();
 		main.automachine();
 		main.autosys();
+		main.autosimple();
+	}
+	
+	public void autosimple() throws IOException {
+		final File aFolder = new File( new File( "c" ), "automatic" );
+		final File outputFolder = new File( aFolder, "simple" );
+		new SimpleKeyGenerator().generate( outputFolder );
 	}
 
 	public void autosys() throws IOException {

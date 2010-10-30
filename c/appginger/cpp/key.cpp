@@ -35,25 +35,8 @@ const char * keyName( Ref key ) {
 	//	Keys fall into the following categories: FunctionKey, SimpleKey, Pointer to Keys
 	if ( IsSimpleKey( key ) ) {
 		switch ( SimpleKeyID( key ) ) {
-			case 0: return "Absent";
-			case 1: return "Bool";
-			case 2: return "Key";
-			case 3: return "Termin";
-			case 4: return "Nil";
-			case 5: return "Pair";
-			case 6: return "Vector";
-			case 7: return "String";
-			case 8: return "Symbol";
-			case 9: return "Small";
-			case 10: return "Float";
-			case 11: return "Unicode";
-			case 12: return "Char";
-			case 13: return "Maplet";
-			case 14: return "Map";
-			case 15: return "Assoc";
-			case 16: return "Indirection";
-			case 17: return "Ref";
-			case 18: return "WeakRef";
+			//	Add in the cases.
+			#include "simplekey.cpp.auto"
 			default: return "<Unknown>";
 		}
 	} else if ( IsFunctionKey( key ) ) {

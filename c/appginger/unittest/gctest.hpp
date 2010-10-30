@@ -39,6 +39,7 @@ protected:
 	void testMethod();
 	void testCacheMap();
 	void testRehashing();
+	void verifyMapIntegrity( Ref map );
 
 protected:	
 	AppContext context;

@@ -1,7 +1,7 @@
 
 CC=@CXX@
 
-CXXFLAGS=-g -I../hpp -I../../automatic/machine -I../../automatic/sys -I/usr/local/boost_1_43_0 -Wall -Wnon-virtual-dtor # -Weffc++
+CXXFLAGS=-g -I../hpp -I../../automatic/machine -I../../automatic/sys -I../../automatic/simple -I/usr/local/boost_1_43_0 -Wall -Wnon-virtual-dtor # -Weffc++
 CFLAGS=-Wmissing-prototypes 
 
 OBJS=mishap.o term.o read_xml.o \

@@ -343,7 +343,7 @@ const SysMap::value_type rawData[] = {
 	SysMap::value_type( "newList", SysInfo( fnc_syscall, Arity( 0, true ), Arity( 1 ), sysNewList, "Builds a list from the arguments" ) ),
 	SysMap::value_type( "newListOnto", SysInfo( fnc_syscall, Arity( 1, true ), Arity( 1 ), sysNewListOnto, "Builds a list from the first N-1 args and appends that to the last argument" ) ),
 	SysMap::value_type( "newMap", SysInfo( fnc_syscall, Arity( 0, true ), Arity( 1 ), sysNewHardEqMap, "Builds a new map from maps and maplets" ) ),
-	SysMap::value_type( "newHardIdMap", SysInfo( fnc_syscall, Arity( 0, true ), Arity( 1 ), sysNewWeakIdMap, "Builds a new map from maps and maplets that uses identity (==) for the equality test" ) ),
+	SysMap::value_type( "newHardIdMap", SysInfo( fnc_syscall, Arity( 0, true ), Arity( 1 ), sysNewHardIdMap, "Builds a new map from maps and maplets that uses identity (==) for the equality test" ) ),
 	SysMap::value_type( "newWeakIdMap", SysInfo( fnc_syscall, Arity( 0, true ), Arity( 1 ), sysNewWeakIdMap, "Builds a new map from maps and maplets that only weakly retains its entries" ) ),
 	SysMap::value_type( "newCacheMap", SysInfo( fnc_syscall, Arity( 0, true ), Arity( 1 ), sysNewCacheEqMap, "Builds a new map from maps and maplets that the garbage collector can clear under pressure" ) ),
 	SysMap::value_type( "mapIndex", SysInfo( fnc_syscall, Arity( 2 ), Arity( 1 ), sysMapIndex, "Looks up a map for a given index" ) ),

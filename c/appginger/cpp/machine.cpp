@@ -191,11 +191,11 @@ Ref * MachineClass::instructionShow( Ref *pc ) {
 	return this->instructionShow( std::cout, pc );
 }
 
-void MachineClass::print_results( float time_taken ) {
-	this->print_results( std::cout, time_taken );
+void MachineClass::printResults( float time_taken ) {
+	this->printResults( std::cout, time_taken );
 }
 
-void MachineClass::print_results( std::ostream & out, float time_taken ) {
+void MachineClass::printResults( std::ostream & out, float time_taken ) {
 	const bool quiet = this->appg.isBatchMode();
 
 	int n = this->vp - this->vp_base;

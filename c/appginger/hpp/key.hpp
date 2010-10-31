@@ -120,7 +120,7 @@ KEYLESS_KIND
 #define LENGTH_OFFSET 			( KIND_WIDTH + TAGG )
 #define LENGTH_MASK				( 0xFF << LENGTH_OFFSET )
 
-#define SimpleKeyID( k ) 		( ToULong(k) >> LEN_WIDTH >> KIND_WIDTH >> TAGG )
+#define SimpleKeyID( k ) 		( ToULong(k) >> ( LEN_WIDTH + KIND_WIDTH + TAGG ) )
 
 #define MAKE_KEY( id, n, flav )		ToRef( ( ( id << LEN_WIDTH | n ) << KIND_WIDTH | flav ) << TAGG | KEY_TAGG )
 
@@ -133,7 +133,7 @@ KEYLESS_KIND
 
 #define IsMapSimpleKey( k )		( ( SimpleKeyID( k ) >> 2 ) == 5 )
 #define IsMapKey( k )			( IsSimpleKey( k ) && IsMapSimpleKey( k ) )
-#define MapKeyEq( k )			( ( SimpleKeyID( k ) & 0x10 ) == 1 )
+#define MapKeyEq( k )			( ( SimpleKeyID( k ) & 0x2 ) == 0 )
 
 
 //	Recognisers

@@ -25,7 +25,7 @@
 extern Ref * sysEquals( Ref * pc, MachineClass * vm );
 extern Ref * sysHash( Ref *pc, class MachineClass * vm );
 extern bool refEquals( Ref x, Ref y );
-extern unsigned long refHash( Ref r );
+extern unsigned long gngEqHash( Ref r );
 
 #endif
 

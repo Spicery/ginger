@@ -28,18 +28,19 @@
 class GCTest : public CppUnit::TestFixture {
 
 	CPPUNIT_TEST_SUITE( GCTest );
-	CPPUNIT_TEST( testRef );
-	CPPUNIT_TEST( testMethod );
-	CPPUNIT_TEST( testCacheMap );
-	CPPUNIT_TEST( testRehashing );
+	CPPUNIT_TEST( testAllRef );
+	CPPUNIT_TEST( testMethodWeakness );
+	CPPUNIT_TEST( testCacheEqMap );
+	CPPUNIT_TEST( testHardIdRehashing );
+	//CPPUNIT_TEST( testWeakIdRehashing );
 	CPPUNIT_TEST_SUITE_END();
 	
 protected:
-	void testRef();
-	void testMethod();
-	void testCacheMap();
-	void testRehashing();
-	void verifyMapIntegrity( Ref map );
+	void testAllRef();
+	void testMethodWeakness();
+	void testCacheEqMap();
+	void testHardIdRehashing();
+	//void testWeakIdRehashing();
 
 protected:	
 	AppContext context;

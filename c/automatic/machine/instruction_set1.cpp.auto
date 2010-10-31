@@ -409,14 +409,14 @@ static Ref *spcfn_invoke( Ref *pc, Machine vm ) {
     		Ref method_table = pc[ 1 ];
     		while ( method_table != sys_absent ) {
     			Ref * entry_K = RefToPtr4( method_table );
-    			if ( key == entry_K[ ASSOC_KEY_OFFSET ] ) {
-    				Ref fn = entry_K[ ASSOC_VALUE_OFFSET ];
+    			if ( key == entry_K[ ASSOC_OFFSET_KEY ] ) {
+    				Ref fn = entry_K[ ASSOC_OFFSET_VALUE ];
     				//	Now chain out.
     				Ref * fn_K = RefToPtr4( fn );
     				VMPCFUNC = fn_K;
     				RETURN( fn_K + 1 );
     			} else {
-    				method_table = entry_K[ ASSOC_NEXT_OFFSET ];
+    				method_table = entry_K[ ASSOC_OFFSET_NEXT ];
     			}
     		}
     	}
@@ -438,8 +438,8 @@ static Ref *spcfn_invoke( Ref *pc, Machine vm ) {
     		Ref dispatch_table = pc[2];
     		while ( dispatch_table != sys_absent ) {
     			Ref * entry_K = RefToPtr4( dispatch_table );
-    			if ( key == entry_K[ ASSOC_KEY_OFFSET ] ) {	
-    				Ref fn = entry_K[ ASSOC_VALUE_OFFSET ];
+    			if ( key == entry_K[ ASSOC_OFFSET_KEY ] ) {	
+    				Ref fn = entry_K[ ASSOC_OFFSET_VALUE ];
     				
     				//	Add to the method cache.
     				{
@@ -467,7 +467,7 @@ static Ref *spcfn_invoke( Ref *pc, Machine vm ) {
     				VMPCFUNC = fn_K;
     				RETURN( fn_K + 1 );
     			} else {
-    				dispatch_table = entry_K[ ASSOC_NEXT_OFFSET ];
+    				dispatch_table = entry_K[ ASSOC_OFFSET_NEXT ];
     			}
     		}	
     		/* Failed to find a matching method */

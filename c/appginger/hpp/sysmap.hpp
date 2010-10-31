@@ -31,7 +31,9 @@ extern Ref * sysMapExplode( Ref *pc, class MachineClass * vm );
 extern Ref * sysMapIndex( Ref *pc, class MachineClass * vm );
 
 extern void gngPrintMapPtr( std::ostream & out, Ref * r );
-void gngRehashMapPtr( Ref * map_K );
+extern void gngRehashMapPtr( Ref * map_K );
+extern unsigned int gngIdHash( Ref ref );
+
 
 
 #endif

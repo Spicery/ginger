@@ -120,8 +120,8 @@ public:
 	
 public:
 
-	void 			print_results( std::ostream & out, float time_taken );
-	void 			print_results( float time_taken );
+	void 			printResults( std::ostream & out, float time_taken );
+	void 			printResults( float time_taken );
 
 	void			printfn( Ref x );
 	void			printfn( std::ostream & out, Ref x );

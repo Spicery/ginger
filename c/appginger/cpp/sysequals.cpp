@@ -152,7 +152,7 @@ bool refEquals( Ref x, Ref y ) {
 	}
 }
 
-unsigned long refHash( Ref r ) {
+unsigned long gngEqHash( Ref r ) {
 	if ( IsObj( r ) ) {
 		Ref * obj_K = RefToPtr4( r );
 		Ref key = *obj_K;
@@ -216,7 +216,7 @@ unsigned long refHash( Ref r ) {
 
 Ref * sysHash( Ref *pc, class MachineClass * vm ) {
 	if ( vm->count == 1 ) {
-		vm->fastPeek() = ULongToSmall( refHash( vm->fastPeek() ) );
+		vm->fastPeek() = ULongToSmall( gngEqHash( vm->fastPeek() ) );
 		return pc;
 	} else {
 		throw Mishap( "Wrong number of arguments for hash" );

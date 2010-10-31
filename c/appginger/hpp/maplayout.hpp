@@ -48,9 +48,9 @@
 +---------------+-------------+-------------+----------+
 */
 
-#define ASSOC_KEY_OFFSET 		1
-#define ASSOC_VALUE_OFFSET 		2
-#define ASSOC_NEXT_OFFSET 		3
+#define ASSOC_OFFSET_KEY 		1
+#define ASSOC_OFFSET_VALUE 		2
+#define ASSOC_OFFSET_NEXT 		3
 #define ASSOC_SIZE				4
 
 extern Ref & fastMapData( Ref r );

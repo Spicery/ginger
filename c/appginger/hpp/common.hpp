@@ -19,6 +19,17 @@
 #ifndef COMMON_HPP
 #define COMMON_HPP
 
+/*
+	SAFE_MODE is a compile-time flag that controls the execution of
+	relatively expensive run-time checks. Should be disabled for release.
+	
+	Set SAFE_MODE to 0 for faster execution.
+*/
+#ifdef DEBUG_MODE
+#define SAFE_MODE 1
+#else
+#define SAFE_MODE 0
+#endif
 
 typedef unsigned long ulong;
 typedef const char *charseq;

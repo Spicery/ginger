@@ -452,7 +452,9 @@ private:
 							this->forward( obj_K[ REF_OFFSET_CONT ] );
 						}
 					} else if ( IsMapSimpleKey( key ) ) {
-						if ( true || MapKeyEq( key ) ) {
+						//std::cout << "KEY " << key << "; EQ  " << MapKeyEq( key ) << std::endl;
+						
+						if ( MapKeyEq( key ) ) {
 							if ( key == sysCacheEqMapKey && this->isUnderPressure() ) {
 								//std::cerr << "MapKeyEq( key ) = " << MapKeyEq( key ) << std::endl;
 								this->clearCacheMap( obj_K );
@@ -512,13 +514,13 @@ private:
 			Ref chain = *this->assoc_chains[ i ];
 			while ( chain != sys_absent ) {
 				Ref * assoc_K = RefToPtr4( chain );
-				Ref lhs = assoc_K[ ASSOC_KEY_OFFSET ];
+				Ref lhs = assoc_K[ ASSOC_OFFSET_KEY ];
 				
 				if ( isTargetForwarded( lhs ) ) {
 					//	The key has been traced (or is non-pointer).
 					//	We want to forward the assoc object.
-					this->forwardTarget( assoc_K[ ASSOC_VALUE_OFFSET ] );
-					if ( isntTargetForwarded( assoc_K[ ASSOC_VALUE_OFFSET ] ) ) {
+					this->forwardTarget( assoc_K[ ASSOC_OFFSET_VALUE ] );
+					if ( isntTargetForwarded( assoc_K[ ASSOC_OFFSET_VALUE ] ) ) {
 						cerr << "Target[1] not forwarded!" << endl;
 						throw Unreachable();
 					}
@@ -527,7 +529,7 @@ private:
 					this->weak_roots.insert( assoc_K );
 				}
 				
-				chain = assoc_K[ ASSOC_NEXT_OFFSET ];
+				chain = assoc_K[ ASSOC_OFFSET_NEXT ];
 			}			
 		}
 		this->prev_num_assoc_chains = this->assoc_chains.size();
@@ -545,11 +547,11 @@ private:
 		
 		for ( vector< Ref * >::iterator it = w.begin(); it != w.end(); ++it ) {
 			Ref * wroot_K = *it;
-			Ref lhs = wroot_K[ ASSOC_KEY_OFFSET ];
+			Ref lhs = wroot_K[ ASSOC_OFFSET_KEY ];
 			if ( isTargetForwarded( lhs ) ) {
 				//	The key has been traced (or is non-pointer).
-				this->forwardTarget( wroot_K[ ASSOC_VALUE_OFFSET ] );
-				if ( isntTargetForwarded( wroot_K[ ASSOC_VALUE_OFFSET ] ) ) {
+				this->forwardTarget( wroot_K[ ASSOC_OFFSET_VALUE ] );
+				if ( isntTargetForwarded( wroot_K[ ASSOC_OFFSET_VALUE ] ) ) {
 					cerr << "Target[2] not forwarded!" << endl;
 					throw Unreachable();
 				}
@@ -577,7 +579,7 @@ private:
 				
 				const bool traced1 = (this->weak_roots.find( assoc_K ) == this->weak_roots.end() );
 				
-				Ref k  = assoc_K[ ASSOC_KEY_OFFSET ];
+				Ref k  = assoc_K[ ASSOC_OFFSET_KEY ];
 				const bool traced2 = isTargetForwarded( k );
 				
 				if ( traced1 != traced2 ) {
@@ -585,7 +587,7 @@ private:
 					throw SystemError( "GC weak assoc invariant [1] violated" );
 				}
 				
-				const bool traced3 = isTargetForwarded( assoc_K[ ASSOC_VALUE_OFFSET ] );
+				const bool traced3 = isTargetForwarded( assoc_K[ ASSOC_OFFSET_VALUE ] );
 				if ( traced1 && not( traced3 ) ) {
 					//cerr << "All very wrong" << endl;
 					throw SystemError( "GC weak assoc invariant [2] violated" );
@@ -594,11 +596,11 @@ private:
 				if ( not traced1 ) {
 					//	The key has not been traced and the assoc item
 					//	is eligible for garbage collection.
-					*chain = assoc_K[ ASSOC_NEXT_OFFSET ];
+					*chain = assoc_K[ ASSOC_OFFSET_NEXT ];
 					if ( this->tracker ) this->tracker->prune1();
 					//cerr << "Prune" << endl;
 				} else {
-					chain = &assoc_K[ ASSOC_NEXT_OFFSET ];
+					chain = &assoc_K[ ASSOC_OFFSET_NEXT ];
 					if ( this->tracker ) this->tracker->retain1();
 					//cerr << "Skip" << endl;
 				}

@@ -38,15 +38,15 @@ Ref & fastMapletValue( Ref r ) {
 }
 
 Ref & fastAssocKey( Ref r ) {
-	return RefToPtr4( r )[ ASSOC_KEY_OFFSET ];
+	return RefToPtr4( r )[ ASSOC_OFFSET_KEY ];
 }
 
 Ref & fastAssocValue( Ref r ) {
-	return RefToPtr4( r )[ ASSOC_VALUE_OFFSET ];
+	return RefToPtr4( r )[ ASSOC_OFFSET_VALUE ];
 }
 
 Ref & fastAssocNext( Ref r ) {
-	return RefToPtr4( r )[ ASSOC_NEXT_OFFSET ];
+	return RefToPtr4( r )[ ASSOC_OFFSET_NEXT ];
 }
 
 /*

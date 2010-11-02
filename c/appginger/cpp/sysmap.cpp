@@ -275,7 +275,7 @@ static Ref * newMap( Ref *pc, MachineClass * vm, Ref map_key ) {
 	
 	xfr.xfrRef( LongToSmall( data_size ) );
 	xfr.setOrigin();
-	xfr.xfrRef( sysVectorKey );
+	xfr.xfrRef( sysHashMapDataKey );
 	
 	//	ToBeDone: We could really do with a memcpy style operation here. 
 	for ( long i = 0; i < data_size; i++ ) {
@@ -436,7 +436,11 @@ static void verifyMapIntegrity( Ref map ) {
 	ASSERT_EQUAL( count, (long)sofar );
 }
 
-
+/**
+	gngRehashMapPtr has the job of rehashing identity based hash maps 
+	after a garbage collection. In the case of a weak map, it also has to
+	adjust the count, as that may have become smaller.
+*/
 void gngRehashMapPtr( Ref * map_K ) {
 	const int width = fastMapPtrWidth( map_K );
 	unsigned long mask = ( 1L << width ) - 1;
@@ -448,6 +452,8 @@ void gngRehashMapPtr( Ref * map_K ) {
 	
 	//	Fill vdata with sys_absent.
 	vector< Ref > vdata( data_length, sys_absent );
+	
+	long count = 0;
 	
 	for ( long i = 0; i < data_length; i++ ) {
 		Ref & chain = data_K[ i + 1 ];
@@ -463,8 +469,8 @@ void gngRehashMapPtr( Ref * map_K ) {
 			//cout << "Moving from " << i << " to " << hash << endl;
 			
 			fastAssocNext( assoc ) = vdata[ hash ];
-			//RefToPtr4( assoc )[ ASSOC_OFFSET_NEXT ] = vdata[ hash ];
 			vdata[ hash ] = assoc;
+			count += 1;
 		}
 	}	
 	
@@ -473,6 +479,13 @@ void gngRehashMapPtr( Ref * map_K ) {
 	//}
 	
 	memcpy( data_K + 1, &vdata[0], sizeof( Ref ) * data_length );
+	
+	const long count_current = SmallToLong( map_K[ MAP_OFFSET_COUNT ] );
+	if ( map_K[0] == sysWeakIdMapKey && count < count_current ) {
+		map_K[ MAP_OFFSET_COUNT ] = LongToSmall( count );
+	} else if ( count != count_current ) {
+		throw SystemError( "Map count differs after GC" );
+	}
 	
 	if ( SAFE_MODE ) {
 		Ref r = Ptr4ToRef( map_K );

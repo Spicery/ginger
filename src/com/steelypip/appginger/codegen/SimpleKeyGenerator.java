@@ -58,16 +58,23 @@ public class SimpleKeyGenerator {
 		add( "Maplet",  		13, 2, 	Kind.RECORD_KIND );
 		add( "Indirection", 	14, 1, 	Kind.RECORD_KIND );
 		add( "Assoc", 			15, 3, 	Kind.RECORD_KIND );
-//			Do NOT move references with changing IsRefSimpleKey
+		
+		//	Do NOT move references with changing IsRefSimpleKey
+		//	Must be on a multiple of 4 boundary.
 		add( "HardRef", 		16, 1, 	Kind.RECORD_KIND );
 		add( "SoftRef", 		17, 1, 	Kind.RECORD_KIND );
 		add( "WeakRef", 		18, 1, 	Kind.RECORD_KIND );
 		add( "ReservedRef", 	19, 1, 	Kind.RECORD_KIND );
-//			Do NOT move references with changing IsMapSimpleKey
+		
+		//	Do NOT move references with changing IsMapSimpleKey
+		//	Must be on a multiple of 4 boundary.
 		add( "CacheEqMap",		20, 3, 	Kind.MAP_KIND );
 		add( "HardEqMap", 		21, 3,  Kind.MAP_KIND );
 		add( "HardIdMap",		22, 3,  Kind.MAP_KIND );
-		add( "WeakIdMap",		23, 3,  Kind.MAP_KIND );		
+		add( "WeakIdMap",		23, 3,  Kind.MAP_KIND );
+		
+		//	More arbitrary keys.
+		add( "HashMapData", 	24, 0,	Kind.VECTOR_KIND );
 	}
 	
 	public void generate( final File outputFolder ) throws IOException {

@@ -22,3 +22,4 @@ case 20: return "CacheEqMap";
 case 21: return "HardEqMap";
 case 22: return "HardIdMap";
 case 23: return "WeakIdMap";
+case 24: return "HashMapData";

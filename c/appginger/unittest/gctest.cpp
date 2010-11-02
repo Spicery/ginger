@@ -67,12 +67,14 @@ static int verifyAssocChain( Ref chain ) {
 	return count;
 }
 
-static void verifyMapIntegrity( Ref map ) {
+#define IsHashMapData( x ) 	( IsObj( x ) && ( RefToPtr4( x )[ 0 ] == sysHashMapDataKey ) )
+
+static void verifyMapIntegrity( Ref map, Ref expected_map_key ) {
 	CPPUNIT_ASSERT( IsMap( map ) );
 	Ref * map_K = RefToPtr4( map );
-	CPPUNIT_ASSERT_EQUAL( sysHardIdMapKey, map_K[ 0 ] );
+	CPPUNIT_ASSERT_EQUAL( expected_map_key, map_K[ 0 ] );
 	Ref data = map_K[ MAP_OFFSET_DATA ];
-	CPPUNIT_ASSERT( IsVector( data ) );
+	CPPUNIT_ASSERT( IsHashMapData( data ) );
 	Ref * data_K = RefToPtr4( data );
 	int bit_width = fastMapPtrWidth( map_K );
 	int length = SmallToLong( data_K[ VECTOR_OFFSET_LENGTH ] );
@@ -106,9 +108,118 @@ static void verifyMapIntegrity( Ref map ) {
 	}
 */
 
+void GCTest::testWeakIdRehashing() {
+	{
+		std::stringstream program;
+		
+		//	Create some garbage.
+		program << "<sysapp name=\"newVector\"><sysapp name=\"explode\"><seq><string value=\"abcdefghijk\"/></seq></sysapp></sysapp>";
+		
+		//	val a := "alpha";
+		//	val b := "beta";
+		//	val c := "gamma";
+		program << "<bind><var name=\"a\" protected=\"true\" tag=\"public\"/><string value=\"alpha\"/></bind>";
+		program << "<bind><var name=\"b\" protected=\"true\" tag=\"public\"/><string value=\"beta\"/></bind>";
+		program << "<bind><var name=\"c\" protected=\"true\" tag=\"public\"/><string value=\"gamma\"/></bind>";
+		//	val map := newHardIdMap( a :- 11, b :- 22, "gamma" :- 33 );	# not c
+		program << "<bind><var name=\"map\" protected=\"true\" tag=\"public\"/><app><id name=\"newWeakIdMap\"/><seq><seq><sysapp name=\"newMaplet\"><id name=\"a\"/><int value=\"11\"/></sysapp><sysapp name=\"newMaplet\"><id name=\"b\"/><int value=\"22\"/></sysapp></seq><sysapp name=\"newMaplet\"><string value=\"gamma\"/><int value=\"33\"/></sysapp></seq></app></bind>";
+		
+		//	val ma := map.index( a );
+		//	val mb := map.index( b );
+		//	val mc := map.index( c );
+		program << "<bind><var name=\"ma\" protected=\"true\" tag=\"public\"/><app><id name=\"index\"/><seq><id name=\"map\"/><id name=\"a\"/></seq></app></bind>";
+		program << "<bind><var name=\"mb\" protected=\"true\" tag=\"public\"/><app><id name=\"index\"/><seq><id name=\"map\"/><id name=\"b\"/></seq></app></bind>";
+		program << "<bind><var name=\"mc\" protected=\"true\" tag=\"public\"/><app><id name=\"index\"/><seq><id name=\"map\"/><id name=\"c\"/></seq></app></bind>";
+	
+		//	val mav := map.index( "alpha" );
+		program << "<bind><var name=\"mav\" protected=\"true\" tag=\"public\"/><app><id name=\"index\"/><seq><id name=\"map\"/><string value=\"alpha\"/></seq></app></bind>";
+		program << "<bind><var name=\"mbv\" protected=\"true\" tag=\"public\"/><app><id name=\"index\"/><seq><id name=\"map\"/><string value=\"beta\"/></seq></app></bind>";
+	
+	
+		std::ostringstream output;
+		while ( rcep->unsafe_read_comp_exec_print( program, output ) ) {};
+		
+		verifyMapIntegrity( this->safeValof( "map" )->valof, sysWeakIdMapKey );
+		{
+			Ref map = this->safeValof( "map" )->valof;
+			CPPUNIT_ASSERT_EQUAL( 3L, SmallToLong( RefToPtr4( map )[ MAP_OFFSET_COUNT ] ) );
+		}
+	
+		{
+			Valof * ma = this->safeValof( "ma" );
+			//cout << endl << "pre GC: " << ( gngIdHash( this->safeValof( "a" )->valof ) & 0x3 ) << endl;
+			//cout << ma->valof << endl;
+			CPPUNIT_ASSERT_EQUAL( LongToSmall( 11 ), ma->valof );
+		}
+		{
+			Valof * mb = this->safeValof( "mb" );
+			CPPUNIT_ASSERT_EQUAL( LongToSmall( 22 ), mb->valof );
+		}
+		{
+			Valof * mc = this->safeValof( "mc" );
+			CPPUNIT_ASSERT_EQUAL( sys_absent, mc->valof );
+		}
+		{
+			Valof * mav = this->safeValof( "mav" );
+			CPPUNIT_ASSERT_EQUAL( sys_absent, mav->valof );
+		}	
+		{
+			Valof * mbv = this->safeValof( "mbv" );
+			CPPUNIT_ASSERT_EQUAL( sys_absent, mbv->valof );
+		}	
+	}
+
+	vm->getPressure().setUnderPressure();
+	sysQuiescentGarbageCollect( vm, NULL );
+	
+	verifyMapIntegrity( this->safeValof( "map" )->valof, sysWeakIdMapKey );
+	{
+		Ref map = this->safeValof( "map" )->valof;
+		CPPUNIT_ASSERT_EQUAL( 2L, SmallToLong( RefToPtr4( map )[ MAP_OFFSET_COUNT ] ) );
+	}
+
+	{
+		std::stringstream program;
+		
+		
+		//	% val ma1 := map.index( a );
+		//	% val mb1 := map.index( b );
+		program << "<bind><var name=\"ma1\" protected=\"true\" tag=\"public\"/><app><id name=\"index\"/><seq><id name=\"map\"/><id name=\"a\"/></seq></app></bind>";
+		program << "<bind><var name=\"mb1\" protected=\"true\" tag=\"public\"/><app><id name=\"index\"/><seq><id name=\"map\"/><id name=\"b\"/></seq></app></bind>";
+		
+		//	% val mav1 := map.index( "alpha" );
+		//	% val mbv1 := map.index( "beta" );
+		//	% val mcv1 := map.index( "gamma" );
+		program << "<bind><var name=\"mav1\" protected=\"true\" tag=\"public\"/><app><id name=\"index\"/><seq><id name=\"map\"/><string value=\"alpha\"/></seq></app></bind>";
+		program << "<bind><var name=\"mbv1\" protected=\"true\" tag=\"public\"/><app><id name=\"index\"/><seq><id name=\"map\"/><string value=\"beta\"/></seq></app></bind>";
+		
+		std::ostringstream output;
+		while ( rcep->unsafe_read_comp_exec_print( program, output ) ) {
+		}
+		
+		{
+			Valof * ma1 = this->safeValof( "ma1" );
+			//cout << endl << "post GC: " << ( gngIdHash( this->safeValof( "a" )->valof ) & 0x3 ) << endl;
+			//cout << endl << "post GC: " << this->safeValof( "a" )->valof << "->" << ( gngIdHash( this->safeValof( "a" )->valof ) & 0x3 ) << endl;
+			CPPUNIT_ASSERT_EQUAL( LongToSmall( 11 ), ma1->valof );
+		}
+		{
+			Valof * mb1 = this->safeValof( "mb1" );
+			CPPUNIT_ASSERT_EQUAL( LongToSmall( 22 ), mb1->valof );
+		}
+		{
+			Valof * mav1 = this->safeValof( "mav1" );
+			CPPUNIT_ASSERT_EQUAL( sys_absent, mav1->valof );
+		}	
+		{
+			Valof * mbv1 = this->safeValof( "mbv1" );
+			CPPUNIT_ASSERT_EQUAL( sys_absent, mbv1->valof );
+		}	
+	}
+
+}
+
 void GCTest::testHardIdRehashing() {
-
-
 	{
 		std::stringstream program;
 		
@@ -140,7 +251,7 @@ void GCTest::testHardIdRehashing() {
 		std::ostringstream output;
 		while ( rcep->unsafe_read_comp_exec_print( program, output ) ) {};
 		
-		verifyMapIntegrity( this->safeValof( "map" )->valof );
+		verifyMapIntegrity( this->safeValof( "map" )->valof, sysHardIdMapKey );
 	
 		{
 			Valof * ma = this->safeValof( "ma" );
@@ -173,7 +284,7 @@ void GCTest::testHardIdRehashing() {
 	vm->getPressure().setUnderPressure();
 	sysQuiescentGarbageCollect( vm, NULL );
 	
-	verifyMapIntegrity( this->safeValof( "map" )->valof );
+	verifyMapIntegrity( this->safeValof( "map" )->valof, sysHardIdMapKey );
 
 	{
 		std::stringstream program;
@@ -227,7 +338,178 @@ void GCTest::testHardIdRehashing() {
 
 }
 
+void GCTest::testHardEqMap() {
+	{
+		std::stringstream program;
+		
+		//	Create some garbage.
+		program << "<sysapp name=\"newVector\"><sysapp name=\"explode\"><seq><string value=\"abcdefghijk\"/></seq></sysapp></sysapp>";
+		
+		//	val a := "alpha";
+		//	val b := "beta";
+		//	val c := "gamma";
+		program << "<bind><var name=\"a\" protected=\"true\" tag=\"public\"/><string value=\"alpha\"/></bind>";
+		program << "<bind><var name=\"b\" protected=\"true\" tag=\"public\"/><string value=\"beta\"/></bind>";
+		program << "<bind><var name=\"c\" protected=\"true\" tag=\"public\"/><string value=\"gamma\"/></bind>";
+		
+		
+		
+		//	val map := newHardIdMap( a :- 11, b :- 22, c :- 33 );
+		program << "<bind><var name=\"map\" protected=\"true\" tag=\"public\"/><app><id name=\"newMap\"/><seq><seq><sysapp name=\"newMaplet\"><id name=\"a\"/><int value=\"11\"/></sysapp><sysapp name=\"newMaplet\"><id name=\"b\"/><int value=\"22\"/></sysapp></seq><sysapp name=\"newMaplet\"><id name=\"c\"/><int value=\"33\"/></sysapp></seq></app></bind>";
+		
+		
+		//	val ma := map.index( a );
+		//	val mb := map.index( b );
+		//	val mc := map.index( c );
+		program << "<bind><var name=\"ma\" protected=\"true\" tag=\"public\"/><app><id name=\"index\"/><seq><id name=\"map\"/><id name=\"a\"/></seq></app></bind>";
+		program << "<bind><var name=\"mb\" protected=\"true\" tag=\"public\"/><app><id name=\"index\"/><seq><id name=\"map\"/><id name=\"b\"/></seq></app></bind>";
+		program << "<bind><var name=\"mc\" protected=\"true\" tag=\"public\"/><app><id name=\"index\"/><seq><id name=\"map\"/><id name=\"c\"/></seq></app></bind>";
+	
+		//	val mav := map.index( "alpha" );
+		//	val mbv := map.index( "beta" );
+		//	val mcv := map.index( "gamma" );
+		program << "<bind><var name=\"mav\" protected=\"true\" tag=\"public\"/><app><id name=\"index\"/><seq><id name=\"map\"/><string value=\"alpha\"/></seq></app></bind>";
+		program << "<bind><var name=\"mbv\" protected=\"true\" tag=\"public\"/><app><id name=\"index\"/><seq><id name=\"map\"/><string value=\"beta\"/></seq></app></bind>";
+		program << "<bind><var name=\"mcv\" protected=\"true\" tag=\"public\"/><app><id name=\"index\"/><seq><id name=\"map\"/><string value=\"gamma\"/></seq></app></bind>";
+	
+		std::ostringstream output;
+		while ( rcep->unsafe_read_comp_exec_print( program, output ) ) {};
 
+		verifyMapIntegrity( this->safeValof( "map" )->valof, sysHardEqMapKey );
+		{
+			Ref map = this->safeValof( "map" )->valof;
+			CPPUNIT_ASSERT_EQUAL( 3L, SmallToLong( RefToPtr4( map )[ MAP_OFFSET_COUNT ] ) );
+		}
+
+		{
+			Valof * ma = this->safeValof( "ma" );
+			//cout << endl << "pre GC: " << ( gngIdHash( this->safeValof( "a" )->valof ) & 0x3 ) << endl;
+			//cout << ma->valof << endl;
+			CPPUNIT_ASSERT_EQUAL( LongToSmall( 11 ), ma->valof );
+		}
+		{
+			Valof * mb = this->safeValof( "mb" );
+			CPPUNIT_ASSERT_EQUAL( LongToSmall( 22 ), mb->valof );
+		}
+		{
+			Valof * mc = this->safeValof( "mc" );
+			CPPUNIT_ASSERT_EQUAL( LongToSmall( 33 ), mc->valof );
+		}
+		{
+			Valof * mav = this->safeValof( "mav" );
+			CPPUNIT_ASSERT_EQUAL( LongToSmall( 11 ), mav->valof );
+		}	
+		{
+			Valof * mbv = this->safeValof( "mbv" );
+			CPPUNIT_ASSERT_EQUAL( LongToSmall( 22 ), mbv->valof );
+		}	
+		{
+			Valof * mcv = this->safeValof( "mcv" );
+			CPPUNIT_ASSERT_EQUAL( LongToSmall( 33 ), mcv->valof );
+		}
+	}
+
+	vm->getPressure().setUnderPressure();
+	sysQuiescentGarbageCollect( vm, NULL );
+	
+	verifyMapIntegrity( this->safeValof( "map" )->valof, sysHardEqMapKey );
+	{
+		Ref map = this->safeValof( "map" )->valof;
+		CPPUNIT_ASSERT_EQUAL( 3L, SmallToLong( RefToPtr4( map )[ MAP_OFFSET_COUNT ] ) );
+	}
+
+	{
+		std::stringstream program;
+		
+		
+		//	% val ma1 := map.index( a );
+		//	% val mb1 := map.index( b );
+		//	% val mc1 := map.index( c );
+		program << "<bind><var name=\"ma1\" protected=\"true\" tag=\"public\"/><app><id name=\"index\"/><seq><id name=\"map\"/><id name=\"a\"/></seq></app></bind>";
+		program << "<bind><var name=\"mb1\" protected=\"true\" tag=\"public\"/><app><id name=\"index\"/><seq><id name=\"map\"/><id name=\"b\"/></seq></app></bind>";
+		program << "<bind><var name=\"mc1\" protected=\"true\" tag=\"public\"/><app><id name=\"index\"/><seq><id name=\"map\"/><id name=\"c\"/></seq></app></bind>";
+	
+		//	% val mav1 := map.index( "alpha" );
+		//	% val mbv1 := map.index( "beta" );
+		//	% val mcv1 := map.index( "gamma" );
+		program << "<bind><var name=\"mav1\" protected=\"true\" tag=\"public\"/><app><id name=\"index\"/><seq><id name=\"map\"/><string value=\"alpha\"/></seq></app></bind>";
+		program << "<bind><var name=\"mbv1\" protected=\"true\" tag=\"public\"/><app><id name=\"index\"/><seq><id name=\"map\"/><string value=\"beta\"/></seq></app></bind>";
+		program << "<bind><var name=\"mcv1\" protected=\"true\" tag=\"public\"/><app><id name=\"index\"/><seq><id name=\"map\"/><string value=\"gamma\"/></seq></app></bind>";
+	
+		std::ostringstream output;
+		while ( rcep->unsafe_read_comp_exec_print( program, output ) ) {
+		}
+		
+		{
+			Valof * ma1 = this->safeValof( "ma1" );
+			//cout << endl << "post GC: " << ( gngIdHash( this->safeValof( "a" )->valof ) & 0x3 ) << endl;
+			//cout << endl << "post GC: " << this->safeValof( "a" )->valof << "->" << ( gngIdHash( this->safeValof( "a" )->valof ) & 0x3 ) << endl;
+			CPPUNIT_ASSERT_EQUAL( LongToSmall( 11 ), ma1->valof );
+		}
+		{
+			Valof * mb1 = this->safeValof( "mb1" );
+			CPPUNIT_ASSERT_EQUAL( LongToSmall( 22 ), mb1->valof );
+		}
+		{
+			Valof * mc1 = this->safeValof( "mc1" );
+			CPPUNIT_ASSERT_EQUAL( LongToSmall( 33 ), mc1->valof );
+		}
+		{
+			Valof * mav1 = this->safeValof( "mav1" );
+			CPPUNIT_ASSERT_EQUAL( LongToSmall( 11 ), mav1->valof );
+		}	
+		{
+			Valof * mbv1 = this->safeValof( "mbv1" );
+			CPPUNIT_ASSERT_EQUAL( LongToSmall( 22 ), mbv1->valof );
+		}	
+		{
+			Valof * mcv1 = this->safeValof( "mcv1" );
+			CPPUNIT_ASSERT_EQUAL( LongToSmall( 33 ), mcv1->valof );
+		}
+	}
+
+}
+
+
+
+void GCTest::testCacheEqMap() {
+	std::stringstream program;
+	
+	//	val cmap := newCacheMap( "a" :- 1, "b" :- 2 );
+	program << "<bind><var name=\"cmap\" protected=\"true\" tag=\"public\"/><app><id name=\"newCacheMap\"/><seq><sysapp name=\"newMaplet\"><string value=\"a\"/><int value=\"1\"/></sysapp><sysapp name=\"newMaplet\"><string value=\"b\"/><int value=\"2\"/></sysapp></seq></app></bind>";
+	
+	std::ostringstream output;
+	while ( rcep->unsafe_read_comp_exec_print( program, output ) ) {};
+
+	{
+		Valof * cmap = this->safeValof( "cmap" );
+		CPPUNIT_ASSERT( IsObj( cmap->valof ) );
+		CPPUNIT_ASSERT( IsMap( cmap->valof ) );
+		CPPUNIT_ASSERT_EQUAL( 2L, SmallToLong( RefToPtr4( cmap->valof )[ MAP_OFFSET_COUNT ] ) );
+
+	}	
+
+	vm->getPressure().setUnderPressure();
+	sysQuiescentGarbageCollect( vm, NULL );
+	
+	verifyMapIntegrity( this->safeValof( "cmap" )->valof, sysCacheEqMapKey );
+	
+	//	The first garbage collect should not affect the cache map.
+	
+	{
+		Valof * cmap = this->safeValof( "cmap" );
+		CPPUNIT_ASSERT( IsMap( cmap->valof ) );
+		CPPUNIT_ASSERT_EQUAL( 0L, SmallToLong( RefToPtr4( cmap->valof )[ MAP_OFFSET_COUNT ] ) );
+		CPPUNIT_ASSERT( IsHashMapData( RefToPtr4( cmap->valof )[ MAP_OFFSET_DATA ] ) );
+		Ref * data_K = RefToPtr4( RefToPtr4( cmap->valof )[ MAP_OFFSET_DATA ] );
+		const long N = SmallToLong( data_K[ VECTOR_OFFSET_LENGTH ]	);
+		CPPUNIT_ASSERT( N > 1 );
+		for ( long i = 1; i < N; i++ ) {
+			CPPUNIT_ASSERT_EQUAL( sys_absent, data_K[ i ] );
+		}
+	}
+
+}
 
 void GCTest::testAllRef() {
 	stringstream program;
@@ -289,43 +571,6 @@ void GCTest::testAllRef() {
 		CPPUNIT_ASSERT( IsRef( s ) );
 		CPPUNIT_ASSERT_EQUAL( sys_absent, RefToPtr4( s )[ REF_OFFSET_CONT ] );
 	}	
-}
-
-void GCTest::testCacheEqMap() {
-	std::stringstream program;
-	
-	//	val cmap := newCacheMap( "a" :- 1, "b" :- 2 );
-	program << "<bind><var name=\"cmap\" protected=\"true\" tag=\"public\"/><app><id name=\"newCacheMap\"/><seq><sysapp name=\"newMaplet\"><string value=\"a\"/><int value=\"1\"/></sysapp><sysapp name=\"newMaplet\"><string value=\"b\"/><int value=\"2\"/></sysapp></seq></app></bind>";
-	
-	std::ostringstream output;
-	while ( rcep->unsafe_read_comp_exec_print( program, output ) ) {};
-
-	{
-		Valof * cmap = this->safeValof( "cmap" );
-		CPPUNIT_ASSERT( IsObj( cmap->valof ) );
-		CPPUNIT_ASSERT( IsMap( cmap->valof ) );
-		CPPUNIT_ASSERT_EQUAL( 2L, SmallToLong( RefToPtr4( cmap->valof )[ MAP_OFFSET_COUNT ] ) );
-
-	}	
-
-	vm->getPressure().setUnderPressure();
-	sysQuiescentGarbageCollect( vm, NULL );
-	
-	//	The first garbage collect should not affect the cache map.
-	
-	{
-		Valof * cmap = this->safeValof( "cmap" );
-		CPPUNIT_ASSERT( IsMap( cmap->valof ) );
-		CPPUNIT_ASSERT_EQUAL( 0L, SmallToLong( RefToPtr4( cmap->valof )[ MAP_OFFSET_COUNT ] ) );
-		CPPUNIT_ASSERT( IsVector( RefToPtr4( cmap->valof )[ MAP_OFFSET_DATA ] ) );
-		Ref * data_K = RefToPtr4( RefToPtr4( cmap->valof )[ MAP_OFFSET_DATA ] );
-		const long N = SmallToLong( data_K[ VECTOR_OFFSET_LENGTH ]	);
-		CPPUNIT_ASSERT( N > 1 );
-		for ( long i = 1; i < N; i++ ) {
-			CPPUNIT_ASSERT_EQUAL( sys_absent, data_K[ i ] );
-		}
-	}
-
 }
 
 void GCTest::testMethodWeakness() {	

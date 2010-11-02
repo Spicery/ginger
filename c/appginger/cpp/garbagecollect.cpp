@@ -453,7 +453,6 @@ private:
 						}
 					} else if ( IsMapSimpleKey( key ) ) {
 						//std::cout << "KEY " << key << "; EQ  " << MapKeyEq( key ) << std::endl;
-						
 						if ( MapKeyEq( key ) ) {
 							if ( key == sysCacheEqMapKey && this->isUnderPressure() ) {
 								//std::cerr << "MapKeyEq( key ) = " << MapKeyEq( key ) << std::endl;
@@ -471,10 +470,23 @@ private:
 				}
 				case VECTOR_KIND: {
 					if ( this->tracker ) this->tracker->startVector( obj_K );
-					long n = sizeAfterKeyOfVector( obj_K );
-					Ref * obj_K1 = obj_K + 1;
-					for ( long i = 0; i < n; i++ ) {
-						this->forward( obj_K1[ i ] );
+					if ( key == sysHashMapDataKey ) {
+						//obj_K[ METHOD_OFFSET_CACHE ] = sys_absent;
+						//this->assoc_chains.push_back( &obj_K[ METHOD_OFFSET_DISPATCH_TABLE ] );
+						long n = sizeAfterKeyOfVector( obj_K );
+						Ref * obj_K1 = obj_K + 1;
+						for ( long i = 0; i < n; i++ ) {
+							Ref * chain = &obj_K1[ i ];
+							if ( *chain != sys_absent ) {
+								this->assoc_chains.push_back( chain );
+							}
+						}						
+					} else {
+						long n = sizeAfterKeyOfVector( obj_K );
+						Ref * obj_K1 = obj_K + 1;
+						for ( long i = 0; i < n; i++ ) {
+							this->forward( obj_K1[ i ] );
+						}
 					}
 					if ( this->tracker ) this->tracker->endVector( obj_K );
 					break;

@@ -8,7 +8,7 @@ clean:
 	rm -rf build/appginger
 	rm -f bin/common2gnx
 	rm -f bin/appginger
-	$(MAKE) -C c $@
+	$(MAKE) -C apps $@
 	
 distclean: clean
 	rm -f Makefile

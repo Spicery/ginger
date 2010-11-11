@@ -1,0 +1,14 @@
+
+#	Do nothing
+all:
+	
+#	This is the top-level make
+check: smoke.pass literals.pass full_lexical_binding.pass records.pass
+
+.tests.pass:
+	java -cp ../../../classes com.steelypip.appginger.functest.FuncTestMain "../cpp/appginger -B" $< 
+	
+clean:
+	rm -f *.pass
+	
+.SUFFIXES: .pass .tests

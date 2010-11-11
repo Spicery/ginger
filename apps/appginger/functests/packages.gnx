@@ -1,0 +1,51 @@
+<package url="Alpha">
+	<bind>
+		<var name="a" tag0="useful" tag1="shared"/>
+		<string value="avalue"/>
+	</bind>
+	<bind>
+		<var name="a1" tag0="shared"/>
+		<string value="a1value"/>
+	</bind>
+</package>
+
+<package url="Beta">	
+	<import match="useful" from="Alpha" into0="utilities"/>
+</package>
+
+<package url="Gamma">
+	<import match="shared" from="Alpha"/>
+</package>
+
+<package url="Delta">
+	<import match="utilities" from="Beta"/>
+</package>
+
+----
+
+<package url="Alpha">
+	<bind>
+		<var name="a" tag0="useful" tag1="shared"/>
+		<string value="avalue"/>
+	</bind>
+	<bind>
+		<var name="a1" tag0="shared"/>
+		<string value="a1value"/>
+	</bind>
+</package>
+
+<package url="Psi">	
+	<import match0="useful" from="Alpha" alias="psi" qualified="true"/>
+	<id name="a" alias="psi"/>
+</package>
+
+<package url="Psi">
+	<bind><var name="c" alias="psi" tag0="useful" tag1="shared"/><string value="?"/></bind>
+</package>
+
+<package url="Omega">
+	<import match0="shared" from="Alpha" protected="true"/>
+	<bind><var name="a"/><string value="not allowed"/></bind>
+</package>
+
+<bind><var name="a" pkg="Omega"/><string value="not allowed"/></bind>

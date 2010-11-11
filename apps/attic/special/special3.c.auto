@@ -1,0 +1,522 @@
+Special spc__add;
+Special spc__decr;
+Special spc__div;
+Special spc__eq;
+Special spc__gt;
+Special spc__gte;
+Special spc__incr;
+Special spc__incr_by;
+Special spc__lt;
+Special spc__lte;
+Special spc__mul;
+Special spc__print;
+Special spc__putchar;
+Special spc__sub;
+Special spc_calls;
+Special spc_check0;
+Special spc_check1;
+Special spc_end;
+Special spc_end1_calls;
+Special spc_end_call_global;
+Special spc_enter;
+Special spc_enter0;
+Special spc_enter1;
+Special spc_eq_si;
+Special spc_eq_ss;
+Special spc_goto;
+Special spc_gt_si;
+Special spc_gt_ss;
+Special spc_gte_si;
+Special spc_gte_ss;
+Special spc_halt;
+Special spc_ifnot;
+Special spc_ifso;
+Special spc_lt_si;
+Special spc_lt_ss;
+Special spc_lte_si;
+Special spc_lte_ss;
+Special spc_neq_si;
+Special spc_neq_ss;
+Special spc_not;
+Special spc_pop_global;
+Special spc_pop_local;
+Special spc_push_global;
+Special spc_push_local;
+Special spc_push_local0;
+Special spc_push_local1;
+Special spc_pushq;
+Special spc_reset;
+Special spc_return;
+Special spc_set;
+Special spc_set_call_global;
+Special spc_set_calls;
+Special spc_start;
+void special_interpreter( int mode, Ref *pc, Machine vm ) {
+    Ref *VMSP, *VMVP, *VMLINK;
+    if ( mode == 0 ) goto Initialize;
+    MELT;
+    goto **pc;
+    L__add: {
+        int y = ToInt( *( VMVP-- ) );
+        int x = ToInt( *( VMVP ) );
+        int sum = x + y;
+        if ( x < 0 ? sum > y : sum < y ) {
+            reset( "overflow detected %d + %d", x, y );
+        }
+        *VMVP = ToRef( sum );
+        RETURN( pc + 1 );
+        /*
+        int y = ToInt( *( VMVP-- ) );
+        *VMVP = ToRef( ToInt( *( VMVP ) ) + y );
+        RETURN( pc + 1 );
+        */
+    }
+    L__decr: {
+        int x = ToInt( *( VMVP ) );
+        int sum = x - ToInt( IntToSmall( 1 ) );
+        if ( sum > x ) {
+            reset( "integer overflow detected %d - 1", x );
+        }
+        *( VMVP ) = ToRef( sum );
+        RETURN( pc + 1 );
+        
+        /*
+        *( VMVP ) = ToRef( ToInt( *( VMVP ) ) - ToInt( IntToSmall( 1 ) ) );
+        RETURN( pc + 1 );
+        */
+    }
+    L__div: {
+        int b = ToInt( *( VMVP-- ) );
+        *( VMVP ) = ToRef( ToInt( *( VMVP ) ) / b );
+        RETURN( pc + 1 );
+    }
+    L__eq: {
+        Ref r = *( VMVP-- );
+        *( VMVP ) = *( VMVP ) == r ? sys_true : sys_false;
+        RETURN( pc + 1 );
+    }
+    L__gt: {
+        int b = ToInt( *( VMVP-- ) );
+        *( VMVP ) = ToInt( *( VMVP ) ) > b ? sys_true : sys_false;
+        RETURN( pc + 1 );
+    }
+    L__gte: {
+        int b = ToInt( *( VMVP-- ) );
+        *( VMVP ) = ToInt( *( VMVP ) ) >= b ? sys_true : sys_false;
+        RETURN( pc + 1 );
+    }
+    L__incr: {
+        int x = ToInt( *( VMVP ) );
+        int sum = x + ToInt( IntToSmall( 1 ) );
+        if ( sum < x ) {
+            reset( "integer overflow detected %d + 1", x );
+        }
+        *( VMVP ) = ToRef( sum );
+        RETURN( pc + 1 );
+        /*
+        *( VMVP ) = ToRef( ToInt( *( VMVP ) ) + ToInt( IntToSmall( 1 ) ) );
+        RETURN( pc + 1 );
+        */
+    }
+    L__incr_by: {
+        int x = ToInt( *( VMVP ) );
+        int y = ToInt( pc[ 1 ] );
+        int sum = x + y;
+        if ( x < 0 ? sum > y : sum < y ) {
+            reset( "overflow detected %d + %d", x, y );
+        }
+        *VMVP = ToRef( sum );
+        RETURN( pc + 2 );
+        /*
+        int n = ToInt( pc[ 1 ] );
+        *( VMVP ) = ToRef( ToInt( *( VMVP ) ) + n );
+        RETURN( pc + 2 );
+        */
+    }
+    L__lt: {
+        int b = ToInt( *( VMVP-- ) );
+        *( VMVP ) = ToInt( *( VMVP ) ) < b ? sys_true : sys_false;
+        RETURN( pc + 1 );
+    }
+    L__lte: {
+        int b = ToInt( *( VMVP-- ) );
+        *( VMVP ) = ToInt( *( VMVP ) ) <= b ? sys_true : sys_false;
+        RETURN( pc + 1 );
+    }
+    L__mul: {
+        //  This needs to be given overflow detection!
+        int b = ToInt( *( VMVP-- ) );
+        *( VMVP ) = ToRef( ToInt( *( VMVP ) ) * ( b >> TAG ) );
+        RETURN( pc + 1 );
+    }
+    L__print: {
+        Ref r = *VMVP--;
+        sys_print( r );
+        RETURN( pc + 1 );
+    }
+    L__putchar: {
+        putchar( ( ( unt )( *VMVP-- ) ) >> 8 );
+        RETURN( pc + 1 );
+    }
+    L__sub: {
+        //  This needs to be given overflow detection!
+        int b = ToInt( *( VMVP-- ) );
+        *( VMVP ) = ToRef( ToInt( *( VMVP ) ) - b );
+        RETURN( pc + 1 );
+    }
+    L_calls: {
+        Ref r = *( VMVP-- );
+        {    
+            Ref *ptr;
+            if ( !IsPtr4( r ) ) call_error( r );
+            ptr = RefToPtr4( r );
+            if ( !IsFnKey( *ptr ) ) call_error( r );
+            VMLINK = pc + 1;
+            RETURN( ptr + 1 );
+        }
+    }
+    L_check0: {
+        int n = ToInt( *( ++pc ) );
+        #ifdef DBG_SPECIAL
+        fprintf(
+        	stderr,
+        	"Difference between %u and %u (held in %d)\n",
+        	ToUInt( VMVP ),
+        	ToUInt( VMSP[n] ),
+        	n
+        );
+        #endif
+        if ( VMVP == VMSP[n] ) RETURN( pc + 1 );
+        reset( "Wrong number of results (needed 0 but got %u)", VMVP - ToRefRef( VMSP[n] ) );
+        RETURN( NULL );	// stupid compiler
+    }
+    L_check1: {
+        int n = ToInt( *( ++pc ) );
+        unsigned int d;
+        #ifdef DBG_SPECIAL
+        fprintf( stderr, "Recovering %u from %d\n", ToUInt( VMSP[n] ), n );
+        fprintf( stderr, "Comparing with %u\n",  ToUInt( VMVP ) );
+        fprintf( stderr, "Length of value stack = %d\n", ( VMVP - VMVP_base ) );
+        #endif
+        d = VMVP - ToRefRef( VMSP[n] );
+        if ( d == 1 ) RETURN( pc + 1 );
+        reset( "Wrong number of results (needed 1 but got %u)", d );
+        RETURN( NULL );	// stupid compiler
+    }
+    L_end: {
+        Ref r;
+        int n = ToInt( *( ++pc ) );
+        #ifdef DBG_SPECIAL
+        fprintf( stderr, "Recovering %u from %d\n", ToUInt( VMSP[n] ), n );
+        fprintf( stderr, "Comparing with %u\n",  ToUInt( VMVP ) );
+        fprintf( stderr, "Length of value stack = %d\n", ( VMVP - VMVP_base ) );
+        #endif
+        r = ToRef( ToUInt( VMVP ) - ToUInt( VMSP[n] ) );
+        *( ++VMVP ) = r;
+        RETURN( pc + 1 );
+    }
+    L_end1_calls: {
+        Ref r = *( VMVP-- );
+        int var = ToInt( pc[ 1 ] );
+        VMCOUNT = ( VMVP - ( Ref * )( VMSP[ var ] ) ) - 1;
+        {    
+            Ref *ptr;
+            if ( !IsPtr4( r ) ) call_error( r );
+            ptr = RefToPtr4( r );
+            if ( !IsFnKey( *ptr ) ) call_error( r );
+            VMLINK = pc + 2;
+            RETURN( ptr + 1 );
+        }
+    }
+    L_end_call_global: {
+        int var = ToInt( pc[ 1 ] );
+        Ref r = ((Ident)( pc[ 2 ] )) -> valof;
+        VMCOUNT = VMVP - ( Ref * )( VMSP[ var ] );
+        {    
+            Ref *ptr;
+            if ( !IsPtr4( r ) ) call_error( r );
+            ptr = RefToPtr4( r );
+            if ( !IsFnKey( *ptr ) ) call_error( r );
+            VMLINK = pc + 3;
+            RETURN( ptr + 1 );
+        }
+    }
+    L_enter: {
+        int A = ToInt( pc[ -2 ] );
+        Ref *prev = VMSP;
+        VMSP += ToInt( VMSP[ -1 ] );
+        VMSP[ 0 ] = VMLINK;
+        VMSP[ 1 ] = prev;
+        VMSP[ 2 ] = ToRef( pc[ -3 ] );
+        VMSP += 3;
+        if ( A != VMCOUNT ) enter_error( VMCOUNT, A );
+        {    int i;
+            for ( i = 0; i < A; i++ ) {
+                VMSP[ i ] = *( VMVP-- );
+            }
+        }
+        RETURN( pc + 1 );
+    }
+    L_enter0: {
+        Ref *prev = VMSP;
+        VMSP += ToInt( VMSP[ -1 ] );
+        VMSP[ 0 ] = VMLINK;
+        VMSP[ 1 ] = prev;
+        VMSP[ 2 ] = ToRef( pc[ -3 ] );
+        VMSP += 3;
+        if ( VMCOUNT != 0 ) {
+            enter_error( VMCOUNT, 0 );
+        }
+        RETURN( pc + 1 );
+    }
+    L_enter1: {
+        Ref *prev = VMSP;
+        VMSP += ToInt( VMSP[ -1 ] );
+        VMSP[ 0 ] = VMLINK;
+        VMSP[ 1 ] = prev;
+        VMSP[ 2 ] = ToRef( pc[ -3 ] );
+        VMSP += 3;
+        if ( VMCOUNT != 1 ) {
+            enter_error( VMCOUNT, 1 );
+        }
+        VMSP[ 0 ] = *( VMVP-- );
+        RETURN( pc + 1 );
+    }
+    L_eq_si: {
+        int s = ToInt( pc[1] );
+        int i = ToInt( pc[2] );
+        int d = ToInt( pc[3] );
+        RETURN( ToInt( VMSP[ s ] ) == i ? pc + d + 3 : pc + 4 );
+    }
+    L_eq_ss: {
+        int s = ToInt( pc[1] );
+        int t = ToInt( pc[2] );
+        int d = ToInt( pc[3] );
+        RETURN( ToInt( VMSP[ s ] ) == ToInt( VMSP[ t ] ) ? pc + d + 3 : pc + 4 );
+    }
+    L_goto: {
+        int n = ToInt( *( ++pc ) );
+        RETURN( pc + n );
+    }
+    L_gt_si: {
+        int s = ToInt( pc[1] );
+        int i = ToInt( pc[2] );
+        RETURN( ToInt( VMSP[ s ] ) > i ? pc + ToInt( pc[3] ) + 3 : pc + 4 );
+    }
+    L_gt_ss: {
+        int s = ToInt( pc[1] );
+        int t = ToInt( pc[2] );
+        int d = ToInt( pc[3] );
+        RETURN( ToInt( VMSP[ s ] ) > ToInt( VMSP[ t ] ) ? pc + d + 3 : pc + 4 );
+    }
+    L_gte_si: {
+        int s = ToInt( pc[1] );
+        int i = ToInt( pc[2] );
+        int d = ToInt( pc[3] );
+        RETURN( ToInt( VMSP[ s ] ) >= i ? pc + d + 3: pc + 4 );
+    }
+    L_gte_ss: {
+        int s = ToInt( pc[1] );
+        int t = ToInt( pc[2] );
+        int d = ToInt( pc[3] );
+        RETURN( ToInt( VMSP[ s ] ) >= ToInt( VMSP[ t ] ) ? pc + d + 3 : pc + 4 );
+    }
+    L_halt: {
+        #ifdef DBG_SPECIAL	
+        printf( "\nhalt\n" );
+        #endif
+        exit( EXIT_SUCCESS );
+    }
+    L_ifnot: {
+        #ifdef DBG_SPECIAL
+        fprintf( stderr, "IFNOT finds %x on the stack (cf. %x & %x)\n", (unt)(*( VMVP )), (unt)(sys_false), (unt)(sys_true) );
+        #endif
+        RETURN(
+        	*( VMVP-- ) == sys_false ?
+        	pc + ToInt( pc[ 1 ] ) + 1:
+        	pc + 2
+        );
+    }
+    L_ifso: {
+        RETURN(
+        	*( VMVP-- ) == sys_false ?
+        	pc + 2 :
+        	pc + ToInt( pc[ 1 ] ) + 1
+        );
+    }
+    L_lt_si: {
+        int s = ToInt( pc[1] );
+        int i = ToInt( pc[2] );
+        int d = ToInt( pc[3] );
+        RETURN( ToInt( VMSP[ s ] ) < i ? pc + d + 3 : pc + 4 );
+    }
+    L_lt_ss: {
+        int s = ToInt( pc[1] );
+        int t = ToInt( pc[2] );
+        int d = ToInt( pc[3] );
+        RETURN( ToInt( VMSP[ s ] ) < ToInt( VMSP[ t ] ) ? pc + d + 3 : pc + 4 );
+    }
+    L_lte_si: {
+        int s = ToInt( pc[1] );
+        int i = ToInt( pc[2] );
+        int d = ToInt( pc[3] );
+        RETURN( ToInt( VMSP[ s ] ) <= i ? pc + d + 3 : pc + 4 );
+    }
+    L_lte_ss: {
+        int s = ToInt( pc[1] );
+        int t = ToInt( pc[2] );
+        int d = ToInt( pc[3] );
+        RETURN( ToInt( VMSP[ s ] ) <= ToInt( VMSP[ t ] ) ? pc + d + 3 : pc + 4 );
+    }
+    L_neq_si: {
+        int s = ToInt( pc[1] );
+        int i = ToInt( pc[2] );
+        RETURN( ToInt( VMSP[ s ] ) == i ? pc + 4 : pc + ToInt( pc[3] ) + 3 );
+    }
+    L_neq_ss: {
+        int s = ToInt( pc[1] );
+        int t = ToInt( pc[2] );
+        int d = ToInt( pc[3] );
+        RETURN( ToInt( VMSP[ s ] ) != ToInt( VMSP[ t ] ) ? pc + d + 3 : pc + 4 );
+    }
+    L_not: {
+        *VMVP = ( *VMVP == sys_false ? sys_true : sys_false );
+        RETURN( pc + 1 );
+    }
+    L_pop_global: {
+        Ident id = (Ident)( *( ++pc ) );
+        id->valof = *( VMVP-- );
+        RETURN( pc + 1 );
+    }
+    L_pop_local: {
+        VMSP[ ToInt( *( ++pc ) ) ] = *( VMVP-- );
+        RETURN( pc + 1 );
+    }
+    L_push_global: {
+        Ident id = (Ident)( *( ++pc ) );
+        *( ++VMVP ) = id->valof;
+        RETURN( pc + 1 );
+    }
+    L_push_local: {
+        *( ++VMVP ) = VMSP[ ToInt( *( ++pc ) ) ];
+        RETURN( pc + 1 );
+    }
+    L_push_local0: {
+        *( ++VMVP ) = VMSP[ 0 ];
+        RETURN( pc + 1 );
+    }
+    L_push_local1: {
+        *( ++VMVP ) = VMSP[ 1 ];
+        RETURN( pc + 1 );
+    }
+    L_pushq: {
+        *( ++VMVP ) = *( ++pc );
+        RETURN( pc + 1 );
+    }
+    L_reset: {
+        FREEZE;
+        longjmp( mishap_jump_buffer, 2 );
+    }
+    L_return: {
+        Ref *link;
+        link = (Ref *)VMSP[ -3 ];	//	recover return address
+        VMSP = (Ref *)VMSP[ -2 ];				//	restore stack pointer
+        #ifdef DBG_SPECIAL
+        	printf( "Recover link = %x\n", ToUInt( link ) );
+        	printf( "Stack pointer recovered as %x\n", ToUInt( VMSP ) );
+        #endif
+        RETURN( link );
+    }
+    L_set: {
+        VMCOUNT = VMVP - (Ref *)VMSP[ ToInt( pc[ 1 ] ) ];
+        RETURN( pc + 2 );
+    }
+    L_set_call_global: {
+        Ref r = ((Ident)( pc[ 2 ] )) -> valof;
+        VMCOUNT = ToInt( pc[ 1 ] );
+        {    
+            Ref *ptr;
+            if ( !IsPtr4( r ) ) call_error( r );
+            ptr = RefToPtr4( r );
+            if ( !IsFnKey( *ptr ) ) call_error( r );
+            VMLINK = pc + 3;
+            RETURN( ptr + 1 );
+        }
+    }
+    L_set_calls: {
+        Ref r = *( VMVP-- );
+        VMCOUNT = ToInt( pc[ 1 ] );
+        {    
+            Ref *ptr;
+            if ( !IsPtr4( r ) ) call_error( r );
+            ptr = RefToPtr4( r );
+            if ( !IsFnKey( *ptr ) ) call_error( r );
+            VMLINK = pc + 2;
+            RETURN( ptr + 1 );
+        }
+    }
+    L_start: {
+        int n = ToInt( *( ++pc ) );
+        #ifdef DBG_SPECIAL
+        fprintf( stderr, "Storing %u in %d\n", ToUInt( ToRef( VMVP ) ), n );
+        #endif
+        VMSP[n] = ToRef( VMVP );
+        RETURN( pc + 1 );
+    }
+    Initialize: {
+        spc__add = &&L__add;
+        spc__decr = &&L__decr;
+        spc__div = &&L__div;
+        spc__eq = &&L__eq;
+        spc__gt = &&L__gt;
+        spc__gte = &&L__gte;
+        spc__incr = &&L__incr;
+        spc__incr_by = &&L__incr_by;
+        spc__lt = &&L__lt;
+        spc__lte = &&L__lte;
+        spc__mul = &&L__mul;
+        spc__print = &&L__print;
+        spc__putchar = &&L__putchar;
+        spc__sub = &&L__sub;
+        spc_calls = &&L_calls;
+        spc_check0 = &&L_check0;
+        spc_check1 = &&L_check1;
+        spc_end = &&L_end;
+        spc_end1_calls = &&L_end1_calls;
+        spc_end_call_global = &&L_end_call_global;
+        spc_enter = &&L_enter;
+        spc_enter0 = &&L_enter0;
+        spc_enter1 = &&L_enter1;
+        spc_eq_si = &&L_eq_si;
+        spc_eq_ss = &&L_eq_ss;
+        spc_goto = &&L_goto;
+        spc_gt_si = &&L_gt_si;
+        spc_gt_ss = &&L_gt_ss;
+        spc_gte_si = &&L_gte_si;
+        spc_gte_ss = &&L_gte_ss;
+        spc_halt = &&L_halt;
+        spc_ifnot = &&L_ifnot;
+        spc_ifso = &&L_ifso;
+        spc_lt_si = &&L_lt_si;
+        spc_lt_ss = &&L_lt_ss;
+        spc_lte_si = &&L_lte_si;
+        spc_lte_ss = &&L_lte_ss;
+        spc_neq_si = &&L_neq_si;
+        spc_neq_ss = &&L_neq_ss;
+        spc_not = &&L_not;
+        spc_pop_global = &&L_pop_global;
+        spc_pop_local = &&L_pop_local;
+        spc_push_global = &&L_push_global;
+        spc_push_local = &&L_push_local;
+        spc_push_local0 = &&L_push_local0;
+        spc_push_local1 = &&L_push_local1;
+        spc_pushq = &&L_pushq;
+        spc_reset = &&L_reset;
+        spc_return = &&L_return;
+        spc_set = &&L_set;
+        spc_set_call_global = &&L_set_call_global;
+        spc_set_calls = &&L_set_calls;
+        spc_start = &&L_start;
+        return;
+    }
+}

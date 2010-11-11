@@ -1,0 +1,33 @@
+================================================================================
+Title: nfib
+--------------------------------------------------------------------------------
+<bind><var name="nfib" protected="true"/><fn name="nfib"><seq><var name="n"/></seq><if><sysapp name="&lt;="><id name="n"/><int value="1"/></sysapp><int value="1"/><sysapp name="+"><sysapp name="+"><int value="1"/><app><id name="nfib"/><sysapp name="-"><id name="n"/><int value="1"/></sysapp></app></sysapp><app><id name="nfib"/><sysapp name="-"><id name="n"/><int value="2"/></sysapp></app></sysapp></if></fn></bind>
+<app><id name="nfib"/><int value="15"/></app>
+--------------------------------------------------------------------------------
+1973
+================================================================================
+Title: Identity
+--------------------------------------------------------------------------------
+<bind><var name="f" protected="true"/><fn name="f"><seq><var name="x"/></seq><id name="x"/></fn></bind>
+<app><id name="f"/><int value="99"/></app>
+--------------------------------------------------------------------------------
+99
+================================================================================
+Title: Index
+--------------------------------------------------------------------------------
+<!-- 
+	"abc".index(2);
+	["abc".explode].index(3);
+	{"abc".explode}.index(1);
+	{% 'p' :- 'a', 'q' :- 'b', 'r' :- 'c' %}.index( 'q' );
+-->
+<app><id name="index"/><seq><string value="abc"/><int value="2"/></seq></app>
+<app><id name="index"/><seq><sysapp name="newList"><sysapp name="explode"><seq><string value="abc"/></seq></sysapp></sysapp><int value="3"/></seq></app>
+<app><id name="index"/><seq><sysapp name="newVector"><sysapp name="explode"><seq><string value="abc"/></seq></sysapp></sysapp><int value="1"/></seq></app>
+<app><id name="index"/><seq><sysapp name="newMap"><seq><seq><sysapp name="newMaplet"><seq><char value="p"/></seq><seq><char value="a"/></seq></sysapp><sysapp name="newMaplet"><seq><char value="q"/></seq><seq><char value="b"/></seq></sysapp></seq><sysapp name="newMaplet"><seq><char value="r"/></seq><seq><char value="c"/></seq></sysapp></seq></sysapp><seq><char value="q"/></seq></seq></app>
+--------------------------------------------------------------------------------
+b
+c
+a
+b
+================================================================================

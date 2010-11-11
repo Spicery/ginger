@@ -1,0 +1,807 @@
+static void spcfn_add( void ) {
+    Ref ry = *( VMVP-- );
+    Ref rx = *( VMVP );
+    if ( IsSmall( rx ) && IsSmall( ry ) ) {
+    	long y = (long)ry;
+    	long x = (long)rx;
+    	long sum = x + y;
+    	if ( x < 0 ? sum <= y : sum >= y ) {
+    		*VMVP = ToRef( sum );
+    		RETURN( pc + 1 );
+    	} else {
+        	throw Mishap( "Overflow detected in +" );
+    	}
+    } else {
+    	throw Mishap( "Small integers only" );
+    } 
+}
+
+static void spcfn_decr( void ) {
+    Ref rx = *VMVP;
+    if ( IsSmall( rx ) ) {
+    	long x = (long)rx;
+    	long sum = x - (long)LongToSmall( 1 );
+    	if ( sum > x ) {
+    		throw Mishap( "integer overflow detected in x - 1" ).culprit( "x", "" + x );
+    	}
+    	*( VMVP ) = ToRef( sum );
+    	RETURN( pc + 1 );
+    } else {
+    	throw Mishap( "Small integer needed" );
+    }
+    
+    //*( VMVP ) = ToRef( ToLong( *( VMVP ) ) - ToLong( IntToSmall( 1 ) ) );
+    //RETURN( pc + 1 );
+}
+
+static void spcfn_div( void ) {
+    long b = ToLong( *( VMVP-- ) );
+    *( VMVP ) = ToRef( ToLong( *( VMVP ) ) / b );
+    RETURN( pc + 1 );
+}
+
+static void spcfn_eq( void ) {
+    Ref r = *( VMVP-- );
+    *( VMVP ) = *( VMVP ) == r ? sys_true : sys_false;
+    RETURN( pc + 1 );
+}
+
+static void spcfn_neq( void ) {
+    Ref r = *( VMVP-- );
+    *( VMVP ) = *( VMVP ) == r ? sys_false : sys_true;
+    RETURN( pc + 1 );
+}
+
+static void spcfn_gt( void ) {
+    long b = ToLong( *( VMVP-- ) );
+    *( VMVP ) = ToLong( *( VMVP ) ) > b ? sys_true : sys_false;
+    RETURN( pc + 1 );
+}
+
+static void spcfn_gte( void ) {
+    long b = ToLong( *( VMVP-- ) );
+    *( VMVP ) = ToLong( *( VMVP ) ) >= b ? sys_true : sys_false;
+    RETURN( pc + 1 );
+}
+
+static void spcfn_incr( void ) {
+    Ref rx = *VMVP;
+    if ( IsSmall( rx ) ) {
+    	long x = (long)rx;
+    	long sum = x + (long)LongToSmall( 1 );
+    	if ( sum > x ) {
+    		*( VMVP ) = ToRef( sum );
+    		RETURN( pc + 1 );
+    	} else {
+    		throw Mishap( "integer overflow detected in x + 1" );
+    	}
+    } else {
+    	throw Mishap( "Small integer needed" );
+    }
+    
+}
+
+static void spcfn_incr_by( void ) {
+    Ref ry = ToRef( pc[ 1 ] );
+    Ref rx = *( VMVP );
+    if ( IsSmall( rx ) && IsSmall( ry ) ) {
+    	long y = (long)ry;
+    	long x = (long)rx;
+    	long sum = x + y;
+    	if ( x < 0 ? sum <= y : sum >= y ) {
+    		*VMVP = ToRef( sum );
+    		RETURN( pc + 2 );
+    	} else {
+        	throw Mishap( "Overflow detected in +" );
+    	}
+    } else {
+    	throw Mishap( "Small integers only" );
+    } 
+}
+
+static void spcfn_lt( void ) {
+    long b = ToLong( *( VMVP-- ) );
+    *( VMVP ) = ToLong( *( VMVP ) ) < b ? sys_true : sys_false;
+    RETURN( pc + 1 );
+}
+
+static void spcfn_lte( void ) {
+    long b = ToLong( *( VMVP-- ) );
+    *( VMVP ) = ToLong( *( VMVP ) ) <= b ? sys_true : sys_false;
+    RETURN( pc + 1 );
+}
+
+static void spcfn_mul( void ) {
+    //  This needs to be given overflow detection!
+    long b = ToLong( *( VMVP-- ) );
+    *( VMVP ) = ToRef( ToLong( *( VMVP ) ) * ( b >> TAG ) );
+    RETURN( pc + 1 );
+}
+
+static void spcfn_sub( void ) {
+    //  This needs to be given overflow detection!
+    long b = ToLong( *( VMVP-- ) );
+    *( VMVP ) = ToRef( ToLong( *( VMVP ) ) - b );
+    RETURN( pc + 1 );
+}
+
+static void spcfn_calls( void ) {
+    Ref r = *( VMVP-- );
+    {    
+        Ref *ptr;
+        if ( !IsObj( r ) ) call_error( r );
+        ptr = RefToPtr4( r );
+        if ( !IsFunctionKey( *ptr ) ) call_error( r );
+        VMLINK = pc + 1;
+        VMLINKFUNC = VMPCFUNC;
+        VMPCFUNC = ptr;
+        RETURN( ptr + 1 );
+    }
+}
+
+static void spcfn_chainlite( void ) {
+    Ref * fn_K = RefToPtr4( pc[ 1 ] );
+    VMCOUNT += ToLong( pc[2] );
+    
+    //	Leave VMLINK & VMLINKFUNC alone.
+    //	The lite function has not stashed them into the callstack.
+    //	As a consequence we can chain directly without meddling with
+    //	them.
+    
+    VMPCFUNC = fn_K;
+    RETURN( fn_K + 1 );
+}
+
+static void spcfn_check_count( void ) {
+    long n = ToLong( *( ++pc ) );
+    #ifdef DBG_SPECIAL
+    fprintf(
+    	stderr,
+    	"Difference between %lu and %lu (held in %ld)\n",
+    	ToULong( VMVP ),
+    	ToULong( LOCAL(n) ),
+    	n
+    );
+    #endif
+    if ( VMCOUNT == n ) RETURN( pc + 1 );
+    throw Mishap( "Wrong number of results (needed 0)" ).culprit( "#Results", "" + ( VMVP - ToRefRef( LOCAL(n) ) ) );
+    RETURN( NULL );	// stupid compiler
+}
+
+static void spcfn_check_mark0( void ) {
+    long n = ToLong( *( ++pc ) );
+    #ifdef DBG_SPECIAL
+    fprintf(
+    	stderr,
+    	"Difference between %lu and %lu (held in %ld)\n",
+    	ToULong( VMVP ),
+    	ToULong( LOCAL(n) ),
+    	n
+    );
+    #endif
+    if ( VMVP == LOCAL(n) ) RETURN( pc + 1 );
+    throw Mishap( "Wrong number of results (needed 0)" ).culprit( "#Results", "" + ( VMVP - ToRefRef( LOCAL(n) ) ) );
+    RETURN( NULL );	// stupid compiler
+}
+
+static void spcfn_check_mark1( void ) {
+    long n = ToLong( *( ++pc ) );
+    unsigned long d;
+    #ifdef DBG_SPECIAL
+    fprintf( stderr, "Recovering %lu from %ld\n", ToULong( LOCAL(n) ), n );
+    fprintf( stderr, "Comparing with %u\n",  ToULong( VMVP ) );
+    fprintf( stderr, "Length of value stack = %d\n", ( VMVP - VMVP_base ) );
+    #endif
+    d = VMVP - ToRefRef( LOCAL(n) );
+    if ( d == 1 ) RETURN( pc + 1 );
+    throw Mishap( "Wrong number of results (needed 1)" ).culprit( "#results", "" + d );
+    RETURN( NULL );	// stupid compiler
+}
+
+static void spcfn_end_mark( void ) {
+    Ref r;
+    long n = ToLong( *( ++pc ) );
+    #ifdef DBG_SPECIAL
+    fprintf( stderr, "Recovering %u from %d\n", ToULong( LOCAL(n) ), n );
+    fprintf( stderr, "Comparing with %u\n",  ToULong( VMVP ) );
+    fprintf( stderr, "Length of value stack = %d\n", ( VMVP - VMVP_base ) );
+    #endif
+    r = ToRef( ToULong( VMVP ) - ToULong( LOCAL(n) ) );
+    *( ++VMVP ) = r;
+    RETURN( pc + 1 );
+}
+
+static void spcfn_end1_calls( void ) {
+    Ref r = *( VMVP-- );							//	Reduce stack by 1, safely.
+    long var = ToLong( pc[ 1 ] );
+    VMCOUNT = ( VMVP - ToRefRef( LOCAL( var ) ) );	//	Stack reduced by 1 already, don't redo.
+    {    
+        Ref *ptr;
+        if ( !IsObj( r ) ) call_error( r );
+        ptr = RefToPtr4( r );
+        if ( !IsFunctionKey( *ptr ) ) call_error( r );
+        VMLINK = pc + 2;
+        VMLINKFUNC = VMPCFUNC;
+        VMPCFUNC = ptr;
+        RETURN( ptr + 1 );
+    }
+}
+
+static void spcfn_end_call_global( void ) {
+    long var = ToLong( pc[ 1 ] );
+    Ref r = ((Valof *)( pc[ 2 ] )) -> valof;
+    VMCOUNT = VMVP - ToRefRef( LOCAL( var ) );
+    {    
+        Ref *ptr;
+        if ( !IsObj( r ) ) call_error( r );
+        ptr = RefToPtr4( r );
+        if ( !IsFunctionKey( *ptr ) ) call_error( r );
+        VMLINK = pc + 3;
+        VMLINKFUNC = VMPCFUNC;
+    	VMPCFUNC = ptr;
+        RETURN( ptr + 1 );
+    }
+}
+
+static void spcfn_enter( void ) {
+    //
+    //	ENTER only works as the 1st instruction of a function.
+    //	It uses -ve offsets to access the fields before the key.
+    //
+    long A = ToLong( pc[ -2 ] ); // field before the function key.
+    Ref *prev = VMSP;
+    VMSP -= SP_OVERHEAD + ToULong( pc[ -3 ] );
+    VMSP[ SP_PREV_SP ] = prev;
+    VMSP[ SP_LINK ] = VMLINK;
+    VMSP[ SP_FUNC ] = VMLINKFUNC;
+    if ( A != VMCOUNT ) {
+        enter_error( VMCOUNT, A );
+    }
+    {
+        while ( --A >= 0 ) {
+            LOCAL( A ) = *( VMVP-- );
+        }
+    }
+    RETURN( pc + 1 );
+}
+
+static void spcfn_enter0( void ) {
+    //	ENTER0 only works as the 1st instruction of a function.
+    Ref *prev = VMSP;
+    VMSP -= SP_OVERHEAD + ToULong( pc[ -3 ] );
+    VMSP[ SP_PREV_SP ] = prev;
+    VMSP[ SP_LINK ] = VMLINK;
+    VMSP[ SP_FUNC ] = VMLINKFUNC;
+    if ( VMCOUNT != 0 ) {
+        enter_error( VMCOUNT, 0 );
+    }
+    RETURN( pc + 1 );
+}
+
+static void spcfn_enter1( void ) {
+    //	ENTER1 only works as the 1st instruction of a function.
+    Ref *prev = VMSP;
+    VMSP -= SP_OVERHEAD + ToULong( pc[ -3 ] );
+    VMSP[ SP_PREV_SP ] = prev;
+    VMSP[ SP_LINK ] = VMLINK;
+    VMSP[ SP_FUNC ] = VMLINKFUNC;
+    if ( VMCOUNT != 1 ) {
+        enter_error( VMCOUNT, 1 );
+    }
+    LOCAL( 0 ) = *( VMVP-- );
+    RETURN( pc + 1 );
+}
+
+static void spcfn_eq_si( void ) {
+    long s = ToLong( pc[1] );
+    long i = ToLong( pc[2] );
+    long d = ToLong( pc[3] );
+    RETURN( ToLong( LOCAL( s ) ) == i ? pc + d + 3 : pc + 4 );
+}
+
+static void spcfn_eq_ss( void ) {
+    long s = ToLong( pc[1] );
+    long t = ToLong( pc[2] );
+    long d = ToLong( pc[3] );
+    RETURN( ToLong( LOCAL( s ) ) == ToLong( LOCAL( t ) ) ? pc + d + 3 : pc + 4 );
+}
+
+static void spcfn_field( void ) {
+    unsigned long N = ToULong( *++pc );
+    VMVP[0] = RefToPtr4( VMVP[0] )[ N ];
+    RETURN( pc + 1 );
+}
+
+static void spcfn_getiterator( void ) {
+    FREEZE;
+    pc = sysFastGetFastIterator( pc, vm );
+    MELT;
+    RETURN( pc + 1 );
+}
+
+static void spcfn_goto( void ) {
+    long n = ToLong( *( ++pc ) );
+    RETURN( pc + n );
+}
+
+static void spcfn_gt_si( void ) {
+    long s = ToLong( pc[1] );
+    long i = ToLong( pc[2] );
+    RETURN( ToLong( LOCAL( s ) ) > i ? pc + ToLong( pc[3] ) + 3 : pc + 4 );
+}
+
+static void spcfn_gt_ss( void ) {
+    long s = ToLong( pc[1] );
+    long t = ToLong( pc[2] );
+    long d = ToLong( pc[3] );
+    RETURN( ToLong( LOCAL( s ) ) > ToLong( LOCAL( t ) ) ? pc + d + 3 : pc + 4 );
+}
+
+static void spcfn_gte_si( void ) {
+    long s = ToLong( pc[1] );
+    long i = ToLong( pc[2] );
+    long d = ToLong( pc[3] );
+    RETURN( ToLong( LOCAL( s ) ) >= i ? pc + d + 3: pc + 4 );
+}
+
+static void spcfn_gte_ss( void ) {
+    long s = ToLong( pc[1] );
+    long t = ToLong( pc[2] );
+    long d = ToLong( pc[3] );
+    RETURN( ToLong( LOCAL( s ) ) >= ToLong( LOCAL( t ) ) ? pc + d + 3 : pc + 4 );
+}
+
+static void spcfn_halt( void ) {
+    #ifdef DBG_SPECIAL	
+    printf( "\nhalt\n" );
+    #endif
+    exit( EXIT_SUCCESS );
+}
+
+static void spcfn_ifnot( void ) {
+    #ifdef DBG_SPECIAL
+    fprintf( stderr, "IFNOT finds %x on the stack (cf. %x & %x)\n", (unt)(*( VMVP )), (unt)(sys_false), (unt)(sys_true) );
+    #endif
+    RETURN(
+    	*( VMVP-- ) == sys_false ?
+    	pc + ToLong( pc[ 1 ] ) + 1:
+    	pc + 2
+    );
+}
+
+static void spcfn_ifso( void ) {
+    RETURN(
+    	*( VMVP-- ) == sys_false ?
+    	pc + 2 :
+    	pc + ToLong( pc[ 1 ] ) + 1
+    );
+}
+
+static void spcfn_invoke( void ) {
+    //
+    //	INVOKE only works as the 1st instruction of a function.
+    //	It uses -ve offsets to access the fields before the key.
+    //
+    //	The purpose of INVOKE is to dispatch a core method on an
+    //	object and its arguments.
+    //
+    
+    //	Get the arity from the field before the function key.
+    long A = ToLong( pc[ -2 ] );
+    //	Check the arguments.
+    if ( VMCOUNT != A ) {
+    	enter_error( VMCOUNT, A );
+    }
+    
+    //	Get the subject.
+    Ref subject = VMVP[ A - 1 ];
+    
+    //	Get the method.
+    //	Ref method = Ptr4ToRef( pc - 1 );	//	Self pointer (tagged) !!!!
+    		
+    //	Select the method fragment to call.
+    if ( IsObj( subject ) ) {
+    	Ref * subject_K = RefToPtr4( subject );
+    	Ref key = subject_K[ 0 ];
+    	
+    	//	Does the method cache contain this key?
+    	{
+    		Ref method_table = pc[ 1 ];
+    		while ( method_table != sys_absent ) {
+    			Ref * entry_K = RefToPtr4( method_table );
+    			if ( key == entry_K[ ASSOC_OFFSET_KEY ] ) {
+    				Ref fn = entry_K[ ASSOC_OFFSET_VALUE ];
+    				//	Now chain out.
+    				Ref * fn_K = RefToPtr4( fn );
+    				VMPCFUNC = fn_K;
+    				RETURN( fn_K + 1 );
+    			} else {
+    				method_table = entry_K[ ASSOC_OFFSET_NEXT ];
+    			}
+    		}
+    	}
+    	
+    	{
+    		//	Ensure that there is enough room to add into the method
+    		//	cache.
+    		if ( vm->heap().wouldGC( ASSOC_SIZE ) ) {
+    			vm->heap().preflight( pc, ASSOC_SIZE );
+    			//	This will have trashed the local variables so we simply
+    			//	retry! It's not efficient but it is exceedingly rare.
+    			RETURN( pc );	//	<---- Loop!!
+    		}
+    	}
+    	
+    	//	Not in the method cache. Attempt to look it up in the method-table.
+    	if ( IsObj( key ) ) {
+    		//Ref * key_K = RefToPtr4( key );	
+    		Ref dispatch_table = pc[2];
+    		while ( dispatch_table != sys_absent ) {
+    			Ref * entry_K = RefToPtr4( dispatch_table );
+    			if ( key == entry_K[ ASSOC_OFFSET_KEY ] ) {	
+    				Ref fn = entry_K[ ASSOC_OFFSET_VALUE ];
+    				
+    				//	Add to the method cache.
+    				{
+    					vm->gcVeto();
+    					XfrClass xfr( vm->heap().preflight( pc, ASSOC_SIZE ) );
+    					xfr.setOrigin();
+    					xfr.xfrRef( sysAssocKey );
+    					xfr.xfrRef( key );
+    					xfr.xfrRef( fn );
+    					xfr.xfrRef( pc[1] );	//	Reference to the current method table entry.
+    					pc[1] = xfr.makeRef();
+    					vm->gcLiftVeto();
+    				}
+    				
+    				//	Now we chain into the fragment we have recovered, utilising the
+    				//	fact that this is a lightweight call.
+    				
+    				Ref * fn_K = RefToPtr4( fn );
+    				
+    				//	Leave VMLINK & VMLINKFUNC alone.
+    				//	The lite function has not stashed them into the callstack.
+    				//	As a consequence we can chain directly without meddling with
+    				//	them.
+    				
+    				VMPCFUNC = fn_K;
+    				RETURN( fn_K + 1 );
+    			} else {
+    				dispatch_table = entry_K[ ASSOC_OFFSET_NEXT ];
+    			}
+    		}	
+    		/* Failed to find a matching method */
+    	}
+    }
+    invoke_error();
+    RETURN( pc );	// IDIOT COMPILER. Only here to suppress daft complaints.
+}
+
+static void spcfn_listiterate( void ) {
+    //	This instruction implements the fast iterator for lists.
+    //	It may assume that there 2 items on the stack (L:List, _) on input.
+    //	Since there were 2 inputs, it may therefore safely return 2 items
+    //	without a stack check.
+    
+    Ref list = VMVP[-1];	//	Ignore VMVP[0], which is a dummy value.
+    if ( IsPair( list ) ) {
+    	VMVP[0] = RefToPtr4( list )[ PAIR_TAIL_OFFSET ];
+    	VMVP[-1] = RefToPtr4( list )[ PAIR_HEAD_OFFSET ];
+    } else {
+    	VMVP[0] = sys_termin;	//	Signals exit.
+    }
+    
+    
+    VMPCFUNC = VMLINKFUNC;
+    RETURN( VMLINK );
+}
+
+static void spcfn_lt_si( void ) {
+    long s = ToLong( pc[1] );
+    long i = ToLong( pc[2] );
+    long d = ToLong( pc[3] );
+    RETURN( ToLong( LOCAL( s ) ) < i ? pc + d + 3 : pc + 4 );
+}
+
+static void spcfn_lt_ss( void ) {
+    long s = ToLong( pc[1] );
+    long t = ToLong( pc[2] );
+    long d = ToLong( pc[3] );
+    RETURN( ToLong( LOCAL( s ) ) < ToLong( LOCAL( t ) ) ? pc + d + 3 : pc + 4 );
+}
+
+static void spcfn_lte_si( void ) {
+    long s = ToLong( pc[1] );
+    long i = ToLong( pc[2] );
+    long d = ToLong( pc[3] );
+    RETURN( ToLong( LOCAL( s ) ) <= i ? pc + d + 3 : pc + 4 );
+}
+
+static void spcfn_lte_ss( void ) {
+    long s = ToLong( pc[1] );
+    long t = ToLong( pc[2] );
+    long d = ToLong( pc[3] );
+    RETURN( ToLong( LOCAL( s ) ) <= ToLong( LOCAL( t ) ) ? pc + d + 3 : pc + 4 );
+}
+
+static void spcfn_neq_si( void ) {
+    long s = ToLong( pc[1] );
+    long i = ToLong( pc[2] );
+    RETURN( ToLong( LOCAL( s ) ) == i ? pc + 4 : pc + ToLong( pc[3] ) + 3 );
+}
+
+static void spcfn_neq_ss( void ) {
+    long s = ToLong( pc[1] );
+    long t = ToLong( pc[2] );
+    long d = ToLong( pc[3] );
+    RETURN( ToLong( LOCAL( s ) ) != ToLong( LOCAL( t ) ) ? pc + d + 3 : pc + 4 );
+}
+
+static void spcfn_not( void ) {
+    *VMVP = ( *VMVP == sys_false ? sys_true : sys_false );
+    RETURN( pc + 1 );
+}
+
+static void spcfn_pop_global( void ) {
+    Valof * id = (Valof *)( *( ++pc ) );
+    id->valof = *( VMVP-- );
+    RETURN( pc + 1 );
+}
+
+static void spcfn_pop_local( void ) {
+    LOCAL( ToLong( *( ++pc ) ) ) = *( VMVP-- );
+    RETURN( pc + 1 );
+}
+
+static void spcfn_push_global( void ) {
+    Valof * id = (Valof *)( *( ++pc ) );
+    *( ++VMVP ) = id->valof;
+    RETURN( pc + 1 );
+}
+
+static void spcfn_push_local( void ) {
+    *( ++VMVP ) = LOCAL( ToLong( *( ++pc ) ) );
+    RETURN( pc + 1 );
+}
+
+static void spcfn_push_local0( void ) {
+    *( ++VMVP ) = LOCAL(0);
+    RETURN( pc + 1 );
+}
+
+static void spcfn_push_local1( void ) {
+    *( ++VMVP ) = LOCAL(1);
+    RETURN( pc + 1 );
+}
+
+static void spcfn_pushq( void ) {
+    *( ++VMVP ) = *( ++pc );
+    RETURN( pc + 1 );
+}
+
+static void spcfn_reset( void ) {
+    FREEZE;
+    throw NormalExit();
+}
+
+static void spcfn_return( void ) {
+    Ref *linkptr;
+    VMPCFUNC = ToRefRef( VMSP[ SP_FUNC ] );
+    linkptr = ToRefRef( VMSP[ SP_LINK ] );				//	recover return address
+    VMSP = ToRefRef( VMSP[ SP_PREV_SP ] );				//	restore stack pointer
+    #ifdef DBG_SPECIAL
+    	printf( "Recover link = %x\n", ToUInt( link ) );
+    	printf( "Stack pointer recovered as %x\n", ToUInt( VMSP ) );
+    #endif
+    RETURN( linkptr );
+}
+
+static void spcfn_set( void ) {
+    VMCOUNT = VMVP - (Ref *)LOCAL( ToLong( pc[ 1 ] ) );
+    RETURN( pc + 2 );
+}
+
+static void spcfn_set_call_global( void ) {
+    Ref r = ((Valof *)( pc[ 2 ] )) -> valof;
+    VMCOUNT = ToLong( pc[ 1 ] );
+    {    
+        Ref *ptr;
+        if ( !IsObj( r ) ) call_error( r );
+        ptr = RefToPtr4( r );
+        if ( !IsFunctionKey( *ptr ) ) call_error( r );
+        VMLINK = pc + 3;
+        VMLINKFUNC = VMPCFUNC;
+    	VMPCFUNC = ptr;
+        RETURN( ptr + 1 );
+    }
+}
+
+static void spcfn_set_calls( void ) {
+    Ref r = *( VMVP-- );
+    VMCOUNT = ToLong( pc[ 1 ] );
+    {    
+        Ref *ptr;
+        if ( !IsObj( r ) ) call_error( r );
+        ptr = RefToPtr4( r );
+        if ( !IsFunctionKey( *ptr ) ) call_error( r );
+        VMLINK = pc + 2;
+        VMLINKFUNC = VMPCFUNC;
+        VMPCFUNC = ptr;
+        RETURN( ptr + 1 );
+    }
+}
+
+static void spcfn_set_syscall( void ) {
+    VMCOUNT = ToLong( pc[ 1 ] );
+    SysCall * sys = ToSysCall( pc[ 2 ] );
+    FREEZE;
+    pc = (*sys)( pc + 3, vm );
+    MELT;
+    RETURN( pc );
+}
+
+static void spcfn_start_mark( void ) {
+    long n = ToLong( *( ++pc ) );
+    #ifdef DBG_SPECIAL
+    fprintf( stderr, "Storing %u in %d\n", ToULong( ToRef( VMVP ) ), n );
+    #endif
+    LOCAL(n) = ToRef( VMVP );
+    RETURN( pc + 1 );
+}
+
+static void spcfn_stringiterate( void ) {
+    //	This instruction implements the fast iterator for vectors.
+    //	It may assume that there 2 items on the stack (i:Small, v:Vector) on input.
+    //	Since there were 2 inputs, it may therefore safely return 2 items
+    //	without a stack check.
+    
+    Ref * string = RefToPtr4( VMVP[0] );
+    Ref len_as_small = string[ STRING_OFFSET_LENGTH ];
+    Ref index = VMVP[-1];
+    
+    //	Is is safe to compare smalls this way.
+    if ( index < len_as_small ) {
+    	VMVP[-1] = CharToCharacter( reinterpret_cast< unsigned char * >( string + 1 )[ SmallToLong( index ) ] );
+    	VMVP[0] = ToRef( (long)index + (long)LongToSmall( 1 ) );			//	It is safe to add smalls like this too.
+    } else {
+    	VMVP[0]	= sys_termin;
+    }
+    
+    VMPCFUNC = VMLINKFUNC;
+    RETURN( VMLINK );
+}
+
+static void spcfn_syscall( void ) {
+    SysCall * sys = ToSysCall( *++pc );
+    FREEZE;
+    pc = (*sys)( ++pc, vm );
+    MELT;
+    RETURN( pc );
+}
+
+static void spcfn_syscall_arg( void ) {
+    SysCall * sys = ToSysCall( pc[ 1 ] );
+    FREEZE;
+    //	Skip the data arg. The system call picks it up via pc[-1]. Note that
+    //	it is NOT garbage collected. That means it cannot be an object.
+    pc = (*sys)( pc + 3, vm );
+    MELT;
+    RETURN( pc );
+}
+
+static void spcfn_syscall_dat( void ) {
+    SysCall * sys = ToSysCall( pc[ 1 ] );
+    FREEZE;
+    //	Skip the data arg. The system call picks it up via pc[-1]. Note that
+    //	it is NOT garbage collected. That means it cannot be an object.
+    pc = (*sys)( pc + 3, vm );
+    MELT;
+    RETURN( pc );
+}
+
+static void spcfn_syscall_argdat( void ) {
+    SysCall * sys = ToSysCall( pc[ 1 ] );
+    FREEZE;
+    //	Skip the data arg. The system call picks it up via pc[-1]. Note that
+    //	it is NOT garbage collected. That means it cannot be an object.
+    pc = (*sys)( pc + 4, vm );
+    MELT;
+    RETURN( pc );
+}
+
+static void spcfn_sysreturn( void ) {
+    VMPCFUNC = VMLINKFUNC;
+    RETURN( VMLINK );
+}
+
+static void spcfn_vectoriterate( void ) {
+    //	This instruction implements the fast iterator for vectors.
+    //	It may assume that there 2 items on the stack (i:Small, v:Vector) on input.
+    //	Since there were 2 inputs, it may therefore safely return 2 items
+    //	without a stack check.
+    
+    Ref * vector = RefToPtr4( VMVP[0] );
+    Ref len_as_small = vector[ VECTOR_OFFSET_LENGTH ];
+    Ref index = VMVP[-1];
+    
+    //	Is is safe to compare smalls this way.
+    if ( index > len_as_small ) {
+    	VMVP[0]	= sys_termin;
+    } else {
+    	VMVP[-1] = vector[ SmallToLong( index ) ];
+    	VMVP[0] = ToRef( (long)index + (long)LongToSmall( 1 ) );			//	It is safe to add smalls like this too.
+    }
+    
+    VMPCFUNC = VMLINKFUNC;
+    RETURN( VMLINK );
+}
+
+InstructionSet2::InstructionSet2() {
+    this->spc_add = (Ref)spcfn_add;
+    this->spc_decr = (Ref)spcfn_decr;
+    this->spc_div = (Ref)spcfn_div;
+    this->spc_eq = (Ref)spcfn_eq;
+    this->spc_neq = (Ref)spcfn_neq;
+    this->spc_gt = (Ref)spcfn_gt;
+    this->spc_gte = (Ref)spcfn_gte;
+    this->spc_incr = (Ref)spcfn_incr;
+    this->spc_incr_by = (Ref)spcfn_incr_by;
+    this->spc_lt = (Ref)spcfn_lt;
+    this->spc_lte = (Ref)spcfn_lte;
+    this->spc_mul = (Ref)spcfn_mul;
+    this->spc_sub = (Ref)spcfn_sub;
+    this->spc_calls = (Ref)spcfn_calls;
+    this->spc_chainlite = (Ref)spcfn_chainlite;
+    this->spc_check_count = (Ref)spcfn_check_count;
+    this->spc_check_mark0 = (Ref)spcfn_check_mark0;
+    this->spc_check_mark1 = (Ref)spcfn_check_mark1;
+    this->spc_end_mark = (Ref)spcfn_end_mark;
+    this->spc_end1_calls = (Ref)spcfn_end1_calls;
+    this->spc_end_call_global = (Ref)spcfn_end_call_global;
+    this->spc_enter = (Ref)spcfn_enter;
+    this->spc_enter0 = (Ref)spcfn_enter0;
+    this->spc_enter1 = (Ref)spcfn_enter1;
+    this->spc_eq_si = (Ref)spcfn_eq_si;
+    this->spc_eq_ss = (Ref)spcfn_eq_ss;
+    this->spc_field = (Ref)spcfn_field;
+    this->spc_getiterator = (Ref)spcfn_getiterator;
+    this->spc_goto = (Ref)spcfn_goto;
+    this->spc_gt_si = (Ref)spcfn_gt_si;
+    this->spc_gt_ss = (Ref)spcfn_gt_ss;
+    this->spc_gte_si = (Ref)spcfn_gte_si;
+    this->spc_gte_ss = (Ref)spcfn_gte_ss;
+    this->spc_halt = (Ref)spcfn_halt;
+    this->spc_ifnot = (Ref)spcfn_ifnot;
+    this->spc_ifso = (Ref)spcfn_ifso;
+    this->spc_invoke = (Ref)spcfn_invoke;
+    this->spc_listiterate = (Ref)spcfn_listiterate;
+    this->spc_lt_si = (Ref)spcfn_lt_si;
+    this->spc_lt_ss = (Ref)spcfn_lt_ss;
+    this->spc_lte_si = (Ref)spcfn_lte_si;
+    this->spc_lte_ss = (Ref)spcfn_lte_ss;
+    this->spc_neq_si = (Ref)spcfn_neq_si;
+    this->spc_neq_ss = (Ref)spcfn_neq_ss;
+    this->spc_not = (Ref)spcfn_not;
+    this->spc_pop_global = (Ref)spcfn_pop_global;
+    this->spc_pop_local = (Ref)spcfn_pop_local;
+    this->spc_push_global = (Ref)spcfn_push_global;
+    this->spc_push_local = (Ref)spcfn_push_local;
+    this->spc_push_local0 = (Ref)spcfn_push_local0;
+    this->spc_push_local1 = (Ref)spcfn_push_local1;
+    this->spc_pushq = (Ref)spcfn_pushq;
+    this->spc_reset = (Ref)spcfn_reset;
+    this->spc_return = (Ref)spcfn_return;
+    this->spc_set = (Ref)spcfn_set;
+    this->spc_set_call_global = (Ref)spcfn_set_call_global;
+    this->spc_set_calls = (Ref)spcfn_set_calls;
+    this->spc_set_syscall = (Ref)spcfn_set_syscall;
+    this->spc_start_mark = (Ref)spcfn_start_mark;
+    this->spc_stringiterate = (Ref)spcfn_stringiterate;
+    this->spc_syscall = (Ref)spcfn_syscall;
+    this->spc_syscall_arg = (Ref)spcfn_syscall_arg;
+    this->spc_syscall_dat = (Ref)spcfn_syscall_dat;
+    this->spc_syscall_argdat = (Ref)spcfn_syscall_argdat;
+    this->spc_sysreturn = (Ref)spcfn_sysreturn;
+    this->spc_vectoriterate = (Ref)spcfn_vectoriterate;
+}
+

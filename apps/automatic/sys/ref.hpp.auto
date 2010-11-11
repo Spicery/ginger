@@ -1,0 +1,5 @@
+extern Ref * sysNewHardRef( Ref * pc, MachineClass * vm );
+extern Ref * sysNewSoftRef( Ref * pc, MachineClass * vm );
+extern Ref * sysNewWeakRef( Ref * pc, MachineClass * vm );
+extern Ref * sysIsRef( Ref * pc, MachineClass * vm );
+extern Ref * sysRefContField( Ref * pc, MachineClass * vm );

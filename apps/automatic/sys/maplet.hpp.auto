@@ -1,0 +1,4 @@
+extern Ref * sysNewMaplet( Ref * pc, MachineClass * vm );
+extern Ref * sysIsMaplet( Ref * pc, MachineClass * vm );
+extern Ref * sysMapletKeyField( Ref * pc, MachineClass * vm );
+extern Ref * sysMapletValueField( Ref * pc, MachineClass * vm );

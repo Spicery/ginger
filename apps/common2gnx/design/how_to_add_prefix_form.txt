@@ -1,0 +1,39 @@
+How to Add a Prefix Form to common2gnx
+======================================
+
+Overview
+--------
+These notes are based on what I did to add the keyword "package".
+
+Steps
+-----
+
+1.	If required add elements and attributes to the Ginger XML
+	syntax. At present, this is done by editing the document 
+	ginger_xml_syntax.txt
+	
+	In this case we added the element
+		<package url=URL/>
+	This is obviously incomplete since it does not include
+	imports. Those will get added in a separate development step.
+	
+2.	Add all the tokens that the syntax needs. For every new keyword 
+	this means modifying
+	
+		a.	toktype.hpp - to add a new case to the enum tokType
+		b.	toktype.hpp - to add the enum to new tok_type_name
+		c.	item_map.cpp - where the attributes of the token are set
+
+	Only the last part (c) is tricky. You need to specify 
+	
+		* 	the external name of the token ("package")
+		* 	the internal enum (tokty_package)
+		*	the 'role' of the token (PrefixRole)
+		*	the precedence, if it can appear in a postfix context
+			(it can't, leave at 0)
+			
+	For more details see "how_to_add_keywords.txt".
+
+3.	Add a new case to ReadStateClass::prefix_processing() in
+	"read_expr.cpp". Note that this case must end with a return and
+	not a break.

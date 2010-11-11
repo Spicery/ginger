@@ -1,0 +1,50 @@
+
+CC=g++
+
+CXXFLAGS=-g -I../hpp -I../../automatic/machine -I../../automatic/sys -I../../automatic/simple -I/usr/local/boost_1_43_0 -Wall -Wnon-virtual-dtor # -Weffc++
+CFLAGS=-Wmissing-prototypes 
+
+OBJS=mishap.o term.o read_xml.o \
+	functor.o plant.o cage.o vmi.o registers.o roots.o \
+	rcep.o arity.o resolve.o lift.o ident.o \
+	dict.o package.o \
+	sys.o syskey.o sysclass.o sysequals.o sysprint.o syslist.o sysvector.o \
+	sysstring.o syssymbol.o sysmap.o sysindirection.o sysinstance.o \
+	sysfunction.o sysmethod.o \
+	destination.o heap.o \
+	key.o \
+	misclayout.o listlayout.o stringlayout.o \
+	maplayout.o vectorlayout.o functionlayout.o \
+	heapcrawl.o cagecrawl.o callstackcrawl.o fnobjcrawl.o \
+	garbagecollect.o \
+	scanfunc.o scandict.o \
+	machine.o \
+	instruction_set.o \
+	machine1.o \
+	instruction_set1.o \
+	machine2.o \
+	instruction_set2.o \
+	machine3.o \
+	instruction_set3.o \
+	appcontext.o \
+	makesysfn.o \
+	valof.o \
+	facet.o
+
+all: appginger
+
+# $@ is make shorthand for the target.
+# $@ is make shorthand for the dependencies
+appginger: libappginger.a main.o
+	g++ $(CXXFLAGS) $(BOOST_CPPFLAGS) -o $@ main.o libappginger.a 
+	
+clean:
+	rm -f *.o
+	rm -f appginger
+	rm -r *.a
+
+#	Nothing needs doing.
+check:
+	
+libappginger.a: $(OBJS)
+	ar -rcs $@ $+

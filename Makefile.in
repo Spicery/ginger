@@ -1,8 +1,8 @@
 all:
-	$(MAKE) -C c $@ 
+	$(MAKE) -C apps $@ 
 	if [ ! -d bin ]; then mkdir -p bin; fi
-	cp c/appginger/cpp/appginger bin/
-	cp c/common2gnx/cpp/common2gnx bin
+	cp apps/appginger/cpp/appginger bin/
+	cp apps/common2gnx/cpp/common2gnx bin
 
 clean:
 	rm -rf build/appginger
@@ -12,18 +12,18 @@ clean:
 	
 distclean: clean
 	rm -f Makefile
-	rm -f c/Makefile
-	rm -f c/appginger/Makefile
-	rm -f c/appginger/cpp/Makefile
-	rm -f c/appginger/functests/Makefile
-	rm -f c/common2gnx/Makefile
-	rm -f c/common2gnx/cpp/Makefile
+	rm -f apps/Makefile
+	rm -f apps/appginger/Makefile
+	rm -f apps/appginger/cpp/Makefile
+	rm -f apps/appginger/functests/Makefile
+	rm -f apps/common2gnx/Makefile
+	rm -f apps/common2gnx/cpp/Makefile
 	rm -f config.h
 	rm -f config.status
 	rm -f config.log
 
 check: all
-	$(MAKE) -C c $@
+	$(MAKE) -C apps $@
 
 
 # This will become dist & distdir??
@@ -33,12 +33,12 @@ snapshot:
 	cp Makefile build/appginger/
 	cp *.txt build/appginger/
 	mkdir build/appginger/bin
-	mkdir build/appginger/c
-	cp -r c/Makefile build/appginger/c/
-	cp -r c/appginger build/appginger/c/
-	cp -r c/headers build/appginger/c/
-	cp -r c/automatic build/appginger/c/
-	cp -r c/common2gnx build/appginger/c/
+	mkdir build/appginger/apps
+	cp -r apps/Makefile build/appginger/apps/
+	cp -r apps/appginger build/appginger/apps/
+	cp -r apps/headers build/appginger/apps/
+	cp -r apps/automatic build/appginger/apps/
+	cp -r apps/common2gnx build/appginger/apps/
 	mkdir build/appginger/classes
 	mkdir build/appginger/docs
 	cp -r docs/syntax/*.txt build/appginger/docs/

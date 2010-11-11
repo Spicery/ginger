@@ -68,13 +68,13 @@ if test "${boost_libdir}"; then
 fi
 
 AC_CONFIG_FILES([Makefile
-                 c/Makefile
-                 c/appginger/Makefile
-                 c/appginger/cpp/Makefile
-                 c/appginger/functests/Makefile
-                 c/lisp2gnx/Makefile
-                 c/lisp2gnx/lsp/Makefile
-                 c/lisp2gnx/functests/Makefile
-                 c/common2gnx/Makefile
-                 c/common2gnx/cpp/Makefile])
+                 apps/Makefile
+                 apps/appginger/Makefile
+                 apps/appginger/cpp/Makefile
+                 apps/appginger/functests/Makefile
+                 apps/lisp2gnx/Makefile
+                 apps/lisp2gnx/lsp/Makefile
+                 apps/lisp2gnx/functests/Makefile
+                 apps/common2gnx/Makefile
+                 apps/common2gnx/cpp/Makefile])
 AC_OUTPUT

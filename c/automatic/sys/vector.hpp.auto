@@ -1,3 +1,0 @@
-extern Ref * sysNewVector( Ref * pc, MachineClass * vm );
-extern Ref * sysIsVector( Ref * pc, MachineClass * vm );
-extern Ref * sysIndexVector( Ref * pc, MachineClass * vm );

@@ -52,6 +52,8 @@
 using namespace std;
 
 #include <getopt.h>
+#include <sys/types.h>
+#include <dirent.h>
 
 #include "mishap.hpp"
 
@@ -65,7 +67,7 @@ private:
 public:
 	void parseArgs( int argc, char **argv, char **envp );
 	void summary();
-	int run();
+	void run();
 	void printGPL( const char * start, const char * end );
 	std::string version();
 };
@@ -175,10 +177,6 @@ void Main::parseArgs( int argc, char **argv, char **envp ) {
 
 }
     
-int Main::run() {
-    return EXIT_SUCCESS;
-}
-
 
 void Main::printGPL( const char * start, const char * end ) {
     bool printing = false;
@@ -218,6 +216,59 @@ void Main::summary() {
 	}
 }
 
+static bool try_serve( string fullname ) {
+	ifstream file( fullname.c_str() );
+	if ( file.is_open() ) {
+		string line;
+		while ( file.good() ) {
+			getline( file, line );
+			cout << line << endl;
+		}
+		file.close();
+		return true;
+	} else {
+		return false;
+	}
+}
+
+static bool find_definition( string project, string pkg, string name ) {
+	string dname = project + "/" + pkg;
+	
+	DIR * dirp = opendir( dname.c_str() );
+	for (;;) {
+		struct dirent * dp = readdir(dirp);
+		if ( dp == NULL ) break;
+		
+		string entry;
+		entry.append( dp->d_name, dp->d_namlen );
+				
+		string fullname = dname + "/" + entry + "/" + name + ".gnx";
+
+		if ( try_serve( fullname ) ) return true;
+	}
+	
+	return false;
+}
+
+void Main::run() {
+	for ( 
+		vector< pair< string, string > >::iterator it = this->definitions.begin();
+		it != this->definitions.end();
+		++it
+	) {
+		cout << it->first << "::" << it->second << endl;
+		if ( !find_definition( this->project, it->first, it->second ) ) {
+			//	NOTE: This is not correct because the values of package & variable must be escaped!
+			cout << "<mishap message=\"Missing definition\">";
+			cout << "<culprit name=\"package\" value=\"" << it->first << "\"/>";
+			cout << "<culprit name=\"identifier\" value=\"" << it->second << "\"/>";
+			cout << "</mishap>" << endl;
+		}
+	}
+}
+			
+
+
 int main( int argc, char ** argv, char **envp ) {
 	try {
 		Main main;
@@ -225,7 +276,8 @@ int main( int argc, char ** argv, char **envp ) {
 		#ifdef DBG_FETCHGNX
 			main.summary();
 		#endif
-		return main.run();
+		main.run();
+	    return EXIT_SUCCESS;
 	} catch ( Problem & p ) {
 		p.report();
 		return EXIT_FAILURE;

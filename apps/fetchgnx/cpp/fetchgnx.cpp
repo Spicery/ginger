@@ -52,10 +52,9 @@
 using namespace std;
 
 #include <getopt.h>
-#include <sys/types.h>
-#include <dirent.h>
 
 #include "mishap.hpp"
+#include "search.hpp"
 
 class Main {
 private:
@@ -216,9 +215,11 @@ void Main::summary() {
 	}
 }
 
+/*
 static bool try_serve( string fullname ) {
 	ifstream file( fullname.c_str() );
 	if ( file.is_open() ) {
+		cout << "Found: " << fullname << endl;
 		string line;
 		while ( file.good() ) {
 			getline( file, line );
@@ -231,6 +232,9 @@ static bool try_serve( string fullname ) {
 	}
 }
 
+#define AUTO_SUFFIX 			".auto"
+#define AUTO_SUFFIX_SIZE 		sizeof( AUTO_SUFFIX )
+
 static bool find_definition( string project, string pkg, string name ) {
 	string dname = project + "/" + pkg;
 	
@@ -238,10 +242,14 @@ static bool find_definition( string project, string pkg, string name ) {
 	for (;;) {
 		struct dirent * dp = readdir(dirp);
 		if ( dp == NULL ) break;
+		if ( ( dp->d_type & DT_DIR ) == 0 || dp->d_namlen < AUTO_SUFFIX_SIZE ) continue;
 		
 		string entry;
 		entry.append( dp->d_name, dp->d_namlen );
-				
+		
+		//	Check that -entry- matches *.auto
+		if ( entry.find( AUTO_SUFFIX, entry.size() - AUTO_SUFFIX_SIZE ) == string::npos ) continue;
+		
 		string fullname = dname + "/" + entry + "/" + name + ".gnx";
 
 		if ( try_serve( fullname ) ) return true;
@@ -249,15 +257,17 @@ static bool find_definition( string project, string pkg, string name ) {
 	
 	return false;
 }
+*/
 
 void Main::run() {
+	Search search( this->project );
 	for ( 
 		vector< pair< string, string > >::iterator it = this->definitions.begin();
 		it != this->definitions.end();
 		++it
 	) {
 		cout << it->first << "::" << it->second << endl;
-		if ( !find_definition( this->project, it->first, it->second ) ) {
+		if ( !search.find_definition( it->first, it->second ) ) {
 			//	NOTE: This is not correct because the values of package & variable must be escaped!
 			cout << "<mishap message=\"Missing definition\">";
 			cout << "<culprit name=\"package\" value=\"" << it->first << "\"/>";

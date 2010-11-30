@@ -4,7 +4,7 @@ CC=g++
 CXXFLAGS=-g -I../hpp -I/usr/local/boost_1_43_0 -Wall -Wnon-virtual-dtor # -Weffc++
 CFLAGS=-Wmissing-prototypes 
 
-OBJS=fetchgnx.o mishap.o
+OBJS=fetchgnx.o mishap.o search.o folderscan.o projectcache.o packagecache.o
 
 all: fetchgnx
 

@@ -32,8 +32,8 @@ private:
 	bool file_exists( std::string fullpathname );
 	
 public:
-	bool try_serve( std::string fullname );
-	bool find_definition( std::string pkg, std::string name );
+	//bool try_serve( std::string fullname );
+	void find_definition( std::string pkg, std::string name );
 	
 public:
 	Search( std::string project_path );

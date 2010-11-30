@@ -49,6 +49,9 @@ public:
 	Problem & culprit( const std::string arg );
 	Problem & culprit( const std::string reason, const long N );
 	void report();
+	std::string getMessage();
+	std::pair< std::string, std::string > & getCulprit( int n );
+	int getCount();
 	
 protected:
 	Problem( const std::string & msg ) : message( msg ), culprits() {}

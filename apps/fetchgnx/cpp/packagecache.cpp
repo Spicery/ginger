@@ -16,24 +16,78 @@
     along with AppGinger.  If not, see <http://www.gnu.org/licenses/>.
 \******************************************************************************/
 
+#include <fstream>
 #include <iostream>
 using namespace std;
 
 #include "packagecache.hpp"
 
-PackageCache::PackageCache() {
+PackageCache::PackageCache( std::string pkg_name ) : 
+	package_name( pkg_name ) 
+{
 }
 
 PackageCache::~PackageCache() {
 }
 
+bool PackageCache::hasVariable( std::string var_name ) {
+	return this->cache.find( var_name ) != this->cache.end();
+}
+
 std::string PackageCache::getPathName( std::string var_name ) {
-	return this->cache[ var_name ];
+	return this->cache[ var_name ].pathname;
 }
 
 void PackageCache::putPathName( std::string var_name, std::string path_name ) {
-	this->cache[ var_name ] = path_name;
-	cout << "PUT " << var_name << " = " << path_name << endl;
+	if ( this->cache.find( var_name ) == this->cache.end() ) {
+		this->cache[ var_name ].pathname = path_name;
+	} else if ( this->cache[ var_name ].mishap == NULL ) {
+		Mishap * m = new Mishap( "Multiple possible files providing definition" );
+		m->culprit( "Variable", var_name );
+		m->culprit( "Pathname 1", this->cache[ var_name ].pathname );
+		m->culprit( "Pathname 2", path_name );
+		this->cache[ var_name ].mishap = m;
+	}
+	//cout << "PUT " << var_name << " = " << path_name << endl;
 }
 
+static void dumpFile( string fullname ) {
+	ifstream file( fullname.c_str() );
+	if ( file.is_open() ) {
+		//cout << "Found: " << fullname << endl;
+		string line;
+		while ( file.good() ) {
+			getline( file, line );
+			cout << line << endl;
+		}
+		file.close();
+	} else {
+		throw Mishap( "Cannot open file" ).culprit( "Filename", fullname );
+	}
+}
+
+void PackageCache::printVariable( string var_name ) {
+	std::map< std::string, PkgInfo >::iterator it = this->cache.find( var_name );
+	if ( it == this->cache.end() ) {
+		throw 
+			Mishap( "Cannot find variable" ).
+			culprit( "Variable", var_name ).
+			culprit( "Package", this->package_name );
+	} else {
+		Mishap * m = it->second.mishap;
+		if ( m != NULL ) {
+			throw *m;
+		} else {
+			dumpFile( it->second.pathname );
+		}
+	}
+}
+
+
+PkgInfo::PkgInfo() : mishap( NULL ) {
+}
+
+PkgInfo::~PkgInfo() {
+	delete this->mishap; 
+}
 

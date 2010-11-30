@@ -57,3 +57,14 @@ void Problem::report() {
 	}
 }
 
+std::string Problem::getMessage() {
+	return this->message;
+}
+
+std::pair< std::string, std::string > & Problem::getCulprit( int n ) {
+	return this->culprits[ n ];
+}
+
+int Problem::getCount() {
+	return this->culprits.size();
+}

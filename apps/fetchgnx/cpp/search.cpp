@@ -45,7 +45,7 @@ Search::~Search() {
 }
 
 
-bool Search::file_exists( std::string fullpathname ) {
+/* bool Search::file_exists( std::string fullpathname ) {
 	static struct stat stat_file_info;
 	return 0 == stat( fullpathname.c_str(), &stat_file_info );
 }
@@ -53,7 +53,7 @@ bool Search::file_exists( std::string fullpathname ) {
 static void dumpFile( string fullname ) {
 	ifstream file( fullname.c_str() );
 	if ( file.is_open() ) {
-		cout << "Found: " << fullname << endl;
+		//cout << "Found: " << fullname << endl;
 		string line;
 		while ( file.good() ) {
 			getline( file, line );
@@ -69,17 +69,17 @@ bool Search::try_serve( string fullname ) {
 	if ( !this->file_exists( fullname ) ) return false;
 	dumpFile( fullname );
 	return true;
-}
+}*/
 
 
-bool Search::find_definition( string pkg, string name ) {
+void Search::find_definition( string pkg, string name ) {
 	PackageCache * c = this->project_cache.getPackageCache( pkg );
 	if ( c != NULL ) {
-		cout << "FOUND" << endl;
-		return this->try_serve( c->getPathName( name ) );
+		//cout << "FOUND" << endl;
+		c->printVariable( name );
 	} else {
-		cout << "NOT FOUND" << endl;
-		PackageCache * newc = new PackageCache();
+		//cout << "NOT FOUND" << endl;
+		PackageCache * newc = new PackageCache( pkg );
 		this->project_cache.putPackageCache( pkg, newc );
 		
 		FolderScan fscan( this->project_folder + "/" + pkg );
@@ -106,6 +106,6 @@ bool Search::find_definition( string pkg, string name ) {
 			}	
 		}
 		
-		return this->try_serve( newc->getPathName( name ) );
+		newc->printVariable( name );
 	}
 }

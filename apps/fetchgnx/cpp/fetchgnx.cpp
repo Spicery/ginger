@@ -267,11 +267,16 @@ void Main::run() {
 		++it
 	) {
 		cout << it->first << "::" << it->second << endl;
-		if ( !search.find_definition( it->first, it->second ) ) {
+		try {
+			search.find_definition( it->first, it->second );
+		} catch ( Mishap &m ) {
 			//	NOTE: This is not correct because the values of package & variable must be escaped!
-			cout << "<mishap message=\"Missing definition\">";
-			cout << "<culprit name=\"package\" value=\"" << it->first << "\"/>";
-			cout << "<culprit name=\"identifier\" value=\"" << it->second << "\"/>";
+			cout << "<mishap message=\"" << m.getMessage() << "\">";
+			int n = m.getCount();
+			for ( int i = 0; i < n; i++ ) {
+				pair< string, string > & p = m.getCulprit( i );
+				cout << "<culprit name=\"" << p.first << "\" value=\"" << p.second << "\"/>";
+			}
 			cout << "</mishap>" << endl;
 		}
 	}

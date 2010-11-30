@@ -50,9 +50,9 @@ bool FolderScan::nextFolder() {
 }
 
 std::string FolderScan::entryName() {
-	std::string ans;
-	ans.append( dp->d_name, dp->d_namlen );
-	return ans;
+	//std::string ans;
+	//ans.append( dp->d_name, dp->d_namlen );
+	return std::string( dp->d_name );
 }
 
 std::string FolderScan::folderName() {

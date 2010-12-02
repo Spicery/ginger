@@ -4313,7 +4313,7 @@ if test "${boost_libdir}"; then
  echo "BOOST_LDDFLAGS set"
 fi
 
-ac_config_files="$ac_config_files Makefile apps/Makefile apps/appginger/Makefile apps/appginger/cpp/Makefile apps/appginger/functests/Makefile apps/lisp2gnx/Makefile apps/lisp2gnx/lsp/Makefile apps/lisp2gnx/functests/Makefile apps/common2gnx/Makefile apps/common2gnx/cpp/Makefile"
+ac_config_files="$ac_config_files Makefile apps/Makefile apps/appginger/Makefile apps/appginger/cpp/Makefile apps/appginger/functests/Makefile apps/lisp2gnx/Makefile apps/lisp2gnx/lsp/Makefile apps/lisp2gnx/functests/Makefile apps/common2gnx/Makefile apps/common2gnx/cpp/Makefile apps/file2gnx/Makefile apps/file2gnx/cpp/Makefile"
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -5027,6 +5027,8 @@ do
     "apps/lisp2gnx/functests/Makefile") CONFIG_FILES="$CONFIG_FILES apps/lisp2gnx/functests/Makefile" ;;
     "apps/common2gnx/Makefile") CONFIG_FILES="$CONFIG_FILES apps/common2gnx/Makefile" ;;
     "apps/common2gnx/cpp/Makefile") CONFIG_FILES="$CONFIG_FILES apps/common2gnx/cpp/Makefile" ;;
+    "apps/file2gnx/Makefile") CONFIG_FILES="$CONFIG_FILES apps/file2gnx/Makefile" ;;
+    "apps/file2gnx/cpp/Makefile") CONFIG_FILES="$CONFIG_FILES apps/file2gnx/cpp/Makefile" ;;
 
   *) as_fn_error $? "invalid argument: \`$ac_config_target'" "$LINENO" 5;;
   esac

@@ -28,12 +28,22 @@ using namespace std;
 #include "mishap.hpp"
 
 
-Problem & Problem::culprit( const std::string reason, const std::string arg ) {
+Mishap & Mishap::culprit( const std::string reason, const std::string arg ) {
 	this->culprits.push_back( pair< const string, const string >( reason, arg ) );
 	return *this;
 }
 
-Problem & Problem::culprit( const std::string reason, const long N ) {
+Mishap & Mishap::culprit( const char * reason, const std::string arg ) {
+	this->culprits.push_back( pair< const string, const string >( reason, arg ) );
+	return *this;
+}
+
+Mishap & Mishap::culprit( const char * reason, const char * arg ) {
+	this->culprits.push_back( pair< const string, const string >( reason, arg ) );
+	return *this;
+}
+
+Mishap & Mishap::culprit( const std::string reason, const long N ) {
 	std::ostringstream s;
 	s << N;
 	const std::string result( s.str() );
@@ -41,12 +51,12 @@ Problem & Problem::culprit( const std::string reason, const long N ) {
 	return *this;
 }
 
-Problem & Problem::culprit( const std::string arg ) {
+Mishap & Mishap::culprit( const std::string arg ) {
 	this->culprits.push_back( std::pair< const string, const string >( "Argument", arg ) );
 	return *this;
 }
 
-void Problem::report() {
+void Mishap::report() {
 	cerr << "MISHAP: " << this->message << endl;
 	for ( 	
 		vector< pair< string, string > >::iterator it = this->culprits.begin();
@@ -57,7 +67,7 @@ void Problem::report() {
 	}
 }
 
-void Problem::gnxReport() {
+void Mishap::gnxReport() {
 	cout << "<mishap message=\"" << this->message << "\">";
 	for ( 	
 		vector< pair< string, string > >::iterator it = this->culprits.begin();
@@ -70,14 +80,14 @@ void Problem::gnxReport() {
 	
 }
 
-std::string Problem::getMessage() {
+std::string Mishap::getMessage() {
 	return this->message;
 }
 
-std::pair< std::string, std::string > & Problem::getCulprit( int n ) {
+std::pair< std::string, std::string > & Mishap::getCulprit( int n ) {
 	return this->culprits[ n ];
 }
 
-int Problem::getCount() {
+int Mishap::getCount() {
 	return this->culprits.size();
 }

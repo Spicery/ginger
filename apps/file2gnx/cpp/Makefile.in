@@ -11,7 +11,7 @@ all: file2gnx
 # $@ is make shorthand for the target.
 # $@ is make shorthand for the dependencies
 file2gnx: $(OBJS)
-	@CXX@ $(CXXFLAGS) $(BOOST_CPPFLAGS) -o $@ $<
+	@CXX@ $(CXXFLAGS) $(BOOST_CPPFLAGS) -o $@ $(OBJS)
 	
 clean:
 	rm -f *.o

@@ -25,87 +25,27 @@
 #include <stdexcept>
 
 
-//	Abstract.
-class Throwable {
-protected:
-	Throwable() {}
-	virtual ~Throwable() {}
-};
-
-class NormalExit : public Throwable {
-public:
-	NormalExit() {}
-	virtual ~NormalExit() {}
-};
-
 //	Abstract
-class Problem : public Throwable {
+class Mishap {
 private:
 	std::string message;
 	std::vector< std::pair< std::string, std::string > > culprits;
 
 public:
-	Problem & culprit( const std::string reason, const std::string arg );
-	Problem & culprit( const std::string arg );
-	Problem & culprit( const std::string reason, const long N );
+	Mishap & culprit( const std::string reason, const std::string arg );
+	Mishap & culprit( const char * reason, const std::string arg );
+	Mishap & culprit( const char * reason, const char * arg );
+	Mishap & culprit( const std::string arg );
+	Mishap & culprit( const std::string reason, const long N );
 	void report();
 	void gnxReport();
 	std::string getMessage();
 	std::pair< std::string, std::string > & getCulprit( int n );
 	int getCount();
 	
-protected:
-	Problem( const std::string & msg ) : message( msg ), culprits() {}
-	virtual ~Problem() {}
-};
-
-class SystemError : public Problem {
 public:
-	SystemError & culprit( const std::string reason, const std::string arg ) { this->Problem::culprit( reason, arg ); return *this; }
-	SystemError & culprit( const std::string arg ) { this->Problem::culprit( arg ); return *this; }
-	SystemError( const std::string & msg ) : Problem( msg ) {}
-	virtual ~SystemError() {}
-};
-
-class Mishap : public Problem {
-public:
-	Mishap & culprit( const std::string reason, const std::string arg ) { this->Problem::culprit( reason, arg ); return *this; }
-	Mishap & culprit( const std::string arg ) { this->Problem::culprit( arg ); return *this; }
-	Mishap & culprit( const std::string arg, const long N ) { this->Problem::culprit( arg, N ); return *this; }
-	Mishap( const std::string & msg ) : Problem( msg ) {}
+	Mishap( const std::string & msg ) : message( msg ), culprits() {}
 	virtual ~Mishap() {}
-};
-
-class ToBeDone : public Mishap {
-public:
-	ToBeDone() :  Mishap( "To be done" ) {}
-	virtual ~ToBeDone() {}
-};
-
-class Unreachable : public SystemError {
-public:
-	Unreachable() : SystemError( "Unreachable" ) {}
-	virtual ~Unreachable() {}
-};
-
-class ArgsMismatch : public Mishap {
-public:
-	ArgsMismatch() :  Mishap( "Argument mismatch (wrong number of args?)" ) {}
-	virtual ~ArgsMismatch() {}
-};
-
-class TypeError : public Mishap {
-public:
-	TypeError( const std::string arg ) :  Mishap( arg ) {}
-	TypeError() : Mishap( "Type Error" ) {}
-	virtual ~TypeError() {}
-};
-
-class OutOfRange : public Mishap {
-public:
-	OutOfRange( const std::string arg ) :  Mishap( arg ) {}
-	OutOfRange() : Mishap( "Out of Range" ) {}
-	virtual ~OutOfRange() {}
 };
 
 #endif

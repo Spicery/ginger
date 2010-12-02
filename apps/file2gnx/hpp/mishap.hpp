@@ -16,6 +16,7 @@
     along with AppGinger.  If not, see <http://www.gnu.org/licenses/>.
 \******************************************************************************/
 
+
 #ifndef MISHAP_HPP
 #define MISHAP_HPP
 

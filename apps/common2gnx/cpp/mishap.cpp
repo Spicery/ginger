@@ -31,3 +31,14 @@ Mishap::Mishap( const std::string & msg ) :
 {
 }
 
+void Mishap::gnxReport() {
+	cout << "<mishap message=\"" << this->message << "\">";
+	for ( 	
+		vector< pair< string, string > >::iterator it = this->culprits.begin();
+		it != this->culprits.end();
+		++it
+	) {
+		cout << "culprit name=\"" << it->first << "\" value=\"" << it->second << "\">";
+	}
+	cout << "</mishap>" << endl;	
+}

@@ -14,6 +14,7 @@ public:
 	Mishap & culprit( const std::string reason, const std::string arg );
 	Mishap & culprit( const std::string arg );
 	void report();
+	void gnxReport();
 	
 public:
 	Mishap( const std::string & msg );

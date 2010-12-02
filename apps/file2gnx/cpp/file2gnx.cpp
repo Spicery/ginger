@@ -17,11 +17,11 @@
 \******************************************************************************/
 
 #include <iostream>
-#include <ostream>
-#include <fstream>
+//#include <ostream>
+//#include <fstream>
 
 #include <stdlib.h>
-#include <cstdio>
+//#include <cstdio>
 
 #include "mishap.hpp"
 

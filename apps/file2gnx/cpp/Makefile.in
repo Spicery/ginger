@@ -1,4 +1,3 @@
-
 CC=@CXX@
 
 CXXFLAGS=-g -I../hpp -I/usr/local/boost_1_43_0 -Wall -Wnon-virtual-dtor # -Weffc++

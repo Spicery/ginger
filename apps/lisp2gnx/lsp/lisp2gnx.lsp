@@ -11,18 +11,23 @@
 ;;;			((<key1> <value1>) (<key2> <value2>) ... )
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(define (lisp2gnx args)
-	(run))
+(define (lisp2gnx all-args)
+	(let 
+		((args (cdr all-args)))
+		(run 
+			(if (null? args) 
+				(current-input-port) 
+				(open-input-file (car args))))))
 
-(define (run)
+(define (run port)
 	(let
-		((sexp (read)))
+		((sexp (read port)))
 		(if (eof-object? sexp)
 			(exit)
 			(begin
 				(gnx2output (sexp2expr sexp))
 				(force-output)
-				(run)))))
+				(run port)))))
 				
 				
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

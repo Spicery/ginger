@@ -16,6 +16,8 @@
     along with AppGinger.  If not, see <http://www.gnu.org/licenses/>.
 \******************************************************************************/
 
+#define FILE2GNX "/usr/local/bin/file2gnx"
+
 #include <fstream>
 #include <iostream>
 using namespace std;
@@ -51,7 +53,20 @@ void PackageCache::putPathName( std::string var_name, std::string path_name ) {
 	//cout << "PUT " << var_name << " = " << path_name << endl;
 }
 
+//
+//	Insecure. We need to do this more neatly. It would be best if common2gnx
+//	and lisp2gnx could handle being passed a filename as an argument. This
+//	would be both more secure and efficient.
+//
+static void run( string command, string pathname ) {
+	const char * cmd = command.c_str();
+	execl( cmd, cmd, pathname.c_str(), NULL );
+}
+
+
 static void dumpFile( string fullname ) {
+	run( FILE2GNX, fullname );
+	/*
 	ifstream file( fullname.c_str() );
 	if ( file.is_open() ) {
 		//cout << "Found: " << fullname << endl;
@@ -64,6 +79,7 @@ static void dumpFile( string fullname ) {
 	} else {
 		throw Mishap( "Cannot open file" ).culprit( "Filename", fullname );
 	}
+	*/
 }
 
 void PackageCache::printVariable( string var_name ) {

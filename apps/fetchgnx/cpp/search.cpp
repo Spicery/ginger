@@ -28,6 +28,7 @@ using namespace std;
 #include "mishap.hpp"
 #include "folderscan.hpp"
 
+//#define DBG_SEARCH
 
 #define AUTO_SUFFIX 			".auto"
 #define AUTO_SUFFIX_SIZE 		sizeof( AUTO_SUFFIX )
@@ -43,34 +44,6 @@ Search::Search( std::string project_folder ) :
 
 Search::~Search() {
 }
-
-
-/* bool Search::file_exists( std::string fullpathname ) {
-	static struct stat stat_file_info;
-	return 0 == stat( fullpathname.c_str(), &stat_file_info );
-}
-
-static void dumpFile( string fullname ) {
-	ifstream file( fullname.c_str() );
-	if ( file.is_open() ) {
-		//cout << "Found: " << fullname << endl;
-		string line;
-		while ( file.good() ) {
-			getline( file, line );
-			cout << line << endl;
-		}
-		file.close();
-	} else {
-		throw Mishap( "Cannot open file" ).culprit( "Filename", fullname );
-	}
-}
-
-bool Search::try_serve( string fullname ) {
-	if ( !this->file_exists( fullname ) ) return false;
-	dumpFile( fullname );
-	return true;
-}*/
-
 
 void Search::find_definition( string pkg, string name ) {
 	PackageCache * c = this->project_cache.getPackageCache( pkg );
@@ -88,20 +61,27 @@ void Search::find_definition( string pkg, string name ) {
 	
 			//	Check that -entry- matches *.auto
 			if ( entry.find( AUTO_SUFFIX, entry.size() - AUTO_SUFFIX_SIZE ) == string::npos ) continue;
-			
-			string fullname = fscan.folderName() + "/" + entry + "/" + name + ".gnx";
+			#ifdef DBG_SEARCH
+				cout << "*.auto: " << entry << endl;
+			#endif
 			
 			FolderScan files( fscan.folderName() + "/" + entry );
 			while ( files.nextFile() ) {
 				string fname = files.entryName();
-				if ( fname.find( GNX_SUFFIX, fname.size() - GNX_SUFFIX_SIZE ) == string::npos ) continue;
+				#ifdef DBG_SEARCH
+					cout << "Entry : " << fname << endl;
+				#endif
 				
 				size_t n = fname.rfind( '.' );
 				if ( n == string::npos ) continue;
 				
+				
 				string root = fname.substr( 0, n );
 				string extn = fname.substr( n + 1 );
 				
+				#ifdef DBG_SEARCH
+					cout << "Adding " << root << " -> " << ( files.folderName() + "/" + fname ) <<  endl;
+				#endif
 				newc->putPathName( root, files.folderName() + "/" + fname );		
 			}	
 		}

@@ -17,7 +17,7 @@
 \******************************************************************************/
 
 //	Local debugging switch for conditional code compilation.
-#define DBG_FETCHGNX 1
+//#define DBG_FETCHGNX 1
 
 /**
 	The fetchgnx command is used to fetch the Ginger XML (GNX) contents of a 
@@ -85,11 +85,11 @@ std::string Main::version() {
 extern char * optarg;
 static struct option long_options[] =
     {
-        { "prj",            required_argument,      0, 'j' },
-        { "prj1",           required_argument,     	0, 'J' },
-        { "pkg",           	required_argument,      0, 'p' },
-        { "pkg1",        	required_argument,  	0, 'P' },
-        { "def",        	required_argument,      0, 'd' },
+        { "project",        required_argument,      0, 'j' },
+        { "project1",       required_argument,     	0, 'J' },
+        { "package",        required_argument,      0, 'p' },
+        { "package1",       required_argument,  	0, 'P' },
+        { "variable",       required_argument,      0, 'v' },
         { "version",        no_argument,            0, 'V' },
         { "help",			optional_argument,		0, 'H' },
         { "license",        optional_argument,      0, 'L' },
@@ -100,7 +100,7 @@ void Main::parseArgs( int argc, char **argv, char **envp ) {
 	std::string current_package;
     for(;;) {
         int option_index = 0;
-        int c = getopt_long( argc, argv, "j:J:p:P:d:VH:L", long_options, &option_index );
+        int c = getopt_long( argc, argv, "j:J:p:P:v:VH:L:", long_options, &option_index );
         if ( c == -1 ) break;
         switch ( c ) {
         	case 'J': 
@@ -120,7 +120,7 @@ void Main::parseArgs( int argc, char **argv, char **envp ) {
 				}
 				break;
             }
-            case 'd': {
+            case 'v': {
             	this->definitions.push_back( pair< string, string >( current_package, string( optarg ) ) );
                 break;
             }
@@ -215,50 +215,6 @@ void Main::summary() {
 	}
 }
 
-/*
-static bool try_serve( string fullname ) {
-	ifstream file( fullname.c_str() );
-	if ( file.is_open() ) {
-		cout << "Found: " << fullname << endl;
-		string line;
-		while ( file.good() ) {
-			getline( file, line );
-			cout << line << endl;
-		}
-		file.close();
-		return true;
-	} else {
-		return false;
-	}
-}
-
-#define AUTO_SUFFIX 			".auto"
-#define AUTO_SUFFIX_SIZE 		sizeof( AUTO_SUFFIX )
-
-static bool find_definition( string project, string pkg, string name ) {
-	string dname = project + "/" + pkg;
-	
-	DIR * dirp = opendir( dname.c_str() );
-	for (;;) {
-		struct dirent * dp = readdir(dirp);
-		if ( dp == NULL ) break;
-		if ( ( dp->d_type & DT_DIR ) == 0 || dp->d_namlen < AUTO_SUFFIX_SIZE ) continue;
-		
-		string entry;
-		entry.append( dp->d_name, dp->d_namlen );
-		
-		//	Check that -entry- matches *.auto
-		if ( entry.find( AUTO_SUFFIX, entry.size() - AUTO_SUFFIX_SIZE ) == string::npos ) continue;
-		
-		string fullname = dname + "/" + entry + "/" + name + ".gnx";
-
-		if ( try_serve( fullname ) ) return true;
-	}
-	
-	return false;
-}
-*/
-
 void Main::run() {
 	Search search( this->project );
 	for ( 
@@ -266,7 +222,9 @@ void Main::run() {
 		it != this->definitions.end();
 		++it
 	) {
-		cout << it->first << "::" << it->second << endl;
+		#if DBG_FETCHGNX
+			cout << it->first << "::" << it->second << endl;
+		#endif
 		try {
 			search.find_definition( it->first, it->second );
 		} catch ( Mishap &m ) {

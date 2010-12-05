@@ -65,7 +65,7 @@ static struct option long_options[] =
 
 void Main::printGPL( const char * start, const char * end ) {
     bool printing = false;
-    ifstream license( "LICENSE.TXT" );
+    ifstream license( LICENSE_FILE );
     std::string line;
     while ( getline( license, line ) )  {
         if ( !printing && ( start == NULL || line.find( start ) != string::npos ) ) {

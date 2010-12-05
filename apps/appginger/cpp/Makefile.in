@@ -1,7 +1,20 @@
+# EPREFIX should be bound to PREFIX by default. This appears to be a lie.
+# As a consequence we override EPREFIX entirely. Probably incorrect but not
+# that interesting.
+prefix=@prefix@
+exec_prefix=@prefix@
+datarootdir=@datarootdir@
+PACKAGE_TARNAME=@PACKAGE_TARNAME@
+INSTALL_BIN=@bindir@
+INSTALL_LIB=@datarootdir@/@PACKAGE_TARNAME@
+INSTALL_DOC=@docdir@
+
+LICENSE_FILE="$(INSTALL_LIB)/LICENSE.txt"
+
 
 CC=@CXX@
 
-CXXFLAGS=-g -I../hpp -I../../automatic/machine -I../../automatic/sys -I../../automatic/simple -I/usr/local/boost_1_43_0 -Wall -Wnon-virtual-dtor # -Weffc++
+CXXFLAGS=-DLICENSE_FILE='$(LICENSE_FILE)' -g -I../hpp -I../../automatic/machine -I../../automatic/sys -I../../automatic/simple -I/usr/local/boost_1_43_0 -Wall -Wnon-virtual-dtor # -Weffc++
 CFLAGS=-Wmissing-prototypes 
 
 OBJS=mishap.o term.o read_xml.o \

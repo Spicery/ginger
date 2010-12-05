@@ -1,28 +1,11 @@
-# appGinger version
-VERSION = 0.4.1
-
-# Customize below to fit your system
-
-# paths
-PREFIX = /usr/local
-MANPREFIX = ${PREFIX}/share/man
-
-GTKINC=$(shell pkg-config --cflags gtk+-2.0 webkit-1.0)
-GTKLIB=$(shell pkg-config --libs gtk+-2.0 webkit-1.0)
-
-
-# includes and libs
-INCS = -I. -I/usr/include ${GTKINC}
-LIBS = -L/usr/lib -lc ${GTKLIB} -lgthread-2.0
-
-# flags
-CPPFLAGS = -DVERSION=\"${VERSION}\"
-CFLAGS = -std=c99 -pedantic -Wall -Os ${INCS} ${CPPFLAGS}
-LDFLAGS = -g ${LIBS}
-
-# Solaris
-#CFLAGS = -fast ${INCS} -DVERSION=\"${VERSION}\"
-#LDFLAGS = ${LIBS}
-
-# compiler and linker
-CC = cc
+# --- Paths ---
+# EPREFIX should be bound to PREFIX by default. This appears to be a lie.
+# As a consequence we override EPREFIX entirely. Probably incorrect but not
+# that interesting.
+prefix=@prefix@
+exec_prefix=@prefix@
+datarootdir=@datarootdir@
+PACKAGE_TARNAME=@PACKAGE_TARNAME@
+INSTALL_BIN=@bindir@
+INSTALL_LIB=@datarootdir@/@PACKAGE_TARNAME@
+INSTALL_DOC=@docdir@

@@ -4313,7 +4313,8 @@ if test "${boost_libdir}"; then
  echo "BOOST_LDDFLAGS set"
 fi
 
-ac_config_files="$ac_config_files Makefile apps/Makefile apps/appginger/Makefile apps/appginger/cpp/Makefile apps/appginger/functests/Makefile apps/lisp2gnx/Makefile apps/lisp2gnx/lsp/Makefile apps/lisp2gnx/functests/Makefile apps/common2gnx/Makefile apps/common2gnx/cpp/Makefile apps/file2gnx/Makefile apps/file2gnx/cpp/Makefile"
+ac_config_files="$ac_config_files Makefile apps/Makefile apps/appginger/Makefile apps/appginger/cpp/Makefile apps/appginger/functest/Makefile apps/appginger/unittest/Makefile apps/lisp2gnx/Makefile apps/lisp2gnx/lsp/Makefile apps/lisp2gnx/functest/Makefile apps/common2gnx/Makefile apps/common2gnx/cpp/Makefile apps/fetchgnx/Makefile apps/fetchgnx/cpp/Makefile apps/fetchgnx/unittest/Makefile apps/file2gnx/Makefile apps/file2gnx/cpp/Makefile apps/file2gnx/unittest/Makefile"
+
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -5021,14 +5022,19 @@ do
     "apps/Makefile") CONFIG_FILES="$CONFIG_FILES apps/Makefile" ;;
     "apps/appginger/Makefile") CONFIG_FILES="$CONFIG_FILES apps/appginger/Makefile" ;;
     "apps/appginger/cpp/Makefile") CONFIG_FILES="$CONFIG_FILES apps/appginger/cpp/Makefile" ;;
-    "apps/appginger/functests/Makefile") CONFIG_FILES="$CONFIG_FILES apps/appginger/functests/Makefile" ;;
+    "apps/appginger/functest/Makefile") CONFIG_FILES="$CONFIG_FILES apps/appginger/functest/Makefile" ;;
+    "apps/appginger/unittest/Makefile") CONFIG_FILES="$CONFIG_FILES apps/appginger/unittest/Makefile" ;;
     "apps/lisp2gnx/Makefile") CONFIG_FILES="$CONFIG_FILES apps/lisp2gnx/Makefile" ;;
     "apps/lisp2gnx/lsp/Makefile") CONFIG_FILES="$CONFIG_FILES apps/lisp2gnx/lsp/Makefile" ;;
-    "apps/lisp2gnx/functests/Makefile") CONFIG_FILES="$CONFIG_FILES apps/lisp2gnx/functests/Makefile" ;;
+    "apps/lisp2gnx/functest/Makefile") CONFIG_FILES="$CONFIG_FILES apps/lisp2gnx/functest/Makefile" ;;
     "apps/common2gnx/Makefile") CONFIG_FILES="$CONFIG_FILES apps/common2gnx/Makefile" ;;
     "apps/common2gnx/cpp/Makefile") CONFIG_FILES="$CONFIG_FILES apps/common2gnx/cpp/Makefile" ;;
+    "apps/fetchgnx/Makefile") CONFIG_FILES="$CONFIG_FILES apps/fetchgnx/Makefile" ;;
+    "apps/fetchgnx/cpp/Makefile") CONFIG_FILES="$CONFIG_FILES apps/fetchgnx/cpp/Makefile" ;;
+    "apps/fetchgnx/unittest/Makefile") CONFIG_FILES="$CONFIG_FILES apps/fetchgnx/unittest/Makefile" ;;
     "apps/file2gnx/Makefile") CONFIG_FILES="$CONFIG_FILES apps/file2gnx/Makefile" ;;
     "apps/file2gnx/cpp/Makefile") CONFIG_FILES="$CONFIG_FILES apps/file2gnx/cpp/Makefile" ;;
+    "apps/file2gnx/unittest/Makefile") CONFIG_FILES="$CONFIG_FILES apps/file2gnx/unittest/Makefile" ;;
 
   *) as_fn_error $? "invalid argument: \`$ac_config_target'" "$LINENO" 5;;
   esac

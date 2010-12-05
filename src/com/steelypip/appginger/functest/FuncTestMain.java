@@ -46,11 +46,6 @@ public class FuncTestMain {
 		return test_list;
 	}
 	
-	/*private void runCommon2GnxFuncTests() {
-		List< FuncTest > tests = this.tests( new File( new File( new File( "c" ), "common2gnx" ), "functests" ) );
-		//	To do
-	}*/
-	
 	private boolean needNewLine = false;
 
 	private void runAppGingerFuncTests( final String fname, final String command ) throws IOException {

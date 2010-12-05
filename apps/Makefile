@@ -1,6 +1,0 @@
-all clean:
-	$(MAKE) -C appginger $@
-	$(MAKE) -C common2gnx $@
-	$(MAKE) -C lisp2gnx $@
-	$(MAKE) -C fetchgnx $@
-	$(MAKE) -C file2gnx $@

@@ -74,7 +74,7 @@ void Mishap::gnxReport() {
 		it != this->culprits.end();
 		++it
 	) {
-		cout << "culprit name=\"" << it->first << "\" value=\"" << it->second << "\">";
+		cout << "<culprit name=\"" << it->first << "\" value=\"" << it->second << "\" />";
 	}
 	cout << "</mishap>" << endl;
 	

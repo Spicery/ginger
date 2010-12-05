@@ -78,5 +78,5 @@ install:
 	mkdir -p $(INSTALL_LIB)
 	/usr/bin/install -m a=r LICENSE.txt $(INSTALL_LIB)
 	mkdir -p $(INSTALL_LIB)/lisp2gnx
-	echo /usr/bin/install -m a=r apps/lisp2gnx/lsp/lisp2gnx.lsp $(INSTALL_LIB)/lisp2gnx
-	echo /usr/bin/install $(EXECUTABLES) $(INSTALL_BIN)
+	/usr/bin/install -m a=r apps/lisp2gnx/lsp/lisp2gnx.lsp $(INSTALL_LIB)/lisp2gnx
+	/usr/bin/install $(EXECUTABLES) $(INSTALL_BIN)

@@ -1,4 +1,3 @@
-
 CC=@CXX@
 
 CXXFLAGS=-g -I../hpp -I/usr/local/boost_1_43_0 -Wall -Wnon-virtual-dtor # -Weffc++
@@ -11,8 +10,8 @@ all: fetchgnx
 # $@ is make shorthand for the target.
 # $@ is make shorthand for the dependencies
 fetchgnx: $(OBJS)
-	@CXX@ $(CXXFLAGS) $(BOOST_CPPFLAGS) -o $@
-	
+	@CXX@ $(CXXFLAGS) $(BOOST_CPPFLAGS) -o $@ $(OBJS)
+
 clean:
 	rm -f *.o
 	rm -f fetchgnx

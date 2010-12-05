@@ -6,7 +6,7 @@ dox:
 
 clean:
 	$(MAKE) -C cpp $@
-	$(MAKE) -C unittests $@
+	$(MAKE) -C unittest $@
 
 check:
-	$(MAKE) -C unittests $@
+	$(MAKE) -C unittest $@

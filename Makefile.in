@@ -15,7 +15,7 @@ distclean: clean
 	rm -f apps/Makefile
 	rm -f apps/appginger/Makefile
 	rm -f apps/appginger/cpp/Makefile
-	rm -f apps/appginger/functests/Makefile
+	rm -f apps/appginger/functest/Makefile
 	rm -f apps/common2gnx/Makefile
 	rm -f apps/common2gnx/cpp/Makefile
 	rm -f config.h

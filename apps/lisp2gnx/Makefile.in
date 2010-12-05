@@ -3,7 +3,7 @@ all:
 
 clean:
 	$(MAKE) -C lsp $@
-	$(MAKE) -C functests $@
+	$(MAKE) -C functest $@
 
 check:
-	$(MAKE) -C functests $@
+	$(MAKE) -C functest $@

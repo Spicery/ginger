@@ -41,7 +41,7 @@ appginger: libappginger.a main.o
 clean:
 	rm -f *.o
 	rm -f appginger
-	rm -r *.a
+	rm -f *.a
 
 #	Nothing needs doing.
 check:

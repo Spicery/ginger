@@ -6,7 +6,8 @@ dox:
 
 clean:
 	$(MAKE) -C cpp $@
-	$(MAKE) -C functests $@
+	$(MAKE) -C functest $@
+	$(MAKE) -C unittest $@
 
 check:
-	$(MAKE) -C functests $@
+	$(MAKE) -C functest $@

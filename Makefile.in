@@ -56,3 +56,27 @@ snapshot:
 	cp -r instructions build/appginger/
 	cp -r src build/appginger/
 	( cd ./build ; tar cf - appginger | gzip > appginger.tgz )
+
+prefix=@prefix@
+datarootdir=@datarootdir@
+PACKAGE_TARNAME=@PACKAGE_TARNAME@
+INSTALL_BIN=@bindir@
+INSTALL_LIB=@datarootdir@/@PACKAGE_TARNAME@
+INSTALL_DOC=@docdir@
+
+EXECUTABLES=\
+	apps/appginger/cpp/appginger \
+	apps/fetchgnx/cpp/fetchgnx \
+	apps/file2gnx/cpp/file2gnx \
+	apps/common2gnx/cpp/common2gnx \
+	apps/lisp2gnx/cpp/lisp2gnx
+
+install:
+	echo Installing binaries into $(INSTALL_BIN)
+	echo Installing support files $(INSTALL_LIB)
+	echo Installing docs into $(INSTALL_DOC)
+	mkdir -p $(INSTALL_LIB)
+	/usr/bin/install -m a=r LICENSE.txt $(INSTALL_LIB)
+	mkdir -p $(INSTALL_LIB)/lisp2gnx
+	echo /usr/bin/install -m a=r apps/lisp2gnx/lsp/lisp2gnx.lsp $(INSTALL_LIB)/lisp2gnx
+	echo /usr/bin/install $(EXECUTABLES) $(INSTALL_BIN)

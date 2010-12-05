@@ -11,7 +11,7 @@ all: fetchgnx
 # $@ is make shorthand for the target.
 # $@ is make shorthand for the dependencies
 fetchgnx: $(OBJS)
-	g++ $(CXXFLAGS) $(BOOST_CPPFLAGS) -o $@ $^
+	g++ $(CXXFLAGS) $(BOOST_CPPFLAGS) -o $@
 	
 clean:
 	rm -f *.o
@@ -19,4 +19,3 @@ clean:
 
 #	Nothing needs doing.
 check:
-

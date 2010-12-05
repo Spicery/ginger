@@ -7,12 +7,15 @@ INSTALL_DOC=@docdir@
 
 all: lisp2gnx
 
+# Do the mv at the very end in order that any failure does not leave lisp2gnx
+# file behind that is treated as a succesfully build.
 lisp2gnx:
-	touch lisp2gnx
-	cat '#!/bin/sh' >> lisp2gnx
-	cat 'GUILE_LOAD_PATH=""' >> lisp2gnx
-	cat "exec guile -l $(INSTALL_LIB)/lisp2gnx/lisp2gnx.lsp -e lisp2gnx -- $@" >> lisp2gnx
-	chmod a=rx lisp2gnx
+	touch lisp2gnx.tmp
+	echo '#!/bin/sh' >> lisp2gnx.tmp
+	echo 'GUILE_LOAD_PATH=""' >> lisp2gnx.tmp
+	echo "exec guile -l $(INSTALL_LIB)/lisp2gnx/lisp2gnx.lsp -e lisp2gnx -- "'$$@' >> lisp2gnx.tmp
+	chmod a=rx lisp2gnx.tmp
+	mv lisp2gnx.tmp lisp2gnx
 	
 clean:
 	rm -f *.o

@@ -26,7 +26,7 @@
 class ProjectCache {
 private:
 	std::string project_folder;
-	map< std::string, PackageCache * > cache;
+	std::map< std::string, PackageCache * > cache;
 	
 public:
 	PackageCache * getPackageCache( std::string pkg_name );

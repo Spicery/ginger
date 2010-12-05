@@ -20,6 +20,12 @@
 
 #include <fstream>
 #include <iostream>
+
+#include <stdlib.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+
+
 using namespace std;
 
 #include "packagecache.hpp"

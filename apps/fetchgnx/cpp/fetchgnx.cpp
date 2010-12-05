@@ -49,12 +49,13 @@
 #include <fstream>
 #include <vector>
 
-using namespace std;
-
+#include <stdlib.h>
 #include <getopt.h>
 
 #include "mishap.hpp"
 #include "search.hpp"
+
+using namespace std;
 
 class Main {
 private:

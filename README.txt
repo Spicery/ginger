@@ -115,7 +115,7 @@ course, the central part of the system. It has the following layout:
 		% make
 		% ./testrunner	# run the unit tests
 
-	c/appginger/functests
+	c/appginger/functest
 		This is the functional test area. The functional tests rely on a Java
 		program that we have to compile separately. Again, this is really quite naff
 		but tidying up isn't high up my to-do list yet. The make script relies on
@@ -127,7 +127,7 @@ course, the central part of the system. It has the following layout:
 		% ( cd src; javac -d ../classes com/steelypip/appginger/functest/FuncTestMain.java)
 		%
 		% # Run the functional tests.
-		% cd c/appginger/functests	
+		% cd c/appginger/functest	
 		% make clean	# run tests from scratch
 		% make check
 	
@@ -146,10 +146,10 @@ TLC. It has a less developed structure.
 		% cd c/common2gnx/cpp
 		% make
 
-	c/common2gnx/functests
+	c/common2gnx/functest
 		Some functional tests.
 
-		% cd $APPGINGER/c/common2gnx/functests
+		% cd $APPGINGER/c/common2gnx/functest
 		% make clean
 		% make check
 

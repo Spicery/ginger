@@ -63,7 +63,6 @@ static void run( string command, string pathname ) {
 	const char * cmd = command.c_str();
 	pipe( pipe_fd );
 	pid_t pid = fork();
-	int return_value_of_child;
 	switch ( pid ) {
 		case -1: {	//	Something went wrong.
 			throw Mishap( "Child process unexpectedly failed" ).culprit( "Command", command ).culprit( "Argument", pathname );
@@ -90,6 +89,7 @@ static void run( string command, string pathname ) {
 				write( STDOUT_FILENO, buf, n );
 			}
 			
+			int return_value_of_child;
 			wait( &return_value_of_child );
 			break;
 		}

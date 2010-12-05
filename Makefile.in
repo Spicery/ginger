@@ -69,7 +69,7 @@ EXECUTABLES=\
 	apps/fetchgnx/cpp/fetchgnx \
 	apps/file2gnx/cpp/file2gnx \
 	apps/common2gnx/cpp/common2gnx \
-	apps/lisp2gnx/cpp/lisp2gnx
+	apps/lisp2gnx/lsp/lisp2gnx
 
 install:
 	echo Installing binaries into $(INSTALL_BIN)

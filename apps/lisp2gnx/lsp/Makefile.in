@@ -1,5 +1,19 @@
-all:
+prefix=@prefix@
+datarootdir=@datarootdir@
+PACKAGE_TARNAME=@PACKAGE_TARNAME@
+INSTALL_BIN=@bindir@
+INSTALL_LIB=@datarootdir@/@PACKAGE_TARNAME@
+INSTALL_DOC=@docdir@
+
+all: lisp2gnx
+
+lisp2gnx:
+	touch lisp2gnx
+	cat '#!/bin/sh' >> lisp2gnx
+	cat 'GUILE_LOAD_PATH=""' >> lisp2gnx
+	cat "exec guile -l $(INSTALL_LIB)/lisp2gnx/lisp2gnx.lsp -e lisp2gnx -- $@" >> lisp2gnx
+	chmod a=rx lisp2gnx
 	
 clean:
 	rm -f *.o
-	rm -f common2gnx
+	rm -f lisp2gnx

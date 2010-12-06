@@ -1,8 +1,7 @@
 
 CC=g++
 
-CXXFLAGS=-g -I../hpp -L/opt/local/lib -L../cpp -I/opt/local/include -I../../automatic/machine -I../../automatic/sys -I../../automatic/simple -I/usr/local/boost_1_43_0 -Wall -Wnon-virtual-dtor # -Weffc++
-LDFLAGS=-ldl
+CXXFLAGS=-g -I../hpp -L/opt/local/lib -ldl -L../cpp -I/opt/local/include -I../../automatic/machine -I../../automatic/sys -I../../automatic/simple -I/usr/local/boost_1_43_0 -Wall -Wnon-virtual-dtor # -Weffc++
 CFLAGS=-Wmissing-prototypes 
 
 OBJS=example.o testrunner.o gctest.o gcstats.o archtest.o
@@ -10,7 +9,7 @@ OBJS=example.o testrunner.o gctest.o gcstats.o archtest.o
 all: testrunner
 
 check: testrunner
-	./testrunner > results.xunit
+	./testrunner > results.xml
 
 # $@ is make shorthand for the target.
 # $@ is make shorthand for the dependencies

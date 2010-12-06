@@ -16,29 +16,12 @@
     along with AppGinger.  If not, see <http://www.gnu.org/licenses/>.
 \******************************************************************************/
 
-#include "projectcache.hpp"
+#include "varinfo.hpp"
 
-using namespace std;
-
-ProjectCache::ProjectCache( std::string project_path ) :
-	project_folder( project_path )
-{
+VarInfo::VarInfo() : mishap( NULL ) {
 }
 
-ProjectCache::~ProjectCache() {
-	for (
-		map< string, PackageCache * >::iterator it = this->cache.begin();
-		it != this->cache.end();
-		++it
-	) {
-		delete it->second;
-	}
+VarInfo::~VarInfo() {
+	delete this->mishap; 
 }
 
-PackageCache * ProjectCache::getPackageCache( string pkg_name ) {
-	return this->cache[ pkg_name ];
-}
-
-void ProjectCache::putPackageCache( string pkg_name, PackageCache * pkg ) {
-	this->cache[ pkg_name ] = pkg;
-}

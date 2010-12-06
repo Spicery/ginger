@@ -24,29 +24,21 @@
 #include <memory>
 
 #include "mishap.hpp"
-
-class PkgInfo {
-public:
-	std::string 				pathname;
-	Mishap *					mishap;
-	
-public:
-	PkgInfo();
-	~PkgInfo();
-};
+#include "varinfo.hpp"
 
 //	A mapping from variable names to file names.
 class PackageCache {
 private:
 	std::string package_name;
-	std::map< std::string, PkgInfo > cache;
+	std::map< std::string, VarInfo > cache;
 	
 public:
+	std::string getPackageName();
 	bool hasVariable( std::string var_name );
 	std::string getPathName( std::string name );
 	void putPathName( std::string name, std::string pathname );
 	//void printVariable( std::string var_name );
-	std::string variableFile( std::string var_name );
+	VarInfo * variableFile( std::string var_name );
 
 
 public:

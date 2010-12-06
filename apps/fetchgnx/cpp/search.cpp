@@ -93,15 +93,27 @@ static void run( string command, string pathname ) {
 }
 
 
-static void dumpFile( string fullname ) {
+static void dumpFile( string & fullname ) {
 	run( EXEC_DIR "/" FILE2GNX, fullname );
 }
+
+static void returnDefinition( PackageCache * c, string name ) {
+	VarInfo * vfile = c->variableFile( name );
+	if ( vfile != NULL ) {
+		dumpFile( vfile->pathname );
+	} else {
+		throw 
+			Mishap( "Cannot find variable" ).
+			culprit( "Variable", name ).
+			culprit( "Package", c->getPackageName() );
+	}
+}
+
 
 void Search::findDefinition( string pkg, string name ) {
 	PackageCache * c = this->project_cache.getPackageCache( pkg );
 	if ( c != NULL ) {
-		//cout << "FOUND" << endl;
-		dumpFile( c->variableFile( name ) );
+		returnDefinition( c, name );
 	} else {
 		//cout << "NOT FOUND" << endl;
 		PackageCache * newc = new PackageCache( pkg );
@@ -138,7 +150,6 @@ void Search::findDefinition( string pkg, string name ) {
 			}	
 		}
 		
-		string vfile = newc->variableFile( name );
-		dumpFile( vfile );
+		returnDefinition( newc, name );
 	}
 }

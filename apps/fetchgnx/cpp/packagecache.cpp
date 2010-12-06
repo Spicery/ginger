@@ -23,10 +23,10 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 
+#include "packagecache.hpp"
 
 using namespace std;
 
-#include "packagecache.hpp"
 
 PackageCache::PackageCache( std::string pkg_name ) : 
 	package_name( pkg_name ) 
@@ -34,6 +34,10 @@ PackageCache::PackageCache( std::string pkg_name ) :
 }
 
 PackageCache::~PackageCache() {
+}
+
+string PackageCache::getPackageName() {
+	return package_name;
 }
 
 bool PackageCache::hasVariable( std::string var_name ) {
@@ -57,48 +61,19 @@ void PackageCache::putPathName( std::string var_name, std::string path_name ) {
 	//cout << "PUT " << var_name << " = " << path_name << endl;
 }
 
-
-
-/*void PackageCache::printVariable( string var_name ) {
-	std::map< std::string, PkgInfo >::iterator it = this->cache.find( var_name );
+VarInfo * PackageCache::variableFile( string var_name ) {
+	std::map< std::string, VarInfo >::iterator it = this->cache.find( var_name );
 	if ( it == this->cache.end() ) {
-		throw 
-			Mishap( "Cannot find variable" ).
-			culprit( "Variable", var_name ).
-			culprit( "Package", this->package_name );
+		return NULL;
 	} else {
 		Mishap * m = it->second.mishap;
 		if ( m != NULL ) {
 			throw *m;
 		} else {
-			dumpFile( it->second.pathname );
-		}
-	}
-}*/
-
-string PackageCache::variableFile( string var_name ) {
-	std::map< std::string, PkgInfo >::iterator it = this->cache.find( var_name );
-	if ( it == this->cache.end() ) {
-		throw 
-			Mishap( "Cannot find variable" ).
-			culprit( "Variable", var_name ).
-			culprit( "Package", this->package_name );
-	} else {
-		Mishap * m = it->second.mishap;
-		if ( m != NULL ) {
-			throw *m;
-		} else {
-			return it->second.pathname;
+			return & it->second;
 		}
 	}
 }
 
 
-
-PkgInfo::PkgInfo() : mishap( NULL ) {
-}
-
-PkgInfo::~PkgInfo() {
-	delete this->mishap; 
-}
 

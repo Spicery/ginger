@@ -27,9 +27,9 @@
 
 using namespace std;
 
-#define COMMON2GNX	"/usr/local/bin/common2gnx"
-#define LISP2GNX 	"/usr/local/bin/lisp2gnx"
-#define GNX2GNX     "/bin/cat"
+#define COMMON2GNX	( EXEC_DIR "/common2gnx" )
+#define LISP2GNX 	( EXEC_DIR "/lisp2gnx" )
+#define GNX2GNX     ( EXEC_DIR "/cat" )
 
 //
 //	Insecure. We need to do this more neatly. It would be best if common2gnx

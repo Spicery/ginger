@@ -10,7 +10,7 @@ OBJS=example.o testrunner.o gctest.o gcstats.o archtest.o
 all: testrunner
 
 check: testrunner
-	./testrunner
+	./testrunner > results.xunit
 
 # $@ is make shorthand for the target.
 # $@ is make shorthand for the dependencies

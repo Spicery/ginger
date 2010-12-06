@@ -45,7 +45,8 @@ public:
 	bool hasVariable( std::string var_name );
 	std::string getPathName( std::string name );
 	void putPathName( std::string name, std::string pathname );
-	void printVariable( std::string var_name );
+	//void printVariable( std::string var_name );
+	std::string variableFile( std::string var_name );
 
 
 public:

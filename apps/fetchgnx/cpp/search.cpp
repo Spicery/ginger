@@ -36,6 +36,10 @@ using namespace std;
 #define GNX_SUFFIX 				".gnx"
 #define GNX_SUFFIX_SIZE 		sizeof( GNX_SUFFIX )
 
+#define FILE2GNX "file2gnx"
+
+
+
 Search::Search( std::string project_folder ) :
 	project_folder( project_folder ),
 	project_cache( project_folder )
@@ -45,11 +49,59 @@ Search::Search( std::string project_folder ) :
 Search::~Search() {
 }
 
-void Search::find_definition( string pkg, string name ) {
+//
+//	Insecure. We need to do this more neatly. It would be best if common2gnx
+//	and lisp2gnx could handle being passed a filename as an argument. This
+//	would be both more secure and efficient.
+//
+static void run( string command, string pathname ) {
+	int pipe_fd[ 2 ];
+	const char * cmd = command.c_str();
+	pipe( pipe_fd );
+	pid_t pid = fork();
+	switch ( pid ) {
+		case -1: {	//	Something went wrong.
+			throw Mishap( "Child process unexpectedly failed" ).culprit( "Command", command ).culprit( "Argument", pathname );
+			break;
+		}
+		case 0: {	//	Child process - exec into command.
+			//	Close the unused read descriptor.
+			close( pipe_fd[0] );
+			//	Attach stdout to the write descriptor.
+			dup2( pipe_fd[1], STDOUT_FILENO );
+			execl( cmd, cmd, pathname.c_str(), NULL );
+			break;
+		}
+		default: {	// 	Parent process.
+			//	Close the unused write descriptor.
+			close( pipe_fd[1] );
+			
+			//	Read from the read descriptor until exhausted.
+			const int input_fd = pipe_fd[0];
+			static char buf[ 1024 ];
+			for (;;) {
+				ssize_t n = read( input_fd, buf, sizeof( buf ) );
+				if ( n == 0 ) break;
+				write( STDOUT_FILENO, buf, n );
+			}
+			
+			int return_value_of_child;
+			wait( &return_value_of_child );
+			break;
+		}
+	}
+}
+
+
+static void dumpFile( string fullname ) {
+	run( EXEC_DIR "/" FILE2GNX, fullname );
+}
+
+void Search::findDefinition( string pkg, string name ) {
 	PackageCache * c = this->project_cache.getPackageCache( pkg );
 	if ( c != NULL ) {
 		//cout << "FOUND" << endl;
-		c->printVariable( name );
+		dumpFile( c->variableFile( name ) );
 	} else {
 		//cout << "NOT FOUND" << endl;
 		PackageCache * newc = new PackageCache( pkg );
@@ -86,6 +138,7 @@ void Search::find_definition( string pkg, string name ) {
 			}	
 		}
 		
-		newc->printVariable( name );
+		string vfile = newc->variableFile( name );
+		dumpFile( vfile );
 	}
 }

@@ -16,8 +16,6 @@
     along with AppGinger.  If not, see <http://www.gnu.org/licenses/>.
 \******************************************************************************/
 
-#define FILE2GNX "/usr/local/bin/file2gnx"
-
 #include <fstream>
 #include <iostream>
 
@@ -59,55 +57,9 @@ void PackageCache::putPathName( std::string var_name, std::string path_name ) {
 	//cout << "PUT " << var_name << " = " << path_name << endl;
 }
 
-//
-//	Insecure. We need to do this more neatly. It would be best if common2gnx
-//	and lisp2gnx could handle being passed a filename as an argument. This
-//	would be both more secure and efficient.
-//
-static void run( string command, string pathname ) {
-	int pipe_fd[ 2 ];
-	const char * cmd = command.c_str();
-	pipe( pipe_fd );
-	pid_t pid = fork();
-	switch ( pid ) {
-		case -1: {	//	Something went wrong.
-			throw Mishap( "Child process unexpectedly failed" ).culprit( "Command", command ).culprit( "Argument", pathname );
-			break;
-		}
-		case 0: {	//	Child process - exec into command.
-			//	Close the unused read descriptor.
-			close( pipe_fd[0] );
-			//	Attach stdout to the write descriptor.
-			dup2( pipe_fd[1], STDOUT_FILENO );
-			execl( cmd, cmd, pathname.c_str(), NULL );
-			break;
-		}
-		default: {	// 	Parent process.
-			//	Close the unused write descriptor.
-			close( pipe_fd[1] );
-			
-			//	Read from the read descriptor until exhausted.
-			const int input_fd = pipe_fd[0];
-			static char buf[ 1024 ];
-			for (;;) {
-				ssize_t n = read( input_fd, buf, sizeof( buf ) );
-				if ( n == 0 ) break;
-				write( STDOUT_FILENO, buf, n );
-			}
-			
-			int return_value_of_child;
-			wait( &return_value_of_child );
-			break;
-		}
-	}
-}
 
 
-static void dumpFile( string fullname ) {
-	run( FILE2GNX, fullname );
-}
-
-void PackageCache::printVariable( string var_name ) {
+/*void PackageCache::printVariable( string var_name ) {
 	std::map< std::string, PkgInfo >::iterator it = this->cache.find( var_name );
 	if ( it == this->cache.end() ) {
 		throw 
@@ -122,7 +74,25 @@ void PackageCache::printVariable( string var_name ) {
 			dumpFile( it->second.pathname );
 		}
 	}
+}*/
+
+string PackageCache::variableFile( string var_name ) {
+	std::map< std::string, PkgInfo >::iterator it = this->cache.find( var_name );
+	if ( it == this->cache.end() ) {
+		throw 
+			Mishap( "Cannot find variable" ).
+			culprit( "Variable", var_name ).
+			culprit( "Package", this->package_name );
+	} else {
+		Mishap * m = it->second.mishap;
+		if ( m != NULL ) {
+			throw *m;
+		} else {
+			return it->second.pathname;
+		}
+	}
 }
+
 
 
 PkgInfo::PkgInfo() : mishap( NULL ) {

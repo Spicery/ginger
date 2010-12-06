@@ -227,7 +227,7 @@ void Main::run() {
 			cout << it->first << "::" << it->second << endl;
 		#endif
 		try {
-			search.find_definition( it->first, it->second );
+			search.findDefinition( it->first, it->second );
 		} catch ( Mishap &m ) {
 			//	NOTE: This is not correct because the values of package & variable must be escaped!
 			cout << "<mishap message=\"" << m.getMessage() << "\">";

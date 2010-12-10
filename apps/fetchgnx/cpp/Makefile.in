@@ -14,17 +14,18 @@ EXEC_DIR="$(INSTALL_BIN)"
 
 CC=@CXX@
 
-CXXFLAGS=-DEXEC_DIR='$(EXEC_DIR)' -g -I../hpp -I/usr/local/boost_1_43_0 -Wall -Wnon-virtual-dtor # -Weffc++
+# -Weffc++
+CXXFLAGS=-DEXEC_DIR='$(EXEC_DIR)' -g -I../hpp -I../../libgng/hpp -I/usr/local/boost_1_43_0 -Wall -Wnon-virtual-dtor
 CFLAGS=-Wmissing-prototypes 
 
-OBJS=fetchgnx.o mishap.o search.o folderscan.o projectcache.o packagecache.o varinfo.o
+OBJS=fetchgnx.o mishap.o search.o folderscan.o projectcache.o packagecache.o varinfo.o importinfo.o importsetinfo.o
 
 all: fetchgnx
 
 # $@ is make shorthand for the target.
 # $@ is make shorthand for the dependencies
 fetchgnx: $(OBJS)
-	@CXX@ $(CXXFLAGS) $(BOOST_CPPFLAGS) -o $@ $(OBJS)
+	@CXX@ $(CXXFLAGS) $(BOOST_CPPFLAGS) -o $@ $(OBJS) ../../libgng/cpp/libgng.a
 
 clean:
 	rm -f *.o

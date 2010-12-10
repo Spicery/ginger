@@ -16,30 +16,25 @@
     along with AppGinger.  If not, see <http://www.gnu.org/licenses/>.
 \******************************************************************************/
 
-#ifndef PROJECT_CACHE_HPP
-#define PROJECT_CACHE_HPP
+#ifndef IMPORT_SET_INFO_HPP
+#define IMPORT_SET_INFO_HPP
 
 #include <string>
+#include <list>
+#include <map>
+#include <utility>
 
-#include "packagecache.hpp"
+#include "importinfo.hpp"
 
-class ProjectCache {
+class ImportSetInfo {
 private:
-	std::string project_folder;
-	std::map< std::string, PackageCache * > cache;
-	
-private:
-	void putPackageCache( std::string & pkg_name, PackageCache * cache );
-	PackageCache * getPackageCache( std::string & pkg_name );
-	PackageCache * cachePackage( std::string & pkg );
+	std::list< ImportInfo > imports;
 	
 public:
-	PackageCache * fetchPackageCache( std::string & pkg );
+	void readFile( std::string filename );
+	void printImports();
+	void fillFromList( std::list< std::string > & from_list );
 
-
-public:
-	ProjectCache( std::string project_folder );
-	~ProjectCache();
 };
 
 #endif

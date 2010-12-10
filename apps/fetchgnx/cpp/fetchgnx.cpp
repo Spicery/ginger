@@ -48,8 +48,8 @@
 #include <utility>
 #include <fstream>
 #include <vector>
+#include <cstdlib>
 
-#include <stdlib.h>
 #include <getopt.h>
 
 #include "mishap.hpp"

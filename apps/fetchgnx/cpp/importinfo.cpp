@@ -16,30 +16,39 @@
     along with AppGinger.  If not, see <http://www.gnu.org/licenses/>.
 \******************************************************************************/
 
-#ifndef PROJECT_CACHE_HPP
-#define PROJECT_CACHE_HPP
+#include <fstream>
+#include <iostream>
+#include <utility>
 
-#include <string>
+#include "importinfo.hpp"
+#include "mishap.hpp"
 
-#include "packagecache.hpp"
+using namespace std;
 
-class ProjectCache {
-private:
-	std::string project_folder;
-	std::map< std::string, PackageCache * > cache;
-	
-private:
-	void putPackageCache( std::string & pkg_name, PackageCache * cache );
-	PackageCache * getPackageCache( std::string & pkg_name );
-	PackageCache * cachePackage( std::string & pkg );
-	
-public:
-	PackageCache * fetchPackageCache( std::string & pkg );
+#define FROM "from"
 
+typedef std::map< std::string, std::string > Dict;
 
-public:
-	ProjectCache( std::string project_folder );
-	~ProjectCache();
-};
+ImportInfo::ImportInfo( Dict & attrs ) : 
+	attrs( attrs ) 
+{
+	Dict::iterator it = attrs.find( FROM );
+	if ( it == attrs.end() ) {
+		throw Mishap( "Missing attribute in import" ).culprit( "Attribute", FROM );
+	}
+	this->from = it->second;
+}
 
-#endif
+void ImportInfo::printInfo() {
+	for ( 
+		Dict::iterator jt = this->attrs.begin();
+		jt != this->attrs.end();
+		++jt
+	) {
+		cout << jt->first << " -> " << jt->second << endl;
+	}	
+}
+
+string & ImportInfo::getFrom() {
+	return this->from;
+}

@@ -21,16 +21,19 @@
 
 #include <string>
 #include <map>
+#include <list>
 #include <memory>
 
 #include "mishap.hpp"
 #include "varinfo.hpp"
+#include "importsetinfo.hpp"
 
 //	A mapping from variable names to file names.
 class PackageCache {
 private:
-	std::string package_name;
-	std::map< std::string, VarInfo > cache;
+	std::string 						package_name;
+	std::map< std::string, VarInfo > 	cache;
+	ImportSetInfo 						imports;
 	
 public:
 	std::string getPackageName();
@@ -39,6 +42,9 @@ public:
 	void putPathName( std::string name, std::string pathname );
 	//void printVariable( std::string var_name );
 	VarInfo * variableFile( std::string var_name );
+	void readImports( std::string import_file );
+	void printImports();
+	void fillFromList( std::list< std::string > & from_list );
 
 
 public:

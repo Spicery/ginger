@@ -18,15 +18,15 @@
 
 #include <fstream>
 #include <iostream>
+#include <cstdlib>
 
-#include <stdlib.h>
 #include <sys/types.h>
 #include <sys/wait.h>
 
 #include "packagecache.hpp"
+#include "sax.hpp"
 
 using namespace std;
-
 
 PackageCache::PackageCache( std::string pkg_name ) : 
 	package_name( pkg_name ) 
@@ -35,6 +35,15 @@ PackageCache::PackageCache( std::string pkg_name ) :
 
 PackageCache::~PackageCache() {
 }
+
+void PackageCache::readImports( string ifile ) {
+	this->imports.readFile( ifile );
+}
+
+void PackageCache::fillFromList( list< string > & from_list ) {
+	this->imports.fillFromList( from_list );
+}
+
 
 string PackageCache::getPackageName() {
 	return package_name;
@@ -75,5 +84,6 @@ VarInfo * PackageCache::variableFile( string var_name ) {
 	}
 }
 
-
-
+void PackageCache::printImports() {
+	this->imports.printImports();
+}

@@ -18,7 +18,6 @@
 
 #include <fstream>
 #include <iostream>
-using namespace std;
 
 #include <sys/types.h>
 #include <dirent.h>
@@ -28,17 +27,11 @@ using namespace std;
 #include "mishap.hpp"
 #include "folderscan.hpp"
 
+using namespace std;
+
 //#define DBG_SEARCH
 
-#define AUTO_SUFFIX 			".auto"
-#define AUTO_SUFFIX_SIZE 		sizeof( AUTO_SUFFIX )
-
-#define GNX_SUFFIX 				".gnx"
-#define GNX_SUFFIX_SIZE 		sizeof( GNX_SUFFIX )
-
 #define FILE2GNX "file2gnx"
-
-
 
 Search::Search( std::string project_folder ) :
 	project_folder( project_folder ),
@@ -92,64 +85,44 @@ static void run( string command, string pathname ) {
 	}
 }
 
-
 static void dumpFile( string & fullname ) {
 	run( EXEC_DIR "/" FILE2GNX, fullname );
 }
 
-static void returnDefinition( PackageCache * c, string name ) {
+void Search::returnDefinition( PackageCache * c, string name ) {
 	VarInfo * vfile = c->variableFile( name );
 	if ( vfile != NULL ) {
 		dumpFile( vfile->pathname );
 	} else {
-		throw 
-			Mishap( "Cannot find variable" ).
-			culprit( "Variable", name ).
-			culprit( "Package", c->getPackageName() );
+		list< string > from_list;
+		c->fillFromList( from_list );
+		for (
+			list< string >::iterator it = from_list.begin();
+			it != from_list.end();
+			++it
+		) {
+			PackageCache * c = this->project_cache.fetchPackageCache( *it );
+			VarInfo * v = c->variableFile( name );
+			if ( v != NULL ) {
+				if ( vfile == NULL ) {
+					vfile = v;
+				} else {
+					throw Mishap( "Ambiguous sources for definition" ).culprit( "Source 1", vfile->pathname ).culprit( "Source 2", v->pathname );
+				}
+			}
+		}
+		if ( vfile != NULL ) {
+			dumpFile( vfile->pathname );
+		} else {
+			throw  (
+				Mishap( "Cannot find variable" ).
+				culprit( "Variable", name ).
+				culprit( "Package", c->getPackageName() )
+			);
+		}
 	}
 }
 
-
 void Search::findDefinition( string pkg, string name ) {
-	PackageCache * c = this->project_cache.getPackageCache( pkg );
-	if ( c != NULL ) {
-		returnDefinition( c, name );
-	} else {
-		//cout << "NOT FOUND" << endl;
-		PackageCache * newc = new PackageCache( pkg );
-		this->project_cache.putPackageCache( pkg, newc );
-		
-		FolderScan fscan( this->project_folder + "/" + pkg );
-		while ( fscan.nextFolder() ) {
-			string entry = fscan.entryName();
-	
-			//	Check that -entry- matches *.auto
-			if ( entry.find( AUTO_SUFFIX, entry.size() - AUTO_SUFFIX_SIZE ) == string::npos ) continue;
-			#ifdef DBG_SEARCH
-				cout << "*.auto: " << entry << endl;
-			#endif
-			
-			FolderScan files( fscan.folderName() + "/" + entry );
-			while ( files.nextFile() ) {
-				string fname = files.entryName();
-				#ifdef DBG_SEARCH
-					cout << "Entry : " << fname << endl;
-				#endif
-				
-				size_t n = fname.rfind( '.' );
-				if ( n == string::npos ) continue;
-				
-				
-				string root = fname.substr( 0, n );
-				string extn = fname.substr( n + 1 );
-				
-				#ifdef DBG_SEARCH
-					cout << "Adding " << root << " -> " << ( files.folderName() + "/" + fname ) <<  endl;
-				#endif
-				newc->putPathName( root, files.folderName() + "/" + fname );		
-			}	
-		}
-		
-		returnDefinition( newc, name );
-	}
+	this->returnDefinition( this->project_cache.fetchPackageCache( pkg ), name );
 }

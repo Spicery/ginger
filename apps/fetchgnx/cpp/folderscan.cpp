@@ -16,12 +16,10 @@
     along with AppGinger.  If not, see <http://www.gnu.org/licenses/>.
 \******************************************************************************/
 
-using namespace std;
-
 #include "folderscan.hpp"
 #include "mishap.hpp"
 
-
+using namespace std;
 
 FolderScan::FolderScan( string pathname ) : pathname( pathname ) {
 	this->dp = NULL;

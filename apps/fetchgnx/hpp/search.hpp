@@ -22,6 +22,7 @@
 #include <string>
 
 #include "projectcache.hpp"
+#include "packagecache.hpp"
 
 class Search {
 private:
@@ -30,6 +31,7 @@ private:
 
 private:
 	bool file_exists( std::string fullpathname );
+	void returnDefinition( PackageCache * c, std::string name );
 	
 public:
 	//bool try_serve( std::string fullname );

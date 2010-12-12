@@ -94,10 +94,10 @@ void Search::returnDefinition( PackageCache * c, string name ) {
 	if ( vfile != NULL ) {
 		dumpFile( vfile->pathname );
 	} else {
-		list< string > from_list;
+		vector< string > from_list;
 		c->fillFromList( from_list );
 		for (
-			list< string >::iterator it = from_list.begin();
+			vector< string >::iterator it = from_list.begin();
 			it != from_list.end();
 			++it
 		) {

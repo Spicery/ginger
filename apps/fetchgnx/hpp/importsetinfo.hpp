@@ -20,7 +20,7 @@
 #define IMPORT_SET_INFO_HPP
 
 #include <string>
-#include <list>
+#include <vector>
 #include <map>
 #include <utility>
 
@@ -28,12 +28,12 @@
 
 class ImportSetInfo {
 private:
-	std::list< ImportInfo > imports;
+	std::vector< ImportInfo > imports;
 	
 public:
 	void readFile( std::string filename );
 	void printImports();
-	void fillFromList( std::list< std::string > & from_list );
+	void fillFromList( std::vector< std::string > & from_list );
 
 };
 

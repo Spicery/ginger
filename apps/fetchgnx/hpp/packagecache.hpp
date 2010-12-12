@@ -44,7 +44,7 @@ public:
 	VarInfo * variableFile( std::string var_name );
 	void readImports( std::string import_file );
 	void printImports();
-	void fillFromList( std::list< std::string > & from_list );
+	void fillFromList( std::vector< std::string > & from_list );
 
 
 public:

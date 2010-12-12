@@ -28,7 +28,7 @@ using namespace std;
 //#define DBG_IMPORT_SET_INFO
 
 typedef std::map< std::string, std::string > Dict;
-typedef std::list< ImportInfo > ImportList;
+typedef std::vector< ImportInfo > ImportList;
 
 
 class ImportHandler : public Ginger::SaxHandler {
@@ -86,7 +86,7 @@ void ImportSetInfo::printImports() {
 	}
 }
 
-void ImportSetInfo::fillFromList( std::list< std::string > & from_list ) {
+void ImportSetInfo::fillFromList( std::vector< std::string > & from_list ) {
 	for ( 
 		ImportList::iterator it = this->imports.begin();
 		it != this->imports.end();

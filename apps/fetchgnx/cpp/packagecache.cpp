@@ -40,7 +40,7 @@ void PackageCache::readImports( string ifile ) {
 	this->imports.readFile( ifile );
 }
 
-void PackageCache::fillFromList( list< string > & from_list ) {
+void PackageCache::fillFromList( vector< string > & from_list ) {
 	this->imports.fillFromList( from_list );
 }
 

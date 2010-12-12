@@ -47,6 +47,10 @@ bool FolderScan::nextFolder() {
 	return this->nextFilteredByType( DT_DIR );
 }
 
+bool FolderScan::nextFolderOrFile() {
+	return this->nextFilteredByType( DT_DIR | DT_REG );
+}
+
 std::string FolderScan::entryName() {
 	//std::string ans;
 	//ans.append( dp->d_name, dp->d_namlen );

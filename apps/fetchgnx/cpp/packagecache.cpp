@@ -87,3 +87,11 @@ VarInfo * PackageCache::variableFile( string var_name ) {
 void PackageCache::printImports() {
 	this->imports.printImports();
 }
+
+void PackageCache::setLoadPath( string & path ) {
+	this->load_path = path;
+}
+
+string PackageCache::getLoadPath() {
+	return this->load_path;
+}

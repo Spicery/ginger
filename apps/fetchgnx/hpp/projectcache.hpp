@@ -38,7 +38,7 @@ public:
 
 
 public:
-	ProjectCache( std::string project_folder );
+	ProjectCache( std::string & project_folder );
 	~ProjectCache();
 };
 

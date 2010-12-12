@@ -15,6 +15,7 @@
     You should have received a copy of the GNU General Public License
     along with AppGinger.  If not, see <http://www.gnu.org/licenses/>.
 \******************************************************************************/
+#include <iostream>
 
 #include "projectcache.hpp"
 #include "folderscan.hpp"
@@ -24,9 +25,11 @@ using namespace std;
 #define AUTO_SUFFIX 			".auto"
 #define AUTO_SUFFIX_SIZE 		sizeof( AUTO_SUFFIX )
 
+#define LOAD					"load"
+#define LOAD_SIZE				sizeof( LOAD )
 
 
-ProjectCache::ProjectCache( std::string project_path ) :
+ProjectCache::ProjectCache( std::string & project_path ) :
 	project_folder( project_path )
 {
 }
@@ -57,34 +60,39 @@ PackageCache * ProjectCache::cachePackage( string & pkg ) {
 	//newc->printImports();
 	
 	FolderScan fscan( this->project_folder + "/" + pkg );
-	while ( fscan.nextFolder() ) {
+	while ( fscan.nextFolderOrFile() ) {
 		string entry = fscan.entryName();
 
 		//	Check that -entry- matches *.auto
-		if ( entry.find( AUTO_SUFFIX, entry.size() - AUTO_SUFFIX_SIZE ) == string::npos ) continue;
-		#ifdef DBG_SEARCH
-			cout << "*.auto: " << entry << endl;
-		#endif
-		
-		FolderScan files( fscan.folderName() + "/" + entry );
-		while ( files.nextFile() ) {
-			string fname = files.entryName();
+		if ( entry.find( AUTO_SUFFIX, entry.size() - AUTO_SUFFIX_SIZE ) != string::npos ) {
 			#ifdef DBG_SEARCH
-				cout << "Entry : " << fname << endl;
+				cout << "*.auto: " << entry << endl;
 			#endif
 			
-			size_t n = fname.rfind( '.' );
-			if ( n == string::npos ) continue;
-			
-			
-			string root = fname.substr( 0, n );
-			string extn = fname.substr( n + 1 );
-			
-			#ifdef DBG_SEARCH
-				cout << "Adding " << root << " -> " << ( files.folderName() + "/" + fname ) <<  endl;
-			#endif
-			newc->putPathName( root, files.folderName() + "/" + fname );		
-		}	
+			FolderScan files( fscan.folderName() + "/" + entry );
+			while ( files.nextFile() ) {
+				string fname = files.entryName();
+				#ifdef DBG_SEARCH
+					cout << "Entry : " << fname << endl;
+				#endif
+				
+				size_t n = fname.rfind( '.' );
+				if ( n == string::npos ) continue;
+				
+				
+				string root = fname.substr( 0, n );
+				string extn = fname.substr( n + 1 );
+				
+				#ifdef DBG_SEARCH
+					cout << "Adding " << root << " -> " << ( files.folderName() + "/" + fname ) <<  endl;
+				#endif
+				newc->putPathName( root, files.folderName() + "/" + fname );		
+			}	
+		} else if ( entry.compare( 0, LOAD_SIZE - 1, LOAD ) == 0 ) {
+			//	It doesn't match *.auto but it is a load file though.
+			string p = fscan.folderName() + "/" + entry;
+			newc->setLoadPath( p );
+		}
 	}	
 	
 	this->putPackageCache( pkg, newc );

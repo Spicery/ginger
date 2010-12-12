@@ -35,6 +35,7 @@ public:
 	bool nextFilteredByType( __uint8_t flags );
 	bool nextFile();
 	bool nextFolder();
+	bool nextFolderOrFile();
 	
 	std::string entryName();
 	std::string folderName();

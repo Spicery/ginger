@@ -123,6 +123,17 @@ void Search::returnDefinition( PackageCache * c, string name ) {
 	}
 }
 
-void Search::findDefinition( string pkg, string name ) {
+void Search::findDefinition( string & pkg, string & name ) {
 	this->returnDefinition( this->project_cache.fetchPackageCache( pkg ), name );
+}
+
+void Search::loadPackage( string & pkg ) {
+	//cout << "Need to load package " << pkg << endl;
+	PackageCache * c = this->project_cache.fetchPackageCache( pkg );
+	string path = c->getLoadPath();
+	if ( path.size() > 0 ) {
+		dumpFile( path );	
+	} else {
+		cout << "  load path was not defined" << endl;
+	}
 }

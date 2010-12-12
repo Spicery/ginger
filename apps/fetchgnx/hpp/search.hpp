@@ -35,7 +35,8 @@ private:
 	
 public:
 	//bool try_serve( std::string fullname );
-	void findDefinition( std::string pkg, std::string name );
+	void findDefinition( std::string & pkg, std::string & name );
+	void loadPackage( std::string & pkg );
 	
 public:
 	Search( std::string project_path );

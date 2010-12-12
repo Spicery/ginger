@@ -218,6 +218,13 @@ void Main::summary() {
 
 void Main::run() {
 	Search search( this->project );
+	for (
+		std::vector< std::string >::iterator it = this->packages_to_load.begin();
+		it != this->packages_to_load.end();
+		++it
+	) {
+		search.loadPackage( *it );
+	}
 	for ( 
 		vector< pair< string, string > >::iterator it = this->definitions.begin();
 		it != this->definitions.end();

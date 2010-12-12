@@ -32,6 +32,7 @@
 class PackageCache {
 private:
 	std::string 						package_name;
+	std::string							load_path;
 	std::map< std::string, VarInfo > 	cache;
 	ImportSetInfo 						imports;
 	
@@ -40,12 +41,12 @@ public:
 	bool hasVariable( std::string var_name );
 	std::string getPathName( std::string name );
 	void putPathName( std::string name, std::string pathname );
-	//void printVariable( std::string var_name );
 	VarInfo * variableFile( std::string var_name );
 	void readImports( std::string import_file );
 	void printImports();
 	void fillFromList( std::vector< std::string > & from_list );
-
+	void setLoadPath( std::string & path );
+	std::string getLoadPath();
 
 public:
 	PackageCache( std::string pkg_name );

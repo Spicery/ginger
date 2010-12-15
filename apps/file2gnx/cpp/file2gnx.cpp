@@ -17,11 +17,7 @@
 \******************************************************************************/
 
 #include <iostream>
-//#include <ostream>
-//#include <fstream>
-
-#include <stdlib.h>
-//#include <cstdio>
+#include <cstdlib>
 
 #include "mishap.hpp"
 
@@ -29,7 +25,7 @@ using namespace std;
 
 #define COMMON2GNX	( EXEC_DIR "/common2gnx" )
 #define LISP2GNX 	( EXEC_DIR "/lisp2gnx" )
-#define GNX2GNX     ( EXEC_DIR "/cat" )
+#define GNX2GNX     ( "/bin/cat" )
 
 //
 //	Insecure. We need to do this more neatly. It would be best if common2gnx
@@ -38,6 +34,7 @@ using namespace std;
 //
 void run( string command, string pathname ) {
 	const char * cmd = command.c_str();
+	cout << "Exec " << cmd << " " << pathname << endl;
 	execl( cmd, cmd, pathname.c_str(), NULL );
 }
 

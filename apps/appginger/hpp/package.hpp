@@ -88,9 +88,9 @@ public:
 	Package * getPackage( const std::string title );
 	Import * getAlias( const std::string title );
 	Ident exported( const std::string & c, const FacetSet * facets );
-	Ident lookup( const std::string & c, bool search );
+	Ident lookup( const std::string & c, bool search, bool allow_autoload );
 	Ident add( const std::string & c, const FacetSet * facets );
-	Ident lookup_or_add( const std::string & c, const FacetSet * facets );
+	Ident lookupOrAdd( const std::string & c, const FacetSet * facets );
 	Valof * valof( const std::string & c );
 	
 public:

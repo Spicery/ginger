@@ -350,7 +350,7 @@ Term TermData::makeTerm() {
 		} else if ( name == "sysfn" ) {
 			return term_new_sysfn( this->attrs[ "value" ] );
 		} else {
-			throw Unreachable();
+			throw Unreachable( __FILE__, __LINE__ );
 		}
 	} else if ( has_attr( this, "name" ) ) {
 		if ( name == "id" ) {

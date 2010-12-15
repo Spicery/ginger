@@ -130,6 +130,7 @@ public:
 	void			resetMachine();
 	PlantClass *	plant();		
 	HeapClass &		heap();
+	AppContext &	getAppContext();
 	
 public:
 	virtual Ref sysFastListIterator();

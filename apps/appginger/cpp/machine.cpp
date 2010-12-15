@@ -273,6 +273,9 @@ Package * MachineClass::getPackage( std::string title ) {
 	return this->package_mgr_aptr->getPackage( title );
 }
 
+AppContext & MachineClass::getAppContext() {
+	return this->appg;
+}
 
 // -----------------------------------------------------------------------------
 

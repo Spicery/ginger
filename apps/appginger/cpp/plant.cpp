@@ -111,7 +111,7 @@ Ref PlantClass::detach( const bool in_heap, Ref fnkey ) {
 		*p++ = ToRef( this->nlocals );
 		*p++ = ToRef( this->ninputs );
 		Ref * func = p;
-		if ( fnkey != sysCoreFunctionKey ) throw Unreachable();
+		if ( fnkey != sysCoreFunctionKey ) throw Unreachable( __FILE__, __LINE__ );
 		*p++ = sysCoreFunctionKey;
 		for ( std::vector< Ref >::iterator it = this->code_data->begin(); it != this->code_data->end(); ++it ) {
 			*p++ = *it;
@@ -472,7 +472,7 @@ void PlantClass::compileTerm( Term term ) {
 		}
 		case fnc_sysfn: {
 			Package * p = this->vm->getPackage( STANDARD_LIBRARY );
-			Ident id = p->lookup_or_add( term_sysfn_cont( term ), /*fetchFacet( "public" ),*/ fetchFacetSet( "public" ) );	
+			Ident id = p->lookupOrAdd( term_sysfn_cont( term ), /*fetchFacet( "public" ),*/ fetchFacetSet( "public" ) );	
 			if ( id->value_of->valof == sys_absent ) {
 				Ref r = makeSysFn( this, term_sysfn_cont( term ), sys_undef );
 				if ( r == sys_undef ) {

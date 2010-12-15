@@ -90,6 +90,7 @@ bool RCEP::unsafe_read_comp_exec_print( istream & input, std::ostream & output )
 
 	try {
         term = read_xml.readElement();
+        //term_print( term );
         
         if ( not term ) return false;
 

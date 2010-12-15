@@ -88,7 +88,7 @@ public:
 
 class Unreachable : public SystemError {
 public:
-	Unreachable() : SystemError( "Unreachable" ) {}
+	Unreachable( const char * file, int line );
 	virtual ~Unreachable() {}
 };
 

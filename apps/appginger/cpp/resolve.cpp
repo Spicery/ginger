@@ -106,7 +106,7 @@ public:
 			}
 			if ( f == outer->function() ) return;
 		}		
-		throw Unreachable();
+		throw Unreachable( __FILE__, __LINE__ );
 	}
 	
 	Ident search( const std::string & c ) {
@@ -175,12 +175,12 @@ static void lookupAndAddGlobal( Package * current, VarTermClass * t ) {
 	switch ( t->refType() ) {
 		case LOCAL_REF_TYPE: {
 			Package * p = current;
-			t->ident() = p->lookup_or_add( c, facets );
+			t->ident() = p->lookupOrAdd( c, facets );
 			break;
 		}
 		case ABSOLUTE_REF_TYPE: {
 			Package * p = current->getPackage( pkg );
-			t->ident() = p->lookup_or_add( c, facets );
+			t->ident() = p->lookupOrAdd( c, facets );
 			break;
 		}
 		case ALIAS_REF_TYPE: {
@@ -192,7 +192,7 @@ static void lookupAndAddGlobal( Package * current, VarTermClass * t ) {
 			//cout << "Declaration facets: " << *facets << endl;
 		
 			if ( imp != NULL && facets->isntEmptyIntersection( m ) ) {
-				Ident id = imp->package()->lookup_or_add( c, facets );
+				Ident id = imp->package()->lookupOrAdd( c, facets );
 				t->ident() = id;
 			} else if ( imp != NULL ) {
 				throw Mishap( "Declaration in package referenced by alias of an import would not be exported" );
@@ -209,16 +209,16 @@ static Ident lookupGlobal( Package * current, IdTermClass * t ) {
 	const std::string & c = t->name();
 	switch ( t->refType() ) {
 		case LOCAL_REF_TYPE: {
-			return current->lookup( c, true );
+			return current->lookup( c, true, true );
 		}
 		case ABSOLUTE_REF_TYPE: {
 			Package * p = current->getPackage( pkg );
-			return p->lookup( c, true );
+			return p->lookup( c, true, true );
 		}
 		case ALIAS_REF_TYPE: {
 			Import * imp = current->getAlias( t->alias() );
 			if ( imp != NULL ) {
-				Ident id = imp->package()->lookup( c, true );
+				Ident id = imp->package()->lookup( c, true, true );
 				const FacetSet * m = imp->matchingTags();
 				if ( id->facets->isntEmptyIntersection( m ) ) {
 					return id;
@@ -228,10 +228,10 @@ static Ident lookupGlobal( Package * current, IdTermClass * t ) {
 			} else {
 				throw Mishap( "No such alias" );
 			}
-			throw Unreachable();
+			throw Unreachable( __FILE__, __LINE__ );
 		}
 		default:
-			throw Unreachable();
+			throw Unreachable( __FILE__, __LINE__ );
 	}
 }
 
@@ -443,7 +443,7 @@ Term ResolveStateClass::resolve( Term term ) {
             }
         }
     }
-    throw Unreachable();
+    throw Unreachable( __FILE__, __LINE__ );
 }
 
 Term resolveTerm( Package * pkg, Term term, bool & needs_lifting ) {

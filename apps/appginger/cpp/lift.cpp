@@ -67,7 +67,7 @@ void LiftStateClass::capturingFunctions( Ident & outer, std::list< int >  & inde
 		index_of_functions.push_front( i );
 		if ( f == outer->function() ) return;
 	}		
-	throw Unreachable();
+	throw Unreachable( __FILE__, __LINE__ );
 }
 
 
@@ -182,7 +182,7 @@ Term LiftStateClass::lift( Term term ) {
             }
         }
     }
-    throw Unreachable();
+    throw Unreachable( __FILE__, __LINE__ );
 }
 
 Term liftTerm( Package * pkg, Term term ) {

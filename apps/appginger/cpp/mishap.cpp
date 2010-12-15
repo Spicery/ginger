@@ -70,4 +70,14 @@ void Problem::report() {
 	}
 }
 
+#include <sstream>
+
+Unreachable::Unreachable( const char * file, int line ) : 
+	SystemError( "Unreachable" ) 
+{
+	stringstream s;
+	s << line;
+	this->culprit( "File", file );
+	this->culprit( "Line", s.str() );
+}
 

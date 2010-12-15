@@ -16,15 +16,29 @@
     along with AppGinger.  If not, see <http://www.gnu.org/licenses/>.
 \******************************************************************************/
 
+#include <unistd.h>
+
+
 #include <vector>
 #include <iostream>
-using namespace std;
+#include <fstream>
+#include <sstream>
+
+#include <boost/iostreams/stream_buffer.hpp>
+#include <boost/iostreams/device/file_descriptor.hpp>
 
 #include "package.hpp"
 #include "sys.hpp"
 #include "key.hpp"
 #include "makesysfn.hpp"
 #include "mishap.hpp"
+#include "rcep.hpp"
+#include "command.hpp"
+
+using namespace boost; 
+using namespace std;
+
+#define FETCHGNX ( INSTALL_BIN "/fetchgnx" )
 
 //#define DBG_PACKAGE
 
@@ -110,7 +124,7 @@ Ident Package::exported( const std::string & name, const FacetSet * facets ) {
 
 //	Lookup starts in the dictionary of the local package. It then scans all
 //	imports packages looking for a unique answer.
-Ident Package::lookup( const std::string & c, bool search ) {
+Ident Package::lookup( const std::string & c, bool search, bool autoload ) {
 	//	Imports are not implemented yet, so this is simple.
 	Ident id = this->dict.lookup( c );
 	if ( id ) return id;
@@ -127,7 +141,9 @@ Ident Package::lookup( const std::string & c, bool search ) {
 		}	
 	}
 	
-	id = this->autoload( c );
+	if ( autoload ) {
+		id = this->autoload( c );
+	}
 	return id;
 }
 
@@ -152,8 +168,8 @@ Ident Package::add( const std::string & c, const FacetSet * facets ) {
 }
 
 
-Ident Package::lookup_or_add( const std::string & c, const FacetSet * facets ) {
-    Ident id = this->lookup( c, false );
+Ident Package::lookupOrAdd( const std::string & c, const FacetSet * facets ) {
+    Ident id = this->lookup( c, false, false );
 	if ( not id ) {
     	return this->add( c, facets );
     } else {
@@ -162,7 +178,61 @@ Ident Package::lookup_or_add( const std::string & c, const FacetSet * facets ) {
 }
 
 
+typedef iostreams::stream_buffer< iostreams::file_descriptor_source > fdistreambuf;
+
 Ident OrdinaryPackage::autoload( const std::string & c ) {
+	//	We start by making a protective forward declaration.
+	//	<something goes here>
+	
+	try {
+		//	Then we invoke fetchgnx.
+		
+		//cout << "Invoking fetchgnx" << endl;
+		
+		Command cmd( FETCHGNX );
+		cmd.addArg( "-j" );
+		cmd.addArg( this->getMachine()->getAppContext().getProjectFolder() );
+		cmd.addArg( "-p" );
+		cmd.addArg( this->title );
+		cmd.addArg( "-v" );
+		cmd.addArg( c );
+		
+		//	We convert the returning GNX to a stream.
+		int fd = cmd.run();
+		iostreams::file_descriptor_source fdsource( fd, iostreams::close_handle );
+		fdistreambuf input_stream_buf( fdsource );
+		istream input_stream( &input_stream_buf );
+
+		//cout << "Loading" << endl;
+		
+		stringstream prog;
+		{
+			string s;
+			while ( getline( input_stream, s ) ) {
+				prog << s;
+			}
+		}
+		cout << "[[" << prog.str() << "]]" << endl;
+
+		//	And we load the stream.
+		RCEP rcep( this );
+		
+		//cout << "Do load" << endl;
+		rcep.unsafe_read_comp_exec_print( prog, cout );
+		//cout << "Done" << endl;
+
+		//	Hopefully the forward declaration was enforced.
+		//	Ifso then return the Ident.
+		//	Otherwise fail and undo the forward declaration.
+		Ident id = this->dict.lookup( c );
+		if ( not id ) {
+			//	Undo the forward declaration.
+		}
+		return id;
+	} catch ( Mishap & m ) {
+		//	Undo the forward declaration.
+	}
+	
 	//	No autoloading implemented yet - just fail.
 	return shared< IdentClass >();
 }
@@ -213,7 +283,7 @@ Package * Import::package() {
 }
 
 Valof * Package::valof( const std::string & c ) {
-	Ident id = this->lookup( c, true );
+	Ident id = this->lookup( c, true, true );
 	if ( not id ) return NULL;
 	return id->value_of;
 }

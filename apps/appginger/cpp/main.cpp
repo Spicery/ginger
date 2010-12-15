@@ -25,8 +25,6 @@
 #include <unistd.h>
 #include <getopt.h>
 
-using namespace std;
-
 #include "appcontext.hpp"
 #include "rcep.hpp"
 #include "term.hpp"
@@ -35,6 +33,10 @@ using namespace std;
 #include "machine1.hpp"
 #include "machine2.hpp"
 #include "machine3.hpp"
+
+using namespace std;
+
+#define LICENSE_FILE	( INSTALL_LIB "/LICENSE.txt" )
 
 class Main {
 public:
@@ -60,6 +62,7 @@ static struct option long_options[] =
         { "version",        no_argument,            0, 'v' },
         { "debug",          required_argument,      0, 'd' },
         { "license",        optional_argument,      0, 'l' },
+        { "project",		required_argument,		0, 'j' },
         { 0, 0, 0, 0 }
     };
 
@@ -220,6 +223,10 @@ int Main::run( int argc, char **argv, char **envp ) {
                     exit( EXIT_FAILURE );
                 }
                 exit( EXIT_SUCCESS );   //  Is that right?              
+            }
+            case 'j': {
+            	appg.setProjectFolder( optarg );
+            	break;
             }
             case '?': {
                 break;

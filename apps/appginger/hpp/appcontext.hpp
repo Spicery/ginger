@@ -19,6 +19,8 @@
 #ifndef APP_CONTEXT_HPP
 #define APP_CONTEXT_HPP
 
+#include <string>
+
 #define VERSION "0.6.1"
 
 class MachineClass;
@@ -30,11 +32,12 @@ private:
 		InteractiveMode,
 		BatchMode,
 		CGIMode
-	} mode;
-	int machine_impl_num;
-	bool dbg_show_code;
-	bool is_trapping_mishap;
-	bool is_gctrace;
+	} 					mode;
+	int 				machine_impl_num;
+	bool 				dbg_show_code;
+	bool 				is_trapping_mishap;
+	bool 				is_gctrace;
+	std::string 		project_folder;
 	
 public:
 	void setInteractiveMode() { this->mode = InteractiveMode; }
@@ -52,6 +55,9 @@ public:
 	const char * version() { return VERSION; }
 	void setShowCode() { this->dbg_show_code = true; }
 	bool getShowCode() { return this->dbg_show_code; }
+	std::string getProjectFolder() { return this->project_folder; }
+	void setProjectFolder( std::string & folder ) { this->project_folder = folder; }
+	void setProjectFolder( const char * folder ) { this->project_folder = folder; }
 
 public:
 	MachineClass * newMachine();
@@ -63,7 +69,8 @@ public:
 		machine_impl_num( 1 ),
 		dbg_show_code( false ),
 		is_trapping_mishap( true ),
-		is_gctrace( false )
+		is_gctrace( false ),
+		project_folder( "." )
 	{
 	}
 

@@ -34,7 +34,6 @@ using namespace std;
 //
 void run( string command, string pathname ) {
 	const char * cmd = command.c_str();
-	cout << "Exec " << cmd << " " << pathname << endl;
 	execl( cmd, cmd, pathname.c_str(), NULL );
 }
 

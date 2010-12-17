@@ -92,6 +92,7 @@ public:
 	Ident add( const std::string & c, const FacetSet * facets );
 	Ident lookupOrAdd( const std::string & c, const FacetSet * facets );
 	Valof * valof( const std::string & c );
+	void forwardDeclare( const std::string & c );
 	
 public:
 	Package( PackageManager * pkgmgr, const std::string title ) :

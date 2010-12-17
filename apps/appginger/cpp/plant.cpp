@@ -131,7 +131,7 @@ static int tmpvar( Plant plant ) {
 }
 
 Ident PlantClass::newTmpIdent() {
-	return ident_new_tmp( tmpvar( this ) );
+	return identNewTmp( tmpvar( this ) );
 }
 
 void PlantClass::compileIf( bool sense, Term term, DestinationClass & dst ) {

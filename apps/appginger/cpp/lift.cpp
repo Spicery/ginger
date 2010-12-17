@@ -151,7 +151,7 @@ Term LiftStateClass::lift( Term term ) {
 								cerr << "  Index level " << index << endl;
 								cerr << "  Outer ident is " << (prev_id)->getNameString() << "@" << (prev_id)->function()->name() << endl;							
 							#endif
-							Ident new_input = ident_new_local( t->nameString(), this_fn );
+							Ident new_input = identNewLocal( t->nameString(), this_fn );
 							if ( prev_id->isShared() ) { new_input->setShared(); }
 							#ifdef DBG_LIFTING
 								cerr << "  Inner ident is " << new_input->getFinalSlot() << endl;

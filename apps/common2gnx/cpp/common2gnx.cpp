@@ -1,12 +1,13 @@
 #include <iostream>
-using namespace std;
 
-#include <stdio.h>
-#include <stdlib.h>
+#include <cstdio>
+#include <cstdlib>
 
 #include "mishap.hpp"
 #include "item_factory.hpp"
 #include "read_expr.hpp"
+
+using namespace std;
 
 int main( int argc, char **argv, char **envp ) {
 	try {

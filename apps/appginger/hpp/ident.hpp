@@ -83,10 +83,10 @@ public:
 typedef shared< IdentClass > Ident;
 
 
-Ident ident_new_local( const std::string & nm, FnTermClass * fn );
-Ident ident_new_last_arg( const std::string & nm, FnTermClass * fn );
-Ident ident_new_tmp( int n );
-Ident ident_new_global( const std::string nm, const FacetSet * facets );
+Ident identNewLocal( const std::string & nm, FnTermClass * fn );
+Ident identNewLastArg( const std::string & nm, FnTermClass * fn );
+Ident identNewTmp( int n );
+Ident identNewGlobal( const std::string nm, const FacetSet * facets );
 
 #endif
 

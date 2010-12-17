@@ -33,6 +33,7 @@ private:
 public:	
 	Ident lookup( const std::string & c );
 	Ident add( const std::string & c, const FacetSet * facets );
+	void remove( const std::string & c );
 	Ident lookup_or_add( const std::string & c, const FacetSet * facets );
 	
 public:

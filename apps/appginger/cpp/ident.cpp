@@ -58,7 +58,7 @@ bool IdentClass::isSame( IdentClass * other ) {
 	return this->name_data == other->name_data;
 }
 
-Ident ident_new_local( const std::string & nm, FnTermClass * fn ) {
+Ident identNewLocal( const std::string & nm, FnTermClass * fn ) {
 	shared< IdentClass > id( new IdentClass( nm, fn ) );
 	id->setLocal();
 	fn->addInner( id );
@@ -66,20 +66,20 @@ Ident ident_new_local( const std::string & nm, FnTermClass * fn ) {
 	return shared< IdentClass >( id );
 }
 
-Ident ident_new_last_arg( const std::string & nm, FnTermClass * fn ) {
-	Ident id = ident_new_local( nm, fn );
+Ident identNewLastArg( const std::string & nm, FnTermClass * fn ) {
+	Ident id = identNewLocal( nm, fn );
 	id->setSlot( fn->nlocals()++ );
 	return id;
 }
 
-Ident ident_new_tmp( const int n ) {
+Ident identNewTmp( const int n ) {
 	IdentClass * id = new IdentClass( std::string( "tmpvar" ), (FnTermClass *)NULL );
 	id->setLocal();
 	id->setSlot( n );
 	return shared< IdentClass >( id );
 }
 
-Ident ident_new_global( const std::string nm, const FacetSet * facets ) {
+Ident identNewGlobal( const std::string nm, const FacetSet * facets ) {
 	IdentClass * id = new IdentClass( nm, facets );
 	id->setGlobal();
 	return shared< IdentClass >( id );

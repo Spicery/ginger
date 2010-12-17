@@ -24,8 +24,12 @@ Ident DictClass::lookup( const std::string & s ) {
 }
 
 Ident DictClass::add( const std::string & s, const FacetSet * facets ) {
-	Ident id = ident_new_global( s, facets );
+	Ident id = identNewGlobal( s, facets );
     return this->table[ s ] = id;
+}
+
+void DictClass::remove( const std::string & s ) {
+	this->table.erase( s );
 }
 
 Ident DictClass::lookup_or_add( const std::string & c, const FacetSet * facets ) {

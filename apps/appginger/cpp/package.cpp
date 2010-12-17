@@ -23,6 +23,9 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <exception>
+
+#include <syslog.h>
 
 #include <boost/iostreams/stream_buffer.hpp>
 #include <boost/iostreams/device/file_descriptor.hpp>
@@ -177,60 +180,71 @@ Ident Package::lookupOrAdd( const std::string & c, const FacetSet * facets ) {
     }
 }
 
+void Package::forwardDeclare( const std::string & c ) {
+	this->dict.add( c, fetchEmptyFacetSet() );
+}
 
 typedef iostreams::stream_buffer< iostreams::file_descriptor_source > fdistreambuf;
 
 Ident OrdinaryPackage::autoload( const std::string & c ) {
-	//	We start by making a protective forward declaration.
-	//	<something goes here>
+	syslog( LOG_INFO, "Autoloading %s", c.c_str() );
+	//	Then we invoke fetchgnx.
 	
-	try {
-		//	Then we invoke fetchgnx.
-		
-		//cout << "Invoking fetchgnx" << endl;
-		
-		Command cmd( FETCHGNX );
-		cmd.addArg( "-j" );
-		cmd.addArg( this->getMachine()->getAppContext().getProjectFolder() );
-		cmd.addArg( "-p" );
-		cmd.addArg( this->title );
-		cmd.addArg( "-v" );
-		cmd.addArg( c );
-		
-		//	We convert the returning GNX to a stream.
-		int fd = cmd.run();
-		iostreams::file_descriptor_source fdsource( fd, iostreams::close_handle );
-		fdistreambuf input_stream_buf( fdsource );
-		istream input_stream( &input_stream_buf );
+	//cout << "Invoking fetchgnx" << endl;
+	
+	Command cmd( FETCHGNX );
+	cmd.addArg( "-j" );
+	cmd.addArg( this->getMachine()->getAppContext().getProjectFolder() );
+	cmd.addArg( "-p" );
+	cmd.addArg( this->title );
+	cmd.addArg( "-v" );
+	cmd.addArg( c );
+	
+	//	We convert the returning GNX to a stream.
+	int fd = cmd.run();
+	iostreams::file_descriptor_source fdsource( fd, iostreams::close_handle );
+	fdistreambuf input_stream_buf( fdsource );
+	istream input_stream( &input_stream_buf );
 
-		//cout << "Loading" << endl;
-		
-		stringstream prog;
-		{
-			string s;
-			while ( getline( input_stream, s ) ) {
-				prog << s;
-			}
+	//cout << "Loading" << endl;
+	
+	stringstream prog;
+	{
+		string s;
+		while ( getline( input_stream, s ) ) {
+			prog << s;
 		}
-		cout << "[[" << prog.str() << "]]" << endl;
+	}
+	cout << "[[" << prog.str() << "]]" << endl;
+		
 
+	//	Now we establish a forward declaration.
+	this->forwardDeclare( c );
+	//	Hopefully the forward declaration will be justified.
+	Ident id = this->dict.lookup( c );
+
+	try {
 		//	And we load the stream.
 		RCEP rcep( this );
-		
 		//cout << "Do load" << endl;
 		rcep.unsafe_read_comp_exec_print( prog, cout );
 		//cout << "Done" << endl;
 
-		//	Hopefully the forward declaration was enforced.
-		//	Ifso then return the Ident.
-		//	Otherwise fail and undo the forward declaration.
-		Ident id = this->dict.lookup( c );
-		if ( not id ) {
-			//	Undo the forward declaration.
+		if ( id->value_of->valof == sys_undef ) {
+			//	The autoloading failed. Undo the declaration.
+			this->dict.remove( c );
+			syslog( LOG_ERR, "Autoloading %c failed due to the loaded code not establishing a binding", c.c_str() );
+			return shared< IdentClass >();
+		} else {
+			return id;
 		}
-		return id;
-	} catch ( Mishap & m ) {
+	} catch ( std::exception & e ) {
 		//	Undo the forward declaration.
+		if ( id->value_of->valof == sys_undef ) {
+			//	The autoloading failed. Undo the declaration.
+			this->dict.remove( c );
+		}
+		syslog( LOG_ERR, "Autoloading %c failed due to an exception", c.c_str() );
 	}
 	
 	//	No autoloading implemented yet - just fail.

@@ -48,6 +48,7 @@ Search::~Search() {
 //	would be both more secure and efficient.
 //
 static void run( string command, string pathname ) {
+	//cout << "running " << command << " " << pathname << endl;
 	int pipe_fd[ 2 ];
 	const char * cmd = command.c_str();
 	pipe( pipe_fd );
@@ -86,6 +87,7 @@ static void run( string command, string pathname ) {
 }
 
 static void dumpFile( string & fullname ) {
+	//cout << "Dumping file " << fullname << endl;
 	run( EXEC_DIR "/" FILE2GNX, fullname );
 }
 

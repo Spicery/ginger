@@ -41,7 +41,7 @@
 	-	--def <name>, generates the GNX for the named definition of the current package
  */ 
  
- 
+#define FETCHGNX "fetchgnx"
 
 #include <iostream>
 #include <string>
@@ -51,6 +51,7 @@
 #include <cstdlib>
 
 #include <getopt.h>
+#include <syslog.h>
 
 #include "mishap.hpp"
 #include "search.hpp"
@@ -150,7 +151,7 @@ void Main::parseArgs( int argc, char **argv, char **envp ) {
                 exit( EXIT_SUCCESS );   //  Is that right?
             }
             case 'V': {
-                cout << "fetchgnx: version " << this->version() << " (" << __DATE__ << " " << __TIME__ << ")" << endl;
+                cout << FETCHGNX << ": version " << this->version() << " (" << __DATE__ << " " << __TIME__ << ")" << endl;
                 exit( EXIT_SUCCESS );   //  Is that right?
             }
             case 'L': {
@@ -195,7 +196,7 @@ void Main::printGPL( const char * start, const char * end ) {
 }
 
 void Main::summary() {
-	cout << "FetchGNX Summary" << endl;
+	cout << FETCHGNX << " Summary" << endl;
 	cout << "  Project " << this->project << endl;
 	cout << "    Needs loading? " << ( this->project_needs_loading ? "true" : "false" ) << endl;
 	cout << "  Packages to load (" << this->packages_to_load.size() << ")" << endl;
@@ -223,6 +224,7 @@ void Main::run() {
 		it != this->packages_to_load.end();
 		++it
 	) {
+		syslog( LOG_INFO, "Loading package %s", it->c_str() );
 		search.loadPackage( *it );
 	}
 	for ( 
@@ -234,6 +236,7 @@ void Main::run() {
 			cout << it->first << "::" << it->second << endl;
 		#endif
 		try {
+			syslog( LOG_INFO, "Loading definition %s from package %s", it->second.c_str(), it->first.c_str() );
 			search.findDefinition( it->first, it->second );
 		} catch ( Mishap &m ) {
 			//	NOTE: This is not correct because the values of package & variable must be escaped!
@@ -251,6 +254,8 @@ void Main::run() {
 
 
 int main( int argc, char ** argv, char **envp ) {
+	openlog( FETCHGNX, 0, LOG_LOCAL2 );
+	setlogmask( LOG_UPTO( LOG_INFO ) );
 	try {
 		Main main;
 		main.parseArgs( argc, argv, envp );

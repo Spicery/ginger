@@ -57,6 +57,7 @@ public:
 extern const FacetSet * fetchFacetSet( std::set< std::string > & names );
 extern const FacetSet * fetchFacetSet( std::string & name );
 extern const FacetSet * fetchFacetSet( const char * name );
+extern const FacetSet * fetchEmptyFacetSet();
 extern std::ostream& operator<<( std::ostream & out, const FacetSet & facets ); 
 extern std::ostream& operator<<( std::ostream & out, const Facet & facets );
 

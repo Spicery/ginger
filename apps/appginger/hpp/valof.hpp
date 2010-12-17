@@ -27,7 +27,7 @@ public:
 	Ref valof;
 	
 public:
-	Valof() : valof( sys_absent ) {}
+	Valof() : valof( sys_undef ) {}			//	Should this be undef??
 	Valof( Ref r ) : valof( r ) {}
 };
 

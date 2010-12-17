@@ -46,6 +46,11 @@ const FacetSet * fetchFacetSet( set< string > & names ) {
 	}
 }
 
+const FacetSet * fetchEmptyFacetSet() {
+	static set< string > empty;
+	return fetchFacetSet( empty );
+}
+
 const FacetSet * fetchFacetSet( string & name ) {
 	set< string > names;
 	names.insert( name );

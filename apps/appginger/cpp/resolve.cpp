@@ -278,7 +278,7 @@ void ResolveStateClass::addIdent( NamedTermMixin * arg, FnTermClass * fn, int & 
 	#ifdef DBG_RESOLVE
 		fprintf( stderr, "Processing %s\n", c );
 	#endif
-	Ident id = ident_new_local( c, fn );
+	Ident id = identNewLocal( c, fn );
 	this->env.add( id );
 	id->level = this->level;
 	arg->ident() = id;
@@ -391,7 +391,7 @@ Term ResolveStateClass::resolve( Term term ) {
             } else {
             	FnTermClass * fn = this->function;
                 //    printf( "LOCAL VAR %s\n", c );
-                Ident id = ident_new_local( c, fn );
+                Ident id = identNewLocal( c, fn );
                 this->env.add( id );
                 id->level = this->level;
                 t->ident() = id;

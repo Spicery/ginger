@@ -24,6 +24,7 @@
 
 #include <unistd.h>
 #include <getopt.h>
+#include <syslog.h>
 
 #include "appcontext.hpp"
 #include "rcep.hpp"
@@ -36,6 +37,7 @@
 
 using namespace std;
 
+#define APPGINGER		"appginger"
 #define LICENSE_FILE	( INSTALL_LIB "/LICENSE.txt" )
 
 class Main {
@@ -86,7 +88,7 @@ int Main::run( int argc, char **argv, char **envp ) {
 	AppContext appg;
     for(;;) {
         int option_index = 0;
-        int c = getopt_long( argc, argv, "CIBhm:vd:l", long_options, &option_index );
+        int c = getopt_long( argc, argv, "CIBhm:vd:lj:", long_options, &option_index );
         if ( c == -1 ) break;
         switch ( c ) {
             case 'C': {
@@ -120,7 +122,7 @@ int Main::run( int argc, char **argv, char **envp ) {
                 //  files and this will simply go there. Or run a web
                 //  browser pointed there.
                 if ( optarg == NULL ) {
-                    printf( "Usage :  appginger [options] [files]\n\n" );
+                    printf( "Usage :  %s [options] [files]\n\n", APPGINGER );
                     printf( "OPTION                SUMMARY\n" );
                     printf( "-B, --batch           run in batch mode\n" );
                     printf( "-C, --cgi             run as CGI script\n" );
@@ -128,9 +130,10 @@ int Main::run( int argc, char **argv, char **envp ) {
                     printf( "-T, --terminate       stop on mishap\n" );
                     printf( "-d, --debug           add debug option (see --help=debug)\n" );
                     printf( "-h, --help            print out this help info (see --help=help)\n" );
+                    printf( "-j, --project         set the project folder\n" );
+                    printf( "-l, --license         print out license information and exit\n" );
                     printf( "-m<n>                 run using machine #n\n" );
                     printf( "-v, --version         print out version information and exit\n" );
-                    printf( "-l, --license         print out license information and exit\n" );
                     printf( "\n" );
                 } else if ( std::string( optarg ) == "help" ) {
                     cout << "--help=debug          help on the debugging options available" << endl;
@@ -285,6 +288,8 @@ int Main::run( int argc, char **argv, char **envp ) {
 
 
 int main( int argc, char **argv, char **envp ) {
+	openlog( APPGINGER, 0, LOG_LOCAL2 );
+	setlogmask( LOG_UPTO( LOG_INFO ) );
 	Main main;
 	return main.run( argc, argv, envp );
 }

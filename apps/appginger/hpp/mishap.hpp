@@ -29,16 +29,16 @@
 void this_never_happens( void );
 
 //	Abstract.
-class Throwable {
+class Throwable : public std::exception {
 protected:
 	Throwable() {}
-	virtual ~Throwable() {}
+	virtual ~Throwable() throw() {}
 };
 
 class NormalExit : public Throwable {
 public:
 	NormalExit() {}
-	virtual ~NormalExit() {}
+	virtual ~NormalExit() throw() {}
 };
 
 //	Abstract
@@ -56,7 +56,7 @@ public:
 	
 protected:
 	Problem( const std::string & msg ) : message( msg ), culprits() {}
-	virtual ~Problem() {}
+	virtual ~Problem()  throw() {}
 };
 
 class SystemError : public Problem {
@@ -64,7 +64,7 @@ public:
 	SystemError & culprit( const std::string reason, const std::string arg ) { this->Problem::culprit( reason, arg ); return *this; }
 	SystemError & culprit( const std::string arg ) { this->Problem::culprit( arg ); return *this; }
 	SystemError( const std::string & msg ) : Problem( msg ) {}
-	virtual ~SystemError() {}
+	virtual ~SystemError()  throw() {}
 };
 
 class Mishap : public Problem {
@@ -77,39 +77,39 @@ public:
 		return *this; 
 	}
 	Mishap( const std::string & msg ) : Problem( msg ) {}
-	virtual ~Mishap() {}
+	virtual ~Mishap()  throw() {}
 };
 
 class ToBeDone : public Mishap {
 public:
 	ToBeDone() :  Mishap( "To be done" ) {}
-	virtual ~ToBeDone() {}
+	virtual ~ToBeDone()  throw() {}
 };
 
 class Unreachable : public SystemError {
 public:
 	Unreachable( const char * file, int line );
-	virtual ~Unreachable() {}
+	virtual ~Unreachable()  throw() {}
 };
 
 class ArgsMismatch : public Mishap {
 public:
 	ArgsMismatch() :  Mishap( "Argument mismatch (wrong number of args?)" ) {}
-	virtual ~ArgsMismatch() {}
+	virtual ~ArgsMismatch()  throw() {}
 };
 
 class TypeError : public Mishap {
 public:
 	TypeError( const std::string arg ) :  Mishap( arg ) {}
 	TypeError() : Mishap( "Type Error" ) {}
-	virtual ~TypeError() {}
+	virtual ~TypeError()  throw() {}
 };
 
 class OutOfRange : public Mishap {
 public:
 	OutOfRange( const std::string arg ) :  Mishap( arg ) {}
 	OutOfRange() : Mishap( "Out of Range" ) {}
-	virtual ~OutOfRange() {}
+	virtual ~OutOfRange()  throw() {}
 };
 
 #endif

@@ -137,7 +137,9 @@ bool RCEP::unsafe_read_comp_exec_print( istream & input, std::ostream & output )
 
 
 	finish = clock();
-    vm->printResults( output, static_cast<float>( finish - start ) / CLOCKS_PER_SEC );
+	if ( this->printing ) {
+	    vm->printResults( output, static_cast<float>( finish - start ) / CLOCKS_PER_SEC );
+	}
     fflush( stdout );
 	fflush( stderr );
 	

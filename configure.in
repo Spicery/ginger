@@ -84,6 +84,9 @@ AC_CONFIG_FILES([Makefile
                  apps/fetchgnx/unittest/Makefile
                  apps/file2gnx/Makefile
                  apps/file2gnx/cpp/Makefile
-				 apps/file2gnx/unittest/Makefile])
+				 apps/file2gnx/unittest/Makefile
+				 apps/libgng/Makefile
+				 apps/libgng/cpp/Makefile
+				 apps/libgng/unittest/Makefile])
 				 
 AC_OUTPUT

@@ -226,6 +226,7 @@ Ident OrdinaryPackage::autoload( const std::string & c ) {
 	try {
 		//	And we load the stream.
 		RCEP rcep( this );
+		rcep.setPrinting( false );	//	Turn off result printing.
 		//cout << "Do load" << endl;
 		rcep.unsafe_read_comp_exec_print( prog, cout );
 		//cout << "Done" << endl;

@@ -19,13 +19,18 @@
 #include <iostream>
 #include <cstdlib>
 
+#include <syslog.h>
+
 #include "mishap.hpp"
 
 using namespace std;
 
-#define COMMON2GNX	( EXEC_DIR "/common2gnx" )
-#define LISP2GNX 	( EXEC_DIR "/lisp2gnx" )
-#define GNX2GNX     ( "/bin/cat" )
+#define APP_TITLE		"file2gnx"
+#define LOG_FACILITY	LOG_LOCAL2
+
+#define COMMON2GNX		( EXEC_DIR "/common2gnx" )
+#define LISP2GNX 		( EXEC_DIR "/lisp2gnx" )
+#define GNX2GNX     	( "/bin/cat" )
 
 //
 //	Insecure. We need to do this more neatly. It would be best if common2gnx
@@ -38,9 +43,11 @@ void run( string command, string pathname ) {
 }
 
 int main( int argc, char ** argv ) {
+	openlog( APP_TITLE, 0, LOG_FACILITY );
+	setlogmask( LOG_UPTO( LOG_INFO ) );
 
 	if ( argc != 2 ) {
-		cerr << "Usage: file2gnx <pathname>" << endl;
+		cerr << "Usage: " << APP_TITLE << " <pathname>" << endl;
 		return EXIT_FAILURE;
 	}
 	
@@ -57,16 +64,19 @@ int main( int argc, char ** argv ) {
 		string extn( pathname.substr( n + 1, pathname.size() ) );
 		//cout << "extension is " << extn << endl;
 		
+		const char * cmdpath = NULL;
 		if ( extn == "cmn" ) {
-			run( COMMON2GNX, pathname );
+			cmdpath = COMMON2GNX;
 		} else if ( extn == "lsp" ) {
-			run( LISP2GNX, pathname );
+			cmdpath = LISP2GNX;
 		} else if ( extn == "gnx" ) {
-			run( GNX2GNX, pathname );			
+			cmdpath = GNX2GNX;
 		} else {
 			throw Mishap( "Filename has unrecognised extension, giving up" ).culprit( "Filename", pathname ).culprit( "Extension", extn );
 		}
-	
+		syslog( LOG_INFO, "Converting %s with extension %s using %s", pathname.c_str(), extn.c_str(), cmdpath );
+		run( cmdpath, pathname );
+		
 		return EXIT_SUCCESS;
 	} catch ( Mishap & m ) {
 		m.gnxReport();

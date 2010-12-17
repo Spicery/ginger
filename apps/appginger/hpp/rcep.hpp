@@ -27,6 +27,12 @@
 class RCEP {
 private:
 	Package * current_package;
+	bool printing;
+
+public:
+	void setPrinting( bool p ) {
+		this->printing = p;
+	}
 
 public:
 	MachineClass * getMachine() { return this->current_package->getMachine(); } 
@@ -39,7 +45,8 @@ public:
 
 public:
 	RCEP( Package * current_package ) :
-		current_package( current_package )
+		current_package( current_package ),
+		printing( true )
 	{
 	}
 };

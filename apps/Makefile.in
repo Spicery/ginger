@@ -1,4 +1,5 @@
 all clean:
+	$(MAKE) -C libgng $@
 	$(MAKE) -C appginger $@
 	$(MAKE) -C common2gnx $@
 	$(MAKE) -C lisp2gnx $@

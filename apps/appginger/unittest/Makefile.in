@@ -9,7 +9,7 @@ OBJS=example.o testrunner.o gctest.o gcstats.o archtest.o
 all: testrunner
 
 check: testrunner
-	./testrunner > results.xml 2> results.xml 
+	./testrunner 2> results.xml 
 
 # $@ is make shorthand for the target.
 # $@ is make shorthand for the dependencies

@@ -18,11 +18,17 @@
 
 #include <fstream>
 #include <iostream>
+#include <vector>
+
+#include <sys/types.h>
+#include <sys/wait.h>
+
 
 #include <sys/types.h>
 #include <dirent.h>
 #include <sys/stat.h>
 
+#include "importinfo.hpp"
 #include "search.hpp"
 #include "mishap.hpp"
 #include "folderscan.hpp"
@@ -102,23 +108,43 @@ void Search::returnDefinition( PackageCache * c, string name ) {
 	if ( vfile != NULL ) {
 		dumpFile( vfile->getPathName() );
 	} else {
-		vector< string > from_list;
-		c->fillFromList( from_list );
-		for (
-			vector< string >::iterator it = from_list.begin();
-			it != from_list.end();
-			++it
-		) {
-			PackageCache * c = this->project_cache.fetchPackageCache( *it );
-			VarInfo * v = c->variableFile( name );
-			if ( v != NULL ) {
-				if ( vfile == NULL ) {
-					vfile = v;
-				} else {
-					throw Mishap( "Ambiguous sources for definition" ).culprit( "Source 1", vfile->getPathName() ).culprit( "Source 2", v->getPathName() );
+		#if 1
+			vector< ImportInfo > & imports = c->importVector();
+			for ( 
+				vector< ImportInfo >::iterator it = imports.begin();
+				it != imports.end();
+				++it
+			) {
+				ImportInfo & imp = *it;
+				PackageCache * c = this->project_cache.fetchPackageCache( imp.getFrom() );
+				VarInfo * v = c->variableFile( name );
+				if ( v != NULL ) {
+					if ( vfile == NULL ) {
+						vfile = v;
+					} else {
+						throw Mishap( "Ambiguous sources for definition" ).culprit( "Source 1", vfile->getPathName() ).culprit( "Source 2", v->getPathName() );
+					}
 				}
 			}
-		}
+		#else
+			vector< string > from_list;
+			c->fillFromList( from_list );
+			for (
+				vector< string >::iterator it = from_list.begin();
+				it != from_list.end();
+				++it
+			) {
+				PackageCache * c = this->project_cache.fetchPackageCache( *it );
+				VarInfo * v = c->variableFile( name );
+				if ( v != NULL ) {
+					if ( vfile == NULL ) {
+						vfile = v;
+					} else {
+						throw Mishap( "Ambiguous sources for definition" ).culprit( "Source 1", vfile->getPathName() ).culprit( "Source 2", v->getPathName() );
+					}
+				}
+			}
+		#endif
 		if ( vfile != NULL ) {
 			dumpFile( vfile->getPathName() );
 		} else {

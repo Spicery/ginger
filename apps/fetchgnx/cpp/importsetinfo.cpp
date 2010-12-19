@@ -95,3 +95,7 @@ void ImportSetInfo::fillFromList( std::vector< std::string > & from_list ) {
 		from_list.push_back( it->getFrom() );
 	}	
 }
+
+vector< ImportInfo > & ImportSetInfo::importVector() {
+	return this->imports;
+}

@@ -83,10 +83,14 @@ void PackageCache::printImports() {
 	this->imports.printImports();
 }
 
-void PackageCache::setLoadPath( string & path ) {
+void PackageCache::setLoadPath( const string & path ) {
 	this->load_path = path;
 }
 
 string PackageCache::getLoadPath() {
 	return this->load_path;
+}
+
+vector< ImportInfo > & PackageCache::importVector() {
+	return this->imports.importVector();
 }

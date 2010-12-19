@@ -29,7 +29,7 @@ using namespace std;
 #define LOAD_SIZE				sizeof( LOAD )
 
 
-ProjectCache::ProjectCache( std::string & project_path ) :
+ProjectCache::ProjectCache( const std::string & project_path ) :
 	project_folder( project_path )
 {
 }
@@ -44,15 +44,15 @@ ProjectCache::~ProjectCache() {
 	}
 }
 
-PackageCache * ProjectCache::getPackageCache( string & pkg_name ) {
+PackageCache * ProjectCache::getPackageCache( const string & pkg_name ) {
 	return this->cache[ pkg_name ];
 }
 
-void ProjectCache::putPackageCache( string & pkg_name, PackageCache * pkg ) {
+void ProjectCache::putPackageCache( const string & pkg_name, PackageCache * pkg ) {
 	this->cache[ pkg_name ] = pkg;
 }
 
-PackageCache * ProjectCache::cachePackage( string & pkg ) {
+PackageCache * ProjectCache::cachePackage( const string & pkg ) {
 	//cout << "NOT FOUND" << endl;
 	PackageCache * newc = new PackageCache( pkg );
 	
@@ -65,6 +65,10 @@ PackageCache * ProjectCache::cachePackage( string & pkg ) {
 
 		//	Check that -entry- matches *.auto
 		if ( entry.find( AUTO_SUFFIX, entry.size() - AUTO_SUFFIX_SIZE ) != string::npos ) {
+		
+			const string default_tag = entry.substr( 0, entry.size() + 1 - AUTO_SUFFIX_SIZE );
+			//cout << "TAG = " << default_tag << endl;
+		
 			#ifdef DBG_SEARCH
 				cout << "*.auto: " << entry << endl;
 			#endif
@@ -88,11 +92,13 @@ PackageCache * ProjectCache::cachePackage( string & pkg ) {
 				#if 0
 					VarInfo * v = newc->varInfo( root );
 					v->init( root, files.folderName() + "/" + fname );
+					v->addTag( default_tag );
 					//cout << "old path name " << v->getPathName() << endl;
 					v->freeze();
 				#else
 					VarInfo & v = newc->varInfoRef( root );
 					v.init( root, files.folderName() + "/" + fname );
+					v.addTag( default_tag );
 					//cout << "old path name " << v->getPathName() << endl;
 					v.freeze();					
 				#endif
@@ -102,7 +108,7 @@ PackageCache * ProjectCache::cachePackage( string & pkg ) {
 			}	
 		} else if ( entry.compare( 0, LOAD_SIZE - 1, LOAD ) == 0 ) {
 			//	It doesn't match *.auto but it is a load file though.
-			string p = fscan.folderName() + "/" + entry;
+			const string p( fscan.folderName() + "/" + entry );
 			newc->setLoadPath( p );
 		}
 	}	
@@ -112,7 +118,7 @@ PackageCache * ProjectCache::cachePackage( string & pkg ) {
 	return newc;
 }
 
-PackageCache * ProjectCache::fetchPackageCache( string & pkg ) {
+PackageCache * ProjectCache::fetchPackageCache( const string & pkg ) {
 	PackageCache * c = this->getPackageCache( pkg );
 	if ( c != NULL ) return c;
 	return this->cachePackage( pkg );

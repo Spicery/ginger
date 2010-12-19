@@ -71,6 +71,6 @@ const std::string & VarInfo::getPathName() {
 	
 #if 0
 	string VarInfo::getVarName() {
-		return std::string( this->var_name );
+		return this->var_name;
 	}
 #endif

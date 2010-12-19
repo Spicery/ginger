@@ -49,6 +49,11 @@ void ImportInfo::printInfo() {
 	}	
 }
 
-string & ImportInfo::getFrom() {
+const string & ImportInfo::getFrom() {
 	return this->from;
 }
+
+bool ImportInfo::matches( const string & tag ) {
+	return false;
+}
+

@@ -32,6 +32,7 @@
 #include "search.hpp"
 #include "mishap.hpp"
 #include "folderscan.hpp"
+#include "packagecache.hpp"
 
 using namespace std;
 

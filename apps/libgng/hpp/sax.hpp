@@ -16,43 +16,51 @@
     along with AppGinger.  If not, see <http://www.gnu.org/licenses/>.
 \******************************************************************************/
 
-#ifndef PACKAGE_CACHE_HPP
-#define PACKAGE_CACHE_HPP
+#ifndef LIB_SAX_HPP
+#define LIB_SAX_HPP
 
-#include <string>
+#include <istream>
+#include <vector>
 #include <map>
-#include <list>
-#include <memory>
 
-#include "mishap.hpp"
-#include "varinfo.hpp"
-#include "importsetinfo.hpp"
+namespace Ginger {
 
-//	A mapping from variable names to file names.
-class PackageCache {
-private:
-	std::string 						package_name;
-	std::string							load_path;
-	std::map< std::string, VarInfo > 	cache;
-	ImportSetInfo 						imports;
+class SaxHandler {
+public:
+	virtual void startTag( std::string & name, std::map< std::string, std::string > & attrs ) = 0;
+	virtual void endTag( std::string & name ) = 0;
 	
 public:
-	std::string getPackageName();
-	bool hasVariable( std::string var_name );
-	std::string getPathName( std::string name );
-	//void putPathName( std::string name, std::string pathname );
-	VarInfo * variableFile( std::string var_name );
-	VarInfo * varInfo( const std::string & var_name );
-	VarInfo & varInfoRef( const std::string & var_name );
-	void readImports( std::string import_file );
-	void printImports();
-	void fillFromList( std::vector< std::string > & from_list );
-	void setLoadPath( std::string & path );
-	std::string getLoadPath();
-
-public:
-	PackageCache( std::string pkg_name );
-	~PackageCache();
+	virtual ~SaxHandler() {}
 };
+
+class SaxParser {
+private:
+	std::istream & input;
+	SaxHandler & parent;
+	int level;
+	
+private:
+	void readName( std::string & name );
+	void eatWhiteSpace();
+	void processAttributes( std::map< std::string, std::string > & attrs );
+	void readAttributeValue( std::string & attr );
+	void mustReadChar( const char ch );
+	char nextChar();
+	char peekChar();
+	
+public:
+	void read();
+	void readElement();
+	SaxParser( std::istream & in, SaxHandler & p ) :
+		input( in ),
+		parent( p ),
+		level( 0 )
+	{
+	}
+};
+
+
+}
 
 #endif

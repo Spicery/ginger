@@ -16,39 +16,40 @@
     along with AppGinger.  If not, see <http://www.gnu.org/licenses/>.
 \******************************************************************************/
 
-#ifndef VAR_INFO_HPP
-#define VAR_INFO_HPP
+#include <iostream>
+#include <fstream>
 
-#include <string>
-#include <map>
-#include <memory>
-#include <set>
+#include <cppunit/CompilerOutputter.h>
+#include <cppunit/XmlOutputter.h>
+#include <cppunit/ui/text/TestRunner.h>
+#include <cppunit/extensions/TestFactoryRegistry.h>
 
-#include "mishap.hpp"
+using namespace std;
 
-class VarInfo {
-public:
-	bool						frozen;
-	
-private:
-	std::string		 			var_name;
-	std::set< std::string >		tag_set;
-	std::string 				pathname;
-	
-public:
-	Mishap *					mishap;
-	
-public:
-	const std::string & getPathName();
-	void init( const std::string & vname, const std::string & pathname );
-	void freeze();
-	void addTag( const std::string & tag );
-	//void setVarName( const std::string * vname );
-	//std::string getVarName();
-	
-public:
-	VarInfo();
-	~VarInfo();
-};
+int main( int argc, char ** argv ) {
+	CppUnit::TextUi::TestRunner runner;
+	CppUnit::TestFactoryRegistry &registry = CppUnit::TestFactoryRegistry::getRegistry();
+	runner.addTest( registry.makeTest() );
 
-#endif
+	ofstream out;
+	if ( argc == 2 ) {
+		out.open( argv[ 1 ] );
+	}
+	
+	runner.setOutputter( 
+		new CppUnit::XmlOutputter( 
+			&runner.result(), 
+			( out.is_open() ? out : std::cerr )
+		) 
+	);
+		
+	// Run the tests.
+  	bool wasSucessful = runner.run();
+
+	if ( out.is_open() ) {
+		out.close();
+	}
+	
+  	// Return error code 1 if the one of test failed.
+  	return wasSucessful ? 0 : 1;
+}

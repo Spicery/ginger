@@ -86,15 +86,21 @@ static void run( string command, string pathname ) {
 	}
 }
 
-static void dumpFile( string & fullname ) {
+static void dumpFile( const string & fullname ) {
 	//cout << "Dumping file " << fullname << endl;
 	run( EXEC_DIR "/" FILE2GNX, fullname );
 }
 
 void Search::returnDefinition( PackageCache * c, string name ) {
 	VarInfo * vfile = c->variableFile( name );
+	/*cout << "name = " << name << endl;
+	cout << "vfile " << vfile << endl;
+	cout << "  pathname " << vfile->getPathName() << endl;
+	cout << "  var_name " << vfile->getVarName() << endl;
+	cout << "  frozen? " << vfile->frozen << endl;*/
+	
 	if ( vfile != NULL ) {
-		dumpFile( vfile->pathname );
+		dumpFile( vfile->getPathName() );
 	} else {
 		vector< string > from_list;
 		c->fillFromList( from_list );
@@ -109,12 +115,12 @@ void Search::returnDefinition( PackageCache * c, string name ) {
 				if ( vfile == NULL ) {
 					vfile = v;
 				} else {
-					throw Mishap( "Ambiguous sources for definition" ).culprit( "Source 1", vfile->pathname ).culprit( "Source 2", v->pathname );
+					throw Mishap( "Ambiguous sources for definition" ).culprit( "Source 1", vfile->getPathName() ).culprit( "Source 2", v->getPathName() );
 				}
 			}
 		}
 		if ( vfile != NULL ) {
-			dumpFile( vfile->pathname );
+			dumpFile( vfile->getPathName() );
 		} else {
 			throw  (
 				Mishap( "Cannot find variable" ).

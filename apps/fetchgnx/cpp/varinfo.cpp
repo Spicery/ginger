@@ -16,12 +16,61 @@
     along with AppGinger.  If not, see <http://www.gnu.org/licenses/>.
 \******************************************************************************/
 
+#include <iostream>
+
 #include "varinfo.hpp"
 
-VarInfo::VarInfo() : mishap( NULL ) {
+using namespace std;
+
+VarInfo::VarInfo() : 
+	frozen( false ),
+	mishap( NULL ) 
+{
 }
 
 VarInfo::~VarInfo() {
 	delete this->mishap; 
 }
 
+void VarInfo::freeze() {
+	this->frozen = true;
+}
+
+
+void VarInfo::init( const std::string & vname, const std::string & pname  ) {
+	//cout << "init " << pname << endl;
+	if ( ! this->frozen ) {
+		this->var_name = vname;
+		this->pathname = pname;
+	} else if ( this->mishap == NULL ) {
+		Mishap * m = new Mishap( "Multiple possible files providing definition" );
+		m->culprit( "Variable", this->var_name );
+		m->culprit( "Pathname 1", this->pathname );
+		m->culprit( "Pathname 2", pname );
+		this->mishap = m;
+	}
+	//cout << "PUT " << this->var_name << " = " << this->pathname << endl;
+}
+
+void VarInfo::addTag( const std::string & tag ) {
+	if ( !this->frozen ) {
+		this->tag_set.insert( tag );
+	} else if ( this->mishap == NULL ) {
+		Mishap * m = new Mishap( "Multiple possible files trying to tag variable" );
+		m->culprit( "Variable", this->var_name );
+		m->culprit( "Pathname", this->pathname );
+		m->culprit( "Tag", tag );
+		this->mishap = m;		
+	}
+}
+
+const std::string & VarInfo::getPathName() {
+	//cout << "Returning " << this->pathname << endl;
+	return this->pathname;
+}
+	
+#if 0
+	string VarInfo::getVarName() {
+		return std::string( this->var_name );
+	}
+#endif

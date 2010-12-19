@@ -54,20 +54,7 @@ bool PackageCache::hasVariable( std::string var_name ) {
 }
 
 std::string PackageCache::getPathName( std::string var_name ) {
-	return this->cache[ var_name ].pathname;
-}
-
-void PackageCache::putPathName( std::string var_name, std::string path_name ) {
-	if ( this->cache.find( var_name ) == this->cache.end() ) {
-		this->cache[ var_name ].pathname = path_name;
-	} else if ( this->cache[ var_name ].mishap == NULL ) {
-		Mishap * m = new Mishap( "Multiple possible files providing definition" );
-		m->culprit( "Variable", var_name );
-		m->culprit( "Pathname 1", this->cache[ var_name ].pathname );
-		m->culprit( "Pathname 2", path_name );
-		this->cache[ var_name ].mishap = m;
-	}
-	//cout << "PUT " << var_name << " = " << path_name << endl;
+	return this->cache[ var_name ].getPathName();
 }
 
 VarInfo * PackageCache::variableFile( string var_name ) {
@@ -82,6 +69,14 @@ VarInfo * PackageCache::variableFile( string var_name ) {
 			return & it->second;
 		}
 	}
+}
+
+VarInfo * PackageCache::varInfo( const string & vname ) {
+	return & this->cache[ vname ];
+}
+
+VarInfo & PackageCache::varInfoRef( const string & vname ) {
+	return this->cache[ vname ];
 }
 
 void PackageCache::printImports() {

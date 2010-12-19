@@ -16,43 +16,41 @@
     along with AppGinger.  If not, see <http://www.gnu.org/licenses/>.
 \******************************************************************************/
 
-#ifndef PACKAGE_CACHE_HPP
-#define PACKAGE_CACHE_HPP
+
+#ifndef MISHAP_HPP
+#define MISHAP_HPP
 
 #include <string>
-#include <map>
-#include <list>
-#include <memory>
+#include <vector>
+#include <utility>
+#include <stdexcept>
 
-#include "mishap.hpp"
-#include "varinfo.hpp"
-#include "importsetinfo.hpp"
+namespace Ginger {
 
-//	A mapping from variable names to file names.
-class PackageCache {
+//	Abstract
+class Mishap {
 private:
-	std::string 						package_name;
-	std::string							load_path;
-	std::map< std::string, VarInfo > 	cache;
-	ImportSetInfo 						imports;
+	std::string message;
+	std::vector< std::pair< std::string, std::string > > culprits;
+
+public:
+	Mishap & culprit( const std::string reason, const std::string arg );
+	Mishap & culprit( const char * reason, const std::string arg );
+	Mishap & culprit( const char * reason, const char * arg );
+	Mishap & culprit( const std::string arg );
+	Mishap & culprit( const std::string reason, const long N );
+	void report();
+	void gnxReport();
+	std::string getMessage();
+	std::pair< std::string, std::string > & getCulprit( int n );
+	int getCount();
 	
 public:
-	std::string getPackageName();
-	bool hasVariable( std::string var_name );
-	std::string getPathName( std::string name );
-	//void putPathName( std::string name, std::string pathname );
-	VarInfo * variableFile( std::string var_name );
-	VarInfo * varInfo( const std::string & var_name );
-	VarInfo & varInfoRef( const std::string & var_name );
-	void readImports( std::string import_file );
-	void printImports();
-	void fillFromList( std::vector< std::string > & from_list );
-	void setLoadPath( std::string & path );
-	std::string getLoadPath();
-
-public:
-	PackageCache( std::string pkg_name );
-	~PackageCache();
+	Mishap( const std::string & msg ) : message( msg ), culprits() {}
+	virtual ~Mishap() {}
 };
 
+}
+
 #endif
+

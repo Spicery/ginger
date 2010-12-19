@@ -43,8 +43,7 @@ public:
 	void init( const std::string & vname, const std::string & pathname );
 	void freeze();
 	void addTag( const std::string & tag );
-	//void setVarName( const std::string * vname );
-	//std::string getVarName();
+	std::set< std::string > & 	tagSet();
 	
 public:
 	VarInfo();

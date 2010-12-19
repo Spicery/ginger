@@ -25,7 +25,9 @@
 
 using namespace std;
 
-#define FROM "from"
+#define FROM 				"from"
+#define MATCH 				"match"
+#define MATCH_SIZE	 		( sizeof( MATCH ) - 1 )
 
 typedef std::map< std::string, std::string > Dict;
 
@@ -54,6 +56,20 @@ const string & ImportInfo::getFrom() {
 }
 
 bool ImportInfo::matches( const string & tag ) {
+	for ( 
+		std::map< std::string, std::string >::iterator it = this->attrs.begin();
+		it != attrs.end();
+		++it
+	) {
+		const string & key = it->first;
+		
+		//	The following is the idiom for being a prefix.
+		if ( key.compare( 0, MATCH_SIZE, MATCH ) == 0 ) {	
+			const string & value = it->second;
+			//cout << "Comparing {" << value << "} with {" << tag << "}" << endl;
+			if ( value == tag ) return true;
+		}
+	}
 	return false;
 }
 

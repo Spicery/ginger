@@ -98,28 +98,44 @@ static void dumpFile( const string & fullname ) {
 	run( EXEC_DIR "/" FILE2GNX, fullname );
 }
 
+static bool tagMatches( ImportInfo & imp, VarInfo * vinfo ) {
+	set< string > & tags = vinfo->tagSet();
+	for (
+		set< string >::iterator it = tags.begin();
+		it != tags.end();
+		++it
+	) {
+		//cout << "Checking [" << *it << "]" << endl;
+		if ( imp.matches( *it ) ) return true;
+	}
+	return false;
+}
+
 void Search::returnDefinition( PackageCache * c, string name ) {
 	VarInfo * vfile = c->variableFile( name );
-	/*cout << "name = " << name << endl;
-	cout << "vfile " << vfile << endl;
-	cout << "  pathname " << vfile->getPathName() << endl;
-	cout << "  var_name " << vfile->getVarName() << endl;
-	cout << "  frozen? " << vfile->frozen << endl;*/
+	
+	#if 0
+		cout << "name = " << name << endl;
+		cout << "vfile " << vfile << endl;
+		cout << "  pathname " << vfile->getPathName() << endl;
+		cout << "  var_name " << vfile->getVarName() << endl;
+		cout << "  frozen? " << vfile->frozen << endl;
+	#endif
 	
 	if ( vfile != NULL ) {
 		dumpFile( vfile->getPathName() );
 	} else {
-		#if 1
-			vector< ImportInfo > & imports = c->importVector();
-			for ( 
-				vector< ImportInfo >::iterator it = imports.begin();
-				it != imports.end();
-				++it
-			) {
-				ImportInfo & imp = *it;
-				PackageCache * c = this->project_cache.fetchPackageCache( imp.getFrom() );
-				VarInfo * v = c->variableFile( name );
-				if ( v != NULL ) {
+		vector< ImportInfo > & imports = c->importVector();
+		for ( 
+			vector< ImportInfo >::iterator it = imports.begin();
+			it != imports.end();
+			++it
+		) {
+			ImportInfo & imp = *it;
+			PackageCache * c = this->project_cache.fetchPackageCache( imp.getFrom() );
+			VarInfo * v = c->variableFile( name );
+			if ( v != NULL ) {
+				if ( tagMatches( imp, v ) ) {
 					if ( vfile == NULL ) {
 						vfile = v;
 					} else {
@@ -127,25 +143,7 @@ void Search::returnDefinition( PackageCache * c, string name ) {
 					}
 				}
 			}
-		#else
-			vector< string > from_list;
-			c->fillFromList( from_list );
-			for (
-				vector< string >::iterator it = from_list.begin();
-				it != from_list.end();
-				++it
-			) {
-				PackageCache * c = this->project_cache.fetchPackageCache( *it );
-				VarInfo * v = c->variableFile( name );
-				if ( v != NULL ) {
-					if ( vfile == NULL ) {
-						vfile = v;
-					} else {
-						throw Mishap( "Ambiguous sources for definition" ).culprit( "Source 1", vfile->getPathName() ).culprit( "Source 2", v->getPathName() );
-					}
-				}
-			}
-		#endif
+		}
 		if ( vfile != NULL ) {
 			dumpFile( vfile->getPathName() );
 		} else {

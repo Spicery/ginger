@@ -74,3 +74,7 @@ const std::string & VarInfo::getPathName() {
 		return this->var_name;
 	}
 #endif
+
+set< string > & VarInfo::tagSet() {
+	return this->tag_set;
+}

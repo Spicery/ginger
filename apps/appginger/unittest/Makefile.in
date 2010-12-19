@@ -10,7 +10,6 @@ all: testrunner
 
 check: testrunner
 	./testrunner > results.xml 2> results.xml 
-	cat results.xml | sed '/8859-1'\'' /{N;s/\n/s/;}' > results.xml
 
 # $@ is make shorthand for the target.
 # $@ is make shorthand for the dependencies

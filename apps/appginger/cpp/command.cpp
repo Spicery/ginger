@@ -19,6 +19,8 @@
 #include <string>
 
 #include <unistd.h>
+#include <sys/types.h>
+#include <sys/wait.h>
 
 #include <boost/iostreams/stream_buffer.hpp>
 #include <boost/iostreams/device/file_descriptor.hpp>

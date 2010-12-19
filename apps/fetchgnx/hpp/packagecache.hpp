@@ -47,8 +47,9 @@ public:
 	void readImports( std::string import_file );
 	void printImports();
 	void fillFromList( std::vector< std::string > & from_list );
-	void setLoadPath( std::string & path );
+	void setLoadPath( const std::string & path );
 	std::string getLoadPath();
+	std::vector< ImportInfo > & importVector();
 
 public:
 	PackageCache( std::string pkg_name );

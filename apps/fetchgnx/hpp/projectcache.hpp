@@ -29,16 +29,16 @@ private:
 	std::map< std::string, PackageCache * > cache;
 	
 private:
-	void putPackageCache( std::string & pkg_name, PackageCache * cache );
-	PackageCache * getPackageCache( std::string & pkg_name );
-	PackageCache * cachePackage( std::string & pkg );
+	void putPackageCache( const std::string & pkg_name, PackageCache * cache );
+	PackageCache * getPackageCache( const std::string & pkg_name );
+	PackageCache * cachePackage( const std::string & pkg );
 	
 public:
-	PackageCache * fetchPackageCache( std::string & pkg );
+	PackageCache * fetchPackageCache( const std::string & pkg );
 
 
 public:
-	ProjectCache( std::string & project_folder );
+	ProjectCache( const std::string & project_folder );
 	~ProjectCache();
 };
 

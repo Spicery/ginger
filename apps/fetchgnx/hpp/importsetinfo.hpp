@@ -34,6 +34,7 @@ public:
 	void readFile( std::string filename );
 	void printImports();
 	void fillFromList( std::vector< std::string > & from_list );
+	std::vector< ImportInfo > & importVector();
 
 };
 

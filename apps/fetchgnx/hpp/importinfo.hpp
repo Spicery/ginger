@@ -29,7 +29,8 @@ private:
 	
 public:
 	void printInfo();
-	std::string & getFrom();
+	const std::string & getFrom();
+	bool matches( const std::string & tag );
 	
 public:
 	ImportInfo( std::map< std::string, std::string > & attrs );

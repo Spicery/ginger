@@ -13,7 +13,7 @@ EXEC_DIR="$(INSTALL_BIN)"
 
 CC=g++
 
-CXXFLAGS=-DEXEC_DIR='$(EXEC_DIR)' -g -I../hpp -I/usr/local/boost_1_43_0 -Wall -Wnon-virtual-dtor # -Weffc++
+CXXFLAGS=-DEXEC_DIR='$(EXEC_DIR)' -g -I../hpp -I/usr/local/boost_1_45_0 -Wall -Wnon-virtual-dtor # -Weffc++
 CFLAGS=-Wmissing-prototypes 
 
 OBJS=sax.o mishap.o

@@ -21,7 +21,7 @@
 
 #include <string>
 
-#define VERSION "0.6.1"
+#define VERSION "0.6.2"
 
 class MachineClass;
 class Package;

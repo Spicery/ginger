@@ -22,15 +22,23 @@
 #include <string>
 #include <map>
 
+#include "facet.hpp"
+
+using namespace Ginger;
+
 class ImportInfo {
 private:
 	std::map< std::string, std::string > attrs;
 	std::string from;
+	const FacetSet * into_tags;
+	const FacetSet * match_tags;
 	
 public:
 	void printInfo();
 	const std::string & getFrom();
 	bool matches( const std::string & tag );
+	const FacetSet * matchTags() const { return this->match_tags; }
+	const FacetSet * intoTags() const { return this->into_tags; }
 	
 public:
 	ImportInfo( std::map< std::string, std::string > & attrs );

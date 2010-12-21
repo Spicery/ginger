@@ -1,6 +1,6 @@
 /******************************************************************************\
-	Copyright (c) 2010 Stephen Leach. AppGinger is distributed under the terms 
-	of the GNU General Public License. This file is part of AppGinger.
+    Copyright (c) 2010 Stephen Leach. AppGinger is distributed under the terms 
+    of the GNU General Public License. This file is part of AppGinger.
 
     AppGinger is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -16,32 +16,32 @@
     along with AppGinger.  If not, see <http://www.gnu.org/licenses/>.
 \******************************************************************************/
 
-#ifndef SEARCH_HPP
-#define SEARCH_HPP
+#ifndef DEFN_HPP
+#define DEFN_HPP
 
-#include <string>
+enum Mode {
+	UNQUALIFIED,
+	ALIAS,
+	ABSOLUTE
+};
 
-#include "projectcache.hpp"
-#include "packagecache.hpp"
-#include "defn.hpp"
+struct Defn {
+	Mode					mode;
+	std::string 			pkg;
+	std::string				alias;
+	std::string				var;
 
-class Search {
-private:
-	std::string project_folder;
-	ProjectCache project_cache;
-
-private:
-	bool file_exists( std::string fullpathname );
-	void printUnqualifiedDefinition( PackageCache * c, const std::string name );
-	
-public:
-	//bool try_serve( std::string fullname );
-	void findDefinition( const Defn & defn );
-	void loadPackage( std::string & pkg );
-	
-public:
-	Search( std::string project_path );
-	~Search();
+	Defn(
+		Mode					mode,
+		const std::string &		pkg,
+		const std::string &		alias,
+		const std::string &		var
+	) :
+		mode( mode ),
+		pkg( pkg ),
+		alias( alias ),
+		var( var )
+	{}
 };
 
 #endif

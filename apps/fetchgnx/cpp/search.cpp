@@ -99,20 +99,11 @@ static void dumpFile( const string & fullname ) {
 }
 
 static bool tagMatches( ImportInfo & imp, VarInfo * vinfo ) {
-	set< string > & tags = vinfo->tagSet();
-	for (
-		set< string >::iterator it = tags.begin();
-		it != tags.end();
-		++it
-	) {
-		//cout << "Checking [" << *it << "]" << endl;
-		if ( imp.matches( *it ) ) return true;
-	}
-	return false;
+	return imp.matchTags()->isntEmptyIntersection( vinfo->varInfoTags() );
 }
 
-void Search::returnDefinition( PackageCache * c, string name ) {
-	VarInfo * vfile = c->variableFile( name );
+void Search::printUnqualifiedDefinition( PackageCache * c, const string name ) {
+	VarInfo * vfile = c->absoluteVarInfo( name );
 	
 	#if 0
 		cout << "name = " << name << endl;
@@ -133,7 +124,7 @@ void Search::returnDefinition( PackageCache * c, string name ) {
 		) {
 			ImportInfo & imp = *it;
 			PackageCache * c = this->project_cache.fetchPackageCache( imp.getFrom() );
-			VarInfo * v = c->variableFile( name );
+			VarInfo * v = c->absoluteVarInfo( name );
 			if ( v != NULL ) {
 				if ( tagMatches( imp, v ) ) {
 					if ( vfile == NULL ) {
@@ -156,8 +147,8 @@ void Search::returnDefinition( PackageCache * c, string name ) {
 	}
 }
 
-void Search::findDefinition( string & pkg, string & name ) {
-	this->returnDefinition( this->project_cache.fetchPackageCache( pkg ), name );
+void Search::findDefinition( const Defn & defn ) {
+	this->printUnqualifiedDefinition( this->project_cache.fetchPackageCache( defn.pkg ), defn.var );
 }
 
 void Search::loadPackage( string & pkg ) {

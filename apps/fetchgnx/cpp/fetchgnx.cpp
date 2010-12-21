@@ -54,16 +54,17 @@
 #include <syslog.h>
 
 #include "mishap.hpp"
+#include "defn.hpp"
 #include "search.hpp"
 
 using namespace std;
 
 class Main {
 private:
-	string project;
-	bool project_needs_loading;
-	std::vector< std::string > packages_to_load;
-	std::vector< std::pair< std::string, std::string > > definitions;
+	string 						project;
+	bool 						project_needs_loading;
+	std::vector< std::string > 	packages_to_load;
+	std::vector< Defn > 		definitions;
 	
 public:
 	void parseArgs( int argc, char **argv, char **envp );
@@ -91,6 +92,9 @@ static struct option long_options[] =
         { "project1",       required_argument,     	0, 'J' },
         { "package",        required_argument,      0, 'p' },
         { "package1",       required_argument,  	0, 'P' },
+        { "alias",			required_argument,		0, 'a' },
+        { "unqualified",	no_argument,			0, 'u' },
+        { "absolute",		no_argument,			0, 'b' },
         { "variable",       required_argument,      0, 'v' },
         { "version",        no_argument,            0, 'V' },
         { "help",			optional_argument,		0, 'H' },
@@ -99,10 +103,12 @@ static struct option long_options[] =
     };
 
 void Main::parseArgs( int argc, char **argv, char **envp ) {
-	std::string current_package;
+	string current_package;
+	string alias;
+	Mode mode;
     for(;;) {
         int option_index = 0;
-        int c = getopt_long( argc, argv, "j:J:p:P:v:VH:L:", long_options, &option_index );
+        int c = getopt_long( argc, argv, "j:J:p:P:v:VH:L:a:ub", long_options, &option_index );
         if ( c == -1 ) break;
         switch ( c ) {
         	case 'J': 
@@ -122,8 +128,30 @@ void Main::parseArgs( int argc, char **argv, char **envp ) {
 				}
 				break;
             }
+            case 'a' : {
+            	alias = optarg;
+            	mode = ALIAS;
+            	break;
+            }
+            case 'b' : {
+            	mode = ABSOLUTE;
+            	alias = "";
+            	break;
+            }
+            case 'u' : {
+            	mode = UNQUALIFIED;
+            	alias = "";
+            	break;
+            }
             case 'v': {
-            	this->definitions.push_back( pair< string, string >( current_package, string( optarg ) ) );
+            	this->definitions.push_back(
+            		Defn( 
+            			mode,
+            			current_package,
+            			alias,
+            			string( optarg )
+            		)
+            	);
                 break;
             }
             case 'H': {
@@ -209,11 +237,11 @@ void Main::summary() {
 	}
 	cout << "  Definitions to load (" << this->definitions.size() << ")" << endl;
 	for (
-		vector< pair< string, string > >::iterator it = this->definitions.begin();
+		vector< Defn >::iterator it = this->definitions.begin();
 		it != this->definitions.end();
 		++it
 	) {
-		cout << "    " << it->first << ", " << it->second << endl;
+		cout << "    " << it->pkg << ", " << it->var << endl;
 	}
 }
 
@@ -228,16 +256,16 @@ void Main::run() {
 		search.loadPackage( *it );
 	}
 	for ( 
-		vector< pair< string, string > >::iterator it = this->definitions.begin();
+		vector< Defn >::iterator it = this->definitions.begin();
 		it != this->definitions.end();
 		++it
 	) {
 		#if DBG_FETCHGNX
-			cout << it->first << "::" << it->second << endl;
+			cout << it->pkg << "::" << it->var << endl;
 		#endif
 		try {
-			syslog( LOG_INFO, "Loading definition %s from package %s", it->second.c_str(), it->first.c_str() );
-			search.findDefinition( it->first, it->second );
+			syslog( LOG_INFO, "Loading definition %s from package %s", it->var.c_str(), it->pkg.c_str() );
+			search.findDefinition( *it );
 		} catch ( Mishap &m ) {
 			//	NOTE: This is not correct because the values of package & variable must be escaped!
 			cout << "<mishap message=\"" << m.getMessage() << "\">";

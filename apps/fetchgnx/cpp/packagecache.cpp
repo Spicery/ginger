@@ -28,7 +28,8 @@
 
 using namespace std;
 
-PackageCache::PackageCache( std::string pkg_name ) : 
+PackageCache::PackageCache( ProjectCache * project, std::string pkg_name ) : 
+	project( project ),
 	package_name( pkg_name ) 
 {
 }
@@ -40,9 +41,9 @@ void PackageCache::readImports( string ifile ) {
 	this->imports.readFile( ifile );
 }
 
-void PackageCache::fillFromList( vector< string > & from_list ) {
+/*void PackageCache::fillFromList( vector< string > & from_list ) {
 	this->imports.fillFromList( from_list );
-}
+}*/
 
 
 string PackageCache::getPackageName() {
@@ -57,9 +58,85 @@ std::string PackageCache::getPathName( std::string var_name ) {
 	return this->cache[ var_name ].getPathName();
 }
 
-VarInfo * PackageCache::variableFile( string var_name ) {
+/*
+	Performs an absolute search for the variable in this
+	package. Note that this should use pervasive (or included)
+	imports (but doesn't yet).
+*/
+VarInfo * PackageCache::absoluteVarInfo( const string & var_name ) {
+	return this->absoluteVarInfo( var_name, NULL );
+	/*std::map< std::string, VarInfo >::iterator it = this->cache.find( var_name );
+	if ( it == this->cache.end() ) {
+		//	We should not give up just yet. We should search all included 
+		//	(pervasively imported) packages.
+		return NULL;
+	} else {
+		Mishap * m = it->second.mishap;
+		if ( m != NULL ) {
+			throw *m;
+		} else {
+			return & it->second;
+		}
+	}*/
+}
+
+/*
+	NULL match means unrestricted.
+*/
+VarInfo * PackageCache::absoluteVarInfo( const string & var_name, const FacetSet * match ) {
 	std::map< std::string, VarInfo >::iterator it = this->cache.find( var_name );
 	if ( it == this->cache.end() ) {
+		//	We should not give up just yet. We should search all included 
+		//	(pervasively imported) packages whose "into" tags overlap with
+		//	the "match" tags.
+		
+		//cout << "Looking for inclusions into " << this->package_name << endl;
+		
+		VarInfo * var_info = NULL;
+		const FacetSet * tags = NULL;
+		string from;
+		std::vector< ImportInfo > & iv = importVector();
+		for ( 
+			vector< ImportInfo >::iterator it = iv.begin();
+			it != iv.end();
+			++it
+		) {
+			if ( it->intoTags()->isEmpty() ) continue;
+			if ( match != NULL && it->intoTags()->isEmptyIntersection( match ) ) continue;
+			//cout << "Found inclusion " << it->getFrom() << endl;
+			
+			PackageCache * c = this->project->fetchPackageCache( it->getFrom() );
+			VarInfo * v = c->absoluteVarInfo( var_name, it->matchTags() );
+			
+			//cout << "  Matched? " << ( v == NULL ? "no" : "yes" ) << endl;	
+			if ( v != NULL ) {
+				if ( var_info != NULL ) {
+					throw (
+						Mishap( "Ambiguous inclusion" ).
+						culprit( "Package", this->package_name ).
+						culprit( "Variable", var_name ).
+						culprit( "Import 1", from ).
+						culprit( "Import 2", it->getFrom() )
+					);
+				}
+				//cout << "  Setting var_info" << endl;
+				var_info = v;
+				from = it->getFrom();
+				tags = it->intoTags();
+			}
+		}
+		if ( var_info == NULL ) {
+			return NULL;
+		} else {
+			VarInfo * ans = &this->cache[ var_name ];
+			ans->init( var_info );
+			ans->setTags( tags );
+			ans->freeze();
+			return ans;
+		}
+	} else if ( match !=NULL && !match->isntEmptyIntersection( it->second.varInfoTags() ) ) {	//	Check that the tag is contained in the "match" tags.			
+		//	Not part of the export. Do NOT search the pervasive imports, except
+		//	for detecting errors (i.e. to detect clashes with protected includes).
 		return NULL;
 	} else {
 		Mishap * m = it->second.mishap;
@@ -71,9 +148,9 @@ VarInfo * PackageCache::variableFile( string var_name ) {
 	}
 }
 
-VarInfo * PackageCache::varInfo( const string & vname ) {
+/*VarInfo * PackageCache::varInfo( const string & vname ) {
 	return & this->cache[ vname ];
-}
+}*/
 
 VarInfo & PackageCache::varInfoRef( const string & vname ) {
 	return this->cache[ vname ];

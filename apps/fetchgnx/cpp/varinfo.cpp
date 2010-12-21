@@ -19,11 +19,15 @@
 #include <iostream>
 
 #include "varinfo.hpp"
+#include "facet.hpp"
 
 using namespace std;
+using namespace Ginger;
 
 VarInfo::VarInfo() : 
 	frozen( false ),
+	var_info_tags( fetchEmptyFacetSet() ),
+	parent_var_info( NULL ),
 	mishap( NULL ) 
 {
 }
@@ -36,6 +40,22 @@ void VarInfo::freeze() {
 	this->frozen = true;
 }
 
+void VarInfo::init( VarInfo * v ) {
+	if ( ! this->frozen ) {
+		this->var_name = v->var_name;
+		this->parent_var_info = v;
+	} else {
+		throw Mishap( "Unreachable" );
+	}
+}
+
+const std::string & VarInfo::getPathName() {
+	if ( this->parent_var_info == NULL ) {
+		return this->pathname;
+	} else {
+		return this->parent_var_info->getPathName();
+	}
+}
 
 void VarInfo::init( const std::string & vname, const std::string & pname  ) {
 	//cout << "init " << pname << endl;
@@ -45,7 +65,7 @@ void VarInfo::init( const std::string & vname, const std::string & pname  ) {
 	} else if ( this->mishap == NULL ) {
 		Mishap * m = new Mishap( "Multiple possible files providing definition" );
 		m->culprit( "Variable", this->var_name );
-		m->culprit( "Pathname 1", this->pathname );
+		m->culprit( "Pathname 1", this->getPathName() );
 		m->culprit( "Pathname 2", pname );
 		this->mishap = m;
 	}
@@ -54,27 +74,20 @@ void VarInfo::init( const std::string & vname, const std::string & pname  ) {
 
 void VarInfo::addTag( const std::string & tag ) {
 	if ( !this->frozen ) {
-		this->tag_set.insert( tag );
+		this->var_info_tags = this->var_info_tags->add( tag );
 	} else if ( this->mishap == NULL ) {
 		Mishap * m = new Mishap( "Multiple possible files trying to tag variable" );
 		m->culprit( "Variable", this->var_name );
-		m->culprit( "Pathname", this->pathname );
+		m->culprit( "Pathname", this->getPathName() );
 		m->culprit( "Tag", tag );
 		this->mishap = m;		
 	}
 }
 
-const std::string & VarInfo::getPathName() {
-	//cout << "Returning " << this->pathname << endl;
-	return this->pathname;
+const FacetSet * VarInfo::varInfoTags() {
+	return this->var_info_tags;
 }
-	
-#if 0
-	string VarInfo::getVarName() {
-		return this->var_name;
-	}
-#endif
 
-set< string > & VarInfo::tagSet() {
-	return this->tag_set;
+void VarInfo::setTags( const FacetSet * fs ) {
+	this->var_info_tags = fs;
 }

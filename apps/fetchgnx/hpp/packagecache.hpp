@@ -27,10 +27,14 @@
 #include "mishap.hpp"
 #include "varinfo.hpp"
 #include "importsetinfo.hpp"
+#include "projectcache.hpp"
+
+class ProjectCache;
 
 //	A mapping from variable names to file names.
 class PackageCache {
 private:
+	ProjectCache *						project;
 	std::string 						package_name;
 	std::string							load_path;
 	std::map< std::string, VarInfo > 	cache;
@@ -40,19 +44,18 @@ public:
 	std::string getPackageName();
 	bool hasVariable( std::string var_name );
 	std::string getPathName( std::string name );
-	//void putPathName( std::string name, std::string pathname );
-	VarInfo * variableFile( std::string var_name );
-	VarInfo * varInfo( const std::string & var_name );
+	VarInfo * absoluteVarInfo( const std::string & var_name );	//	Any facet.
+	VarInfo * absoluteVarInfo( const std::string & var_name, const FacetSet * match );
 	VarInfo & varInfoRef( const std::string & var_name );
 	void readImports( std::string import_file );
 	void printImports();
-	void fillFromList( std::vector< std::string > & from_list );
+	//void fillFromList( std::vector< std::string > & from_list );
 	void setLoadPath( const std::string & path );
 	std::string getLoadPath();
 	std::vector< ImportInfo > & importVector();
 
 public:
-	PackageCache( std::string pkg_name );
+	PackageCache( ProjectCache * project, std::string pkg_name );
 	~PackageCache();
 };
 

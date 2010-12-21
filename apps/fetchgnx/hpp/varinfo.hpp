@@ -25,6 +25,7 @@
 #include <set>
 
 #include "mishap.hpp"
+#include "facet.hpp"
 
 class VarInfo {
 public:
@@ -32,8 +33,9 @@ public:
 	
 private:
 	std::string		 			var_name;
-	std::set< std::string >		tag_set;
+	const Ginger::FacetSet *	var_info_tags;	
 	std::string 				pathname;
+	VarInfo *					parent_var_info;
 	
 public:
 	Mishap *					mishap;
@@ -41,9 +43,11 @@ public:
 public:
 	const std::string & getPathName();
 	void init( const std::string & vname, const std::string & pathname );
+	void init( VarInfo * v );
 	void freeze();
 	void addTag( const std::string & tag );
-	std::set< std::string > & 	tagSet();
+	void setTags( const Ginger::FacetSet * fs );
+	const Ginger::FacetSet * 	varInfoTags();
 	
 public:
 	VarInfo();

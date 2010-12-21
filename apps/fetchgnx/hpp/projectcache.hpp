@@ -23,6 +23,8 @@
 
 #include "packagecache.hpp"
 
+class PackageCache;
+
 class ProjectCache {
 private:
 	std::string project_folder;

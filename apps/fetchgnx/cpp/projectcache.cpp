@@ -54,7 +54,7 @@ void ProjectCache::putPackageCache( const string & pkg_name, PackageCache * pkg 
 
 PackageCache * ProjectCache::cachePackage( const string & pkg ) {
 	//cout << "NOT FOUND" << endl;
-	PackageCache * newc = new PackageCache( pkg );
+	PackageCache * newc = new PackageCache( this, pkg );
 	
 	newc->readImports( this->project_folder + "/" + pkg + "/imports.gnx" );
 	//newc->printImports();
@@ -89,19 +89,11 @@ PackageCache * ProjectCache::cachePackage( const string & pkg ) {
 				#ifdef DBG_SEARCH
 					cout << "Adding " << root << " -> " << ( files.folderName() + "/" + fname ) <<  endl;
 				#endif
-				#if 0
-					VarInfo * v = newc->varInfo( root );
-					v->init( root, files.folderName() + "/" + fname );
-					v->addTag( default_tag );
-					//cout << "old path name " << v->getPathName() << endl;
-					v->freeze();
-				#else
-					VarInfo & v = newc->varInfoRef( root );
-					v.init( root, files.folderName() + "/" + fname );
-					v.addTag( default_tag );
-					//cout << "old path name " << v->getPathName() << endl;
-					v.freeze();					
-				#endif
+				VarInfo & v = newc->varInfoRef( root );
+				v.init( root, files.folderName() + "/" + fname );
+				v.addTag( default_tag );
+				//cout << "old path name " << v->getPathName() << endl;
+				v.freeze();					
 				//cout << "new path name 1 = " << newc->varInfo( root )->getPathName() << endl;
 				//cout << "new path name 2 = " << v->getPathName() << endl;
 				//newc->putPathName( root, files.folderName() + "/" + fname );		

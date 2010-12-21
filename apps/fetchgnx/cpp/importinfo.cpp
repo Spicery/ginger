@@ -19,6 +19,8 @@
 #include <fstream>
 #include <iostream>
 #include <utility>
+#include <string>
+#include <set>
 
 #include "importinfo.hpp"
 #include "mishap.hpp"
@@ -28,17 +30,36 @@ using namespace std;
 #define FROM 				"from"
 #define MATCH 				"match"
 #define MATCH_SIZE	 		( sizeof( MATCH ) - 1 )
+#define INTO				"into"
+#define INTO_SIZE			( sizeof( INTO ) - 1 )
 
 typedef std::map< std::string, std::string > Dict;
 
 ImportInfo::ImportInfo( Dict & attrs ) : 
-	attrs( attrs ) 
+	attrs( attrs )
 {
 	Dict::iterator it = attrs.find( FROM );
 	if ( it == attrs.end() ) {
 		throw Mishap( "Missing attribute in import" ).culprit( "Attribute", FROM );
 	}
 	this->from = it->second;
+	
+	set< string > matches;
+	set< string > intos;
+	for (
+		Dict::iterator it = attrs.begin();
+		it != attrs.end();
+		++it
+	) {
+		if ( it->first.compare( 0, MATCH_SIZE, MATCH ) == 0 ) {
+			matches.insert( it->second );
+		} else if ( it->first.compare( 0, INTO_SIZE, INTO ) == 0 ) {
+			intos.insert( it->second );
+		}
+	}
+	
+	this->match_tags = fetchFacetSet( matches );
+	this->into_tags = fetchFacetSet( intos );
 }
 
 void ImportInfo::printInfo() {
@@ -66,7 +87,7 @@ bool ImportInfo::matches( const string & tag ) {
 		//	The following is the idiom for being a prefix.
 		if ( key.compare( 0, MATCH_SIZE, MATCH ) == 0 ) {	
 			const string & value = it->second;
-			//cout << "Comparing {" << value << "} with {" << tag << "}" << endl;
+			//	cout << "Comparing {" << value << "} with {" << tag << "}" << endl;
 			if ( value == tag ) return true;
 		}
 	}

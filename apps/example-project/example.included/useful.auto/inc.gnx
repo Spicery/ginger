@@ -1,0 +1,4 @@
+<bind>
+	<var name="inc"/>
+	<string value="Inclusion is fun!"/>
+</bind>

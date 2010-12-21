@@ -1,0 +1,4 @@
+<bind>
+	<var name="paradox"/>
+	<string value="paradox"/>
+</bind>

@@ -1,0 +1,7 @@
+<package>
+	<!-- Testing pervasive (or inclusion) imports versus non-pervasive (or linked) imports -->
+	<!-- import from="example.pervasive" match0="public" into0="public" /> -->
+	<import from="example.imp1" match0="public" />
+	<import from="example.imp2" match0="public" />
+</package>
+

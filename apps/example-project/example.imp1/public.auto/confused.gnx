@@ -1,0 +1,4 @@
+<bind>
+	<var name="confused" protected="true" tag="public"/>
+	<string value="Oh dear"/>
+</bind>

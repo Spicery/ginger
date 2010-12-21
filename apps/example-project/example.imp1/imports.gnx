@@ -1,0 +1,4 @@
+<package>
+	<import from="example.included" match0="useful" into0="public" />
+</package>
+

@@ -1,0 +1,4 @@
+<bind>
+	<var name="byebye" protected="true" tag="public"/>
+	<string value="Bye bye, world!"/>
+</bind>

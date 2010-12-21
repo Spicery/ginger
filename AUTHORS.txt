@@ -6,8 +6,10 @@ Copyright (c) 2010 Stephen Leach. AppGinger is distributed under the terms
 of the GNU General Public License. This file is part of AppGinger.
 
 Development:
-  Stephen Leach <steve@steelypip.com>	appginger and common2gnx development
-  Graham Higgins <gjh@bel-epa.com>		autoconf & RPM packaging
+  Stephen Leach <steve@steelypip.com>   
+    appginger, fetchgnx, file2gnx, lisp2gnx and common2gnx development
+  Graham Higgins <gjh@bel-epa.com>      
+    Continuous integration, autoconf & RPM packaging
   
 Design Team:
   Stephen Leach <steve@steelypip.com>

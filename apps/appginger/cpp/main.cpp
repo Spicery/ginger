@@ -132,13 +132,31 @@ static void printBuildInfo() {
 	cout << "  <build";
 	cout << "version=\""; printAttr( VERSION ); cout << "\" ";
 	cout << "file=\"" << __FILE__ << "\" ";
-	cout << "timestamp=\""; printAttr( __TIMESTAMP__ ); cout << "\" ";
+	cout << "date=\""; printAttr( __DATE__ ); cout << "\" ";
+	cout << "time=\""; printAttr( __TIME__ ); cout << "\" ";
 	cout << "/>" << endl;
+}
+
+static void printCopyrightInfo() {
+}
+
+static void printLicenseInfo() {
+	cout << "  <license>";
+    ifstream license( LICENSE_FILE );
+    std::string line;
+    while ( getline( license, line ) )  {
+    	cout << "    ";
+    	printAttr( line );
+    	cout << endl;
+    }
+    cout << "  </license>" << endl;
 }
 
 static void printMetaInfo() {
 	cout << "<appginger>" << endl;
 	printBuildInfo();
+	printLicenseInfo();
+	printCopyrightInfo();
 	printStdInfo();
 	cout << "</appginger>" << endl;
 }

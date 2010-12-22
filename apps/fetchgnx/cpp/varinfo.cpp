@@ -49,7 +49,7 @@ void VarInfo::init( VarInfo * v ) {
 	}
 }
 
-const std::string & VarInfo::getPathName() {
+const std::string & VarInfo::getPathName() const {
 	if ( this->parent_var_info == NULL ) {
 		return this->pathname;
 	} else {
@@ -90,4 +90,22 @@ const FacetSet * VarInfo::varInfoTags() {
 
 void VarInfo::setTags( const FacetSet * fs ) {
 	this->var_info_tags = fs;
+}
+
+BuiltInFlag VarInfo::builtInFlag() const {
+	const string & p = this->getPathName();
+	const size_t n = p.rfind( '.' );
+	
+	if ( n == string::npos ) {
+		return NONSYS;
+	} else {		
+		const string extn( p.substr( n + 1, p.size() ) );
+		if ( extn == "sysfn" ) {
+			return SYSFN;
+		} else if ( extn == "sysclass" ) {
+			return SYSCLASS;
+		} else {
+			return NONSYS;
+		}
+	}
 }

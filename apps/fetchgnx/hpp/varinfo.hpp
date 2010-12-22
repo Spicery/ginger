@@ -27,6 +27,12 @@
 #include "mishap.hpp"
 #include "facet.hpp"
 
+enum BuiltInFlag {
+	NONSYS,
+	SYSFN,
+	SYSCLASS
+};
+
 class VarInfo {
 public:
 	bool						frozen;
@@ -41,13 +47,14 @@ public:
 	Mishap *					mishap;
 	
 public:
-	const std::string & getPathName();
+	const std::string & getPathName() const;
 	void init( const std::string & vname, const std::string & pathname );
 	void init( VarInfo * v );
 	void freeze();
 	void addTag( const std::string & tag );
 	void setTags( const Ginger::FacetSet * fs );
-	const Ginger::FacetSet * 	varInfoTags();
+	const Ginger::FacetSet * varInfoTags();
+	BuiltInFlag builtInFlag() const;
 	
 public:
 	VarInfo();

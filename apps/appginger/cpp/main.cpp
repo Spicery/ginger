@@ -60,6 +60,7 @@ static struct option long_options[] =
         { "interactive",    no_argument,            0, 'I' },
         { "batch",          no_argument,            0, 'B' },
         { "help",           optional_argument,      0, 'h' },
+        { "metainfo",		no_argument,			0, 'M' },
         { "machine",        required_argument,      0, 'm' },
         { "version",        no_argument,            0, 'v' },
         { "debug",          required_argument,      0, 'd' },
@@ -84,11 +85,69 @@ void Main::printGPL( const char * start, const char * end ) {
     }
 }
 
+static void renderText( std::ostream & out, const std::string & str ) {
+	for ( std::string::const_iterator it = str.begin(); it != str.end(); ++it ) {
+		const unsigned char ch = *it;
+		if ( ch == '<' ) {
+			out << "&lt;";
+		} else if ( ch == '>' ) {
+			out << "&gt;";
+		} else if ( ch == '&' ) {
+			out << "&amp;";
+		} else if ( 32 <= ch && ch < 127 ) {
+			out << ch;
+		} else {
+			out << "&#" << (int)ch << ";";
+		}
+	}
+}
+
+static void printAttr( const std::string & str ) {
+	renderText( cout, str );
+}
+
+static void printStdInfo() {
+	cout << "  <std>" << endl;
+	for (
+		SysMap::iterator it = sysMap.begin();
+		it != sysMap.end();
+		++it
+	) {
+		cout << "    <sysfn ";
+		cout << "name=\"";
+		printAttr( it->first );
+		cout << "\"";
+		cout << " docstring=\"";
+		if ( it->second.docstring != NULL ) {
+			printAttr( it->second.docstring );
+		} else {
+			std::cout << "-";
+		}
+		cout << "\" />" << endl;
+	}
+	cout << "  </std>" << endl;
+}
+
+static void printBuildInfo() {
+	cout << "  <build";
+	cout << "version=\""; printAttr( VERSION ); cout << "\" ";
+	cout << "file=\"" << __FILE__ << "\" ";
+	cout << "timestamp=\""; printAttr( __TIMESTAMP__ ); cout << "\" ";
+	cout << "/>" << endl;
+}
+
+static void printMetaInfo() {
+	cout << "<appginger>" << endl;
+	printBuildInfo();
+	printStdInfo();
+	cout << "</appginger>" << endl;
+}
+
 int Main::run( int argc, char **argv, char **envp ) {
 	AppContext appg;
     for(;;) {
         int option_index = 0;
-        int c = getopt_long( argc, argv, "CIBhm:vd:lj:", long_options, &option_index );
+        int c = getopt_long( argc, argv, "CIBMhm:vd:lj:", long_options, &option_index );
         if ( c == -1 ) break;
         switch ( c ) {
             case 'C': {
@@ -204,6 +263,10 @@ int Main::run( int argc, char **argv, char **envp ) {
                     printf( "Unknown help topic %s\n", optarg );
                 }
                 exit( EXIT_SUCCESS );   //  Is that right?
+            }
+            case 'M' : {
+            	printMetaInfo();
+            	exit( EXIT_SUCCESS );
             }
             case 'm' : {
                 appg.setMachineImplNum( atoi( optarg ) );

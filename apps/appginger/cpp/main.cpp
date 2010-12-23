@@ -137,26 +137,17 @@ static void printBuildInfo() {
 	cout << "/>" << endl;
 }
 
-static void printCopyrightInfo() {
-}
-
 static void printLicenseInfo() {
-	cout << "  <license>";
-    ifstream license( LICENSE_FILE );
-    std::string line;
-    while ( getline( license, line ) )  {
-    	cout << "    ";
-    	printAttr( line );
-    	cout << endl;
-    }
-    cout << "  </license>" << endl;
+	cout << "  <ipr>" << endl;
+	cout << "    <license url=\"http://www.gnu.org/licenses/gpl-3.0.txt\" />" << endl;
+	cout << "    <copyright=\"Copyright (c) 2010 Stephen Leach\" />" << endl;
+	cout << "  </ipr>" << endl;
 }
 
 static void printMetaInfo() {
 	cout << "<appginger>" << endl;
 	printBuildInfo();
 	printLicenseInfo();
-	printCopyrightInfo();
 	printStdInfo();
 	cout << "</appginger>" << endl;
 }

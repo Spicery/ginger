@@ -102,52 +102,64 @@ static void renderText( std::ostream & out, const std::string & str ) {
 	}
 }
 
-static void printAttr( const std::string & str ) {
-	renderText( cout, str );
+static void printAttr( const char * name, const std::string & val ) {
+	cout << name << "=\"";
+	renderText( cout, val );
+	cout << "\" ";
 }
 
 static void printStdInfo() {
 	cout << "  <std>" << endl;
+	cout << "    <!-- Summary of the built-in functions -->" << endl;
 	for (
 		SysMap::iterator it = sysMap.begin();
 		it != sysMap.end();
 		++it
 	) {
 		cout << "    <sysfn ";
-		cout << "name=\"";
-		printAttr( it->first );
-		cout << "\"";
-		cout << " docstring=\"";
-		if ( it->second.docstring != NULL ) {
-			printAttr( it->second.docstring );
-		} else {
-			std::cout << "-";
-		}
-		cout << "\" />" << endl;
+		printAttr( "name", it->first );
+		printAttr( "docstring", ( it->second.docstring != NULL ? it->second.docstring : "-" ) );
+		cout << "/>" << endl;
 	}
 	cout << "  </std>" << endl;
 }
 
 static void printBuildInfo() {
-	cout << "  <build";
-	cout << "version=\""; printAttr( VERSION ); cout << "\" ";
-	cout << "file=\"" << __FILE__ << "\" ";
-	cout << "date=\""; printAttr( __DATE__ ); cout << "\" ";
-	cout << "time=\""; printAttr( __TIME__ ); cout << "\" ";
+	cout << "  <release>" << endl;
+	cout << "    <version "; printAttr( "number", VERSION ); cout << "/>" << endl;
+	cout << "    <build ";
+	printAttr( "file", __FILE__ );
+	printAttr( "date", __DATE__ ); 
+	printAttr( "time", __TIME__ ); 
 	cout << "/>" << endl;
+	cout << "  </release>" << endl;
 }
 
 static void printLicenseInfo() {
 	cout << "  <ipr>" << endl;
+	cout << "    <!-- Intellectual Property Rights -->" << endl;
 	cout << "    <license url=\"http://www.gnu.org/licenses/gpl-3.0.txt\" />" << endl;
-	cout << "    <copyright=\"Copyright (c) 2010 Stephen Leach\" />" << endl;
+	cout << "    <copyright notice=\"Copyright (c) 2010 Stephen Leach\" email=\"stephen.leach@steelypip.com\"/>" << endl;
 	cout << "  </ipr>" << endl;
 }
 
+static void printCommunityInfo() {
+	cout << "  <community>" << endl;
+	cout << "    <!-- URLs for all the services for users & the devteam -->" << endl;
+	cout << "    <!-- We are obviously missing a user website, forum and mailing list -->" << endl;
+	cout << "    <repository type=\"subversion\" url=\"http://svn6.assembla.com/svn/ginger/\" />" << endl;
+	cout << "    <issue_tracking type=\"trac\" url=\"http://trac6.assembla.com/ginger\" />" << endl;
+	cout << "  </community>" << endl;
+	
+}
+
 static void printMetaInfo() {
+	cout << "<?xml version=\"1.0\"?>" << endl;
 	cout << "<appginger>" << endl;
+	cout << "  <!-- Information about the AppGinger executable, its toolchain or community -->" << endl;
 	printBuildInfo();
 	printLicenseInfo();
+	printCommunityInfo();
 	printStdInfo();
 	cout << "</appginger>" << endl;
 }

@@ -46,6 +46,9 @@ public:
 	void printGPL( const char * start, const char * end );
 };
 
+//	This is the structure of struct option, which does not seem to be
+//	especially well documented.
+//
 //  struct option {
 //      const char *name;   // option name
 //      int has_arg;        // 0 = no arg, 1 = mandatory arg, 2 = optional arg
@@ -219,7 +222,7 @@ int Main::run( int argc, char **argv, char **envp ) {
                     cout << "--help=debug          help on the debugging options available" << endl;
                     cout << "--help=help           this short help" << endl;
                     cout << "--help=licence        help on displaying license information" << endl;
-                    cout << "--help=std            print out variables in std" << endl;
+                    //cout << "--help=std            print out variables in std" << endl;
                 } else if ( std::string( optarg ) == "debug" ) {
                     cout << "--debug=showcode      Causes the generated instructions to be displayed." << endl;
                     cout << "--debug=notrap        Prevents mishaps being caught, for use with gdb." << endl;
@@ -228,6 +231,9 @@ int Main::run( int argc, char **argv, char **envp ) {
                     cout << "Displays key sections of the GNU Public License." << endl;
                     cout << "--license=warranty    Shows warranty." << endl;
                     cout << "--license=conditions  Shows terms and conditions." << endl;
+                /*
+                	Removing the --help=std functionality as it is superceded
+                	by the --metainfo option.
                 } else if ( std::string( optarg ) == std::string( "std" ) ) {
                     for (
                         SysMap::iterator it = sysMap.begin();
@@ -244,7 +250,7 @@ int Main::run( int argc, char **argv, char **envp ) {
                         } else {
                             std::cout << "-" << std::endl;
                         }
-                    }
+                    }*/
                 } else if ( std::string( optarg ) == std::string( "hex" ) ) {
                 	cout << hex;
                     cout << "absent         :\t" << sys_absent << endl;

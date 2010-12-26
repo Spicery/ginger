@@ -1,5 +1,6 @@
 all:
-	$(MAKE) -C apps $@ 
+	$(MAKE) -C apps $@
+	$(MAKE) -C projects $@
 	if [ ! -d bin ]; then mkdir -p bin; fi
 	cp apps/appginger/cpp/appginger bin/
 	cp apps/common2gnx/cpp/common2gnx bin
@@ -9,6 +10,7 @@ clean:
 	rm -f bin/common2gnx
 	rm -f bin/appginger
 	$(MAKE) -C apps $@
+	$(MAKE) -C projects $@
 	
 distclean: clean
 	rm -f Makefile
@@ -78,6 +80,8 @@ EXECUTABLES=\
 install: all
 	echo Installing binaries into $(INSTALL_BIN)
 	echo Installing support files $(INSTALL_LIB)
+	mkdir -p $(INSTALL_LIB)
+	cp -r projects/standard_library $(INSTALL_LIB) 
 	echo Installing docs into $(INSTALL_DOC)
 	mkdir -p $(INSTALL_LIB)
 	/usr/bin/install -m a=r LICENSE.txt $(INSTALL_LIB)

@@ -30,6 +30,7 @@
 #include <boost/iostreams/stream_buffer.hpp>
 #include <boost/iostreams/device/file_descriptor.hpp>
 
+#include "common.hpp"
 #include "package.hpp"
 #include "sys.hpp"
 #include "key.hpp"

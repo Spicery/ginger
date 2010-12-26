@@ -1,0 +1,8 @@
+all: standard_library
+	
+standard_library:
+	cp -r standard_library.template standard_library
+	( cd .. ; java -cp classes/ com.steelypip.appginger.std.StdMain )
+
+clean:
+	/bin/rm -rf standard_library

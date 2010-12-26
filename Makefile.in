@@ -29,7 +29,8 @@ distclean: clean
 	rm -f apps/file2gnx/unittest/Makefile
 	rm -f apps/lisp2gnx/functest/Makefile
 	rm -f apps/lisp2gnx/lsp/Makefile
-	rm -f apps/lisp2gnx/Makefile	
+	rm -f apps/lisp2gnx/Makefile
+	rm -f projects/Makefile
 	rm -f config.h
 	rm -f config.status
 	rm -f config.log

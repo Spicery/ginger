@@ -1,5 +1,5 @@
 all: standard_library
-	
+
 standard_library:
 	cp -r standard_library.template standard_library
 	( cd ../src; find . -name '*.java' | xargs javac -d ../classes/ )

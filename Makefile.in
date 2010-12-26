@@ -11,7 +11,7 @@ clean:
 	rm -f bin/appginger
 	$(MAKE) -C apps $@
 	$(MAKE) -C projects $@
-	
+
 distclean: clean
 	rm -f Makefile
 	rm -f apps/Makefile

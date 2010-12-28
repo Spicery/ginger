@@ -18,18 +18,21 @@ distclean: clean
 	rm -f apps/appginger/Makefile
 	rm -f apps/appginger/cpp/Makefile
 	rm -f apps/appginger/functest/Makefile
+	rm -f apps/appginger/unittest/Makefile
 	rm -f apps/common2gnx/Makefile
 	rm -f apps/common2gnx/cpp/Makefile
-	rm -f apps/appginger/unittest/Makefile
-	rm -f apps/fetchgnx/cpp/Makefile
 	rm -f apps/fetchgnx/Makefile
+	rm -f apps/fetchgnx/cpp/Makefile
 	rm -f apps/fetchgnx/unittest/Makefile
-	rm -f apps/file2gnx/cpp/Makefile
 	rm -f apps/file2gnx/Makefile
+	rm -f apps/file2gnx/cpp/Makefile
 	rm -f apps/file2gnx/unittest/Makefile
-	rm -f apps/lisp2gnx/functest/Makefile
-	rm -f apps/lisp2gnx/lsp/Makefile
+	rm -f apps/libgng/Makefile
+	rm -f apps/libgng/cpp/Makefile
+	rm -f apps/libgng/unittest/Makefile
 	rm -f apps/lisp2gnx/Makefile
+	rm -f apps/lisp2gnx/lsp/Makefile
+	rm -f apps/lisp2gnx/functest/Makefile
 	rm -f projects/Makefile
 	rm -f config.h
 	rm -f config.status

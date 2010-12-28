@@ -1,6 +1,6 @@
 all:
 	$(MAKE) -C cpp $@
-	
+
 dox:
 	doxygen Doxyfile
 

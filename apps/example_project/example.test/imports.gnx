@@ -3,5 +3,6 @@
 	<!-- import from="example.pervasive" match0="public" into0="public" /> -->
 	<import from="example.imp1" match0="public" />
 	<import from="example.imp2" match0="public" />
+	<import alias="useful" from="example.alias" match0="public" />
 </package>
 

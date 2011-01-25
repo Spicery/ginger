@@ -513,7 +513,12 @@ void Machine3::core( bool init_mode, Ref *pc ) {
     }
     L_push_global: {
         Valof * id = (Valof *)( *( ++pc ) );
-        *( ++VMVP ) = id->valof;
+        if ( sys_undef == ( *( ++VMVP ) = id->valof ) ) {
+        	//	TO DO: Two problems here. Firstly it is not efficient to
+        	//	do this check more than once. Secondly, the error message
+        	//	does not supply enough context.
+        	throw Mishap( "Accessing uninitialised variable" );
+        }
         RETURN( pc + 1 );
     }
     L_push_local: {

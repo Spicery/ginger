@@ -56,3 +56,5 @@
 #define sysWeakIdMapKey MAKE_KEY( 23, 3, MAP_KIND )
 #define HashMapDataID 24
 #define sysHashMapDataKey MAKE_KEY( 24, 0, VECTOR_KIND )
+#define UndefID 25
+#define sysUndefKey MAKE_KEY( 25, 0, KEYLESS_KIND )

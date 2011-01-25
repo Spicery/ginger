@@ -54,7 +54,12 @@ enum NamedRefType TermClass::refType() {
 	throw "No refType for this type";
 }
 
-const std::string & TermClass::pkg() {
+const std::string & TermClass::encPkg() {
+	std::cerr << this->type_name() << std::endl;
+	throw "No package name for this type";
+}
+
+const std::string & TermClass::defPkg() {
 	std::cerr << this->type_name() << std::endl;
 	throw "No package name for this type";
 }

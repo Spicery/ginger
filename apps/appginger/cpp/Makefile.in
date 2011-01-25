@@ -15,10 +15,10 @@ INSTALL_DOC=@docdir@
 
 CC=@CXX@
 
-CXXFLAGS=-DINSTALL_BIN='"$(INSTALL_BIN)"' -DINSTALL_LIB='"$(INSTALL_LIB)"' -g -I../hpp -I../../automatic/machine -I../../automatic/sys -I../../automatic/simple -I/opt/local/include -Wall -Wnon-virtual-dtor -L/opt/local/lib
+CXXFLAGS=-DINSTALL_BIN='"$(INSTALL_BIN)"' -DINSTALL_LIB='"$(INSTALL_LIB)"' -g -I../../libgng/hpp -I../hpp -I../../automatic/machine -I../../automatic/sys -I../../automatic/simple -I/opt/local/include -Wall -Wnon-virtual-dtor -L/opt/local/lib
 CFLAGS=-Wmissing-prototypes 
 
-OBJS= command.o mishap.o term.o read_xml.o \
+OBJS= package_autoload.o command.o mishap.o term.o read_xml.o \
 	functor.o plant.o cage.o vmi.o registers.o roots.o \
 	rcep.o arity.o resolve.o lift.o ident.o \
 	dict.o package.o \
@@ -42,15 +42,14 @@ OBJS= command.o mishap.o term.o read_xml.o \
 	instruction_set3.o \
 	appcontext.o \
 	makesysfn.o \
-	valof.o \
-	facet.o
+	valof.o 
 
 all: appginger
 
 # $@ is make shorthand for the target.
 # $@ is make shorthand for the dependencies
 appginger: libappginger.a main.o
-	@CXX@ $(CXXFLAGS) $(BOOST_CPPFLAGS) -o $@ main.o libappginger.a -l boost_iostreams
+	@CXX@ $(CXXFLAGS) $(BOOST_CPPFLAGS) -o $@ main.o libappginger.a -l boost_iostreams ../../libgng/cpp/libgng.a
 	
 clean:
 	rm -f *.o

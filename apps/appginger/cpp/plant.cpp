@@ -471,9 +471,9 @@ void PlantClass::compileTerm( Term term ) {
 			break;
 		}
 		case fnc_sysfn: {
-			Package * p = this->vm->getPackage( STANDARD_LIBRARY );
-			Ident id = p->lookupOrAdd( term_sysfn_cont( term ), /*fetchFacet( "public" ),*/ fetchFacetSet( "public" ) );	
-			if ( id->value_of->valof == sys_absent ) {
+			Package * p = this->vm->getPackage( STANDARD_LIBRARY_PACKAGE );
+			Ident id = p->fetchDefinitionIdent( term_sysfn_cont( term ) ); //, /*fetchFacet( "public" ),*/ fetchFacetSet( "public" ) );	
+			if ( id->value_of->valof == sys_undef ) {
 				Ref r = makeSysFn( this, term_sysfn_cont( term ), sys_undef );
 				if ( r == sys_undef ) {
 					throw Mishap( "No such system function" ).culprit( "Function", term_sysfn_cont( term ) );

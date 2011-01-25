@@ -37,6 +37,7 @@
 
 #include <unistd.h>
 #include <getopt.h>
+#include <syslog.h>
 
 #include "common.hpp"
 #include "rcep.hpp"
@@ -47,22 +48,22 @@
 #include "machine1.hpp"
 #include "machine2.hpp"
 #include "machine3.hpp"
+#include "database.hpp"
 
 using namespace std;
 
-
 Package * AppContext::initInteractivePackage( MachineClass * vm ) {
-    Package * interactive_pkg = vm->getPackage( "interactive" );
-    Package * std_pkg = vm->getPackage( STANDARD_LIBRARY );
-    interactive_pkg->import( 
+    Package * interactive_pkg = vm->getPackage( INTERACTIVE_PACKAGE );
+    //Package * std_pkg = vm->getPackage( STANDARD_LIBRARY_PACKAGE );
+    /*interactive_pkg->import( 
         Import(
             fetchFacetSet( "public" ),  		//  Import the public facet from ...
             std_pkg,                    		//  ... the standard library.
-            std::string( STANDARD_LIBRARY ),    //  Alias
+            std::string( STANDARD_LIBRARY_PACKAGE ),    //  Alias
             true,                       		//  Protected = nonmaskable.
             NULL                        		//  Not into - or should it be the empty FacetSet???
         )
-    );
+    );*/
     return interactive_pkg;
 }
 
@@ -77,4 +78,13 @@ MachineClass * AppContext::newMachine() {
             break;
         }
     }
+}
+
+void AppContext::addProjectFolder( std::string & folder ) {
+	this->project_folder_list.push_back( folder );
+}
+
+
+void AppContext::addProjectFolder( const char * folder ) { 
+	this->project_folder_list.push_back( folder );
 }

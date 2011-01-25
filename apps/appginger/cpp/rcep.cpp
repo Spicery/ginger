@@ -42,38 +42,41 @@ using namespace std;
 
 #ifdef DBG_CRAWL
 
-#include "heapcrawl.hpp"
-#include "cagecrawl.hpp"
-#include "sys.hpp"
-#include "key.hpp"
-#include "garbagecollect.hpp"
+	#include "heapcrawl.hpp"
+	#include "cagecrawl.hpp"
+	#include "sys.hpp"
+	#include "key.hpp"
+	#include "garbagecollect.hpp"
 	
-static void crawl( Machine vm, const char * logfname ) {
-	ofstream out( logfname );
-	out << "Heap Crawl" << endl;
-	
-	HeapCrawl hcrawl( vm->heap() );
-	for (;;) {
-		CageClass * cage = hcrawl.next();
-		if ( not cage ) break; 
-		out << "  Cage[" << cage->serialNumber() << "] at " << (unsigned long)cage << " with " << cage->nboxesInUse() << "/" << cage->capacity() << " cells" << endl;
-
-		CageCrawl ccrawl( cage );
-		for (;;) {
-			Ref * key = ccrawl.next();
-			if ( not key ) break;
-			out << hex << "    @" << (unsigned long) key << " : " << keyName( *key ) << endl;
-			//out << "Value = ";
-			//refPtrPrint( out, key );
-			//out << endl;
-		}
+	static void crawl( Machine vm, const char * logfname ) {
+		ofstream out( logfname );
+		out << "Heap Crawl" << endl;
 		
-		out.flush();
-	}
-	out.close();
-}
+		HeapCrawl hcrawl( vm->heap() );
+		for (;;) {
+			CageClass * cage = hcrawl.next();
+			if ( not cage ) break; 
+			out << "  Cage[" << cage->serialNumber() << "] at " << (unsigned long)cage << " with " << cage->nboxesInUse() << "/" << cage->capacity() << " cells" << endl;
 	
+			CageCrawl ccrawl( cage );
+			for (;;) {
+				Ref * key = ccrawl.next();
+				if ( not key ) break;
+				out << hex << "    @" << (unsigned long) key << " : " << keyName( *key ) << endl;
+				//out << "Value = ";
+				//refPtrPrint( out, key );
+				//out << endl;
+			}
+			
+			out.flush();
+		}
+		out.close();
+	}
+		
 #endif
+
+int RCEP::level = 0;
+
 
 bool RCEP::unsafe_read_comp_exec_print( istream & input, std::ostream & output ) {
 	Machine vm = this->getMachine();
@@ -125,8 +128,17 @@ bool RCEP::unsafe_read_comp_exec_print( istream & input, std::ostream & output )
 	    vmiRETURN( plant );
 	    r = vmiENDFUNCTION( plant );
 	    start = clock();
-	    vm->gcLiftAllVetoes();
-    	vm->execute( r );
+	    vm->addToQueue( r );
+	    if ( this->isTopLevel() ) {
+        	#ifdef DBG_RCEP
+        		cerr << "About to execute queue" << endl;
+        	#endif
+			vm->executeQueue();
+	    } else {
+        	#ifdef DBG_RCEP
+        		cerr << "Not top level" << endl;
+        	#endif
+	    }
 	} catch ( NormalExit ) {
 	}
 	#ifdef DBG_CRAWL

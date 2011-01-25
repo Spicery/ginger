@@ -22,6 +22,7 @@
 #include <map>
 #include <sstream>
 
+
 using namespace std;
 
 #include "read_xml.hpp"
@@ -29,6 +30,7 @@ using namespace std;
 #include "sys.hpp"
 #include "mishap.hpp"
 #include "facet.hpp"
+/*
 
 //- SAX Parser -----------------------------------------------------------------
 
@@ -61,7 +63,7 @@ void SaxClass::eatWhiteSpace() {
 }
 
 static bool is_name_char( const char ch ) {
-	return isalnum( ch ) || ch == '-';
+	return isalnum( ch ) || ch == '-' || ch == '.';
 }
 
 void SaxClass::readName( std::string & name ) {
@@ -72,6 +74,24 @@ void SaxClass::readName( std::string & name ) {
 		//std::cout << "name so far '" << name << "'" << endl;
 	}
 	input.putback( ch );
+}
+
+//#32 -> (char)32
+//#x20 -> (char)32
+
+static char escToChar( const std::string & esc ) {
+	if ( esc.length() < 2 ) throw Mishap( "Invalid XML escape sequence" ).culprit( "Sequence", esc );
+	stringstream stream;
+	int offset = 1;
+	std::ios_base& (*base)(std::ios_base&) = std::dec;
+	if ( esc[1] == 'x' ) {
+		base = std::hex;
+		offset += 1;
+	}
+	stream << esc.substr( offset );
+	int n;
+	stream >> base >> n;
+	return (char)n;
 }
 
 void SaxClass::readAttributeValue( std::string & attr ) {
@@ -88,6 +108,9 @@ void SaxClass::readAttributeValue( std::string & attr ) {
 					throw Mishap( "Malformed escape" );
 				}
 			}
+			if ( esc.size() == 0 ) {
+				throw Mishap( "Empty XML escape character (&;)" );
+			}
 			if ( esc == "lt" ) {
 				attr.push_back( '<' );
 			} else if ( esc == "gt" ) {
@@ -98,8 +121,10 @@ void SaxClass::readAttributeValue( std::string & attr ) {
 				attr.push_back( '"' );
 			} else if ( esc == "apos" ) {
 				attr.push_back( '\'' );
+			} else if ( esc[0] == '#' ) {
+				attr.push_back( escToChar( esc ) );
 			} else {
-				throw;
+				throw Mishap( "Unrecognised XML escaped character" ).culprit( "Character", esc );
 			}
 		} else {
 			attr.push_back( ch );
@@ -192,7 +217,7 @@ void SaxClass::read() {
 	}
 			
 }
-
+*/
 
 //- Read XML -------------------------------------------------------------------
 
@@ -234,24 +259,6 @@ Term ReadXmlClass::readElement() {
 
 static bool has_attr( TermData * t, const char * v ) {
 	return t->attrs.find( v ) != t->attrs.end();
-}
-
-static bool startsWith( const std::string & a, const std::string & b ) {
-	return !a.compare( 0, b.length(), b );
-}
-
-static const FacetSet * makeFacetSet( TermData * t, const std::string & prefix ) {
-	set< string > tags;
-	for ( 
-		map<string,string>::iterator it = t->attrs.begin();
-		it != t->attrs.end();
-		++it 
-	) {
-		if ( startsWith( it->first, prefix ) ) {
-			tags.insert( it->second );
-		}
-	}
-	return fetchFacetSet( tags );
 }
 
 static Term makeIf( const int i, const int n, const std::vector< Term > & kids ) {
@@ -298,18 +305,19 @@ static Term makeSysApp( string & name, vector< Term > & kids ) {
 	return t;
 }
 
-static void packageContext( TermData * t, string & pkg_name, string & alias_name, enum NamedRefType & r  ) {
-	if ( has_attr( t, "pkg" ) ) {
+static void packageContext( TermData * t, string & enc_pkg_name, string & def_pkg_name, string & alias_name, enum NamedRefType & r  ) {
+	if ( has_attr( t, "def.pkg" ) ) {
 		r = ABSOLUTE_REF_TYPE;
 	} else if ( has_attr( t, "alias" ) ){
 		r = ALIAS_REF_TYPE;
 	} else {
-		r = LOCAL_REF_TYPE;
+		r = UNQUALIFIED_REF_TYPE;
 	}
 	
 	//	Note how these assignments come last as they are side
 	//	effecting on the attrs map.
-	pkg_name = t->attrs[ "pkg" ];
+	def_pkg_name = t->attrs[ "def.pkg" ];
+	enc_pkg_name = t->attrs[ "enc.pkg" ];
 	alias_name = t->attrs[ "alias" ];
 }
 
@@ -355,15 +363,15 @@ Term TermData::makeTerm() {
 	} else if ( has_attr( this, "name" ) ) {
 		if ( name == "id" ) {
 			enum NamedRefType r;
-			std::string pkg_name, alias_name;
-			packageContext( this, pkg_name, alias_name, r );
-			return shared< TermClass >( new IdTermClass( r, pkg_name, alias_name, attrs[ "name" ] ) );
+			std::string enc_pkg_name, def_pkg_name, alias_name;
+			packageContext( this, enc_pkg_name, def_pkg_name, alias_name, r );
+			return shared< TermClass >( new IdTermClass( r, enc_pkg_name, def_pkg_name, alias_name, attrs[ "name" ] ) );
 		} else if ( name == "var" ) {
 			enum NamedRefType r;
-			std::string pkg_name, alias_name;
-			packageContext( this, pkg_name, alias_name, r );
-			const FacetSet * facets = makeFacetSet( this, "tag" );
-			return shared< TermClass >( new VarTermClass( r, pkg_name, alias_name, facets, attrs[ "name" ] ) );
+			std::string enc_pkg_name, def_pkg_name, alias_name;
+			packageContext( this, enc_pkg_name, def_pkg_name, alias_name, r );
+			//const FacetSet * facets = makeFacetSet( this, "tag" );
+			return shared< TermClass >( new VarTermClass( r, enc_pkg_name, def_pkg_name, alias_name, /*facets,*/ attrs[ "name" ] ) );
 		} else if ( name == "sysapp" ) {
 			return makeSysApp( attrs[ "name" ], kids );
 		} else {
@@ -418,13 +426,14 @@ Term TermData::makeTerm() {
 		}
 		return t;
 	} else if ( name == "import" ) {
-		if ( !has_attr( this, "from" ) ) throw Mishap( "Malformed import" );
-		const FacetSet * match_tags = makeFacetSet( this, "match" );
+		throw SystemError( "No longer handles import directly" );
+		/*if ( !has_attr( this, "from" ) ) throw Mishap( "Malformed import" );
+		//const FacetSet * match_tags = makeFacetSet( this, "match" );
 		string from = attrs[ "from" ];
 		string alias = has_attr( this, "alias" ) ? attrs[ "alias" ] : from;
 		bool prot = has_attr( this, "protected" ) && ( attrs[ "protected" ] == string( "true" ) );
-		const FacetSet * intos = makeFacetSet( this, "into" );
-		return shared< TermClass >( new ImportTermClass( match_tags, from, alias, prot, /*into,*/ intos ) ); 
+		//const FacetSet * intos = makeFacetSet( this, "into" );
+		return shared< TermClass >( new ImportTermClass( match_tags, from, alias, prot, intos ) ); */
 	} else {
 		cerr << "name = " << name << endl;
 		cerr << "#kids = " << kids.size() << endl;

@@ -169,22 +169,24 @@ public:
 };
 
 static void lookupAndAddGlobal( Package * current, VarTermClass * t ) {
-	const std::string & pkg = t->pkg();
+	const std::string & epkg = t->encPkg();
+	const std::string & dpkg = t->defPkg();
 	const std::string & c = t->name();
-	const FacetSet * facets = t->facets();
+	//const FacetSet * facets = t->facets();
 	switch ( t->refType() ) {
-		case LOCAL_REF_TYPE: {
-			Package * p = current;
-			t->ident() = p->lookupOrAdd( c, facets );
+		case UNQUALIFIED_REF_TYPE: {
+			Package * p = epkg != "" ? current->getPackage( epkg ) : current;
+			t->ident() = p->fetchDefinitionIdent( c ); //, facets );
 			break;
 		}
 		case ABSOLUTE_REF_TYPE: {
-			Package * p = current->getPackage( pkg );
-			t->ident() = p->lookupOrAdd( c, facets );
+			Package * p = current->getPackage( dpkg );
+			t->ident() = p->fetchDefinitionIdent( c ); //, facets );
 			break;
 		}
 		case ALIAS_REF_TYPE: {
-			Import * imp = current->getAlias( t->alias() );
+			throw Mishap( "Declaring global variable in aliased context" );
+			/*Import * imp = current->getAlias( t->alias() );
 			const FacetSet * m = imp->matchingTags();
 		
 			//cout << "ALIAS DECLARATION" << endl;
@@ -192,43 +194,37 @@ static void lookupAndAddGlobal( Package * current, VarTermClass * t ) {
 			//cout << "Declaration facets: " << *facets << endl;
 		
 			if ( imp != NULL && facets->isntEmptyIntersection( m ) ) {
-				Ident id = imp->package()->lookupOrAdd( c, facets );
+				Ident id = imp->package()->fetchDefinitionIdent( c, facets );
 				t->ident() = id;
 			} else if ( imp != NULL ) {
 				throw Mishap( "Declaration in package referenced by alias of an import would not be exported" );
 			} else {
 				throw Mishap( "No such alias" );
 			}
-			break;
+			break;*/
 		}
 	}
 }
 
 static Ident lookupGlobal( Package * current, IdTermClass * t ) {
-	const std::string & pkg = t->pkg();
+	const std::string & epkg = t->encPkg();
+	const std::string & dpkg = t->defPkg();
 	const std::string & c = t->name();
+	//cout << "Looking up global identifier: " << c << endl;
+	//cout << "Ref type                    : " << t->refType() << endl;
+	//cout << "Def pkg                     : " << dpkg << endl;
 	switch ( t->refType() ) {
-		case LOCAL_REF_TYPE: {
-			return current->lookup( c, true, true );
+		case UNQUALIFIED_REF_TYPE: {
+			Package * p = epkg != "" ? current->getPackage( epkg ) : current;
+			return p->fetchUnqualifiedIdent( c );
 		}
 		case ABSOLUTE_REF_TYPE: {
-			Package * p = current->getPackage( pkg );
-			return p->lookup( c, true, true );
+			Package * p = current->getPackage( dpkg );
+			return p->fetchAbsoluteIdent( c );
 		}
 		case ALIAS_REF_TYPE: {
-			Import * imp = current->getAlias( t->alias() );
-			if ( imp != NULL ) {
-				Ident id = imp->package()->lookup( c, true, true );
-				const FacetSet * m = imp->matchingTags();
-				if ( id->facets->isntEmptyIntersection( m ) ) {
-					return id;
-				} else {
-					throw Mishap( "Aliased variable not exported" );
-				}
-			} else {
-				throw Mishap( "No such alias" );
-			}
-			throw Unreachable( __FILE__, __LINE__ );
+			Package * p = epkg != "" ? current->getPackage( epkg ) : current;
+			return p->fetchQualifiedIdent( t->alias(), c );
 		}
 		default:
 			throw Unreachable( __FILE__, __LINE__ );
@@ -298,7 +294,7 @@ Term ResolveStateClass::resolve( Term term ) {
     		return t;
     	}
     	case fnc_import: {
-    		ImportTermClass * t = dynamic_cast< ImportTermClass * >( term.get() );
+    		/*ImportTermClass * t = dynamic_cast< ImportTermClass * >( term.get() );
 			Package * from_pkg = this->package->getPackage( t->from );
 			this->package->import( 
 				Import( 
@@ -309,7 +305,8 @@ Term ResolveStateClass::resolve( Term term ) {
 					t->intos
 				)
 			);
-    		return term;
+    		return term;*/
+    		throw SystemError( "import not directly supported any more" );
     	}
         case fnc_fn : {
             //    fn( seq( id( _ ), ... ), Body )

@@ -77,6 +77,35 @@ bool MachineClass::gcMoveEnabled() {
 	return this->veto_count <= 0;
 }
 
+void MachineClass::addToQueue( Ref r ) {
+	this->queue.push_back( r );
+}
+
+void MachineClass::executeQueue() {
+	if ( this->queue.size() == 1 ) {
+		Ref r = this->queue.front();
+		this->queue.clear();
+		this->gcLiftAllVetoes();
+	    this->execute( r );
+	} else {		
+		Plant plant = this->plant();
+	    vmiFUNCTION( plant, 0, 0 );
+	    vmiENTER( plant );
+        for ( 
+        	vector< Ref >::iterator it = this->queue.begin();
+        	it != this->queue.end();
+        	++it
+        ) {
+        	vmiPUSHQ( plant, *it );
+        	vmiSET_CALLS( plant, 0 );
+        }
+        this->queue.clear();
+	    vmiRETURN( plant );
+	    Ref r = vmiENDFUNCTION( plant );
+		this->gcLiftAllVetoes();
+		this->execute( r );
+	}
+}
 
 bool MachineClass::getShowCode() {
 	return this->appg.getShowCode();
@@ -88,6 +117,7 @@ bool MachineClass::isGCTrace() {
 
 void MachineClass::resetMachine() {
 	this->plant_aptr.reset( new PlantClass( this ) );
+	this->package_mgr_aptr->reset();
 }
 
 PlantClass * MachineClass::plant() {

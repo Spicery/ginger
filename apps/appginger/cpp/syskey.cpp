@@ -41,7 +41,9 @@ Ref refKey( Ref r ) {
 	if ( taggg == SYMBOL_TAGGG ) return sysSymbolKey;
 	if ( taggg == MISC_TAGGG ) {
 		if ( r == sys_nil ) {
-			return sysNilKey; 
+			return sysNilKey;
+		} else if ( r == sys_undef ) {
+			return sysUndefKey;
 		} else {
 			throw;
 		}

@@ -46,8 +46,13 @@ using namespace std;
 
 //#define DBG_PACKAGE
 
+Package::~Package() {
+}
+
+
 OrdinaryPackage::OrdinaryPackage( PackageManager * pkgmgr, const std::string title ) :
-	Package( pkgmgr, title )
+	Package( pkgmgr, title ),
+	loaded( false )
 {
 	#ifdef DBG_PACKAGE
 		std::cout << "NEW ORDINARY PACKAGE: " << title << std::endl;
@@ -58,15 +63,27 @@ OrdinaryPackage::OrdinaryPackage( PackageManager * pkgmgr, const std::string tit
 PackageManager::PackageManager( MachineClass * vm ) :
 	vm( vm )
 {
-	this->packages[ STANDARD_LIBRARY ] = new StandardLibraryPackage( this, std::string( STANDARD_LIBRARY  ) );
+	this->packages[ STANDARD_LIBRARY_PACKAGE ] = new StandardLibraryPackage( this, std::string( STANDARD_LIBRARY_PACKAGE ) );
 }
 
 Package * PackageManager::getPackage( std::string title ) {
 	std::map< std::string, class Package * >::iterator it = this->packages.find( title );
 	if ( it == this->packages.end() ) {
-		return this->packages[ title ] = new OrdinaryPackage( this, title );
+		Package * p = this->packages[ title ] = new OrdinaryPackage( this, title );
+		p->loadIfNeeded();
+		return p;
 	} else {
 		return it->second;
+	}
+}
+
+void PackageManager::reset() {
+	for ( 
+		map< string, class Package * >::iterator it = this->packages.begin();
+		it != this->packages.end();
+		++it
+	) {
+		it->second->reset();
 	}
 }
 
@@ -74,232 +91,75 @@ Package * Package::getPackage( std::string title ) {
 	return this->pkgmgr->getPackage( title );
 }
 
-Import * Package::getAlias( const std::string alias ) {
-	for ( 
-		vector< Import >::iterator it = this->imports.begin(); 
-		it != this->imports.end();
-		++it
-	) {
-		if ( alias == it->alias ) {
-			return &*it;
-		}
-	}	
-	return NULL;
-}
-
-Ident Package::exported( const std::string & name, const FacetSet * facets ) {
-	#ifdef DBG_PACKAGE
-		cout << "Looking up an exported ID: " << name << " from package: " << this->title << endl;
-	#endif
-	Ident id = this->dict.lookup( name );
-	if ( id ) {
-		#ifdef DBG_PACKAGE
-			cout << "Found in local dictionary with facet: " << id->facet->name() << endl;
-		#endif
-		return id->facets != NULL && id->facets->isntEmptyIntersection( facets ) ? id : shared< IdentClass >( (IdentClass *)NULL );
-	}
-	
-	for ( 
-		vector< Import >::iterator it = this->imports.begin(); 
-		it != this->imports.end();
-		++it
-	) {
-		if ( it->intos != NULL && it->intos->isntEmptyIntersection( facets ) ) {
-			Package * from_pkg = it->from;
-			Ident id = from_pkg->exported( name, it->matchingTags() );
-			/*
-			if ( id ) {
-				return id->facets.contain( facet ) ? id : shared< IdentClass >( (IdentClass *)NULL );
-			}*/
-			return id;
-		}
-	}	
-	
-	id = this->autoload( name );
-	if ( id ) {
-		#ifdef DBG_PACKAGE
-			cout << "Autoload: Exporting with facet: " << ( id->facet ? id->facet->name() : "<null>" ) << endl;
-			cout << "Autoload: Importing with facet: " << ( facet ? facet->name() : "<null>" ) << endl;
-		#endif
-		return id->facets!= NULL && id->facets->isntEmptyIntersection( facets ) ? id : shared< IdentClass >( (IdentClass *)NULL );
-	}
-	return id;
-}
-
-//	Lookup starts in the dictionary of the local package. It then scans all
-//	imports packages looking for a unique answer.
-Ident Package::lookup( const std::string & c, bool search, bool autoload ) {
-	//	Imports are not implemented yet, so this is simple.
-	Ident id = this->dict.lookup( c );
-	if ( id ) return id;
-
-	if ( search ) {
-		for ( 
-			vector< Import >::iterator it = this->imports.begin(); 
-			it != this->imports.end();
-			++it
-		) {
-			Package * from_pkg = it->from;
-			Ident id = from_pkg->exported( c, it->matchingTags() );
-			if ( id ) return id;
-		}	
-	}
-	
-	if ( autoload ) {
-		id = this->autoload( c );
-	}
-	return id;
-}
-
 //	Additions always happen in the dictionary of the package itself.
 //	However it is necessary to check that there are no protected imports.
-Ident Package::add( const std::string & c, const FacetSet * facets ) {
-	for ( 
-		vector< Import >::iterator it = this->imports.begin(); 
-		it != this->imports.end();
-		++it
-	) {
-		//cout << "Checking that " << it->from->title << "is protected? " << it->is_protected << endl;
-		if ( it->is_protected ) {
-			Package * from_pkg = it->from;			
-			Ident id = from_pkg->exported( c, it->matchingTags() );
-			if ( id ) {
-				throw Mishap( "Trying to shadow a protected import" );
-			}
-		}
-	}	
-	return this->dict.add( c, /*facet,*/ facets );
+Ident Package::add( const std::string & c ) { //, const FacetSet * facets ) {
+	return this->dict.add( c ); //, facets );
 }
 
+Ident Package::fetchUnqualifiedIdent( const std::string & c ) {
+	Ident id = this->dict.lookup( c );
+	if ( id ) {
+		return id;
+	} else {
+		Package * p = this->unqualifiedResolutions[ c ];
+		if ( p != NULL ) {
+			Ident id = p->dict.lookup( c );
+			if ( not id ) throw SystemError( "Unqualified lookup has been incorrectly recorded" );
+			return id;
+		} else {
+			return this->unqualifiedAutoload( c );
+		}
+	}
+}
 
-Ident Package::lookupOrAdd( const std::string & c, const FacetSet * facets ) {
-    Ident id = this->lookup( c, false, false );
+Ident Package::fetchQualifiedIdent( const std::string & alias, const std::string & c ) {
+	Ident id = this->dict.lookup( c );
+	if ( id ) {
+		return id;
+	} else {
+		Package * p = this->qualifiedResolutions[ pair< string, string >( alias, c ) ];
+		if ( p != NULL ) {
+			Ident id = p->dict.lookup( c );
+			if ( not id ) throw SystemError( "Qualified lookup has been incorrectly recorded" );
+			return id;
+		} else {
+			return this->qualifiedAutoload( alias, c );
+		}
+	}
+}
+
+Ident Package::fetchAbsoluteIdent( const std::string & c ) {
+	//cout << "Absolute fetch" << endl;
+	Ident id = this->dict.lookup( c );
+	if ( id ) {
+		return id;
+	} else {
+		return this->absoluteAutoload( c );
+	}
+}
+
+Ident Package::fetchDefinitionIdent( const std::string & c ) { //, const FacetSet * facets ) {
+	Ident id = this->dict.lookup( c );
 	if ( not id ) {
-    	return this->add( c, facets );
+    	return this->add( c ); //, facets );
     } else {
+    	//	What about the consistency of the old and new facets?
+    	//	TO BE DONE!
     	return id;
     }
 }
 
-void Package::forwardDeclare( const std::string & c ) {
-	this->dict.add( c, fetchEmptyFacetSet() );
+Ident Package::forwardDeclare( const std::string & c ) {
+	return this->dict.add( c ); //, fetchEmptyFacetSet() );
 }
 
-typedef iostreams::stream_buffer< iostreams::file_descriptor_source > fdistreambuf;
-
-Ident OrdinaryPackage::autoload( const std::string & c ) {
-	syslog( LOG_INFO, "Autoloading %s", c.c_str() );
-	//	Then we invoke fetchgnx.
-	
-	//cout << "Invoking fetchgnx" << endl;
-	
-	Command cmd( FETCHGNX );
-	cmd.addArg( "-j" );
-	cmd.addArg( this->getMachine()->getAppContext().getProjectFolder() );
-	cmd.addArg( "-p" );
-	cmd.addArg( this->title );
-	cmd.addArg( "-v" );
-	cmd.addArg( c );
-	
-	//	We convert the returning GNX to a stream.
-	int fd = cmd.run();
-	iostreams::file_descriptor_source fdsource( fd, iostreams::close_handle );
-	fdistreambuf input_stream_buf( fdsource );
-	istream input_stream( &input_stream_buf );
-
-	//cout << "Loading" << endl;
-	
-	stringstream prog;
-	{
-		string s;
-		while ( getline( input_stream, s ) ) {
-			prog << s;
-		}
-	}
-	cout << "[[" << prog.str() << "]]" << endl;
-		
-
-	//	Now we establish a forward declaration.
-	this->forwardDeclare( c );
-	//	Hopefully the forward declaration will be justified.
-	Ident id = this->dict.lookup( c );
-
-	try {
-		//	And we load the stream.
-		RCEP rcep( this );
-		rcep.setPrinting( false );	//	Turn off result printing.
-		//cout << "Do load" << endl;
-		rcep.unsafe_read_comp_exec_print( prog, cout );
-		//cout << "Done" << endl;
-
-		if ( id->value_of->valof == sys_undef ) {
-			//	The autoloading failed. Undo the declaration.
-			this->dict.remove( c );
-			syslog( LOG_ERR, "Autoloading %c failed due to the loaded code not establishing a binding", c.c_str() );
-			return shared< IdentClass >();
-		} else {
-			return id;
-		}
-	} catch ( std::exception & e ) {
-		//	Undo the forward declaration.
-		if ( id->value_of->valof == sys_undef ) {
-			//	The autoloading failed. Undo the declaration.
-			this->dict.remove( c );
-		}
-		syslog( LOG_ERR, "Autoloading %c failed due to an exception", c.c_str() );
-	}
-	
-	//	No autoloading implemented yet - just fail.
-	return shared< IdentClass >();
-}
-
-Ident StandardLibraryPackage::autoload( const std::string & c ) {
-	Ref r = makeSysFn( this->pkgmgr->vm->plant(), c, sys_undef );
-	if ( r == sys_undef ) {
-		//	Doesn't match a system call. Fail.
-		return shared< IdentClass >();
-	} else {
-		Ident id = this->add( c, fetchFacetSet( "public" ) );
-		id->value_of->valof = r;
-		return id;
-	}
-}
-
-
-void Package::import( const Import & imp ) {
-	//	Strictly speaking we should not pushback until we have verified
-	//	we have a non-duplicate import. Imports are indexed by
-	//		-	facet
-	//		-	from package
-	//		-	alias
-	for ( 
-		std::vector< Import >::iterator it = this->imports.begin(); 
-		it != this->imports.end();
-		++it
-	) {
-		if ( 
-			it->matching_tags == imp.matching_tags &&
-			it->from == imp.from &&
-			it->alias == imp.alias
-		) {
-			*it = imp;
-			return;
-		}
-	}
-	//	No previous matching imports, so add.
-	this->imports.push_back( imp );
-}
-
-const FacetSet * Import::matchingTags() { 
-	return this->matching_tags;
-}
-
-Package * Import::package() { 
-	return this->from; 
+void Package::retractForwardDeclare( const std::string & c ) {
+	return this->dict.remove( c );
 }
 
 Valof * Package::valof( const std::string & c ) {
-	Ident id = this->lookup( c, true, true );
+	Ident id = this->dict.lookup( c );
 	if ( not id ) return NULL;
 	return id->value_of;
 }

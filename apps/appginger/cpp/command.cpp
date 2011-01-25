@@ -17,6 +17,7 @@
 \******************************************************************************/
 
 #include <string>
+#include <iostream>
 
 #include <unistd.h>
 #include <sys/types.h>
@@ -31,16 +32,18 @@
 using namespace std;
 using namespace boost; 
 
+//#define DBG_COMMAND
 
 Command::Command( const std::string command ) :
 	command( command ),
+	should_wait_on_close( false ),
 	child_pid( 0 ),
 	input_fd( -1 )
 {
 }
 
 Command::~Command() {
-	if ( this->child_pid != 0 ) {
+	if ( this->should_wait_on_close && this->child_pid != 0 ) {
 		int return_value_of_child;
 		wait( &return_value_of_child );
 	}
@@ -62,12 +65,68 @@ void Command::fill( vector< char * > & argv ) {
 	argv.push_back( NULL );
 }
 
-// GOT HERE - need to modify this into a class that is a command builder,
-//	sort of thing
-int Command::run() {
+
+void Command::runSilent() {
+	vector< char * > arg_vector;
+	this->fill( arg_vector );
+	
+	#ifdef DBG_COMMAND
+		cout << "Command: " << this->command << endl;
+		for ( 
+			vector< string >::iterator it = this->args.begin();
+			it != this->args.end();
+			++it
+		) {
+			cout << "Arg: " << *it << endl;
+		}
+	#endif
+	
+	pid_t pid = fork();
+	switch ( pid ) {
+		case -1: {	//	Something went wrong.
+			throw Mishap( "Child process unexpectedly failed" ).culprit( "Command", command );
+			break;
+		}
+		case 0: {	//	Child process - exec into command.
+			execv( this->command.c_str(), &arg_vector[0] );
+			break;
+		}
+		default: {	// 	Parent process.
+			pid_t stat_loc;
+			wait( &stat_loc );
+			return;
+		}
+	}
+	throw Unreachable( __FILE__, __LINE__ );
+	
+}
+
+/*
+	This is how to convert a file descriptor to a output stream using
+	Boost.
+	
+		int fd = cmd.runWithOutput();
+		iostreams::file_descriptor_source fdsource( fd, iostreams::close_handle );
+		fdistreambuf input_stream_buf( fdsource );
+		istream input_stream( &input_stream_buf );
+
+*/
+int Command::runWithOutput() {
 
 	vector< char * > arg_vector;
 	this->fill( arg_vector );
+	
+	#ifdef DBG_COMMAND
+		cout << "Command: " << this->command << endl;
+		for ( 
+			vector< string >::iterator it = this->args.begin();
+			it != this->args.end();
+			++it
+		) {
+			cout << "Arg: " << *it << endl;
+		}
+	#endif
+	
 	
 	int pipe_fd[ 2 ];
 	pipe( pipe_fd );
@@ -86,6 +145,8 @@ int Command::run() {
 			break;
 		}
 		default: {	// 	Parent process.
+			this->should_wait_on_close = true;
+			
 			//	Close the unused write descriptor.
 			close( pipe_fd[1] );
 			
@@ -95,3 +156,5 @@ int Command::run() {
 	}
 	throw Unreachable( __FILE__, __LINE__ );
 }
+
+

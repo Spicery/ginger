@@ -75,6 +75,7 @@ public class SimpleKeyGenerator {
 		
 		//	More arbitrary keys.
 		add( "HashMapData", 	24, 0,	Kind.VECTOR_KIND );
+		add( "Undef", 			25, 0,	Kind.KEYLESS_KIND );
 	}
 	
 	public void generate( final File outputFolder ) throws IOException {

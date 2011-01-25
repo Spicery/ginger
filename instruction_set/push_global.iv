@@ -1,3 +1,8 @@
 Valof * id = (Valof *)( *( ++pc ) );
-*( ++VMVP ) = id->valof;
+if ( sys_undef == ( *( ++VMVP ) = id->valof ) ) {
+	//	TO DO: Two problems here. Firstly it is not efficient to
+	//	do this check more than once. Secondly, the error message
+	//	does not supply enough context.
+	throw Mishap( "Accessing uninitialised variable" );
+}
 RETURN( pc + 1 );

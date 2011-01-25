@@ -17,13 +17,13 @@ public class Main {
 	}
 	
 	public void autosimple() throws IOException {
-		final File aFolder = new File( new File( "c" ), "automatic" );
+		final File aFolder = new File( new File( "apps" ), "automatic" );
 		final File outputFolder = new File( aFolder, "simple" );
 		new SimpleKeyGenerator().generate( outputFolder );
 	}
 
 	public void autosys() throws IOException {
-		final File aFolder = new File( new File( "c" ), "automatic" );
+		final File aFolder = new File( new File( "apps" ), "automatic" );
 		final File outputFolder = new File( aFolder, "sys" );
 		final LogCreated sysconsts = new LogCreated();
 		
@@ -89,7 +89,7 @@ public class Main {
 	 * @throws IOException 
 	 */
 	public void automachine() throws IOException {
-		final File aFolder = new File( new File( "c" ), "automatic" );
+		final File aFolder = new File( new File( "apps" ), "automatic" );
 		final File outputFolder = new File( aFolder, "machine" );
 		if ( ! outputFolder.exists() ) {
 			throw new RuntimeException( "Missing output folder" );

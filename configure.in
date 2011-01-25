@@ -88,6 +88,8 @@ AC_CONFIG_FILES([Makefile
                  apps/libgng/Makefile
                  apps/libgng/cpp/Makefile
                  apps/libgng/unittest/Makefile
+                 apps/gngmetainfo/cpp/Makefile
+                 apps/gngmetainfo/unittest/Makefile
                  projects/Makefile])
 
 AC_OUTPUT

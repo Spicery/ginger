@@ -1,10 +1,12 @@
 package com.steelypip.appginger.std;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.PrintWriter;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 
@@ -39,9 +41,9 @@ public class StdMain {
 		File dir = new File( System.getProperty( "user.dir" ) );
 		dir = new File( dir, "projects" );
 		dir = new File( dir, "standard_library" );
-		dir = new File( dir, "ginger.common" );
-		return dir;
-		
+		dir = new File( dir, "ginger.library" );
+		dir = new File( dir, "public.auto" );
+		return dir;		
 	}
 	
 	/**
@@ -60,6 +62,21 @@ public class StdMain {
 			} else {
 				b.append( '%' );
 				b.append( Integer.toHexString( ch ) );
+			}
+		}
+		return b.toString();
+	}
+	
+	static String escape( final String name ) {
+		final StringBuilder b = new StringBuilder();
+		for ( int i = 0; i < name.length(); i++ ) {
+			char ch = name.charAt( i );
+			if ( ch < 256 && ( Character.isDigit( ch ) || Character.isLetter( ch ) || "_-".indexOf( ch ) >= 0 ) ) {
+				b.append( ch );
+			} else {
+				b.append( "&#x" );
+				b.append( Integer.toHexString( ch ) );
+				b.append( ';' );
 			}
 		}
 		return b.toString();
@@ -101,8 +118,14 @@ public class StdMain {
         	
         	//System.out.format( "%s\t%s\t%s\t%s\n", name, enc_name, encode( name ), d );
         	
-        	final File f = new File( dir, ename + ".sysfn" );
-        	f.createNewFile();
+        	final File f = new File( dir, ename + ".gnx" );
+        	System.out.println( f );
+        	final PrintWriter pw = new PrintWriter( new FileWriter( f ) );
+        	
+        	//	TODO: the name needs proper quoting.
+        	final String escname = escape( name );
+        	pw.format( "<bind><var name=\"%s\"/><sysfn value=\"%s\"/></bind>\n", escname, escname );
+        	pw.close();
             
         	//System.out.println( enc_name + ", " + name );
             //System.out.println( URLEncoder.encode( "... ", "UTF-8" ) );

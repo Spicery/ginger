@@ -15,7 +15,7 @@ INSTALL_DOC=@docdir@
 
 CC=@CXX@
 
-CXXFLAGS=-DINSTALL_BIN='"$(INSTALL_BIN)"' -DINSTALL_LIB='"$(INSTALL_LIB)"' -g -I../../libgng/hpp -I../hpp -I../../automatic/machine -I../../automatic/sys -I../../automatic/simple -I/opt/local/include -Wall -Wnon-virtual-dtor -L/opt/local/lib
+CXXFLAGS=-DINSTALL_BIN='"$(INSTALL_BIN)"' -DINSTALL_LIB='"$(INSTALL_LIB)"' -g -I../hpp -I../../libgng/hpp -I../../automatic/machine -I../../automatic/sys -I../../automatic/simple -I/opt/local/include -Wall -Wnon-virtual-dtor -L/opt/local/lib
 CFLAGS=-Wmissing-prototypes 
 
 OBJS= package_autoload.o command.o mishap.o term.o read_xml.o \

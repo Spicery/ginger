@@ -44,7 +44,7 @@ private:
 	VarInfo *					parent_var_info;
 	
 public:
-	Mishap *					mishap;
+	Ginger::Mishap *			mishap;
 	
 public:
 	const std::string & getPathName() const;

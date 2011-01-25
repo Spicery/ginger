@@ -20,6 +20,7 @@
 #include "mishap.hpp"
 
 using namespace std;
+using namespace Ginger;
 
 FolderScan::FolderScan( string pathname ) : pathname( pathname ) {
 	this->dp = NULL;

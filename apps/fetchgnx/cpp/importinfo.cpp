@@ -32,6 +32,7 @@ using namespace std;
 #define MATCH_SIZE	 		( sizeof( MATCH ) - 1 )
 #define INTO				"into"
 #define INTO_SIZE			( sizeof( INTO ) - 1 )
+#define ALIAS				"alias"
 
 typedef std::map< std::string, std::string > Dict;
 
@@ -60,6 +61,15 @@ ImportInfo::ImportInfo( Dict & attrs ) :
 	
 	this->match_tags = fetchFacetSet( matches );
 	this->into_tags = fetchFacetSet( intos );
+}
+
+bool ImportInfo::hasAlias( const string & alias ) {
+	Dict::iterator it = attrs.find( ALIAS );
+	if ( it == attrs.end() ) {
+		return false;
+	} else {
+		return alias == it->second;
+	}
 }
 
 void ImportInfo::printInfo() {

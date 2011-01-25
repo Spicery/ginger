@@ -39,6 +39,7 @@ public:
 	bool matches( const std::string & tag );
 	const FacetSet * matchTags() const { return this->match_tags; }
 	const FacetSet * intoTags() const { return this->into_tags; }
+	bool hasAlias( const std::string & alias );
 	
 public:
 	ImportInfo( std::map< std::string, std::string > & attrs );

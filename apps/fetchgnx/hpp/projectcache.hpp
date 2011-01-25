@@ -20,15 +20,19 @@
 #define PROJECT_CACHE_HPP
 
 #include <string>
+#include <map>
+#include <vector>
 
 #include "packagecache.hpp"
 
 class PackageCache;
+class Search;
 
 class ProjectCache {
 private:
-	std::string project_folder;
-	std::map< std::string, PackageCache * > cache;
+	Search * 									parent;
+	std::vector< std::string > 					project_folders;
+	std::map< std::string, PackageCache * > 	cache;
 	
 private:
 	void putPackageCache( const std::string & pkg_name, PackageCache * cache );
@@ -40,7 +44,7 @@ public:
 
 
 public:
-	ProjectCache( const std::string & project_folder );
+	ProjectCache( Search * parent, std::vector< std::string > & project_folder );
 	~ProjectCache();
 };
 

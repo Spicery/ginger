@@ -53,29 +53,47 @@
 #include <getopt.h>
 #include <syslog.h>
 
+#include "database.hpp"
 #include "mishap.hpp"
 #include "defn.hpp"
 #include "search.hpp"
 
 using namespace std;
 
+#define STANDARD_LIBRARY	"standard_library"
+
+enum Task {
+	FETCH_DEFINITION,
+	RESOLVE_QUALIFIED,
+	RESOLVE_UNQUALIFIED,
+	LOAD_PACKAGE
+};
+
 class Main {
 private:
-	string 						project;
-	bool 						project_needs_loading;
+	Task						task;
+	vector< string >			project_folders;
+	string 						package_name;
+	string						alias_name;
+	string						variable_name;
 	std::vector< std::string > 	packages_to_load;
 	std::vector< Defn > 		definitions;
+	std::string					sqlite_db_file;
 	
 public:
 	void parseArgs( int argc, char **argv, char **envp );
 	void summary();
+	void init();
 	void run();
 	void printGPL( const char * start, const char * end );
 	std::string version();
+	
+public:
+	Main() : task( FETCH_DEFINITION ) {}
 };
 
 std::string Main::version() {
-	return "0.1";
+	return "0.3";
 }
 
 //  struct option {
@@ -88,70 +106,40 @@ std::string Main::version() {
 extern char * optarg;
 static struct option long_options[] =
     {
-        { "project",        required_argument,      0, 'j' },
-        { "project1",       required_argument,     	0, 'J' },
-        { "package",        required_argument,      0, 'p' },
-        { "package1",       required_argument,  	0, 'P' },
         { "alias",			required_argument,		0, 'a' },
-        { "unqualified",	no_argument,			0, 'u' },
-        { "absolute",		no_argument,			0, 'b' },
+        { "define",         no_argument,            0, 'D' },
+        { "help",			optional_argument,		0, 'H' },
+        { "initial",        no_argument,            0, 'I' },
+        { "license",        optional_argument,      0, 'L' },
+        { "projectfolder",  required_argument,      0, 'f' },
+        { "package",        required_argument,      0, 'p' },
+		{ "resolve",        no_argument,            0, 'R' },
+        { "qualified",		required_argument,		0, 'q' },
+    	{ "sqlite",			required_argument,		0, 's' }, 	//	or --cache???
+        { "unqualified",	required_argument,		0, 'u' },
         { "variable",       required_argument,      0, 'v' },
         { "version",        no_argument,            0, 'V' },
-        { "help",			optional_argument,		0, 'H' },
-        { "license",        optional_argument,      0, 'L' },
         { 0, 0, 0, 0 }
     };
 
 void Main::parseArgs( int argc, char **argv, char **envp ) {
-	string current_package;
-	string alias;
-	Mode mode;
+	bool qualified = false;
     for(;;) {
         int option_index = 0;
-        int c = getopt_long( argc, argv, "j:J:p:P:v:VH:L:a:ub", long_options, &option_index );
+        int c = getopt_long( argc, argv, "RDH:IVL:f:p:a:v:", long_options, &option_index );
         if ( c == -1 ) break;
         switch ( c ) {
-        	case 'J': 
-            case 'j': {
-            	if ( this->project.size() != 0 ) {
-            		throw Mishap( "Project being defined twice" );	
-            	}
-				this->project = std::string( optarg );
-				this->project_needs_loading = ( c == 'P' );
-                break;
-            }
-			case 'P':
-            case 'p': {
-				current_package = std::string( optarg );
-				if ( c == 'P' ) {
-					this->packages_to_load.push_back( current_package );
-				}
-				break;
-            }
             case 'a' : {
-            	alias = optarg;
-            	mode = ALIAS;
+            	alias_name = optarg;
+            	qualified = true;
             	break;
             }
-            case 'b' : {
-            	mode = ABSOLUTE;
-            	alias = "";
+            case 'D': {
+            	task = FETCH_DEFINITION;
             	break;
             }
-            case 'u' : {
-            	mode = UNQUALIFIED;
-            	alias = "";
-            	break;
-            }
-            case 'v': {
-            	this->definitions.push_back(
-            		Defn( 
-            			mode,
-            			current_package,
-            			alias,
-            			string( optarg )
-            		)
-            	);
+            case 'f': {
+				this->project_folders.push_back( optarg );
                 break;
             }
             case 'H': {
@@ -159,11 +147,19 @@ void Main::parseArgs( int argc, char **argv, char **envp ) {
                 //  files and this will simply go there. Or run a web
                 //  browser pointed there.
                 if ( optarg == NULL ) {
-                    printf( "Usage :  appginger [options] [files]\n\n" );
-                    printf( "OPTION                SUMMARY\n" );
-                    printf( "-h, --help            print out this help info (see --help=help)\n" );
-                    printf( "-v, --version         print out version information and exit\n" );
-                    printf( "-l, --license         print out license information and exit\n" );
+                    printf( "Usage:  fetchgnx MODE_OPTION -s DATABASE -j PROJECT -p PACKAGE [-a ALIAS] -v VARIABLE\n" );
+                    printf( "MODE OPTIONS\n" );
+                    printf( "-R, --resolve         find the orgin package::variable of a reference" );
+                    printf( "-D, --definition      find the definition of a package::variable" );
+                    printf( "-H, --help[=TOPIC]    help info on optional topic (see --help=help)\n" );
+                    printf( "-I, --initial         fetch initialisation code for a package\n" );
+                    printf( "-V, --version         print out version information and exit\n" );
+                    printf( "-L, --license[=PART]  print out license information and exit (see --help=license)\n" );
+                    printf( "ARGUMENTS FOR -R AND -D\n" );
+                    printf( "-j, --project=PATH    defines project folder, there may be more than one\n" );
+                    printf( "-p, --package=NAME    sets the package name\n" );
+                    printf( "-a, --alias=NAME      sets the alias name, optional\n" );
+                    printf( "-v, --variable=NAME   sets the variable name\n" );
                     printf( "\n" );
                 } else if ( std::string( optarg ) == "help" ) {
                     cout << "--help=help           this short help" << endl;
@@ -178,9 +174,9 @@ void Main::parseArgs( int argc, char **argv, char **envp ) {
                 }
                 exit( EXIT_SUCCESS );   //  Is that right?
             }
-            case 'V': {
-                cout << FETCHGNX << ": version " << this->version() << " (" << __DATE__ << " " << __TIME__ << ")" << endl;
-                exit( EXIT_SUCCESS );   //  Is that right?
+            case 'I' : {
+            	task = LOAD_PACKAGE;
+            	break;
             }
             case 'L': {
                 if ( optarg == NULL || std::string( optarg ) == std::string( "all" ) ) {
@@ -195,6 +191,26 @@ void Main::parseArgs( int argc, char **argv, char **envp ) {
                 }
                 exit( EXIT_SUCCESS );   //  Is that right?              
             }
+            case 'p': {
+				package_name = std::string( optarg );
+				break;
+            }
+            case 'R' : {
+            	task = RESOLVE_UNQUALIFIED;
+            	break;
+            }
+            case 's': {
+            	this->sqlite_db_file = string( optarg );
+            	break;
+            }
+            case 'v': {
+            	variable_name = string( optarg );
+                break;
+            }
+            case 'V': {
+                cout << FETCHGNX << ": version " << this->version() << " (" << __DATE__ << " " << __TIME__ << ")" << endl;
+                exit( EXIT_SUCCESS );   //  Is that right?
+            }
             case '?': {
                 break;
             }
@@ -203,7 +219,9 @@ void Main::parseArgs( int argc, char **argv, char **envp ) {
             }
         }
     }
-
+    if ( qualified && this->task == RESOLVE_UNQUALIFIED ) {
+		this->task = RESOLVE_QUALIFIED;
+	}
 }
     
 
@@ -223,9 +241,16 @@ void Main::printGPL( const char * start, const char * end ) {
     }
 }
 
+#ifdef DBG_FETCHGNX
 void Main::summary() {
 	cout << FETCHGNX << " Summary" << endl;
-	cout << "  Project " << this->project << endl;
+	for (
+		auto it = this->project_folders.begin();
+		it != this->project_folders.end();
+		++it
+	) {
+		cout << "  Project " << *it << endl;
+	}
 	cout << "    Needs loading? " << ( this->project_needs_loading ? "true" : "false" ) << endl;
 	cout << "  Packages to load (" << this->packages_to_load.size() << ")" << endl;
 	for ( 
@@ -244,9 +269,37 @@ void Main::summary() {
 		cout << "    " << it->pkg << ", " << it->var << endl;
 	}
 }
+#endif
+
+void Main::init() {
+	//cout << ( INSTALL_LIB "/" STANDARD_LIBRARY ) << endl;
+	this->project_folders.push_back( INSTALL_LIB "/" STANDARD_LIBRARY );
+}
 
 void Main::run() {
-	Search search( this->project );
+	Search search( this->project_folders );
+	switch ( this->task ) {
+		case RESOLVE_QUALIFIED: {
+			search.resolveQualified( this->package_name, this->alias_name, this->variable_name );
+			break;
+		}
+		case RESOLVE_UNQUALIFIED: {
+			search.resolveUnqualified( this->package_name, this->variable_name );
+			break;
+		}
+		case FETCH_DEFINITION : {
+			search.fetchDefinition( this->package_name, this->variable_name );
+			break;
+		}
+		case LOAD_PACKAGE: {
+			search.loadPackage( this->package_name );
+			break;
+		}
+	}
+}
+
+/*
+	Search search( this->sqlite_db_file, this->project_folders );
 	for (
 		std::vector< std::string >::iterator it = this->packages_to_load.begin();
 		it != this->packages_to_load.end();
@@ -277,7 +330,7 @@ void Main::run() {
 			cout << "</mishap>" << endl;
 		}
 	}
-}
+}*/
 			
 
 
@@ -290,9 +343,13 @@ int main( int argc, char ** argv, char **envp ) {
 		#ifdef DBG_FETCHGNX
 			main.summary();
 		#endif
+		main.init();
 		main.run();
 	    return EXIT_SUCCESS;
-	} catch ( Problem & p ) {
+	} catch ( Ginger::SystemError & p ) {
+		p.report();
+		return EXIT_FAILURE;
+	} catch ( Ginger::Problem & p ) {
 		p.report();
 		return EXIT_FAILURE;
 	}

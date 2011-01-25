@@ -21,7 +21,7 @@
 
 enum Mode {
 	UNQUALIFIED,
-	ALIAS,
+	QUALIFIED,
 	ABSOLUTE
 };
 

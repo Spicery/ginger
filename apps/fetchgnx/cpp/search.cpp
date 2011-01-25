@@ -19,6 +19,8 @@
 #include <fstream>
 #include <iostream>
 #include <vector>
+#include <sstream>
+#include <string>
 
 #include <sys/types.h>
 #include <sys/wait.h>
@@ -40,9 +42,29 @@ using namespace std;
 
 #define FILE2GNX "file2gnx"
 
-Search::Search( std::string project_folder ) :
-	project_folder( project_folder ),
-	project_cache( project_folder )
+static void renderText( std::ostream & out, const std::string & str ) {
+	for ( std::string::const_iterator it = str.begin(); it != str.end(); ++it ) {
+		const unsigned char ch = *it;
+		if ( ch == '<' ) {
+			out << "&lt;";
+		} else if ( ch == '>' ) {
+			out << "&gt;";
+		} else if ( ch == '&' ) {
+			out << "&amp;";
+		} else if ( 32 <= ch && ch < 127 ) {
+			out << ch;
+		} else {
+			out << "&#" << (int)ch << ";";
+		}
+	}
+}
+
+static void renderText( const std::string & str ) {
+	renderText( cout, str );
+}
+
+Search::Search( vector< string > & project_folders ) :
+	project_cache( ProjectCache( this, project_folders ) )
 {
 }
 
@@ -54,7 +76,7 @@ Search::~Search() {
 //	and lisp2gnx could handle being passed a filename as an argument. This
 //	would be both more secure and efficient.
 //
-static void run( string command, string pathname ) {
+static void run( string command, string pathname, ostream & out ) {
 	//cout << "running " << command << " " << pathname << endl;
 	int pipe_fd[ 2 ];
 	const char * cmd = command.c_str();
@@ -83,7 +105,8 @@ static void run( string command, string pathname ) {
 			for (;;) {
 				ssize_t n = read( input_fd, buf, sizeof( buf ) );
 				if ( n == 0 ) break;
-				write( STDOUT_FILENO, buf, n );
+				//write( STDOUT_FILENO, buf, n );	//	Use this command if you want faster output only to stdout.
+				out.write( buf, n );				//	This is more general.
 			}
 			
 			int return_value_of_child;
@@ -93,30 +116,74 @@ static void run( string command, string pathname ) {
 	}
 }
 
-static void dumpFile( const string & fullname ) {
-	//cout << "Dumping file " << fullname << endl;
-	run( EXEC_DIR "/" FILE2GNX, fullname );
+void Search::cacheDefinitionFile( PackageCache * c, const string & name, const string & pathname ) {
+	ostringstream out;
+	run( EXEC_DIR "/" FILE2GNX, pathname, out );
+	cout << out.str();
 }
 
 static bool tagMatches( ImportInfo & imp, VarInfo * vinfo ) {
 	return imp.matchTags()->isntEmptyIntersection( vinfo->varInfoTags() );
 }
 
-void Search::printUnqualifiedDefinition( PackageCache * c, const string name ) {
-	VarInfo * vfile = c->absoluteVarInfo( name );
-	
-	#if 0
-		cout << "name = " << name << endl;
-		cout << "vfile " << vfile << endl;
-		cout << "  pathname " << vfile->getPathName() << endl;
-		cout << "  var_name " << vfile->getVarName() << endl;
-		cout << "  frozen? " << vfile->frozen << endl;
-	#endif
-	
+void Search::printAbsoluteDefinition( PackageCache * x, const string name ) {
+	VarInfo * vfile = x->absoluteVarInfo( name );
 	if ( vfile != NULL ) {
-		dumpFile( vfile->getPathName() );
+		this->cacheDefinitionFile( x, name, vfile->getPathName() );
 	} else {
-		vector< ImportInfo > & imports = c->importVector();
+		throw  (
+			Mishap( "Cannot find variable" ).
+			culprit( "Variable", name ).
+			culprit( "Package", x->getPackageName() )
+		);
+	}
+}
+
+static ImportInfo * importWithAlias( PackageCache * x, const string alias ) {
+	vector< ImportInfo > & imports = x->importVector();
+	for ( 
+		vector< ImportInfo >::iterator it = imports.begin();
+		it != imports.end();
+		++it
+	) {
+		ImportInfo & imp = *it;
+		if ( imp.hasAlias( alias ) ) return &imp;
+	}
+	return NULL;
+}
+
+static void outputUnqualified( const string & enc_pkg_name, const string & name, const string & def_pkg ) {
+	cout << "<resolve enc.pkg=\"";
+	renderText( enc_pkg_name );
+	cout << "\" name=\"";
+	renderText( name );
+	cout << "\" def.pkg=\"";
+	renderText( def_pkg );
+	cout << "\" />" << endl;
+}
+
+static void outputQualified( const string & enc_pkg_name, const string & alias_name, const string & var_name, const string & def_pkg ) {
+	cout << "<resolve enc.pkg=\"";
+	renderText( enc_pkg_name );
+	cout << "\" alias=\"";
+	renderText( alias_name );
+	cout << "\" name=\"";
+	renderText( var_name );
+	cout << "\" def.pkg=\"";
+	renderText( def_pkg );
+	cout << "\" />" << endl;
+}
+
+void Search::resolveUnqualified( const string & enc_pkg_name, const string & name ) {
+	//cerr << "UNQUALIFIED" << endl;
+	PackageCache * x = this->project_cache.fetchPackageCache( enc_pkg_name );
+	VarInfo * vfile = x->absoluteVarInfo( name );
+	if ( vfile != NULL ) {
+		outputUnqualified( enc_pkg_name, name, enc_pkg_name );
+		//this->cacheDefinitionFile( x, name, vfile->getPathName() );
+	} else {
+		vector< ImportInfo > & imports = x->importVector();
+		PackageCache * def_pkg = NULL;
 		for ( 
 			vector< ImportInfo >::iterator it = imports.begin();
 			it != imports.end();
@@ -129,6 +196,7 @@ void Search::printUnqualifiedDefinition( PackageCache * c, const string name ) {
 				if ( tagMatches( imp, v ) ) {
 					if ( vfile == NULL ) {
 						vfile = v;
+						def_pkg = c;
 					} else {
 						throw Mishap( "Ambiguous sources for definition" ).culprit( "Source 1", vfile->getPathName() ).culprit( "Source 2", v->getPathName() );
 					}
@@ -136,28 +204,64 @@ void Search::printUnqualifiedDefinition( PackageCache * c, const string name ) {
 			}
 		}
 		if ( vfile != NULL ) {
-			dumpFile( vfile->getPathName() );
+			outputUnqualified( enc_pkg_name, name, def_pkg->getPackageName() );
+			//this->cacheUnqualifiedLookup( x->getPackageName(), name, def_pkg->getPackageName(), name );
+			//this->cacheDefinitionFile( def_pkg, name, vfile->getPathName() );
 		} else {
 			throw  (
 				Mishap( "Cannot find variable" ).
 				culprit( "Variable", name ).
-				culprit( "Package", c->getPackageName() )
+				culprit( "Package", x->getPackageName() )
 			);
 		}
 	}
 }
 
-void Search::findDefinition( const Defn & defn ) {
-	this->printUnqualifiedDefinition( this->project_cache.fetchPackageCache( defn.pkg ), defn.var );
+void Search::resolveQualified( const string & enc_pkg_name, const string & alias_name, const string & var_name ) {
+	//cerr << "QUALIFIED" << endl;
+	PackageCache * x = this->project_cache.fetchPackageCache( enc_pkg_name );
+	VarInfo * vfile = NULL;
+	PackageCache * def_pkg = NULL;
+	ImportInfo * imp = importWithAlias( x, alias_name );
+	if ( imp != NULL ) {
+		PackageCache * c = this->project_cache.fetchPackageCache( imp->getFrom() );
+		VarInfo * v = c->absoluteVarInfo( var_name );
+		if ( v != NULL ) {
+			if ( tagMatches( *imp, v ) ) {
+				if ( vfile == NULL ) {
+					vfile = v;
+					def_pkg = c;
+				} else {
+					throw Mishap( "Ambiguous sources for definition" ).culprit( "Source 1", vfile->getPathName() ).culprit( "Source 2", v->getPathName() );
+				}
+			}
+		}
+	}
+	if ( vfile != NULL ) {
+		outputQualified( enc_pkg_name, alias_name, var_name, def_pkg->getPackageName() );
+		//this->cacheUnqualifiedLookup( x->getPackageName(), name, def_pkg->getPackageName(), name );
+		//this->cacheDefinitionFile( def_pkg, name, vfile->getPathName() );
+	} else {
+		throw  (
+			Mishap( "Cannot find variable" ).
+			culprit( "Variable", var_name ).
+			culprit( "Package", enc_pkg_name )
+		);
+	}
+}
+
+void Search::fetchDefinition( const string & pkg_name, const string & var_name ) {
+	//cerr << "FETCH" << endl;
+	PackageCache * pkg = this->project_cache.fetchPackageCache( pkg_name );
+	this->printAbsoluteDefinition( pkg, var_name );
 }
 
 void Search::loadPackage( string & pkg ) {
-	//cout << "Need to load package " << pkg << endl;
 	PackageCache * c = this->project_cache.fetchPackageCache( pkg );
-	string path = c->getLoadPath();
-	if ( path.size() > 0 ) {
-		dumpFile( path );	
+	string pathname = c->getLoadPath();
+	if ( pathname.size() > 0 ) {
+		run( EXEC_DIR "/" FILE2GNX, pathname, cout );
 	} else {
-		cout << "  load path was not defined" << endl;
+		//cout << "<seq><!-- load path was not defined --></seq>" << endl;
 	}
 }

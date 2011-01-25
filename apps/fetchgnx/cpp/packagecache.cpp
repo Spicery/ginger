@@ -37,14 +37,26 @@ PackageCache::PackageCache( ProjectCache * project, std::string pkg_name ) :
 PackageCache::~PackageCache() {
 }
 
+/*
+	GOT HERE - CONSIDERING HOW TO COPE WITH RELOADING. Repeats could
+	cause the cached imports to grow without limit, unless there is a good
+	composite primary key.
+		from
+		match*
+		into*
+	This rather suggests that match and into should not be tag sets but
+	single tags. That means that you have to be able to support multiple
+	imports sharing the same alias identifer.
+	FetchGNX will indeed permit exactly that, because the imports are not
+	amalgamated. And tags are blown away by appginger, as definitions come
+	from outside (usually) (Which raises the issue of definitions that are
+	made interactively. What tags do they end up having? The simple answer
+	is none, although that is not entirely satisfactory.
+	
+*/
 void PackageCache::readImports( string ifile ) {
 	this->imports.readFile( ifile );
 }
-
-/*void PackageCache::fillFromList( vector< string > & from_list ) {
-	this->imports.fillFromList( from_list );
-}*/
-
 
 string PackageCache::getPackageName() {
 	return package_name;
@@ -64,20 +76,13 @@ std::string PackageCache::getPathName( std::string var_name ) {
 	imports (but doesn't yet).
 */
 VarInfo * PackageCache::absoluteVarInfo( const string & var_name ) {
-	return this->absoluteVarInfo( var_name, NULL );
-	/*std::map< std::string, VarInfo >::iterator it = this->cache.find( var_name );
-	if ( it == this->cache.end() ) {
-		//	We should not give up just yet. We should search all included 
-		//	(pervasively imported) packages.
-		return NULL;
-	} else {
-		Mishap * m = it->second.mishap;
-		if ( m != NULL ) {
-			throw *m;
-		} else {
-			return & it->second;
-		}
-	}*/
+	VarInfo * v = this->absoluteVarInfo( var_name, NULL );
+	if ( v == NULL ) {
+		//	Is it already pre-populated in the database? If so we 
+		//	will bring it into the local cache and set v.
+		
+	}
+	return v;
 }
 
 /*

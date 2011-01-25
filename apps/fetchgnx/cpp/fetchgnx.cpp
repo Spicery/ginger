@@ -53,7 +53,7 @@
 #include <getopt.h>
 #include <syslog.h>
 
-#include "database.hpp"
+//#include "database.hpp"
 #include "mishap.hpp"
 #include "defn.hpp"
 #include "search.hpp"

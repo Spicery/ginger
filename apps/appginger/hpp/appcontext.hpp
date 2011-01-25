@@ -20,8 +20,11 @@
 #define APP_CONTEXT_HPP
 
 #include <string>
+#include <list>
 
-#define VERSION "0.6.2"
+#include "database.hpp"
+
+#define VERSION "0.7.0"
 
 class MachineClass;
 class Package;
@@ -37,8 +40,8 @@ private:
 	bool 				dbg_show_code;
 	bool 				is_trapping_mishap;
 	bool 				is_gctrace;
-	std::string 		project_folder;
-	
+	std::list< std::string >		project_folder_list;
+
 public:
 	void setInteractiveMode() { this->mode = InteractiveMode; }
 	void setBatchMode() { this->mode = BatchMode; }
@@ -55,9 +58,10 @@ public:
 	const char * version() { return VERSION; }
 	void setShowCode() { this->dbg_show_code = true; }
 	bool getShowCode() { return this->dbg_show_code; }
-	std::string getProjectFolder() { return this->project_folder; }
-	void setProjectFolder( std::string & folder ) { this->project_folder = folder; }
-	void setProjectFolder( const char * folder ) { this->project_folder = folder; }
+	std::list< std::string > & getProjectFolderList() { return this->project_folder_list; }
+	void addProjectFolder( std::string & folder );
+	void addProjectFolder( const char * folder );
+	
 
 public:
 	MachineClass * newMachine();
@@ -69,11 +73,11 @@ public:
 		machine_impl_num( 1 ),
 		dbg_show_code( false ),
 		is_trapping_mishap( true ),
-		is_gctrace( false ),
-		project_folder( "." )
+		is_gctrace( false )
 	{
 	}
 
+	~AppContext() {}
 };
 
 #endif

@@ -22,41 +22,13 @@
 #include <map>
 #include <string>
 #include <vector>
+#include <utility>
 #include "dict.hpp"
 #include "ident.hpp"
 
 class Package;
 
-class Import {
-friend class Package;
-private:
-	const FacetSet *    matching_tags;	//	Never NULL.
-	Package *			from;			//	Never NULL.
-	std::string			alias;
-	bool				is_protected;
-	const FacetSet * 	intos;			//	NULL = not into, the usual case.
-	
-public:
-	const FacetSet *	matchingTags();
-	Package *			package();
 
-public:
-	Import(
-		const FacetSet *    matches,
-		Package *			from,
-		std::string			alias,
-		bool				is_protected,
-		const FacetSet *	intos
-	) :
-		matching_tags( matches ),
-		from( from ),
-		alias( alias ),
-		is_protected( is_protected ),
-		intos( intos )
-	{
-	}
-
-};
 
 class PackageManager {
 public:		//	Will need to make this private.
@@ -65,6 +37,7 @@ public:		//	Will need to make this private.
 	
 public:
 	Package * getPackage( std::string title );
+	void reset();
 	
 public:
 	PackageManager( MachineClass * vm );
@@ -73,27 +46,38 @@ public:
 class Package {
 friend class GarbageCollect;	//	I would like to get rid of this soon.
 protected:
-	PackageManager * 		pkgmgr;
-	const std::string		title;
-	DictClass				dict;
-	std::vector< Import >	imports;
+	PackageManager * 					pkgmgr;
+	const std::string					title;
+	DictClass							dict;
 
-	virtual Ident autoload( const std::string & c ) = 0;
+public:	//	Should be private.
+	std::map< std::string, Package * > 	unqualifiedResolutions;
+	std::map< std::pair< std::string, std::string >, Package * > 	qualifiedResolutions;
 	
 public:
-	void import( const Import & imp );		
-	
+	virtual void loadIfNeeded() = 0;
+
 public:
 	MachineClass * getMachine() { return this->pkgmgr->vm; }
 	Package * getPackage( const std::string title );
-	Import * getAlias( const std::string title );
-	Ident exported( const std::string & c, const FacetSet * facets );
-	Ident lookup( const std::string & c, bool search, bool allow_autoload );
-	Ident add( const std::string & c, const FacetSet * facets );
-	Ident lookupOrAdd( const std::string & c, const FacetSet * facets );
+	Ident add( const std::string & c ); //, const FacetSet * facets );
 	Valof * valof( const std::string & c );
-	void forwardDeclare( const std::string & c );
+	Ident forwardDeclare( const std::string & c );
+	void retractForwardDeclare( const std::string & c );
+	const std::string & getTitle() { return this->title; }
 	
+public:
+	void reset() { this->dict.reset(); }
+	Ident fetchDefinitionIdent( const std::string & c ); //, const FacetSet * facets );
+	Ident fetchUnqualifiedIdent( const std::string & c );
+	Ident fetchQualifiedIdent( const std::string & alias, const std::string & c );
+	Ident fetchAbsoluteIdent( const std::string & c );
+
+protected:	
+	virtual Ident absoluteAutoload( const std::string & c ) = 0;
+	virtual Ident unqualifiedAutoload( const std::string & c ) = 0;
+	virtual Ident qualifiedAutoload( const std::string & alias, const std::string & c ) = 0;
+
 public:
 	Package( PackageManager * pkgmgr, const std::string title ) :
 		pkgmgr( pkgmgr ),
@@ -102,20 +86,32 @@ public:
 	{
 	}
 	
-	virtual ~Package() {}
+	virtual ~Package();
 };
 
 class OrdinaryPackage : public Package {
+private:
+	bool loaded;
+
+public:
+	void loadIfNeeded();
 protected:
-	virtual Ident autoload( const std::string & c );
+	virtual Ident absoluteAutoload( const std::string & c );
+	virtual Ident unqualifiedAutoload( const std::string & c );
+	virtual Ident qualifiedAutoload( const std::string & alias, const std::string & c );
+	
 public:
 	OrdinaryPackage( PackageManager * pkgmgr, const std::string title );
 	virtual ~OrdinaryPackage() {}
 };
 
 class StandardLibraryPackage : public Package {
+public:
+	void loadIfNeeded();
 protected:
-	virtual Ident autoload( const std::string & c );
+	virtual Ident absoluteAutoload( const std::string & c );
+	virtual Ident unqualifiedAutoload( const std::string & c );
+	virtual Ident qualifiedAutoload( const std::string & alias, const std::string & c );
 public:
 	StandardLibraryPackage( PackageManager * pkgmgr, std::string title ) :
 		Package( pkgmgr, title )
@@ -123,6 +119,5 @@ public:
 	}
 	virtual ~StandardLibraryPackage() {}
 };
-
 
 #endif

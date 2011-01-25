@@ -26,6 +26,7 @@ class Command {
 private:
 	std::string 						command;
 	std::vector< std::string > 			args;
+	bool								should_wait_on_close;
 	pid_t 								child_pid;
 	int									input_fd;
 	
@@ -36,7 +37,8 @@ public:
 	void addArg( const std::string arg );
 	
 public:
-	int run();
+	int runWithOutput();
+	void runSilent();
 	
 public:
 	Command( const std::string command );

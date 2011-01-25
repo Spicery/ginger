@@ -29,9 +29,16 @@ private:
 	Package * current_package;
 	bool printing;
 
+private:
+	static int level;
+
 public:
 	void setPrinting( bool p ) {
 		this->printing = p;
+	}
+	
+	bool isTopLevel() {
+		return level == 1;
 	}
 
 public:
@@ -48,6 +55,11 @@ public:
 		current_package( current_package ),
 		printing( true )
 	{
+		level += 1;
+	}
+	
+	~RCEP() {
+		level -= 1;
 	}
 };
 

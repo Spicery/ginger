@@ -21,7 +21,7 @@
 
 #include "shared.hpp"
 #include "valof.hpp"
-#include "facet.hpp"
+//#include "facet.hpp"
 class FnTermClass;
 
 #include <string>
@@ -41,7 +41,7 @@ private:
 	FnTermClass *		func;
 
 public:
-	const FacetSet * 	facets;
+	//const FacetSet * 	facets;
 	Valof * 			value_of;		//	used for global idents
 	int 				level;			//	level of scope
 
@@ -75,7 +75,7 @@ public:
 	FnTermClass * function() { return this->func; }
 	
 public:
-	IdentClass( const std::string & nm, const FacetSet * facets );	//	Global
+	IdentClass( const std::string & nm ); /*, const FacetSet * facets );*/	//	Global
 	IdentClass( const std::string & nm, FnTermClass * fn ); 		//	Local
 	const std::string & getNameString() const;
 };
@@ -86,7 +86,7 @@ typedef shared< IdentClass > Ident;
 Ident identNewLocal( const std::string & nm, FnTermClass * fn );
 Ident identNewLastArg( const std::string & nm, FnTermClass * fn );
 Ident identNewTmp( int n );
-Ident identNewGlobal( const std::string nm, const FacetSet * facets );
+Ident identNewGlobal( const std::string nm ); /*, const FacetSet * facets );*/
 
 #endif
 

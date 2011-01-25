@@ -48,6 +48,7 @@ private:
 	std::vector< std::pair< std::string, std::string > > culprits;
 
 public:
+	void setMessage( const std::string & msg ) { this->message = msg; }
 	Problem & culprit( const std::string reason, const std::string arg );
 	Problem & culprit( const std::string arg );
 	Problem & culprit( const std::string reason, Ref ref );
@@ -63,7 +64,9 @@ class SystemError : public Problem {
 public:
 	SystemError & culprit( const std::string reason, const std::string arg ) { this->Problem::culprit( reason, arg ); return *this; }
 	SystemError & culprit( const std::string arg ) { this->Problem::culprit( arg ); return *this; }
+	SystemError & culprit( const std::string arg, const long N ) { this->Problem::culprit( arg, N ); return *this; }
 	SystemError( const std::string & msg ) : Problem( msg ) {}
+	SystemError() : Problem( "System Error (see log file)" ) {}
 	virtual ~SystemError()  throw() {}
 };
 

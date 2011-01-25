@@ -24,8 +24,9 @@
 #include <map>
 
 #include "term.hpp"
+#include "sax.hpp"
 
-class ReadXmlClass;
+/*class ReadXmlClass;
 
 class SaxClass {
 private:
@@ -48,7 +49,7 @@ public:
 		parent( p )
 	{
 	}
-};
+};*/
 
 class TermData {
 public:
@@ -65,14 +66,13 @@ public:
 	}
 };
 
-class ReadXmlClass {
+class ReadXmlClass : public Ginger::SaxHandler {
 private:
-	SaxClass sax;
+	Ginger::SaxParser sax;
 
 	std::vector< Term > term_stack;
 	std::vector< TermData > tag_stack;
-	
-	
+
 	
 public:
 	void startTag( std::string & name, std::map< std::string, std::string > & attrs );
@@ -81,9 +81,11 @@ public:
 	
 public:
 	ReadXmlClass( std::istream & in ) : 
-		sax( SaxClass( in, *this ) )
+		sax( Ginger::SaxParser( in, *this ) )
 	{
 	}
+	
+	virtual ~ReadXmlClass() {}
 };
 
 

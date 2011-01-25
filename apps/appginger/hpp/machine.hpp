@@ -21,6 +21,7 @@
 
 #include <memory>
 #include <iostream>
+#include <vector>
 
 #include "dict.hpp"
 #include "plant.hpp"
@@ -74,6 +75,7 @@ private:
 	std::auto_ptr<PlantClass>		plant_aptr;
 	std::auto_ptr<HeapClass>		heap_aptr;
 	Pressure						pressure;
+	std::vector< Ref >				queue;
 
 public:
 	Registers						registers;
@@ -141,7 +143,11 @@ public:
 	virtual Ref * setUpPC( Ref r );
 	virtual void execute( Ref r ) = 0;
 	virtual const InstructionSet & instructionSet() = 0;
-	
+
+public:
+	void executeQueue();
+	void addToQueue( Ref r );
+
 public:
 	bool getShowCode();
 	bool isGCTrace();

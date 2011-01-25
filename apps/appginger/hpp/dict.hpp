@@ -31,10 +31,11 @@ private:
 	std::map< std::string, Ident > table;
     
 public:	
+	void reset();
 	Ident lookup( const std::string & c );
-	Ident add( const std::string & c, const FacetSet * facets );
+	Ident add( const std::string & c ); // , const FacetSet * facets );
 	void remove( const std::string & c );
-	Ident lookup_or_add( const std::string & c, const FacetSet * facets );
+	Ident lookup_or_add( const std::string & c ); //, const FacetSet * facets );
 	
 public:
 	DictClass() : table() {}

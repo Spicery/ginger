@@ -32,7 +32,7 @@ typedef shared< class TermClass > Term;
 //-- general ------------------------------------------------------------
 
 enum NamedRefType {
-	LOCAL_REF_TYPE,
+	UNQUALIFIED_REF_TYPE,
 	ALIAS_REF_TYPE,
 	ABSOLUTE_REF_TYPE
 };
@@ -58,7 +58,8 @@ public:
 	virtual Ref ref();	
 	virtual Ident & ident();
 	virtual enum NamedRefType refType();
-	virtual const std::string & pkg();
+	virtual const std::string & encPkg();
+	virtual const std::string & defPkg();
 	virtual const std::string & name();
 	virtual const std::string url();
 	
@@ -310,25 +311,28 @@ public:
 class NamedTermMixin : 	public NoChildrenTermMixin {
 private:
 	enum NamedRefType	ref_type;
-	const std::string	pkg_data;
+	const std::string	enc_pkg_data;
+	const std::string	def_pkg_data;
 	const std::string	alias_data;
 	const std::string 	name_data;
 	Ident				ident_data;
 	bool				is_outer_ref;		
 
 public:
-	NamedTermMixin( enum NamedRefType r, const char * p, const char * a, const char * nm ) :
+	NamedTermMixin( enum NamedRefType r, const char * p, const char * d, const char * a, const char * nm ) :
 		ref_type( r ),
-		pkg_data( p ),
+		enc_pkg_data( p ),
+		def_pkg_data( d ),
 		alias_data( a ),
 		name_data( nm ),
 		is_outer_ref( false )
 	{
 	}
 	
-	NamedTermMixin( enum NamedRefType r, const std::string & p, const std::string a, const std::string & nm ) :
+	NamedTermMixin( enum NamedRefType r, const std::string & p, const std::string & d, const std::string a, const std::string & nm ) :
 		ref_type( r ),
-		pkg_data( p ),
+		enc_pkg_data( p ),
+		def_pkg_data( d ),
 		alias_data( a ),
 		name_data( nm ),
 		is_outer_ref( false )
@@ -356,8 +360,12 @@ public:
 		return this->name_data;
 	}
 	
-	const std::string & pkg() {
-		return this->pkg_data;
+	const std::string & encPkg() {
+		return this->enc_pkg_data;
+	}
+	
+	const std::string & defPkg() {
+		return this->def_pkg_data;
 	}
 	
 	const std::string & alias() {
@@ -380,13 +388,13 @@ public:
 	}
 	
 public:
-	IdTermClass( enum NamedRefType r, const char * p, const char * a, const char * nm ) :
-		NamedTermMixin( r, p, a, nm )
+	IdTermClass( enum NamedRefType r, const char * p, const char * d, const char * a, const char * nm ) :
+		NamedTermMixin( r, p, d, a, nm )
 	{
 	}
 	
-	IdTermClass( enum NamedRefType r, const std::string & p, const std::string & a, const std::string & nm ) :
-		NamedTermMixin( r, p, a, nm )
+	IdTermClass( enum NamedRefType r, const std::string & enc_pkg, const std::string & def_pkg, const std::string & a, const std::string & nm ) :
+		NamedTermMixin( r, enc_pkg, def_pkg, a, nm )
 	{	
 	}
 
@@ -396,12 +404,12 @@ public:
 
 class VarTermClass : public NamedTermMixin {
 private:
-	const FacetSet * facets_data;
+	//const FacetSet * facets_data;
 	
-public:
+/*public:
 	const FacetSet * facets() {
 		return this->facets_data;
-	}
+	}*/
 
 
 public:
@@ -410,14 +418,14 @@ public:
 	}
 	
 public:
-	VarTermClass( enum NamedRefType r, const char * p, const char * a, const char * nm ) :
-		NamedTermMixin( r, p, a, nm )
+	VarTermClass( enum NamedRefType r, const char * p, const char * d, const char * a, const char * nm ) :
+		NamedTermMixin( r, p, d, a, nm )
 	{
 	}
 	
-	VarTermClass( enum NamedRefType r, const std::string & p, const std::string & a, const FacetSet * fs, const std::string & nm ) :
-		NamedTermMixin( r, p, a, nm ),
-		facets_data( fs )
+	VarTermClass( enum NamedRefType r, const std::string & p, const std::string & d, const std::string & a, /*const FacetSet * fs,*/ const std::string & nm ) :
+		NamedTermMixin( r, p, d, a, nm )
+		//facets_data( fs )
 	{	
 	}
 	
@@ -576,9 +584,10 @@ public:
 
 //-- from ---------------------------------------------------------------
 
-class ImportTermClass : public NoChildrenTermMixin {
+/*class ImportTermClass : public NoChildrenTermMixin {
 private:
 	const FacetSet * 	match_tags;
+	
 public:
 	const std::string	from;
 	const std::string	alias;
@@ -610,7 +619,7 @@ public:
 	}
 	
 	virtual ~ImportTermClass() {}
-};
+};*/
 
 //------------------------------------------------------------------------------
 

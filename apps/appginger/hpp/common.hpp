@@ -47,7 +47,8 @@ typedef Ref * SysCall( Ref * pc, MachineClass * );
 #define	ToChars( x ) 	( ( char * )( x ) )
 #define ToSysCall( x ) 	( (SysCall *)( x ) )
 
-#define STANDARD_LIBRARY	"ginger.common"
+#define STANDARD_LIBRARY_PACKAGE	"ginger.library"
+#define INTERACTIVE_PACKAGE			"ginger.interactive"
 
 #endif
 

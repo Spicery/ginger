@@ -16,7 +16,7 @@ CC=@CXX@
 CXXFLAGS=-DEXEC_DIR='$(EXEC_DIR)' -g -I../hpp -I/usr/local/boost_1_43_0 -Wall -Wnon-virtual-dtor # -Weffc++
 CFLAGS=-Wmissing-prototypes 
 
-OBJS=sax.o mishap.o facet.o
+OBJS=sax.o mishap.o facet.o database.o fileutils.o
 
 all: libgng.a
 

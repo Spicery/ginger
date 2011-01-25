@@ -29,22 +29,22 @@
 namespace Ginger {
 using namespace std;
 
-Mishap & Mishap::culprit( const std::string reason, const std::string arg ) {
+Problem & Problem::culprit( const std::string reason, const std::string arg ) {
 	this->culprits.push_back( pair< const string, const string >( reason, arg ) );
 	return *this;
 }
 
-Mishap & Mishap::culprit( const char * reason, const std::string arg ) {
+Problem & Problem::culprit( const char * reason, const std::string arg ) {
 	this->culprits.push_back( pair< const string, const string >( reason, arg ) );
 	return *this;
 }
 
-Mishap & Mishap::culprit( const char * reason, const char * arg ) {
+Problem & Problem::culprit( const char * reason, const char * arg ) {
 	this->culprits.push_back( pair< const string, const string >( reason, arg ) );
 	return *this;
 }
 
-Mishap & Mishap::culprit( const std::string reason, const long N ) {
+Problem & Problem::culprit( const std::string reason, const long N ) {
 	std::ostringstream s;
 	s << N;
 	const std::string result( s.str() );
@@ -52,13 +52,13 @@ Mishap & Mishap::culprit( const std::string reason, const long N ) {
 	return *this;
 }
 
-Mishap & Mishap::culprit( const std::string arg ) {
+Problem & Problem::culprit( const std::string arg ) {
 	this->culprits.push_back( std::pair< const string, const string >( "Argument", arg ) );
 	return *this;
 }
 
-void Mishap::report() {
-	cerr << "MISHAP: " << this->message << endl;
+void Problem::report() {
+	cerr << "Problem: " << this->message << endl;
 	for ( 	
 		vector< pair< string, string > >::iterator it = this->culprits.begin();
 		it != this->culprits.end();
@@ -68,8 +68,8 @@ void Mishap::report() {
 	}
 }
 
-void Mishap::gnxReport() {
-	cout << "<mishap message=\"" << this->message << "\">";
+void Problem::gnxReport() {
+	cout << "<Problem message=\"" << this->message << "\">";
 	for ( 	
 		vector< pair< string, string > >::iterator it = this->culprits.begin();
 		it != this->culprits.end();
@@ -77,20 +77,20 @@ void Mishap::gnxReport() {
 	) {
 		cout << "<culprit name=\"" << it->first << "\" value=\"" << it->second << "\" />";
 	}
-	cout << "</mishap>" << endl;
+	cout << "</Problem>" << endl;
 	
 }
 
-std::string Mishap::getMessage() {
+std::string Problem::getMessage() {
 	return this->message;
 }
 
-std::pair< std::string, std::string > & Mishap::getCulprit( int n ) {
+std::pair< std::string, std::string > & Problem::getCulprit( int n ) {
 	return this->culprits[ n ];
 }
 
-int Mishap::getCount() {
+int Problem::getCount() {
 	return this->culprits.size();
 }
 
-}
+} // namespace Ginger

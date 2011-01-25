@@ -27,30 +27,57 @@
 
 namespace Ginger {
 
-//	Abstract
-class Mishap {
-private:
+class Problem : public std::exception {
+protected:
 	std::string message;
 	std::vector< std::pair< std::string, std::string > > culprits;
 
+protected:	
+	void setMessage( const std::string & msg ) { this->message = msg; }
+	Problem & culprit( const char * reason, const std::string arg );
+	Problem & culprit( const char * reason, const char * arg );
+	Problem & culprit( const std::string reason, const std::string arg );
+	Problem & culprit( const std::string arg );
+	Problem & culprit( const std::string reason, const long N );
+	
 public:
-	Mishap & culprit( const std::string reason, const std::string arg );
-	Mishap & culprit( const char * reason, const std::string arg );
-	Mishap & culprit( const char * reason, const char * arg );
-	Mishap & culprit( const std::string arg );
-	Mishap & culprit( const std::string reason, const long N );
 	void report();
 	void gnxReport();
 	std::string getMessage();
 	std::pair< std::string, std::string > & getCulprit( int n );
 	int getCount();
 	
-public:
-	Mishap( const std::string & msg ) : message( msg ), culprits() {}
-	virtual ~Mishap() {}
+protected:
+	Problem( const std::string & msg ) : message( msg ), culprits() {}
+	virtual ~Problem() throw() {}
 };
 
-}
+
+//	Abstract
+class Mishap : public Problem {
+public:
+	Mishap & culprit( const std::string reason, const std::string arg ) { this->Problem::culprit( reason, arg ); return *this; }
+	Mishap & culprit( const std::string arg ) { this->Problem::culprit( arg ); return *this; }
+	Mishap & culprit( const std::string arg, const long N ) { this->Problem::culprit( arg, N ); return *this; }
+	
+public:
+	Mishap( const std::string & msg ) : Problem( msg ) {}
+	virtual ~Mishap() throw() {}
+};
+
+class SystemError : public Problem {
+public:
+	SystemError & culprit( const std::string reason, const std::string arg ) { this->Problem::culprit( reason, arg ); return *this; }
+	SystemError & culprit( const std::string arg ) { this->Problem::culprit( arg ); return *this; }
+	SystemError & culprit( const std::string arg, const long N ) { this->Problem::culprit( arg, N ); return *this; }
+	
+public:
+	SystemError( const std::string & msg ) : Problem( msg ) {}
+	SystemError() : Problem( "System Error (see log file)" ) {}
+	virtual ~SystemError()  throw() {}
+};
+
+} // namespace Ginger
 
 #endif
 

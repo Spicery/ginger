@@ -64,7 +64,7 @@ void SaxParser::eatWhiteSpace() {
 }
 
 static bool is_name_char( const char ch ) {
-	return isalnum( ch ) || ch == '-';
+	return isalnum( ch ) || ch == '-' || ch == '.';
 }
 
 void SaxParser::readName( std::string & name ) {

@@ -1,0 +1,4 @@
+<bind>
+	<var name="greeting" protected="true" tag="public"/>
+	<string value="Greetings, world!"/>
+</bind>

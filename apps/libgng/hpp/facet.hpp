@@ -16,8 +16,8 @@
     along with AppGinger.  If not, see <http://www.gnu.org/licenses/>.
 \******************************************************************************/
 
-#ifndef FACET_HPP
-#define FACET_HPP
+#ifndef GINGER_FACET_HPP
+#define GINGER_FACET_HPP
 
 #include <string>
 #include <set>

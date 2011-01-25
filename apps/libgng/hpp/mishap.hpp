@@ -17,8 +17,8 @@
 \******************************************************************************/
 
 
-#ifndef MISHAP_HPP
-#define MISHAP_HPP
+#ifndef GINGER_MISHAP_HPP
+#define GINGER_MISHAP_HPP
 
 #include <string>
 #include <vector>

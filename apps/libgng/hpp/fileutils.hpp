@@ -16,8 +16,8 @@
     along with AppGinger.  If not, see <http://www.gnu.org/licenses/>.
 \******************************************************************************/
 
-#ifndef FILE_UTILS_HPP
-#define FILE_UTILS_HPP
+#ifndef GINGER_FILE_UTILS_HPP
+#define GINGER_FILE_UTILS_HPP
 
 #include <string>
 

@@ -16,8 +16,8 @@
     along with AppGinger.  If not, see <http://www.gnu.org/licenses/>.
 \******************************************************************************/
 
-#ifndef LIB_SAX_HPP
-#define LIB_SAX_HPP
+#ifndef GINGER_SAX_HPP
+#define GINGER_SAX_HPP
 
 #include <istream>
 #include <vector>

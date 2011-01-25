@@ -16,8 +16,8 @@
     along with AppGinger.  If not, see <http://www.gnu.org/licenses/>.
 \******************************************************************************/
 
-#ifndef DATABASE_HPP
-#define DATABASE_HPP
+#ifndef GINGER_DATABASE_HPP
+#define GINGER_DATABASE_HPP
 
 #include <string>
 

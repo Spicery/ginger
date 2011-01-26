@@ -5,3 +5,4 @@ all clean:
 	$(MAKE) -C lisp2gnx $@
 	$(MAKE) -C fetchgnx $@
 	$(MAKE) -C file2gnx $@
+	$(MAKE) -C simplifygnx $@

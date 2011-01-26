@@ -1,0 +1,12 @@
+all:
+	$(MAKE) -C cpp $@
+	
+dox:
+	doxygen Doxyfile
+
+clean:
+	$(MAKE) -C cpp $@
+	$(MAKE) -C unittest $@
+
+check:
+	$(MAKE) -C unittest $@

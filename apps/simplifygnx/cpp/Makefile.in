@@ -1,0 +1,36 @@
+# EPREFIX should be bound to PREFIX by default. This appears to be a lie.
+# As a consequence we override EPREFIX entirely. Probably incorrect but not
+# that interesting.
+prefix=@prefix@
+exec_prefix=@prefix@
+datarootdir=@datarootdir@
+PACKAGE_TARNAME=@PACKAGE_TARNAME@
+INSTALL_BIN=@bindir@
+INSTALL_LIB=@datarootdir@/@PACKAGE_TARNAME@
+INSTALL_DOC=@docdir@
+
+#LICENSE_FILE="$(INSTALL_LIB)/LICENSE.txt"
+#LICENSE_FILE="$(INSTALL_LIB)/LICENSE.txt"
+
+
+CC=@CXX@
+
+CXXFLAGS=-DINSTALL_BIN='"$(INSTALL_BIN)"' -DINSTALL_LIB='"$(INSTALL_LIB)"' -g -I../hpp -I../../libgng/hpp -Wall -Wnon-virtual-dtor
+CFLAGS=-Wmissing-prototypes 
+
+OBJS= simplifygnx.o
+
+all: simplifygnx
+
+# $@ is make shorthand for the target.
+# $@ is make shorthand for the dependencies
+simplifygnx: $(OBJS)
+	@CXX@ $(CXXFLAGS) $(BOOST_CPPFLAGS) -o $@ $^ ../../libgng/cpp/libgng.a
+	
+clean:
+	rm -f *.o
+	rm -f simplifygnx
+	rm -f *.a
+
+#	Nothing needs doing.
+check:

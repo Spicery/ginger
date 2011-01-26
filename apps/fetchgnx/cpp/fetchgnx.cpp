@@ -24,21 +24,9 @@
 	project. It can
 	
 		-	Fetch the GNX to initialise a project.
+		-	Resolve a variable reference in package A to a definition in package B
 		-	Fetch the GNX for a definition in the project.
 		
-	Optionally it will also recursively fetch definitions that are referenced
-	by a definition, which will improve the initial load time.
-<pre>
-    fetchgnx --prj <PATH> <OPTIONS>
-</pre>
-
-	OPTIONS
-	-	--prj <URL>, sets the location of the origin project
-	-	--prj1 <URL>, first load for the project 
-	-	--pkg <name>, sets a package as the context
-	-	--pkg1 <name>, first load for the package
-	-	--load, generates the initialisation for current package
-	-	--def <name>, generates the GNX for the named definition of the current package
  */ 
  
 #define FETCHGNX "fetchgnx"

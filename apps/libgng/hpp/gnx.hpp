@@ -44,7 +44,7 @@ public:
 
 class Gnx {
 private: 
-	const std::string element_name;
+	std::string element_name;
 	std::vector< shared< Gnx > > children;
 	std::map< std::string, std::string > attributes;
 	
@@ -52,12 +52,16 @@ public:
 	const std::string & attribute( const std::string & key ) const;
 	bool hasAttribute( const std::string & key ) const;
 	shared< Gnx > child( int n ) const;
-	const std::string & name() const;
+	int size() const;
+	std::string & name();
 
 public:
+	void clearAttributes();
 	void putAttribute( const std::string & key, const std::string & value );
 	void putAttributeMap( std::map< std::string, std::string > & attrs );
 	void addChild( shared< Gnx > child );
+	void popFrontChild();
+	void flattenChild( int n );
 	
 public:
 	void render( std::ostream & out );

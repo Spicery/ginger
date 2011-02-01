@@ -425,6 +425,50 @@ public:
 	virtual ~Absolute() {}
 };
 
+class SysFold : public Ginger::GnxVisitor {
+public:
+	bool again;
+
+public:
+	void startVisit( Ginger::Gnx & element ) {
+		const string & x = element.name();
+		if ( x == "sysapp" ) {
+			for ( int i = 0; i < element.size(); i++ ) {
+				if ( element.child( i )->name() == "seq" ) {
+					element.flattenChild( i );
+					i -= 1;
+				}
+			}
+		}
+	}
+
+	void endVisit( Ginger::Gnx & element ) {
+		const string & x = element.name();
+		if ( x == "id" ) {
+			if ( element.hasAttribute( "def.pkg" ) && element.attribute( "def.pkg" ) == "ginger.library" ) {
+				const string name( element.attribute( "name" ) );
+				element.clearAttributes();
+				element.putAttribute( "name", name );
+				element.name() = "sysfn";
+			}
+		} else if ( x == "app" ) {
+			if ( element.size() == 2 && element.child( 0 )->name() == "sysfn" ) {
+				const string name( element.child( 0 )->attribute( "name" ) );
+				element.name() = "sysapp";
+				element.clearAttributes();
+				element.putAttribute( "name", name );
+				element.popFrontChild();
+				this->again = true;	
+			}
+		}
+	}
+
+public:
+	SysFold() : again( false ) {}
+	virtual ~SysFold() {}
+};
+
+
 void Main::run() {
 	Ginger::GnxReader reader;
 	shared< Ginger::Gnx > g( reader.readGnx() );
@@ -432,6 +476,12 @@ void Main::run() {
 	//	We should walk the tree looking for: VAR & ID elements.
 	Absolute a( this->project_folders, this->package );
 	g->visit( a );
+	
+	for (;;) {
+		SysFold s;
+		g->visit( s );
+		if ( not s.again ) break;
+	}
 	
 	g->render();
 	cout << endl;

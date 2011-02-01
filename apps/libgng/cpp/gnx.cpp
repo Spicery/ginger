@@ -144,9 +144,29 @@ shared< Gnx > GnxReader::readGnx() {
 GnxVisitor::~GnxVisitor() {
 }
 
-const string & Gnx::name() const {
+string & Gnx::name() {
 	return this->element_name;
 }
+
+void Gnx::clearAttributes() {
+	this->attributes.clear();
+}
+
+int Gnx::size() const {
+	return this->children.size();
+}
+
+void Gnx::popFrontChild() {
+	this->children.erase( this->children.begin() );
+}
+
+void Gnx::flattenChild( int n ) {
+	vector< shared< Gnx > > kids = this->children[ n ]->children;
+	vector< shared< Gnx > > ::iterator child = this->children.begin() + n;
+	vector< shared< Gnx > > ::iterator after_child = this->children.erase( child );
+	this->children.insert( after_child, kids.begin(), kids.end() );
+}
+
 
 void Gnx::visit( GnxVisitor & v ) {
 	v.startVisit( *this );

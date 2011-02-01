@@ -15,7 +15,7 @@ INSTALL_DOC=${datarootdir}/doc/${PACKAGE_TARNAME}
 
 CC=g++
 
-CXXFLAGS=-DINSTALL_BIN='"$(INSTALL_BIN)"' -DINSTALL_LIB='"$(INSTALL_LIB)"' -g -I../hpp -I../../libgng/hpp -Wall -Wnon-virtual-dtor
+CXXFLAGS=-DINSTALL_BIN='"$(INSTALL_BIN)"' -DINSTALL_LIB='"$(INSTALL_LIB)"' -g -I../hpp -I../../libgng/hpp  -I/opt/local/include -L/opt/local/lib -Wall -Wnon-virtual-dtor
 CFLAGS=-Wmissing-prototypes 
 
 OBJS= simplifygnx.o

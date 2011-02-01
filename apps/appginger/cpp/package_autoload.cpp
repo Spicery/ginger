@@ -183,7 +183,7 @@ Ident OrdinaryPackage::unqualifiedAutoload( const std::string & c ) {
 
 	ResolveHandler resolve;
 	Ginger::SaxParser parser( prog, resolve );
-	parser.read();
+	parser.readElement();
 	
 	//resolve.report();
 	

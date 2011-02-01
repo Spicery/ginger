@@ -33,7 +33,6 @@ protected:
 	std::vector< std::pair< std::string, std::string > > culprits;
 
 protected:	
-	void setMessage( const std::string & msg ) { this->message = msg; }
 	Problem & culprit( const char * reason, const std::string arg );
 	Problem & culprit( const char * reason, const char * arg );
 	Problem & culprit( const std::string reason, const std::string arg );
@@ -41,6 +40,7 @@ protected:
 	Problem & culprit( const std::string reason, const long N );
 	
 public:
+	void setMessage( const std::string & msg ) { this->message = msg; }
 	void report();
 	void gnxReport();
 	std::string getMessage();

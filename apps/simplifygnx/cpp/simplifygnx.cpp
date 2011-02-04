@@ -25,7 +25,7 @@ to it as a stream.
 	
 --absolute : replace all qualified/unqualified references to global
 	variables with absolute references to their package of origin (i.e.
-	defining package). 
+	defining package). Marks variables as globally/locally scoped.
 
 --arity : performs a basic arity analysis, tagging expressions with
 	their proven arity and flagging bindings and system calls as safe.
@@ -156,11 +156,11 @@ extern char * optarg;
 static struct option long_options[] =
     {
 		{ "absolute",		no_argument,			0, '1' },
-		{ ARITY,			no_argument,			0, '2' },
+		{ "arity",			no_argument,			0, '2' },
         { "lifetime", 		no_argument,			0, '3' },
         { "lift",			no_argument,			0, '4' },
         { "sysapp",			no_argument,			0, '5' },
-        { TAILCALL,		no_argument,			0, '6' },
+        { "tailcall",		no_argument,			0, '6' },
 		{ "projectfolder",	required_argument,		0, 'f' },
         { "help",			optional_argument,		0, 'H' },
         { "license",        optional_argument,      0, 'L' },
@@ -405,33 +405,6 @@ std::string resolveQualified(
 	return resolve.defPkgName();
 }
 
-struct VarInfo {
-	const string *	name;
-	bool 			is_protected;
-	bool			is_local;
-	
-	bool isGlobal() {
-		return not this->is_local;
-	}
-	
-	bool isLocal() {
-		return this->is_local;
-	}
-	
-	VarInfo() :
-		name( NULL ),
-		is_protected( false )
-	{
-	}
-	
-	VarInfo( const string * name, bool is_protected, bool is_local ) : 
-		name( name ),
-		is_protected( is_protected ),
-		is_local( is_local )
-	{
-	}
-};
-
 /*
 
 //	Template for a Tree-walking Transformation
@@ -571,6 +544,37 @@ public:
 	virtual ~TailCall() {}
 };
 
+struct VarInfo {
+	const string *	name;
+	size_t				dec_level;
+	bool 			is_protected;
+	bool			is_local;
+	
+	bool isGlobal() {
+		return not this->is_local;
+	}
+	
+	bool isLocal() {
+		return this->is_local;
+	}
+	
+	VarInfo() :
+		name( NULL ),
+		is_protected( false )
+	{
+	}
+	
+	VarInfo( const string * name, size_t dec_level, bool is_protected, bool is_local ) : 
+		name( name ),
+		dec_level( dec_level ),
+		is_protected( is_protected ),
+		is_local( is_local )
+	{
+	}
+};
+
+
+
 /*
 	This pass does the following tasks. 
 	
@@ -617,6 +621,9 @@ private:
 			++it
 		) {
 			if ( name == *(it->name) ) {
+				if ( it->dec_level != this->vars.size() ) {
+					cout << "We have detected an outer declaration: " << name << endl;
+				}
 				return &*it;
 			}
 		}
@@ -669,7 +676,7 @@ public:
 			} else {
 				element.putAttribute( "scope", "local" );
 			}
-			this->vars.push_back( VarInfo( &name, is_protected, not is_global ) );
+			this->vars.push_back( VarInfo( &name, this->vars.size(), is_protected, not is_global ) );
 		} else if ( x == "fn" || x == "block" || x == "for" ) {
 			this->scopes.push_back( this->vars.size() );
 		}
@@ -764,34 +771,40 @@ public:
 
 void Main::run() {
 	Ginger::GnxReader reader;
-	shared< Ginger::Gnx > g( reader.readGnx() );
 	
-	if ( absolute_processing ) {
-		Absolute a( this->project_folders, this->package );
-		g->visit( a );
-	}
-
-	if ( sysapp_processing ) {	
-		for (;;) {
-			SysFold s;
-			g->visit( s );
-			if ( not s.again ) break;
+	for (;;) {
+	
+		shared< Ginger::Gnx > g( reader.readGnx() );
+		if ( not g ) break;
+	
+		if ( absolute_processing ) {
+			Absolute a( this->project_folders, this->package );
+			g->visit( a );
 		}
-	}
 	
-	if ( tailcall_processing ) {
-		g->orFlags( TAIL_CALL_MASK );
-		TailCall tc;
-		g->visit( tc );
+		if ( sysapp_processing ) {	
+			for (;;) {
+				SysFold s;
+				g->visit( s );
+				if ( not s.again ) break;
+			}
+		}
+		
+		if ( tailcall_processing ) {
+			g->orFlags( TAIL_CALL_MASK );
+			TailCall tc;
+			g->visit( tc );
+		}
+		
+		if ( arity_processing ) {
+			ArityMarker a;
+			g->visit( a );
+		}
+		
+		g->render();
+		cout << endl;
+		
 	}
-	
-	if ( arity_processing ) {
-		ArityMarker a;
-		g->visit( a );
-	}
-	
-	g->render();
-	cout << endl;
 }
 
 int main( int argc, char ** argv, char **envp ) {

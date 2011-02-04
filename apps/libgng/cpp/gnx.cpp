@@ -58,11 +58,19 @@ void Gnx::addChild( shared< Gnx > child ) {
 	this->children.push_back( child );
 }
 	
-Gnx::Gnx( const string & name ) : element_name( name ) {
+Gnx::Gnx( const string & name ) : element_name( name ), flags( 0 ) {
 }
 
 shared< Gnx > Gnx::child( int n ) const {
 	return this->children.at( n );
+}
+
+shared< Gnx > Gnx::lastChild() const {
+	return this->children.back();
+}
+
+shared< Gnx > Gnx::firstChild() const {
+	return this->children.front();
 }
 
 const std::string & Gnx::attribute( const std::string & key ) const {
@@ -148,8 +156,12 @@ string & Gnx::name() {
 	return this->element_name;
 }
 
-void Gnx::clearAttributes() {
+void Gnx::clearAllAttributes() {
 	this->attributes.clear();
+}
+
+void Gnx::clearAttribute( const string & key ) {
+	this->attributes.erase( key );
 }
 
 int Gnx::size() const {
@@ -178,6 +190,26 @@ void Gnx::visit( GnxVisitor & v ) {
 		(*it)->visit( v );
 	}
 	v.endVisit( *this );
+}
+
+bool Gnx::hasAnyFlags( int mask ) {
+	return this->flags && mask != 0;
+}
+
+bool Gnx::hasAllFlags( int mask ) {
+	return this->flags && mask == mask;
+}
+
+void Gnx::clearFlags( int mask ) {
+	this->flags &= ~mask;
+}
+
+void Gnx::orFlags( int mask ) {
+	this->flags |= mask;
+}
+
+void Gnx::andFlags( int mask ) {
+	this->flags &= mask;
 }
 
 

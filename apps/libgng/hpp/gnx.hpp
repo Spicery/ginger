@@ -47,16 +47,25 @@ private:
 	std::string element_name;
 	std::vector< shared< Gnx > > children;
 	std::map< std::string, std::string > attributes;
+	int flags;
 	
 public:
 	const std::string & attribute( const std::string & key ) const;
 	bool hasAttribute( const std::string & key ) const;
 	shared< Gnx > child( int n ) const;
+	shared< Gnx > firstChild() const;
+	shared< Gnx > lastChild() const;
 	int size() const;
 	std::string & name();
+	bool hasAnyFlags( int mask );
+	bool hasAllFlags( int mask );
+	void clearFlags( int mask );
+	void orFlags( int mask );
+	void andFlags( int mask );
 
 public:
-	void clearAttributes();
+	void clearAttribute( const std::string & key );
+	void clearAllAttributes();
 	void putAttribute( const std::string & key, const std::string & value );
 	void putAttributeMap( std::map< std::string, std::string > & attrs );
 	void addChild( shared< Gnx > child );

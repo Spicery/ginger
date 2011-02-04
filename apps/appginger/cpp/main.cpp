@@ -231,6 +231,8 @@ static void printStdInfo() {
 		cout << "    <sysfn ";
 		printAttr( "name", it->first );
 		printAttr( "docstring", ( it->second.docstring != NULL ? it->second.docstring : "-" ) );
+		printAttr( "in", it->second.in_arity.toString() );
+		printAttr( "out", it->second.out_arity.toString() );
 		cout << "/>" << endl;
 	}
 	cout << "  </std>" << endl;

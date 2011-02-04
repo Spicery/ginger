@@ -25,7 +25,7 @@ to it as a stream.
 	
 --absolute : replace all qualified/unqualified references to global
 	variables with absolute references to their package of origin (i.e.
-	defining package).
+	defining package). 
 
 --arity : performs a basic arity analysis, tagging expressions with
 	their proven arity and flagging bindings and system calls as safe.
@@ -40,12 +40,21 @@ to it as a stream.
 	local variables are strictly local. It will use partApply to explicitly
 	replace closures, invent extra local variables, passing in explicitly
 	created reference objects.
+
+--sysapp: Replace references to system calls with <sysfn>
+	and <sysapp>. It relies on absolute references and will typically
+	be combined with --absolute.
+	
+--tailcall: Marks tail-calls.
  */ 
  
-#define SIMPLIFYGNX "simplifygnx"
+#define SIMPLIFYGNX 	"simplifygnx"
+#define ARITY 			"arity"
+#define TAILCALL		"tailcall"
 
 #include <iostream>
 #include <fstream>
+#include <sstream>
 
 #include <getopt.h>
 #include <syslog.h>
@@ -58,10 +67,53 @@ to it as a stream.
 #include "sax.hpp"
 #include "gnx.hpp"
 #include "command.hpp"
+#include "metainfo.hpp"
 
 using namespace std;
 
 #define FETCHGNX ( INSTALL_BIN "/fetchgnx" )
+
+/*class Arity {
+private:
+	int 	count;
+	bool 	more;
+	
+public:
+	void add( const Arity & that ) {
+		this->count += that.count;
+		this->more = this->more || that.more;
+	}
+	
+	void unify( const Arity & that ) {
+		this->count = min( this->count, that.count );
+		this->more = this->more || that.more || ( this->count != that.count );
+	}
+	
+	const string toString() {
+		stringstream in;
+		in << ( this->count );
+		if ( this->more ) {
+			in << '+';
+		}
+		return in.str();
+	}
+	
+public:
+	Arity( int n ) :
+		count( n ),
+		more( false )
+	{
+	}
+	
+	Arity( const string & s ) {
+		int n;
+		stringstream out( s );
+		out >> n;
+		this->count = n;
+		this->more = s.find( '+' ) != string::npos;
+	}
+};*/
+
 
 class Main {
 private:
@@ -72,6 +124,10 @@ public:
 	bool arity_processing;
 	bool lifetime_processing;
 	bool lift_processing;
+	bool sysapp_processing;
+	bool tailcall_processing;
+
+public:
 	std::string package;
 
 public:
@@ -85,7 +141,9 @@ public:
 		absolute_processing( false ),
 		arity_processing( false ),
 		lifetime_processing( false ),
-		lift_processing( false )
+		lift_processing( false ),
+		sysapp_processing( false ),
+		tailcall_processing( false )
 	{}
 };
 
@@ -98,9 +156,11 @@ extern char * optarg;
 static struct option long_options[] =
     {
 		{ "absolute",		no_argument,			0, '1' },
-		{ "arity",			no_argument,			0, '2' },
+		{ ARITY,			no_argument,			0, '2' },
         { "lifetime", 		no_argument,			0, '3' },
         { "lift",			no_argument,			0, '4' },
+        { "sysapp",			no_argument,			0, '5' },
+        { TAILCALL,		no_argument,			0, '6' },
 		{ "projectfolder",	required_argument,		0, 'f' },
         { "help",			optional_argument,		0, 'H' },
         { "license",        optional_argument,      0, 'L' },
@@ -112,7 +172,7 @@ static struct option long_options[] =
 void Main::parseArgs( int argc, char **argv, char **envp ) {
     for(;;) {
         int option_index = 0;
-        int c = getopt_long( argc, argv, "1234f:H::L::p:V", long_options, &option_index );
+        int c = getopt_long( argc, argv, "123456f:H::L::p:V", long_options, &option_index );
         if ( c == -1 ) break;
         switch ( c ) {
         	case '1': {
@@ -130,7 +190,15 @@ void Main::parseArgs( int argc, char **argv, char **envp ) {
         	case '4': {
         		this->lift_processing = true;
         		break;
-        	}        
+        	}
+        	case '5': {
+        		this->sysapp_processing = true;
+        		break;
+        	}
+        	case '6': {
+        		this->tailcall_processing = true;
+        		break;
+        	}
         	case 'f' : {
         		this->project_folders.push_back( optarg );
         		break;
@@ -337,28 +405,222 @@ std::string resolveQualified(
 	return resolve.defPkgName();
 }
 
+struct VarInfo {
+	const string *	name;
+	bool 			is_protected;
+	bool			is_local;
+	
+	bool isGlobal() {
+		return not this->is_local;
+	}
+	
+	bool isLocal() {
+		return this->is_local;
+	}
+	
+	VarInfo() :
+		name( NULL ),
+		is_protected( false )
+	{
+	}
+	
+	VarInfo( const string * name, bool is_protected, bool is_local ) : 
+		name( name ),
+		is_protected( is_protected ),
+		is_local( is_local )
+	{
+	}
+};
+
+/*
+
+//	Template for a Tree-walking Transformation
+class TransformOfSomeKind : public Ginger::GnxVisitor {
+public:
+	void startVisit( Ginger::Gnx & element ) {
+	}
+	
+	void endVisit( Ginger::Gnx & element ) {
+	}
+	
+public:
+	virtual ~TransformOfSomeKind() {}
+};
+*/
+
+
+class ArityMarker : public Ginger::GnxVisitor {
+public:
+	void startVisit( Ginger::Gnx & element ) {
+		element.clearAttribute( ARITY );	//	Throw away any previous marking.
+	}
+	
+	void endVisit( Ginger::Gnx & element ) {
+		if ( element.hasAttribute( "value" ) ) {
+			element.putAttribute( ARITY, "1" );
+		} else {
+			const string & x = element.name();
+			if ( x == "id" || x == "fn" ) {
+				element.putAttribute( ARITY, "1" );
+			} else if ( x == "for" ) {
+				if ( element.hasAttribute( ARITY ) && element.attribute( ARITY ) == "0" ) {
+					element.putAttribute( ARITY, "0" );
+				}
+			} else if ( x == "set" || x == "bind" ) {
+				element.putAttribute( ARITY, "0" );
+			} else if ( x == "seq" ) {
+				bool all_have_arity = true;
+				for ( int i = 0; all_have_arity && i < element.size(); i++ ) {
+					all_have_arity = element.child( i )->hasAttribute( ARITY );
+				}
+				if ( all_have_arity ) {
+					Ginger::Arity sofar( 0 );
+					for ( int i = 0; i < element.size(); i++ ) {
+						Ginger::Arity kid( element.child( i )->attribute( ARITY ) );
+						sofar = sofar.add( kid );
+					}
+					element.putAttribute( ARITY, sofar.toString() );
+				}
+			} else if ( x == "if" ) {
+				bool has_odd_kids = ( element.size() % 2 ) == 1;
+				cout << "SIZE = " << element.size() << ", %2 = " << ( element.size() % 2 ) << endl;
+				bool all_have_arity = true;
+				for ( int i = 1; all_have_arity && i < element.size(); i += 2 ) {
+					//cout << "CHECK " << i << endl;
+					all_have_arity = element.child( i )->hasAttribute( ARITY );
+				}
+				if ( all_have_arity && has_odd_kids ) {
+					//cout << "CHECK LAST" << endl;
+					all_have_arity = element.lastChild()->hasAttribute( ARITY );
+				}
+				cout << "All? = " << all_have_arity << endl;
+				if ( all_have_arity ) {
+					const int N = element.size();
+					if ( N == 0 ) {
+						element.putAttribute( ARITY, "0" );
+					} else if ( N == 1 ) {
+						element.putAttribute( ARITY, element.child( 0 )->attribute( ARITY ) );
+					} else {
+						Ginger::Arity sofar( element.child( 1 )->attribute( ARITY ) );
+						for ( int i = 3; i < element.size(); i += 2 ) {
+							//cout << "CALC " << i << endl;
+							Ginger::Arity kid( element.child( i )->attribute( ARITY ) );
+							sofar = sofar.unify( kid );
+						}
+						if ( has_odd_kids ) {
+							//cout << "CALC LAST" << endl;
+							sofar = sofar.unify( Ginger::Arity( element.lastChild()->attribute( ARITY ) ) );
+						}
+						element.putAttribute( ARITY, sofar.toString() );
+					}
+					
+				}
+			} else if ( x == "sysapp" ) {
+				element.putAttribute( ARITY, Ginger::outArity( element.attribute( "name" ) ).toString() );
+			}
+		} 
+	}
+	
+public:
+	virtual ~ArityMarker() {}
+};
+
+
+
+#define TAIL_CALL_MASK 		0x1
+
+class TailCall : public Ginger::GnxVisitor {
+
+public:
+	void startVisit( Ginger::Gnx & element ) {
+		const string & x = element.name();
+		element.clearAttribute( TAILCALL );	//	Throw away any previous marking.
+		if ( x == "fn" ) {
+			//cout << "Marking last child of fn" << endl;
+			element.lastChild()->orFlags( TAIL_CALL_MASK );
+		} else if ( element.hasAllFlags( TAIL_CALL_MASK ) ) {
+			if ( x == "app" ) {
+				element.putAttribute( TAILCALL, "true" );
+			} else if ( x == "if" ) {
+				bool has_odd_kids = ( x.size() % 2 ) == 1;
+				for ( int i = 1; i < element.size(); i += 2 ) {
+					element.child( i )->orFlags( TAIL_CALL_MASK );
+				}
+				if ( has_odd_kids ) {
+					element.lastChild()->orFlags( TAIL_CALL_MASK );
+				}
+			} else if ( x == "seq" || x == "block" ) {
+				if ( x.size() >= 1 ) {
+					element.lastChild()->orFlags( TAIL_CALL_MASK );
+				}
+			} 
+			//	else don't push the marker down. 
+			//	This includes <for>, <sysapp>, any constant,
+			//	<id>, <set>
+		}
+	}
+	
+	void endVisit( Ginger::Gnx & element ) {
+		element.clearFlags( TAIL_CALL_MASK );
+	}
+	
+	
+public:
+	TailCall() {}
+
+	virtual ~TailCall() {}
+};
+
+/*
+	This pass does the following tasks. 
+	
+	[1] It finds all references global variables and find their
+		originating package. It caches this using the def.pkg attribute.
+	
+	[1] It classifies variables into global and local and caches this
+		using the scope attribute. 
+		
+	[3] It propagates the protected="true" maplet into all <id> elements.
+	
+*/
 class Absolute : public Ginger::GnxVisitor {
 private:
 	vector< string > & project_folders;
 	std::string package;
 	
 	vector< int > scopes;
-	vector< const string * > vars;
+	vector< VarInfo > vars;
 	
 private:
 	bool isGlobalScope() {
 		return this->scopes.empty();
 	}
 	
-	bool isLocalId( const std::string & name ) {
+	bool isLocalId( const std::string & name, VarInfo ** var_info ) {
 		for ( 
-			vector< const string * >::iterator it = this->vars.begin();
+			vector< VarInfo >::iterator it = this->vars.begin();
 			it != this->vars.end();
 			++it
 		) {
-			if ( name == **it ) return true;
+			if ( name == *(it->name) ) {
+				*var_info = &*it;
+				return it->is_local;
+			}
 		}
 		return false;
+	}
+	
+	VarInfo * findId( const std::string & name ) {
+		for ( 
+			vector< VarInfo >::iterator it = this->vars.begin();
+			it != this->vars.end();
+			++it
+		) {
+			if ( name == *(it->name) ) {
+				return &*it;
+			}
+		}
+		return NULL;
 	}
 	
 public:
@@ -366,20 +628,21 @@ public:
 		const string & x = element.name();
 		if ( x == "id" ) {
 			const string & name = element.attribute( "name" );
-			if ( !this->isLocalId( name ) ) {
+			VarInfo * v = this->findId( name );
+			if ( v == NULL || v->isGlobal() ) {
 				element.putAttribute( "scope", "global" );
 				if ( not element.hasAttribute( "def.pkg" ) ) {
 					const string & enc_pkg = element.hasAttribute( "enc.pkg" ) ? element.attribute( "enc.pkg" ) : this->package;
 					if ( element.hasAttribute( "alias" ) ) {
 						const string & alias = element.attribute( "alias" );
-						cout << "RESOLVE (QUALIFIED): name=" << name << ", alias=" << alias << ", enc.pkg=" << enc_pkg << endl;
+						//cout << "RESOLVE (QUALIFIED): name=" << name << ", alias=" << alias << ", enc.pkg=" << enc_pkg << endl;
 						const string def_pkg( resolveQualified( this->project_folders, enc_pkg, alias, name ) );
-						cout << "   def = " << def_pkg << endl;
+						//cout << "   def = " << def_pkg << endl;
 						element.putAttribute( "def.pkg", def_pkg );
 					} else {
-						cout << "RESOLVE (UNQUALIFIED): name=" << name << ", enc.pkg=" << enc_pkg << endl;
+						//cout << "RESOLVE (UNQUALIFIED): name=" << name << ", enc.pkg=" << enc_pkg << endl;
 						const string def_pkg( resolveUnqualified( this->project_folders, enc_pkg, name ) );
-						cout << "   def = " << def_pkg << endl;
+						//cout << "   def = " << def_pkg << endl;
 						element.putAttribute( "def.pkg", def_pkg );						
 					}
 					cout << "ID: " << name << endl;
@@ -387,21 +650,26 @@ public:
 			} else {
 				element.putAttribute( "scope", "local" );
 			}
+			if ( v != NULL && v->is_protected ) {
+				element.putAttribute( "protected", "true" );
+			}
 		} else if ( x == "var" ) {
-			if ( this->isGlobalScope() ) {
+			const string & name = element.attribute( "name" );
+			const bool is_protected = element.hasAttribute( "protected" ) && element.attribute( "protected" ) == "true";
+			//cout << "NAME " << name << " is protected? " << element.hasAttribute( "protected" ) << endl;
+			const bool is_global = this->isGlobalScope();
+			if ( is_global ) {
 				element.putAttribute( "scope", "global" );
 				if ( not element.hasAttribute( "def.pkg" ) ) {
-					const string & name = element.attribute( "name" );
 					const string & enc_pkg = element.hasAttribute( "enc.pkg" ) ? element.attribute( "enc.pkg" ) : this->package;
-					cout << "RESOLVE (UNQUALIFIED): name=" << name << ", enc.pkg=" << enc_pkg << endl;
-					cout << "VAR: " << name << endl;
+					//cout << "RESOLVE (UNQUALIFIED): name=" << name << ", enc.pkg=" << enc_pkg << endl;
+					//cout << "VAR: " << name << endl;
 					element.putAttribute( "def.pkg", enc_pkg );						
 				}
 			} else {
 				element.putAttribute( "scope", "local" );
-				const string & name = element.attribute( "name" );
-				this->vars.push_back( &name );
 			}
+			this->vars.push_back( VarInfo( &name, is_protected, not is_global ) );
 		} else if ( x == "fn" || x == "block" || x == "for" ) {
 			this->scopes.push_back( this->vars.size() );
 		}
@@ -425,6 +693,31 @@ public:
 	virtual ~Absolute() {}
 };
 
+/*
+	This pass does the following tasks.
+	
+	[1] It finds all references to the ginger.library, which are guaranteed
+		to be built-in functions. It replaces these references with 
+		<sysfn> constants.
+		
+		If this transformation is successful, it does not need to force a
+		further pass. The action (#2) it needs to combine with happens on the
+		way up.
+		
+	[2] It replaces all <app><sysfn .../>...</app> forms with the especially
+		efficient <sysapp>...</sysapp> form. 
+		
+		If this transformation is successful it triggers a further pass 
+		to permit flattening of nested seqs.
+		
+	[3] It flattens any superfluous nested uses of <seq>. That includes
+		the body of <sysapp> elements. The purpose of this is to normalise
+		the code to simplify pattern recognition. 
+		
+		This transformation is forced on the way down the tree, which is 
+		arbitrary.
+		
+*/
 class SysFold : public Ginger::GnxVisitor {
 public:
 	bool again;
@@ -432,7 +725,7 @@ public:
 public:
 	void startVisit( Ginger::Gnx & element ) {
 		const string & x = element.name();
-		if ( x == "sysapp" ) {
+		if ( x == "sysapp" || x == "seq" ) {
 			for ( int i = 0; i < element.size(); i++ ) {
 				if ( element.child( i )->name() == "seq" ) {
 					element.flattenChild( i );
@@ -447,7 +740,7 @@ public:
 		if ( x == "id" ) {
 			if ( element.hasAttribute( "def.pkg" ) && element.attribute( "def.pkg" ) == "ginger.library" ) {
 				const string name( element.attribute( "name" ) );
-				element.clearAttributes();
+				element.clearAllAttributes();
 				element.putAttribute( "name", name );
 				element.name() = "sysfn";
 			}
@@ -455,7 +748,7 @@ public:
 			if ( element.size() == 2 && element.child( 0 )->name() == "sysfn" ) {
 				const string name( element.child( 0 )->attribute( "name" ) );
 				element.name() = "sysapp";
-				element.clearAttributes();
+				element.clearAllAttributes();
 				element.putAttribute( "name", name );
 				element.popFrontChild();
 				this->again = true;	
@@ -473,14 +766,28 @@ void Main::run() {
 	Ginger::GnxReader reader;
 	shared< Ginger::Gnx > g( reader.readGnx() );
 	
-	//	We should walk the tree looking for: VAR & ID elements.
-	Absolute a( this->project_folders, this->package );
-	g->visit( a );
+	if ( absolute_processing ) {
+		Absolute a( this->project_folders, this->package );
+		g->visit( a );
+	}
+
+	if ( sysapp_processing ) {	
+		for (;;) {
+			SysFold s;
+			g->visit( s );
+			if ( not s.again ) break;
+		}
+	}
 	
-	for (;;) {
-		SysFold s;
-		g->visit( s );
-		if ( not s.again ) break;
+	if ( tailcall_processing ) {
+		g->orFlags( TAIL_CALL_MASK );
+		TailCall tc;
+		g->visit( tc );
+	}
+	
+	if ( arity_processing ) {
+		ArityMarker a;
+		g->visit( a );
 	}
 	
 	g->render();

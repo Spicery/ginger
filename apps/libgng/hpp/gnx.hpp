@@ -51,10 +51,12 @@ private:
 	
 public:
 	const std::string & attribute( const std::string & key ) const;
+	const std::string & attribute( const std::string & key, const std::string & def ) const;
 	bool hasAttribute( const std::string & key ) const;
-	shared< Gnx > child( int n ) const;
-	shared< Gnx > firstChild() const;
-	shared< Gnx > lastChild() const;
+	bool hasAttribute( const std::string & key, const std::string & eqval ) const;
+	shared< Gnx > & child( int n );
+	shared< Gnx > & firstChild();
+	shared< Gnx > & lastChild();
 	int size() const;
 	std::string & name();
 	bool hasAnyFlags( int mask );
@@ -67,10 +69,12 @@ public:
 	void clearAttribute( const std::string & key );
 	void clearAllAttributes();
 	void putAttribute( const std::string & key, const std::string & value );
+	void putAttribute( const std::string & key, const int & value );
 	void putAttributeMap( std::map< std::string, std::string > & attrs );
 	void addChild( shared< Gnx > child );
 	void popFrontChild();
 	void flattenChild( int n );
+	void copyFrom( const Gnx & g );
 	
 public:
 	void render( std::ostream & out );

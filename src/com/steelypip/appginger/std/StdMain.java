@@ -27,7 +27,6 @@ import org.xml.sax.SAXException;
 
 public class StdMain {
 
-
 	static File appginger() {
 		File dir = new File( System.getProperty( "user.dir" ) );
 		dir = new File( dir, "apps" );
@@ -44,6 +43,14 @@ public class StdMain {
 		dir = new File( dir, "ginger.library" );
 		dir = new File( dir, "public.auto" );
 		return dir;		
+	}
+	
+	static File meta_info_folder() {
+		File dir = new File( System.getProperty( "user.dir" ) );
+		dir = new File( dir, "apps" );
+		dir = new File( dir, "automatic" );
+		dir = new File( dir, "metainfo" );
+		return dir;
 	}
 	
 	/**
@@ -100,7 +107,48 @@ public class StdMain {
         //doc.getDocumentElement().normalize();
         //System.out.println( "Root element " + doc.getDocumentElement().getNodeName() );
         
-        XPathFactory factory = XPathFactory.newInstance();
+        generateGingerLibrary( doc );
+        generateMetaInfoTable( doc );
+	}
+	
+	private static void generateMetaInfoTable( Document doc ) throws XPathExpressionException, IOException {
+		XPathFactory factory = XPathFactory.newInstance();
+        XPath xpath = factory.newXPath();
+        XPathExpression expr = xpath.compile( "//appginger/std/sysfn" );
+        NodeList nodes = (NodeList)expr.evaluate(doc, XPathConstants.NODESET);
+
+        final File dir = meta_info_folder();
+        dir.mkdirs();
+       	final File f = new File( dir, "metainfo.cpp.inc" );
+       	final PrintWriter pw = new PrintWriter( new FileWriter( f ) );
+
+       	
+       	
+        for ( int i = 0; i < nodes.getLength(); i++ ) {
+        	final Element e = (Element)nodes.item( i );
+        	final String name = e.getAttribute( "name" );
+        	
+        	final String in = e.getAttribute( "in" );
+        	final int in_count = Integer.parseInt( in.replace( "+", "" ) );
+        	final boolean in_more = in.indexOf( '+' ) != -1;
+        	final String out = e.getAttribute( "out" );
+        	final int out_count = Integer.parseInt( out.replace( "+", "" ) );
+        	final boolean out_more = out.indexOf( '+' ) != -1;
+       	
+        	
+        	
+        	pw.format( 
+        		"MAPLET( \"%s\", MetaInfo( Arity( %s, %s ), Arity( %s, %s ) ) ),\n", 
+        		name, in_count, in_more, out_count, out_more
+        	);
+            
+        }
+    	pw.close();
+	}
+
+	private static void generateGingerLibrary( Document doc )
+			throws XPathExpressionException, IOException {
+		XPathFactory factory = XPathFactory.newInstance();
         XPath xpath = factory.newXPath();
         XPathExpression expr = xpath.compile( "//appginger/std/sysfn" );
         NodeList nodes = (NodeList)expr.evaluate(doc, XPathConstants.NODESET);

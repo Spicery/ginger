@@ -99,7 +99,8 @@ static struct option long_options[] =
         { "help",			optional_argument,		0, 'H' },
         { "initial",        no_argument,            0, 'I' },
         { "license",        optional_argument,      0, 'L' },
-        { "projectfolder",  required_argument,      0, 'f' },
+        { "folder",  required_argument,      		0, 'f' },
+        { "project",  required_argument,      		0, 'j' },
         { "package",        required_argument,      0, 'p' },
 		{ "resolve",        no_argument,            0, 'R' },
         { "qualified",		required_argument,		0, 'q' },
@@ -114,7 +115,7 @@ void Main::parseArgs( int argc, char **argv, char **envp ) {
 	bool qualified = false;
     for(;;) {
         int option_index = 0;
-        int c = getopt_long( argc, argv, "RDH:IVL:f:p:a:v:", long_options, &option_index );
+        int c = getopt_long( argc, argv, "RDH::IVL::j:f:p:a:v:", long_options, &option_index );
         if ( c == -1 ) break;
         switch ( c ) {
             case 'a' : {
@@ -126,6 +127,7 @@ void Main::parseArgs( int argc, char **argv, char **envp ) {
             	task = FETCH_DEFINITION;
             	break;
             }
+            case 'j':
             case 'f': {
 				this->project_folders.push_back( optarg );
                 break;
@@ -135,16 +137,17 @@ void Main::parseArgs( int argc, char **argv, char **envp ) {
                 //  files and this will simply go there. Or run a web
                 //  browser pointed there.
                 if ( optarg == NULL ) {
-                    printf( "Usage:  fetchgnx MODE_OPTION -s DATABASE -j PROJECT -p PACKAGE [-a ALIAS] -v VARIABLE\n" );
+                    printf( "Usage:  fetchgnx MODE_OPTION -j PROJECT -p PACKAGE [-a ALIAS] -v VARIABLE\n" );
                     printf( "MODE OPTIONS\n" );
-                    printf( "-R, --resolve         find the orgin package::variable of a reference" );
-                    printf( "-D, --definition      find the definition of a package::variable" );
+                    printf( "-R, --resolve         find the origin package::variable of a reference\n" );
+                    printf( "-D, --definition      find the definition of a package::variable\n" );
                     printf( "-H, --help[=TOPIC]    help info on optional topic (see --help=help)\n" );
                     printf( "-I, --initial         fetch initialisation code for a package\n" );
                     printf( "-V, --version         print out version information and exit\n" );
                     printf( "-L, --license[=PART]  print out license information and exit (see --help=license)\n" );
                     printf( "ARGUMENTS FOR -R AND -D\n" );
                     printf( "-j, --project=PATH    defines project folder, there may be more than one\n" );
+                    printf( "-f, --folder=PATH     alternative to --project option\n" );
                     printf( "-p, --package=NAME    sets the package name\n" );
                     printf( "-a, --alias=NAME      sets the alias name, optional\n" );
                     printf( "-v, --variable=NAME   sets the variable name\n" );

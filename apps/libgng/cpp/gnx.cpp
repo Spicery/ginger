@@ -17,6 +17,7 @@
 \******************************************************************************/
 
 #include <iostream>
+#include <sstream>
 
 #include "gnx.hpp"
 #include "sax.hpp"
@@ -50,6 +51,12 @@ void Gnx::putAttribute( const std::string & key, const std::string & value ) {
 	this->attributes[ key ] = value;
 }
 
+void Gnx::putAttribute( const std::string & key, const int & value ) {
+	stringstream s;
+	s << value;
+	this->attributes[ key ] = s.str();
+}
+
 void Gnx::putAttributeMap( std::map< std::string, std::string > & attrs ) {
 	this->attributes.insert( attrs.begin(), attrs.end() );
 }
@@ -58,18 +65,15 @@ void Gnx::addChild( shared< Gnx > child ) {
 	this->children.push_back( child );
 }
 	
-Gnx::Gnx( const string & name ) : element_name( name ), flags( 0 ) {
-}
-
-shared< Gnx > Gnx::child( int n ) const {
+shared< Gnx > & Gnx::child( int n ) {
 	return this->children.at( n );
 }
 
-shared< Gnx > Gnx::lastChild() const {
+shared< Gnx > & Gnx::lastChild() {
 	return this->children.back();
 }
 
-shared< Gnx > Gnx::firstChild() const {
+shared< Gnx > & Gnx::firstChild() {
 	return this->children.front();
 }
 
@@ -77,8 +81,18 @@ const std::string & Gnx::attribute( const std::string & key ) const {
 	return this->attributes.at( key );
 }
 
+const std::string & Gnx::attribute( const std::string & key, const std::string & def  ) const {
+	std::map< std::string, std::string >::const_iterator it = this->attributes.find( key );
+	return it != this->attributes.end() ? it->second : def;
+}
+
 bool Gnx::hasAttribute( const std::string & key ) const {
 	return this->attributes.find( key ) != this->attributes.end();
+}
+
+bool Gnx::hasAttribute( const std::string & key, const std::string & eqval ) const {
+	std::map< std::string, std::string >::const_iterator it = this->attributes.find( key );
+	return it != this->attributes.end() && eqval == it->second;
 }
 
 void Gnx::render( std::ostream & out ) {
@@ -212,5 +226,17 @@ void Gnx::andFlags( int mask ) {
 	this->flags &= mask;
 }
 
+void Gnx::copyFrom( const Gnx & g ) {
+	this->element_name = g.element_name;
+	this->attributes = g.attributes;
+	this->children = g.children;
+	this->flags = g.flags;
+}
+
+Gnx::Gnx( const string & name ) : 
+	element_name( name ), 
+	flags( 0 ) 
+{
+}
 
 } 	//	namespace

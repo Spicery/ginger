@@ -33,6 +33,10 @@ distclean: clean
 	rm -f apps/lisp2gnx/Makefile
 	rm -f apps/lisp2gnx/lsp/Makefile
 	rm -f apps/lisp2gnx/functest/Makefile
+	rm -f apps/tidygnx/Makefile
+	rm -f apps/tidygnx/cpp/Makefile
+	rm -f apps/gson2gnx/Makefile
+	rm -f apps/gson2gnx/cpp/Makefile
 	rm -f projects/Makefile
 	rm -f config.h
 	rm -f config.status
@@ -55,6 +59,8 @@ snapshot:
 	cp -r apps/headers build/appginger/apps/
 	cp -r apps/automatic build/appginger/apps/
 	cp -r apps/common2gnx build/appginger/apps/
+	cp -r apps/gson2gnx build/appginger/apps/
+	cp -r apps/tidygnx build/appginger/apps/
 	mkdir build/appginger/classes
 	mkdir build/appginger/docs
 	cp -r docs/syntax/*.txt build/appginger/docs/
@@ -80,7 +86,9 @@ EXECUTABLES=\
 	apps/file2gnx/cpp/file2gnx \
 	apps/common2gnx/cpp/common2gnx \
 	apps/lisp2gnx/lsp/lisp2gnx \
-	apps/simplifygnx/cpp/simplifygnx
+	apps/simplifygnx/cpp/simplifygnx \
+	apps/tidygnx/cpp/tidygnx \
+	apps/gson2gnx/cpp/gson2gnx
 
 install: all
 	echo Installing binaries into $(INSTALL_BIN)

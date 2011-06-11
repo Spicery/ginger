@@ -2,8 +2,8 @@ all: standard_library
 
 standard_library:
 	cp -r standard_library.template standard_library
-	( mkdir -p ../classes; cd ../src; find . -name '*.java' | xargs $(JAVA_HOME)/bin/javac -d ../classes/ )
-	( cd .. ; $(JAVA_HOME)/bin/java -cp classes/ com.steelypip.appginger.std.StdMain )
+	( mkdir -p ../classes; cd ../src; find . -name '*.java' | xargs javac -d ../classes/ )
+	( cd .. ; java -cp classes/ com.steelypip.appginger.std.StdMain )
 
 clean:
 	/bin/rm -rf standard_library ../classes

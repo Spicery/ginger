@@ -19,6 +19,7 @@
 #ifndef GINGER_GNX_HPP
 #define GINGER_GNX_HPP
 
+#include <iostream>
 #include <ostream>
 #include <string>
 #include <vector>
@@ -33,6 +34,7 @@ extern void gnxRenderText( std::ostream & out, const std::string & string );
 extern void gnxRenderText( const std::string & string );
 
 class Gnx;
+typedef shared< Gnx > SharedGnx;
 
 class GnxVisitor {
 public:
@@ -43,6 +45,7 @@ public:
 };
 
 class Gnx {
+friend class PrettyPrint;
 private: 
 	std::string element_name;
 	std::vector< shared< Gnx > > children;
@@ -73,16 +76,32 @@ public:
 	void putAttributeMap( std::map< std::string, std::string > & attrs );
 	void addChild( shared< Gnx > child );
 	void popFrontChild();
+	void popLastChild();
 	void flattenChild( int n );
 	void copyFrom( const Gnx & g );
 	
 public:
 	void render( std::ostream & out );
 	void render();
+	void prettyPrint( std::ostream & out );
+	void prettyPrint();
 	void visit( GnxVisitor & v );
 	
 public:
 	Gnx( const std::string & name );
+};
+
+class GnxBuilder {
+private:
+	std::vector< shared< Gnx > > stack;
+	shared< Gnx > answer;
+public:
+	GnxBuilder();
+	void start( const std::string & name );
+	void put( const std::string & key, const std::string & value );
+	void add( shared< Gnx > & child );
+	void end();
+	shared< Gnx > & build();
 };
 
 class GnxReader {

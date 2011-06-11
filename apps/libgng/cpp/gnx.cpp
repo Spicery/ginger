@@ -95,6 +95,62 @@ bool Gnx::hasAttribute( const std::string & key, const std::string & eqval ) con
 	return it != this->attributes.end() && eqval == it->second;
 }
 
+class PrettyPrint {
+private:
+	std::ostream & out;
+	
+public:
+	PrettyPrint( std::ostream & out ) : out( out ) {}
+
+private:
+	void indent( int level ) {
+		for ( int n = 0; n < level; n++ ) {
+			out << ' ';
+		}
+	}
+	
+public:
+	void pretty( Gnx & gnx, int level ) {
+		indent( level );
+		out << "<" << gnx.name();	
+		for ( 
+			std::map< std::string, std::string >::iterator it = gnx.attributes.begin();
+			it != gnx.attributes.end();
+			++it
+		) {
+			out << " " << it->first << "=\"";
+			gnxRenderText( out, it->second );
+			out << "\"";
+		}
+		if ( gnx.children.empty() ) {
+			out << "/>" << endl;
+		} else {
+			out << ">" << endl;
+			for ( 
+				std::vector< shared< Gnx > >::iterator it = gnx.children.begin();
+				it != gnx.children.end();
+				++it
+			) {
+				Gnx & g = **it;
+				this->pretty( g, level + 1 );
+			}
+			indent( level );
+			out << "</" << gnx.name() << ">" << endl;
+		}	
+	}
+};
+
+void Gnx::prettyPrint( std::ostream & out ) {
+	PrettyPrint pp( out );
+	pp.pretty( *this, 0 );
+}
+
+void Gnx::prettyPrint() {
+	this->prettyPrint( cout );
+}
+
+
+
 void Gnx::render( std::ostream & out ) {
 	out << "<" << this->element_name;
 	for ( 
@@ -186,6 +242,10 @@ void Gnx::popFrontChild() {
 	this->children.erase( this->children.begin() );
 }
 
+void Gnx::popLastChild() {
+	this->children.erase( this->children.end() - 1 );
+}
+
 void Gnx::flattenChild( int n ) {
 	vector< shared< Gnx > > kids = this->children[ n ]->children;
 	vector< shared< Gnx > > ::iterator child = this->children.begin() + n;
@@ -238,5 +298,43 @@ Gnx::Gnx( const string & name ) :
 	flags( 0 ) 
 {
 }
+
+GnxBuilder::GnxBuilder() :
+	answer( shared< Gnx >() )
+{
+}
+
+void GnxBuilder::start( const std::string & name ) {
+	this->stack.push_back( shared< Gnx >( new Gnx( name ) ) );
+}
+
+void GnxBuilder::put( const std::string & key, const std::string & value ) {
+	this->stack.back()->putAttribute( key, value );
+}
+
+void GnxBuilder::end() {
+	shared< Gnx > prev( this->stack.back() );
+	this->stack.pop_back();
+	if ( this->stack.empty() ) {
+		this->answer = prev;
+	} else {
+		this->stack.back()->addChild( prev );
+	}
+}
+
+shared< Gnx > & GnxBuilder::build() {
+	if ( !this->stack.empty() ) {
+		shared< Gnx > & in_progress = this->stack.back();
+		this->answer = in_progress->lastChild();
+		in_progress->popLastChild();
+	}
+	return this->answer;
+}
+
+void GnxBuilder::add( shared< Gnx > & child ) {
+	this->stack.back()->addChild( child );
+}
+
+
 
 } 	//	namespace

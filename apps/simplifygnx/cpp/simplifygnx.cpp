@@ -909,9 +909,9 @@ public:
 			const string & uid = *it;
 			Ginger::Gnx * v = this->dec_outer[ uid ];
 			if ( v == NULL ) throw;
-			cout << "SO FAR: ";
-			v->render();
-			cout << endl;
+			//cout << "SO FAR: ";
+			/*v->render();
+			cout << endl;*/
 			shared< Ginger::Gnx > var( new Ginger::Gnx( tag ) );
 			var->putAttribute( "name", v->attribute( "name" ) );
 			var->putAttribute( UID, uid );
@@ -924,7 +924,7 @@ public:
 	void endVisit( Ginger::Gnx & element ) {
 		const string & x = element.name();
 		if ( x == "fn" ) {
-			cout << "Capture set:" << element.attribute( "name", "[anon]" ) << ":";
+			/*cout << "Capture set:" << element.attribute( "name", "[anon]" ) << ":";
 			for ( 
 				set< string >::iterator it = this->capture_sets.back().begin();
 				it != this->capture_sets.back().end();
@@ -932,7 +932,7 @@ public:
 			) {
 				cout << " " << *it << endl;
 			}
-			cout << endl;
+			cout << endl;*/
 			
 			if ( not this->capture_sets.back().empty() ) {
 				
@@ -944,8 +944,8 @@ public:
 					newarg->addChild( arg );
 					newarg->addChild( this->makeLocals( "var" ) );
 					
-					newarg->render();
-					cout << endl;
+					/*newarg->render();
+					cout << endl;*/
 					
 					element.child( 0 ) = newarg;
 				}
@@ -974,9 +974,15 @@ public:
 
 class AddDeref : public Ginger::GnxVisitor {
 public:
+	
 	void startVisit( Ginger::Gnx & element ) {
 	}
 	
+	//	This has to be an endVisit. If it is a startVisit, it might
+	//	generate an infinite loop, generating and infinitely deep
+	//	chain of derefs. It could be a start visit IF we added/removed
+	//	a flag attribute.
+	//
 	void endVisit( Ginger::Gnx & element ) {
 		const string & x = element.name();
 		if ( element.hasAttribute( IS_OUTER, "true" ) && element.hasAttribute( PROTECTED, "false" ) && ( x == "var" || x == "id" ) ) {
@@ -985,6 +991,10 @@ public:
 			shared< Ginger::Gnx > d( new Ginger::Gnx( "deref" ) );
 			d->addChild( t );
 			element.copyFrom( *d );
+		} else if ( x == "bind" && element.child(0).name() == "deref" ) {
+			//	<bind><deref><var></deref>EXPR</bind> 
+			//	<bind><var><makeref>EXPR</makeref></bind>
+			GOT HERE
 		}
 	}
 	

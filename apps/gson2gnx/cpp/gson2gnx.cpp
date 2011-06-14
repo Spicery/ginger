@@ -92,7 +92,7 @@ public:
 				string v( lhs->attribute( "name" ) );
 				this->builder.start( "maplet" );
 				this->builder.start( "constant" );
-				this->builder.put( "type", "string" );
+				this->builder.put( "type", "symbol" );
 				this->builder.put( "value", v );
 				this->builder.end();
 				this->readExpr();

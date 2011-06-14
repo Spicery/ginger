@@ -1,6 +1,7 @@
 #ifndef ITEM_FACTORY_HPP
 #define ITEM_FACTORY_HPP
 
+#include <iostream>s
 #include <string>
 
 #include <stdio.h>
@@ -8,9 +9,6 @@
 #include "item.hpp"
 
 class ItemFactoryClass {
-public:
-	Item				spare;
-
 public:
 	FILE				*file;
     bool            	peeked;
@@ -37,11 +35,7 @@ public:
 		item( new ItemClass() )
 	{
 	}
-	
-	~ItemFactoryClass() {
-		delete this->spare;
-	}
-	
+		
 };
 
 typedef class ItemFactoryClass *ItemFactory;

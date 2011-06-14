@@ -91,7 +91,7 @@ Item ItemFactoryClass::read() {
 			this->item->tok_type = tokty_number;
             this->item->name = this->text;
 		}
-    } else if ( ch == '"' ) {
+    } else if ( ch == '"' || ch == '\'' || ch == '`' ) {
 		//
 		//	Strings and Character sequences
 		//
@@ -101,7 +101,7 @@ Item ItemFactoryClass::read() {
 				ch = getc( this->file );
 				if ( ch == '\\' ) {
 					ch = '\\';
-				} else if ( ch == '"' ) {
+				} else if ( ch == '"' || ch == '\'' || ch == '`' ) {
 					//	nothing
 				} else if ( ch == 'n' ) {
 					ch = '\n';
@@ -120,7 +120,7 @@ Item ItemFactoryClass::read() {
         if ( ch == '\n' ) {
             throw "unterminated string (%s)";
         }
-		this->item->tok_type = tokty_string;
+		this->item->tok_type = ch == '\''  ? tokty_charseq : ch == '`' ? tokty_symbol : tokty_string;
 		this->item->name = this->text;
     } else if ( isalpha( ch ) || ch == '_' ) {
 		//	

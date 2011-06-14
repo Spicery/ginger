@@ -168,10 +168,25 @@ public:
 		//cout << "Token type " << tok_type_name( item->tok_type ) << endl;
 		if ( item->isLiteralConstant() ) {
 			this->itemf->drop();
-			builder.start( "constant" );
-			builder.put( "type", item->asType() );
-			builder.put( "value", item->asValue() );
-			builder.end();
+			if ( item->isCharSeqValue() ) {
+				builder.start( "seq" );
+				const string v( item->asValue() );
+				for ( string::const_iterator it = v.begin(); it != v.end(); ++it ) {
+					builder.start( "constant" );
+					builder.put( "type", "char" );
+					string s;
+					const char ch = *it;
+					s.push_back( ch );
+					builder.put( "value", s );
+					builder.end();
+				}
+				builder.end();
+			} else {
+				builder.start( "constant" );
+				builder.put( "type", item->asType() );
+				builder.put( "value", item->asValue() );
+				builder.end();
+			}
 		} else if ( item->isName() ) {
 			this->readElementOrName();
 		} else if ( this->tryReadSign( '[' ) ) {
@@ -223,13 +238,18 @@ int main( int argc, char **argv, char **envp ) {
 		}
 	
 		GnxBuilder builder;
-		ItemFactoryClass itemf( in );
-		GsonReader reader( builder, &itemf );
-		reader.readExpr();
+		{
+			ItemFactoryClass itemf( in );
+			GsonReader reader( builder, &itemf );
+			reader.readExpr();
+		}
 		
-		shared< Gnx > gnx( builder.build() );
-		gnx->render();
-		cout << endl;		
+		{
+			shared< Gnx > gnx( builder.build() );
+			gnx->render();
+		}
+		cout << endl;	
+		//cout << "OK" << endl;
 	} catch ( Mishap m ) {
 		m.report();
 		return EXIT_FAILURE;

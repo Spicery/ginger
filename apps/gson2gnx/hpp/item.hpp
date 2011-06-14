@@ -1,6 +1,7 @@
 #ifndef ITEM_HPP
 #define ITEM_HPP
 
+#include <iostream>
 #include <string>
 
 #include "toktype.hpp"
@@ -23,11 +24,16 @@ public:
 		tok_type( tokty_eof )
 	{
 	}
+	
+	~ItemClass() {
+		std::cout << "Deleting Item" << std::endl;
+	}
 
 public:
 	//bool item_is_neg_num();
 	//int item_int();
 	bool isLiteralConstant();
+	bool isCharSeqValue();
 	bool isName();
 	bool isStringValue();
 	bool isIntegerValue();

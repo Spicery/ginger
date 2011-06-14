@@ -13,6 +13,8 @@ using namespace Ginger;
 
 bool ItemClass::isLiteralConstant() {
 	switch ( this->tok_type ) {
+		case tokty_symbol :
+		case tokty_charseq :
 		case tokty_number : 
 		case tokty_string : 
 			return true;
@@ -27,6 +29,10 @@ bool ItemClass::isName() {
 
 bool ItemClass::isStringValue() {
 	return this->tok_type == tokty_string;
+}
+
+bool ItemClass::isCharSeqValue() {
+	return this->tok_type == tokty_charseq;
 }
 
 bool ItemClass::isIntegerValue() {
@@ -56,6 +62,7 @@ const std::string ItemClass::asValue() {
 
 const std::string ItemClass::asType() {
 	switch ( this->tok_type ) {
+		case tokty_symbol : return "symbol";
 		case tokty_number : return "int";
 		case tokty_string : return "string";
 		default: throw Mishap( "Unreachable" );

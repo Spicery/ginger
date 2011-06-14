@@ -14,7 +14,9 @@ typedef enum TokType {
 //	tokty_obrace,
 //	tokty_obracket,
 //	tokty_oparen,
-	tokty_string
+	tokty_string,
+	tokty_charseq,
+	tokty_symbol
 } TokType;
 
 const char *tok_type_name( TokType fnc );

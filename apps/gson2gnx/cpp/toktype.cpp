@@ -16,6 +16,8 @@ const char *tok_type_name( TokType fnc ) {
 		case tokty_equals : return "equals";*/
 		case tokty_number : return "number";
 		case tokty_string : return "string";
+		case tokty_charseq: return "charseq";
+		case tokty_symbol: return "symbol";
 		default: return "?";
     }
     throw "Unreachable";

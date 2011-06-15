@@ -22,9 +22,9 @@
 #include <string>
 #include <list>
 
-//#include "database.hpp"
+#include "gngversion.hpp"
 
-#define VERSION "0.7.0"
+#define VERSION APPGINGER_VERSION
 
 class MachineClass;
 class Package;

@@ -84,6 +84,8 @@ public:
 	void render( std::ostream & out );
 	void render();
 	void prettyPrint( std::ostream & out );
+	void prettyPrint( std::ostream & out, const std::string & indentation );
+	void prettyPrint( const std::string & indentation );
 	void prettyPrint();
 	void visit( GnxVisitor & v );
 	

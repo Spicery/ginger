@@ -104,14 +104,18 @@ bool Gnx::hasAttribute( const std::string & key, const std::string & eqval ) con
 class PrettyPrint {
 private:
 	std::ostream & out;
+	std::string indentation;
 	
 public:
-	PrettyPrint( std::ostream & out ) : out( out ) {}
+	PrettyPrint( std::ostream & out, const std::string & ind ) : 
+		out( out ), 
+		indentation( ind ) 
+	{}
 
 private:
 	void indent( int level ) {
 		for ( int n = 0; n < level; n++ ) {
-			out << ' ';
+			out << this->indentation;
 		}
 	}
 	
@@ -146,16 +150,23 @@ public:
 	}
 };
 
-void Gnx::prettyPrint( std::ostream & out ) {
-	PrettyPrint pp( out );
+void Gnx::prettyPrint( std::ostream & out, const std::string & indentation ) {
+	PrettyPrint pp( out, indentation );
 	pp.pretty( *this, 0 );
 }
 
 void Gnx::prettyPrint() {
-	this->prettyPrint( cout );
+	string indentation( "    " );
+	this->prettyPrint( cout, indentation );
 }
 
+void Gnx::prettyPrint( const std::string & indentation ) {
+	this->prettyPrint( cout, indentation );
+}
 
+void Gnx::prettyPrint( std::ostream & out ) {
+	this->prettyPrint( out, "    " );
+}
 
 void Gnx::render( std::ostream & out ) {
 	out << "<" << this->element_name;

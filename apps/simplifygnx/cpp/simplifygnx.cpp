@@ -991,10 +991,10 @@ public:
 			shared< Ginger::Gnx > d( new Ginger::Gnx( "deref" ) );
 			d->addChild( t );
 			element.copyFrom( *d );
-		/*} else if ( x == "bind" && element.child(0).name() == "deref" ) {
+		} else if ( x == "bind" && element.child(0).name() == "deref" ) {
 			//	<bind><deref><var></deref>EXPR</bind> 
 			//	<bind><var><makeref>EXPR</makeref></bind>
-			GOT HERE*/
+			GOT HERE
 		}
 	}
 	

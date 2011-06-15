@@ -77,12 +77,12 @@ static struct option long_options[] =
         { "cgi",            no_argument,            0, 'C' },
         { "interactive",    no_argument,            0, 'I' },
         { "batch",          no_argument,            0, 'B' },
-        { "help",           optional_argument,      0, 'h' },
+        { "help",           optional_argument,      0, 'H' },
         { "metainfo",		no_argument,			0, 'M' },
         { "machine",        required_argument,      0, 'm' },
-        { "version",        no_argument,            0, 'v' },
+        { "version",        no_argument,            0, 'V' },
         { "debug",          required_argument,      0, 'd' },
-        { "license",        optional_argument,      0, 'l' },
+        { "license",        optional_argument,      0, 'L' },
         { "project",		required_argument,		0, 'j' },
         { 0, 0, 0, 0 }
     };
@@ -309,7 +309,7 @@ int Main::run( int argc, char **argv, char **envp ) {
 	bool meta_info_needed = false;
     for(;;) {
         int option_index = 0;
-        int c = getopt_long( argc, argv, "CIBMhm:vd:lf:", long_options, &option_index );
+        int c = getopt_long( argc, argv, "CIBMH::m:Vd:L::f:", long_options, &option_index );
         if ( c == -1 ) break;
         switch ( c ) {
             case 'C': {
@@ -338,7 +338,7 @@ int Main::run( int argc, char **argv, char **envp ) {
                 }
                 break;
             }
-            case 'h': {
+            case 'H': {
                 //  Eventually we will have a "home" for our auxillary
                 //  files and this will simply go there. Or run a web
                 //  browser pointed there.
@@ -366,11 +366,11 @@ int Main::run( int argc, char **argv, char **envp ) {
                 //printf( "Machine #%d (%s)\n", machine_impl_num, optarg );
                 break;
             }
-            case 'v': {
+            case 'V': {
                 cout << "appginger: version " << this->context.version() << " (" << __DATE__ << " " << __TIME__ << ")" << endl;
                 return EXIT_SUCCESS;
             }
-            case 'l': {
+            case 'L': {
             	return printLicense( optarg );
             }
             case 'f': {

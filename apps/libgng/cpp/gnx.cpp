@@ -21,6 +21,7 @@
 
 #include "gnx.hpp"
 #include "sax.hpp"
+#include "mishap.hpp"
 
 
 namespace Ginger {
@@ -78,7 +79,12 @@ shared< Gnx > & Gnx::firstChild() {
 }
 
 const std::string & Gnx::attribute( const std::string & key ) const {
-	return this->attributes.at( key );
+	std::map< std::string, std::string >::const_iterator it = this->attributes.find( key );
+	if ( it != this->attributes.end() ) {
+		return it->second;
+	} else {
+		throw Mishap( "No such key" ).culprit( "Key", key );
+	}
 }
 
 const std::string & Gnx::attribute( const std::string & key, const std::string & def  ) const {

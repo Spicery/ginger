@@ -371,19 +371,20 @@ public:
 			if ( in == NULL ) throw Mishap( "Cannot open file" ).culprit( "Filename", input_file_name );
 		}
 	
-		GnxBuilder builder;
-		{
-			ItemFactoryClass itemf( in );
+		ItemFactoryClass itemf( in );
+		for (;;) {
+			GnxBuilder builder;
+			
+			if ( itemf.peek()->isAtEnd() ) break;
+			
 			GsonReader reader( builder, &itemf );
 			reader.readExpr();
-		}
-		
-		{
+	
 			shared< Gnx > gnx( builder.build() );
 			gnx->render();
+	
+			cout << endl;	
 		}
-		cout << endl;	
-		//cout << "OK" << endl;
 	}
 };
 

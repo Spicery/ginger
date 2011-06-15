@@ -57,6 +57,10 @@ bool ItemClass::isIntegerValue() {
 	return this->tok_type == tokty_number;
 }
 
+bool ItemClass::isAtEnd() {
+	return this->tok_type == tokty_eof;
+}
+
 bool ItemClass::isOpenList() {
 	return this->isSign( '[' );
 }

@@ -40,6 +40,5 @@ public:
 
 typedef class ItemFactoryClass *ItemFactory;
 
-
 #endif
 

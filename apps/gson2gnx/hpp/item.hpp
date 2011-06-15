@@ -41,6 +41,7 @@ public:
 	bool isCloseList();
 	bool isComma();
 	bool isSign( char ch );
+	bool isAtEnd();
 	char signChar();
 	const std::string asValue();
 	const std::string asType();

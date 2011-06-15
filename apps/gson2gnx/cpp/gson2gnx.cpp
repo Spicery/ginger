@@ -1,8 +1,12 @@
 #include <iostream>
 
 #include <cstdlib>
-#include "mishap.hpp"
 
+#include <fstream>
+#include <getopt.h>
+
+#include "mishap.hpp"
+#include "gngversion.hpp"
 
 #include "item_factory.hpp"
 #include "gnx.hpp"
@@ -227,14 +231,126 @@ public:
 	GsonReader( GnxBuilder & b, ItemFactory x ) : builder( b ), itemf( x ) {}
 };
 
-int main( int argc, char **argv, char **envp ) {
-	try {
+
+#define GSON2GNX "gson2gnx"
+
+extern char * optarg;
+static struct option long_options[] =
+    {
+        { "help",			optional_argument,		0, 'H' },
+        { "license",        optional_argument,      0, 'L' },
+        { "version",        no_argument,            0, 'V' },
+        { 0, 0, 0, 0 }
+    };
+
+class Main {
+private:
+	bool use_stdin;
+	string input_file_name;
+
+public:
+	string version() {
+		return "0.1";
+	}
+
+	void printGPL( const char * start, const char * end ) {
+		bool printing = false;
+		ifstream license( INSTALL_LIB "/LICENSE.TXT" );
+		std::string line;
+		while ( getline( license, line ) )  {
+			if ( !printing && ( start == NULL || line.find( start ) != string::npos ) ) {
+				printing = true;
+			} else if ( printing && end != NULL && line.find( end ) != string::npos ) {
+				printing = false;
+			}
+			if ( printing ) {
+				std::cout << line << std::endl;
+			}
+		}
+	}
+
+
+	void parseArgs( int argc, char **argv, char **envp ) {
+		this->use_stdin = true;
+		
+		for(;;) {
+			int option_index = 0;
+			int c = getopt_long( argc, argv, "H::L::V", long_options, &option_index );
+			if ( c == -1 ) break;
+			switch ( c ) {
+				case 'H': {
+					//  Eventually we will have a "home" for our auxillary
+					//  files and this will simply go there. Or run a web
+					//  browser pointed there.
+					if ( optarg == NULL ) {
+						printf( "Usage:  %s OPTIONS < GSON_IN > GNX_OUT\n", GSON2GNX );
+						printf( "OPTIONS\n" );
+						printf( "-H, --help[=TOPIC]    help info on optional topic (see --help=help)\n" );
+						printf( "-V, --version         print out version information and exit\n" );
+						printf( "-L, --license[=PART]  print out license information and exit (see --help=license)\n" );
+						printf( "\n" );
+					} else if ( std::string( optarg ) == "help" ) {
+						cout << "--help=help           this short help" << endl;
+						cout << "--help=licence        help on displaying license information" << endl;
+					} else if ( std::string( optarg ) == "license" ) {
+						cout << "Displays key sections of the GNU Public License." << endl;
+						cout << "--license=warranty    Shows warranty." << endl;
+						cout << "--license=conditions  Shows terms and conditions." << endl;
+					} else {
+						printf( "Unknown help topic %s\n", optarg );
+					}
+					exit( EXIT_SUCCESS );   //  Is that right?
+				}
+				case 'L': {
+					if ( optarg == NULL || std::string( optarg ) == std::string( "all" ) ) {
+						this->printGPL( NULL, NULL );
+					} else if ( std::string( optarg ) == std::string( "warranty" ) ) {
+						this->printGPL( "Disclaimer of Warranty.", "Limitation of Liability." );                 
+					} else if ( std::string( optarg ) == std::string( "conditions" ) ) {
+						this->printGPL( "TERMS AND CONDITIONS", "END OF TERMS AND CONDITIONS" );
+					} else {
+						std::cerr << "Unknown license option: " << optarg << std::endl;
+						exit( EXIT_FAILURE );
+					}
+					exit( EXIT_SUCCESS );   //  Is that right?              
+				}
+				case 'V': {
+					cout << GSON2GNX << ": version " << this->version() << " (" << __DATE__ << " " << __TIME__ << ") part of AppGinger version " << APPGINGER_VERSION << endl;
+					exit( EXIT_SUCCESS );   //  Is that right?
+				}
+				case '?': {
+					break;
+				}
+				default: {
+					printf( "?? getopt returned character code 0%x ??\n", static_cast< int >( c ) );
+				}
+			}
+        }
+        
+		argc -= optind;
+		argv += optind;
+		
+		if ( argc > 0 ) {
+			use_stdin = false;
+			input_file_name = argv[ argc - 1 ];
+			argc -= 1;
+			argv += 1;
+		}
+		
+		if ( argc > 0 ) {
+			throw Mishap( "Unused trailing argument" ).culprit( "Unused", argv[ argc - 1 ] );
+		}
+
+	}
+	
+public:
+	void run() {
 		FILE * in;
-		if ( argc == 2 ) {
-			in = fopen( argv[1], "r" ); 
-			if ( in == NULL ) throw Mishap( "Cannot open file" ).culprit( "Filename", argv[1] );
-		} else {
+		if ( this->use_stdin ) {
 			in = stdin;
+		} else {
+			in = fopen( input_file_name.c_str(), "r" ); 
+			if ( in == NULL ) throw Mishap( "Cannot open file" ).culprit( "Filename", input_file_name );
 		}
 	
 		GnxBuilder builder;
@@ -250,9 +366,20 @@ int main( int argc, char **argv, char **envp ) {
 		}
 		cout << endl;	
 		//cout << "OK" << endl;
-	} catch ( Mishap m ) {
-		m.report();
+	}
+};
+
+int main( int argc, char **argv, char **envp ) {
+	try {
+		Main main;
+		main.parseArgs( argc, argv, envp );
+		main.run();
+	    return EXIT_SUCCESS;
+	} catch ( Ginger::SystemError & p ) {
+		p.report();
+		return EXIT_FAILURE;
+	} catch ( Ginger::Problem & p ) {
+		p.report();
 		return EXIT_FAILURE;
 	}
-	return EXIT_SUCCESS;
 }

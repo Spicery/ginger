@@ -8,3 +8,4 @@ all clean:
 	$(MAKE) -C simplifygnx $@
 	$(MAKE) -C tidygnx $@
 	$(MAKE) -C gson2gnx $@
+	$(MAKE) -C xson2gnx $@

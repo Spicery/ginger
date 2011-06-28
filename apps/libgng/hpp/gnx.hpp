@@ -44,8 +44,45 @@ public:
 	virtual ~GnxVisitor();
 };
 
+template <class T>
+class Iterator {
+public:
+	bool hasNext();
+	T next();
+};
+
+typedef class Iterator< SharedGnx > SharedGnxIterator;
+typedef class Iterator< std::string > StringIterator;
+
+class GnxChildIterator : public Iterator< SharedGnx & > {
+private:
+	std::vector< shared< Gnx > >::iterator it;
+	std::vector< shared< Gnx > >::iterator end;
+public:
+	bool hasNext();
+	SharedGnx & next();
+public:
+	GnxChildIterator( SharedGnx gnx );
+	GnxChildIterator( Gnx & gnx );
+};
+
+typedef std::pair< const std::string, std::string > GnxEntry;
+
+class GnxEntryIterator : public Iterator< GnxEntry & > {
+private:
+	std::map< std::string, std::string >::iterator it;
+	std::map< std::string, std::string >::iterator end;
+public:
+	bool hasNext();
+	GnxEntry & next();
+public:
+	GnxEntryIterator( SharedGnx gnx );
+	GnxEntryIterator( Gnx & gnx );
+};
+
 class Gnx {
-friend class PrettyPrint;
+friend class GnxChildIterator;
+friend class GnxEntryIterator;
 private: 
 	std::string element_name;
 	std::vector< shared< Gnx > > children;
@@ -61,7 +98,9 @@ public:
 	shared< Gnx > & firstChild();
 	shared< Gnx > & lastChild();
 	int size() const;
+	bool isEmpty() const;
 	std::string & name();
+	bool hasName( const std::string & name );
 	bool hasAnyFlags( int mask );
 	bool hasAllFlags( int mask );
 	void clearFlags( int mask );
@@ -96,14 +135,16 @@ public:
 class GnxBuilder {
 private:
 	std::vector< shared< Gnx > > stack;
-	shared< Gnx > answer;
+	std::vector< shared< Gnx > > put_aside;
 public:
 	GnxBuilder();
 	void start( const std::string & name );
 	void put( const std::string & key, const std::string & value );
 	void add( shared< Gnx > & child );
 	void end();
-	shared< Gnx > & build();
+	void save();
+	void restore();
+	shared< Gnx > build();
 };
 
 class GnxReader {

@@ -1,0 +1,86 @@
+<grammar>
+	<form title="if-form">
+		<lex token="if" role="special"/>
+		<lex token="then" role="nonfix"/>
+		<lex token="elseif" role="nonfix"/>
+		<lex token="elseunless" role="nonfix"/>
+		<lex token="endif" role="nonfix"/>
+		<rule state="EXPR" on="if">
+			<element name="if">
+				<read state="EXPR"/>
+				<read state="THEN"/>
+			</element>
+		</rule>
+		<rule state="THEN" on="then">
+			<read state="EXPR"/>
+			<read state="ELSE"/>
+		</rule>
+		<rule state="ELSE" on="elseif">
+			<read state="EXPR"/>
+			<read state="THEN"/>
+		</rule>
+		<rule state="ELSE" on="elseunless">
+			<element name="not"><read state="EXPR"/></element>
+			<read state="THEN"/>
+		</rule>
+		<rule state="ELSE" on="endif">
+			<element name="seq"/>
+		</rule>
+		<rule state="ELSE" on="else">
+			<read state="EXPR"/>
+			<must.read token="endif"/>
+		</rule>
+	</form>
+	<form title="General Expression">
+		<lex token="(" role="special"/>
+		<lex token=")" role="nonfix"/>
+		<rule state="EXPR">
+			<read state="PRIMARY"/>
+			<read state="SECONDARY"/>
+		</rule>
+		<rule state="PRIMARY" on="(">
+			<if peek.role="nonfix">
+				<element name="seq"/>
+				<read state="EXPR"/>
+			</if>
+			<must.read token=")"/>
+		</rule>
+		<!-- Note we peek the open parenthesis so we can just reuse EXPR -->
+		<rule state="SECONDARY" peek="(">
+			<!-- Save the LHS to the scratchpad -->
+			<save/>
+			<element name="app">
+				<!-- Recover the LHS as the function -->
+				<restore/>
+				<read state="EXPR"/>
+			</element>
+		</rule>
+	</form>
+	<form title="id">
+		<rule state="PRIMARY" role="unreserved">
+			<element name="id">
+				<!-- We have to get access to the current token. -->
+				<put key="name" value.from="token"/>
+			</element>
+		</rule>
+	</form>
+	<form title="+">
+		<lex token="+" role="infix" precedence="1000"/>
+		<lex token="," role="infix" precedence="100"/>
+		<rule state="SECONDARY" role="infix" precedence.from="token">
+			<!-- 
+				We have to get access to the left hand side. 
+				Save it to the scratchpad.
+			-->
+			<save/> 
+			<element name="sysapp">
+				<put key="name" from="token"/>
+				<seq>
+					<!-- Grab LHS from the scratchpad -->
+					<restore/>
+					<read state="EXPR" precedence.from="token"/>
+				</seq>
+			</element>
+		</rule>
+	</form>
+</grammar>

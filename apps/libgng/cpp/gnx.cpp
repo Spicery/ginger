@@ -101,73 +101,6 @@ bool Gnx::hasAttribute( const std::string & key, const std::string & eqval ) con
 	return it != this->attributes.end() && eqval == it->second;
 }
 
-class PrettyPrint {
-private:
-	std::ostream & out;
-	std::string indentation;
-	
-public:
-	PrettyPrint( std::ostream & out, const std::string & ind ) : 
-		out( out ), 
-		indentation( ind ) 
-	{}
-
-private:
-	void indent( int level ) {
-		for ( int n = 0; n < level; n++ ) {
-			out << this->indentation;
-		}
-	}
-	
-public:
-	void pretty( Gnx & gnx, int level ) {
-		indent( level );
-		out << "<" << gnx.name();	
-		for ( 
-			std::map< std::string, std::string >::iterator it = gnx.attributes.begin();
-			it != gnx.attributes.end();
-			++it
-		) {
-			out << " " << it->first << "=\"";
-			gnxRenderText( out, it->second );
-			out << "\"";
-		}
-		if ( gnx.children.empty() ) {
-			out << "/>" << endl;
-		} else {
-			out << ">" << endl;
-			for ( 
-				std::vector< shared< Gnx > >::iterator it = gnx.children.begin();
-				it != gnx.children.end();
-				++it
-			) {
-				Gnx & g = **it;
-				this->pretty( g, level + 1 );
-			}
-			indent( level );
-			out << "</" << gnx.name() << ">" << endl;
-		}	
-	}
-};
-
-void Gnx::prettyPrint( std::ostream & out, const std::string & indentation ) {
-	PrettyPrint pp( out, indentation );
-	pp.pretty( *this, 0 );
-}
-
-void Gnx::prettyPrint() {
-	string indentation( "    " );
-	this->prettyPrint( cout, indentation );
-}
-
-void Gnx::prettyPrint( const std::string & indentation ) {
-	this->prettyPrint( cout, indentation );
-}
-
-void Gnx::prettyPrint( std::ostream & out ) {
-	this->prettyPrint( out, "    " );
-}
-
 void Gnx::render( std::ostream & out ) {
 	out << "<" << this->element_name;
 	for ( 
@@ -243,6 +176,10 @@ string & Gnx::name() {
 	return this->element_name;
 }
 
+bool Gnx::hasName( const string & name ) {
+	return this->element_name == name;
+}
+
 void Gnx::clearAllAttributes() {
 	this->attributes.clear();
 }
@@ -253,6 +190,10 @@ void Gnx::clearAttribute( const string & key ) {
 
 int Gnx::size() const {
 	return this->children.size();
+}
+
+bool Gnx::isEmpty() const {
+	return this->children.empty();
 }
 
 void Gnx::popFrontChild() {
@@ -316,9 +257,9 @@ Gnx::Gnx( const string & name ) :
 {
 }
 
-GnxBuilder::GnxBuilder() :
-	answer( shared< Gnx >() )
+GnxBuilder::GnxBuilder() 
 {
+	this->stack.push_back( shared< Gnx >( new Gnx( "dummy" ) ) );
 }
 
 void GnxBuilder::start( const std::string & name ) {
@@ -330,28 +271,147 @@ void GnxBuilder::put( const std::string & key, const std::string & value ) {
 }
 
 void GnxBuilder::end() {
+	if ( this->stack.size() <= 1 ) {
+		throw Mishap( "Too many 'ends'" );
+	}
 	shared< Gnx > prev( this->stack.back() );
 	this->stack.pop_back();
-	if ( this->stack.empty() ) {
-		this->answer = prev;
-	} else {
-		this->stack.back()->addChild( prev );
-	}
+	this->stack.back()->addChild( prev );
 }
 
-shared< Gnx > & GnxBuilder::build() {
-	if ( !this->stack.empty() ) {
-		shared< Gnx > & in_progress = this->stack.back();
-		this->answer = in_progress->lastChild();
-		in_progress->popLastChild();
+shared< Gnx > GnxBuilder::build() {
+	if ( this->stack.size() <= 0 ) {
+		throw Mishap( "Too many 'builds'" );
 	}
-	return this->answer;
+	shared< Gnx > in_progress = this->stack.back();
+	
+	if ( in_progress->isEmpty() ) {
+		throw Mishap( "Construction aborted (too many builds)" );
+	}
+	
+	shared< Gnx > answer = in_progress->lastChild();
+	in_progress->popLastChild();
+	return answer;
 }
 
 void GnxBuilder::add( shared< Gnx > & child ) {
 	this->stack.back()->addChild( child );
 }
 
+void GnxBuilder::save() {
+	this->put_aside.push_back( this->build() );
+}
 
+void GnxBuilder::restore() {
+	if ( this->put_aside.empty() ) {
+		throw Mishap( "Too many 'restores'" );
+	}
+	this->add( this->put_aside.back() );
+	this->put_aside.pop_back();
+}
+
+
+
+class PrettyPrint {
+private:
+	std::ostream & out;
+	std::string indentation;
+	
+public:
+	PrettyPrint( std::ostream & out, const std::string & ind ) : 
+		out( out ), 
+		indentation( ind ) 
+	{}
+
+private:
+	void indent( int level ) {
+		for ( int n = 0; n < level; n++ ) {
+			out << this->indentation;
+		}
+	}
+	
+public:
+	void pretty( Gnx & gnx, int level ) {
+		indent( level );
+		out << "<" << gnx.name();
+		
+		GnxEntryIterator keys( gnx );
+		while ( keys.hasNext() ) {
+			GnxEntry & it = keys.next();
+			out << " " << it.first << "=\"";
+			gnxRenderText( out, it.second );
+			out << "\"";
+		}
+		
+		if ( gnx.isEmpty() ) {
+			out << "/>" << endl;
+		} else {
+			out << ">" << endl;
+			
+			GnxChildIterator kids( gnx );
+			while ( kids.hasNext() ) {
+				SharedGnx & g = kids.next();
+				this->pretty( *g, level + 1 );
+			}
+
+			indent( level );
+			out << "</" << gnx.name() << ">" << endl;
+		}	
+	}
+};
+
+void Gnx::prettyPrint( std::ostream & out, const std::string & indentation ) {
+	PrettyPrint pp( out, indentation );
+	pp.pretty( *this, 0 );
+}
+
+void Gnx::prettyPrint() {
+	string indentation( "    " );
+	this->prettyPrint( cout, indentation );
+}
+
+void Gnx::prettyPrint( const std::string & indentation ) {
+	this->prettyPrint( cout, indentation );
+}
+
+void Gnx::prettyPrint( std::ostream & out ) {
+	this->prettyPrint( out, "    " );
+}
+
+GnxChildIterator::GnxChildIterator( SharedGnx gnx ) {
+	this->it = gnx->children.begin();
+	this->end = gnx->children.end();
+}
+
+GnxChildIterator::GnxChildIterator( Gnx & gnx ) {
+	this->it = gnx.children.begin();
+	this->end = gnx.children.end();
+}
+
+bool GnxChildIterator::hasNext() {
+	return this->it != this->end;
+}
+
+SharedGnx & GnxChildIterator::next() {
+	return *this->it++;
+}
+
+GnxEntryIterator::GnxEntryIterator( SharedGnx gnx ) {
+	this->it = gnx->attributes.begin();
+	this->end = gnx->attributes.end();
+}
+
+GnxEntryIterator::GnxEntryIterator( Gnx & gnx ) {
+	this->it = gnx.attributes.begin();
+	this->end = gnx.attributes.end();
+}
+
+bool GnxEntryIterator::hasNext() {
+	return this->it != this->end;
+}
+
+GnxEntry & GnxEntryIterator::next() {
+	return *this->it++;
+}
 
 } 	//	namespace

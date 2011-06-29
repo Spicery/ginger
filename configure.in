@@ -95,6 +95,8 @@ AC_CONFIG_FILES([Makefile
                  apps/tidygnx/cpp/Makefile
                  apps/gson2gnx/Makefile
                  apps/gson2gnx/cpp/Makefile
+                 apps/xson2gnx/Makefile
+                 apps/xson2gnx/cpp/Makefile
                  projects/Makefile])
 
 AC_OUTPUT

@@ -19,6 +19,7 @@
 //	C++ STL
 #include <iostream>
 #include <string>
+#include <limits>
 #include <sstream>
 
 //	AppGinger lib

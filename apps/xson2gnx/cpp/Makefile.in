@@ -18,7 +18,7 @@ OBJS=xson2gnx.o item_factory.o item.o toktype.o xsonparser.o
 
 xson2gnx: $(OBJS)
 	@CXX@ $(CXXFLAGS) $(BOOST_CPPFLAGS) -o xson2gnx $(OBJS) ../../libgng/cpp/libgng.a
-	
+
 clean:
 	rm -f *.o
 	rm -f xson2gnx

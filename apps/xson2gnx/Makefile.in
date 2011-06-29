@@ -3,4 +3,3 @@ all:
 
 clean:
 	( cd ./cpp; make clean )
-

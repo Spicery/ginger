@@ -4308,7 +4308,7 @@ if test "${boost_libdir}"; then
  echo "BOOST_LDDFLAGS set"
 fi
 
-ac_config_files="$ac_config_files Makefile apps/Makefile apps/appginger/Makefile apps/appginger/cpp/Makefile apps/appginger/functest/Makefile apps/appginger/unittest/Makefile apps/lisp2gnx/Makefile apps/lisp2gnx/lsp/Makefile apps/lisp2gnx/functest/Makefile apps/common2gnx/Makefile apps/common2gnx/cpp/Makefile apps/fetchgnx/Makefile apps/fetchgnx/cpp/Makefile apps/fetchgnx/unittest/Makefile apps/file2gnx/Makefile apps/file2gnx/cpp/Makefile apps/file2gnx/unittest/Makefile apps/libgng/Makefile apps/libgng/cpp/Makefile apps/libgng/unittest/Makefile apps/simplifygnx/Makefile apps/simplifygnx/cpp/Makefile apps/simplifygnx/unittest/Makefile apps/tidygnx/Makefile apps/tidygnx/cpp/Makefile apps/gson2gnx/Makefile apps/gson2gnx/cpp/Makefile apps/xson2gnx/Makefile apps/xson2gnx/cpp/Makefile projects/Makefile"
+ac_config_files="$ac_config_files Makefile apps/Makefile apps/appginger/Makefile apps/appginger/cpp/Makefile apps/appginger/functest/Makefile apps/appginger/unittest/Makefile apps/lisp2gnx/Makefile apps/lisp2gnx/lsp/Makefile apps/lisp2gnx/functest/Makefile apps/common2gnx/Makefile apps/common2gnx/cpp/Makefile apps/fetchgnx/Makefile apps/fetchgnx/cpp/Makefile apps/fetchgnx/unittest/Makefile apps/file2gnx/Makefile apps/file2gnx/cpp/Makefile apps/file2gnx/unittest/Makefile apps/libgng/Makefile apps/libgng/cpp/Makefile apps/libgng/unittest/Makefile apps/simplifygnx/Makefile apps/simplifygnx/cpp/Makefile apps/simplifygnx/unittest/Makefile apps/tidymnx/Makefile apps/tidymnx/cpp/Makefile apps/gson2gnx/Makefile apps/gson2gnx/cpp/Makefile apps/lnx2mnx/Makefile apps/lnx2mnx/cpp/Makefile apps/src2lnx/Makefile apps/src2lnx/cpp/Makefile projects/Makefile"
 
 
 cat >confcache <<\_ACEOF
@@ -5036,12 +5036,14 @@ do
     "apps/simplifygnx/Makefile") CONFIG_FILES="$CONFIG_FILES apps/simplifygnx/Makefile" ;;
     "apps/simplifygnx/cpp/Makefile") CONFIG_FILES="$CONFIG_FILES apps/simplifygnx/cpp/Makefile" ;;
     "apps/simplifygnx/unittest/Makefile") CONFIG_FILES="$CONFIG_FILES apps/simplifygnx/unittest/Makefile" ;;
-    "apps/tidygnx/Makefile") CONFIG_FILES="$CONFIG_FILES apps/tidygnx/Makefile" ;;
-    "apps/tidygnx/cpp/Makefile") CONFIG_FILES="$CONFIG_FILES apps/tidygnx/cpp/Makefile" ;;
+    "apps/tidymnx/Makefile") CONFIG_FILES="$CONFIG_FILES apps/tidymnx/Makefile" ;;
+    "apps/tidymnx/cpp/Makefile") CONFIG_FILES="$CONFIG_FILES apps/tidymnx/cpp/Makefile" ;;
     "apps/gson2gnx/Makefile") CONFIG_FILES="$CONFIG_FILES apps/gson2gnx/Makefile" ;;
     "apps/gson2gnx/cpp/Makefile") CONFIG_FILES="$CONFIG_FILES apps/gson2gnx/cpp/Makefile" ;;
-    "apps/xson2gnx/Makefile") CONFIG_FILES="$CONFIG_FILES apps/xson2gnx/Makefile" ;;
-    "apps/xson2gnx/cpp/Makefile") CONFIG_FILES="$CONFIG_FILES apps/xson2gnx/cpp/Makefile" ;;
+    "apps/lnx2mnx/Makefile") CONFIG_FILES="$CONFIG_FILES apps/lnx2mnx/Makefile" ;;
+    "apps/lnx2mnx/cpp/Makefile") CONFIG_FILES="$CONFIG_FILES apps/lnx2mnx/cpp/Makefile" ;;
+    "apps/src2lnx/Makefile") CONFIG_FILES="$CONFIG_FILES apps/src2lnx/Makefile" ;;
+    "apps/src2lnx/cpp/Makefile") CONFIG_FILES="$CONFIG_FILES apps/src2lnx/cpp/Makefile" ;;
     "projects/Makefile") CONFIG_FILES="$CONFIG_FILES projects/Makefile" ;;
 
   *) as_fn_error $? "invalid argument: \`$ac_config_target'" "$LINENO" 5;;

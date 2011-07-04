@@ -91,12 +91,14 @@ AC_CONFIG_FILES([Makefile
                  apps/simplifygnx/Makefile
                  apps/simplifygnx/cpp/Makefile
                  apps/simplifygnx/unittest/Makefile
-                 apps/tidygnx/Makefile
-                 apps/tidygnx/cpp/Makefile
+                 apps/tidymnx/Makefile
+                 apps/tidymnx/cpp/Makefile
                  apps/gson2gnx/Makefile
                  apps/gson2gnx/cpp/Makefile
-                 apps/xson2gnx/Makefile
-                 apps/xson2gnx/cpp/Makefile
+                 apps/lnx2mnx/Makefile
+                 apps/lnx2mnx/cpp/Makefile
+                 apps/src2lnx/Makefile
+                 apps/src2lnx/cpp/Makefile
                  projects/Makefile])
 
 AC_OUTPUT

@@ -6,6 +6,7 @@ all clean:
 	$(MAKE) -C fetchgnx $@
 	$(MAKE) -C file2gnx $@
 	$(MAKE) -C simplifygnx $@
-	$(MAKE) -C tidygnx $@
+	$(MAKE) -C tidymnx $@
 	$(MAKE) -C gson2gnx $@
-	$(MAKE) -C xson2gnx $@
+	$(MAKE) -C lnx2mnx $@
+	$(MAKE) -C src2lnx $@

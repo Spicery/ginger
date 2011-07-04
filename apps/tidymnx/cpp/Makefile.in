@@ -14,7 +14,7 @@ CFLAGS=-Wmissing-prototypes
 
 OBJS=tidymnx.o
 
-tidygnx: $(OBJS)
+tidymnx: $(OBJS)
 	g++ $(CXXFLAGS) $(BOOST_CPPFLAGS) -o tidymnx $(OBJS) ../../libgng/cpp/libgng.a
 
 clean:

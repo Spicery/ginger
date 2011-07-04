@@ -23,7 +23,6 @@
 #include "sax.hpp"
 #include "mishap.hpp"
 
-
 namespace Ginger {
 using namespace std;
 
@@ -36,6 +35,10 @@ void gnxRenderText( std::ostream & out, const std::string & str ) {
 			out << "&gt;";
 		} else if ( ch == '&' ) {
 			out << "&amp;";
+		} else if ( ch == '"' ) {
+			out << "&quot;";
+		} else if ( ch == '\'' ) {
+			out << "&apos;";
 		} else if ( 32 <= ch && ch < 127 ) {
 			out << ch;
 		} else {
@@ -146,12 +149,19 @@ public:
 	void endTag( std::string & name ) {
 		if ( not( this->context.empty() ) ) {
 			this->answer = this->context.back();
-			this->context.pop_back();
-			if ( not( this->context.empty() ) ) {
-				this->context.back()->addChild( this->answer );
+			if ( this->answer->name() == name ) {
+				this->context.pop_back();
+				if ( not( this->context.empty() ) ) {
+					this->context.back()->addChild( this->answer );
+				}
+			} else {
+				throw Mishap( "Mismatched closing element name" ).culprit( "Open", this->answer->name() ).culprit( "Close", name );
 			}
+		} else {
+			throw Mishap( "Unused closing element" ).culprit( "Name", name );
 		}
 	}
+
 	
 	shared< Gnx > result() {
 		return answer;

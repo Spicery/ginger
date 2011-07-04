@@ -39,6 +39,7 @@ private:
 	std::istream & input;
 	SaxHandler & parent;
 	int level;
+	bool finished;
 	
 private:
 	void readName( std::string & name );
@@ -55,7 +56,8 @@ public:
 	SaxParser( std::istream & in, SaxHandler & p ) :
 		input( in ),
 		parent( p ),
-		level( 0 )
+		level( 0 ),
+		finished( false )
 	{
 	}
 };

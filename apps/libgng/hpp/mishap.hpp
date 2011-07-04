@@ -38,6 +38,7 @@ protected:
 	Problem & culprit( const std::string reason, const std::string arg );
 	Problem & culprit( const std::string arg );
 	Problem & culprit( const std::string reason, const long N );
+	Problem & culprit( const std::string reason, const char N );
 	
 public:
 	void setMessage( const std::string & msg ) { this->message = msg; }
@@ -59,6 +60,7 @@ public:
 	Mishap & culprit( const std::string reason, const std::string arg ) { this->Problem::culprit( reason, arg ); return *this; }
 	Mishap & culprit( const std::string arg ) { this->Problem::culprit( arg ); return *this; }
 	Mishap & culprit( const std::string arg, const long N ) { this->Problem::culprit( arg, N ); return *this; }
+	Mishap & culprit( const std::string arg, const char N ) { this->Problem::culprit( arg, N ); return *this; }
 	
 public:
 	Mishap( const std::string & msg ) : Problem( msg ) {}
@@ -70,6 +72,7 @@ public:
 	SystemError & culprit( const std::string reason, const std::string arg ) { this->Problem::culprit( reason, arg ); return *this; }
 	SystemError & culprit( const std::string arg ) { this->Problem::culprit( arg ); return *this; }
 	SystemError & culprit( const std::string arg, const long N ) { this->Problem::culprit( arg, N ); return *this; }
+	SystemError & culprit( const std::string arg, const char N ) { this->Problem::culprit( arg, N ); return *this; }
 	
 public:
 	SystemError( const std::string & msg ) : Problem( msg ) {}

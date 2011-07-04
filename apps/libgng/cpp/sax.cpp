@@ -38,20 +38,20 @@ using namespace std;
 
 char SaxParser::nextChar() {
 	char c;
-	if ( not input.get( c ) ) throw;
+	if ( not input.get( c ) ) throw Mishap( "Cannot read from file (unexpected end?)" );
 	return c;
 }
 
 char SaxParser::peekChar() {
 	char c = input.peek();
-	if ( not input ) throw;
+	if ( not input ) throw Mishap( "Cannot read from file (unexpected end?)" );
 	return c;
 }
 
 void SaxParser::mustReadChar( const char ch_want ) {
 	char c_got;
-	if ( not ( input.get( c_got ) ) ) throw;
-	if ( c_got != ch_want ) throw;
+	if ( not ( input.get( c_got ) ) ) throw Mishap( "Cannot read from file (unexpected end?)" );
+	if ( c_got != ch_want ) throw Mishap( "Unexpected character" ).culprit( "Wanted", ch_want ).culprit( "Received", c_got );
 }
 
 void SaxParser::eatWhiteSpace() {
@@ -137,7 +137,13 @@ void SaxParser::read() {
 	this->input >> noskipws;
 	
 	this->eatWhiteSpace();
-	if ( this->input.eof() ) return;
+	if ( this->input.eof() ) {
+		if ( this->finished ) {
+			throw Mishap( "Unexpected end of file" );
+		}
+		this->finished = true;
+		return;
+	}
 	this->mustReadChar( '<' );
 		
 	char ch = nextChar();
@@ -193,7 +199,7 @@ void SaxParser::read() {
 		this->level += 1;
 		return;
 	} else {
-		throw;
+		throw Mishap( "Invalid continuation" );
 	}
 			
 }

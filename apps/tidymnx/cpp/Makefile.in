@@ -12,11 +12,11 @@ INSTALL_DOC=${datarootdir}/doc/${PACKAGE_TARNAME}CC=g++
 CXXFLAGS=-DINSTALL_BIN='"$(INSTALL_BIN)"' -DINSTALL_LIB='"$(INSTALL_LIB)"' -I../hpp -I../../libgng/hpp -I/usr/local/boost_1_43_0 -Wall -g
 CFLAGS=-Wmissing-prototypes 
 
-OBJS=tidygnx.o
+OBJS=tidymnx.o
 
 tidygnx: $(OBJS)
-	g++ $(CXXFLAGS) $(BOOST_CPPFLAGS) -o tidygnx $(OBJS) ../../libgng/cpp/libgng.a
+	g++ $(CXXFLAGS) $(BOOST_CPPFLAGS) -o tidymnx $(OBJS) ../../libgng/cpp/libgng.a
 
 clean:
 	rm -f *.o
-	rm -f tidygnx
+	rm -f tidymnx

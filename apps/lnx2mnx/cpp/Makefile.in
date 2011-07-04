@@ -14,11 +14,11 @@ CC=@CXX@
 CXXFLAGS=-DINSTALL_BIN='"$(INSTALL_BIN)"' -DINSTALL_LIB='"$(INSTALL_LIB)"' -I../hpp -I../../libgng/hpp -I/usr/local/boost_1_43_0 -Wall -g
 CFLAGS=-Wmissing-prototypes 
 
-OBJS=xson2gnx.o item_factory.o item.o toktype.o xsonparser.o
+OBJS=lnx2mnx.o item_factory.o item.o toktype.o parser.o
 
-xson2gnx: $(OBJS)
-	@CXX@ $(CXXFLAGS) $(BOOST_CPPFLAGS) -o xson2gnx $(OBJS) ../../libgng/cpp/libgng.a
+lnx2mnx: $(OBJS)
+	@CXX@ $(CXXFLAGS) $(BOOST_CPPFLAGS) -o lnx2mnx $(OBJS) ../../libgng/cpp/libgng.a
 
 clean:
 	rm -f *.o
-	rm -f xson2gnx
+	rm -f lnx2mnx

@@ -33,7 +33,7 @@
 //	This application modules.
 #include "item_factory.hpp"
 #include "toktype.hpp"
-#include "xsonparser.hpp"
+#include "parser.hpp"
 
 using namespace std;
 using namespace Ginger;

@@ -26,7 +26,7 @@
 #include "gnx.hpp"
 
 //	This project header files.
-#include "xsonparser.hpp"
+#include "parser.hpp"
 #include "item.hpp"
 
 namespace XSON2GNX {

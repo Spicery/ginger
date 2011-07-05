@@ -23,14 +23,14 @@
 #include <getopt.h>
 
 #include "gngversion.hpp"
-#include "gnx.hpp"
+#include "mnx.hpp"
 #include "mishap.hpp"
 
 using namespace Ginger;
 using namespace std;
 
 
-#define TIDYGNX "tidygnx"
+#define TIDYMNX "tidymnx"
 
 extern char * optarg;
 static struct option long_options[] =
@@ -84,7 +84,7 @@ public:
 					//  files and this will simply go there. Or run a web
 					//  browser pointed there.
 					if ( optarg == NULL ) {
-						printf( "Usage:  %s OPTIONS < GSON_IN > GNX_OUT\n", TIDYGNX );
+						printf( "Usage:  %s OPTIONS < MNX_IN > MNX_OUT\n", TIDYMNX );
 						printf( "OPTIONS\n" );
 						printf( "-i, --indent=STRING   sets the indentation string.\n" );
 						printf( "-H, --help[=TOPIC]    help info on optional topic (see --help=help)\n" );
@@ -121,7 +121,7 @@ public:
 					exit( EXIT_SUCCESS );   //  Is that right?              
 				}
 				case 'V': {
-					cout << TIDYGNX << ": version " << this->version() << " (" << __DATE__ << " " << __TIME__ << ") part of AppGinger version " << APPGINGER_VERSION << endl;
+					cout << TIDYMNX << ": version " << this->version() << " (" << __DATE__ << " " << __TIME__ << ") part of AppGinger version " << APPGINGER_VERSION << endl;
 					exit( EXIT_SUCCESS );   //  Is that right?
 				}
 				case '?': {
@@ -151,8 +151,8 @@ public:
 	
 public:
 	void run() {
-		GnxReader reader;
-		shared< Gnx > g( reader.readGnx() );
+		MnxReader reader;
+		shared< Mnx > g( reader.readMnx() );
 		g->prettyPrint( this->indent );
 	}
 };

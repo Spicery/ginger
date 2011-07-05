@@ -134,6 +134,12 @@ void MnxSaxParser::processAttributes(
 
 
 void MnxSaxParser::read() {
+	if ( this->pending_end_tag ) {
+		this->parent.endTag( this->tag_name );
+		this->pending_end_tag = false;
+		return;
+	}
+	
 	this->input >> noskipws;
 	
 	this->eatWhiteSpace();
@@ -179,13 +185,13 @@ void MnxSaxParser::read() {
 		input.putback( ch );
 	}
 	
-	std::string name;
-	this->readName( name );
-	this->parent.startTagOpen( name );
+	this->tag_name.resize( 0 );
+	this->readName( this->tag_name );
+	this->parent.startTagOpen( this->tag_name );
 	
 	//std::map< std::string, std::string > attributes;
 	this->processAttributes();// attributes );
-	this->parent.startTagClose( name );
+	this->parent.startTagClose( this->tag_name );
 	
 	this->eatWhiteSpace();
 	
@@ -193,7 +199,8 @@ void MnxSaxParser::read() {
 	ch = nextChar();
 	if ( ch == '/' ) {
 		this->mustReadChar( '>' );
-		this->parent.endTag( name );
+		this->pending_end_tag = true;
+		//this->parent.endTag( name ); <- this code replaced
 		return;
 	} else if ( ch == '>' ) {
 		this->level += 1;

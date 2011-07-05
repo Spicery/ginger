@@ -40,6 +40,8 @@ class MnxSaxParser {
 private:
 	std::istream & input;
 	MnxSaxHandler & parent;
+	std::string tag_name;
+	bool pending_end_tag;
 	int level;
 	bool finished;
 	
@@ -53,11 +55,21 @@ private:
 	char peekChar();
 	
 public:
+	/**
+		Each read will consume input and invoke the callbacks until it
+		comes to the end of a start tag or stop tag. In the case of an
+		empty element, it will treat it a separate start and end tag.
+	*/
 	void read();
+
+public:
 	void readElement();
+	
+public:
 	MnxSaxParser( std::istream & in, MnxSaxHandler & p ) :
 		input( in ),
 		parent( p ),
+		pending_end_tag( false ),
 		level( 0 ),
 		finished( false )
 	{

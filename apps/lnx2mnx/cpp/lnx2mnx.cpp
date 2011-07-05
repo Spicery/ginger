@@ -37,9 +37,9 @@
 
 using namespace std;
 using namespace Ginger;
-using namespace XSON2GNX;
+using namespace LNX2MNX_NS;
 
-#define XSON2GNX_APP "xson2gnx"
+#define XSON2GNX_APP "lnx2mnx"
 
 extern char * optarg;
 static struct option long_options[] =
@@ -142,7 +142,7 @@ public:
 		}
 		
 		shared< ItemFactoryClass > itemf( new ItemFactoryClass( in ) );
-		XSONParser xsonparser( itemf, grammar );
+		Parser xsonparser( itemf, grammar );
 		SharedGnx answer = xsonparser.parse();
 		
 		answer->render();

@@ -25,10 +25,10 @@
 //	This project.
 #include "item_factory.hpp"
 
-namespace XSON2GNX {
+namespace LNX2MNX_NS {
 
 
-class XSONParser {
+class Parser {
 private:
 	Ginger::GnxBuilder builder;
 	ItemFactory itemf;
@@ -47,12 +47,12 @@ public:
 
 public:
 	Ginger::SharedGnx parse();
-	XSONParser( ItemFactory itemf, Ginger::SharedGnx grammar );
+	Parser( ItemFactory itemf, Ginger::SharedGnx grammar );
 };
 
 class RuleParser {
 private:
-	XSONParser * parent;
+	Parser * parent;
 	Ginger::GnxBuilder & builder;
 	const std::string state;
 	float precedence;
@@ -80,7 +80,7 @@ public:
 	void ifUnlessAction( Ginger::SharedGnx & action, const bool ifVsUnless, const bool readVsPeek );
 	void whileUntilAction( Ginger::SharedGnx & action, const bool whileVsUntil, const bool readVsPeek );
 public:
-	RuleParser( XSONParser * parent, const std::string & state, float precedence, Item item );
+	RuleParser( Parser * parent, const std::string & state, float precedence, Item item );
 };
 
 } // namespace XSON2GNX {

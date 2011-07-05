@@ -28,7 +28,7 @@
 //	This apps modules.
 #include "item.hpp"
 
-namespace XSON2GNX {
+namespace LNX2MNX_NS {
 using namespace std;
 using namespace Ginger;
 

@@ -16,45 +16,11 @@
     along with AppGinger.  If not, see <http://www.gnu.org/licenses/>.
 \******************************************************************************/
 
-#ifndef TOKTYPE_HPP
-#define TOKTYPE_HPP
+#include "lnxread.hpp"
 
 namespace LNX2MNX_NS {
-
-/*
-	These are the predefined token tokens. I am not sure what 
-	degree of configurability I think they should have as yet.
-	
-	I think we are looking at a type/subtype classfication. This
-	is the main type.
-*/
-
-typedef enum TokenType {
-	tokty_start,		//	Artificial initial value, signifying no reading done.
-	tokty_number,
-	tokty_string,		//	Probably needs to subtype on quote used.
-	tokty_sign,			//	Custom subtyping.
-	tokty_name,			//	Custom subtyping.
-	tokty_end			//	Artificial final value, signifying end of file.
-} TokType;
+using namespace std;
 
 
-const char *tok_type_name( TokType fnc );
-enum TokenType name_to_tok_type( const char * ty );
-
-class TokenTypeMask {
-private:
-	unsigned int mask;
-public:
-	void add( const char * name );
-	void add( const std::string & name );
-	void add( enum TokenType ty );
-	bool contains( enum TokenType ty );
-public:
-	TokenTypeMask() : mask( 0 ) {}
-};
 
 } // namespace
-
-#endif
-

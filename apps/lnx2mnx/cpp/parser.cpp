@@ -29,7 +29,7 @@
 #include "parser.hpp"
 #include "item.hpp"
 
-namespace XSON2GNX {
+namespace LNX2MNX_NS {
 using namespace Ginger;
 using namespace std;
 
@@ -67,27 +67,27 @@ using namespace std;
 #define PRECEDENCE_FROM		"precedence.from"
 #define PRECEDENCE_GTE		"precedence.gte"
 
-XSONParser::XSONParser( ItemFactory itemf, SharedGnx grammar ) : 
+Parser::Parser( ItemFactory itemf, SharedGnx grammar ) : 
 	itemf( itemf )
 {
 	this->init( grammar );
 	this->start = grammar->attribute( START );
 }
 
-void XSONParser::init( SharedGnx grammar ) {
+void Parser::init( SharedGnx grammar ) {
 	this->loadRules( grammar );
 }
 
-Item XSONParser::peek() {
+Item Parser::peek() {
 	return this->itemf->peek();
 }
 
-void XSONParser::drop() {
+void Parser::drop() {
 	this->itemf->drop();
 }
 
 
-void XSONParser::loadRules( SharedGnx g ) {
+void Parser::loadRules( SharedGnx g ) {
 	if ( g->hasName( RULE ) ) {
 		this->load1Rule( g );
 	} else if ( g->hasName( GROUP ) || g->hasName( GRAMMAR ) ) {
@@ -99,19 +99,19 @@ void XSONParser::loadRules( SharedGnx g ) {
 	}
 }
 
-void XSONParser::load1Rule( SharedGnx g ) {
+void Parser::load1Rule( SharedGnx g ) {
 	if ( ! g->hasAttribute( STATE ) ) {
 		throw Mishap( "Misformed rule" );
 	}
 	this->rules[ g->attribute( STATE ) ].push_back( g );
 }
 
-std::vector< Ginger::SharedGnx > & XSONParser::getRule( const std::string & state ) {
+std::vector< Ginger::SharedGnx > & Parser::getRule( const std::string & state ) {
 	return this->rules[ state ];
 }
 
 
-SharedGnx XSONParser::parse() {
+SharedGnx Parser::parse() {
 	ItemClass item( *this->peek() );
 	RuleParser p( this, this->start, 0, &item );
 	p.parse();
@@ -120,7 +120,7 @@ SharedGnx XSONParser::parse() {
 }
 
 RuleParser::RuleParser( 
-	XSONParser * parent, 
+	Parser * parent, 
 	const std::string & state, 
 	float precedence, 
 	Item item 
@@ -300,7 +300,7 @@ SharedGnx RuleParser::findMatchingRule( const string & state, const Item item, c
 		}
 	}
 	if ( throwVsReturnNull ) {
-		throw Mishap( "Parse failed" );
+		throw Mishap( "Parser failed" );
 	} else {
 		return shared< Gnx >();
 	}

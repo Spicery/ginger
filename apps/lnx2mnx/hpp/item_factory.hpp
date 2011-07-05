@@ -15,7 +15,7 @@
 #include "item.hpp"
 
 
-namespace XSON2GNX {
+namespace LNX2MNX_NS {
 
 class ItemFactoryClass {
 public:

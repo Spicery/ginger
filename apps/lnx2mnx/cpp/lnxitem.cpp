@@ -16,20 +16,9 @@
     along with AppGinger.  If not, see <http://www.gnu.org/licenses/>.
 \******************************************************************************/
 
-#ifndef LNX_READ_LNX2MNX_HPP
-#define LNX_READ_LNX2MNX_HPP
-
+//	Local libs
+#include "lnxread.hpp"
 
 namespace LNX2MNX_NS {
 
-class LnxRead {
-public:
-	LnxItem read();
-	void unread();
-	void drop();
-	LnxItem peek();
-};
-
-} // namespave
-
-#endif
+} // namespace

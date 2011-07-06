@@ -79,9 +79,9 @@ Item ItemFactoryClass::read() {
             continue;
         }
         if ( ch == '/' && this->trychar( '*' ) ) {
-            do
+            do {
                 ch = getc( this->file );
-            while ( ch != '*' || !this->trychar( '/' ) );
+            } while ( ch != '*' || !this->trychar( '/' ) );
             continue;
         }
         break;

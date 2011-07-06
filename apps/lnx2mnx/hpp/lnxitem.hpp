@@ -19,9 +19,10 @@
 #ifndef LNX_READ_GINGER_HPP
 #define LNX_READ_GINGER_HPP
 
-namespace LNX2LMX_NS {
+namespace LNX2MNX_NS {
 
-
+class LnxItem {
+};
 
 } // namespace
 

@@ -19,6 +19,8 @@
 #ifndef LNX_READ_LNX2MNX_HPP
 #define LNX_READ_LNX2MNX_HPP
 
+//	Local libs
+#include "lnxitem.hpp"
 
 namespace LNX2MNX_NS {
 

@@ -16,7 +16,7 @@ CC=@CXX@
 CXXFLAGS=-DINSTALL_BIN='"$(INSTALL_BIN)"' -DINSTALL_LIB='"$(INSTALL_LIB)"' -DEXEC_DIR='$(EXEC_DIR)' -g -I../hpp -I/opt/local/include -Wall -Wnon-virtual-dtor # -Weffc++
 CFLAGS=-Wmissing-prototypes 
 
-OBJS=sax.o mishap.o facet.o fileutils.o gnx.o command.o arity.o metainfo.o printgpl.o mnx.o mnxsax.o
+OBJS=sax.o mishap.o facet.o fileutils.o gnx.o command.o arity.o metainfo.o printgpl.o mnx.o mnxsax.o lnxitem.o lnxreader.o
 
 all: libgng.a
 

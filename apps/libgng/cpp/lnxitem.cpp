@@ -22,7 +22,7 @@
 #include "lnxitem.hpp"
 #include "lnxreader.hpp"
 
-namespace LNX2MNX_NS {
+namespace Ginger {
 using namespace std;
 
 void LnxItem::put( const std::string & key, const std::string & value ) {
@@ -33,6 +33,10 @@ void LnxItem::put( const std::string & key, const std::string & value ) {
 std::string & LnxItem::propertyValue( const std::string & key ) {
 	int n = this->reader->propertyIndex( key );
 	//cerr << "checking N = " << n << " of " << this->values.size() << endl;
+	return this->values[ n ];
+}
+
+std::string & LnxItem::propertyValue( int n ) {
 	return this->values[ n ];
 }
 

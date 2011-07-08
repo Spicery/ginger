@@ -23,9 +23,8 @@
 //	Local libs
 #include "lnxreader.hpp"
 
-namespace LNX2MNX_NS {
+namespace Ginger {
 using namespace std;
-using namespace Ginger;
 
 class LnxHandler : public MnxSaxHandler {
 private:
@@ -138,6 +137,15 @@ void LnxReader::fillMap( std::map< std::string, std::string > & map ) {
 	for ( int i = 0; i < this->property_count; i++ ) {
 		map[ this->property_keys[ i ] ] = this->property_defaults[ i ];
 	}
+}
+
+int LnxReader::propertyCount() {
+	if ( this->handler->needsInit() ) {
+		//	We are at the start & the columns have not been set up.
+		//	A single read is enough to cause initialisation.
+		this->parser->read();
+	}
+	return this->property_count;
 }
 
 

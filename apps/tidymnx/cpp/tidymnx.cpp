@@ -76,7 +76,7 @@ public:
 		
 		for(;;) {
 			int option_index = 0;
-			int c = getopt_long( argc, argv, "H::L::V", long_options, &option_index );
+			int c = getopt_long( argc, argv, "i:H::L::V", long_options, &option_index );
 			if ( c == -1 ) break;
 			switch ( c ) {
 				case 'H': {

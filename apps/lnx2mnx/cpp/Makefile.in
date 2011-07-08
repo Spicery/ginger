@@ -19,9 +19,6 @@ OBJS=lnx2mnx.o item_factory.o item.o toktype.o parser.o
 lnx2mnx: $(OBJS)
 	@CXX@ $(CXXFLAGS) $(BOOST_CPPFLAGS) -o lnx2mnx $(OBJS) ../../libgng/cpp/libgng.a
 
-tmpmain: $(OBJS)
-	@CXX@ $(CXXFLAGS) $(BOOST_CPPFLAGS) -o tmpmain tmpmain.o item_factory.o item.o toktype.o parser.o lnxreader.o lnxitem.o ../../libgng/cpp/libgng.a
-
 clean:
 	rm -f *.o
 	rm -f lnx2mnx

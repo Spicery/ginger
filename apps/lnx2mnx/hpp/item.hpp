@@ -5,11 +5,12 @@
 #include <string>
 
 #include "toktype.hpp"
+#include "lnxreader.hpp"
 
 namespace LNX2MNX_NS {
 
 
-class ItemClass {
+/*class ItemClass {
 friend class ItemFactoryClass;
 friend class RoleMatch;
 private:
@@ -50,7 +51,7 @@ public:
 	const std::string asFeature( const std::string & feature );
 };
 
-typedef ItemClass * Item;
+typedef ItemClass * Item;*/
 
 const char *name_to_tok_type( enum TokenType ty );
 
@@ -61,7 +62,7 @@ public:
 	void addNamedRole( const char * role );
 	void addNamedRole( const std::string & role );
 	void addRole( enum TokenType role );
-	bool contains( const Item & item );
+	bool contains( Ginger::LnxItem * item );
 };
 
 

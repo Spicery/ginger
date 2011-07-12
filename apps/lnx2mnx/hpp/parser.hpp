@@ -21,9 +21,10 @@
 
 //	AppGinger library.
 #include "gnx.hpp"
+#include "lnxreader.hpp"
 
 //	This project.
-#include "item_factory.hpp"
+//#include "item_factory.hpp"
 
 namespace LNX2MNX_NS {
 
@@ -31,7 +32,7 @@ namespace LNX2MNX_NS {
 class Parser {
 private:
 	Ginger::GnxBuilder builder;
-	ItemFactory itemf;
+	Ginger::LnxReader itemf;
 	std::string start;
 	std::map< std::string, std::vector< Ginger::SharedGnx > > rules;
 	
@@ -42,12 +43,12 @@ private:
 public:
 	std::vector< Ginger::SharedGnx > & getRule( const std::string & key );
 	Ginger::GnxBuilder & getBuilder() { return builder; }
-	Item peek();
+	Ginger::LnxItem * peek();
 	void drop();
 
 public:
 	Ginger::SharedGnx parse();
-	Parser( ItemFactory itemf, Ginger::SharedGnx grammar );
+	Parser( Ginger::LnxReader itemf, Ginger::SharedGnx grammar );
 };
 
 class RuleParser {
@@ -56,17 +57,17 @@ private:
 	Ginger::GnxBuilder & builder;
 	const std::string state;
 	float precedence;
-	Item item;
+	Ginger::LnxItem * item;
 	
 public:
-	Item peek();
+	Ginger::LnxItem * peek();
 	void drop();
 	void parse();
 	void parseFromState( const std::string & state, float precedence );
 	void parseFromState( const std::string & state );
 	void processChildren( Ginger::SharedGnx & g );
-	Ginger::SharedGnx findMatchingRule( const std::string & state, const Item item, const bool throwVsReturnNull );
-	bool evaluateCondition( Item item, Ginger::SharedGnx & g, const bool readVsPeek );
+	Ginger::SharedGnx findMatchingRule( const std::string & state, Ginger::LnxItem * item, const bool throwVsReturnNull );
+	bool evaluateCondition( Ginger::LnxItem * item, Ginger::SharedGnx & g, const bool readVsPeek );
 
 public:
 	void processAction( Ginger::SharedGnx & g );
@@ -80,7 +81,7 @@ public:
 	void ifUnlessAction( Ginger::SharedGnx & action, const bool ifVsUnless, const bool readVsPeek );
 	void whileUntilAction( Ginger::SharedGnx & action, const bool whileVsUntil, const bool readVsPeek );
 public:
-	RuleParser( Parser * parent, const std::string & state, float precedence, Item item );
+	RuleParser( Parser * parent, const std::string & state, float precedence, Ginger::LnxItem * item );
 };
 
 } // namespace XSON2GNX {

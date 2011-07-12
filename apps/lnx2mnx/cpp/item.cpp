@@ -39,7 +39,7 @@ using namespace Ginger;
 	return not( b ) && i < 0;
 }*/
 
-bool ItemClass::isLiteralConstant() {
+/*bool ItemClass::isLiteralConstant() {
 	switch ( this->tok_type ) {
 		case tokty_number : 
 		case tokty_string : 
@@ -97,7 +97,7 @@ const std::string ItemClass::asFeature( const std::string & feature ) {
 	} else {
 		throw Mishap( "Unrecognised feature name" ).culprit( "Feature", feature );
 	}
-}
+}*/
 
 void RoleMatch::addNamedRole( const char * role ) {
 	this->toktymask.add( role );
@@ -111,8 +111,14 @@ void RoleMatch::addRole( enum TokenType role ) {
 	this->toktymask.add( role );
 }
 
-bool RoleMatch::contains( const Item & item ) {
-	return this->toktymask.contains( item->tok_type );
+static enum TokenType  asTokType( LnxItem * item ) {
+	//	To be done
+	// 	return 0;
+	return tokty_start;
+}
+
+bool RoleMatch::contains( LnxItem * item ) {
+	return this->toktymask.contains( asTokType( item ) );
 }
 
 } // namespace

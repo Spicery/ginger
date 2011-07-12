@@ -67,7 +67,7 @@ using namespace std;
 #define PRECEDENCE_FROM		"precedence.from"
 #define PRECEDENCE_GTE		"precedence.gte"
 
-Parser::Parser( ItemFactory itemf, SharedGnx grammar ) : 
+Parser::Parser( LnxReader itemf, SharedGnx grammar ) : 
 	itemf( itemf )
 {
 	this->init( grammar );
@@ -78,12 +78,12 @@ void Parser::init( SharedGnx grammar ) {
 	this->loadRules( grammar );
 }
 
-Item Parser::peek() {
-	return this->itemf->peek();
+LnxItem * Parser::peek() {
+	return this->itemf.peek();
 }
 
 void Parser::drop() {
-	this->itemf->drop();
+	this->itemf.drop();
 }
 
 
@@ -112,7 +112,7 @@ std::vector< Ginger::SharedGnx > & Parser::getRule( const std::string & state ) 
 
 
 SharedGnx Parser::parse() {
-	ItemClass item( *this->peek() );
+	LnxItem item( *this->peek() );
 	RuleParser p( this, this->start, 0, &item );
 	p.parse();
 	//this->parseFromState( this->start );
@@ -123,7 +123,7 @@ RuleParser::RuleParser(
 	Parser * parent, 
 	const std::string & state, 
 	float precedence, 
-	Item item 
+	LnxItem * item 
 ) :
 	parent( parent ),
 	builder( parent->getBuilder() ),
@@ -132,7 +132,7 @@ RuleParser::RuleParser(
 	item( item )
 {}
 
-Item RuleParser::peek() {
+LnxItem * RuleParser::peek() {
 	return this->parent->peek();
 }
 
@@ -148,7 +148,7 @@ void RuleParser::parse() {
 }
 
 void RuleParser::parseFromState( const std::string & state, float prec ) {
-	ItemClass item( *this->peek() );
+	LnxItem item( *this->peek() );
 	RuleParser r( this->parent, state, prec, &item );
 	r.parse();
 }
@@ -202,6 +202,11 @@ void RuleParser::processAction( SharedGnx & action ) {
 	}
 }
 
+static int asPrecedence( LnxItem * item ) {
+	//	TO BE DONE.
+	return 0;
+}
+
 void RuleParser::parseAction( SharedGnx & action ) {
 	const string & state = action->attribute( STATE );
 	if ( action->hasAttribute( PRECEDENCE ) ) {
@@ -210,7 +215,7 @@ void RuleParser::parseAction( SharedGnx & action ) {
 		ss >> f;
 		this->parseFromState( state, f );
 	} else if ( action->hasAttribute( PRECEDENCE_FROM ) ) {
-		this->parseFromState( state, this->item->asPrecedence() );
+		this->parseFromState( state, asPrecedence( this->item ) );
 	} else {
 		this->parseFromState( state );
 	}
@@ -222,29 +227,39 @@ void RuleParser::elementAction( SharedGnx & action ) {
 	this->builder.end();
 }
 
+static string asFeature( LnxItem * item, const string & from ) {
+	//	To be done.
+	return "";
+}
+
 void RuleParser::putAction( SharedGnx & action ) {
 	if ( action->hasAttribute( VALUE ) ) {
 		this->builder.put( action->attribute( KEY ), action->attribute( VALUE ) );
 	} else if ( action->hasAttribute( VALUE_FROM ) ) {
 		this->builder.put( 
 			action->attribute( KEY ), 
-			item->asFeature( action->attribute( VALUE_FROM ) ) 
+			asFeature( item, action->attribute( VALUE_FROM ) ) 
 		);
 	} else {
 		cerr << "Malformed thingy" << endl;
 	}
 }
 
+static string asValue( LnxItem & item ) {
+	//	To be done.
+	return "";
+}
+
 void RuleParser::mustReadAction( SharedGnx & action ) { 
-	ItemClass item( *this->peek() );
+	LnxItem item( *this->peek() );
 	if ( !this->evaluateCondition( &item, action, true ) ) {
-		throw Mishap( "Unexpected token" ).culprit( "Item", item.asValue() );
+		throw Mishap( "Unexpected token" ).culprit( "Item", asValue( item ) );
 	}
 }
 
 
 void RuleParser::ifUnlessAction( SharedGnx & action, const bool ifVsUnless, const bool readVsPeek ) {
-	ItemClass item( *this->peek() );
+	LnxItem item( *this->peek() );
 	if ( ifVsUnless == this->evaluateCondition( &item, action, readVsPeek ) ) {
 		this->processChildren( action );
 	}	
@@ -252,7 +267,7 @@ void RuleParser::ifUnlessAction( SharedGnx & action, const bool ifVsUnless, cons
 
 void RuleParser::whileUntilAction( SharedGnx & action, const bool whileVsUntil, const bool readVsPeek ) { 
 	for (;;) {
-		ItemClass item( *this->peek() );
+		LnxItem item( *this->peek() );
 		if ( whileVsUntil != this->evaluateCondition( &item, action, readVsPeek ) ) break;
 		this->processChildren( action );
 	}
@@ -262,18 +277,18 @@ void RuleParser::parseListAction( SharedGnx & action, const bool readVsPeek ) {
 	const string & state = action->attribute( STATE );
 	const string & sep = action->attribute( SEPARATOR );
 	
-	ItemClass item1( *this->peek() );
+	LnxItem item1( *this->peek() );
 	if ( not this->evaluateCondition( &item1, action, false ) ) {
 		for (;;) {
 			this->parseFromState( state );
-			Item t = this->peek();
-			if ( t->asValue() != sep ) break;
+			LnxItem * t = this->peek();
+			if ( asValue( *t ) != sep ) break;
 			this->parent->drop();
 		}
 	}
-	Item itemN = this->parent->peek();
+	LnxItem * itemN = this->parent->peek();
 	if ( not this->evaluateCondition( itemN, action, readVsPeek ) ) {
-		throw Mishap( "Unexpected token" ).culprit( "Item", itemN->asValue() );
+		throw Mishap( "Unexpected token" ).culprit( "Item", asValue( *itemN ) );
 	}
 }
 
@@ -285,7 +300,7 @@ void RuleParser::restoreAction() {
 	this->builder.restore();
 }
 
-SharedGnx RuleParser::findMatchingRule( const string & state, const Item item, const bool throwVsReturnNull ) {
+SharedGnx RuleParser::findMatchingRule( const string & state, LnxItem * item, const bool throwVsReturnNull ) {
 	vector< SharedGnx > & rv = this->parent->getRule( state );
 	cerr << "Checking " << rv.size() << " rules" << endl;
 	for ( 
@@ -306,7 +321,7 @@ SharedGnx RuleParser::findMatchingRule( const string & state, const Item item, c
 	}
 }
 
-bool RuleParser::evaluateCondition( Item item, SharedGnx & g, const bool readVsPeek ) {
+bool RuleParser::evaluateCondition( LnxItem  * item, SharedGnx & g, const bool readVsPeek ) {
 	if ( g->hasAttribute( ROLE_EQ ) ) {
 		RoleMatch match;
 		match.addNamedRole( g->attribute( ROLE_EQ ) );
@@ -317,14 +332,14 @@ bool RuleParser::evaluateCondition( Item item, SharedGnx & g, const bool readVsP
 			return false;
 		}
 	} else if ( g->hasAttribute( TOKEN_EQ ) ) {
-		if ( item->asValue() == g->attribute( TOKEN_EQ ) ) {
+		if ( asValue( *item ) == g->attribute( TOKEN_EQ ) ) {
 			if ( readVsPeek ) this->drop();
 			return true;
 		} else {
 			return false;
 		}
 	} else if ( g->hasAttribute( TOKEN_NEQ ) ) {
-		if ( item->asValue() != g->attribute( TOKEN_NEQ ) ) {
+		if ( asValue( *item ) != g->attribute( TOKEN_NEQ ) ) {
 			if ( readVsPeek ) this->drop();
 			return true;
 		} else {
@@ -332,10 +347,10 @@ bool RuleParser::evaluateCondition( Item item, SharedGnx & g, const bool readVsP
 		}
 	} else if ( g->hasAttribute( PRECEDENCE_GTE ) ) {
 		cerr << " - checking precedence" << endl;
-		cerr << "   1. " <<  item->asPrecedence() << endl;
+		cerr << "   1. " <<  asPrecedence( item ) << endl;
 		cerr << "   2. " << this->precedence  << endl;
-		cerr << "   =  " << ( item->asPrecedence() >= this->precedence ) << endl;
-		if ( item->asPrecedence() >= this->precedence ) {
+		cerr << "   =  " << ( asPrecedence( item ) >= this->precedence ) << endl;
+		if ( asPrecedence( item ) >= this->precedence ) {
 			if ( readVsPeek ) this->drop();
 			return true;
 		} else {

@@ -31,7 +31,6 @@
 #include "gnx.hpp"
 
 //	This application modules.
-#include "item_factory.hpp"
 #include "toktype.hpp"
 #include "parser.hpp"
 
@@ -133,15 +132,24 @@ public:
 		
 		
 
-		FILE * in;
+		/*FILE * in;
 		if ( this->use_stdin ) {
 			in = stdin;
 		} else {
 			in = fopen( input_file_name.c_str(), "r" ); 
 			if ( in == NULL ) throw Mishap( "Cannot open file" ).culprit( "Filename", input_file_name );
+		}*/
+	
+		ifstream input;
+		istream & in( this->use_stdin ? cin : input );
+		if ( !this->use_stdin ) {
+			input.open( input_file_name.c_str() ); 
+			if ( input.bad() ) throw Mishap( "Cannot open file" ).culprit( "Filename", input_file_name );
 		}
-		
-		shared< ItemFactoryClass > itemf( new ItemFactoryClass( in ) );
+	
+	
+		LnxReader itemf( in );
+		//shared< ItemFactoryClass > itemf( new ItemFactoryClass( in ) );
 		Parser xsonparser( itemf, grammar );
 		SharedGnx answer = xsonparser.parse();
 		

@@ -43,7 +43,15 @@ ValuePushAction::ValuePushAction( State * state, const std::string & name, const
 {}
 
 void ValuePushAction::run( char ch ) {
-	 this->state->pushToIndex( this->prop_index, ch );
+	 this->state->pushToIndex( this->prop_index, this->value );
+}
+
+PushBackAction::PushBackAction( State * state ) :
+	Action( state )
+{}
+
+void PushBackAction::run( char ch ) {
+	this->state->ok = false;
 }
 
 FromPropertyPushAction::FromPropertyPushAction( State * state, const std::string & name, const std::string & from_property ) :

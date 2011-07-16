@@ -134,6 +134,14 @@ void Mnx::render() {
 	this->render( cout );
 }
 
+std::string Mnx::toString() {
+	ostringstream out;
+	this->render( out );
+	return out.str();
+}
+
+
+
 class MnxHandler : public MnxSaxHandler {
 private:
 	shared< Mnx > answer;

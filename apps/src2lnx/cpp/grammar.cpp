@@ -37,6 +37,7 @@ using namespace std;
 #define START "start"
 #define ANY_MATCHER "any"
 #define PUSH "push"
+#define PUSHBACK "pushback"
 #define VALUE "value"
 #define FROM_PROPERTY "from.property"
 #define EMIT "emit"
@@ -56,21 +57,30 @@ using namespace std;
 #define IS_UPPER_MATCHER "isupper"
 #define IS_SPACE_MATCHER "isspace"
 #define IS_PRINT_MATCHER "isprint"
+#define OUTPUT 	"output"
+#define FALSE	"false"
+#define TITLE 	"title"
+#define LINE_NUMBER			"line.number"
 
 
 void Grammar::start() {
+	this->state->emitHead();
+	/*
 	cout << "<item.stream";
 	for ( int n = 0; n < this->state->count(); n++ ) {
-		string & name = this->state->name( n );
-		string & def = this->state->def( n );
-		cout << " " << name << "=\"";
-		gnxRenderText( cout, def );
-		cout << "\"";
+		if ( this->state->property_output[ i ] ) {
+			string & name = this->state->name( n );
+			string & def = this->state->def( n );
+			cout << " " << name << "=\"";
+			gnxRenderText( cout, def );
+			cout << "\"";
+		}
 	}
 	cout << ">" << endl;
+	*/
 }
 
-void Grammar::processChar( char & ch ) {
+bool Grammar::processChar( const char ch ) {
 	Node * current = this->nodes[ this->state->nodeIndex() ];
 	vector< Arc * > & arcs = current->arcs();
 	for ( 
@@ -83,9 +93,10 @@ void Grammar::processChar( char & ch ) {
 		if ( match->matches( ch ) ) {
 			//cerr << "Found a matching option! Hurruh!" << endl;
 			current_arc->runActions( ch );
-			return;
+			return false;
 		}
 	}
+	throw Mishap( "Unexpected character" ).culprit( "Character", ch ).culprit( "While processing", current->title() );
 }
 
 void Grammar::processEof() {
@@ -96,24 +107,39 @@ void Grammar::processEof() {
 }
 
 void Grammar::finish() {
-	cout << "</item.stream>" << endl;
+	this->state->emitTail();
+	//cout << "</item.stream>" << endl;
 }
 
 void Grammar::initEmptyNodes(
 	State * state, 
-	SharedGnx description,
-	vector< SharedGnx > & node_desc
+	SharedMnx description,
+	vector< SharedMnx > & node_desc
 ) {
-	GnxChildIterator it( description );
+	state->lineno_needed = false;
+	MnxChildIterator it( description );
 	while ( it.hasNext() ) {
-		SharedGnx d( it.next() );
+		SharedMnx d( it.next() );
 		if ( d->hasName( PROPERTY ) ) {
-			//cerr << "Name = " << d->name() << endl;
-			state->addProperty( d->attribute( NAME ), d->attribute( DEFAULT ) );
+			if ( d->hasAttribute( DEFAULT ) ) {
+				//cerr << "Name = " << d->name() << endl;
+				//if ( d->hasAttribute( OUTPUT ) ) {
+				//	cerr << "  Output = " << d->attribute( OUTPUT ) << endl;
+				//}
+				state->addProperty( d->attribute( NAME ), d->attribute( DEFAULT ), !d->hasAttribute( OUTPUT, FALSE ) );
+			} else if ( d->hasAttribute( LINE_NUMBER ) ) {
+				state->lineno_needed = true;
+				state->lineno_property = d->attribute( NAME );
+			} else {
+				throw Mishap( "Unrecognised property description in LinX grammar" ).culprit( "Element", d->toString() );
+			}
 		} else if ( d->hasName( NODE ) ) {
 			Node * node = new Node( d->attribute( NAME ) );
 			this->node_index[ d->attribute( NAME ) ] = this->node_count++;
 			this->nodes.push_back( node );
+			if ( d->hasAttribute( TITLE ) ) {
+				node->title() = d->attribute( TITLE );
+			}
 			node_desc.push_back( d );
 		} else {
 			throw Mishap( "Unrecognised element name in LinX grammar" ).culprit( "Name", d->name() );
@@ -121,11 +147,11 @@ void Grammar::initEmptyNodes(
 	}
 }
 
-void Grammar::initStartNode( SharedGnx description ) {
+void Grammar::initStartNode( SharedMnx description ) {
 	state->nodeIndex() = description->hasAttribute( START ) ? this->node_index[ description->attribute( START ) ] : 0;
 }
 
-void Grammar::initMatch( Node * node, SharedGnx arcd, Arc * arc ) {
+void Grammar::initMatch( Node * node, SharedMnx arcd, Arc * arc ) {
 	if ( arcd->hasAttribute( EOF_MATCHER ) ) {
 		node->eofArc() = arc;
 	} else {
@@ -156,9 +182,9 @@ void Grammar::initMatch( Node * node, SharedGnx arcd, Arc * arc ) {
 			arc->match() = new IsPrintMatch();
 		} else 	{
 			Mishap mishap( "Unrecognised arc-type" );
-			GnxEntryIterator it( arcd );
+			MnxEntryIterator it( arcd );
 			while ( it.hasNext() ) {
-				GnxEntry & p = it.next();
+				MnxEntry & p = it.next();
 				mishap.culprit( "Attribute", p.first );
 			}
 			throw mishap;
@@ -167,7 +193,7 @@ void Grammar::initMatch( Node * node, SharedGnx arcd, Arc * arc ) {
 }
 
 void Grammar::initAction(
-	SharedGnx actiond,
+	SharedMnx actiond,
 	Arc * arc
 ) {
 	if ( actiond->hasName( PUSH ) ) {
@@ -195,6 +221,8 @@ void Grammar::initAction(
 			cerr << "Bad node" << endl;
 			throw;
 		}
+	} else if ( actiond->hasName( PUSHBACK ) ) {
+		arc->addAction( new PushBackAction( this->state ) );
 	} else if ( actiond->hasName( EMIT ) ) {
 		arc->addAction( new EmitAction( this->state ) );
 	} else if ( actiond->hasName( GOTO ) ) {
@@ -225,22 +253,22 @@ void Grammar::initAction(
 }
 
 void Grammar::initArcs(
-	vector< SharedGnx > & node_desc
+	vector< SharedMnx > & node_desc
 ) {
 	for ( unsigned int i = 0; i < node_desc.size(); i++ ) {
-		SharedGnx d( node_desc[ i ] );
+		SharedMnx d( node_desc[ i ] );
 		Node * node = this->nodes[ i ];
 		
-		GnxChildIterator arcs( d );
+		MnxChildIterator arcs( d );
 		while ( arcs.hasNext() ) {
-			SharedGnx arcd( arcs.next() );
+			SharedMnx arcd( arcs.next() );
 			//cerr << "ARC " << arc->name() << endl;
 			Arc * arc = new Arc();
 			this->initMatch( node, arcd, arc );
 	
-			GnxChildIterator actions( arcd );
+			MnxChildIterator actions( arcd );
 			while ( actions.hasNext() ) {
-				SharedGnx actiond( actions.next() );
+				SharedMnx actiond( actions.next() );
 				this->initAction( actiond, arc );
 			}
 		}		
@@ -248,11 +276,11 @@ void Grammar::initArcs(
 }
 
 
-Grammar::Grammar( State * state, SharedGnx description ) :
+Grammar::Grammar( State * state, SharedMnx description ) :
 	state( state ),
 	node_count( 0 )
 {
-	vector< SharedGnx > node_desc;
+	vector< SharedMnx > node_desc;
 	
 	//	Create the initial nodes as empty.
 	this->initEmptyNodes( state, description, node_desc );

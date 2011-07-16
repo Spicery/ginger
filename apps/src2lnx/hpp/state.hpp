@@ -26,12 +26,21 @@
 namespace SRC2LNX_NS {
 
 class State {
+public:
+	bool ok;
+
+public:
+	int lineno;
+	bool lineno_needed;
+	std::string lineno_property;
+	
 private:
 	int node_index;
 
 private:
 	int prop_count;
 	std::map< std::string, int > property_index;
+	std::vector< bool > property_output;
 	std::vector< std::string > property_name;
 	std::vector< std::string > property_default;
 	std::vector< std::string > property_value;
@@ -43,12 +52,14 @@ public:
 	int count() { return this->prop_count; }
 	std::string & name( int n );
 	std::string & def( int n );
-	void addProperty( const std::string & name, const std::string & def );
+	void addProperty( const std::string & name, const std::string & def, bool output );
 	int propIndex( const std::string & name );
 	void pushToIndex( int index, char ch );
 	void pushToIndex( int index, const std::string & value );
 	void pushToIndexFromIndex( int to_index, int from_index );
 	void emit();
+	void emitHead();
+	void emitTail();
 	void reset( int index );
 	std::string & propValue( int n ) { return this->property_value[ n ]; }
 

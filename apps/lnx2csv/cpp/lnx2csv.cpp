@@ -170,23 +170,17 @@ private:
 		LnxReader reader( in );
 		
 		if ( this->columns ) {
-			map< string, string > columns;
-			reader.fillMap( columns );
-			
 			const char * gap = "";
-			for (
-				map< string, string >::iterator it = columns.begin();
-				it != columns.end();
-				++it
-			) {
+			for ( int i = 0; i < reader.propertyCount(); i++ ) {
 				cout << gap;
 				
 				//	Note that column names do NOT need quoting. This is because
 				//	they MUST obey the XML name format which (by inspection) does
 				//	not require quoting.
-				cout << "\"" << it->first << "\"";
+				cout << "\"" << reader.propertyKey( i ) << "\"";
 				
 				gap = ",";
+				
 			}
 			cout << endl;
 		}

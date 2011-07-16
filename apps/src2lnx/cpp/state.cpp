@@ -21,7 +21,7 @@
 
 //	Ginger library
 #include "mishap.hpp"
-#include "gnx.hpp"
+#include "mnx.hpp"
 
 //	Local libs
 #include "state.hpp"
@@ -30,13 +30,14 @@ namespace SRC2LNX_NS {
 using namespace std;
 using namespace Ginger;
 
-void State::addProperty( const string & name, const string & def ) {
+void State::addProperty( const string & name, const string & def, bool output ) {
 	map< string, int >::iterator it = this->property_index.find( name );
 	if ( it == this->property_index.end() ) {
 		this->property_index[ name ] = this->prop_count++;
 		this->property_name.push_back( name );
 		this->property_value.push_back( def );
 		this->property_default.push_back( def );
+		this->property_output.push_back( output );
 	} else {
 		throw Mishap( "Repeated attribute" ).culprit( "Name", name ).culprit( "Default", def );
 	}
@@ -78,15 +79,44 @@ void State::reset( int index ) {
 void State::emit() {
 	cout << "<.";
 	for ( int i = 0; i < this->prop_count; i++ ) {
-		cout << " " << this->property_name[ i ] << "=\"";
-		gnxRenderText( cout, this->property_value[ i ] );
-		this->property_value[ i ] = this->property_default[ i ];
+		if ( this->property_output[ i ] ) {
+			cout << " " << this->property_name[ i ] << "=\"";
+			mnxRenderText( cout, this->property_value[ i ] );
+			this->property_value[ i ] = this->property_default[ i ];
+			cout << "\"";
+		}
+	}
+	if ( this->lineno_needed ) {
+		cout << " " << this->lineno_property << "=\"";
+		cout <<	this->lineno;
 		cout << "\"";
 	}
 	cout << "/>" << endl;
 }
 
+void State::emitHead() {
+	cout << "<item.stream";
+	for ( int i = 0; i < this->prop_count; i++ ) {
+		if ( this->property_output[ i ] ) {
+			string & name = this->property_name[ i ];
+			string & def = this->property_default[ i ];
+			cout << " " << name << "=\"";
+			mnxRenderText( cout, def );
+			cout << "\"";
+		}
+	}
+	if ( this->lineno_needed ) {
+		cout << " " << this->lineno_property << "=\"\"";
+	}
+	cout << ">" << endl;
+}
+
+void State::emitTail() {
+	cout << "</item.stream>" << endl;
+}
+
 State::State() :
+	lineno_needed( false ),
 	node_index( 0 ),
 	prop_count( 0 )
 {}

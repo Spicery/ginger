@@ -32,17 +32,19 @@ namespace SRC2LNX_NS {
 class Node {
 private:
 	const std::string name;
+	std::string title_string;
 	Arc * eof_arc;
 	std::vector< Arc * > arc_vector;
 
 public:
 	const std::string getName() const { return this->name; }
+	std::string & title() { return this->title_string; }
 	void addArc( Arc * arc );
 	std::vector< Arc * > & arcs() { return this->arc_vector; }
 	Arc * & eofArc() { return this->eof_arc; }
 	
 public:
-	Node( const std::string & name ) : name( name ), eof_arc( NULL ) {}
+	Node( const std::string & name ) : name( name ), title_string( name ), eof_arc( NULL ) {}
 };
 
 

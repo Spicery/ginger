@@ -24,7 +24,7 @@
 #include <string>
 
 //	Ginger libs
-#include "gnx.hpp"
+#include "mnx.hpp"
 
 //	Local libs
 #include "state.hpp"
@@ -42,27 +42,27 @@ private:
 private:	
 	void initEmptyNodes(
 		State * state, 
-		Ginger::SharedGnx description,
-		std::vector< Ginger::SharedGnx > & node_desc
+		Ginger::SharedMnx description,
+		std::vector< Ginger::SharedMnx > & node_desc
 	);
 
-	void initStartNode( Ginger::SharedGnx description );
+	void initStartNode( Ginger::SharedMnx description );
 
 	void initArcs( 
-		std::vector< Ginger::SharedGnx > & node_desc
+		std::vector< Ginger::SharedMnx > & node_desc
 	);
 	
-	void initMatch( Node * node, Ginger::SharedGnx arcd, Arc * arc );
-	void initAction( Ginger::SharedGnx actiond, Arc * arc );
+	void initMatch( Node * node, Ginger::SharedMnx arcd, Arc * arc );
+	void initAction( Ginger::SharedMnx actiond, Arc * arc );
 	
 public:
 	void start();
-	void processChar( char & ch );
+	bool processChar( char ch );
 	void processEof();
 	void finish();
 	
 public:
-	Grammar( State * state, Ginger::SharedGnx description );
+	Grammar( State * state, Ginger::SharedMnx description );
 };
 
 } // namespace

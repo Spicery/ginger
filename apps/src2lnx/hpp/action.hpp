@@ -55,6 +55,13 @@ public:
 	ValuePushAction( State * state, const std::string & name, const std::string & value );
 };
 
+class PushBackAction : public Action {
+public:
+	void run( char ch );
+public:
+	PushBackAction( State * state );
+};
+
 class FromPropertyPushAction : public Action {
 private:
 	int prop_index;

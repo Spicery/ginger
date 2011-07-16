@@ -28,7 +28,7 @@
 #include "printgpl.hpp"
 #include "mishap.hpp"
 #include "gngversion.hpp"
-#include "gnx.hpp"
+#include "mnx.hpp"
 
 //	This application modules.
 #include "grammar.hpp"
@@ -127,8 +127,8 @@ public:
 public:
 	void run() {
 		ifstream g( this->grammar_file.c_str() );
-		GnxReader reader( g );
-		shared< Gnx > grammar_description( reader.readGnx() );
+		MnxReader reader( g );
+		shared< Mnx > grammar_description( reader.readMnx() );
 		
 		State state;
 		Grammar grammar( &state, grammar_description );
@@ -136,8 +136,15 @@ public:
 		grammar.start();
 		char ch;
 		cin >> noskipws;
+		state.lineno = 1;
 		while ( cin >> ch ) {
-			grammar.processChar( ch );
+			do {
+				state.ok = true;
+				grammar.processChar( ch ); 
+			} while ( !state.ok );
+			if ( ch == '\n' ) {
+				state.lineno += 1;
+			}
 		}
 		grammar.processEof();
 		grammar.finish();

@@ -28,7 +28,7 @@
 #include "printgpl.hpp"
 #include "mishap.hpp"
 #include "gngversion.hpp"
-#include "gnx.hpp"
+#include "mnx.hpp"
 
 //	This application modules.
 #include "toktype.hpp"
@@ -127,18 +127,8 @@ public:
 public:
 	void run() {
 		ifstream g( this->grammar_file.c_str() );
-		GnxReader reader( g );
-		shared< Gnx > grammar = reader.readGnx();
-		
-		
-
-		/*FILE * in;
-		if ( this->use_stdin ) {
-			in = stdin;
-		} else {
-			in = fopen( input_file_name.c_str(), "r" ); 
-			if ( in == NULL ) throw Mishap( "Cannot open file" ).culprit( "Filename", input_file_name );
-		}*/
+		MnxReader reader( g );
+		shared< Mnx > grammar = reader.readMnx();
 	
 		ifstream input;
 		istream & in( this->use_stdin ? cin : input );
@@ -147,11 +137,10 @@ public:
 			if ( input.bad() ) throw Mishap( "Cannot open file" ).culprit( "Filename", input_file_name );
 		}
 	
-	
 		LnxReader itemf( in );
 		//shared< ItemFactoryClass > itemf( new ItemFactoryClass( in ) );
 		Parser xsonparser( itemf, grammar );
-		SharedGnx answer = xsonparser.parse();
+		SharedMnx answer = xsonparser.parse();
 		
 		answer->render();
 		cout << endl;
@@ -169,6 +158,7 @@ int main( int argc, char **argv, char **envp ) {
 		p.report();
 		return EXIT_FAILURE;
 	} catch ( Ginger::Problem & p ) {
+		//cerr << "REPORTING" << endl;
 		p.report();
 		return EXIT_FAILURE;
 	}

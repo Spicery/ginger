@@ -20,7 +20,7 @@
 #define XSONPARSER_HPP
 
 //	AppGinger library.
-#include "gnx.hpp"
+#include "mnx.hpp"
 #include "lnxreader.hpp"
 
 //	This project.
@@ -30,31 +30,36 @@ namespace LNX2MNX_NS {
 
 
 class Parser {
-private:
-	Ginger::GnxBuilder builder;
-	Ginger::LnxReader itemf;
-	std::string start;
-	std::map< std::string, std::vector< Ginger::SharedGnx > > rules;
+public:
+	Ginger::SharedMnx mishapDesc;
 	
-	void init( Ginger::SharedGnx grammar );
-	void loadRules( Ginger::SharedGnx g );
-	void load1Rule( Ginger::SharedGnx g );
+private:
+	Ginger::MnxBuilder builder;
+	Ginger::LnxReader & itemf;
+	std::string start;
+	std::map< std::string, std::vector< Ginger::SharedMnx > > rules;
+	std::string token_print_property;
+	
+	void init( Ginger::SharedMnx grammar );
+	void loadRules( Ginger::SharedMnx g );
+	void load1Rule( Ginger::SharedMnx g );
 
 public:
-	std::vector< Ginger::SharedGnx > & getRule( const std::string & key );
-	Ginger::GnxBuilder & getBuilder() { return builder; }
+	std::vector< Ginger::SharedMnx > & getRule( const std::string & key );
+	Ginger::MnxBuilder & getBuilder() { return builder; }
 	Ginger::LnxItem * peek();
 	void drop();
 
 public:
-	Ginger::SharedGnx parse();
-	Parser( Ginger::LnxReader itemf, Ginger::SharedGnx grammar );
+	Ginger::SharedMnx parse();
+	Parser( Ginger::LnxReader & itemf, Ginger::SharedMnx grammar );
 };
 
 class RuleParser {
 private:
 	Parser * parent;
-	Ginger::GnxBuilder & builder;
+	Ginger::MnxBuilder & builder;
+	int depth;
 	const std::string state;
 	float precedence;
 	Ginger::LnxItem * item;
@@ -65,21 +70,24 @@ public:
 	void parse();
 	void parseFromState( const std::string & state, float precedence );
 	void parseFromState( const std::string & state );
-	void processChildren( Ginger::SharedGnx & g );
-	Ginger::SharedGnx findMatchingRule( const std::string & state, Ginger::LnxItem * item, const bool throwVsReturnNull );
-	bool evaluateCondition( Ginger::LnxItem * item, Ginger::SharedGnx & g, const bool readVsPeek );
+	void processChildren( Ginger::SharedMnx & g );
+	Ginger::SharedMnx findMatchingRule( const std::string & state, Ginger::LnxItem * item, const bool throwVsReturnNull );
+	bool evaluateCondition( Ginger::LnxItem * item, Ginger::SharedMnx & g, const bool readVsPeek );
+
+public:	
+	void unexpectedToken( Ginger::LnxItem * item );
 
 public:
-	void processAction( Ginger::SharedGnx & g );
-	void parseAction( Ginger::SharedGnx & g );
-	void parseListAction( Ginger::SharedGnx & action, const bool readVsPeek );
-	void putAction( Ginger::SharedGnx & action );
-	void elementAction( Ginger::SharedGnx & action );
+	void processAction( Ginger::SharedMnx & g );
+	void parseAction( Ginger::SharedMnx & g );
+	void parseListAction( Ginger::SharedMnx & action, const bool readVsPeek );
+	void putAction( Ginger::SharedMnx & action );
+	void elementAction( Ginger::SharedMnx & action );
 	void saveAction();
 	void restoreAction();
-	void mustReadAction( Ginger::SharedGnx & action );
-	void ifUnlessAction( Ginger::SharedGnx & action, const bool ifVsUnless, const bool readVsPeek );
-	void whileUntilAction( Ginger::SharedGnx & action, const bool whileVsUntil, const bool readVsPeek );
+	void mustReadAction( Ginger::SharedMnx & action );
+	void ifUnlessAction( Ginger::SharedMnx & action, const bool ifVsUnless, const bool readVsPeek );
+	void whileUntilAction( Ginger::SharedMnx & action, const bool whileVsUntil, const bool readVsPeek );
 public:
 	RuleParser( Parser * parent, const std::string & state, float precedence, Ginger::LnxItem * item );
 };

@@ -48,8 +48,10 @@ private:
 
 public:
 	void put( const std::string & key, const std::string & value );
+	bool hasProperty( const std::string & );
 	std::vector< std::string > & propertyDefaults() { return this->property_defaults; }
 	std::string & propertyKey( int n ) { return this->property_keys[ n ]; }
+	std::string & propertyDefault( int n ) { return this->property_defaults[ n ]; }
 	
 	//	This needs to check that the value is in range - otherwise throw an exception.
 	int propertyIndex( const std::string & key );

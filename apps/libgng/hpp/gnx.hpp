@@ -120,6 +120,7 @@ public:
 	void copyFrom( const Gnx & g );
 	
 public:
+	std::string toString();
 	void render( std::ostream & out );
 	void render();
 	void prettyPrint( std::ostream & out );

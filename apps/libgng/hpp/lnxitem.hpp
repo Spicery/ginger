@@ -28,11 +28,11 @@ class LnxReader;
 
 class LnxItem {
 private:
-	std::vector< std::string > values;
-private:
 	LnxReader * reader;
+	std::vector< std::string > values;
 public:
 	void put( const std::string & key, const std::string & value );
+	bool hasProperty( const std::string & key ) const;
 	std::string & propertyValue( const std::string & key );
 	std::string & propertyValue( int n );
 	const std::string & propertyKey( int n );
@@ -40,6 +40,7 @@ public:
 public:
 	void show();
 public:
+	//LnxItem( LnxItem * item );
 	LnxItem( LnxReader * reader ) : reader( reader ) {}
 };
 

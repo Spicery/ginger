@@ -134,6 +134,12 @@ void Gnx::render() {
 	this->render( cout );
 }
 
+std::string Gnx::toString() {
+	ostringstream out;
+	this->render( out );
+	return out.str();
+}
+
 class GnxHandler : public SaxHandler {
 private:
 	shared< Gnx > answer;

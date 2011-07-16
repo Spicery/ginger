@@ -119,6 +119,20 @@ LnxReader::~LnxReader() {
 	}
 }
 
+LnxItem * LnxReader::peek() {
+	if ( this->handler->isAtBreak() ) {
+		return this->current_item;
+	} else if ( this->handler->isDone() ) {
+		return NULL;
+	} else {
+		return this->read();
+	}
+}
+
+void LnxReader::drop() {
+	this->read();
+}
+
 LnxItem * LnxReader::read() {
 	if ( this->handler->isDone() ) return NULL;
 	for (;;) {
@@ -160,8 +174,14 @@ void LnxReader::put( const string & key, const string & value ) {
 	}
 }
 
+bool LnxReader::hasProperty( const std::string & key ) {
+	map< string, int >::const_iterator it = this->property_index.find( key );
+	return it != this->property_index.end();
+}
+
+
 int LnxReader::propertyIndex( const std::string & key ) { 
-	map< string, int >::iterator it = this->property_index.find( key );
+	map< string, int >::const_iterator it = this->property_index.find( key );
 	if ( it != this->property_index.end() ) {
 		return it->second;
 	} else {

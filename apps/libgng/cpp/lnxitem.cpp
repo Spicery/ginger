@@ -25,6 +25,13 @@
 namespace Ginger {
 using namespace std;
 
+/*LnxItem::LnxItem( LnxItem * item ) :
+	reader( item->reader ),
+	values( item->values )
+{
+}*/
+
+
 void LnxItem::put( const std::string & key, const std::string & value ) {
 	//cout << "Putting " << key << " = " << value << endl;
 	this->propertyValue( key ) = value;
@@ -35,6 +42,11 @@ std::string & LnxItem::propertyValue( const std::string & key ) {
 	//cerr << "checking N = " << n << " of " << this->values.size() << endl;
 	return this->values[ n ];
 }
+
+bool LnxItem::hasProperty( const std::string & key ) const {
+	return this->reader->hasProperty( key );
+}
+
 
 std::string & LnxItem::propertyValue( int n ) {
 	return this->values[ n ];

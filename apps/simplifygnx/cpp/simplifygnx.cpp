@@ -78,7 +78,7 @@ to it as a stream.
 
 #include "mishap.hpp"
 #include "sax.hpp"
-#include "gnx.hpp"
+#include "mnx.hpp"
 #include "command.hpp"
 #include "metainfo.hpp"
 
@@ -458,12 +458,12 @@ std::string resolveQualified(
 /*
 
 //	Template for a Tree-walking Transformation
-class TransformOfSomeKind : public Ginger::GnxVisitor {
+class TransformOfSomeKind : public Ginger::MnxVisitor {
 public:
-	void startVisit( Ginger::Gnx & element ) {
+	void startVisit( Ginger::Mnx & element ) {
 	}
 	
-	void endVisit( Ginger::Gnx & element ) {
+	void endVisit( Ginger::Mnx & element ) {
 	}
 	
 public:
@@ -472,13 +472,13 @@ public:
 */
 
 
-class ArityMarker : public Ginger::GnxVisitor {
+class ArityMarker : public Ginger::MnxVisitor {
 public:
-	void startVisit( Ginger::Gnx & element ) {
+	void startVisit( Ginger::Mnx & element ) {
 		element.clearAttribute( ARITY );	//	Throw away any previous marking.
 	}
 	
-	void endVisit( Ginger::Gnx & element ) {
+	void endVisit( Ginger::Mnx & element ) {
 		if ( element.hasAttribute( "value" ) ) {
 			element.putAttribute( ARITY, "1" );
 		} else {
@@ -546,10 +546,10 @@ public:
 
 #define TAIL_CALL_MASK 		0x1
 
-class TailCall : public Ginger::GnxVisitor {
+class TailCall : public Ginger::MnxVisitor {
 
 public:
-	void startVisit( Ginger::Gnx & element ) {
+	void startVisit( Ginger::Mnx & element ) {
 		const string & x = element.name();
 		element.clearAttribute( TAILCALL );	//	Throw away any previous marking.
 		if ( x == "fn" ) {
@@ -576,7 +576,7 @@ public:
 		}
 	}
 	
-	void endVisit( Ginger::Gnx & element ) {
+	void endVisit( Ginger::Mnx & element ) {
 		element.clearFlags( TAIL_CALL_MASK );
 	}
 	
@@ -598,13 +598,13 @@ public:
 		originating package. It caches this using the def.pkg attribute.
 
 */
-class Absolute : public Ginger::GnxVisitor {
+class Absolute : public Ginger::MnxVisitor {
 private:
 	vector< string > & project_folders;
 	std::string package;
 		
 public:
-	void startVisit( Ginger::Gnx & element ) {
+	void startVisit( Ginger::Mnx & element ) {
 		const string & x = element.name();
 		if ( x == "id" ) {
 			const string & name = element.attribute( "name" );
@@ -635,7 +635,7 @@ public:
 		}
 	}
 	
-	void endVisit( Ginger::Gnx & element ) {
+	void endVisit( Ginger::Mnx & element ) {
 	}
 	
 public:
@@ -649,7 +649,7 @@ public:
 };
 
 struct VarInfo {
-	Ginger::Gnx *			element;
+	Ginger::Mnx *			element;
 	const string *			name;
 	int						uid;
 	size_t					dec_level;
@@ -671,7 +671,7 @@ struct VarInfo {
 	{
 	}
 	
-	VarInfo( Ginger::Gnx * element, const string * name, int uid, size_t dec_level, bool is_protected, bool is_local ) : 
+	VarInfo( Ginger::Mnx * element, const string * name, int uid, size_t dec_level, bool is_protected, bool is_local ) : 
 		element( element ),
 		name( name ),
 		uid( uid ),
@@ -694,7 +694,7 @@ struct VarInfo {
 	[3] It propagates the protected="true" maplet into all <id> elements.
 	
 */
-class Scope : public Ginger::GnxVisitor {
+class Scope : public Ginger::MnxVisitor {
 private:
 	int var_uid;
 	bool outers_found;
@@ -751,7 +751,7 @@ public:
 		return this->outers_found;
 	}
 	
-	void startVisit( Ginger::Gnx & element ) {
+	void startVisit( Ginger::Mnx & element ) {
 		const string & x = element.name();
 		element.clearAttribute( UID );		//	Throw away any previous marking.
 		element.clearAttribute( SCOPE );	//	Throw away any previous marking.
@@ -790,7 +790,7 @@ public:
 		}
 	}
 	
-	void endVisit( Ginger::Gnx & element ) {
+	void endVisit( Ginger::Mnx & element ) {
 		const string & x = element.name();
 		if ( x == "fn" ) { //|| x == "block" || x == "for" ) {
 			int n = this->scopes.back();
@@ -826,12 +826,12 @@ public:
 		to permit flattening of nested seqs.
 		
 */
-class SysFold : public Ginger::GnxVisitor {
+class SysFold : public Ginger::MnxVisitor {
 public:
-	void startVisit( Ginger::Gnx & element ) {
+	void startVisit( Ginger::Mnx & element ) {
 	}
 
-	void endVisit( Ginger::Gnx & element ) {
+	void endVisit( Ginger::Mnx & element ) {
 		const string & x = element.name();
 		if ( x == "id" ) {
 			if ( element.hasAttribute( "def.pkg" ) && element.attribute( "def.pkg" ) == "ginger.library" ) {
@@ -856,18 +856,18 @@ public:
 };
 
 //	Template for a Tree-walking Transformation
-class Lift : public Ginger::GnxVisitor {
+class Lift : public Ginger::MnxVisitor {
 private:
-	map< string, Ginger::Gnx * > 	dec_outer;
+	map< string, Ginger::Mnx * > 	dec_outer;
 	vector< set< string > > 		capture_sets;
 
 public:
-	void startVisit( Ginger::Gnx & element ) {
+	void startVisit( Ginger::Mnx & element ) {
 		const string & x = element.name();
 		if ( x == "var" && element.hasAttribute( IS_OUTER ) && element.hasAttribute( UID ) ) {
 			this->dec_outer[ element.attribute( UID ) ] = &element;
 		} else if ( x == "id" && element.hasAttribute( UID ) ) {
-			map< string, Ginger::Gnx * >::iterator m = this->dec_outer.find( element.attribute( UID ) );
+			map< string, Ginger::Mnx * >::iterator m = this->dec_outer.find( element.attribute( UID ) );
 			if ( m != this->dec_outer.end() ) {
 				element.putAttribute( IS_OUTER, "true" );
 				if ( element.hasAttribute( OUTER_LEVEL ) ) {
@@ -899,20 +899,20 @@ public:
 	}
 	
 	//	method
-	shared< Ginger::Gnx > makeLocals( const char * tag ) {
-		shared< Ginger::Gnx > locals( new Ginger::Gnx( "seq" ) );
+	shared< Ginger::Mnx > makeLocals( const char * tag ) {
+		shared< Ginger::Mnx > locals( new Ginger::Mnx( "seq" ) );
 		for ( 
 			set< string >::iterator it = this->capture_sets.back().begin();
 			it != this->capture_sets.back().end();
 			++it
 		) {
 			const string & uid = *it;
-			Ginger::Gnx * v = this->dec_outer[ uid ];
+			Ginger::Mnx * v = this->dec_outer[ uid ];
 			if ( v == NULL ) throw;
 			//cout << "SO FAR: ";
 			/*v->render();
 			cout << endl;*/
-			shared< Ginger::Gnx > var( new Ginger::Gnx( tag ) );
+			shared< Ginger::Mnx > var( new Ginger::Mnx( tag ) );
 			var->putAttribute( "name", v->attribute( "name" ) );
 			var->putAttribute( UID, uid );
 			var->putAttribute( SCOPE, "local" );
@@ -921,7 +921,7 @@ public:
 		return locals;
 	}
 	
-	void endVisit( Ginger::Gnx & element ) {
+	void endVisit( Ginger::Mnx & element ) {
 		const string & x = element.name();
 		if ( x == "fn" ) {
 			/*cout << "Capture set:" << element.attribute( "name", "[anon]" ) << ":";
@@ -939,8 +939,8 @@ public:
 				//	We should extend the set of local variables with the
 				//	capture set.
 				{
-					shared< Ginger::Gnx > arg( element.child( 0 ) );
-					shared< Ginger::Gnx > newarg( new Ginger::Gnx( "seq" ) );
+					shared< Ginger::Mnx > arg( element.child( 0 ) );
+					shared< Ginger::Mnx > newarg( new Ginger::Mnx( "seq" ) );
 					newarg->addChild( arg );
 					newarg->addChild( this->makeLocals( "var" ) );
 					
@@ -954,9 +954,9 @@ public:
 				//	to partapply onto the original function and 
 				//	the capture set.
 				{
-					shared< Ginger::Gnx > fn( new Ginger::Gnx( "fn" ) );
+					shared< Ginger::Mnx > fn( new Ginger::Mnx( "fn" ) );
 					fn->copyFrom( element );
-					shared< Ginger::Gnx > partapply( new Ginger::Gnx( "sysapp" ) );
+					shared< Ginger::Mnx > partapply( new Ginger::Mnx( "sysapp" ) );
 					partapply->putAttribute( "name", "partApply" );
 					partapply->addChild( this->makeLocals( "id" ) );
 					partapply->addChild( fn );
@@ -972,10 +972,10 @@ public:
 	virtual ~Lift() {}
 };
 
-class AddDeref : public Ginger::GnxVisitor {
+class AddDeref : public Ginger::MnxVisitor {
 public:
 	
-	void startVisit( Ginger::Gnx & element ) {
+	void startVisit( Ginger::Mnx & element ) {
 	}
 	
 	//	This has to be an endVisit. If it is a startVisit, it might
@@ -983,12 +983,12 @@ public:
 	//	chain of derefs. It could be a start visit IF we added/removed
 	//	a flag attribute.
 	//
-	void endVisit( Ginger::Gnx & element ) {
+	void endVisit( Ginger::Mnx & element ) {
 		const string & x = element.name();
 		if ( element.hasAttribute( IS_OUTER, "true" ) && element.hasAttribute( PROTECTED, "false" ) && ( x == "var" || x == "id" ) ) {
-			shared< Ginger::Gnx > t( new Ginger::Gnx( x ) );
+			shared< Ginger::Mnx > t( new Ginger::Mnx( x ) );
 			t->copyFrom( element );
-			shared< Ginger::Gnx > d( new Ginger::Gnx( "deref" ) );
+			shared< Ginger::Mnx > d( new Ginger::Mnx( "deref" ) );
 			d->addChild( t );
 			element.copyFrom( *d );
 		/*} else if ( x == "bind" && element.child(0).name() == "deref" ) {
@@ -1003,9 +1003,9 @@ public:
 };
 
 
-class Flatten : public Ginger::GnxVisitor {
+class Flatten : public Ginger::MnxVisitor {
 public:
-	void startVisit( Ginger::Gnx & element ) {
+	void startVisit( Ginger::Mnx & element ) {
 		const string & x = element.name();
 		if ( x == "sysapp" || x == "seq" ) {
 			for ( int i = 0; i < element.size(); i++ ) {
@@ -1017,7 +1017,7 @@ public:
 		}
 	}
 
-	void endVisit( Ginger::Gnx & element ) {
+	void endVisit( Ginger::Mnx & element ) {
 	}
 
 public:
@@ -1026,11 +1026,11 @@ public:
 };
 
 void Main::run() {
-	Ginger::GnxReader reader;
+	Ginger::MnxReader reader;
 	
 	for (;;) {
 	
-		shared< Ginger::Gnx > g( reader.readGnx() );
+		shared< Ginger::Mnx > g( reader.readMnx() );
 		if ( not g ) break;
 	
 		//	If we are not doing absolute_processing we should assume we

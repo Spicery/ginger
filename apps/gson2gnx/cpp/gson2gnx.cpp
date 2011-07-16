@@ -27,7 +27,7 @@
 #include "gngversion.hpp"
 
 #include "item_factory.hpp"
-#include "gnx.hpp"
+#include "mnx.hpp"
 #include "toktype.hpp"
 
 using namespace std;
@@ -45,7 +45,7 @@ using namespace Ginger;
 
 class GsonReader {
 private: 
-	GnxBuilder& builder;
+	MnxBuilder& builder;
 	ItemFactory itemf;
 	
 public:
@@ -97,7 +97,7 @@ public:
 		
 		//	First we grab the next expression.
 		this->readExpr();
-		shared< Gnx > lhs = this->builder.build();
+		shared< Mnx > lhs = this->builder.build();
 		
 		//	Now we check out the operator.
 		Item op = this->itemf->read();		
@@ -235,7 +235,7 @@ public:
 	void readExpr() {
 		this->readPrimaryExpr();
 		while ( this->tryReadSign( '(' ) ) {
-			shared< Gnx > func = builder.build();
+			shared< Mnx > func = builder.build();
 			builder.start( "app" );
 			builder.add( func );
 			builder.start( "seq" );
@@ -246,7 +246,7 @@ public:
 	}
 	
 public:
-	GsonReader( GnxBuilder & b, ItemFactory x ) : builder( b ), itemf( x ) {}
+	GsonReader( MnxBuilder & b, ItemFactory x ) : builder( b ), itemf( x ) {}
 };
 
 
@@ -373,14 +373,14 @@ public:
 	
 		ItemFactoryClass itemf( in );
 		for (;;) {
-			GnxBuilder builder;
+			MnxBuilder builder;
 			
 			if ( itemf.peek()->isAtEnd() ) break;
 			
 			GsonReader reader( builder, &itemf );
 			reader.readExpr();
 	
-			shared< Gnx > gnx( builder.build() );
+			shared< Mnx > gnx( builder.build() );
 			gnx->render();
 	
 			cout << endl;	

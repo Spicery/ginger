@@ -29,6 +29,7 @@
 //	Local libs
 #include "state.hpp"
 #include "node.hpp"
+#include "mapping.hpp"
 
 namespace SRC2LNX_NS {
 
@@ -43,16 +44,17 @@ private:
 	void initEmptyNodes(
 		State * state, 
 		Ginger::SharedMnx description,
-		std::vector< Ginger::SharedMnx > & node_desc
+		std::vector< Ginger::SharedMnx > & node_desc,
+		std::vector< Ginger::SharedMnx > & mapping_desc,
+		std::map< std::string, std::string > & named_categories
 	);
 
 	void initStartNode( Ginger::SharedMnx description );
 
-	void initArcs( 
-		std::vector< Ginger::SharedMnx > & node_desc
-	);
+	void initArcs( std::vector< Ginger::SharedMnx > & node_desc, std::map< std::string, std::string > & named_categories );
+	void initMappings( std::vector< Ginger::SharedMnx > & mapping_desc );
 	
-	void initMatch( Node * node, Ginger::SharedMnx arcd, Arc * arc );
+	void initMatch( Node * node, Ginger::SharedMnx arcd, Arc * arc, std::map< std::string, std::string > & named_categories );
 	void initAction( Ginger::SharedMnx actiond, Arc * arc );
 	
 public:

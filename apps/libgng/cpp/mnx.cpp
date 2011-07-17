@@ -286,14 +286,23 @@ MnxBuilder::MnxBuilder()
 }
 
 void MnxBuilder::start( const std::string & name ) {
+	#ifdef DEBUG
+		cerr << "*** START " << name << endl;
+	#endif
 	this->stack.push_back( shared< Mnx >( new Mnx( name ) ) );
 }
 
 void MnxBuilder::put( const std::string & key, const std::string & value ) {
+	#ifdef DEBUG
+		cerr << "*** PUT " << key << "=" << value << endl;
+	#endif
 	this->stack.back()->putAttribute( key, value );
 }
 
 void MnxBuilder::end() {
+	#ifdef DEBUG
+		cerr << "*** END" << endl;
+	#endif
 	if ( this->stack.size() <= 1 ) {
 		throw Mishap( "Too many 'ends'" );
 	}
@@ -303,13 +312,17 @@ void MnxBuilder::end() {
 }
 
 shared< Mnx > MnxBuilder::build() {
+	#ifdef DEBUG
+		cerr << "*** BUILD" << endl;
+	#endif
+
 	if ( this->stack.size() <= 0 ) {
 		throw Mishap( "Too many 'builds'" );
 	}
 	shared< Mnx > in_progress = this->stack.back();
 	
 	if ( in_progress->isEmpty() ) {
-		throw Mishap( "Construction aborted (too many builds)" );
+		throw Mishap( "MinX construction failed (too many builds?)" );
 	}
 	
 	shared< Mnx > answer = in_progress->lastChild();
@@ -318,14 +331,23 @@ shared< Mnx > MnxBuilder::build() {
 }
 
 void MnxBuilder::add( shared< Mnx > & child ) {
+	#ifdef DEBUG
+		cerr << "*** ADD" << endl;
+	#endif
 	this->stack.back()->addChild( child );
 }
 
 void MnxBuilder::save() {
+	#ifdef DEBUG
+		cerr << "*** SAVE" << endl;
+	#endif
 	this->put_aside.push_back( this->build() );
 }
 
 void MnxBuilder::restore() {
+	#ifdef DEBUG
+		cerr << "*** RESTORE" << endl;
+	#endif
 	if ( this->put_aside.empty() ) {
 		throw Mishap( "Too many 'restores'" );
 	}

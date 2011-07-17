@@ -68,7 +68,7 @@ EmitAction::EmitAction( State * state ) :
 	Action( state )
 {}
 
-void EmitAction::run( char ch ) {
+void EmitAction::run( char ch ) {	
 	this->state->emit();
 }
 

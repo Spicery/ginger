@@ -60,7 +60,7 @@ private:
 	Parser * parent;
 	Ginger::MnxBuilder & builder;
 	int depth;
-	const std::string state;
+	const std::string init_state;
 	float precedence;
 	Ginger::LnxItem * item;
 	

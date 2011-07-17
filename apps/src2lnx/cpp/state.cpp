@@ -25,6 +25,8 @@
 
 //	Local libs
 #include "state.hpp"
+#include "mapping.hpp"
+
 
 namespace SRC2LNX_NS {
 using namespace std;
@@ -76,7 +78,22 @@ void State::reset( int index ) {
 	this->property_value[ index ] = this->property_default[ index ];
 }
 
+void State::runMappings() {
+	for (
+		vector< Mapping * >::iterator it = this->mappings.begin();
+		it != this->mappings.end();
+		++it
+	) {
+		(*it)->update( this );
+	}
+}
+
 void State::emit() {
+	this->runMappings();
+	this->emitContents();
+}
+
+void State::emitContents() {
 	cout << "<.";
 	for ( int i = 0; i < this->prop_count; i++ ) {
 		if ( this->property_output[ i ] ) {

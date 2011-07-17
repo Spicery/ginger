@@ -19,11 +19,16 @@
 #ifndef STATE_SRC2LNX_HPP
 #define STATE_SRC2LNX_HPP
 
+//	STLs
 #include <string>
 #include <map>
 #include <vector>
 
+
 namespace SRC2LNX_NS {
+
+//	Forward declaration.
+class Mapping;
 
 class State {
 public:
@@ -33,6 +38,9 @@ public:
 	int lineno;
 	bool lineno_needed;
 	std::string lineno_property;
+	
+public:
+	std::vector< Mapping * > mappings;
 	
 private:
 	int node_index;
@@ -47,6 +55,10 @@ private:
 
 public:
 	int & nodeIndex() { return this->node_index; }
+
+private:
+	void runMappings();
+	void emitContents();
 
 public:
 	int count() { return this->prop_count; }

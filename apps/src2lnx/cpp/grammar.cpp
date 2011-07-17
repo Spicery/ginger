@@ -30,54 +30,47 @@ namespace SRC2LNX_NS {
 using namespace Ginger;
 using namespace std;
 
-#define NAME "name"
-#define DEFAULT "default"
-#define PROPERTY "property"
-#define NODE "node"
-#define START "start"
-#define ANY_MATCHER "any"
-#define PUSH "push"
-#define PUSHBACK "pushback"
-#define VALUE "value"
-#define FROM_PROPERTY "from.property"
-#define EMIT "emit"
-#define GOTO "go"
-#define TO "to"
-#define RESET "reset"
-#define DEHEX "dehex"
-#define EOF_MATCHER "eof"
-#define INCLUDE_MATCHER "include"
-#define IS_ALPHA_MATCHER "isalpha"
-#define IS_DIGIT_MATCHER "isdigit"
-#define IS_ALNUM_MATCHER "isalnum"
-#define IS_PUNCT_MATCHER "ispunct"
-#define IS_GRAPH_MATCHER "isgraph"
-#define IS_CNTRL_MATCHER "iscntrl"
-#define IS_LOWER_MATCHER "islower"
-#define IS_UPPER_MATCHER "isupper"
-#define IS_SPACE_MATCHER "isspace"
-#define IS_PRINT_MATCHER "isprint"
-#define OUTPUT 	"output"
-#define FALSE	"false"
-#define TITLE 	"title"
+#define ANY_MATCHER 		"any"
+#define CATEGORY			"category"
+#define DEFAULT 			"default"
+#define DEHEX 				"dehex"
+#define DESTINATION			"destination"
+#define EMIT 				"emit"
+#define EOF_MATCHER 		"eof"
+#define FALSE				"false"
+#define FROM_PROPERTY 		"from.property"
+#define GOTO 				"go"
+#define IN_CATEGORY			"in.category"
+#define INCLUDE_MATCHER 	"include"
+#define IS_ALNUM_MATCHER 	"isalnum"
+#define IS_ALPHA_MATCHER 	"isalpha"
+#define IS_CNTRL_MATCHER 	"iscntrl"
+#define IS_DIGIT_MATCHER 	"isdigit"
+#define IS_GRAPH_MATCHER 	"isgraph"
+#define IS_LOWER_MATCHER 	"islower"
+#define IS_PRINT_MATCHER 	"isprint"
+#define IS_PUNCT_MATCHER 	"ispunct"
+#define IS_SPACE_MATCHER 	"isspace"
+#define IS_UPPER_MATCHER 	"isupper"
+#define KEY					"key"
 #define LINE_NUMBER			"line.number"
+#define MAP		 			"map"
+#define NAME 				"name"
+#define NODE 				"node"
+#define OUTPUT 				"output"
+#define PROPERTY 			"property"
+#define PUSH 				"push"
+#define PUSHBACK 			"pushback"
+#define RESET 				"reset"
+#define SOURCE				"source"
+#define START 				"start"
+#define TITLE 				"title"
+#define TO 					"to"
+#define VALUE				"value"
 
 
 void Grammar::start() {
 	this->state->emitHead();
-	/*
-	cout << "<item.stream";
-	for ( int n = 0; n < this->state->count(); n++ ) {
-		if ( this->state->property_output[ i ] ) {
-			string & name = this->state->name( n );
-			string & def = this->state->def( n );
-			cout << " " << name << "=\"";
-			gnxRenderText( cout, def );
-			cout << "\"";
-		}
-	}
-	cout << ">" << endl;
-	*/
 }
 
 bool Grammar::processChar( const char ch ) {
@@ -114,7 +107,9 @@ void Grammar::finish() {
 void Grammar::initEmptyNodes(
 	State * state, 
 	SharedMnx description,
-	vector< SharedMnx > & node_desc
+	vector< SharedMnx > & node_desc,
+	vector< SharedMnx > & mapping_desc,
+	map< string, string > & named_categories
 ) {
 	state->lineno_needed = false;
 	MnxChildIterator it( description );
@@ -122,16 +117,18 @@ void Grammar::initEmptyNodes(
 		SharedMnx d( it.next() );
 		if ( d->hasName( PROPERTY ) ) {
 			if ( d->hasAttribute( DEFAULT ) ) {
-				//cerr << "Name = " << d->name() << endl;
-				//if ( d->hasAttribute( OUTPUT ) ) {
-				//	cerr << "  Output = " << d->attribute( OUTPUT ) << endl;
-				//}
 				state->addProperty( d->attribute( NAME ), d->attribute( DEFAULT ), !d->hasAttribute( OUTPUT, FALSE ) );
 			} else if ( d->hasAttribute( LINE_NUMBER ) ) {
 				state->lineno_needed = true;
 				state->lineno_property = d->attribute( NAME );
 			} else {
 				throw Mishap( "Unrecognised property description in LinX grammar" ).culprit( "Element", d->toString() );
+			}
+		} else if ( d->hasName( MAP ) ) {
+			if ( d->hasAttribute( SOURCE ) && d->hasAttribute( DESTINATION ) ) {
+				mapping_desc.push_back( d );
+			} else {
+				throw Mishap( "Mapping missing source or destination in LinX grammar" ).culprit( "Element", d->toString() );
 			}
 		} else if ( d->hasName( NODE ) ) {
 			Node * node = new Node( d->attribute( NAME ) );
@@ -141,6 +138,12 @@ void Grammar::initEmptyNodes(
 				node->title() = d->attribute( TITLE );
 			}
 			node_desc.push_back( d );
+		} else if ( d->hasName( CATEGORY ) ) {
+			if ( d->hasAttribute( NAME ) && d->hasAttribute( INCLUDE_MATCHER ) ) {
+				named_categories[ d->attribute( NAME ) ] = d->attribute( INCLUDE_MATCHER );
+			} else {
+				throw Mishap( "Category missing name or include attribute in LinX grammar" ).culprit( "Element", d->toString() );				
+			}
 		} else {
 			throw Mishap( "Unrecognised element name in LinX grammar" ).culprit( "Name", d->name() );
 		}
@@ -151,7 +154,12 @@ void Grammar::initStartNode( SharedMnx description ) {
 	state->nodeIndex() = description->hasAttribute( START ) ? this->node_index[ description->attribute( START ) ] : 0;
 }
 
-void Grammar::initMatch( Node * node, SharedMnx arcd, Arc * arc ) {
+void Grammar::initMatch( 
+	Node * node, 
+	SharedMnx arcd, 
+	Arc * arc, 
+	map< string, string > & named_categories 
+) {
 	if ( arcd->hasAttribute( EOF_MATCHER ) ) {
 		node->eofArc() = arc;
 	} else {
@@ -160,6 +168,13 @@ void Grammar::initMatch( Node * node, SharedMnx arcd, Arc * arc ) {
 			arc->match() = new AnyMatch();
 		} else if ( arcd->hasAttribute( INCLUDE_MATCHER ) ) {
 			arc->match() = new IncludeMatch( arcd->attribute( INCLUDE_MATCHER ) );
+		} else if ( arcd->hasAttribute( IN_CATEGORY ) ) {
+			map< string, string >::iterator it = named_categories.find( arcd->attribute( IN_CATEGORY ) );
+			if ( it != named_categories.end() ) {
+				arc->match() = new IncludeMatch( it->second );
+			} else {
+				throw Mishap( "Unrecognised category" ).culprit( "Name", arcd->attribute( IN_CATEGORY ) );
+			}
 		} else if ( arcd->hasAttribute( IS_SPACE_MATCHER ) ) {
 			arc->match() = new IsSpaceMatch();
 		} else if ( arcd->hasAttribute( IS_ALPHA_MATCHER ) ) {
@@ -253,7 +268,8 @@ void Grammar::initAction(
 }
 
 void Grammar::initArcs(
-	vector< SharedMnx > & node_desc
+	vector< SharedMnx > & node_desc,
+	map< string, string > & named_categories
 ) {
 	for ( unsigned int i = 0; i < node_desc.size(); i++ ) {
 		SharedMnx d( node_desc[ i ] );
@@ -264,7 +280,7 @@ void Grammar::initArcs(
 			SharedMnx arcd( arcs.next() );
 			//cerr << "ARC " << arc->name() << endl;
 			Arc * arc = new Arc();
-			this->initMatch( node, arcd, arc );
+			this->initMatch( node, arcd, arc, named_categories );
 	
 			MnxChildIterator actions( arcd );
 			while ( actions.hasNext() ) {
@@ -275,21 +291,47 @@ void Grammar::initArcs(
 	}
 }
 
+void Grammar::initMappings( vector< SharedMnx > & mapping_desc ) {
+	for ( unsigned int i = 0; i < mapping_desc.size(); i++ ) {
+		SharedMnx d( mapping_desc[ i ] );
+		//	We have checked it has source and destination attributes.
+		int src = this->state->propIndex( d->attribute( SOURCE ) );
+		int dst = this->state->propIndex( d->attribute( DESTINATION ) );
+		
+		Mapping * mapping = new Mapping( src, dst );
+		this->state->mappings.push_back( mapping );
+		
+		MnxChildIterator it( d );
+		while ( it.hasNext() ) {
+			SharedMnx & putd = it.next();
+			if ( putd->hasAttribute( KEY ) && putd->hasAttribute( VALUE ) ) {
+				mapping->put( putd->attribute( KEY ), putd->attribute( VALUE ) );
+			} else {
+				throw Mishap( "Malformed 'put' in LinX grammar" ).culprit( "Element", putd->toString() );
+			}
+		}
+	}	
+}
 
 Grammar::Grammar( State * state, SharedMnx description ) :
 	state( state ),
 	node_count( 0 )
 {
 	vector< SharedMnx > node_desc;
+	vector< SharedMnx > mapping_desc;
+	map< string, string > named_categories;
 	
 	//	Create the initial nodes as empty.
-	this->initEmptyNodes( state, description, node_desc );
+	this->initEmptyNodes( state, description, node_desc, mapping_desc, named_categories );
 
 	//	Setup the starting node in the global state.
 	this->initStartNode( description );
 	
+	//	Fill in the mappings.
+	this->initMappings( mapping_desc );
+	
 	//	Fill in the arcs.
-	this->initArcs( node_desc );
+	this->initArcs( node_desc, named_categories );
 
 }
 

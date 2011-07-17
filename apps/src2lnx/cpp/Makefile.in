@@ -14,7 +14,7 @@ CC=@CXX@
 CXXFLAGS=-DINSTALL_BIN='"$(INSTALL_BIN)"' -DINSTALL_LIB='"$(INSTALL_LIB)"' -I../hpp -I../../libgng/hpp -I/usr/local/boost_1_43_0 -Wall -g
 CFLAGS=-Wmissing-prototypes 
 
-OBJS=src2lnx.o state.o action.o node.o match.o grammar.o arc.o
+OBJS=src2lnx.o state.o action.o node.o match.o grammar.o arc.o mapping.o
 
 xson2gnx: $(OBJS)
 	@CXX@ $(CXXFLAGS) $(BOOST_CPPFLAGS) -o src2lnx $(OBJS) ../../libgng/cpp/libgng.a

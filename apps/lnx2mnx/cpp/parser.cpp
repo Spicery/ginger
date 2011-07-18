@@ -107,6 +107,12 @@ static int cmpPrecedence( LnxItem * item, const std::string & property, float pr
   	}
 }
 
+static bool gtePrecedence( LnxItem * item, const std::string & property, float prec ) {
+	return ( cmpPrecedence( item, property, prec ) & ( EQUAL_TO | GREATER_THAN ) ) != 0;
+}
+
+
+
 Parser::Parser( LnxReader & itemf, SharedMnx grammar ) : 
 	mishapDesc( (Mnx *)NULL ),
 	itemf( itemf )
@@ -403,6 +409,34 @@ void RuleParser::restoreAction() {
 	this->builder.restore();
 }
 
+void RuleParser::parserFailed( LnxItem * item ) {
+	if ( item == NULL ) {
+		throw Mishap( "Parser failed at end of file" );
+	} else {
+		Mishap * mishap = new Mishap( "Parse failed" );
+		if ( !!this->parent->mishapDesc ) {
+			MnxChildIterator kids( this->parent->mishapDesc );
+			while ( kids.hasNext() ) {
+				SharedMnx & culprit = kids.next();
+				if ( 
+					culprit->hasName( CULPRIT ) && 
+					culprit->hasAttribute( PROPERTY ) &&
+					culprit->hasAttribute( TITLE )
+				) {
+					mishap->culprit( 
+						culprit->attribute( TITLE ), 
+						item->propertyValue( culprit->attribute( PROPERTY ) ) 
+					);				
+				} else {
+					throw Mishap( "Malformed culprit description" ).culprit( "Culprit", culprit->toString() );
+				}
+			}
+		}
+		throw *mishap;
+	}	
+}
+
+
 SharedMnx RuleParser::findMatchingRule( const string & state, LnxItem * item, const bool throwVsReturnNull ) {
 	vector< SharedMnx > & rv = this->parent->getRule( state );
 	//cerr << "Checking " << rv.size() << " rules" << endl;
@@ -418,17 +452,14 @@ SharedMnx RuleParser::findMatchingRule( const string & state, LnxItem * item, co
 		}
 	}
 	if ( throwVsReturnNull ) {
-		throw Mishap( "Parser failed" );
+		//	CHANGE THIS!! To be done.
+		throw ( this->parserFailed( item ), "Dummy" );
 	} else {
 		return shared< Mnx >();
 	}
 }
 
 
-
-static bool gtePrecedence( LnxItem * item, const std::string & property, float prec ) {
-	return ( cmpPrecedence( item, property, prec ) & ( EQUAL_TO | GREATER_THAN ) ) != 0;
-}
 
 bool RuleParser::evaluateCondition( LnxItem  * item, SharedMnx & g, const bool readVsPeek ) {
 	#ifdef DEBUG

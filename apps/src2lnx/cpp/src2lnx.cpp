@@ -68,13 +68,14 @@ public:
 		if ( optarg == NULL ) {
 			printf( "Usage:  %s OPTIONS < XSON_IN > GNX_OUT\n", SRC2LNX_APP );
 			printf( "OPTIONS\n" );
-			printf( "-H, --help[=TOPIC]    help info on optional topic (see --help=help)\n" );
-			printf( "-V, --version         print out version information and exit\n" );
-			printf( "-L, --license[=PART]  print out license information and exit (see --help=license)\n" );
+			printf( "-g, --grammar=CONTROL_FILE the tokeniser's control file\n" );
+			printf( "-H, --help[=TOPIC]         help info on optional topic (see --help=help)\n" );
+			printf( "-V, --version              print out version information and exit\n" );
+			printf( "-L, --license[=PART]       print out license information and exit (see --help=license)\n" );
 			printf( "\n" );
 		} else if ( std::string( optarg ) == "help" ) {
 			cout << "--help=help           this short help" << endl;
-			cout << "--help=licence        help on displaying license information" << endl;
+			cout << "--help=license        help on displaying license information" << endl;
 		} else if ( std::string( optarg ) == "license" ) {
 			cout << "Displays key sections of the GNU Public License." << endl;
 			cout << "--license=warranty    Shows warranty." << endl;

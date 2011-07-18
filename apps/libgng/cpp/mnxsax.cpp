@@ -137,6 +137,7 @@ void MnxSaxParser::read() {
 	if ( this->pending_end_tag ) {
 		this->parent.endTag( this->tag_name );
 		this->pending_end_tag = false;
+		this->level -= 1;
 		return;
 	}
 	
@@ -200,6 +201,7 @@ void MnxSaxParser::read() {
 	if ( ch == '/' ) {
 		this->mustReadChar( '>' );
 		this->pending_end_tag = true;
+		this->level += 1;
 		//this->parent.endTag( name ); <- this code replaced
 		return;
 	} else if ( ch == '>' ) {

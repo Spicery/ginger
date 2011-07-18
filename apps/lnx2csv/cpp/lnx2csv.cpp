@@ -88,8 +88,9 @@ public:
 					//  files and this will simply go there. Or run a web
 					//  browser pointed there.
 					if ( optarg == NULL ) {
-						printf( "Usage:  %s OPTIONS < MNX_IN > MNX_OUT\n", APP_NAME );
+						printf( "Usage:  %s OPTIONS < LNX_IN > CSV_OUT\n", APP_NAME );
 						printf( "OPTIONS\n" );
+						printf( "-c, --columns         first line of output is a CSV header\n" );
 						printf( "-H, --help[=TOPIC]    help info on optional topic (see --help=help)\n" );
 						printf( "-V, --version         print out version information and exit\n" );
 						printf( "-L, --license[=PART]  print out license information and exit (see --help=license)\n" );

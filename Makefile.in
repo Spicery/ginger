@@ -43,6 +43,8 @@ distclean: clean
 	rm -f apps/lnx2mnx/cpp/Makefile
 	rm -f apps/src2lnx/Makefile
 	rm -f apps/src2lnx/cpp/Makefile
+	rm -f apps/lnx2csv/Makefile
+	rm -f apps/lnx2csv/cpp/Makefile
 	rm -f projects/Makefile
 	rm -f config.h
 	rm -f config.status
@@ -68,6 +70,7 @@ snapshot:
 	cp -r apps/gson2gnx build/appginger/apps/
 	cp -r apps/lnx2mnx build/appginger/apps/
 	cp -r apps/src2lnx build/appginger/apps/
+	cp -r apps/lnx2csv build/appginger/apps/
 	cp -r apps/tidymnx build/appginger/apps/
 	mkdir build/appginger/classes
 	mkdir build/appginger/docs
@@ -98,6 +101,7 @@ EXECUTABLES=\
 	apps/tidymnx/cpp/tidymnx \
 	apps/gson2gnx/cpp/gson2gnx \
 	apps/src2lnx/cpp/src2lnx \
+	apps/lnx2csv/cpp/lnx2csv \
 	apps/lnx2mnx/cpp/lnx2mnx
 
 install: all

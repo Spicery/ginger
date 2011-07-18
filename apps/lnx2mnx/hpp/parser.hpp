@@ -75,7 +75,10 @@ public:
 	bool evaluateCondition( Ginger::LnxItem * item, Ginger::SharedMnx & g, const bool readVsPeek );
 
 public:	
+	//	Error message (copy & paste to be refactored)
 	void unexpectedToken( Ginger::LnxItem * item );
+	void parserFailed( Ginger::LnxItem * item );
+
 
 public:
 	void processAction( Ginger::SharedMnx & g );

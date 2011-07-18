@@ -152,7 +152,7 @@ public:
 public:
 	void run() {
 		MnxReader reader;
-		shared< Mnx > g( reader.readMnx() );
+		SharedMnx g( reader.readMnx() );
 		g->prettyPrint( this->indent );
 	}
 };

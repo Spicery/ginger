@@ -30,194 +30,7 @@ using namespace std;
 #include "sys.hpp"
 #include "mishap.hpp"
 #include "facet.hpp"
-/*
 
-//- SAX Parser -----------------------------------------------------------------
-
-
-char SaxClass::nextChar() {
-	char c;
-	if ( not input.get( c ) ) throw;
-	return c;
-}
-
-char SaxClass::peekChar() {
-	char c = input.peek();
-	if ( not input ) throw;
-	return c;
-}
-
-void SaxClass::mustReadChar( const char ch_want ) {
-	char c_got;
-	if ( not ( input.get( c_got ) ) ) throw;
-	if ( c_got != ch_want ) throw;
-}
-
-void SaxClass::eatWhiteSpace() {
-	char ch;
-	while ( input.get( ch ) && isspace( ch ) ) {
-		//	Skip.
-	}
-	//cout << "Ungetting '" << ch << "'" << endl;
-	input.putback( ch );
-}
-
-static bool is_name_char( const char ch ) {
-	return isalnum( ch ) || ch == '-' || ch == '.';
-}
-
-void SaxClass::readName( std::string & name ) {
-	char ch;
-	while ( (ch = nextChar()) && is_name_char( ch ) ) {
-		//std::cout << "pushing '" << ch << "'"<< endl;
-		name.push_back( ch );
-		//std::cout << "name so far '" << name << "'" << endl;
-	}
-	input.putback( ch );
-}
-
-//#32 -> (char)32
-//#x20 -> (char)32
-
-static char escToChar( const std::string & esc ) {
-	if ( esc.length() < 2 ) throw Mishap( "Invalid XML escape sequence" ).culprit( "Sequence", esc );
-	stringstream stream;
-	int offset = 1;
-	std::ios_base& (*base)(std::ios_base&) = std::dec;
-	if ( esc[1] == 'x' ) {
-		base = std::hex;
-		offset += 1;
-	}
-	stream << esc.substr( offset );
-	int n;
-	stream >> base >> n;
-	return (char)n;
-}
-
-void SaxClass::readAttributeValue( std::string & attr ) {
-	this->mustReadChar( '\"' );
-	for (;;) {
-		char ch = this->nextChar();
-		if ( ch == '\"' ) break;
-		if ( ch == '&' ) {
-			std::string esc;
-			while ( ch = this->nextChar(), ch != ';' ) {
-				//std::cout << "char " << ch << endl;
-				esc.push_back( ch );
-				if ( esc.size() > 4 ) {
-					throw Mishap( "Malformed escape" );
-				}
-			}
-			if ( esc.size() == 0 ) {
-				throw Mishap( "Empty XML escape character (&;)" );
-			}
-			if ( esc == "lt" ) {
-				attr.push_back( '<' );
-			} else if ( esc == "gt" ) {
-				attr.push_back( '>' );
-			} else if ( esc == "amp" ) {
-				attr.push_back( '&' );
-			} else if ( esc == "quot" ) {
-				attr.push_back( '"' );
-			} else if ( esc == "apos" ) {
-				attr.push_back( '\'' );
-			} else if ( esc[0] == '#' ) {
-				attr.push_back( escToChar( esc ) );
-			} else {
-				throw Mishap( "Unrecognised XML escaped character" ).culprit( "Character", esc );
-			}
-		} else {
-			attr.push_back( ch );
-		}
-	}
-}	
-
-
-void SaxClass::processAttributes(
-	std::map< std::string, std::string > & attrs
-) {
-	//	Process attributes
-	for (;;) {
-		this->eatWhiteSpace();
-		char c = peekChar();
-		if ( c == '/' || c == '>' ) {
-			break;
-		}
-		std::string key;
-		this->readName( key );
-		this->eatWhiteSpace();
-		this->mustReadChar( '=' );
-		this->eatWhiteSpace();
-		std::string value;
-		this->readAttributeValue( value );
-		attrs[ key ] = value;
-	}
-}
-
-
-void SaxClass::read() {
-	this->input >> noskipws;
-	
-	this->eatWhiteSpace();
-	if ( this->input.eof() ) return;
-	this->mustReadChar( '<' );
-		
-	char ch = nextChar();
-	if ( ch == '/' ) {
-		std::string end_tag;
-		this->readName( end_tag );
-		this->eatWhiteSpace();
-		this->mustReadChar( '>' );
-		this->parent.endTag( end_tag );
-		return;
-	} else if ( ch == '!' ) {
-		if ( '-' != nextChar() || '-' != nextChar() ) throw Mishap( "Invalid XML comment syntax" );
-		char ch = nextChar();
-		for (;;) {
-			char prev_ch = ch;
-			ch = nextChar();
-			if ( prev_ch == '-' && ch == '-' ) break;
-		}
-		if ( '>' != nextChar() ) throw Mishap( "Invalid XML comment syntax" );
-		this->read();
-		return;
-	} else if ( ch == '?' ) {
-		for (;;) {
-			char prev = ch;
-			ch = nextChar();
-			if ( prev == '?' && ch == '>' ) break;
-		}
-		this->read();
-		return;
-	} else {
-		//cout << "Ungetting '" << ch << "'" << endl;
-		input.putback( ch );
-	}
-	
-	std::string name;
-	this->readName( name );
-	
-	std::map< std::string, std::string > attributes;
-	this->processAttributes( attributes );
-	
-	this->eatWhiteSpace();
-	
-	
-	ch = nextChar();
-	if ( ch == '/' ) {
-		this->mustReadChar( '>' );
-		this->parent.startTag( name, attributes );
-		this->parent.endTag( name );
-		return;
-	} else if ( ch == '>' ) {
-		this->parent.startTag( name, attributes );
-		return;
-	} else {
-		throw;
-	}
-			
-}
-*/
 
 //- Read XML -------------------------------------------------------------------
 
@@ -321,17 +134,23 @@ static void packageContext( TermData * t, string & enc_pkg_name, string & def_pk
 	alias_name = t->attrs[ "alias" ];
 }
 
+bool TermData::hasConstantType( const char * type ) {
+	return (
+		this->name == "constant" && has_attr( this, "type" ) && this->attrs[ "type" ] == type ||
+		this->name == type 
+	);
+}
 
 Term TermData::makeTerm() {
 	if ( name == "fn" && kids.size() == 2 ) {
 		return term_new_fn( this->attrs[ "name" ], kids[ 0 ], kids[ 1 ] );
 	} else if ( has_attr( this, "value" ) ) {
-		if ( name == "int" ) {
+		if ( this->hasConstantType( "int" ) ) {
 			int i;
 			istringstream s( this->attrs[ "value" ] );
 			if ( not ( s >> i ) ) throw;
 			return term_new_int( i );
-		} else if ( name == "bool" ) {
+		} else if ( this->hasConstantType( "bool" ) ) {
 			if ( this->attrs[ "value" ] == "true" ) {
 				return term_new_bool( true );
 			} else if ( this->attrs[ "value" ] == "false" ) {
@@ -339,23 +158,23 @@ Term TermData::makeTerm() {
 			} else {
 				throw;
 			}
-		} else if ( name == "char" ) {
+		} else if ( this->hasConstantType( "char" ) ) {
 			std::string t = this->attrs[ "value" ];
 			if ( t.size() <= 0 ) throw;
 			return term_new_char( t[ 0 ] );
-		} else if ( name == "string" ) {
+		} else if ( this->hasConstantType( "string" ) ) {
 			return term_new_string( this->attrs[ "value" ] );
-		} else if ( name == "symbol" ) {
+		} else if ( this->hasConstantType( "symbol" ) ) {
 			return term_new_symbol( this->attrs[ "value" ] );
-		} else if ( name == "absent" ) {
+		} else if ( this->hasConstantType( "absent" ) ) {
 			return term_new_absent();
-		} else if ( name == "list" ) {
+		} else if ( this->hasConstantType( "list" ) ) {
 			if ( this->attrs[ "value" ] == "empty" ) {
 				return term_new_list_empty();
 			} else {
 				throw Mishap( "Invalid Ginger XML" );
 			}
-		} else if ( name == "sysfn" ) {
+		} else if ( this->hasConstantType( "sysfn" ) ) {
 			return term_new_sysfn( this->attrs[ "value" ] );
 		} else {
 			throw Unreachable( __FILE__, __LINE__ );

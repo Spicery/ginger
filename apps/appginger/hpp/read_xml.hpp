@@ -56,6 +56,9 @@ public:
 	std::string name;
 	std::map< std::string, std::string > attrs;
 	std::vector< Term > kids;
+
+private:
+	bool hasConstantType( const char * type );
 	
 public:
 	Term makeTerm();

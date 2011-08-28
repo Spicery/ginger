@@ -34,13 +34,16 @@ using namespace std;
 using namespace Ginger;
 
 /*
-	E ::= ATOMIC | COMPOUND
-	ATOMIC ::= NAME | NUMBER | STRING | ?NAME
-	COMPOUND ::= MAP | LIST | ELEMENT
-	ELEMENT ::= NAME ATTRS? LIST | NAME ATTRS
-	ATTRS ::= < ( NAME = STRING | STRING : STRING ),... >
-	MAP ::= { ( NAME = E | E : E ),... }
-	LIST ::= [ E,... ]
+	EXPR ::= PRIMITIVE | COMPOUND
+	PRIMITIVE ::= STRING | NUMBER | VARIABLE
+	COMPOUND ::= APPLY | SEQ | LAMBDA | ARRAY | MAP  | ELEMENT
+	APPLY ::= EXPR SEQ
+	SEQ ::= ( EXPR, ... )
+	ARRAY ::= [ EXPR, ... ]
+	LAMBDA ::= NAME ATTRS SEQ? { EXPR, ... }
+	MAP ::= { ((EXPR : EXPR)|(NAME=EXPR)), ... }
+	ELEMENT ::= NAME ATTRS? ARRAY | NAME ATTRS
+	ATTRS ::= < ( NAME = STRING ), ... >
 */
 
 class GsonReader {
@@ -172,8 +175,22 @@ public:
 			this->readAttrList( '>' );
 			if ( this->tryReadSign( '[' ) ) {
 				this->readExprList( ']' );
+			} else if ( this->tryReadSign( '(' ) ) {
+				builder.start( "seq" );
+				this->readExprList( ')' );
+				builder.end();
+				builder.start( "seq" );
+				this->mustReadSign( '{' );
+				this->readExprList( '}' );
+				builder.end();
+			} else if ( this->tryReadSign( '{' ) ) {
+				builder.start( "seq" );
+				builder.end();
+				builder.start( "seq" );
+				this->readExprList( '}' );
+				builder.end();
 			}
-			builder.end();								
+			builder.end();
 		} else if ( this->tryReadSign( '[' ) ) {
 			builder.start( name );
 			this->readExprList( ']' );

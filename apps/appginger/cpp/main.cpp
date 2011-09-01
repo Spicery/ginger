@@ -109,6 +109,7 @@ static void printUsage() {
 	cout << "-B, --batch           run in batch mode" << endl;
 	cout << "-C, --cgi             run as CGI script" << endl;
 	cout << "-I, --interactive     run interactively" << endl;
+	cout << "-M, --metainfo        dump meta-info XML file to stdout" << endl;
 	cout << "-T, --terminate       stop on mishap" << endl;
 	cout << "-d, --debug           add debug option (see --help=debug)" << endl;
 	cout << "-h, --help            print out this help info (see --help=help)" << endl;

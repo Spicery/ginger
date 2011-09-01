@@ -166,6 +166,40 @@ public:
 			throw Mishap( "Invalid attribute" ).culprit( "key", item->asValue() );
 		}
 	}
+	
+	void readLambdaArgsAndBody() {
+		if ( this->tryReadSign( '(' ) ) {
+			builder.start( "seq" );
+			this->readExprList( ')' );
+			builder.end();
+
+			int curry_count = 0;				
+			while ( this->tryReadSign( '(' ) ) {
+				curry_count += 1;
+				builder.start( "fn" );
+				builder.start( "seq" );
+				this->readExprList( ')' );
+				builder.end();
+			}
+			
+			builder.start( "seq" );
+			this->mustReadSign( '{' );
+			this->readExprList( '}' );
+			builder.end();
+			
+			for ( int i = 0; i < curry_count; i++ ) {
+				builder.end();
+			}
+		} else if ( this->tryReadSign( '{' ) ) {
+			builder.start( "seq" );
+			builder.end();
+			builder.start( "seq" );
+			this->readExprList( '}' );
+			builder.end();
+		} else {
+			throw Mishap( "Expecting lambda form starting ( or {" );
+		}
+	}
 
 	void readElementOrName() {
 		Item item = this->itemf->read();
@@ -175,20 +209,6 @@ public:
 			this->readAttrList( '>' );
 			if ( this->tryReadSign( '[' ) ) {
 				this->readExprList( ']' );
-			} else if ( this->tryReadSign( '(' ) ) {
-				builder.start( "seq" );
-				this->readExprList( ')' );
-				builder.end();
-				builder.start( "seq" );
-				this->mustReadSign( '{' );
-				this->readExprList( '}' );
-				builder.end();
-			} else if ( this->tryReadSign( '{' ) ) {
-				builder.start( "seq" );
-				builder.end();
-				builder.start( "seq" );
-				this->readExprList( '}' );
-				builder.end();
 			}
 			builder.end();
 		} else if ( this->tryReadSign( '[' ) ) {
@@ -240,6 +260,11 @@ public:
 			builder.start( "seq" );
 			this->readExprList( ')' );	
 			builder.end();
+		} else if ( this->tryReadSign( '<' ) ) {
+			builder.start( "fn" );
+			this->readAttrList( '>' );
+			this->readLambdaArgsAndBody();
+			builder.end();			
 		} else if ( this->tryReadSign( '?' ) ) {
 			builder.start( "var" );
 			builder.put( "name", this->itemf->read()->asValue() );

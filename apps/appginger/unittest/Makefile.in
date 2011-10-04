@@ -20,4 +20,4 @@ clean:
 	rm -f *.o
 	rm -f testrunner
 	rm -f *.a
-	rm results.xml
+	rm -f results.xml

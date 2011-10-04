@@ -194,7 +194,7 @@ Term TermData::makeTerm() {
 		} else if ( name == "sysapp" ) {
 			return makeSysApp( attrs[ "name" ], kids );
 		} else {
-			throw;
+			throw Mishap( "Unknown functor" ).culprit( "Functor", name );
 		}
 	} else if ( name == "bind" ) {
 		if ( kids.size() == 2 ) {

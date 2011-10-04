@@ -43,6 +43,7 @@
 #include "sysfunction.hpp"
 #include "sysmethod.hpp"
 #include "sysclass.hpp"
+#include "sysunix.hpp"
 
 //#define DBG_SYS
 
@@ -349,7 +350,8 @@ const SysMap::value_type rawData[] = {
 	SysMap::value_type( "mapIndex", SysInfo( fnc_syscall, Arity( 2 ), Arity( 1 ), sysMapIndex, "Looks up a map for a given index" ) ),
 	SysMap::value_type( "partApply", SysInfo( fnc_syscall, Arity( 1, true ), Arity( 1 ), sysPartApply, "Freezes arguments and a function together to make a new function" ) ),
 	SysMap::value_type( "functionInArity", SysInfo( fnc_syscall, Arity( 1  ), Arity( 1 ), sysFunctionInArity, "Input arity of a function" ) ),
-	SysMap::value_type( "functionOutArity", SysInfo( fnc_syscall, Arity( 1  ), Arity( 1 ), sysFunctionOutArity, "Output arity of a function" ) ),
+	SysMap::value_type( "functionOutArity", SysInfo( fnc_syscall, Arity( 1 ), Arity( 1 ), sysFunctionOutArity, "Output arity of a function" ) ),
+	#include "sysunix.inc"
 	#include "sysmap.inc.auto"
 };
 const int numElems = sizeof rawData / sizeof rawData[0];

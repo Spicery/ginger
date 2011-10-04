@@ -41,6 +41,7 @@ private:
 	bool 				is_trapping_mishap;
 	bool 				is_gctrace;
 	std::list< std::string >		project_folder_list;
+	char **				envp;
 
 public:
 	void setInteractiveMode() { this->mode = InteractiveMode; }
@@ -61,6 +62,8 @@ public:
 	std::list< std::string > & getProjectFolderList() { return this->project_folder_list; }
 	void addProjectFolder( std::string & folder );
 	void addProjectFolder( const char * folder );
+	char ** getEnvironmentVariables() { return this->envp; }
+	void setEnvironmentVariables( char ** e ) { this->envp = e; }
 	
 
 public:

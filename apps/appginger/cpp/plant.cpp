@@ -470,9 +470,9 @@ void PlantClass::compileTerm( Term term ) {
 			vmiSYS_CALL( this, sc );
 			break;
 		}
-		case fnc_sysfn: {
+		/*case fnc_sysfn: {
 			Package * p = this->vm->getPackage( STANDARD_LIBRARY_PACKAGE );
-			Ident id = p->fetchDefinitionIdent( term_sysfn_cont( term ) ); //, /*fetchFacet( "public" ),*/ fetchFacetSet( "public" ) );	
+			Ident id = p->fetchDefinitionIdent( term_sysfn_cont( term ) );  
 			if ( id->value_of->valof == sys_undef ) {
 				Ref r = makeSysFn( this, term_sysfn_cont( term ), sys_undef );
 				if ( r == sys_undef ) {
@@ -482,7 +482,15 @@ void PlantClass::compileTerm( Term term ) {
 			}
 			vmiPUSHID( this, id );
 			break;
-		}		
+		}*/
+		case fnc_sysfn: {
+			Ref r = makeSysFn( this, term_sysfn_cont( term ), sys_undef );
+			if ( r == sys_undef ) {
+				throw Mishap( "No such system function" ).culprit( "Function", term_sysfn_cont( term ) );
+			}
+			vmiPUSHQ( this, r );			
+			break;
+		}
 		case fnc_for: {
 			// suppress unused argument ... will be used in the future
 			// Term bindings = term_index( term, 0 );

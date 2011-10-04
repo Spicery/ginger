@@ -307,6 +307,7 @@ void Main::mainLoop() {
 }
 
 int Main::run( int argc, char **argv, char **envp ) {
+	this->context.setEnvironmentVariables( envp );
 	bool meta_info_needed = false;
     for(;;) {
         int option_index = 0;

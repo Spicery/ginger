@@ -1,6 +1,6 @@
 /******************************************************************************\
-	Copyright (c) 2010 Stephen Leach. AppGinger is distributed under the terms 
-	of the GNU General Public License. This file is part of AppGinger.
+    Copyright (c) 2010 Stephen Leach. AppGinger is distributed under the terms 
+    of the GNU General Public License. This file is part of AppGinger.
 
     AppGinger is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -16,6 +16,14 @@
     along with AppGinger.  If not, see <http://www.gnu.org/licenses/>.
 \******************************************************************************/
 
-#include "valof.hpp"
+#ifndef SYS_UNIX_HPP
+#define SYS_UNIX_HPP
 
+#include "common.hpp"
+#include "machine.hpp"
 
+Ref * sysGetEnv( Ref * pc, class MachineClass * vm );
+Ref * sysPutEnv( Ref * pc, class MachineClass * vm );
+Ref * sysEnvVars( Ref * pc, class MachineClass * vm );
+
+#endif

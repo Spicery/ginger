@@ -27,8 +27,8 @@
 
 #include <syslog.h>
 
-#include <boost/iostreams/stream_buffer.hpp>
-#include <boost/iostreams/device/file_descriptor.hpp>
+//#include <boost/iostreams/stream_buffer.hpp>
+//#include <boost/iostreams/device/file_descriptor.hpp>
 
 #include "common.hpp"
 #include "package.hpp"
@@ -39,7 +39,7 @@
 #include "rcep.hpp"
 #include "command.hpp"
 
-using namespace boost; 
+//using namespace boost; 
 using namespace std;
 
 #define FETCHGNX ( INSTALL_BIN "/fetchgnx" )

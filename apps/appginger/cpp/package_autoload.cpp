@@ -27,9 +27,10 @@
 #include <list>
 
 #include <syslog.h>
+#include <sys/errno.h>
 
-#include <boost/iostreams/stream_buffer.hpp>
-#include <boost/iostreams/device/file_descriptor.hpp>
+//#include <boost/iostreams/stream_buffer.hpp>
+//#include <boost/iostreams/device/file_descriptor.hpp>
 
 #include "sax.hpp"
 
@@ -42,7 +43,7 @@
 #include "rcep.hpp"
 #include "command.hpp"
 
-using namespace boost; 
+//using namespace boost; 
 using namespace std;
 
 #define FETCHGNX ( INSTALL_BIN "/fetchgnx" )
@@ -93,62 +94,11 @@ public:
 };
 
 
-/*class ProjectDriver {
-public:
-	virtual void addProjectFolder( const string & folder ) = 0;
-	virtual const string resolveUnqualified( const string & enc_pkg_name, const string & var_name ) = 0;
-};
-
-class FetchDriver : public ProjectDriver {
-private:
-	Command cmd;
-	
-public:
-	void addProjectFolder( const string & folder ) {
-		this->cmd.addArg( "-f" );
-		this->cmd.addArg( folder );
-	}
-	
-	const string resolveUnqualified( const string & enc_pkg_name, const string & var_name ) {
-		this->cmd.addArg( "-R" );
-		this->cmd.addArg( "-p" );
-		this->cmd.addArg( enc_pkg_name );
-		this->cmd.addArg( "-v" );
-		this->cmd.addArg( var_name );
-		//cerr << "About to run the command" << endl;
-		int fd = cmd.runWithOutput();		
-		//cerr << "Command run " << endl;
-		stringstream prog;
-		for (;;) {
-			static char buffer[ 1024 ];
-			int n = read( fd, buffer, sizeof( buffer ) );
-			if ( n == 0 ) break;
-			prog.write( buffer, n );
-		}
-			
-		#ifdef DBG_PACKAGE_AUTOLOAD
-			cout << "[[" << prog.str() << "]]" << endl;
-		#endif
-	
-		ResolveHandler resolve;
-		Ginger::SaxParser parser( prog, resolve );
-		parser.read();
-		
-		//resolve.report();
-		
-		return resolve.def_pkg_name;
-	}
-	
-public:
-	FetchDriver() : cmd( FETCHGNX ) {}
-	virtual ~FetchDriver() {}
-};*/
-
 
 Ident OrdinaryPackage::unqualifiedAutoload( const std::string & c ) {
 	syslog( LOG_INFO, "Autoloading unqualified %s", c.c_str() );
 	
-	Command cmd( FETCHGNX );
+	Ginger::Command cmd( FETCHGNX );
 	cmd.addArg( "-R" );
 	{
 		list< string > & folders = this->getMachine()->getAppContext().getProjectFolderList();
@@ -173,8 +123,19 @@ Ident OrdinaryPackage::unqualifiedAutoload( const std::string & c ) {
 	for (;;) {
 		static char buffer[ 1024 ];
 		int n = read( fd, buffer, sizeof( buffer ) );
+		//cerr << "READ " << n << " bytes from the file descriptor" << endl;
 		if ( n == 0 ) break;
-		prog.write( buffer, n );
+		if ( n == -1 ) {
+			if ( errno != EINTR ) {
+				perror( "PACKAGE AUTOLOAD" );
+				throw Mishap( "Failed to read" );
+			}
+		} else if ( n > 0 ) {
+			//cerr << "|";
+			//write( 2, buffer, n );
+			//cerr << "|" << endl;
+			prog.write( buffer, n );
+		}
 	}
 		
 	#ifdef DBG_PACKAGE_AUTOLOAD
@@ -197,7 +158,7 @@ Ident OrdinaryPackage::unqualifiedAutoload( const std::string & c ) {
 Ident OrdinaryPackage::qualifiedAutoload( const std::string & alias, const std::string & c ) {
 	syslog( LOG_INFO, "Autoloading qualified %s", c.c_str() );
 	
-	Command cmd( FETCHGNX );
+	Ginger::Command cmd( FETCHGNX );
 	cmd.addArg( "-R" );
 	{
 		list< string > & folders = this->getMachine()->getAppContext().getProjectFolderList();
@@ -225,7 +186,17 @@ Ident OrdinaryPackage::qualifiedAutoload( const std::string & alias, const std::
 		static char buffer[ 1024 ];
 		int n = read( fd, buffer, sizeof( buffer ) );
 		if ( n == 0 ) break;
-		prog.write( buffer, n );
+		if ( n == -1 ) {
+			if ( errno != EINTR ) {
+				perror( "PACKAGE AUTOLOAD" );
+				throw Mishap( "Failed to read" );
+			}
+		} else if ( n > 0 ) {
+			//cerr << "|";
+			//write( 2, buffer, n );
+			//cerr << "|" << endl;
+			prog.write( buffer, n );
+		}
 	}
 		
 	#ifdef DBG_PACKAGE_AUTOLOAD
@@ -247,7 +218,7 @@ Ident OrdinaryPackage::qualifiedAutoload( const std::string & alias, const std::
 Ident OrdinaryPackage::absoluteAutoload( const std::string & c ) {
 	syslog( LOG_INFO, "Autoloading is_absolute_ref %s", c.c_str() );
 	
-	Command cmd( FETCHGNX );
+	Ginger::Command cmd( FETCHGNX );
 	cmd.addArg( "-D" );
 	{
 		list< string > & folders = this->getMachine()->getAppContext().getProjectFolderList();
@@ -273,7 +244,17 @@ Ident OrdinaryPackage::absoluteAutoload( const std::string & c ) {
 		static char buffer[ 1024 ];
 		int n = read( fd, buffer, sizeof( buffer ) );
 		if ( n == 0 ) break;
-		prog.write( buffer, n );
+		if ( n == -1 ) {
+			if ( errno != EINTR ) {
+				perror( "PACKAGE AUTOLOAD" );
+				throw Mishap( "Failed to read" );
+			}
+		} else if ( n > 0 ) {
+			//cerr << "|";
+			//write( 2, buffer, n );
+			//cerr << "|" << endl;
+			prog.write( buffer, n );
+		}
 	}
 		
 	#ifdef DBG_PACKAGE_AUTOLOAD
@@ -296,7 +277,7 @@ Ident OrdinaryPackage::absoluteAutoload( const std::string & c ) {
 			//	The autoloading failed. Undo the declaration.
 			this->retractForwardDeclare( c );
 		}
-		syslog( LOG_ERR, "Autoloading %c failed due to an exception", c.c_str() );
+		syslog( LOG_ERR, "Autoloading %s failed due to an exception", c.c_str() );
 	}
 	
 	//	No autoloading implemented yet - just fail.
@@ -308,7 +289,7 @@ void OrdinaryPackage::loadIfNeeded() {
 	
 	syslog( LOG_INFO, "Loading package %s", this->title.c_str() );
 	
-	Command cmd( FETCHGNX );
+	Ginger::Command cmd( FETCHGNX );
 	cmd.addArg( "-I" );
 	{
 		list< string > & folders = this->getMachine()->getAppContext().getProjectFolderList();
@@ -332,7 +313,17 @@ void OrdinaryPackage::loadIfNeeded() {
 		static char buffer[ 1024 ];
 		int n = read( fd, buffer, sizeof( buffer ) );
 		if ( n == 0 ) break;
-		prog.write( buffer, n );
+		if ( n == -1 ) {
+			if ( errno != EINTR ) {
+				perror( "PACKAGE AUTOLOAD" );
+				throw Mishap( "Failed to read" );
+			}
+		} else if ( n > 0 ) {
+			//cerr << "|";
+			//write( 2, buffer, n );
+			//cerr << "|" << endl;
+			prog.write( buffer, n );
+		}
 	}
 		
 	#ifdef DBG_PACKAGE_AUTOLOAD
@@ -346,7 +337,8 @@ void OrdinaryPackage::loadIfNeeded() {
 			rcep.setPrinting( false );	//	Turn off result printing.
 			rcep.unsafe_read_comp_exec_print( prog, cout );		
 		} catch ( std::exception & e ) {
-			syslog( LOG_ERR, "Package loading %c failed due to an exception", this->title.c_str() );
+			syslog( LOG_ERR, "Package loading failed due to an exception" );
+			syslog( LOG_ERR, "Was trying to load %s", this->title.c_str() );
 		}
 	}
 	

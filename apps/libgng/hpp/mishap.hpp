@@ -80,6 +80,13 @@ public:
 	virtual ~SystemError()  throw() {}
 };
 
+class Unreachable : public SystemError {
+public:
+	Unreachable( const char * file, int line );
+	virtual ~Unreachable()  throw() {}
+};
+
+
 } // namespace Ginger
 
 #endif

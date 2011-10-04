@@ -23,16 +23,16 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 
-#include <boost/iostreams/stream_buffer.hpp>
-#include <boost/iostreams/device/file_descriptor.hpp>
+//#include <boost/iostreams/stream_buffer.hpp>
+//#include <boost/iostreams/device/file_descriptor.hpp>
 
 #include "command.hpp"
 #include "mishap.hpp"
 
 using namespace std;
-using namespace boost; 
+//using namespace boost;
 
-#define DBG_COMMAND
+//#define DBG_COMMAND
 
 namespace Ginger {
 
@@ -99,7 +99,7 @@ void Command::runSilent() {
 			return;
 		}
 	}
-	throw "Unreachable";
+	throw Unreachable( __FILE__, __LINE__ );
 	
 }
 
@@ -156,7 +156,7 @@ int Command::runWithOutput() {
 			return this->input_fd;
 		}
 	}
-	throw "Unreachable";
+	throw Unreachable( __FILE__, __LINE__ );
 }
 
-}
+} // namespace

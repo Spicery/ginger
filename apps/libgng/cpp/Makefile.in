@@ -22,8 +22,10 @@ all: libgng.a
 
 # $@ is make shorthand for the target.
 # $@ is make shorthand for the dependencies
+# Note that calling ranlib should not be needed but I am seeing some weird stuff
 libgng.a: $(OBJS)
 	ar -rcs $@ $+
+	ranlib $@
 	
 clean:
 	rm -f *.o

@@ -101,4 +101,13 @@ int Problem::getCount() {
 	return this->culprits.size();
 }
 
+Unreachable::Unreachable( const char * file, int line ) : 
+	SystemError( "Unreachable" ) 
+{
+	stringstream s;
+	s << line;
+	this->culprit( "File", file );
+	this->culprit( "Line", s.str() );
+}
+
 } // namespace Ginger

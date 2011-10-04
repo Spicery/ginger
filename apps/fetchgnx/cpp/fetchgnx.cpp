@@ -234,30 +234,29 @@ void Main::printGPL( const char * start, const char * end ) {
 
 #ifdef DBG_FETCHGNX
 void Main::summary() {
-	cout << FETCHGNX << " Summary" << endl;
+	cerr << FETCHGNX << " Summary" << endl;
 	for (
-		auto it = this->project_folders.begin();
+		vector< string >::iterator it = this->project_folders.begin();
 		it != this->project_folders.end();
 		++it
 	) {
-		cout << "  Project " << *it << endl;
+		cerr << "  Project " << *it << endl;
 	}
-	cout << "    Needs loading? " << ( this->project_needs_loading ? "true" : "false" ) << endl;
-	cout << "  Packages to load (" << this->packages_to_load.size() << ")" << endl;
+	cerr << "  Packages to load (" << this->packages_to_load.size() << ")" << endl;
 	for ( 
 		vector< string >::iterator it = this->packages_to_load.begin(); 
 		it != this->packages_to_load.end();
 		++it
 	) {
-		cout << "    " << *it << endl;
+		cerr << "    " << *it << endl;
 	}
-	cout << "  Definitions to load (" << this->definitions.size() << ")" << endl;
+	cerr << "  Definitions to load (" << this->definitions.size() << ")" << endl;
 	for (
 		vector< Defn >::iterator it = this->definitions.begin();
 		it != this->definitions.end();
 		++it
 	) {
-		cout << "    " << it->pkg << ", " << it->var << endl;
+		cerr << "    " << it->pkg << ", " << it->var << endl;
 	}
 }
 #endif
@@ -287,6 +286,7 @@ void Main::run() {
 			break;
 		}
 	}
+	//cout.flush();
 }
 
 /*

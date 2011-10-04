@@ -160,6 +160,16 @@ static void outputUnqualified( const string & enc_pkg_name, const string & name,
 	cout << "\" def.pkg=\"";
 	renderText( def_pkg );
 	cout << "\" />" << endl;
+	
+	/*cerr << "...... <resolve enc.pkg=\"";
+	renderText( cerr, enc_pkg_name );
+	cerr << "\" name=\"";
+	renderText( cerr, name );
+	cerr << "\" def.pkg=\"";
+	renderText( cerr, def_pkg );
+	cerr << "\" />" << endl;*/
+	
+	
 }
 
 static void outputQualified( const string & enc_pkg_name, const string & alias_name, const string & var_name, const string & def_pkg ) {
@@ -171,7 +181,7 @@ static void outputQualified( const string & enc_pkg_name, const string & alias_n
 	renderText( var_name );
 	cout << "\" def.pkg=\"";
 	renderText( def_pkg );
-	cout << "\" />" << endl;
+	cout << "\" />" << endl;	
 }
 
 void Search::resolveUnqualified( const string & enc_pkg_name, const string & name ) {

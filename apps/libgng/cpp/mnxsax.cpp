@@ -102,7 +102,7 @@ void MnxSaxParser::readAttributeValue( std::string & attr ) {
 			} else if ( esc == "apos" ) {
 				attr.push_back( '\'' );
 			} else {
-				throw;
+				throw Mishap( "Unexpected escape sequence after &" ).culprit( "Character", esc );
 			}
 		} else {
 			attr.push_back( ch );

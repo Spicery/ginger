@@ -27,6 +27,13 @@
 
 namespace Ginger {
 
+//	Should refactor NormalExit into a separate file.
+class NormalExit : public std::exception {
+public:
+	NormalExit() {}
+	virtual ~NormalExit() throw() {}
+};
+
 class Problem : public std::exception {
 protected:
 	std::string message;

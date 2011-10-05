@@ -37,7 +37,7 @@ void DestinationClass::destinationSet() {
 		clog << "Setting destination at [" << here << "]" << endl;
 	#endif
 	if ( this->is_set ) {
-		this_never_happens();
+		throw Ginger::Unreachable( __FILE__, __LINE__ );
 	}
 	this->location = here;
 	this->is_set = true;

@@ -106,7 +106,7 @@ public:
 			}
 			if ( f == outer->function() ) return;
 		}		
-		throw Unreachable( __FILE__, __LINE__ );
+		throw Ginger::Unreachable( __FILE__, __LINE__ );
 	}
 	
 	Ident search( const std::string & c ) {
@@ -185,7 +185,7 @@ static void lookupAndAddGlobal( Package * current, VarTermClass * t ) {
 			break;
 		}
 		case ALIAS_REF_TYPE: {
-			throw Mishap( "Declaring global variable in aliased context" );
+			throw Ginger::Mishap( "Declaring global variable in aliased context" );
 			/*Import * imp = current->getAlias( t->alias() );
 			const FacetSet * m = imp->matchingTags();
 		
@@ -227,7 +227,7 @@ static Ident lookupGlobal( Package * current, IdTermClass * t ) {
 			return p->fetchQualifiedIdent( t->alias(), c );
 		}
 		default:
-			throw Unreachable( __FILE__, __LINE__ );
+			throw Ginger::Unreachable( __FILE__, __LINE__ );
 	}
 }
 
@@ -247,7 +247,7 @@ enum Lookup ResolveStateClass::lookup( IdTermClass * t, Ident *id ) {
 		return result;
 	} else {
 		*id = lookupGlobal( this->package, t );
-		if ( *id == 0 ) throw Mishap( "Undeclared variable" ).culprit( "Variable", c );
+		if ( *id == 0 ) throw Ginger::Mishap( "Undeclared variable" ).culprit( "Variable", c );
 		#ifdef DBG_RESOLVE
 			fprintf( stderr, "< lookup\n" );
 		#endif
@@ -306,7 +306,7 @@ Term ResolveStateClass::resolve( Term term ) {
 				)
 			);
     		return term;*/
-    		throw SystemError( "import not directly supported any more" );
+    		throw Ginger::SystemError( "import not directly supported any more" );
     	}
         case fnc_fn : {
             //    fn( seq( id( _ ), ... ), Body )
@@ -345,7 +345,7 @@ Term ResolveStateClass::resolve( Term term ) {
 					}
 					break;
 				}
-				default: throw ToBeDone();          
+				default: throw Ginger::Mishap( "TO BE DONE" );
             }
             
             #ifdef DBG_RESOLVE
@@ -440,7 +440,7 @@ Term ResolveStateClass::resolve( Term term ) {
             }
         }
     }
-    throw Unreachable( __FILE__, __LINE__ );
+    throw Ginger::Unreachable( __FILE__, __LINE__ );
 }
 
 Term resolveTerm( Package * pkg, Term term, bool & needs_lifting ) {

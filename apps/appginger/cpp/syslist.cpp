@@ -73,7 +73,7 @@ Ref * sysIsNil( Ref * pc, class MachineClass * vm ) {
 		vm->fastPeek() = IsNil( vm->fastPeek() ) ? sys_true : sys_false;
 		return pc;
 	} else {
-		throw Mishap( "Wrong number of arguments for head" );
+		throw Ginger::Mishap( "Wrong number of arguments for head" );
 	}
 }
 
@@ -83,7 +83,7 @@ Ref * sysIsList( Ref * pc, class MachineClass * vm ) {
 		vm->fastPeek() = IsPair( r ) || IsNil( r ) ? sys_true : sys_false;
 		return pc;
 	} else {
-		throw Mishap( "Wrong number of arguments for head" );
+		throw Ginger::Mishap( "Wrong number of arguments for head" );
 	}
 }
 
@@ -93,7 +93,7 @@ Ref * sysListAppend( Ref * pc, class MachineClass * vm ) {
 	//	Variables here are unaffected by a GC.
 	ptrdiff_t D;
 	
-	if ( vm->count != 2 ) throw Mishap( "Wrong number of arguments in listAppend" );
+	if ( vm->count != 2 ) throw Ginger::Mishap( "Wrong number of arguments in listAppend" );
 
 	//	This section is carefully to survive relocations of the
 	//	call/value stacks. Will NOT survive a GC.
@@ -103,7 +103,7 @@ Ref * sysListAppend( Ref * pc, class MachineClass * vm ) {
 		Ref lhs = vm->fastPeek( 1 );
 		
 		//	Typecheck arguments.
-		if ( !isList( lhs ) || !isList( rhs ) ) throw Mishap( "Invalid arguments in listAppend" );
+		if ( !isList( lhs ) || !isList( rhs ) ) throw Ginger::Mishap( "Invalid arguments in listAppend" );
 		
 		ptrdiff_t start = vm->stackLength();
 		while ( IsPair( lhs ) ) {
@@ -127,13 +127,13 @@ Ref * sysListAppend( Ref * pc, class MachineClass * vm ) {
 }
 
 Ref * sysListIndex( Ref *pc, class MachineClass * vm ) {
-	if ( vm->count != 2 ) throw ArgsMismatch();
+	if ( vm->count != 2 ) throw Ginger::Mishap( "ArgsMismatch" );
 	Ref idx = vm->fastPop();
-	if ( !IsSmall( idx ) ) throw TypeError();
+	if ( !IsSmall( idx ) ) throw Ginger::Mishap( "TypeError" );
 	Ref list = vm->fastPeek();
 	
 	long I = SmallToLong( idx );
-	if ( I <= 0 ) throw OutOfRange();
+	if ( I <= 0 ) throw Ginger::Mishap( "OutOfRange" );
 	
 	while ( IsPair( list ) && --I > 0 ) {
 		list = fastPairTail( list );
@@ -142,9 +142,9 @@ Ref * sysListIndex( Ref *pc, class MachineClass * vm ) {
 	if ( IsPair( list ) ) {
 		vm->fastPeek() = fastPairHead( list );
 	} else if ( IsNil( list ) ) {
-		throw OutOfRange();
+		throw Ginger::Mishap( "OutOfRange" );
 	} else {
-		throw TypeError();
+		throw Ginger::Mishap( "TypeError" );
 	}
 	
 	return pc;
@@ -153,9 +153,9 @@ Ref * sysListIndex( Ref *pc, class MachineClass * vm ) {
 
 
 Ref * sysListExplode( Ref *pc, class MachineClass * vm ) {
-	if ( vm->count != 1 ) throw Mishap( "Wrong number of arguments for listExplode" );
+	if ( vm->count != 1 ) throw Ginger::Mishap( "Wrong number of arguments for listExplode" );
 	Ref r = vm->fastPop();
-	if ( !isList( r ) ) throw Mishap( "Argument mismatch for listExplode" );
+	if ( !isList( r ) ) throw Ginger::Mishap( "Argument mismatch for listExplode" );
 
 	while ( IsPair( r ) ) {
 		vm->checkStackRoom( 1 );
@@ -167,9 +167,9 @@ Ref * sysListExplode( Ref *pc, class MachineClass * vm ) {
 }
 
 Ref * sysListLength( Ref *pc, class MachineClass * vm ) {
-	if ( vm->count != 1 ) throw Mishap( "Wrong number of arguments for listLength" );
+	if ( vm->count != 1 ) throw Ginger::Mishap( "Wrong number of arguments for listLength" );
 	Ref r = vm->fastPeek();
-	if ( !isList( r ) ) throw Mishap( "Argument mismatch for listLength" );
+	if ( !isList( r ) ) throw Ginger::Mishap( "Argument mismatch for listLength" );
 
 	int count = 0;
 	while ( IsPair( r ) ) {

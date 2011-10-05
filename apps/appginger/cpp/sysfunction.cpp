@@ -49,9 +49,9 @@ Ref * sysPartApply( Ref *pc, class MachineClass * vm ) {
 	Ref F = vm->fastPeek();
 	
 	//	F is required to be a function.
-	if ( !IsObj( F ) ) throw Mishap( "Function needed as last arg to partApply" );
+	if ( !IsObj( F ) ) throw Ginger::Mishap( "Function needed as last arg to partApply" );
 	Ref * F_K = RefToPtr4( F );
-	if ( !IsFunctionKey( *F_K ) ) throw Mishap( "Function needed as last arg to partApply" );
+	if ( !IsFunctionKey( *F_K ) ) throw Ginger::Mishap( "Function needed as last arg to partApply" );
 	
 	long F_in_arity = numInputsOfFn( F_K );
 	long F_out_arity = numOutputsOfFn( F_K );
@@ -79,9 +79,9 @@ Ref * sysFunctionInArity( Ref *pc, class MachineClass * vm ) {
 	Ref fn = vm->fastPeek();
 	
 	//	F is required to be a function.
-	if ( !IsObj( fn ) ) throw Mishap( "Function needed" );
+	if ( !IsObj( fn ) ) throw Ginger::Mishap( "Function needed" );
 	Ref * fn_K = RefToPtr4( fn );
-	if ( !IsFunctionKey( *fn_K ) ) throw Mishap( "Function needed" );
+	if ( !IsFunctionKey( *fn_K ) ) throw Ginger::Mishap( "Function needed" );
 	
 	vm->fastPeek() = LongToSmall( numInputsOfFn( fn_K ) );
 	
@@ -92,9 +92,9 @@ Ref * sysFunctionOutArity( Ref *pc, class MachineClass * vm ) {
 	Ref fn = vm->fastPeek();
 	
 	//	F is required to be a function.
-	if ( !IsObj( fn ) ) throw Mishap( "Function needed" );
+	if ( !IsObj( fn ) ) throw Ginger::Mishap( "Function needed" );
 	Ref * fn_K = RefToPtr4( fn );
-	if ( !IsFunctionKey( *fn_K ) ) throw Mishap( "Function needed" );
+	if ( !IsFunctionKey( *fn_K ) ) throw Ginger::Mishap( "Function needed" );
 	
 	vm->fastPeek() = LongToSmall( numOutputsOfFn( fn_K ) );
 

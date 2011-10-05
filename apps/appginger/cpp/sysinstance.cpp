@@ -21,6 +21,7 @@
 #include "key.hpp"
 #include "classlayout.hpp"
 #include "mishap.hpp"
+#include "sysprint.hpp"
 
 unsigned long lengthOfInstance( Ref * obj_K ) {
 	Ref key = *obj_K;
@@ -29,7 +30,7 @@ unsigned long lengthOfInstance( Ref * obj_K ) {
 		int N = SmallToLong( key_K[ CLASS_OFFSET_NFIELDS ] );
 		return N;
 	} else {	
-		throw Mishap( "Instance needed" ).culprit( "Argument", Ptr4ToRef( obj_K ) );
+		throw Ginger::Mishap( "Instance needed" ).culprit( "Argument", refToString( Ptr4ToRef( obj_K ) ) );
 	}
 }
 
@@ -39,6 +40,6 @@ Ref titleOfInstance( Ref * obj_K ) {
 		Ref * key_K = RefToPtr4( key );
 		return key_K[ CLASS_OFFSET_TITLE ];
 	} else {	
-		throw Mishap( "Instance needed" ).culprit( "Argument", Ptr4ToRef( obj_K ) );
+		throw Ginger::Mishap( "Instance needed" ).culprit( "Argument", refToString( Ptr4ToRef( obj_K ) ) );
 	}
 }

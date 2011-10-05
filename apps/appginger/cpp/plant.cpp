@@ -68,7 +68,7 @@ Ref PlantClass::detach( const bool in_heap, Ref fnkey ) {
 	
 	//	The preflighted size must fit into WORDBITS-8 bits.
 	if ( ( preflight_size & ~TAGGG_MASK ) != 0 ) {
-		throw Mishap( "Procedure too large" );
+		throw Ginger::Mishap( "Procedure too large" );
 	}
 	
 	if ( in_heap ) {
@@ -111,7 +111,7 @@ Ref PlantClass::detach( const bool in_heap, Ref fnkey ) {
 		*p++ = ToRef( this->nlocals );
 		*p++ = ToRef( this->ninputs );
 		Ref * func = p;
-		if ( fnkey != sysCoreFunctionKey ) throw Unreachable( __FILE__, __LINE__ );
+		if ( fnkey != sysCoreFunctionKey ) throw Ginger::Unreachable( __FILE__, __LINE__ );
 		*p++ = sysCoreFunctionKey;
 		for ( std::vector< Ref >::iterator it = this->code_data->begin(); it != this->code_data->end(); ++it ) {
 			*p++ = *it;
@@ -371,11 +371,11 @@ void PlantClass::compileTerm( Term term ) {
 			Ident id = t->ident();
 			if ( id != NULL ) {
 				if ( id->isLocal() && id->getFinalSlot() < 0 ) {
-					throw Mishap( "Ident record not assigned slot" ).culprit( "Identifier",  t->name().c_str() );
+					throw Ginger::Mishap( "Ident record not assigned slot" ).culprit( "Identifier",  t->name().c_str() );
 				}
 				vmiPUSHID( this, id );
 			} else {
-				throw Mishap( "Unlifted identifier" ).culprit( "Identifier",  t->name().c_str() );
+				throw Ginger::Mishap( "Unlifted identifier" ).culprit( "Identifier",  t->name().c_str() );
 			}
 			break;
 		}
@@ -399,7 +399,7 @@ void PlantClass::compileTerm( Term term ) {
 				this->compile1( source );
 				vmiPOPID( this, ident );
 			} else {
-				throw ToBeDone().culprit( "Term", functor_name( term_functor( target ) ) );
+				throw Ginger::Mishap( "TO BE DONE" ).culprit( "Term", functor_name( term_functor( target ) ) );
 			}
 			break;
 		}
@@ -476,7 +476,7 @@ void PlantClass::compileTerm( Term term ) {
 			if ( id->value_of->valof == sys_undef ) {
 				Ref r = makeSysFn( this, term_sysfn_cont( term ), sys_undef );
 				if ( r == sys_undef ) {
-					throw Mishap( "No such system function" ).culprit( "Function", term_sysfn_cont( term ) );
+					throw Ginger::Mishap( "No such system function" ).culprit( "Function", term_sysfn_cont( term ) );
 				}
 				id->value_of->valof = r;
 			}
@@ -486,7 +486,7 @@ void PlantClass::compileTerm( Term term ) {
 		case fnc_sysfn: {
 			Ref r = makeSysFn( this, term_sysfn_cont( term ), sys_undef );
 			if ( r == sys_undef ) {
-				throw Mishap( "No such system function" ).culprit( "Function", term_sysfn_cont( term ) );
+				throw Ginger::Mishap( "No such system function" ).culprit( "Function", term_sysfn_cont( term ) );
 			}
 			vmiPUSHQ( this, r );			
 			break;
@@ -520,7 +520,7 @@ void PlantClass::compileTerm( Term term ) {
 				this->compileTerm( term_index( term, 2 ) );
 				d.destinationSet();
 			} else {
-				this_never_happens();
+				throw Ginger::Unreachable( __FILE__, __LINE__ );
 			}
 			break;
 		}
@@ -534,7 +534,7 @@ void PlantClass::compileTerm( Term term ) {
 			break;
 		}
 		default: {
-			throw Mishap( "PLANT_TERM: Not implemented yet" ).culprit( "functor", functor_name( fnc ) );
+			throw Ginger::Mishap( "PLANT_TERM: Not implemented yet" ).culprit( "functor", functor_name( fnc ) );
 		}
 	}
 }
@@ -558,7 +558,7 @@ void PlantClass::compile1( Term term ) {
 	} else if ( a.count() == 1 ) {
 		this->compileTerm( term );
 	} else {
-		throw Mishap( "Wrong number of results in single context" ).culprit( "#Results", "" + a.count() );
+		throw Ginger::Mishap( "Wrong number of results in single context" ).culprit( "#Results", "" + a.count() );
 	}
 }
 
@@ -574,6 +574,6 @@ void PlantClass::compile0( Term term ) {
 	} else if ( a.count() == 0 ) {
 		this->compileTerm( term );
 	} else {
-		throw Mishap( "Wrong number of results in zero context" ).culprit( "#Results", "" + a.count() );
+		throw Ginger::Mishap( "Wrong number of results in zero context" ).culprit( "#Results", "" + a.count() );
 	}
 }

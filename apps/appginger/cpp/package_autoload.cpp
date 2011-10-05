@@ -52,7 +52,7 @@ using namespace std;
 
 class ResolveHandler : public Ginger::SaxHandler {
 public:
-	Mishap mishap;
+	Ginger::Mishap mishap;
 	string enc_pkg_name;
 	string alias_name;
 	string def_pkg_name;
@@ -70,7 +70,7 @@ public:
 		} else if ( name == "culprit" ) {
 			mishap.culprit( attrs[ "name" ], attrs[ "value" ] );
 		} else {
-			throw Mishap( "Unexpected element in response" ).culprit( "Element name", name );
+			throw Ginger::Mishap( "Unexpected element in response" ).culprit( "Element name", name );
 		}
 	}
 	
@@ -128,7 +128,7 @@ Ident OrdinaryPackage::unqualifiedAutoload( const std::string & c ) {
 		if ( n == -1 ) {
 			if ( errno != EINTR ) {
 				perror( "PACKAGE AUTOLOAD" );
-				throw Mishap( "Failed to read" );
+				throw Ginger::Mishap( "Failed to read" );
 			}
 		} else if ( n > 0 ) {
 			//cerr << "|";
@@ -189,7 +189,7 @@ Ident OrdinaryPackage::qualifiedAutoload( const std::string & alias, const std::
 		if ( n == -1 ) {
 			if ( errno != EINTR ) {
 				perror( "PACKAGE AUTOLOAD" );
-				throw Mishap( "Failed to read" );
+				throw Ginger::Mishap( "Failed to read" );
 			}
 		} else if ( n > 0 ) {
 			//cerr << "|";
@@ -247,7 +247,7 @@ Ident OrdinaryPackage::absoluteAutoload( const std::string & c ) {
 		if ( n == -1 ) {
 			if ( errno != EINTR ) {
 				perror( "PACKAGE AUTOLOAD" );
-				throw Mishap( "Failed to read" );
+				throw Ginger::Mishap( "Failed to read" );
 			}
 		} else if ( n > 0 ) {
 			//cerr << "|";
@@ -316,7 +316,7 @@ void OrdinaryPackage::loadIfNeeded() {
 		if ( n == -1 ) {
 			if ( errno != EINTR ) {
 				perror( "PACKAGE AUTOLOAD" );
-				throw Mishap( "Failed to read" );
+				throw Ginger::Mishap( "Failed to read" );
 			}
 		} else if ( n > 0 ) {
 			//cerr << "|";

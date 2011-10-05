@@ -21,9 +21,12 @@
 #include <cstdio>
 #include <cstdlib>
 
+using namespace Ginger;
+
 
 //	Now source the auto-generated C++ file. 
 #include "instructions_context.hpp"
+
 
 
 Machine3::Machine3( AppContext & g ) :

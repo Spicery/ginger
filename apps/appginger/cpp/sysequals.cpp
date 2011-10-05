@@ -107,7 +107,7 @@ static bool refStringEquals( Ref * rx, Ref * ry ) {
 }
 
 static bool refMapEquals( Ref * rx, Ref * ry ) {
-	throw ToBeDone();
+	throw Ginger::Mishap( "ToBeDone" );
 }
 
 bool refEquals( Ref x, Ref y ) {
@@ -134,16 +134,16 @@ bool refEquals( Ref x, Ref y ) {
 						case RECORD_KIND: 	return refRecordEquals( x_K, y_K );
 						case STRING_KIND: 	return refStringEquals( x_K, y_K );
 						default: {
-							throw ToBeDone();
+							throw Ginger::Mishap( "ToBeDone" );
 						}
 					}
 				} else {
 					return false;	//	At least for now.
 				}
 			} else if ( IsObj( xkey ) ) {
-				throw ToBeDone();
+				throw Ginger::Mishap( "ToBeDone" );
 			} else {
-				throw ToBeDone();
+				throw Ginger::Mishap( "ToBeDone" );
 			}			
 		}
 	} else {
@@ -219,7 +219,7 @@ Ref * sysHash( Ref *pc, class MachineClass * vm ) {
 		vm->fastPeek() = ULongToSmall( gngEqHash( vm->fastPeek() ) );
 		return pc;
 	} else {
-		throw Mishap( "Wrong number of arguments for hash" );
+		throw Ginger::Mishap( "Wrong number of arguments for hash" );
 	}
 }
 
@@ -230,7 +230,7 @@ Ref * sysEquals( Ref * pc, class MachineClass * vm ) {
 		vm->fastPeek() = refEquals( x, y ) ? sys_true : sys_false;
 		return pc;
 	} else {
-		throw Mishap( "Wrong number of arguments for =" );
+		throw Ginger::Mishap( "Wrong number of arguments for =" );
 	}
 }
 

@@ -5,6 +5,9 @@
 #include <cstdio>
 #include <cstdlib>
 
+using namespace Ginger;
+
+
 #define FREEZE
 #define MELT
 #define VMLINK 	( vm->link )

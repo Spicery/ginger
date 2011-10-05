@@ -18,6 +18,8 @@
 
 #include <iostream>
 #include <fstream>
+#include <vector>
+#include <string>
 
 #include <cstdio>
 #include <cstdlib>
@@ -26,6 +28,8 @@
 #include <unistd.h>
 #include <getopt.h>
 #include <syslog.h>
+
+#include "mnx.hpp"
 
 #include "appcontext.hpp"
 #include "rcep.hpp"
@@ -287,7 +291,27 @@ void Main::runAsCgi() {
 	cout << "Content-type: text/html\r\n\r\n";
 	cout << "<html><head><title>AppGinger</title></head><body>\n";
 	cout << "<H1>AppGinger Version " << VERSION << "</H1>\n";
+	cout << "<H2>Arguments</H2>";
+	vector< string > & args = this->context.arguments();
+	for ( vector< string >::iterator it = args.begin(); it != args.end(); ++it ) {
+		cout << "<H2>" << *it << "</H2>" << endl;
+		fstream filestr( it->c_str(), fstream::in );
+		string line;
+		if ( filestr.good() ) {
+			//	Chew off first line.
+			getline( filestr, line );
+			cout << line << "<BR/>" << endl;
+		}
+		if ( filestr.good() ) {
+			Ginger::MnxReader content( filestr );
+			shared< Ginger::Mnx > m = content.readMnx();
+			cout << "YAY! " << m->name() << endl;
+		}
+		filestr.close();
+	}
 	cout << "</body></html>\n";
+	
+	
 }
 
 void Main::mainLoop() {
@@ -389,11 +413,12 @@ int Main::run( int argc, char **argv, char **envp ) {
     }
 
 	if ( optind < argc ) {
-		 cout << "non-option ARGV-elements: ";
+		 //cout << "non-option ARGV-elements: ";
 		 while ( optind < argc ) {
-		   cout << argv[ optind++ ] << " ";
+		   	//cout << argv[ optind++ ] << " ";
+		   	this->context.addArgument( argv[ optind++ ] );
 		 }
-		 cout << endl;
+		 //cout << endl;
 	}
 	
 	if ( meta_info_needed ) {
@@ -424,7 +449,7 @@ int main( int argc, char **argv, char **envp ) {
 	try {
 		Main main;
 		return main.run( argc, argv, envp );
-	} catch ( SystemError & e ) {
+	} catch ( Ginger::SystemError & e ) {
 		e.report();
 		return EXIT_FAILURE;
 	}

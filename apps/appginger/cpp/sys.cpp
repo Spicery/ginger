@@ -45,6 +45,8 @@
 #include "sysclass.hpp"
 #include "sysunix.hpp"
 
+using namespace Ginger;
+
 //#define DBG_SYS
 
 
@@ -67,7 +69,7 @@ Ref * sysFastGetFastIterator( Ref * pc, class MachineClass * vm ) {
 					break;
 				}
 				case RECORD_KIND: {
-					throw ToBeDone();
+					throw Mishap( "ToBeDone" );
 					break;
 				}
 				case STRING_KIND: {
@@ -104,21 +106,21 @@ Ref * sysFastGetFastIterator( Ref * pc, class MachineClass * vm ) {
 					break;
 				}
 				default: {
-					throw ToBeDone();
+					throw Ginger::Mishap( "ToBeDone" );
 				}
 			}
 		} else if ( IsObj( key ) ) {
 			//	Compound keys not implemented yet.
-			throw ToBeDone();	//	(compound keys)
+			throw Ginger::Mishap( "ToBeDone" );	//	(compound keys)
 		} else {
-			throw ToBeDone();
+			throw Ginger::Mishap( "ToBeDone" );
 		}
 	} else if ( IsNil( r ) ) {
 		vm->fastPush( r );			//	Iteration state.
 		vm->fastPush( sys_absent );	//	Iteration context, a dummy.
 		vm->fastPush( vm->sysFastListIterator() );
 	} else {
-		throw ToBeDone();
+		throw Ginger::Mishap( "ToBeDone" );
 	}
 	return pc;
 }
@@ -161,7 +163,7 @@ Ref * sysAppend( Ref * pc, class MachineClass * vm ) {
 	index( map_like, idx )
 */
 Ref * sysIndex( Ref *pc, class MachineClass * vm ) {
-	if ( vm->count != 2 ) throw ArgsMismatch();
+	if ( vm->count != 2 ) throw Ginger::Mishap( "ArgsMismatch" );
 	Ref idx = vm->fastPop();
 	Ref map = vm->fastPeek();
 	vm->fastPush( idx );
@@ -174,15 +176,15 @@ Ref * sysIndex( Ref *pc, class MachineClass * vm ) {
 				case PAIR_KIND: return pc = sysListIndex( pc, vm );
 				case STRING_KIND: return pc = sysStringIndex( pc, vm );
 				case MAP_KIND: return pc = sysMapIndex( pc, vm );
-				default: throw ToBeDone();
+				default: throw Ginger::Mishap( "ToBeDone" );
 			}
 		} else {
-			throw ToBeDone();
+			throw Ginger::Mishap( "ToBeDone" );
 		}
 	} else if ( IsNil( map ) ) {
 		return sysListIndex( pc, vm );
 	} else {
-		throw ToBeDone();
+		throw Ginger::Mishap( "ToBeDone" );
 	}
 	return pc;
 }
@@ -222,19 +224,19 @@ Ref * sysExplode( Ref *pc, class MachineClass * vm ) {
 						break;
 					}
 					default: {
-						throw ToBeDone();
+						throw Ginger::Mishap( "ToBeDone" );
 					}
 				}
 			} else if ( IsObj( key ) ) {
 				//	Compound keys not implemented yet.
-				throw ToBeDone();	//	(compound keys)
+				throw Ginger::Mishap( "ToBeDone" );	//	(compound keys)
 			} else {
-				throw ToBeDone();
+				throw Ginger::Mishap( "ToBeDone" );
 			}
 		} else if ( IsNil( r ) ) {
 			return sysListExplode( pc, vm );
 		} else {
-			throw ToBeDone();
+			throw Ginger::Mishap( "ToBeDone" );
 		}
 		return pc;
 	} else {

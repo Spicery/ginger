@@ -2,6 +2,9 @@
 
 #include "instructions_context.hpp"
 
+using namespace Ginger;
+
+
 InstructionSet3::InstructionSet3() {
 	//	Nothing to do!
 }

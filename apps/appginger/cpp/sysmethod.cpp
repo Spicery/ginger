@@ -23,16 +23,17 @@
 
 #include "mishap.hpp"
 #include "vmi.hpp"
+#include "sysprint.hpp"
 
 Ref * sysNewMethod( Ref * pc, MachineClass * vm ) {
 	//	newMethod( name:String, ninputs:Small, noutputs:Small ) -> m:Method
-	if ( vm->count != 3 ) throw Mishap( "Wrong number of arguments" );
+	if ( vm->count != 3 ) throw Ginger::Mishap( "Wrong number of arguments" );
 	
 	Ref noutputs = vm->fastPop();
 	Ref ninputs = vm->fastPop();
 	/*Ref name =*/ vm->fastPop();	//	Currently discarded.
 	
-	if ( !IsSmall( noutputs ) || !IsSmall( ninputs ) ) throw Mishap( "Invalid arguments" ).culprit( "#Outputs", noutputs ).culprit( "Inputs", ninputs );
+	if ( !IsSmall( noutputs ) || !IsSmall( ninputs ) ) throw Ginger::Mishap( "Invalid arguments" ).culprit( "#Outputs", refToString( noutputs ) ).culprit( "Inputs", refToString( ninputs ) );
 	
 	Plant plant = vm->plant();
 	vmiFUNCTION( plant, SmallToLong( ninputs ), SmallToLong( noutputs ) );
@@ -55,22 +56,22 @@ Ref * sysNewMethod( Ref * pc, MachineClass * vm ) {
 		the two functions are the same.
 */
 Ref * sysSetSlot( Ref * pc, MachineClass * vm ) {
-	if ( vm->count != 3 ) throw Mishap( "Wrong number of arguments" );
+	if ( vm->count != 3 ) throw Ginger::Mishap( "Wrong number of arguments" );
 
 	Ref method = vm->fastPop();
 	Ref position = vm->fastPop();
 	Ref gclass = vm->fastPop();
 
-	if ( !IsMethod( method ) ) throw Mishap( "Method needed" ).culprit( "Method", method );
-	if ( !IsSmall( position ) ) throw Mishap( "Small needed" ).culprit( "Position", position );
-	if ( !IsClass( gclass ) ) throw Mishap( "Class needed" ).culprit( "Class", gclass );
+	if ( !IsMethod( method ) ) throw Ginger::Mishap( "Method needed" ).culprit( "Method", refToString( method ) );
+	if ( !IsSmall( position ) ) throw Ginger::Mishap( "Small needed" ).culprit( "Position", refToString( position ) );
+	if ( !IsClass( gclass ) ) throw Ginger::Mishap( "Class needed" ).culprit( "Class", refToString( gclass ) );
 	
 	long pos = SmallToLong( position );
 	long nfields = SmallToLong( RefToPtr4( gclass )[ CLASS_OFFSET_NFIELDS ] );
 	if ( not( 1 <= pos && pos <= nfields ) ) {
 		throw 
-			Mishap( "Position out of range" ).
-			culprit( "Position", position ).
+			Ginger::Mishap( "Position out of range" ).
+			culprit( "Position", pos ).
 			culprit( "Number of fields", nfields )
 		;
 	}
@@ -110,7 +111,7 @@ Ref * sysSetSlot( Ref * pc, MachineClass * vm ) {
 static Ref * gngSetMethod( Ref * pc, MachineClass * vm, const bool override ) {
 	
 	//	setMethod( Class, Method, Function )
-	if ( vm->count != 3 ) throw Mishap( "Wrong number of arguments" );
+	if ( vm->count != 3 ) throw Ginger::Mishap( "Wrong number of arguments" );
 	
 	//	We may need to allocate some store. In order to avoid doing
 	//	this at an inconvenient time we will preflight enough store.
@@ -126,9 +127,9 @@ static Ref * gngSetMethod( Ref * pc, MachineClass * vm, const bool override ) {
 	Ref method = vm->fastPop();
 	Ref gclass = vm->fastPop();
 	
-	if ( !IsFunction( function ) ) throw Mishap( "Function needed" );
-	if ( !IsMethod( method ) ) throw Mishap( "Method needed" );
-	if ( !IsClass( gclass ) ) throw Mishap( "Class needed" );
+	if ( !IsFunction( function ) ) throw Ginger::Mishap( "Function needed" );
+	if ( !IsMethod( method ) ) throw Ginger::Mishap( "Method needed" );
+	if ( !IsClass( gclass ) ) throw Ginger::Mishap( "Class needed" );
 	
 	//Ref * gclass_K = RefToPtr4( gclass );
 	Ref dispatch_table = INDEX( method, METHOD_OFFSET_DISPATCH_TABLE );

@@ -20,6 +20,7 @@
 #define APP_CONTEXT_HPP
 
 #include <string>
+#include <vector>
 #include <list>
 
 #include "gngversion.hpp"
@@ -42,6 +43,7 @@ private:
 	bool 				is_gctrace;
 	std::list< std::string >		project_folder_list;
 	char **				envp;
+	std::vector< std::string > arg_list;
 
 public:
 	void setInteractiveMode() { this->mode = InteractiveMode; }
@@ -64,6 +66,8 @@ public:
 	void addProjectFolder( const char * folder );
 	char ** getEnvironmentVariables() { return this->envp; }
 	void setEnvironmentVariables( char ** e ) { this->envp = e; }
+	void addArgument( const char * s ) { this->arg_list.push_back( s ); }
+	std::vector< std::string > & arguments() { return this->arg_list; }
 	
 
 public:

@@ -49,7 +49,7 @@ int Arity::count() const {
 
 void Arity::check( const int actual_nargs ) const {
 	if ( ! this->isOK( actual_nargs ) ) {
-		throw Mishap( "Wrong number of arguments" );
+		throw Ginger::Mishap( "Wrong number of arguments" );
 	}
 }
 
@@ -61,7 +61,7 @@ std::string Arity::toString() const {
 
 void Arity::check( const Arity that ) const {
 	if ( ! this->isOK( that ) ) {
-		throw Mishap( "Wrong number of arguments" ).culprit( "Expected", this->toString() ).culprit( "Actual", that.toString() );
+		throw Ginger::Mishap( "Wrong number of arguments" ).culprit( "Expected", this->toString() ).culprit( "Actual", that.toString() );
 	}
 }
 

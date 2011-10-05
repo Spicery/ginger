@@ -91,5 +91,7 @@ public:
 	virtual ~ReadXmlClass() {}
 };
 
+extern Term mnxToTerm( shared< Ginger::Mnx > mnx );
+
 
 #endif

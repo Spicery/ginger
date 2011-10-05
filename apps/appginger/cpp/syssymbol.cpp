@@ -54,7 +54,7 @@ static unsigned long nextSerial() {
 		if ( available( next_serial ) ) return next_serial++ ;
 		if ( next_serial > MAX_SERIAL ) {
 			if ( resetted ) {
-				throw Mishap( "Symbol table is full" );
+				throw Ginger::Mishap( "Symbol table is full" );
 			} else { 
 				next_serial = 0;
 				resetted = true;
@@ -117,10 +117,10 @@ Ref * sysMakeSymbol( Ref *pc, MachineClass * vm ) {
 			vm->fastPeek() = refMakeSymbol( s );
 			return pc;
 		} else {
-			throw Mishap( "String needed for newSymbol" );
+			throw Ginger::Mishap( "String needed for newSymbol" );
 		}
 	} else {
-		throw Mishap( "Wrong number of arguments for newSymbol" );
+		throw Ginger::Mishap( "Wrong number of arguments for newSymbol" );
 	}
 }
 
@@ -129,6 +129,6 @@ extern const std::string & symbolToStdString( Ref r ) {
 	if ( it != revsymtab.end() ) {
 		return it->second;
 	} else {
-		throw SystemError( "Corrupt symbol table" );
+		throw Ginger::SystemError( "Corrupt symbol table" );
 	}
 }

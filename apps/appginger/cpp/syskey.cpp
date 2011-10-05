@@ -56,6 +56,6 @@ Ref * sysObjectKey( Ref * pc, MachineClass * vm ) {
 		vm->fastPeek() = refKey( vm->fastPeek() );
 		return pc;
 	} else {
-		throw Mishap( "Wrong number of arguments for objectKey" );
+		throw Ginger::Mishap( "Wrong number of arguments for objectKey" );
 	}
 }

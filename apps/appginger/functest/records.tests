@@ -6,8 +6,8 @@ Title: Record
 	<app>
 		<id name="newRecordClass" />
 		<seq>
-			<string value="K" />
-			<int value="2" />
+			<constant type="string" value="K" />
+			<constant type="int" value="2" />
 		</seq>
 	</app>
 </bind>
@@ -31,7 +31,7 @@ Title: Record
 		<id name="newClassAccessor" />
 		<seq>
 			<id name="K" />
-			<int value="1" />
+			<constant type="int" value="1" />
 		</seq>
 	</app>
 </bind>
@@ -41,7 +41,7 @@ Title: Record
 		<id name="newClassAccessor" />
 		<seq>
 			<id name="K" />
-			<int value="2" />
+			<constant type="int" value="2" />
 		</seq>
 	</app>
 </bind>
@@ -59,14 +59,14 @@ Title: Record
 	<app>
 		<id name="C" />
 		<seq>
-			<int value="99" />
-			<string value="foo" />
+			<constant type="int" value="99" />
+			<constant type="string" value="foo" />
 		</seq>
 	</app>
 </bind>
 <sysapp name="newVector">
 	<app><id name="R"/><id name="X"/></app>
-	<app><id name="R"/><int value="-7"/></app>
+	<app><id name="R"/><constant type="int" value="-7"/></app>
 	<app><id name="A"/><id name="X"/></app>
 	<app><id name="B"/><id name="X"/></app>
 	<sysapp name="newList">
@@ -79,13 +79,13 @@ Title: Record
 Title: Method
 --------------------------------------------------------------------------------
 <!-- val Foo := newRecordClass( "Foo", 1 ); -->
-<bind><var name="Foo" protected="true" tag="public"/><app><id name="newRecordClass"/><seq><string value="Foo"/><int value="1"/></seq></app></bind>
+<bind><var name="Foo" protected="true" tag="public"/><app><id name="newRecordClass"/><seq><constant type="string" value="Foo"/><constant type="int" value="1"/></seq></app></bind>
 
 <!-- val FooCont := newClassAccessor( Foo, 1 ); -->
-<bind><var name="FooCont" protected="true" tag="public"/><app><id name="newClassAccessor"/><seq><id name="Foo"/><int value="1"/></seq></app></bind>
+<bind><var name="FooCont" protected="true" tag="public"/><app><id name="newClassAccessor"/><seq><id name="Foo"/><constant type="int" value="1"/></seq></app></bind>
 
 <!-- val M := newMethod( "M", 1, 1 ); -->
-<bind><var name="M" protected="true" tag="public"/><app><id name="newMethod"/><seq><seq><string value="M"/><int value="1"/></seq><int value="1"/></seq></app></bind>
+<bind><var name="M" protected="true" tag="public"/><app><id name="newMethod"/><seq><seq><constant type="string" value="M"/><constant type="int" value="1"/></seq><constant type="int" value="1"/></seq></app></bind>
 
 <!-- setMethod( Foo, M, FooCont ); -->
 <app><id name="setMethod"/><seq><seq><id name="Foo"/><id name="M"/></seq><id name="FooCont"/></seq></app>
@@ -95,7 +95,7 @@ Title: Method
 
 
 <!-- val X := newFoo( "yay" ); -->
-<bind><var name="X" protected="true" tag="public"/><app><id name="newFoo"/><string value="yay"/></app></bind>
+<bind><var name="X" protected="true" tag="public"/><app><id name="newFoo"/><constant type="string" value="yay"/></app></bind>
 <!-- M( X ); -->
 <app><id name="M"/><id name="X"/></app>
 --------------------------------------------------------------------------------

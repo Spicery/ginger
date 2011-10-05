@@ -69,7 +69,7 @@ void MachineClass::gcLiftVeto() {
 	if ( this->veto_count > 0 ) {
 		this->veto_count -= 1;
 	} else {
-		throw SystemError( "Trying to decrement veto-count less than zero!" );
+		throw Ginger::SystemError( "Trying to decrement veto-count less than zero!" );
 	}
 }
 
@@ -254,7 +254,7 @@ void MachineClass::printResults( std::ostream & out, float time_taken ) {
 
 //	Needs to be inlined after we complete the callstack refactoring.
 void MachineClass::checkStackRoom( long n ) {
-	if ( this->sp < this->vp + n + STACK_BUFFER_OVERHEAD ) throw Mishap( "Stack overflow" );
+	if ( this->sp < this->vp + n + STACK_BUFFER_OVERHEAD ) throw Ginger::Mishap( "Stack overflow" );
 }
 
 Ref MachineClass::sysFastListIterator() {

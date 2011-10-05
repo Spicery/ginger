@@ -31,7 +31,7 @@ Ref * sysVectorAppend( Ref * pc, class MachineClass * vm ) {
 	unsigned long lhs_n;
 	unsigned long rhs_n;
 
-	if ( vm->count != 2 ) throw Mishap( "Wrong number of arguments in vectorAppend" );
+	if ( vm->count != 2 ) throw Ginger::Mishap( "Wrong number of arguments in vectorAppend" );
 
 	{
 	
@@ -39,14 +39,14 @@ Ref * sysVectorAppend( Ref * pc, class MachineClass * vm ) {
 		Ref rhs = vm->fastPeek();
 		Ref lhs = vm->fastPeek( 1 );
 		
-		if ( !IsObj( lhs ) || !IsObj( rhs ) ) throw Mishap( "Invalid arguments in vectorAppend" );
+		if ( !IsObj( lhs ) || !IsObj( rhs ) ) throw Ginger::Mishap( "Invalid arguments in vectorAppend" );
 		
 		Ref * lhs_K = RefToPtr4( lhs );
 		Ref * rhs_K = RefToPtr4( rhs );
 		Ref lhs_key = *lhs_K;
 		Ref rhs_key = *rhs_K;
 		
-		if ( lhs_key != rhs_key || !IsSimpleKey( lhs_key ) || KindOfSimpleKey( lhs_key ) != VECTOR_KIND ) throw Mishap( "Invalid arguments in vectorAppend" );
+		if ( lhs_key != rhs_key || !IsSimpleKey( lhs_key ) || KindOfSimpleKey( lhs_key ) != VECTOR_KIND ) throw Ginger::Mishap( "Invalid arguments in vectorAppend" );
 	
 		lhs_n = sizeAfterKeyOfVector( lhs_K );
 		rhs_n = sizeAfterKeyOfVector( rhs_K );
@@ -72,11 +72,11 @@ Ref * sysVectorAppend( Ref * pc, class MachineClass * vm ) {
 }
 
 Ref * sysVectorIndex( Ref *pc, class MachineClass * vm ) {
-	if ( vm->count != 2 ) throw ArgsMismatch();
+	if ( vm->count != 2 ) throw Ginger::Mishap( "ArgsMismatch" );
 	Ref idx = vm->fastPop();
-	if ( !IsSmall( idx ) ) throw TypeError();
+	if ( !IsSmall( idx ) ) throw Ginger::Mishap( "TypeError" );
 	Ref vec = vm->fastPeek();
-	if ( !IsVector( vec ) ) throw TypeError();
+	if ( !IsVector( vec ) ) throw Ginger::Mishap( "TypeError" );
 	Ref * vec_K = RefToPtr4( vec );
 	
 	const long I = SmallToLong( idx );
@@ -85,18 +85,18 @@ Ref * sysVectorIndex( Ref *pc, class MachineClass * vm ) {
 	if ( 1 <= I && I <= N ) {
 		vm->fastPeek() = vec_K[ I ];
 	} else {
-		throw OutOfRange();
+		throw Ginger::Mishap( "OutOfRange" );
 	}
 	
 	return pc;
 }
 
 Ref * sysVectorExplode( Ref *pc, class MachineClass * vm ) {
-	if ( vm->count != 1 ) throw Mishap( "Wrong number of arguments for vectorExplode" );
+	if ( vm->count != 1 ) throw Ginger::Mishap( "Wrong number of arguments for vectorExplode" );
 	
 	Ref r = vm->fastPop();
 	
-	if ( !IsVectorKind( r ) ) throw Mishap( "Argument mismatch for vectorExplode" );
+	if ( !IsVectorKind( r ) ) throw Ginger::Mishap( "Argument mismatch for vectorExplode" );
 	
 	Ref *obj_K = RefToPtr4( r );
 	unsigned long n = sizeAfterKeyOfVector( obj_K );
@@ -108,9 +108,9 @@ Ref * sysVectorExplode( Ref *pc, class MachineClass * vm ) {
 }
 
 Ref * sysVectorLength( Ref *pc, class MachineClass * vm ) {
-	if ( vm->count != 1 ) throw Mishap( "Wrong number of arguments for vectorLength" );
+	if ( vm->count != 1 ) throw Ginger::Mishap( "Wrong number of arguments for vectorLength" );
 	Ref r = vm->fastPeek();
-	if ( !IsVector( r ) ) throw Mishap( "Argument mismatch for vectorLength" );
+	if ( !IsVector( r ) ) throw Ginger::Mishap( "Argument mismatch for vectorLength" );
 	Ref * obj_K = RefToPtr4( r );
 	
 	vm->fastPeek() = LongToSmall( sizeAfterKeyOfVector( obj_K ) );

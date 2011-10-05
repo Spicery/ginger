@@ -20,7 +20,13 @@
 
 #include <iostream>
 #include <fstream>
-using namespace std;
+
+#include <setjmp.h>
+#include <time.h>
+
+#include <cstdio>
+
+#include "mnx.hpp"
 
 #include "common.hpp"
 #include "read_xml.hpp"
@@ -32,10 +38,8 @@ using namespace std;
 #include "lift.hpp"
 #include "resolve.hpp"
 
-#include <setjmp.h>
-#include <time.h>
+using namespace std;
 
-#include <cstdio>
 
 //#define DBG_RCEP
 
@@ -84,7 +88,8 @@ bool RCEP::unsafe_read_comp_exec_print( istream & input, std::ostream & output )
     Ref r;
     Term term;
 	volatile clock_t start, finish;
-	ReadXmlClass read_xml( input );
+	//ReadXmlClass read_xml( input );
+	Ginger::MnxReader read_xml( input );
 
 #ifdef DBG_RCEP
 	printf( "Entering Read-Compile-Eval-Print loop\n" );
@@ -92,8 +97,10 @@ bool RCEP::unsafe_read_comp_exec_print( istream & input, std::ostream & output )
 #endif
 
 	try {
-        term = read_xml.readElement();
-        //term_print( term );
+		shared< Ginger::Mnx > mnx( read_xml.readMnx() );
+		if ( not mnx ) return false;
+		term = mnxToTerm( mnx );
+        //term = read_xml.readElement();
         
         if ( not term ) return false;
 
@@ -139,7 +146,7 @@ bool RCEP::unsafe_read_comp_exec_print( istream & input, std::ostream & output )
         		cerr << "Not top level" << endl;
         	#endif
 	    }
-	} catch ( NormalExit ) {
+	} catch ( Ginger::NormalExit ) {
 	}
 	#ifdef DBG_CRAWL
 		crawl( vm, "before.log" );
@@ -162,12 +169,12 @@ bool RCEP::read_comp_exec_print( istream & input, std::ostream & output ) {
 	for (;;) {
 		try {
 			return unsafe_read_comp_exec_print( input, output );
-		} catch ( Mishap & m ) {
+		} catch ( Ginger::Mishap & m ) {
 			m.report();
-		} catch ( SystemError & m ) {
+		} catch ( Ginger::SystemError & m ) {
 			m.report();
-			throw;
-		} 
+			throw m;
+		}
 	}
 }
 

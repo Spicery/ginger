@@ -16,7 +16,7 @@ Title: K
 </bind>
 
 <!-- K( true )( false ); -->
-<app><app><id name="K"/><bool value="true"/></app><bool value="false"/></app>
+<app><app><id name="K"/><constant type="bool" value="true"/></app><constant type="bool" value="false"/></app>
 --------------------------------------------------------------------------------
 true
 ================================================================================
@@ -32,7 +32,7 @@ Title: Stateful
 	f();
 	f();
 -->
-<bind><var name="foo" protected="true"/><fn name="foo"><seq/><seq><bind><var name="x" tag="public"/><int value="0"/></bind><fn><seq/><seq><set><sysapp name="+"><id name="x"/><int value="1"/></sysapp><id name="x"/></set><id name="x"/></seq></fn></seq></fn></bind>
+<bind><var name="foo" protected="true"/><fn name="foo"><seq/><seq><bind><var name="x" tag="public"/><constant type="int" value="0"/></bind><fn><seq/><seq><set><sysapp name="+"><id name="x"/><constant type="int" value="1"/></sysapp><id name="x"/></set><id name="x"/></seq></fn></seq></fn></bind>
 <bind><var name="f" tag="public"/><app><id name="foo"/><seq/></app></bind>
 <app><id name="f"/><seq/></app>
 <app><id name="f"/><seq/></app>
@@ -66,16 +66,16 @@ Title: KK, checking intermediate functions do capture
 </bind>
 
 <!-- KK( "foo" )( "bar" )( "gort" ) -->
-<app><app><app><id name="KK"/><string value="foo"/></app><string value="bar"/></app><string value="gort"/></app>
+<app><app><app><id name="KK"/><constant type="string" value="foo"/></app><constant type="string" value="bar"/></app><constant type="string" value="gort"/></app>
 --------------------------------------------------------------------------------
 foo
 gort
 ================================================================================
 Title: Check multiple captures
 --------------------------------------------------------------------------------
-<bind><var name="f" protected="true"/><fn name="f"><seq><var name="x"/></seq><seq><bind><var name="y" protected="true" tag="public"/><sysapp name="*"><int value="2"/><id name="x"/></sysapp></bind><fn><var name="z"/><sysapp name="newList"><seq><seq><id name="z"/><id name="y"/></seq><id name="x"/></seq></sysapp></fn></seq></fn></bind>
+<bind><var name="f" protected="true"/><fn name="f"><seq><var name="x"/></seq><seq><bind><var name="y" protected="true" tag="public"/><sysapp name="*"><constant type="int" value="2"/><id name="x"/></sysapp></bind><fn><var name="z"/><sysapp name="newList"><seq><seq><id name="z"/><id name="y"/></seq><id name="x"/></seq></sysapp></fn></seq></fn></bind>
 
-<app><app><id name="f"/><int value="99"/></app><string value="frog"/></app>
+<app><app><id name="f"/><constant type="int" value="99"/></app><constant type="string" value="frog"/></app>
 --------------------------------------------------------------------------------
 [frog,198,99]
 ================================================================================

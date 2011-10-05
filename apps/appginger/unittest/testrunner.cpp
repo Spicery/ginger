@@ -18,6 +18,7 @@
 
 #include <iostream>
 #include <fstream>
+#include <string>
 
 #include <cppunit/CompilerOutputter.h>
 #include <cppunit/XmlOutputter.h>
@@ -26,24 +27,54 @@
 
 using namespace std;
 
+/*
+	testrunner [OPTIONS] [FILENAME]
+	Option
+		--xml		Output to XML
+		--text		Output to text
+		--stdout	Output to standard output, if no filename
+		--stderr	Output to standard error, if no filename
+*/
 int main( int argc, char ** argv ) {
 	CppUnit::TextUi::TestRunner runner;
 	CppUnit::TestFactoryRegistry &registry = CppUnit::TestFactoryRegistry::getRegistry();
 	runner.addTest( registry.makeTest() );
 	
+	
+	bool use_xml = false;
+	bool use_text = false;
+	bool use_stdout = false;
+	bool use_stderr = false;
+	const char * fname = NULL;
+	for ( int i = 1; i < argc; i++ ) {
+		string arg( argv[ i ] );
+		if ( arg == "--xml" ) {
+			use_xml = true;
+		} else if ( arg == "--text" ) {
+			use_text = true;
+		} else if ( arg == "--stdout" ) {
+			use_stdout = true;
+		} else if ( arg == "--stderr" ) {
+			use_stderr = true;
+		} else {
+			fname = argv[ i ];
+		}
+	}
+	use_xml = use_xml || !use_text;
+
 	ofstream out;
-	if ( argc == 2 ) {
-		out.open( argv[ 1 ] );
+	if ( fname != NULL ) {
+		out.open( fname );
 	}
 
-	
-	runner.setOutputter( 
-		new CppUnit::XmlOutputter( 
-			&runner.result(), 
-			( out.is_open() ? out : std::cerr )
-		) 
-	);
-	
+	if ( !use_text ) {
+		runner.setOutputter( 
+			new CppUnit::XmlOutputter( 
+				&runner.result(), 
+				( fname != NULL ? out : use_stdout ? std::cout : std::cerr )
+			) 
+		);
+	} 
 		
 	// Run the tests.
   	bool wasSucessful = runner.run( "", false, true, false );

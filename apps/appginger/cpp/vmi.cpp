@@ -16,6 +16,9 @@
 	#include "scanfunc.hpp"	
 #endif
 
+static void this_never_happens() {
+	throw Ginger::Unreachable( __FILE__, __LINE__ );
+}
 
 static void emitSPC( Plant plant, Instruction instr ) {
 	const InstructionSet & ins = plant->instructionSet();

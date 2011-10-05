@@ -108,7 +108,7 @@ static long estimateMapSize( MachineClass * vm ) {
 		} else if ( IsMap( r ) ) {
 			total += SmallToLong( fastMapCount( r ) );
 		} else {
-			throw Mishap( "Invalid argument for newMap" );
+			throw Ginger::Mishap( "Invalid argument for newMap" );
 		}
 	}
 	return total;
@@ -237,7 +237,7 @@ public:
 		} else if ( IsMap( r ) ) {
 			this->addMap( r );
 		} else {
-			throw Mishap( "Invalid argument for newMap" );
+			throw Ginger::Mishap( "Invalid argument for newMap" );
 		}
 	}
 
@@ -327,9 +327,9 @@ Ref * sysNewCacheEqMap( Ref *pc, MachineClass * vm ) {
 
 
 Ref * sysMapExplode( Ref *pc, class MachineClass * vm ) {
-	if ( vm->count != 1 ) throw ArgsMismatch();
+	if ( vm->count != 1 ) throw Ginger::Mishap( "ArgsMismatch" );
 	Ref r = vm->fastPop();
-	if ( !IsMap( r ) ) throw TypeError( "Map needed" ).culprit( "Object", r );
+	if ( !IsMap( r ) ) throw Ginger::Mishap( "Map needed" ).culprit( "Object", refToString( r ) );
 	Ref * map_K = RefToPtr4( r );
 	long len = SmallToLong( map_K[ MAP_OFFSET_COUNT ] );
 	vm->checkStackRoom( len );
@@ -346,11 +346,11 @@ Ref * sysMapExplode( Ref *pc, class MachineClass * vm ) {
 }
 
 Ref * sysMapIndex( Ref * pc, class MachineClass * vm ) {
-	if ( vm->count != 2 ) throw ArgsMismatch();
+	if ( vm->count != 2 ) throw Ginger::Mishap( "ArgsMismatch" );
 	const Ref idx = vm->fastPop();
 	const Ref map = vm->fastPop();
 	
-	if ( !IsMap( map ) ) throw TypeError( "Map needed" ).culprit( "Object", map );
+	if ( !IsMap( map ) ) throw Ginger::Mishap( "Map needed" ).culprit( "Object", refToString( map ) );
 	Ref * map_K = RefToPtr4( map );
 	const Ref map_key = *map_K;
 	
@@ -484,7 +484,7 @@ void gngRehashMapPtr( Ref * map_K ) {
 	if ( map_K[0] == sysWeakIdMapKey && count < count_current ) {
 		map_K[ MAP_OFFSET_COUNT ] = LongToSmall( count );
 	} else if ( count != count_current ) {
-		throw SystemError( "Map count differs after GC" );
+		throw Ginger::SystemError( "Map count differs after GC" );
 	}
 	
 	if ( SAFE_MODE ) {

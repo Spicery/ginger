@@ -105,7 +105,7 @@ Ident Package::fetchUnqualifiedIdent( const std::string & c ) {
 		Package * p = this->unqualifiedResolutions[ c ];
 		if ( p != NULL ) {
 			Ident id = p->dict.lookup( c );
-			if ( not id ) throw SystemError( "Unqualified lookup has been incorrectly recorded" );
+			if ( not id ) throw Ginger::SystemError( "Unqualified lookup has been incorrectly recorded" );
 			return id;
 		} else {
 			return this->unqualifiedAutoload( c );
@@ -121,7 +121,7 @@ Ident Package::fetchQualifiedIdent( const std::string & alias, const std::string
 		Package * p = this->qualifiedResolutions[ pair< string, string >( alias, c ) ];
 		if ( p != NULL ) {
 			Ident id = p->dict.lookup( c );
-			if ( not id ) throw SystemError( "Qualified lookup has been incorrectly recorded" );
+			if ( not id ) throw Ginger::SystemError( "Qualified lookup has been incorrectly recorded" );
 			return id;
 		} else {
 			return this->qualifiedAutoload( alias, c );

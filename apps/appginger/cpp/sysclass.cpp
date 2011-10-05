@@ -31,22 +31,23 @@ using namespace std;
 #include "vectorlayout.hpp"
 #include "roots.hpp"
 #include "sysmethod.hpp"
+#include "sysprint.hpp"
 
 static long preflightNewClass( MachineClass * vm ) {
 	Ref overrides = vm->vp[ 0 ];
 	Ref parents = vm->vp[ -1 ];
 	Ref slots = vm->vp[ -2 ];
 
-	if ( !IsVector( overrides ) ) throw TypeError( "Vector needed" );	
-	if ( !IsVector( parents ) ) throw TypeError( "Vector needed" );	
-	if ( !IsVector( slots ) ) throw TypeError( "Vector needed" );	
+	if ( !IsVector( overrides ) ) throw Ginger::Mishap(  "Vector needed" );	
+	if ( !IsVector( parents ) ) throw Ginger::Mishap(  "Vector needed" );	
+	if ( !IsVector( slots ) ) throw Ginger::Mishap(  "Vector needed" );	
 	
 	long sofar = SmallToLong( fastVectorLength( slots ) );
 		
 	const long N = SmallToLong( fastVectorLength( parents ) );
 	for ( long i = 1; i <= N; i++ ) {
 		Ref c = INDEX( parents, i );
-		if ( !IsClass( c ) ) throw TypeError( "Class needed" );
+		if ( !IsClass( c ) ) throw Ginger::Mishap(  "Class needed" );
 		const long nfields = SmallToLong( INDEX( c, CLASS_OFFSET_NFIELDS ) );
 		sofar += nfields;
 	}
@@ -61,7 +62,7 @@ static long preflightNewClass( MachineClass * vm ) {
 		overrides : Vector( Method )
 */
 static Ref * sysClassSlots( Ref * pc, MachineClass * vm ) {
-	if ( vm->count != 3 ) throw ArgsMismatch();
+	if ( vm->count != 3 ) throw Ginger::Mishap( "ArgsMismatch" );
 	
 	const long P = preflightNewClass(vm );		//	Additionally performs type check.
 	vm->heap().preflight( pc, P + 2 );		//	2 = Vector overhead.
@@ -111,7 +112,7 @@ static Ref * sysClassSlots( Ref * pc, MachineClass * vm ) {
 	
 	const long Q = required_slots.size();
 	if ( Q > P ) {
-		throw SystemError( "Incorrect calculation of slots for class!" );
+		throw Ginger::SystemError( "Incorrect calculation of slots for class!" );
 	}
 	
 	XfrClass xfr( vm->heap().preflight( 2 + Q ) );
@@ -130,7 +131,7 @@ static Ref * sysClassSlots( Ref * pc, MachineClass * vm ) {
 }
 
 Ref * sysNewClass( Ref * pc, MachineClass * vm ) {
-	if ( vm->count != 4 ) throw ArgsMismatch();
+	if ( vm->count != 4 ) throw Ginger::Mishap( "ArgsMismatch" );
 	
 	//	Takes top 3 items on stack and returns 1.
 	vm->count = 3;
@@ -165,7 +166,7 @@ Ref * sysNewRecordClass( Ref * pc, MachineClass * vm ) {
 
 		//	A Small is GC insensitive, so it is OK to grab it.
 		Ref nfields = vm->fastPeek();
-		if ( !IsSmall( nfields ) ) throw Mishap( "Non-integer argument to newRecordClass" );
+		if ( !IsSmall( nfields ) ) throw Ginger::Mishap( "Non-integer argument to newRecordClass" );
 
 		{
 			long n = SmallToLong( nfields );
@@ -196,12 +197,12 @@ Ref * sysNewRecordClass( Ref * pc, MachineClass * vm ) {
 		}
 		return pc;
 	} else {
-		throw Mishap( "Wrong number of arguments" );
+		throw Ginger::Mishap( "Wrong number of arguments" );
 	}
 }
 
 static Ref * sysargRecognise( Ref * pc, MachineClass * vm ) {
-	if ( vm->count != 1 ) throw Mishap( "Wrong number of arguments" );
+	if ( vm->count != 1 ) throw Ginger::Mishap( "Wrong number of arguments" );
 	Ref this_item = vm->fastPeek();
 	Ref that_key = pc[ -1 ];
 	vm->fastPeek() = refKey( this_item ) == that_key ? sys_true : sys_false;
@@ -209,9 +210,9 @@ static Ref * sysargRecognise( Ref * pc, MachineClass * vm ) {
 }
 
 Ref * sysClassRecogniser( Ref * pc, MachineClass *vm ) {
-	if ( vm->count != 1 ) throw Mishap( "Wrong number of arguments" );
+	if ( vm->count != 1 ) throw Ginger::Mishap( "Wrong number of arguments" );
 	Ref kk = vm->fastPeek();
-	if ( !IsObj( kk ) || *RefToPtr4( kk ) != sysKeyKey ) throw Mishap( "Key needed" );
+	if ( !IsObj( kk ) || *RefToPtr4( kk ) != sysKeyKey ) throw Ginger::Mishap( "Key needed" );
 	Plant plant = vm->plant();
 	vmiFUNCTION( plant, 1, 1 );
 	vmiSYS_CALL_ARG( plant, sysargRecognise, kk );
@@ -226,7 +227,7 @@ Ref * sysClassRecogniser( Ref * pc, MachineClass *vm ) {
 static Ref * sysargdatConstruct( Ref * pc, MachineClass *vm ) {
 	long N = ToULong( pc[-1] );
 	Ref kk = pc[-2];
-	if ( vm->count != N ) throw Mishap( "Wrong number of arguments" );
+	if ( vm->count != N ) throw Ginger::Mishap( "Wrong number of arguments" );
 	//std::cout << "NFIELDS = " << N << std::endl;
 	//refPrint( std::cout, kk );
 	//std::cout << std::endl;
@@ -240,9 +241,9 @@ static Ref * sysargdatConstruct( Ref * pc, MachineClass *vm ) {
 }
 
 Ref * sysClassConstructor( Ref * pc, MachineClass *vm ) {
-	if ( vm->count != 1 ) throw Mishap( "Wrong number of arguments" );
+	if ( vm->count != 1 ) throw Ginger::Mishap( "Wrong number of arguments" );
 	Ref kk = vm->fastPeek();
-	if ( !IsObj( kk ) || *RefToPtr4( kk ) != sysKeyKey ) throw Mishap( "Key needed" );
+	if ( !IsObj( kk ) || *RefToPtr4( kk ) != sysKeyKey ) throw Ginger::Mishap( "Key needed" );
 	Ref * obj_K = RefToPtr4( kk );
 	long n = SmallToLong( obj_K[ CLASS_OFFSET_NFIELDS ] );
 	Plant plant = vm->plant();
@@ -257,22 +258,22 @@ Ref * sysClassConstructor( Ref * pc, MachineClass *vm ) {
 static Ref * sysargdatAccess( Ref * pc, MachineClass *vm ) {
 	unsigned long N = ToULong( pc[-1] );
 	Ref that_key = pc[-2];
-	if ( vm->count != 1 ) throw Mishap( "Wrong number of arguments" );
+	if ( vm->count != 1 ) throw Ginger::Mishap( "Wrong number of arguments" );
 	Ref this_item  = vm->fastPeek();
 	if ( refKey( this_item ) == that_key ) {
 		vm->fastPeek() = RefToPtr4( this_item )[ N ];
 	} else {
-		throw ToBeDone();
+		throw Ginger::Mishap( "ToBeDone" );
 	}
 	return pc;
 }
 
 Ref * sysClassAccessor( Ref * pc, MachineClass *vm ) {
-	if ( vm->count != 2 ) throw Mishap( "Wrong number of arguments" );
+	if ( vm->count != 2 ) throw Ginger::Mishap( "Wrong number of arguments" );
 	Ref N = vm->fastPop();
-	if ( !IsSmall( N ) ) throw Mishap( "Integer index needed" );
+	if ( !IsSmall( N ) ) throw Ginger::Mishap( "Integer index needed" );
 	Ref kk = vm->fastPeek();
-	if ( !isKey( kk ) ) throw Mishap( "Key needed" );
+	if ( !isKey( kk ) ) throw Ginger::Mishap( "Key needed" );
 	long nargs = SmallToLong( RefToPtr4( kk )[ CLASS_OFFSET_NFIELDS ] );
 	long index = SmallToLong( N );
 	if ( 1 <= index && index <= nargs ) {
@@ -282,17 +283,17 @@ Ref * sysClassAccessor( Ref * pc, MachineClass *vm ) {
 		vmiSYS_RETURN( plant );
 		vm->fastPeek() = vmiENDFUNCTION( plant );
 	} else {
-		throw ToBeDone();
+		throw Ginger::Mishap( "ToBeDone" );
 	}
 	return pc;
 }
 
 Ref * sysClassUnsafeAccessor( Ref * pc, MachineClass *vm ) {
-	if ( vm->count != 2 ) throw Mishap( "Wrong number of arguments" );
+	if ( vm->count != 2 ) throw Ginger::Mishap( "Wrong number of arguments" );
 	Ref N = vm->fastPop();
-	if ( !IsSmall( N ) ) throw Mishap( "Integer index needed" );
+	if ( !IsSmall( N ) ) throw Ginger::Mishap( "Integer index needed" );
 	Ref kk = vm->fastPeek();
-	if ( !isKey( kk ) ) throw Mishap( "Key needed" );
+	if ( !isKey( kk ) ) throw Ginger::Mishap( "Key needed" );
 	long nargs = SmallToLong( RefToPtr4( kk )[ CLASS_OFFSET_NFIELDS ] );
 	long index = SmallToLong( N );
 	if ( 1 <= index && index <= nargs ) {
@@ -302,7 +303,7 @@ Ref * sysClassUnsafeAccessor( Ref * pc, MachineClass *vm ) {
 		vmiSYS_RETURN( plant );
 		vm->fastPeek() = vmiENDFUNCTION( plant );
 	} else {
-		throw ToBeDone();
+		throw Ginger::Mishap( "ToBeDone" );
 	}
 	return pc;
 }
@@ -310,11 +311,11 @@ Ref * sysClassUnsafeAccessor( Ref * pc, MachineClass *vm ) {
 static Ref * sysargExplode( Ref * pc, MachineClass * vm ) {
 	Ref the_key = pc[-1];
 	long nfields = SmallToLong( RefToPtr4( the_key )[ CLASS_OFFSET_NFIELDS ] );
-	if ( vm->count != 1 ) throw Mishap( "Wrong number of arguments" );
+	if ( vm->count != 1 ) throw Ginger::Mishap( "Wrong number of arguments" );
 	Ref obj = vm->fastPop();
-	if ( !IsObj( obj ) ) throw Mishap( "Object needed" ).culprit( "Argument", obj );
+	if ( !IsObj( obj ) ) throw Ginger::Mishap( "Object needed" ).culprit( "Argument", refToString( obj ) );
 	Ref * obj_K = RefToPtr4( obj );
-	if ( obj_K[ 0 ] != the_key ) throw Mishap( "Wrong type of Object" ).culprit( "Object", obj );
+	if ( obj_K[ 0 ] != the_key ) throw Ginger::Mishap( "Wrong type of Object" ).culprit( "Object", refToString( obj ) );
 	for ( int i = 1; i <= nfields; i++ ) {
 		vm->fastPush( obj_K[ i ] );
 	}
@@ -322,11 +323,11 @@ static Ref * sysargExplode( Ref * pc, MachineClass * vm ) {
 }
 
 Ref * sysClassExploder( Ref * pc, MachineClass * vm ) {
-	if ( vm->count != 1 ) throw Mishap( "Wrong number of arguments" );
+	if ( vm->count != 1 ) throw Ginger::Mishap( "Wrong number of arguments" );
 	Ref key = vm->fastPeek();
-	if ( !IsObj( key ) ) throw Mishap( "Class of object needed" );
+	if ( !IsObj( key ) ) throw Ginger::Mishap( "Class of object needed" );
 	Ref * key_K = RefToPtr4( key );
-	if ( *key_K != sysKeyKey ) throw Mishap( "Class of object needed" );
+	if ( *key_K != sysKeyKey ) throw Ginger::Mishap( "Class of object needed" );
 	const long N = SmallToLong( key_K[ CLASS_OFFSET_NFIELDS ] );
 
 	Plant plant = vm->plant();

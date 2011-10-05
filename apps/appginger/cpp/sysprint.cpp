@@ -17,6 +17,7 @@
 \******************************************************************************/
 
 #include <string>
+#include <sstream>
 
 #include "sysprint.hpp"
 #include "syskey.hpp"
@@ -174,5 +175,11 @@ Ref * sysRefPrintln( Ref * pc, class MachineClass * vm ) {
 	pc = sysRefPrint( pc, vm );
 	std::cout << std::endl;
 	return pc;
+}
+
+std::string refToString( Ref ref ) {
+	std::ostringstream s;
+	refPrint( s, ref );
+	return s.str();
 }
 

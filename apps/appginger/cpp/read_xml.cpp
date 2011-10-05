@@ -22,14 +22,15 @@
 #include <map>
 #include <sstream>
 
+#include "mnx.hpp"
 
-using namespace std;
 
 #include "read_xml.hpp"
-
 #include "sys.hpp"
 #include "mishap.hpp"
 #include "facet.hpp"
+
+using namespace std;
 
 
 //- Read XML -------------------------------------------------------------------
@@ -42,7 +43,7 @@ void ReadXmlClass::startTag( std::string & name, std::map< std::string, std::str
 }
 
 void ReadXmlClass::endTag( std::string & name ) {
-	if ( this->tag_stack.size() < 2 ) throw;
+	if ( this->tag_stack.size() < 2 ) throw Ginger::Mishap( "Too many end tags" );
 	
 	TermData & t = this->tag_stack.back();
 	Term term = t.makeTerm();
@@ -94,10 +95,10 @@ static Arity kids_analysis( vector< Term > & kids ) {
 	return sofar;
 }
 
-static Term makeSysApp( string & name, vector< Term > & kids ) {
+static Term makeSysApp( const string & name, vector< Term > & kids ) {
 	SysMap::iterator smit = sysMap.find( name );
 	if ( smit == sysMap.end() ) {
-		throw Mishap( "No such system call" ).culprit( "Name", name );
+		throw Ginger::Mishap( "No such system call" ).culprit( "Name", name );
 	}
 
 	SysInfo & info = smit->second;
@@ -141,6 +142,7 @@ bool TermData::hasConstantType( const char * type ) {
 	);
 }
 
+
 Term TermData::makeTerm() {
 	if ( name == "fn" && kids.size() == 2 ) {
 		return term_new_fn( this->attrs[ "name" ], kids[ 0 ], kids[ 1 ] );
@@ -172,12 +174,12 @@ Term TermData::makeTerm() {
 			if ( this->attrs[ "value" ] == "empty" ) {
 				return term_new_list_empty();
 			} else {
-				throw Mishap( "Invalid Ginger XML" );
+				throw Ginger::Mishap( "Invalid Ginger XML" );
 			}
 		} else if ( this->hasConstantType( "sysfn" ) ) {
 			return term_new_sysfn( this->attrs[ "value" ] );
 		} else {
-			throw Unreachable( __FILE__, __LINE__ );
+			throw Ginger::Unreachable( __FILE__, __LINE__ );
 		}
 	} else if ( has_attr( this, "name" ) ) {
 		if ( name == "id" ) {
@@ -194,19 +196,19 @@ Term TermData::makeTerm() {
 		} else if ( name == "sysapp" ) {
 			return makeSysApp( attrs[ "name" ], kids );
 		} else {
-			throw Mishap( "Unknown functor" ).culprit( "Functor", name );
+			throw Ginger::Mishap( "Unknown functor" ).culprit( "Functor", name );
 		}
 	} else if ( name == "bind" ) {
 		if ( kids.size() == 2 ) {
 			return term_new_basic2( fnc_bind, kids[ 0 ], kids[ 1 ] );
 		} else {
-			throw Mishap( "Malformed bind" );
+			throw Ginger::Mishap( "Malformed bind" );
 		}
 	} else if ( name == "set" ) {
 		if ( kids.size() == 2 ) {
 			return term_new_basic2( fnc_assign, kids[ 0 ], kids[ 1 ] );
 		} else {
-			throw Mishap( "Malformed assignment" );
+			throw Ginger::Mishap( "Malformed assignment" );
 		}
 	} else if ( name == "seq" ) {
 		Term seq = term_new_basic0( fnc_seq );
@@ -245,20 +247,163 @@ Term TermData::makeTerm() {
 		}
 		return t;
 	} else if ( name == "import" ) {
-		throw SystemError( "No longer handles import directly" );
-		/*if ( !has_attr( this, "from" ) ) throw Mishap( "Malformed import" );
-		//const FacetSet * match_tags = makeFacetSet( this, "match" );
-		string from = attrs[ "from" ];
-		string alias = has_attr( this, "alias" ) ? attrs[ "alias" ] : from;
-		bool prot = has_attr( this, "protected" ) && ( attrs[ "protected" ] == string( "true" ) );
-		//const FacetSet * intos = makeFacetSet( this, "into" );
-		return shared< TermClass >( new ImportTermClass( match_tags, from, alias, prot, intos ) ); */
+		throw Ginger::SystemError( "No longer handles import directly" );
 	} else {
 		cerr << "name = " << name << endl;
 		cerr << "#kids = " << kids.size() << endl;
-		throw;
+		throw Ginger::SystemError( "Unrecognised term" );
 	}
 }
 
 
+// ---------------
 
+static void decodePackageContext( shared< Ginger::Mnx > t, string & enc_pkg_name, string & def_pkg_name, string & alias_name, enum NamedRefType & r  ) {
+	if ( t->hasAttribute( "def.pkg" ) ) {
+		r = ABSOLUTE_REF_TYPE;
+	} else if ( t->hasAttribute( "alias" ) ){
+		r = ALIAS_REF_TYPE;
+	} else {
+		r = UNQUALIFIED_REF_TYPE;
+	}
+	
+	//	Note how these assignments come last as they are side
+	//	effecting on the attrs map.
+	def_pkg_name = t->attribute( "def.pkg", "" );
+	enc_pkg_name = t->attribute( "enc.pkg", "" );
+	alias_name = t->attribute( "alias", "" );
+}
+
+
+
+static void fillKids( shared< Ginger::Mnx > mnx, vector< Term > & kids) {
+	Ginger::MnxChildIterator it( mnx );
+	while ( it.hasNext() ) {
+		kids.push_back( mnxToTerm( it.next() ) );
+	}
+}
+
+static Term mnxChildToTerm( shared< Ginger::Mnx > mnx, int n  ) {
+	return mnxToTerm( mnx->child( n ) );
+}
+
+Term mnxToTerm( shared< Ginger::Mnx > mnx ) {
+	const string name( mnx->name() );
+	const int nkids = mnx->size();
+	if ( name == "fn" && nkids == 2 ) {
+		return term_new_fn( mnx->attribute( "name", "" ), mnxChildToTerm( mnx, 0 ), mnxChildToTerm( mnx, 1 ) );
+	} else if ( mnx->hasAttribute( "value" ) && mnx->hasAttribute( "type" ) ) {
+		const string & type = mnx->attribute( "type" );
+		const string & value = mnx->attribute( "value" );
+		if ( type == "int" ) {
+			int i;
+			istringstream s( value );
+			if ( not ( s >> i ) ) throw Ginger::Mishap( "Not an integer value" ).culprit( "Value", value );
+			return term_new_int( i );
+		} else if ( type == "bool" ) {
+			if ( value == "true" ) {
+				return term_new_bool( true );
+			} else if ( value == "false" ) {
+				return term_new_bool( false );
+			} else {
+				throw Ginger::Mishap( "Invalid boolean value" ).culprit( "Value", value );
+			}
+		} else if ( type == "char" ) {
+			if ( value.size() <= 0 ) throw Ginger::Mishap( "Zero characters" );
+			return term_new_char( value[ 0 ] );
+		} else if ( type == "string" ) {
+			return term_new_string( value );
+		} else if ( type == "symbol" ) {
+			return term_new_symbol( value );
+		} else if ( type == "absent" ) {
+			return term_new_absent();
+		} else if ( type == "list" ) {
+			if ( value == "empty" ) {
+				return term_new_list_empty();
+			} else {
+				throw Ginger::Mishap( "Invalid Ginger XML" );
+			}
+		} else if ( type == "sysfn" ) {
+			return term_new_sysfn( value );
+		} else {
+			throw Ginger::Unreachable( __FILE__, __LINE__ );
+		}
+	} else if ( mnx->hasAttribute( "name" ) ) {
+		const string & atname = mnx->attribute( "name" );
+		if ( name == "id" ) {
+			enum NamedRefType r;
+			std::string enc_pkg_name, def_pkg_name, alias_name;
+			decodePackageContext( mnx, enc_pkg_name, def_pkg_name, alias_name, r );
+			return shared< TermClass >( new IdTermClass( r, enc_pkg_name, def_pkg_name, alias_name, atname ) );
+		} else if ( name == "var" ) {
+			enum NamedRefType r;
+			std::string enc_pkg_name, def_pkg_name, alias_name;
+			decodePackageContext( mnx, enc_pkg_name, def_pkg_name, alias_name, r );
+			//const FacetSet * facets = makeFacetSet( mnx, "tag" );
+			return shared< TermClass >( new VarTermClass( r, enc_pkg_name, def_pkg_name, alias_name, /*facets,*/ atname ) );
+		} else if ( name == "sysapp" ) {
+			vector< Term > kids;
+			fillKids( mnx, kids );
+			return makeSysApp( atname, kids );
+		} else {
+			throw Ginger::Mishap( "Unknown functor" ).culprit( "Functor", name );
+		}
+	} else if ( name == "bind" ) {
+		if ( nkids == 2 ) {
+			return term_new_basic2( fnc_bind, mnxChildToTerm( mnx, 0 ), mnxChildToTerm( mnx, 1 ) );
+		} else {
+			throw Ginger::Mishap( "Malformed bind" );
+		}
+	} else if ( name == "set" ) {
+		if ( nkids == 2 ) {
+			return term_new_basic2( fnc_assign, mnxChildToTerm( mnx, 0 ), mnxChildToTerm( mnx, 1 ) );
+		} else {
+			throw Ginger::Mishap( "Malformed assignment" );
+		}
+	} else if ( name == "seq" ) {
+		Term seq = term_new_basic0( fnc_seq );
+		Ginger::MnxChildIterator it( mnx );
+		while ( it.hasNext() ) {
+			term_add( seq, mnxToTerm( it.next() ) );
+		}
+		return seq;
+	} else if ( name == "block" ) {
+		Term seq = term_new_basic0( fnc_block );
+		Ginger::MnxChildIterator it( mnx );
+		while ( it.hasNext() ) {
+			term_add( seq, mnxToTerm( it.next() ) );
+		}
+		return seq;
+	} else if ( name == "if" ) {
+		if ( nkids == 0 ) { 					// 	unusual but defined.
+			return term_new_basic0( fnc_seq );
+		} else if ( nkids == 1 ) {				//	unusual but defined.
+			return mnxChildToTerm( mnx, 0 );
+		} else {
+			vector< Term > kids;
+			fillKids( mnx, kids );			
+			return makeIf( 0, nkids, kids );
+		}
+	} else if ( name == "for" && nkids == 2 ) {
+		return term_new_basic2( fnc_for, mnxToTerm( mnx->child( 0 ) ), mnxToTerm( mnx->child( 1 ) ) );
+	} else if ( name == "from" && nkids == 3 ) {
+		return term_new_from( mnxChildToTerm( mnx, 0 ), mnxChildToTerm( mnx, 1 ), mnxChildToTerm( mnx, 2 )  );
+	} else if ( name == "in" && nkids == 2 ) {
+		return term_new_in( mnxToTerm( mnx->child( 0 ) ), mnxToTerm( mnx->child( 1 ) ) );
+	} else if ( name == "app" && nkids == 2 ) {
+		return term_new_basic2( fnc_app, mnxChildToTerm( mnx, 0 ), mnxChildToTerm( mnx, 1 ) );
+	} else if ( name == "package" && mnx->hasAttribute( "url" )) {
+		Term t = term_new_package( mnx->attribute( "url" ) );
+		Ginger::MnxChildIterator it( mnx );
+		while ( it.hasNext() ) {
+			term_add( t, mnxToTerm( it.next() ) );
+		}
+		return t;
+	} else if ( name == "import" ) {
+		throw Ginger::SystemError( "No longer handles import directly" );
+	} else {
+		cerr << "name = " << name << endl;
+		cerr << "#kids = " << nkids << endl;
+		throw Ginger::SystemError( "Unrecognised term" );
+	}
+}

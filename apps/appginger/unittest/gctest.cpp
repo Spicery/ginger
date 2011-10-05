@@ -113,16 +113,16 @@ void GCTest::testWeakIdRehashing() {
 		std::stringstream program;
 		
 		//	Create some garbage.
-		program << "<sysapp name=\"newVector\"><sysapp name=\"explode\"><seq><string value=\"abcdefghijk\"/></seq></sysapp></sysapp>";
+		program << "<sysapp name=\"newVector\"><sysapp name=\"explode\"><seq><constant type=\"string\" value=\"abcdefghijk\"/></seq></sysapp></sysapp>";
 		
 		//	val a := "alpha";
 		//	val b := "beta";
 		//	val c := "gamma";
-		program << "<bind><var name=\"a\" protected=\"true\" tag=\"public\"/><string value=\"alpha\"/></bind>";
-		program << "<bind><var name=\"b\" protected=\"true\" tag=\"public\"/><string value=\"beta\"/></bind>";
-		program << "<bind><var name=\"c\" protected=\"true\" tag=\"public\"/><string value=\"gamma\"/></bind>";
+		program << "<bind><var name=\"a\" protected=\"true\" tag=\"public\"/><constant type=\"string\" value=\"alpha\"/></bind>";
+		program << "<bind><var name=\"b\" protected=\"true\" tag=\"public\"/><constant type=\"string\" value=\"beta\"/></bind>";
+		program << "<bind><var name=\"c\" protected=\"true\" tag=\"public\"/><constant type=\"string\" value=\"gamma\"/></bind>";
 		//	val map := newHardIdMap( a :- 11, b :- 22, "gamma" :- 33 );	# not c
-		program << "<bind><var name=\"map\" protected=\"true\" tag=\"public\"/><app><id name=\"newWeakIdMap\"/><seq><seq><sysapp name=\"newMaplet\"><id name=\"a\"/><int value=\"11\"/></sysapp><sysapp name=\"newMaplet\"><id name=\"b\"/><int value=\"22\"/></sysapp></seq><sysapp name=\"newMaplet\"><string value=\"gamma\"/><int value=\"33\"/></sysapp></seq></app></bind>";
+		program << "<bind><var name=\"map\" protected=\"true\" tag=\"public\"/><app><id name=\"newWeakIdMap\"/><seq><seq><sysapp name=\"newMaplet\"><id name=\"a\"/><constant type=\"int\" value=\"11\"/></sysapp><sysapp name=\"newMaplet\"><id name=\"b\"/><constant type=\"int\" value=\"22\"/></sysapp></seq><sysapp name=\"newMaplet\"><constant type=\"string\" value=\"gamma\"/><constant type=\"int\" value=\"33\"/></sysapp></seq></app></bind>";
 		
 		//	val ma := map.index( a );
 		//	val mb := map.index( b );
@@ -132,8 +132,8 @@ void GCTest::testWeakIdRehashing() {
 		program << "<bind><var name=\"mc\" protected=\"true\" tag=\"public\"/><app><id name=\"index\"/><seq><id name=\"map\"/><id name=\"c\"/></seq></app></bind>";
 	
 		//	val mav := map.index( "alpha" );
-		program << "<bind><var name=\"mav\" protected=\"true\" tag=\"public\"/><app><id name=\"index\"/><seq><id name=\"map\"/><string value=\"alpha\"/></seq></app></bind>";
-		program << "<bind><var name=\"mbv\" protected=\"true\" tag=\"public\"/><app><id name=\"index\"/><seq><id name=\"map\"/><string value=\"beta\"/></seq></app></bind>";
+		program << "<bind><var name=\"mav\" protected=\"true\" tag=\"public\"/><app><id name=\"index\"/><seq><id name=\"map\"/><constant type=\"string\"  value=\"alpha\"/></seq></app></bind>";
+		program << "<bind><var name=\"mbv\" protected=\"true\" tag=\"public\"/><app><id name=\"index\"/><seq><id name=\"map\"/><constant type=\"string\"  value=\"beta\"/></seq></app></bind>";
 	
 	
 		std::ostringstream output;
@@ -190,8 +190,8 @@ void GCTest::testWeakIdRehashing() {
 		//	% val mav1 := map.index( "alpha" );
 		//	% val mbv1 := map.index( "beta" );
 		//	% val mcv1 := map.index( "gamma" );
-		program << "<bind><var name=\"mav1\" protected=\"true\" tag=\"public\"/><app><id name=\"index\"/><seq><id name=\"map\"/><string value=\"alpha\"/></seq></app></bind>";
-		program << "<bind><var name=\"mbv1\" protected=\"true\" tag=\"public\"/><app><id name=\"index\"/><seq><id name=\"map\"/><string value=\"beta\"/></seq></app></bind>";
+		program << "<bind><var name=\"mav1\" protected=\"true\" tag=\"public\"/><app><id name=\"index\"/><seq><id name=\"map\"/><constant type=\"string\" value=\"alpha\"/></seq></app></bind>";
+		program << "<bind><var name=\"mbv1\" protected=\"true\" tag=\"public\"/><app><id name=\"index\"/><seq><id name=\"map\"/><constant type=\"string\" value=\"beta\"/></seq></app></bind>";
 		
 		std::ostringstream output;
 		while ( rcep->unsafe_read_comp_exec_print( program, output ) ) {
@@ -224,16 +224,16 @@ void GCTest::testHardIdRehashing() {
 		std::stringstream program;
 		
 		//	Create some garbage.
-		program << "<sysapp name=\"newVector\"><sysapp name=\"explode\"><seq><string value=\"abcdefghijk\"/></seq></sysapp></sysapp>";
+		program << "<sysapp name=\"newVector\"><sysapp name=\"explode\"><seq><constant type=\"string\" value=\"abcdefghijk\"/></seq></sysapp></sysapp>";
 		
 		//	val a := "alpha";
 		//	val b := "beta";
 		//	val c := "gamma";
-		program << "<bind><var name=\"a\" protected=\"true\" tag=\"public\"/><string value=\"alpha\"/></bind>";
-		program << "<bind><var name=\"b\" protected=\"true\" tag=\"public\"/><string value=\"beta\"/></bind>";
-		program << "<bind><var name=\"c\" protected=\"true\" tag=\"public\"/><string value=\"gamma\"/></bind>";
+		program << "<bind><var name=\"a\" protected=\"true\" tag=\"public\"/><constant type=\"string\" value=\"alpha\"/></bind>";
+		program << "<bind><var name=\"b\" protected=\"true\" tag=\"public\"/><constant type=\"string\" value=\"beta\"/></bind>";
+		program << "<bind><var name=\"c\" protected=\"true\" tag=\"public\"/><constant type=\"string\" value=\"gamma\"/></bind>";
 		//	val map := newHardIdMap( a :- 11, b :- 22, c :- 33 );
-		program << "<bind><var name=\"map\" protected=\"true\" tag=\"public\"/><app><id name=\"newHardIdMap\"/><seq><seq><sysapp name=\"newMaplet\"><id name=\"a\"/><int value=\"11\"/></sysapp><sysapp name=\"newMaplet\"><id name=\"b\"/><int value=\"22\"/></sysapp></seq><sysapp name=\"newMaplet\"><id name=\"c\"/><int value=\"33\"/></sysapp></seq></app></bind>";
+		program << "<bind><var name=\"map\" protected=\"true\" tag=\"public\"/><app><id name=\"newHardIdMap\"/><seq><seq><sysapp name=\"newMaplet\"><id name=\"a\"/><constant type=\"int\" value=\"11\"/></sysapp><sysapp name=\"newMaplet\"><id name=\"b\"/><constant type=\"int\" value=\"22\"/></sysapp></seq><sysapp name=\"newMaplet\"><id name=\"c\"/><constant type=\"int\" value=\"33\"/></sysapp></seq></app></bind>";
 		
 		//	val ma := map.index( a );
 		//	val mb := map.index( b );
@@ -243,9 +243,9 @@ void GCTest::testHardIdRehashing() {
 		program << "<bind><var name=\"mc\" protected=\"true\" tag=\"public\"/><app><id name=\"index\"/><seq><id name=\"map\"/><id name=\"c\"/></seq></app></bind>";
 	
 		//	val mav := map.index( "alpha" );
-		program << "<bind><var name=\"mav\" protected=\"true\" tag=\"public\"/><app><id name=\"index\"/><seq><id name=\"map\"/><string value=\"alpha\"/></seq></app></bind>";
-		program << "<bind><var name=\"mbv\" protected=\"true\" tag=\"public\"/><app><id name=\"index\"/><seq><id name=\"map\"/><string value=\"beta\"/></seq></app></bind>";
-		program << "<bind><var name=\"mcv\" protected=\"true\" tag=\"public\"/><app><id name=\"index\"/><seq><id name=\"map\"/><string value=\"gamma\"/></seq></app></bind>";
+		program << "<bind><var name=\"mav\" protected=\"true\" tag=\"public\"/><app><id name=\"index\"/><seq><id name=\"map\"/><constant type=\"string\" value=\"alpha\"/></seq></app></bind>";
+		program << "<bind><var name=\"mbv\" protected=\"true\" tag=\"public\"/><app><id name=\"index\"/><seq><id name=\"map\"/><constant type=\"string\" value=\"beta\"/></seq></app></bind>";
+		program << "<bind><var name=\"mcv\" protected=\"true\" tag=\"public\"/><app><id name=\"index\"/><seq><id name=\"map\"/><constant type=\"string\" value=\"gamma\"/></seq></app></bind>";
 	
 	
 		std::ostringstream output;
@@ -300,9 +300,9 @@ void GCTest::testHardIdRehashing() {
 		//	% val mav1 := map.index( "alpha" );
 		//	% val mbv1 := map.index( "beta" );
 		//	% val mcv1 := map.index( "gamma" );
-		program << "<bind><var name=\"mav1\" protected=\"true\" tag=\"public\"/><app><id name=\"index\"/><seq><id name=\"map\"/><string value=\"alpha\"/></seq></app></bind>";
-		program << "<bind><var name=\"mbv1\" protected=\"true\" tag=\"public\"/><app><id name=\"index\"/><seq><id name=\"map\"/><string value=\"beta\"/></seq></app></bind>";
-		program << "<bind><var name=\"mcv1\" protected=\"true\" tag=\"public\"/><app><id name=\"index\"/><seq><id name=\"map\"/><string value=\"gamma\"/></seq></app></bind>";
+		program << "<bind><var name=\"mav1\" protected=\"true\" tag=\"public\"/><app><id name=\"index\"/><seq><id name=\"map\"/><constant type=\"string\" value=\"alpha\"/></seq></app></bind>";
+		program << "<bind><var name=\"mbv1\" protected=\"true\" tag=\"public\"/><app><id name=\"index\"/><seq><id name=\"map\"/><constant type=\"string\" value=\"beta\"/></seq></app></bind>";
+		program << "<bind><var name=\"mcv1\" protected=\"true\" tag=\"public\"/><app><id name=\"index\"/><seq><id name=\"map\"/><constant type=\"string\" value=\"gamma\"/></seq></app></bind>";
 	
 		std::ostringstream output;
 		while ( rcep->unsafe_read_comp_exec_print( program, output ) ) {
@@ -343,19 +343,19 @@ void GCTest::testHardEqMap() {
 		std::stringstream program;
 		
 		//	Create some garbage.
-		program << "<sysapp name=\"newVector\"><sysapp name=\"explode\"><seq><string value=\"abcdefghijk\"/></seq></sysapp></sysapp>";
+		program << "<sysapp name=\"newVector\"><sysapp name=\"explode\"><seq><constant type=\"string\" value=\"abcdefghijk\"/></seq></sysapp></sysapp>";
 		
 		//	val a := "alpha";
 		//	val b := "beta";
 		//	val c := "gamma";
-		program << "<bind><var name=\"a\" protected=\"true\" tag=\"public\"/><string value=\"alpha\"/></bind>";
-		program << "<bind><var name=\"b\" protected=\"true\" tag=\"public\"/><string value=\"beta\"/></bind>";
-		program << "<bind><var name=\"c\" protected=\"true\" tag=\"public\"/><string value=\"gamma\"/></bind>";
+		program << "<bind><var name=\"a\" protected=\"true\" tag=\"public\"/><constant type=\"string\" value=\"alpha\"/></bind>";
+		program << "<bind><var name=\"b\" protected=\"true\" tag=\"public\"/><constant type=\"string\" value=\"beta\"/></bind>";
+		program << "<bind><var name=\"c\" protected=\"true\" tag=\"public\"/><constant type=\"string\" value=\"gamma\"/></bind>";
 		
 		
 		
 		//	val map := newHardIdMap( a :- 11, b :- 22, c :- 33 );
-		program << "<bind><var name=\"map\" protected=\"true\" tag=\"public\"/><app><id name=\"newMap\"/><seq><seq><sysapp name=\"newMaplet\"><id name=\"a\"/><int value=\"11\"/></sysapp><sysapp name=\"newMaplet\"><id name=\"b\"/><int value=\"22\"/></sysapp></seq><sysapp name=\"newMaplet\"><id name=\"c\"/><int value=\"33\"/></sysapp></seq></app></bind>";
+		program << "<bind><var name=\"map\" protected=\"true\" tag=\"public\"/><app><id name=\"newMap\"/><seq><seq><sysapp name=\"newMaplet\"><id name=\"a\"/><constant type=\"int\" value=\"11\"/></sysapp><sysapp name=\"newMaplet\"><id name=\"b\"/><constant type=\"int\" value=\"22\"/></sysapp></seq><sysapp name=\"newMaplet\"><id name=\"c\"/><constant type=\"int\" value=\"33\"/></sysapp></seq></app></bind>";
 		
 		
 		//	val ma := map.index( a );
@@ -368,9 +368,9 @@ void GCTest::testHardEqMap() {
 		//	val mav := map.index( "alpha" );
 		//	val mbv := map.index( "beta" );
 		//	val mcv := map.index( "gamma" );
-		program << "<bind><var name=\"mav\" protected=\"true\" tag=\"public\"/><app><id name=\"index\"/><seq><id name=\"map\"/><string value=\"alpha\"/></seq></app></bind>";
-		program << "<bind><var name=\"mbv\" protected=\"true\" tag=\"public\"/><app><id name=\"index\"/><seq><id name=\"map\"/><string value=\"beta\"/></seq></app></bind>";
-		program << "<bind><var name=\"mcv\" protected=\"true\" tag=\"public\"/><app><id name=\"index\"/><seq><id name=\"map\"/><string value=\"gamma\"/></seq></app></bind>";
+		program << "<bind><var name=\"mav\" protected=\"true\" tag=\"public\"/><app><id name=\"index\"/><seq><id name=\"map\"/><constant type=\"string\" value=\"alpha\"/></seq></app></bind>";
+		program << "<bind><var name=\"mbv\" protected=\"true\" tag=\"public\"/><app><id name=\"index\"/><seq><id name=\"map\"/><constant type=\"string\" value=\"beta\"/></seq></app></bind>";
+		program << "<bind><var name=\"mcv\" protected=\"true\" tag=\"public\"/><app><id name=\"index\"/><seq><id name=\"map\"/><constant type=\"string\" value=\"gamma\"/></seq></app></bind>";
 	
 		std::ostringstream output;
 		while ( rcep->unsafe_read_comp_exec_print( program, output ) ) {};
@@ -432,9 +432,9 @@ void GCTest::testHardEqMap() {
 		//	% val mav1 := map.index( "alpha" );
 		//	% val mbv1 := map.index( "beta" );
 		//	% val mcv1 := map.index( "gamma" );
-		program << "<bind><var name=\"mav1\" protected=\"true\" tag=\"public\"/><app><id name=\"index\"/><seq><id name=\"map\"/><string value=\"alpha\"/></seq></app></bind>";
-		program << "<bind><var name=\"mbv1\" protected=\"true\" tag=\"public\"/><app><id name=\"index\"/><seq><id name=\"map\"/><string value=\"beta\"/></seq></app></bind>";
-		program << "<bind><var name=\"mcv1\" protected=\"true\" tag=\"public\"/><app><id name=\"index\"/><seq><id name=\"map\"/><string value=\"gamma\"/></seq></app></bind>";
+		program << "<bind><var name=\"mav1\" protected=\"true\" tag=\"public\"/><app><id name=\"index\"/><seq><id name=\"map\"/><constant type=\"string\" value=\"alpha\"/></seq></app></bind>";
+		program << "<bind><var name=\"mbv1\" protected=\"true\" tag=\"public\"/><app><id name=\"index\"/><seq><id name=\"map\"/><constant type=\"string\" value=\"beta\"/></seq></app></bind>";
+		program << "<bind><var name=\"mcv1\" protected=\"true\" tag=\"public\"/><app><id name=\"index\"/><seq><id name=\"map\"/><constant type=\"string\" value=\"gamma\"/></seq></app></bind>";
 	
 		std::ostringstream output;
 		while ( rcep->unsafe_read_comp_exec_print( program, output ) ) {
@@ -476,7 +476,7 @@ void GCTest::testCacheEqMap() {
 	std::stringstream program;
 	
 	//	val cmap := newCacheMap( "a" :- 1, "b" :- 2 );
-	program << "<bind><var name=\"cmap\" protected=\"true\" tag=\"public\"/><app><id name=\"newCacheMap\"/><seq><sysapp name=\"newMaplet\"><string value=\"a\"/><int value=\"1\"/></sysapp><sysapp name=\"newMaplet\"><string value=\"b\"/><int value=\"2\"/></sysapp></seq></app></bind>";
+	program << "<bind><var name=\"cmap\" protected=\"true\" tag=\"public\"/><app><id name=\"newCacheMap\"/><seq><sysapp name=\"newMaplet\"><constant type=\"string\" value=\"a\"/><constant type=\"int\" value=\"1\"/></sysapp><sysapp name=\"newMaplet\"><constant type=\"string\" value=\"b\"/><constant type=\"int\" value=\"2\"/></sysapp></seq></app></bind>";
 	
 	std::ostringstream output;
 	while ( rcep->unsafe_read_comp_exec_print( program, output ) ) {};
@@ -518,9 +518,9 @@ void GCTest::testAllRef() {
 	//	val w := newWeakRef( [ "unique ref" ] );
 	//	val s := newSoftRef( [ "unique ref" ] );
 	
-	program << "<bind><var name=\"h\" protected=\"true\" tag=\"public\"/><app><id name=\"newHardRef\"/><sysapp name=\"newList\"><string value=\"unique ref\"/></sysapp></app></bind>";
-	program << "<bind><var name=\"w\" protected=\"true\" tag=\"public\"/><app><id name=\"newWeakRef\"/><sysapp name=\"newList\"><string value=\"unique ref\"/></sysapp></app></bind>";
-	program << "<bind><var name=\"s\" protected=\"true\" tag=\"public\"/><app><id name=\"newSoftRef\"/><sysapp name=\"newList\"><string value=\"unique ref\"/></sysapp></app></bind>";
+	program << "<bind><var name=\"h\" protected=\"true\" tag=\"public\"/><app><id name=\"newHardRef\"/><sysapp name=\"newList\"><constant type=\"string\" value=\"unique ref\"/></sysapp></app></bind>";
+	program << "<bind><var name=\"w\" protected=\"true\" tag=\"public\"/><app><id name=\"newWeakRef\"/><sysapp name=\"newList\"><constant type=\"string\" value=\"unique ref\"/></sysapp></app></bind>";
+	program << "<bind><var name=\"s\" protected=\"true\" tag=\"public\"/><app><id name=\"newSoftRef\"/><sysapp name=\"newList\"><constant type=\"string\" value=\"unique ref\"/></sysapp></app></bind>";
 	
 	std::ostringstream output;
 	while ( rcep->unsafe_read_comp_exec_print( program, output ) ) {};
@@ -577,13 +577,13 @@ void GCTest::testMethodWeakness() {
 	std::stringstream program;
 
 	//	val alpha := newMethod( "alpha", 1, 1 ); 
-	program << "<bind><var name=\"alpha\" protected=\"true\" tag=\"public\"/><app><id name=\"newMethod\"/><seq><seq><string value=\"alpha\"/><int value=\"1\"/></seq><int value=\"1\"/></seq></app></bind>";
+	program << "<bind><var name=\"alpha\" protected=\"true\" tag=\"public\"/><app><id name=\"newMethod\"/><seq><seq><constant type=\"string\" value=\"alpha\"/><constant type=\"int\" value=\"1\"/></seq><constant type=\"int\" value=\"1\"/></seq></app></bind>";
 	
 	//	val A := newClass( "C", { alpha }, {}, {} );
-	program << "<bind><var name=\"A\" protected=\"true\" tag=\"public\"/><app><id name=\"newClass\"/><seq><seq><seq><string value=\"C\"/><sysapp name=\"newVector\"><id name=\"alpha\"/></sysapp></seq><sysapp name=\"newVector\"><seq/></sysapp></seq><sysapp name=\"newVector\"><seq/></sysapp></seq></app></bind>";
+	program << "<bind><var name=\"A\" protected=\"true\" tag=\"public\"/><app><id name=\"newClass\"/><seq><seq><seq><constant type=\"string\" value=\"C\"/><sysapp name=\"newVector\"><id name=\"alpha\"/></sysapp></seq><sysapp name=\"newVector\"><seq/></sysapp></seq><sysapp name=\"newVector\"><seq/></sysapp></seq></app></bind>";
 	
 	//	val B := newClass( "B", { alpha }, {}, {} );
-	program << "<bind><var name=\"B\" protected=\"true\" tag=\"public\"/><app><id name=\"newClass\"/><seq><seq><seq><string value=\"B\"/><sysapp name=\"newVector\"><id name=\"alpha\"/></sysapp></seq><sysapp name=\"newVector\"><seq/></sysapp></seq><sysapp name=\"newVector\"><seq/></sysapp></seq></app></bind>";
+	program << "<bind><var name=\"B\" protected=\"true\" tag=\"public\"/><app><id name=\"newClass\"/><seq><seq><seq><constant type=\"string\" value=\"B\"/><sysapp name=\"newVector\"><id name=\"alpha\"/></sysapp></seq><sysapp name=\"newVector\"><seq/></sysapp></seq><sysapp name=\"newVector\"><seq/></sysapp></seq></app></bind>";
 	
 	std::ostringstream output;
 	while ( rcep->unsafe_read_comp_exec_print( program, output ) ) {};

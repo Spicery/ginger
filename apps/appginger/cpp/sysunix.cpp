@@ -43,10 +43,10 @@ Ref * pushCString( Ref * pc, class MachineClass * vm, char * cstring ) {
 
 //	Arity: 1 -> 1
 Ref * sysGetEnv( Ref * pc, class MachineClass * vm ) {
-	if ( vm->count != 1 ) throw ArgsMismatch();
+	if ( vm->count != 1 ) throw Ginger::Mishap( "ArgsMismatch" );
 	
 	Ref r = vm->fastPop();
-	if ( !IsStringKind( r ) ) throw Mishap( "Non-string argument needed for getEnv" );	
+	if ( !IsStringKind( r ) ) throw Ginger::Mishap( "Non-string argument needed for getEnv" );	
 	Ref * str_K = RefToPtr4( r );
 	
 	char * data = reinterpret_cast< char * >( str_K + 1 );
@@ -63,11 +63,11 @@ Ref * sysGetEnv( Ref * pc, class MachineClass * vm ) {
 
 //	Arity: 2 -> 0
 Ref * sysPutEnv( Ref * pc, class MachineClass * vm ) {
-	if ( vm->count != 2 ) throw ArgsMismatch();
+	if ( vm->count != 2 ) throw Ginger::Mishap( "ArgsMismatch" );
 	Ref rhs = vm->fastPop();
 	Ref lhs = vm->fastPop();
-	if ( !IsStringKind( rhs ) ) throw Mishap( "Non-string argument needed for putEnv" );	
-	if ( !IsStringKind( lhs ) ) throw Mishap( "Non-string argument needed for putEnv" );	
+	if ( !IsStringKind( rhs ) ) throw Ginger::Mishap( "Non-string argument needed for putEnv" );	
+	if ( !IsStringKind( lhs ) ) throw Ginger::Mishap( "Non-string argument needed for putEnv" );	
 	
 	Ref * lhs_K = RefToPtr4( lhs );
 	Ref * rhs_K = RefToPtr4( rhs );
@@ -82,7 +82,7 @@ Ref * sysPutEnv( Ref * pc, class MachineClass * vm ) {
 
 //	Arity: 0 -> 1
 Ref * sysEnvVars( Ref * pc, class MachineClass * vm ) {
-	if ( vm->count != 0 ) throw ArgsMismatch();
+	if ( vm->count != 0 ) throw Ginger::Mishap( "ArgsMismatch" );
 	AppContext & cxt = vm->getAppContext();
 	char ** envp = cxt.getEnvironmentVariables();
 	

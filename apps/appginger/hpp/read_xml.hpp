@@ -26,7 +26,7 @@
 #include "term.hpp"
 #include "sax.hpp"
 
-class TermData {
+/*class TermData {
 public:
 	std::string name;
 	std::map< std::string, std::string > attrs;
@@ -42,9 +42,9 @@ public:
 	TermData() 
 	{
 	}
-};
+};*/
 
-class ReadXmlClass : public Ginger::SaxHandler {
+/*class ReadXmlClass : public Ginger::SaxHandler {
 private:
 	Ginger::SaxParser sax;
 
@@ -64,7 +64,7 @@ public:
 	}
 	
 	virtual ~ReadXmlClass() {}
-};
+};*/
 
 extern Term mnxToTerm( shared< Ginger::Mnx > mnx );
 

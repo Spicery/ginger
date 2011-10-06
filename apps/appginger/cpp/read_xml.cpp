@@ -35,7 +35,7 @@ using namespace std;
 
 //- Read XML -------------------------------------------------------------------
 
-void ReadXmlClass::startTag( std::string & name, std::map< std::string, std::string > & attrs ) {
+/*void ReadXmlClass::startTag( std::string & name, std::map< std::string, std::string > & attrs ) {
 	this->tag_stack.push_back( TermData() );
 	TermData & t = this->tag_stack.back();
 	t.name = name;
@@ -66,14 +66,14 @@ Term ReadXmlClass::readElement() {
 	} else {
 		return v[ 0 ];
 	}
-}
+}*/
 
 
 //- TermData -------------------------------------------------------------------
 
-static bool has_attr( TermData * t, const char * v ) {
+/*static bool has_attr( TermData * t, const char * v ) {
 	return t->attrs.find( v ) != t->attrs.end();
-}
+}*/
 
 static Term makeIf( const int i, const int n, const std::vector< Term > & kids ) {
 	int d = n - i;
@@ -119,7 +119,7 @@ static Term makeSysApp( const string & name, vector< Term > & kids ) {
 	return t;
 }
 
-static void packageContext( TermData * t, string & enc_pkg_name, string & def_pkg_name, string & alias_name, enum NamedRefType & r  ) {
+/*static void packageContext( TermData * t, string & enc_pkg_name, string & def_pkg_name, string & alias_name, enum NamedRefType & r  ) {
 	if ( has_attr( t, "def.pkg" ) ) {
 		r = ABSOLUTE_REF_TYPE;
 	} else if ( has_attr( t, "alias" ) ){
@@ -192,7 +192,7 @@ Term TermData::makeTerm() {
 			std::string enc_pkg_name, def_pkg_name, alias_name;
 			packageContext( this, enc_pkg_name, def_pkg_name, alias_name, r );
 			//const FacetSet * facets = makeFacetSet( this, "tag" );
-			return shared< TermClass >( new VarTermClass( r, enc_pkg_name, def_pkg_name, alias_name, /*facets,*/ attrs[ "name" ] ) );
+			return shared< TermClass >( new VarTermClass( r, enc_pkg_name, def_pkg_name, alias_name, attrs[ "name" ] ) );
 		} else if ( name == "sysapp" ) {
 			return makeSysApp( attrs[ "name" ], kids );
 		} else {
@@ -253,7 +253,7 @@ Term TermData::makeTerm() {
 		cerr << "#kids = " << kids.size() << endl;
 		throw Ginger::SystemError( "Unrecognised term" );
 	}
-}
+}*/
 
 
 // ---------------

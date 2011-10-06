@@ -125,7 +125,7 @@ Ident OrdinaryPackage::unqualifiedAutoload( const std::string & c ) {
 		int n = read( fd, buffer, sizeof( buffer ) );
 		//cerr << "READ " << n << " bytes from the file descriptor" << endl;
 		if ( n == 0 ) break;
-		if ( n == -1 ) {
+		if ( n < 0 ) {
 			if ( errno != EINTR ) {
 				perror( "PACKAGE AUTOLOAD" );
 				throw Ginger::Mishap( "Failed to read" );

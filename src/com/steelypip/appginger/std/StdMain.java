@@ -45,6 +45,14 @@ public class StdMain {
 		return dir;		
 	}
 	
+	static File ginger_interactive() {
+		File dir = new File( System.getProperty( "user.dir" ) );
+		dir = new File( dir, "projects" );
+		dir = new File( dir, "standard_library" );
+		dir = new File( dir, "ginger.interactive" );
+		return dir;		
+	}
+	
 	static File meta_info_folder() {
 		File dir = new File( System.getProperty( "user.dir" ) );
 		dir = new File( dir, "apps" );
@@ -107,10 +115,22 @@ public class StdMain {
         //doc.getDocumentElement().normalize();
         //System.out.println( "Root element " + doc.getDocumentElement().getNodeName() );
         
-        generateGingerLibrary( doc );
+		generateGingerLibrary( doc );
+		generateGingerInteractive();
         generateMetaInfoTable( doc );
 	}
 	
+	
+	
+	private static void generateGingerInteractive() throws IOException {
+        final File dir = ginger_interactive();
+        dir.mkdirs();
+        final File f = new File( dir, "imports.gnx" );
+    	final PrintWriter pw = new PrintWriter( new FileWriter( f ) );
+    	pw.println( "<package><import from=\"ginger.library\" match0=\"public\" /></package>" );
+    	pw.close();
+	}
+
 	private static void generateMetaInfoTable( Document doc ) throws XPathExpressionException, IOException {
 		XPathFactory factory = XPathFactory.newInstance();
         XPath xpath = factory.newXPath();

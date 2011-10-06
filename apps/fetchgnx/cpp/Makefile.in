@@ -25,7 +25,7 @@ all: fetchgnx
 # $@ is make shorthand for the target.
 # $@ is make shorthand for the dependencies
 fetchgnx: $(OBJS)
-	@CXX@ $(CXXFLAGS) $(BOOST_CPPFLAGS) -o $@ $(OBJS) ../../libgng/cpp/libgng.a -lsqlite3
+	@CXX@ $(CXXFLAGS) $(BOOST_CPPFLAGS) -o $@ $(OBJS) ../../libgng/cpp/libgng.a
 
 clean:
 	rm -f *.o

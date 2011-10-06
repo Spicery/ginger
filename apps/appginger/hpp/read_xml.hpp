@@ -19,52 +19,8 @@
 #ifndef READ_XML_HPP
 #define READ_XML_HPP
 
-#include <istream>
-#include <vector>
-#include <map>
-
 #include "term.hpp"
 #include "sax.hpp"
-
-/*class TermData {
-public:
-	std::string name;
-	std::map< std::string, std::string > attrs;
-	std::vector< Term > kids;
-
-private:
-	bool hasConstantType( const char * type );
-	
-public:
-	Term makeTerm();
-
-public:
-	TermData() 
-	{
-	}
-};*/
-
-/*class ReadXmlClass : public Ginger::SaxHandler {
-private:
-	Ginger::SaxParser sax;
-
-	std::vector< Term > term_stack;
-	std::vector< TermData > tag_stack;
-
-	
-public:
-	void startTag( std::string & name, std::map< std::string, std::string > & attrs );
-	void endTag( std::string & name );
-	Term readElement();
-	
-public:
-	ReadXmlClass( std::istream & in ) : 
-		sax( Ginger::SaxParser( in, *this ) )
-	{
-	}
-	
-	virtual ~ReadXmlClass() {}
-};*/
 
 extern Term mnxToTerm( shared< Ginger::Mnx > mnx );
 

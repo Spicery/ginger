@@ -26,31 +26,6 @@
 #include "term.hpp"
 #include "sax.hpp"
 
-/*class ReadXmlClass;
-
-class SaxClass {
-private:
-	std::istream & input;
-	ReadXmlClass & parent;
-	
-private:
-	void readName( std::string & name );
-	void eatWhiteSpace();
-	void processAttributes( std::map< std::string, std::string > & attrs );
-	void readAttributeValue( std::string & attr );
-	void mustReadChar( const char ch );
-	char nextChar();
-	char peekChar();
-	
-public:
-	void read();
-	SaxClass( std::istream & in, ReadXmlClass & p ) :
-		input( in ),
-		parent( p )
-	{
-	}
-};*/
-
 class TermData {
 public:
 	std::string name;

@@ -69,7 +69,7 @@ CageClass * HeapClass::preflight( int size ) {
  * Copy string into a cage of the heap, possibly incurring a GC.
  * We add a null-termination byte too.
  */
-Ref HeapClass::copyString( const char *s ) {
+Ref HeapClass::copyString( Ref * & pc, const char *s ) {
 	//	Strings have a two Ref overhead & must be ref aligned and have
 	//	an additional 1-byte overhead for null-byte.
 	size_t n = strlen( s );
@@ -84,6 +84,16 @@ Ref HeapClass::copyString( const char *s ) {
 	//	printf( "Set origin to '%x'\n", ToUInt( sysStringKey ) );
 	xfr.xfrSubstring( s, 0, n );
 	return xfr.makeRef();
+}
+
+
+/*
+ * Copy string into a cage of the heap, possibly incurring a GC.
+ * We add a null-termination byte too.
+ */
+Ref HeapClass::copyString( const char *s ) {
+	Ref * fake_pc = static_cast< Ref * >( 0 );
+	return this->copyString( fake_pc, s );
 }
 
 

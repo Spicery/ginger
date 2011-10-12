@@ -1,6 +1,6 @@
 /******************************************************************************\
-	Copyright (c) 2010 Stephen Leach. AppGinger is distributed under the terms 
-	of the GNU General Public License. This file is part of AppGinger.
+    Copyright (c) 2010 Stephen Leach. AppGinger is distributed under the terms 
+    of the GNU General Public License. This file is part of AppGinger.
 
     AppGinger is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -16,12 +16,19 @@
     along with AppGinger.  If not, see <http://www.gnu.org/licenses/>.
 \******************************************************************************/
 
-#ifndef READ_XML_HPP
-#define READ_XML_HPP
+#include "mishap.hpp"
 
-#include "term.hpp"
-#include "sax.hpp"
+#include "syscgi.hpp"
 
-extern Term mnxToTerm( shared< Ginger::Mnx > mnx );
-
-#endif
+Ref * cgiValue( Ref * pc, class MachineClass * vm ) {
+	if ( vm->count != 1 ) throw Ginger::Mishap( "ArgsMismatch" );
+	
+	Ref r = vm->fastPeek();
+	if ( !IsStringKind( r ) ) throw Ginger::Mishap( "Non-string argument needed for getEnv" );	
+	Ref * str_K = RefToPtr4( r );
+	
+	char * fieldname = reinterpret_cast< char * >( str_K + 1 );
+	const char * value = vm->getAppContext().cgiValue( fieldname );
+	vm->fastPeek() = vm->heap().copyString( pc, value );
+	return pc;
+}

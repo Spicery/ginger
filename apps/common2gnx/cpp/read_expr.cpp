@@ -215,7 +215,8 @@ Node ReadStateClass::postfix_processing( Node lhs, Item item, int prec ) {
 			case tokty_int: {
 				NodeFactory add( "add" );
 				add.addNode( lhs );
-				add.start( "int" );
+				add.start( "constant" );
+				add.putAttr( "type", "int" );
 				add.putAttr( "value", item->nameString() );
 				add.end();	
 				Node t = add.node();
@@ -399,7 +400,8 @@ Node ReadStateClass::prefix_processing() {
 	Role role = item->role;
 
 	if ( role.IsLiteral() ) {
-		NodeFactory simple( tok_type_as_type( fnc ) );
+		NodeFactory simple( "constant" );
+		simple.putAttr( "type", tok_type_as_type( fnc ) );
 		simple.putAttr( "value", item->nameString() );
 	 	return simple.node();
 	} else if ( role.IsUnary() ) {
@@ -421,7 +423,8 @@ Node ReadStateClass::prefix_processing() {
 			std::string & name = item->nameString();
 			SysConst * sysc = lookupSysConst( name );
 			if ( sysc != NULL ) {
-				NodeFactory constant( sysc->tag );
+				NodeFactory constant( "constant" );
+				constant.putAttr( "type", sysc->tag );
 				constant.putAttr( "value", sysc->value );
 				return constant.node();
 			} else {
@@ -432,7 +435,8 @@ Node ReadStateClass::prefix_processing() {
 		}
 		case tokty_string: {
 			//printf( "Copying string %s\n", (char *)item->extra );
-			NodeFactory str( "string" );
+			NodeFactory str( "constant" );
+			str.putAttr( "type", "string" );
 			str.putAttr( "value", item->nameString() );	//	Prolly wrong.
 			return str.node();
 		}
@@ -446,7 +450,8 @@ Node ReadStateClass::prefix_processing() {
 				const std::string & s = item->nameString();
 				std::string::const_iterator iter = s.begin();
 				for ( iter = s.begin(); iter != s.end(); ++iter ) {
-					charseq.start( "char" );
+					charseq.start( "constant" );
+					charseq.putAttr( "type", "char" );
 					charseq.putAttr( "value", std::string() + *iter );	//	 WRONG
 					charseq.end();
 				}
@@ -597,7 +602,8 @@ Node ReadStateClass::read_opt_expr_prec( int prec ) {
 			t.putAttr( "name", "+" );
 			t.addNode( e );			
 			if ( it->tok_type == tokty_int ) {
-				t.start( "int" );
+				t.start( "constant" );
+				t.putAttr( "type", "int" );
 				t.putAttr( "value", it->nameString() );
 				t.end();
 			} else {

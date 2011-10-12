@@ -28,7 +28,7 @@ unsigned long sizeNeededForStrLen( size_t strlen_n ) {
 	return 2 + ( strlen_n + sizeof( long ) - 1 + 1 ) / sizeof( long );
 }
 
-Ref * pushCString( Ref * pc, class MachineClass * vm, char * cstring ) {
+/*Ref * pushCString( Ref * pc, class MachineClass * vm, char * cstring ) {
 	int result_n = strlen( cstring );
 	XfrClass xfr( vm->heap().preflight( pc, sizeNeededForStrLen( result_n ) ) );
 	xfr.xfrRef( LongToSmall( result_n ) );
@@ -38,7 +38,7 @@ Ref * pushCString( Ref * pc, class MachineClass * vm, char * cstring ) {
 	xfr.xfrSubstringFinish( result_n + 1 );
 	vm->fastPush( xfr.makeRef() );
 	return pc;
-}
+}*/
 
 
 //	Arity: 1 -> 1
@@ -53,9 +53,9 @@ Ref * sysGetEnv( Ref * pc, class MachineClass * vm ) {
 	char * result = getenv( data );
 	
 	if ( result == NULL ) {
-		vm->fastPush( sys_absent );
+		vm->fastPeek() = sys_absent;
 	} else {
-		pc = pushCString( pc, vm, result );
+		vm->fastPeek() = vm->heap().copyString( pc, result );
 	}
 	
 	return pc;
@@ -94,7 +94,7 @@ Ref * sysEnvVars( Ref * pc, class MachineClass * vm ) {
 	vm->checkStackRoom( count );
 	
 	for ( char ** env = envp; *env != 0; env++ ) {
-		pc = pushCString( pc, vm, *env );
+		vm->fastPush( vm->heap().copyString( pc, *env ) );
 	}
 	
 	return pc;

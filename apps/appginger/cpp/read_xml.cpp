@@ -218,6 +218,18 @@ Term mnxToTerm( shared< Ginger::Mnx > mnx ) {
 			term_add( t, mnxToTerm( it.next() ) );
 		}
 		return t;
+	} else if ( name == "list" ) {
+		if ( mnx->isEmpty() ) {
+			return term_new_list_empty();
+		} else {
+			vector< Term > kids;
+			fillKids( mnx, kids );
+			return makeSysApp( "newList", kids );
+		}
+	} else if ( name == "vector" ) {
+		vector< Term > kids;
+		fillKids( mnx, kids );
+		return makeSysApp( "newVector", kids );		
 	} else if ( name == "import" ) {
 		throw Ginger::SystemError( "No longer handles import directly" );
 	} else {

@@ -32,6 +32,7 @@
 #include "garbagecollect.hpp"
 #include "misclayout.hpp"
 
+#include "syscgi.hpp"
 #include "syslist.hpp"
 #include "sysvector.hpp"
 #include "sysstring.hpp"
@@ -322,25 +323,15 @@ const SysMap::value_type rawData[] = {
 	SysMap::value_type( "=", SysInfo( fnc_syscall, Arity( 2 ), Arity( 1 ), sysEquals, "Compare any two values as equal" ) ),
 	SysMap::value_type( "gc", SysInfo( fnc_syscall, Arity( 0 ), Arity( 0 ), sysGarbageCollect, "Forces a garbage collection - useful for tests" ) ),
 	SysMap::value_type( "hash", SysInfo( fnc_syscall, Arity( 1 ), Arity( 1 ), sysHash, "Computes a hash code for any value, returns a positive Small" ) ),
-	SysMap::value_type( "refPrint", SysInfo( fnc_syscall, Arity( 1 ), Arity( 0 ), sysRefPrint, "Prints any value in basic format" ) ),
-	SysMap::value_type( "refPrintln", SysInfo( fnc_syscall, Arity( 1 ), Arity( 0 ), sysRefPrintln, "Prints any value and then adds a new line" ) ),
 	SysMap::value_type( "index", SysInfo( fnc_syscall, Arity( 2 ), Arity( 1 ), sysIndex, "Indexes any sequence" ) ),
-	SysMap::value_type( "vectorIndex", SysInfo( fnc_syscall, Arity( 2 ), Arity( 1 ), sysVectorIndex, "Indexes a vector" ) ),
 	SysMap::value_type( "mapIndex", SysInfo( fnc_syscall, Arity( 2 ), Arity( 1 ), sysMapIndex, "Indexes a map" ) ),
-	SysMap::value_type( "stringIndex", SysInfo( fnc_syscall, Arity( 2 ), Arity( 1 ), sysStringIndex, "Indexes a string" ) ),
 	SysMap::value_type( "listIndex", SysInfo( fnc_syscall, Arity( 2 ), Arity( 1 ), sysListIndex, "Indexes a list" ) ),
 	SysMap::value_type( "explode", SysInfo( fnc_syscall, Arity( 1 ), Arity( 0, true ), sysExplode, "Explodes any sequence into its members" ) ),
 	SysMap::value_type( "listExplode", SysInfo( fnc_syscall, Arity( 1 ), Arity( 0, true ), sysListExplode, "Explodes a list into its members" ) ),
-	SysMap::value_type( "vectorExplode", SysInfo( fnc_syscall, Arity( 1 ), Arity( 0, true ), sysVectorExplode, "Explodes a vector into its members" ) ),
-	SysMap::value_type( "stringExplode", SysInfo( fnc_syscall, Arity( 1 ), Arity( 0, true ), sysStringExplode, "Explodes a string into its members" ) ),
 	SysMap::value_type( "length", SysInfo( fnc_syscall, Arity( 1 ), Arity( 1 ), sysLength, "Returns the length of any sequence" ) ),	
 	SysMap::value_type( "listLength", SysInfo( fnc_syscall, Arity( 1 ), Arity( 1 ), sysListLength, "Returns the length of a list" ) ),	
-	SysMap::value_type( "vectorLength", SysInfo( fnc_syscall, Arity( 1 ), Arity( 1 ), sysVectorLength, "Returns the length of a vector" ) ),	
-	SysMap::value_type( "stringLength", SysInfo( fnc_syscall, Arity( 1 ), Arity( 1 ), sysStringLength, "Returns the length of a string" ) ),	
 	SysMap::value_type( "append", SysInfo( fnc_syscall, Arity( 2 ), Arity( 1 ), sysAppend, "Appends two sequences of the same type, result is a sequence of the same type" ) ),	
 	SysMap::value_type( "listAppend", SysInfo( fnc_syscall, Arity( 2 ), Arity( 1 ), sysListAppend, "Appends two lists" ) ),	
-	SysMap::value_type( "vectorAppend", SysInfo( fnc_syscall, Arity( 2 ), Arity( 1 ), sysVectorAppend, "Appends two vectors" ) ),	
-	SysMap::value_type( "stringAppend", SysInfo( fnc_syscall, Arity( 2 ), Arity( 1 ), sysStringAppend, "Appends two strings" ) ),	
 	SysMap::value_type( "isNil", SysInfo( fnc_syscall, Arity( 1 ), Arity( 1 ), sysIsNil, "Tests whether a list is empty or not" ) ),
 	SysMap::value_type( "isList", SysInfo( fnc_syscall, Arity( 1 ), Arity( 1 ), sysIsList, "Tests whether an object is a list or not" ) ),
 	SysMap::value_type( "newList", SysInfo( fnc_syscall, Arity( 0, true ), Arity( 1 ), sysNewList, "Builds a list from the arguments" ) ),
@@ -353,8 +344,12 @@ const SysMap::value_type rawData[] = {
 	SysMap::value_type( "partApply", SysInfo( fnc_syscall, Arity( 1, true ), Arity( 1 ), sysPartApply, "Freezes arguments and a function together to make a new function" ) ),
 	SysMap::value_type( "functionInArity", SysInfo( fnc_syscall, Arity( 1  ), Arity( 1 ), sysFunctionInArity, "Input arity of a function" ) ),
 	SysMap::value_type( "functionOutArity", SysInfo( fnc_syscall, Arity( 1 ), Arity( 1 ), sysFunctionOutArity, "Output arity of a function" ) ),
-	#include "sysunix.inc"
-	#include "sysmap.inc.auto"
+#include "syscgi.inc"
+#include "sysprint.inc"
+#include "sysstring.inc"
+#include "sysunix.inc"
+#include "sysvector.inc"
+#include "sysmap.inc.auto"
 };
 const int numElems = sizeof rawData / sizeof rawData[0];
 SysMap sysMap( rawData, rawData + numElems );

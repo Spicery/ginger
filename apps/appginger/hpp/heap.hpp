@@ -32,7 +32,8 @@ public:
 	bool wouldGC( int size );
 	CageClass * preflight( Ref * & pc, int size );
 	CageClass * preflight( int size );
-	Ref copyString( const char *s );		//	Copy string, possibly causing GC
+	Ref copyString( const char *s );				//	Copy string, possibly causing GC
+	Ref copyString( Ref * & pc, const char *s );	//	Copy string, possibly causing GC
 
 public:
 	void selectCurrent();

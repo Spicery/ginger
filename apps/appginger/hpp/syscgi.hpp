@@ -1,6 +1,6 @@
 /******************************************************************************\
-	Copyright (c) 2010 Stephen Leach. AppGinger is distributed under the terms 
-	of the GNU General Public License. This file is part of AppGinger.
+    Copyright (c) 2010 Stephen Leach. AppGinger is distributed under the terms 
+    of the GNU General Public License. This file is part of AppGinger.
 
     AppGinger is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -16,12 +16,14 @@
     along with AppGinger.  If not, see <http://www.gnu.org/licenses/>.
 \******************************************************************************/
 
-#ifndef READ_XML_HPP
-#define READ_XML_HPP
+#ifndef SYS_CGI_HPP
+#define SYS_CGI_HPP
 
-#include "term.hpp"
-#include "sax.hpp"
+#include "common.hpp"
+#include "machine.hpp"
 
-extern Term mnxToTerm( shared< Ginger::Mnx > mnx );
+//	Ref * sysXXX( Ref * pc, class MachineClass * vm );
+Ref * cgiValue( Ref * pc, class MachineClass * vm );
+
 
 #endif

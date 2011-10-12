@@ -81,6 +81,62 @@ using namespace std;
 
 int RCEP::level = 0;
 
+void RCEP::execGnx( shared< Ginger::Mnx > mnx, std::ostream & output ) {
+	Machine vm = this->getMachine();
+    Plant plant;
+    Ref r;
+    
+	try {
+		Term term = mnxToTerm( mnx );
+        
+        #ifdef DBG_RCEP
+			fprintf( stderr, "Before lifting\n" );
+        	term_print( term );
+			fprintf( stderr, "Lifting ...\n" );
+			fflush( stderr );
+        #endif
+
+		bool needs_lifting;
+		term = resolveTerm( this->current_package, term, needs_lifting );
+		
+		#ifdef DBG_LIFTING
+			cerr << "Lifting needed? " << needs_lifting << endl;
+		#endif
+		if ( needs_lifting ) {
+			term = liftTerm( this->current_package, term );	
+		}
+
+        #ifdef DBG_RCEP
+			fprintf( stderr, "After lifting\n" );
+        	term_print( term );
+			fprintf( stderr, "---\n" );
+			fflush( stderr );
+        #endif
+
+	    plant = vm->plant();
+	    vmiFUNCTION( plant, 0, 0 );
+	    vmiENTER( plant );
+        plant->compileTerm( term );
+	    vmiRETURN( plant );
+	    r = vmiENDFUNCTION( plant );
+	    vm->addToQueue( r );
+	    if ( this->isTopLevel() ) {
+        	#ifdef DBG_RCEP
+        		cerr << "About to execute queue" << endl;
+        	#endif
+			vm->executeQueue();
+	    } else {
+        	#ifdef DBG_RCEP
+        		cerr << "Not top level" << endl;
+        	#endif
+	    }
+	} catch ( Ginger::NormalExit ) {
+		//	Do nothing! Just exit nicely.	
+	} catch ( Ginger::Problem & m ) {
+		m.report();
+	}
+    output.flush();
+}
 
 bool RCEP::unsafe_read_comp_exec_print( istream & input, std::ostream & output ) {
 	Machine vm = this->getMachine();

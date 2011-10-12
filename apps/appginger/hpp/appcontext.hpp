@@ -23,6 +23,11 @@
 #include <vector>
 #include <list>
 
+#ifdef RUDECGI
+	#include <rude/cgi.h>
+#endif
+
+
 #include "gngversion.hpp"
 
 #define VERSION APPGINGER_VERSION
@@ -44,6 +49,9 @@ private:
 	std::list< std::string >		project_folder_list;
 	char **				envp;
 	std::vector< std::string > arg_list;
+	#ifdef RUDECGI
+		rude::CGI * 		cgi;
+	#endif
 
 public:
 	void setInteractiveMode() { this->mode = InteractiveMode; }
@@ -62,13 +70,14 @@ public:
 	void setShowCode() { this->dbg_show_code = true; }
 	bool getShowCode() { return this->dbg_show_code; }
 	std::list< std::string > & getProjectFolderList() { return this->project_folder_list; }
-	void addProjectFolder( std::string & folder );
+	void addProjectFolder( const std::string & folder );
 	void addProjectFolder( const char * folder );
 	char ** getEnvironmentVariables() { return this->envp; }
 	void setEnvironmentVariables( char ** e ) { this->envp = e; }
 	void addArgument( const char * s ) { this->arg_list.push_back( s ); }
 	std::vector< std::string > & arguments() { return this->arg_list; }
-	
+	const char* cgiValue( const char* fieldname );
+	void initCgi();
 
 public:
 	MachineClass * newMachine();
@@ -82,6 +91,9 @@ public:
 		is_trapping_mishap( true ),
 		is_gctrace( false )
 	{
+		#ifdef RUDECGI	
+			this->cgi = NULL;
+		#endif
 	}
 
 	~AppContext() {}

@@ -133,6 +133,7 @@ public:
 	PlantClass *	plant();		
 	HeapClass &		heap();
 	AppContext &	getAppContext();
+
 	
 public:
 	virtual Ref sysFastListIterator();

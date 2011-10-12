@@ -58,3 +58,7 @@
 #define sysHashMapDataKey MAKE_KEY( 24, 0, VECTOR_KIND )
 #define UndefID 25
 #define sysUndefKey MAKE_KEY( 25, 0, KEYLESS_KIND )
+#define ElementKeyID 26
+#define sysElementKeyKey MAKE_KEY( 26, 2, RECORD_KIND )
+#define AttributesKeyID 27
+#define sysAttributesKeyKey MAKE_KEY( 27, 0, VECTOR_KIND )

@@ -16,6 +16,7 @@
     along with AppGinger.  If not, see <http://www.gnu.org/licenses/>.
 \******************************************************************************/
 
+
 #include <iostream>
 #include <fstream>
 #include <vector>
@@ -28,6 +29,10 @@
 #include <unistd.h>
 #include <getopt.h>
 #include <syslog.h>
+
+#ifdef RUDECGI
+	#include <rude/cgi.h>
+#endif
 
 #include "mnx.hpp"
 
@@ -283,35 +288,86 @@ static void printMetaInfo() {
 	cout << "</appginger>" << endl;
 }
 
+class CgiResponse {
+private:
+	int count;
+	string ctype;
+
+public:
+	CgiResponse() : count( 0 ), ctype( "text/plain" ) {}
+	
+public:
+	void setContentType( const string & type ) {
+		this->ctype = type;
+	}
+
+	void open() {
+		if ( this->count++ != 0 ) return;
+		cout << "Content-type: " << ctype << "\r\n\r\n";
+		cout << "<html><head><title>AppGinger</title></head><body>\n";
+		cout << "<H1>AppGinger Version " << VERSION << "</H1>\n";
+		cout << "<H2>Arguments</H2>";
+	}
+	
+	void close() {
+		if ( count == 0 ) {
+			cout << "Content-type: text/html\r\n\r\n";
+			cout << "<html><head><title>AppGinger</title></head><body>\n";
+			cout << "Empty script\n";
+			cout << "</body></html>\n";
+		} else {
+			cout << "</body></html>\n";
+		}
+	}
+};
+
 
 /*
 	This is a stub that is left in as a reminder to be expanded later.
 */
 void Main::runAsCgi() {
-	cout << "Content-type: text/html\r\n\r\n";
-	cout << "<html><head><title>AppGinger</title></head><body>\n";
-	cout << "<H1>AppGinger Version " << VERSION << "</H1>\n";
-	cout << "<H2>Arguments</H2>";
+	this->context.initCgi();
+	
+	MachineClass * vm = this->context.newMachine();
+	Package * interactive_pkg = this->context.initInteractivePackage( vm );
+	RCEP rcep( interactive_pkg );
+
 	vector< string > & args = this->context.arguments();
 	for ( vector< string >::iterator it = args.begin(); it != args.end(); ++it ) {
-		cout << "<H2>" << *it << "</H2>" << endl;
+		//cout << "<H2>" << *it << "</H2>" << endl;
 		fstream filestr( it->c_str(), fstream::in );
 		string line;
 		if ( filestr.good() ) {
 			//	Chew off first line.
 			getline( filestr, line );
-			cout << line << "<BR/>" << endl;
+			//cout << line << "<BR/>" << endl;
 		}
 		if ( filestr.good() ) {
 			Ginger::MnxReader content( filestr );
-			shared< Ginger::Mnx > m = content.readMnx();
-			cout << "YAY! " << m->name() << endl;
+			CgiResponse response;
+			for (;;) {
+				shared< Ginger::Mnx > m = content.readMnx();
+				if ( not m ) break;
+				if ( m->name() == "option" ) {
+					if ( m->hasAttribute( "projectFolder" ) ) {
+						this->context.addProjectFolder( m->attribute( "projectFolder" ) );
+					}
+					if ( m->hasAttribute( "machine" ) ) {
+						this->context.setMachineImplNum( atoi( m->attribute( "machine" ).c_str() ) );	
+					}
+					if ( m->hasAttribute( "content-type" ) ) {
+						response.setContentType( m->attribute( "content-type" ) );
+					}
+				} else {
+					response.open();
+					rcep.execGnx( m, cout );
+				}
+			}
+			response.close();
 		}
 		filestr.close();
 	}
-	cout << "</body></html>\n";
-	
-	
+
 }
 
 void Main::mainLoop() {

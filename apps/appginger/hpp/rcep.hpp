@@ -21,8 +21,11 @@
 
 #include <istream>
 
+#include "mnx.hpp"
+
 #include "machine.hpp"
 #include "package.hpp"
+
 
 class RCEP {
 private:
@@ -49,6 +52,8 @@ public:
 	
 	//	Traps mishap.
 	bool read_comp_exec_print( std::istream & input, std::ostream & output );
+	
+	void execGnx( shared< Ginger::Mnx > gnx, std::ostream & output );
 
 public:
 	RCEP( Package * current_package ) :

@@ -33,8 +33,8 @@ public:
 		
 		//	Misc
 		SYSFN( "garbageCollect" );
-		SYSFN2( "print", "refPrint" );
-		SYSFN2( "println", "refPrintln" );
+		SYSFN( "print" );
+		SYSFN( "println" );
 
 		SYSFN( "explode" );
 		SYSFN( "length" );

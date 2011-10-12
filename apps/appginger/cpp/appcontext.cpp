@@ -80,11 +80,27 @@ MachineClass * AppContext::newMachine() {
     }
 }
 
-void AppContext::addProjectFolder( std::string & folder ) {
+void AppContext::addProjectFolder( const std::string & folder ) {
 	this->project_folder_list.push_back( folder );
 }
 
 
 void AppContext::addProjectFolder( const char * folder ) { 
 	this->project_folder_list.push_back( folder );
+}
+
+void AppContext::initCgi() {
+#ifdef RUDECGI
+	this->cgi = new rude::CGI();
+#endif
+}
+
+const char* AppContext::cgiValue( const char * fieldname ) {
+#ifdef RUDECGI
+	const char * answer = this->cgi == NULL ? "" : this->cgi->value( fieldname );
+	cout << "CGI " << fieldname << " = " << answer << endl;
+	return answer;
+#else
+	return "";
+#endif
 }

@@ -40,7 +40,7 @@ Ref refKey( Ref r ) {
 	if ( taggg == CHAR_TAGGG ) return sysCharKey;
 	if ( taggg == SYMBOL_TAGGG ) return sysSymbolKey;
 	if ( taggg == MISC_TAGGG ) {
-		if ( r == sys_nil ) {
+		if ( r == SYS_NIL ) {
 			return sysNilKey;
 		} else if ( r == sys_undef ) {
 			return sysUndefKey;

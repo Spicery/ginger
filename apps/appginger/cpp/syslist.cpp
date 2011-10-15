@@ -22,7 +22,7 @@
 #include "listlayout.hpp"
 
 Ref * sysNewList( Ref * pc, class MachineClass * vm ) {
-	Ref sofar = sys_nil;
+	Ref sofar = SYS_NIL;
 	int n = vm->count;
 	//std::cerr << "Count " << n << std::endl;
 	XfrClass xfr( vm->heap().preflight( pc, PAIR_SIZE * n ) );

@@ -152,9 +152,9 @@ static void printHelpHex() {
 	cout << "absent         :\t" << sys_absent << endl;
 	cout << "true           :\t" << sys_true << endl;
 	cout << "false          :\t" << sys_false << endl;
-	cout << "nil            :\t" << sys_nil << endl;
-	cout << "termin         :\t" << sys_termin << endl;
-	cout << "system_only    :\t" << sys_system_only << endl;
+	cout << "nil            :\t" << SYS_NIL << endl;
+	cout << "termin         :\t" << SYS_TERMIN << endl;
+	cout << "system_only    :\t" << SYS_SYSTEM_ONLY << endl;
 	cout << "undef          :\t" << sys_undef << endl;
 	cout << "Function       :\t" << sysFunctionKey << endl;
 	cout << "CoreFunction   :\t" << sysCoreFunctionKey << endl;

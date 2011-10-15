@@ -97,7 +97,7 @@ const char * keyName( Ref key );
 
 
 ////////////////////////////////////////////////////////////////////////
-//	Key_ID.nnnnnnnn.fff.011.11 tags: Simple Keys
+//	Key_ID.nnnnnnnn.gggg.fff.011.11 tags: Simple Keys
 ////////////////////////////////////////////////////////////////////////
 //  It is unclear how many of these we can reasonably have and remain
 //  efficient.  I think the convenience of having as many as we please
@@ -110,19 +110,24 @@ KEYLESS_KIND
 	a reference to the key, typically because it does not appear in the heap.
 */
 
-
-#define KIND_WIDTH				3
-#define KIND_MASK				0x7 << TAGG
+#define LAYOUT_WIDTH			3
+#define LAYOUT_OFFSET			TAGG
+#define LAYOUT_MASK				( 0x7 << LAYOUT_OFFSET )
+#define KIND_WIDTH				4
+#define KIND_OFFSET				( LAYOUT_OFFSET + LAYOUT_WIDTH )
+#define KIND_MASK				( 0xF << ( TAGG + LAYOUT_WIDTH ) )
 #define IsSimpleKey( r )		( ( ToULong( r ) & TAGG_MASK ) == KEY_TAGG )
-#define KindOfSimpleKey( k )	( ( ToULong( k ) & KIND_MASK ) >> TAGG )
+#define KindOfSimpleKey( k )	( ( ToULong( k ) & KIND_MASK ) >> KIND_OFFSET )
 	
 #define LEN_WIDTH				8
-#define LENGTH_OFFSET 			( KIND_WIDTH + TAGG )
+#define LENGTH_OFFSET 			( KIND_WIDTH + KIND_OFFSET )
 #define LENGTH_MASK				( 0xFF << LENGTH_OFFSET )
 
-#define SimpleKeyID( k ) 		( ToULong(k) >> ( LEN_WIDTH + KIND_WIDTH + TAGG ) )
+#define SIM_KEY_ID_OFFSET		( LENGTH_OFFSET + LEN_WIDTH )
+#define SimpleKeyID( k ) 		( ToULong(k) >> SIM_KEY_ID_OFFSET )
 
-#define MAKE_KEY( id, n, flav )		ToRef( ( ( id << LEN_WIDTH | n ) << KIND_WIDTH | flav ) << TAGG | KEY_TAGG )
+#define MAKE_KEY( ID, N, K, L ) \
+	ToRef( ( ( ( (ID) << LEN_WIDTH | (N) ) << KIND_WIDTH | (K) ) << LAYOUT_WIDTH | (L) ) << TAGG | KEY_TAGG )
 
 //	Include the definitions for the Kinds, the ${SimpleKey}ID and sys${SimpleKey}Key's
 #include "simplekey.hpp.auto"
@@ -187,17 +192,17 @@ KEYLESS_KIND
 //	nnnnnnnn.000.101.11 tags
 ////////////////////////////////////////////////////////////////////////
 
-#define sys_nil					ToRef( 0 << TAGGG | MISC_TAGGG )
-#define sys_termin				ToRef( 1 << TAGGG | MISC_TAGGG )
+#define SYS_NIL					ToRef( 0 << TAGGG | MISC_TAGGG )
+#define SYS_TERMIN				ToRef( 1 << TAGGG | MISC_TAGGG )
 
 //	sys_system_only is a system version of sys_absent. User 
 //	programmers never see this.
-#define sys_system_only			ToRef( 2 << TAGGG | MISC_TAGGG )
+#define SYS_SYSTEM_ONLY			ToRef( 2 << TAGGG | MISC_TAGGG )
 
 #define sys_undef				ToRef( 3 << TAGGG | MISC_TAGGG )
 
 //	Nil
-#define IsNil( x )				( x == sys_nil )
+#define IsNil( x )				( x == SYS_NIL )
 
 
 ////////////////////////////////////////////////////////////////////////

@@ -140,9 +140,9 @@ Ref * MachineClass::setUpPC( Ref r ) {
 
 	this->sp = this->sp_base;
 	this->vp = this->vp_base;
-	*this->vp = sys_system_only;
+	*this->vp = SYS_SYSTEM_ONLY;
 
-	*this->sp = sys_system_only;
+	*this->sp = SYS_SYSTEM_ONLY;
 	//	And the previous stack point is additionally set to null.
 	this->sp[ SP_PREV_SP ] = 0;
 	//	The previous link address should be set to null too.

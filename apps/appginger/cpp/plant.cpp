@@ -291,7 +291,7 @@ void PlantClass::compileQueryIfSo( Term query, DestinationClass & dst ) {
 			vmiSET_CALL_ID( this, 2, next_fn );
 			vmiPOPID( this, state );
 			vmiPOPID( this, loopident );
-			vmiIF_NEQ_ID_CONSTANT( this, state, sys_termin, dst );
+			vmiIF_NEQ_ID_CONSTANT( this, state, SYS_TERMIN, dst );
 			
 			break;
 		}

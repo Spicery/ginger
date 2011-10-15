@@ -456,7 +456,7 @@ void Machine3::core( bool init_mode, Ref *pc ) {
         	VMVP[0] = RefToPtr4( list )[ PAIR_TAIL_OFFSET ];
         	VMVP[-1] = RefToPtr4( list )[ PAIR_HEAD_OFFSET ];
         } else {
-        	VMVP[0] = sys_termin;	//	Signals exit.
+        	VMVP[0] = SYS_TERMIN;	//	Signals exit.
         }
         
         
@@ -615,7 +615,7 @@ void Machine3::core( bool init_mode, Ref *pc ) {
         	VMVP[-1] = CharToCharacter( reinterpret_cast< unsigned char * >( string + 1 )[ SmallToLong( index ) ] );
         	VMVP[0] = ToRef( (long)index + (long)LongToSmall( 1 ) );			//	It is safe to add smalls like this too.
         } else {
-        	VMVP[0]	= sys_termin;
+        	VMVP[0]	= SYS_TERMIN;
         }
         
         VMPCFUNC = VMLINKFUNC;
@@ -671,7 +671,7 @@ void Machine3::core( bool init_mode, Ref *pc ) {
         
         //	Is is safe to compare smalls this way.
         if ( index > len_as_small ) {
-        	VMVP[0]	= sys_termin;
+        	VMVP[0]	= SYS_TERMIN;
         } else {
         	VMVP[-1] = vector[ SmallToLong( index ) ];
         	VMVP[0] = ToRef( (long)index + (long)LongToSmall( 1 ) );			//	It is safe to add smalls like this too.

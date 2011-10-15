@@ -26,7 +26,7 @@ Registers::Registers() :
 	in_use( 0 )
 {
 	for ( int i = 0; i < NREG; i++ ) {
-		this->regs[ i ] = sys_system_only;
+		this->regs[ i ] = SYS_SYSTEM_ONLY;
 	}
 }
 
@@ -37,7 +37,7 @@ Registers::Registers() :
 void Registers::clearUnusedRegisters() {
 	for ( int i = 0; i < NREG; i++ ) {
 		if ( ( ( this->in_use >> i ) & 0x1 ) == 0 ) {
-			this->regs[ i ] = sys_system_only;
+			this->regs[ i ] = SYS_SYSTEM_ONLY;
 		}
 	}
 }

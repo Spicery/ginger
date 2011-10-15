@@ -244,7 +244,7 @@ Term term_new_int( const int n ) {
 }
 
 Term term_new_list_empty() {
-	return shared< TermClass >( new ItemTermClass( fnc_list, sys_nil ) );
+	return shared< TermClass >( new ItemTermClass( fnc_list, SYS_NIL ) );
 }
 
 Term term_new_bool( const bool flag ) {

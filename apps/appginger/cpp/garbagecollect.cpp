@@ -440,11 +440,11 @@ private:
 			}
 			if ( this->tracker ) this->tracker->endFnObj();
 		} else if ( IsSimpleKey( key ) ) {
-			switch ( KindOfSimpleKey( key ) ) {
-				//	This should be		case RECORD_LAYOUT:
-				case PAIR_KIND:
-				case MAP_KIND:
-				case RECORD_KIND: {
+			switch ( LayoutOfSimpleKey( key ) ) {
+				case RECORD_LAYOUT: {
+				//case PAIR_KIND:
+				//case MAP_KIND:
+				//case RECORD_KIND: {
 					if ( this->tracker ) this->tracker->startRecord( obj_K );
 					if ( IsRefSimpleKey( key ) ) {
 						if ( this->isEffectivelyWeakRef( key, obj_K ) ) {
@@ -469,8 +469,8 @@ private:
 					if ( this->tracker ) this->tracker->endRecord( obj_K );
 					break;
 				}
-				//	This should be 	case VECTOR_LAYOUT
-				case VECTOR_KIND: {
+				case VECTOR_LAYOUT: {
+				//case VECTOR_KIND: {
 					if ( this->tracker ) this->tracker->startVector( obj_K );
 					if ( key == sysHashMapDataKey ) {
 						//obj_K[ METHOD_OFFSET_CACHE ] = sys_absent;
@@ -494,7 +494,8 @@ private:
 					break;
 				}
 				//	This should be STRING_LAYOUT
-				case STRING_KIND: {
+				case STRING_LAYOUT: {
+				//	case STRING_KIND: {
 					if ( this->tracker ) this->tracker->atString( obj_K );
 					//	Non-full. Can stop.
 					break;

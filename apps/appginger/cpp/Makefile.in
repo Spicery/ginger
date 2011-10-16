@@ -15,7 +15,7 @@ INSTALL_DOC=@docdir@
 
 CC=@CXX@
 
-CXXFLAGS=-DRUDECGI -DINSTALL_BIN='"$(INSTALL_BIN)"' -DINSTALL_LIB='"$(INSTALL_LIB)"' -g -I../hpp -I../../libgng/hpp -I../../automatic/machine -I../../automatic/sys -I../../automatic/simple -I/opt/local/include -Wall -Wnon-virtual-dtor -L/opt/local/lib
+CXXFLAGS=-DRUDECGI -DINSTALL_BIN='"$(INSTALL_BIN)"' -DINSTALL_LIB='"$(INSTALL_LIB)"' -g -I../hpp -I../../libgng/hpp -I../../automatic/machine -I../../automatic/sys -I../../automatic/simple -I/opt/local/include -Wall -Wnon-virtual-dtor -L/opt/local/lib /usr/local/lib/librudecgi.a
 CFLAGS=-Wmissing-prototypes 
 
 OBJS= package_autoload.o term.o read_xml.o \

@@ -52,23 +52,24 @@ void findObjectLimits( Ref * obj_K, Ref * & obj_A, Ref * & obj_Z1 ) {
 	Ref key = *obj_K;
 	Ref * obj_K1 = obj_K + 1;
 	if ( IsSimpleKey( key ) ) {
-		switch ( KindOfSimpleKey( key ) ) {
-			//	Should be 		case RECORD_LAYOUT
-			case PAIR_KIND:
-			case MAP_KIND:
-			case RECORD_KIND: {
+		//switch ( KindOfSimpleKey( key ) ) {
+		switch ( LayoutOfSimpleKey( key ) ) {
+			case RECORD_LAYOUT: {
+			//case PAIR_KIND:
+			//case MAP_KIND:
+			//	case RECORD_KIND: {
 				obj_A = obj_K;
 				obj_Z1 = obj_K1 + sizeAfterKeyOfRecord( obj_K );
 				return;
 			}
-			//	Should be 		case VECTOR_LAYOUT
-			case VECTOR_KIND: {
+			case VECTOR_LAYOUT: {
+			//case VECTOR_KIND: {
 				obj_A = obj_K - 1;
 				obj_Z1 = obj_K1 + sizeAfterKeyOfVector( obj_K );
 				return;
 			}
-			//	Should be 		case STRING_LAYOUT
-			case STRING_KIND: {
+			case STRING_LAYOUT: {
+			//case STRING_KIND: {
 				obj_A = obj_K - 1;
 				long d = sizeAfterKeyOfString( obj_K );
 				obj_Z1 = obj_K1 + d;
@@ -146,20 +147,20 @@ unsigned long lengthAfterObjectKey( Ref * obj_K ) {
 	Ref key = *obj_K;
 	if ( IsSimpleKey( key ) ) {
 		switch ( KindOfSimpleKey( key ) ) {
-			//	Should be 	case RECORD_LAYOUT
-			case MAP_KIND:
-			case PAIR_KIND:
-			case RECORD_KIND: {
+			case RECORD_LAYOUT: {
+			//case MAP_KIND:
+			//case PAIR_KIND:
+			//case RECORD_KIND: {
 				return sizeAfterKeyOfRecord( obj_K );
 				break;
 			}
-			//	Should be 	case VECTOR_LAYOUT
-			case VECTOR_KIND: {
+			case VECTOR_LAYOUT: {
+			//case VECTOR_KIND: {
 				return sizeAfterKeyOfVector( obj_K );
 				break;
 			}
-			//	Should be	case STRING_LAYOUT
-			case STRING_KIND: {
+			case STRING_LAYOUT: {
+			//case STRING_KIND: {
 				return sizeAfterKeyOfString( obj_K );
 				break;
 			}

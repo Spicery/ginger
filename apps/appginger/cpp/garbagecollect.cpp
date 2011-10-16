@@ -441,10 +441,13 @@ private:
 			if ( this->tracker ) this->tracker->endFnObj();
 		} else if ( IsSimpleKey( key ) ) {
 			switch ( LayoutOfSimpleKey( key ) ) {
+			//switch ( KindOfSimpleKey( key ) ) {
 				case RECORD_LAYOUT: {
 				//case PAIR_KIND:
 				//case MAP_KIND:
 				//case RECORD_KIND: {
+					if ( LayoutOfSimpleKey( key ) != RECORD_LAYOUT ) throw Ginger::Unreachable(  __FILE__, __LINE__ ); 	// Delete me.
+					if ( KindOfSimpleKey( key ) != PAIR_KIND && KindOfSimpleKey( key ) != MAP_KIND  && KindOfSimpleKey( key ) != RECORD_KIND ) throw Ginger::Unreachable(  __FILE__, __LINE__ ); 	// Delete me.
 					if ( this->tracker ) this->tracker->startRecord( obj_K );
 					if ( IsRefSimpleKey( key ) ) {
 						if ( this->isEffectivelyWeakRef( key, obj_K ) ) {
@@ -471,6 +474,9 @@ private:
 				}
 				case VECTOR_LAYOUT: {
 				//case VECTOR_KIND: {
+					if ( LayoutOfSimpleKey( key ) != VECTOR_LAYOUT ) throw Ginger::Unreachable(  __FILE__, __LINE__ ); 	// Delete me.
+					if ( KindOfSimpleKey( key ) != VECTOR_KIND ) throw Ginger::Unreachable(  __FILE__, __LINE__ ); 	// Delete me.
+				
 					if ( this->tracker ) this->tracker->startVector( obj_K );
 					if ( key == sysHashMapDataKey ) {
 						//obj_K[ METHOD_OFFSET_CACHE ] = sys_absent;
@@ -495,7 +501,10 @@ private:
 				}
 				//	This should be STRING_LAYOUT
 				case STRING_LAYOUT: {
-				//	case STRING_KIND: {
+				//case STRING_KIND: {
+					if ( LayoutOfSimpleKey( key ) != STRING_LAYOUT ) throw Ginger::Unreachable(  __FILE__, __LINE__ ); 	// Delete me.
+					if ( KindOfSimpleKey( key ) != STRING_KIND ) throw Ginger::Unreachable(  __FILE__, __LINE__ ); 	// Delete me.
+
 					if ( this->tracker ) this->tracker->atString( obj_K );
 					//	Non-full. Can stop.
 					break;

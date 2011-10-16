@@ -8,7 +8,7 @@ if ( IsPair( list ) ) {
 	VMVP[0] = RefToPtr4( list )[ PAIR_TAIL_OFFSET ];
 	VMVP[-1] = RefToPtr4( list )[ PAIR_HEAD_OFFSET ];
 } else {
-	VMVP[0] = sys_termin;	//	Signals exit.
+	VMVP[0] = SYS_TERMIN;	//	Signals exit.
 }
 
 

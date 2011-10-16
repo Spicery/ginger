@@ -9,7 +9,7 @@ Ref index = VMVP[-1];
 
 //	Is is safe to compare smalls this way.
 if ( index > len_as_small ) {
-	VMVP[0]	= sys_termin;
+	VMVP[0]	= SYS_TERMIN;
 } else {
 	VMVP[-1] = vector[ SmallToLong( index ) ];
 	VMVP[0] = ToRef( (long)index + (long)LongToSmall( 1 ) );			//	It is safe to add smalls like this too.

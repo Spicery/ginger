@@ -57,19 +57,25 @@ void findObjectLimits( Ref * obj_K, Ref * & obj_A, Ref * & obj_Z1 ) {
 			case RECORD_LAYOUT: {
 			//case PAIR_KIND:
 			//case MAP_KIND:
-			//	case RECORD_KIND: {
+			//case RECORD_KIND: {
+				if ( LayoutOfSimpleKey( key ) != RECORD_LAYOUT ) throw Ginger::Unreachable(  __FILE__, __LINE__ ); 	// Delete me.
+				if ( KindOfSimpleKey( key ) != PAIR_KIND && KindOfSimpleKey( key ) != MAP_KIND  && KindOfSimpleKey( key ) != RECORD_KIND ) throw Ginger::Unreachable(  __FILE__, __LINE__ ); 	// Delete me.
 				obj_A = obj_K;
 				obj_Z1 = obj_K1 + sizeAfterKeyOfRecord( obj_K );
 				return;
 			}
 			case VECTOR_LAYOUT: {
 			//case VECTOR_KIND: {
+				if ( LayoutOfSimpleKey( key ) != VECTOR_LAYOUT ) throw Ginger::Unreachable(  __FILE__, __LINE__ ); 	// Delete me.
+				if ( KindOfSimpleKey( key ) != VECTOR_KIND ) throw Ginger::Unreachable(  __FILE__, __LINE__ ); 	// Delete me.
 				obj_A = obj_K - 1;
 				obj_Z1 = obj_K1 + sizeAfterKeyOfVector( obj_K );
 				return;
 			}
 			case STRING_LAYOUT: {
 			//case STRING_KIND: {
+				if ( LayoutOfSimpleKey( key ) != STRING_LAYOUT ) throw Ginger::Unreachable(  __FILE__, __LINE__ ); 	// Delete me.
+				if ( KindOfSimpleKey( key ) != STRING_KIND ) throw Ginger::Unreachable(  __FILE__, __LINE__ ); 	// Delete me.
 				obj_A = obj_K - 1;
 				long d = sizeAfterKeyOfString( obj_K );
 				obj_Z1 = obj_K1 + d;
@@ -146,25 +152,33 @@ unsigned long lengthAfterObjectKey( Ref * obj_K ) {
 	//	Keys fall into the following categories: FunctionKey, SimpleKey, Pointer to Keys
 	Ref key = *obj_K;
 	if ( IsSimpleKey( key ) ) {
-		switch ( KindOfSimpleKey( key ) ) {
+		switch ( LayoutOfSimpleKey( key ) ) {
+		//switch ( KindOfSimpleKey( key ) ) {
 			case RECORD_LAYOUT: {
 			//case MAP_KIND:
 			//case PAIR_KIND:
 			//case RECORD_KIND: {
+				if ( LayoutOfSimpleKey( key ) != RECORD_LAYOUT ) throw Ginger::Unreachable(  __FILE__, __LINE__ ); 	// Delete me.
+				if ( KindOfSimpleKey( key ) != PAIR_KIND && KindOfSimpleKey( key ) != MAP_KIND  && KindOfSimpleKey( key ) != RECORD_KIND ) throw Ginger::Unreachable(  __FILE__, __LINE__ ); 	// Delete me.
 				return sizeAfterKeyOfRecord( obj_K );
 				break;
 			}
 			case VECTOR_LAYOUT: {
 			//case VECTOR_KIND: {
+				if ( LayoutOfSimpleKey( key ) != VECTOR_LAYOUT ) throw Ginger::Unreachable(  __FILE__, __LINE__ ); 	// Delete me.
+				if ( KindOfSimpleKey( key ) != VECTOR_KIND ) throw Ginger::Unreachable(  __FILE__, __LINE__ ); 	// Delete me.
 				return sizeAfterKeyOfVector( obj_K );
 				break;
 			}
 			case STRING_LAYOUT: {
 			//case STRING_KIND: {
+				if ( LayoutOfSimpleKey( key ) != STRING_LAYOUT ) throw Ginger::Unreachable(  __FILE__, __LINE__ ); 	// Delete me.
+				if ( KindOfSimpleKey( key ) != STRING_KIND ) throw Ginger::Unreachable(  __FILE__, __LINE__ ); 	// Delete me.
 				return sizeAfterKeyOfString( obj_K );
 				break;
 			}
-			default: throw Ginger::Unreachable(  __FILE__, __LINE__ );
+			default: 
+				throw Ginger::Unreachable(  __FILE__, __LINE__ );
 		}
 	} else if ( IsFunctionKey( key ) ) {
 		return sizeAfterKeyOfFn( obj_K );

@@ -12,7 +12,7 @@ if ( index < len_as_small ) {
 	VMVP[-1] = CharToCharacter( reinterpret_cast< unsigned char * >( string + 1 )[ SmallToLong( index ) ] );
 	VMVP[0] = ToRef( (long)index + (long)LongToSmall( 1 ) );			//	It is safe to add smalls like this too.
 } else {
-	VMVP[0]	= sys_termin;
+	VMVP[0]	= SYS_TERMIN;
 }
 
 VMPCFUNC = VMLINKFUNC;

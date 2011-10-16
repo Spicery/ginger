@@ -4,7 +4,7 @@
 #define MAP_KIND 3
 #define VECTOR_KIND 4
 #define STRING_KIND 5
-#define ASSOC_KIND 6
+#define ATTR_KIND 6
 #define KEYLESS_LAYOUT 0
 #define RECORD_LAYOUT 1
 #define VECTOR_LAYOUT 2

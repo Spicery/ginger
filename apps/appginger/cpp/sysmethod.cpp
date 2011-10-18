@@ -133,7 +133,7 @@ static Ref * gngSetMethod( Ref * pc, MachineClass * vm, const bool override ) {
 	
 	//Ref * gclass_K = RefToPtr4( gclass );
 	Ref dispatch_table = INDEX( method, METHOD_OFFSET_DISPATCH_TABLE );
-	while ( dispatch_table != sys_absent ) {
+	while ( dispatch_table != SYS_ABSENT ) {
 		Ref * bucket_K = RefToPtr4( dispatch_table );
 		if ( gclass == bucket_K[ ASSOC_OFFSET_KEY ] ) {	
 			bucket_K[ ASSOC_OFFSET_VALUE ] = function;

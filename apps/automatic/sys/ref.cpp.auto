@@ -43,7 +43,7 @@ Ref * sysNewWeakRef( Ref * pc, class MachineClass * vm ) {
 Ref * sysIsRef( Ref * pc, class MachineClass * vm ) {
     if ( vm->count == 1 ) {
         Ref r = vm->fastPeek();
-        vm->fastPeek() = IsRef( r ) ? sys_true : sys_false;
+        vm->fastPeek() = IsRef( r ) ? SYS_TRUE : SYS_FALSE;
         return pc;
     } else {
         throw Mishap( "Wrong number of arguments for head" );

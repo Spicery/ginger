@@ -72,9 +72,9 @@ const char * keyName( Ref key );
 #define TAGG            		5
 #define TAGG_MASK				0x1F
 #define FLOAT_MASK				0xF
-#define sys_absent     		 	ToRef( 0 << TAG | SIM_TAG )
-#define sys_false      			ToRef( 1 << TAG | SIM_TAG )
-#define sys_true				ToRef( 2 << TAG | SIM_TAG )
+#define SYS_ABSENT     		 	ToRef( 0 << TAG | SIM_TAG )
+#define SYS_FALSE      			ToRef( 1 << TAG | SIM_TAG )
+#define SYS_TRUE				ToRef( 2 << TAG | SIM_TAG )
 #define FN_TAGG       			( 3 << TAG | SIM_TAG )
 #define KEY_TAGG        		( 4 << TAG | SIM_TAG )
 #define ESC_TAGG      			( 5 << TAG | SIM_TAG )
@@ -140,6 +140,7 @@ KEYLESS_KIND
 #define IsMapSimpleKey( k )		( ( SimpleKeyID( k ) >> 2 ) == 5 )
 #define IsMapKey( k )			( IsSimpleKey( k ) && IsMapSimpleKey( k ) )
 #define MapKeyEq( k )			( ( SimpleKeyID( k ) & 0x2 ) == 0 )
+#define IsAttrMapKey( k )		( k == sysAttrMapKey )
 
 
 //	Recognisers
@@ -150,6 +151,7 @@ KEYLESS_KIND
 #define IsString( x )			( IsObj( x ) && ( *RefToPtr4( x ) == sysStringKey ) )
 #define IsRef( x )				( IsObj( x ) && IsRefKey( *RefToPtr4( x ) ) )
 #define IsMap( x ) 				( IsObj( x ) && IsMapKey( *RefToPtr4( x ) ) )
+#define IsAttrMap( x ) 			( IsObj( x ) && IsAttrMapKey( *RefToPtr4( x ) ) )
 
 #define IsVectorKind( x )		( IsObj( x ) && KindOfSimpleKey( *RefToPtr4( x ) ) == VECTOR_KIND )
 #define IsRecordKind( x )		( IsObj( x ) && KindOfSimpleKey( *RefToPtr4( x ) ) == RECORD_KIND )
@@ -200,7 +202,7 @@ KEYLESS_KIND
 //	programmers never see this.
 #define SYS_SYSTEM_ONLY			ToRef( 2 << TAGGG | MISC_TAGGG )
 
-#define sys_undef				ToRef( 3 << TAGGG | MISC_TAGGG )
+#define SYS_UNDEF				ToRef( 3 << TAGGG | MISC_TAGGG )
 
 //	Nil
 #define IsNil( x )				( x == SYS_NIL )

@@ -147,14 +147,14 @@ private:
 
 public:
 	Ref * nextBucket() { 
-		if ( this->bucket != sys_absent ) {
+		if ( this->bucket != SYS_ABSENT ) {
 			Ref * x = RefToPtr4( this->bucket );
 			this->bucket = x[ ASSOC_OFFSET_NEXT ];
 			return x;
 		} else {
 			while ( index_of_data < size_of_data ) {
 				this->bucket = this->data[ this->index_of_data++ ];
-				if ( this->bucket != sys_absent ) return this->nextBucket();
+				if ( this->bucket != SYS_ABSENT ) return this->nextBucket();
 			}
 			return NULL;
 		}
@@ -165,7 +165,7 @@ public:
 		size_of_data( SmallToLong( map_K[ MAP_OFFSET_COUNT ] ) ),
 		index_of_data( 0 ),
 		data( RefToPtr4( map_K[1] ) + 1 ),
-		bucket( sys_absent )
+		bucket( SYS_ABSENT )
 	{}
 	
 };
@@ -196,7 +196,7 @@ private:
 		Ref bucket0 = data_refref[ hk ];
 		Ref bucket = bucket0;
 		
-		while ( bucket != sys_absent ) {
+		while ( bucket != SYS_ABSENT ) {
 			Ref k1 = fastAssocKey( bucket );
 			if ( refEquals( k, k1 ) ) {
 				//	Overwrite.
@@ -279,7 +279,7 @@ static Ref * newMap( Ref *pc, MachineClass * vm, Ref map_key ) {
 	
 	//	ToBeDone: We could really do with a memcpy style operation here. 
 	for ( long i = 0; i < data_size; i++ ) {
-		xfr.xfrRef( sys_absent );
+		xfr.xfrRef( SYS_ABSENT );
 	}
 	
 	Ref * data_refref = xfr.makeRefRef();
@@ -364,7 +364,7 @@ Ref * sysMapIndex( Ref * pc, class MachineClass * vm ) {
 	const Ref data = RefToPtr4( map )[ MAP_OFFSET_DATA ];
 	Ref bucket = RefToPtr4( data )[ hk + 1 ];
 	
-	while ( bucket != sys_absent ) {
+	while ( bucket != SYS_ABSENT ) {
 		Ref k1 = fastAssocKey( bucket );
 		if ( eq ? refEquals( idx, k1 ) : idx == k1 ) {
 			//	Found it.
@@ -375,7 +375,7 @@ Ref * sysMapIndex( Ref * pc, class MachineClass * vm ) {
 		}
 	}
 	
-	vm->fastPush( sys_absent );
+	vm->fastPush( SYS_ABSENT );
 	return pc;
 }
 
@@ -403,8 +403,8 @@ void gngPrintMapPtr( std::ostream & out, Ref * map_K ) {
 static int verifyAssocChain( Ref chain ) {
 	int count = 0;
 	for (;;) {
-		ASSERT( chain == sys_absent || IsAssoc( chain ) );
-		if ( chain == sys_absent ) break;
+		ASSERT( chain == SYS_ABSENT || IsAssoc( chain ) );
+		if ( chain == SYS_ABSENT ) break;
 		count += 1;
 		chain = fastAssocNext( chain );
 	}
@@ -450,15 +450,15 @@ void gngRehashMapPtr( Ref * map_K ) {
 	const long data_length = SmallToLong( data_K[ VECTOR_OFFSET_LENGTH ] );
 	//std::cout << "REHASHING!!!! length " << data_length << "; width " << width << std::endl;
 	
-	//	Fill vdata with sys_absent.
-	vector< Ref > vdata( data_length, sys_absent );
+	//	Fill vdata with SYS_ABSENT.
+	vector< Ref > vdata( data_length, SYS_ABSENT );
 	
 	long count = 0;
 	
 	for ( long i = 0; i < data_length; i++ ) {
 		Ref & chain = data_K[ i + 1 ];
 		//std::cout << "[" << i << "] " << chain << endl; 
-		while ( chain != sys_absent ) {
+		while ( chain != SYS_ABSENT ) {
 			Ref assoc = chain;
 			Ref lhs = fastAssocKey( chain );
 			chain = fastAssocNext( chain );

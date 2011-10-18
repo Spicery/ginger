@@ -33,7 +33,7 @@ Ref refKey( Ref r ) {
 	if ( tag == OBJ_TAG ) return *RefToPtr4(r);
 	tagg = u & TAGG_MASK;
 	if ( tagg == ( 0 | SIM_TAG ) ) return sysAbsentKey;
-	if ( tagg == ToULong( sys_false ) || tagg == ToULong( sys_true ) ) return sysBoolKey;
+	if ( tagg == ToULong( SYS_FALSE ) || tagg == ToULong( SYS_TRUE ) ) return sysBoolKey;
 	if ( tagg == FN_TAGG ) return sysFunctionKey;
 	if ( tagg == KEY_TAGG ) return sysKeyKey;
 	taggg = u & TAGGG_MASK;
@@ -42,7 +42,7 @@ Ref refKey( Ref r ) {
 	if ( taggg == MISC_TAGGG ) {
 		if ( r == SYS_NIL ) {
 			return sysNilKey;
-		} else if ( r == sys_undef ) {
+		} else if ( r == SYS_UNDEF ) {
 			return sysUndefKey;
 		} else {
 			throw;

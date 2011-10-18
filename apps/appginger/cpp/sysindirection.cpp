@@ -38,7 +38,7 @@ Ref * sysMakeIndirection( Ref * pc, class MachineClass * vm ) {
 	XfrClass xfr( vm->heap().preflight( pc, INDIRECTION_SIZE ) );
 	xfr.setOrigin();
 	xfr.xfrRef( sysIndirectionKey );
-	xfr.xfrRef( sys_absent );
+	xfr.xfrRef( SYS_ABSENT );
 	Ref r = xfr.makeRef();
 	vm->sp[ ToULong( pc[-1] ) ] = r;
 	#ifdef DBG_LIFTING

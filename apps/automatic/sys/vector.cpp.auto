@@ -11,7 +11,7 @@ Ref * sysNewVector( Ref * pc, MachineClass * vm ) {
 Ref * sysIsVector( Ref * pc, class MachineClass * vm ) {
     if ( vm->count == 1 ) {
         Ref r = vm->fastPeek();
-        vm->fastPeek() = IsVector( r ) ? sys_true : sys_false;
+        vm->fastPeek() = IsVector( r ) ? SYS_TRUE : SYS_FALSE;
         return pc;
     } else {
         throw Mishap( "Wrong number of arguments for head" );

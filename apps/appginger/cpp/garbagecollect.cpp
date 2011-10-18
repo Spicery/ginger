@@ -412,7 +412,7 @@ private:
 		Ref * data_K = RefToPtr4( obj_K[ MAP_OFFSET_DATA ] );
 		const long N = SmallToLong( data_K[ VECTOR_OFFSET_LENGTH ] );
 		for ( long i = 1; i <= N; i++ ) {
-			data_K[ i ] = sys_absent;
+			data_K[ i ] = SYS_ABSENT;
 		}
 	}
 
@@ -427,7 +427,7 @@ private:
 			if ( IsMethodKey( key ) ) {
 				//	This is a temporary hack that works around not having
 				//	weak pointers.
-				obj_K[ METHOD_OFFSET_CACHE ] = sys_absent;
+				obj_K[ METHOD_OFFSET_CACHE ] = SYS_ABSENT;
 				this->assoc_chains.push_back( &obj_K[ METHOD_OFFSET_DISPATCH_TABLE ] );
 			} else {
 				FnObjCrawl fnobjcrawl( vm, obj_K );
@@ -480,13 +480,13 @@ private:
 				
 					if ( this->tracker ) this->tracker->startVector( obj_K );
 					if ( key == sysHashMapDataKey ) {
-						//obj_K[ METHOD_OFFSET_CACHE ] = sys_absent;
+						//obj_K[ METHOD_OFFSET_CACHE ] = SYS_ABSENT;
 						//this->assoc_chains.push_back( &obj_K[ METHOD_OFFSET_DISPATCH_TABLE ] );
 						long n = sizeAfterKeyOfVector( obj_K );
 						Ref * obj_K1 = obj_K + 1;
 						for ( long i = 0; i < n; i++ ) {
 							Ref * chain = &obj_K1[ i ];
-							if ( *chain != sys_absent ) {
+							if ( *chain != SYS_ABSENT ) {
 								this->assoc_chains.push_back( chain );
 							}
 						}						
@@ -538,7 +538,7 @@ private:
 	void scanAddedWeakAssocChainToCollectWeakRoots() {
 		for ( size_t i = prev_num_assoc_chains; i < assoc_chains.size(); ++i ) {
 			Ref chain = *this->assoc_chains[ i ];
-			while ( chain != sys_absent ) {
+			while ( chain != SYS_ABSENT ) {
 				Ref * assoc_K = RefToPtr4( chain );
 				Ref lhs = assoc_K[ ASSOC_OFFSET_KEY ];
 				
@@ -593,7 +593,7 @@ private:
 	void pruneWeakAssocChains() {
 		for ( vector< Ref * >::iterator it = assoc_chains.begin(); it != assoc_chains.end(); ++ it ) {
 			Ref * chain = *it;
-			while ( *chain != sys_absent ) {
+			while ( *chain != SYS_ABSENT ) {
 			
 				/*if ( IsObj( *chain ) ) {
 					cerr << "Chain: " << keyName( RefToPtr4( *chain ) ) << endl;
@@ -647,7 +647,7 @@ private:
 			if ( this->isTargetForwarded( *ptr ) ) {
 				this->forward( *ptr );
 			} else {
-				*ptr = sys_absent;
+				*ptr = SYS_ABSENT;
 			}
 		}
 	}

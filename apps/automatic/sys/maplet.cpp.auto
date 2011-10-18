@@ -17,7 +17,7 @@ Ref * sysNewMaplet( Ref * pc, class MachineClass * vm ) {
 Ref * sysIsMaplet( Ref * pc, class MachineClass * vm ) {
     if ( vm->count == 1 ) {
         Ref r = vm->fastPeek();
-        vm->fastPeek() = IsMaplet( r ) ? sys_true : sys_false;
+        vm->fastPeek() = IsMaplet( r ) ? SYS_TRUE : SYS_FALSE;
         return pc;
     } else {
         throw Mishap( "Wrong number of arguments for head" );

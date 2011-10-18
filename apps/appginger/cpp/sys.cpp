@@ -45,6 +45,7 @@
 #include "sysmethod.hpp"
 #include "sysclass.hpp"
 #include "sysunix.hpp"
+#include "sysattrmap.hpp"
 
 using namespace Ginger;
 
@@ -65,7 +66,7 @@ Ref * sysFastGetFastIterator( Ref * pc, class MachineClass * vm ) {
 			switch ( KindOfSimpleKey( key ) ) {
 				case PAIR_KIND: {
 					vm->fastPush( r );			//	Iteration state.
-					vm->fastPush( sys_absent );	//	Iteration context, a dummy.
+					vm->fastPush( SYS_ABSENT );	//	Iteration context, a dummy.
 					vm->fastPush( vm->sysFastListIterator() );
 					break;
 				}
@@ -79,13 +80,14 @@ Ref * sysFastGetFastIterator( Ref * pc, class MachineClass * vm ) {
 					vm->fastPush( vm->sysFastStringIterator() );
 					break;
 				}
+				case ATTR_KIND:
 				case MAP_KIND: {
 				
 					//	Explode the map.
 					Ref * mark = vm->vp;
 					vm->fastPush( r );
 					vm->count = 1;
-					pc = sysMapExplode( pc, vm );
+					pc = sysExplode( pc, vm );
 					ptrdiff_t n = vm->vp - mark;
 
 					//	Gather the map as a vector.
@@ -118,7 +120,7 @@ Ref * sysFastGetFastIterator( Ref * pc, class MachineClass * vm ) {
 		}
 	} else if ( IsNil( r ) ) {
 		vm->fastPush( r );			//	Iteration state.
-		vm->fastPush( sys_absent );	//	Iteration context, a dummy.
+		vm->fastPush( SYS_ABSENT );	//	Iteration context, a dummy.
 		vm->fastPush( vm->sysFastListIterator() );
 	} else {
 		throw Ginger::Mishap( "ToBeDone" );
@@ -177,6 +179,7 @@ Ref * sysIndex( Ref *pc, class MachineClass * vm ) {
 				case PAIR_KIND: return pc = sysListIndex( pc, vm );
 				case STRING_KIND: return pc = sysStringIndex( pc, vm );
 				case MAP_KIND: return pc = sysMapIndex( pc, vm );
+				case ATTR_KIND: return pc = sysAttrMapIndex( pc, vm );
 				default: throw Ginger::Mishap( "ToBeDone" );
 			}
 		} else {
@@ -222,6 +225,10 @@ Ref * sysExplode( Ref *pc, class MachineClass * vm ) {
 					}
 					case MAP_KIND: {
 						pc = sysMapExplode( pc, vm );
+						break;
+					}
+					case ATTR_KIND: {
+						pc = sysAttrMapExplode( pc, vm );
 						break;
 					}
 					default: {
@@ -271,6 +278,7 @@ Ref * sysLength( Ref *pc, class MachineClass * vm ) {
 						vm->fastPeek() = LongToSmall( sizeAfterKeyOfVector( obj_K ) );	// Same as pc = sysStringLength( pc, vm );
 						break;
 					}
+					case ATTR_KIND:
 					case MAP_KIND: {
 						throw Mishap( "Trying to take length of a map" );
 						break;
@@ -344,6 +352,7 @@ const SysMap::value_type rawData[] = {
 	SysMap::value_type( "partApply", SysInfo( fnc_syscall, Arity( 1, true ), Arity( 1 ), sysPartApply, "Freezes arguments and a function together to make a new function" ) ),
 	SysMap::value_type( "functionInArity", SysInfo( fnc_syscall, Arity( 1  ), Arity( 1 ), sysFunctionInArity, "Input arity of a function" ) ),
 	SysMap::value_type( "functionOutArity", SysInfo( fnc_syscall, Arity( 1 ), Arity( 1 ), sysFunctionOutArity, "Output arity of a function" ) ),
+#include "sysattrmap.inc"
 #include "syscgi.inc"
 #include "sysprint.inc"
 #include "sysstring.inc"

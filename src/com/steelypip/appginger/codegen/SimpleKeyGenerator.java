@@ -108,8 +108,8 @@ public class SimpleKeyGenerator {
 		//	More arbitrary keys.
 		add( "HashMapData", 	24, 0,	Kind.VECTOR_KIND	);
 		add( "Undef", 			25, 0,	Kind.KEYLESS_KIND	);
-		add( "ElementKey",      26, 2, 	Kind.RECORD_KIND	);
-		add( "AttributesKey",	27, 0, 	Kind.ATTR_KIND		);
+		add( "Element",      26, 2, 	Kind.RECORD_KIND	);
+		add( "AttrMap",	27, 0, 	Kind.ATTR_KIND		);
 	}
 	
 	public void generate( final File outputFolder ) throws IOException {

@@ -273,7 +273,7 @@ Ident OrdinaryPackage::absoluteAutoload( const std::string & c ) {
 		return id;		
 	} catch ( std::exception & e ) {
 		//	Undo the forward declaration.
-		if ( id->value_of->valof == sys_undef ) {
+		if ( id->value_of->valof == SYS_UNDEF ) {
 			//	The autoloading failed. Undo the declaration.
 			this->retractForwardDeclare( c );
 		}
@@ -359,8 +359,8 @@ Ident StandardLibraryPackage::qualifiedAutoload( const std::string & alias, cons
 }
 
 Ident StandardLibraryPackage::absoluteAutoload( const std::string & c ) {
-	Ref r = makeSysFn( this->pkgmgr->vm->plant(), c, sys_undef );
-	if ( r == sys_undef ) {
+	Ref r = makeSysFn( this->pkgmgr->vm->plant(), c, SYS_UNDEF );
+	if ( r == SYS_UNDEF ) {
 		//	Doesn't match a system call. Fail.
 		return shared< IdentClass >();
 	} else {

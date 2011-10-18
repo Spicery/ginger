@@ -227,7 +227,7 @@ Ref * sysEquals( Ref * pc, class MachineClass * vm ) {
 	if ( vm->count == 2 ) {
 		Ref y = vm->fastPop();
 		Ref x = vm->fastPeek();
-		vm->fastPeek() = refEquals( x, y ) ? sys_true : sys_false;
+		vm->fastPeek() = refEquals( x, y ) ? SYS_TRUE : SYS_FALSE;
 		return pc;
 	} else {
 		throw Ginger::Mishap( "Wrong number of arguments for =" );

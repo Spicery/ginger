@@ -34,7 +34,7 @@ using namespace std;
 
 static int lengthOfAssocChain( Ref achain ) {
 	int count = 0;
-	for ( ; achain != sys_absent ; count++ ) {
+	for ( ; achain != SYS_ABSENT ; count++ ) {
 		CPPUNIT_ASSERT( IsObj( achain ) && *RefToPtr4( achain ) == sysAssocKey );
 		achain = RefToPtr4( achain )[ ASSOC_OFFSET_NEXT ];
 	}
@@ -59,8 +59,8 @@ void GCTest::checkAlpha( int N ) {
 static int verifyAssocChain( Ref chain ) {
 	int count = 0;
 	for (;;) {
-		CPPUNIT_ASSERT( chain == sys_absent || IsAssoc( chain ) );
-		if ( chain == sys_absent ) break;
+		CPPUNIT_ASSERT( chain == SYS_ABSENT || IsAssoc( chain ) );
+		if ( chain == SYS_ABSENT ) break;
 		count += 1;
 		chain = fastAssocNext( chain );
 	}
@@ -157,15 +157,15 @@ void GCTest::testWeakIdRehashing() {
 		}
 		{
 			Valof * mc = this->safeValof( "mc" );
-			CPPUNIT_ASSERT_EQUAL( sys_absent, mc->valof );
+			CPPUNIT_ASSERT_EQUAL( SYS_ABSENT, mc->valof );
 		}
 		{
 			Valof * mav = this->safeValof( "mav" );
-			CPPUNIT_ASSERT_EQUAL( sys_absent, mav->valof );
+			CPPUNIT_ASSERT_EQUAL( SYS_ABSENT, mav->valof );
 		}	
 		{
 			Valof * mbv = this->safeValof( "mbv" );
-			CPPUNIT_ASSERT_EQUAL( sys_absent, mbv->valof );
+			CPPUNIT_ASSERT_EQUAL( SYS_ABSENT, mbv->valof );
 		}	
 	}
 
@@ -209,11 +209,11 @@ void GCTest::testWeakIdRehashing() {
 		}
 		{
 			Valof * mav1 = this->safeValof( "mav1" );
-			CPPUNIT_ASSERT_EQUAL( sys_absent, mav1->valof );
+			CPPUNIT_ASSERT_EQUAL( SYS_ABSENT, mav1->valof );
 		}	
 		{
 			Valof * mbv1 = this->safeValof( "mbv1" );
-			CPPUNIT_ASSERT_EQUAL( sys_absent, mbv1->valof );
+			CPPUNIT_ASSERT_EQUAL( SYS_ABSENT, mbv1->valof );
 		}	
 	}
 
@@ -269,15 +269,15 @@ void GCTest::testHardIdRehashing() {
 		}
 		{
 			Valof * mav = this->safeValof( "mav" );
-			CPPUNIT_ASSERT_EQUAL( sys_absent, mav->valof );
+			CPPUNIT_ASSERT_EQUAL( SYS_ABSENT, mav->valof );
 		}	
 		{
 			Valof * mbv = this->safeValof( "mbv" );
-			CPPUNIT_ASSERT_EQUAL( sys_absent, mbv->valof );
+			CPPUNIT_ASSERT_EQUAL( SYS_ABSENT, mbv->valof );
 		}	
 		{
 			Valof * mcv = this->safeValof( "mcv" );
-			CPPUNIT_ASSERT_EQUAL( sys_absent, mcv->valof );
+			CPPUNIT_ASSERT_EQUAL( SYS_ABSENT, mcv->valof );
 		}
 	}
 
@@ -324,15 +324,15 @@ void GCTest::testHardIdRehashing() {
 		}
 		{
 			Valof * mav1 = this->safeValof( "mav1" );
-			CPPUNIT_ASSERT_EQUAL( sys_absent, mav1->valof );
+			CPPUNIT_ASSERT_EQUAL( SYS_ABSENT, mav1->valof );
 		}	
 		{
 			Valof * mbv1 = this->safeValof( "mbv1" );
-			CPPUNIT_ASSERT_EQUAL( sys_absent, mbv1->valof );
+			CPPUNIT_ASSERT_EQUAL( SYS_ABSENT, mbv1->valof );
 		}	
 		{
 			Valof * mcv1 = this->safeValof( "mcv1" );
-			CPPUNIT_ASSERT_EQUAL( sys_absent, mcv1->valof );
+			CPPUNIT_ASSERT_EQUAL( SYS_ABSENT, mcv1->valof );
 		}
 	}
 
@@ -505,7 +505,7 @@ void GCTest::testCacheEqMap() {
 		const long N = SmallToLong( data_K[ VECTOR_OFFSET_LENGTH ]	);
 		CPPUNIT_ASSERT( N > 1 );
 		for ( long i = 1; i < N; i++ ) {
-			CPPUNIT_ASSERT_EQUAL( sys_absent, data_K[ i ] );
+			CPPUNIT_ASSERT_EQUAL( SYS_ABSENT, data_K[ i ] );
 		}
 	}
 
@@ -540,7 +540,7 @@ void GCTest::testAllRef() {
 	{
 		Ref w =  this->safeValof( "w" )->valof;
 		CPPUNIT_ASSERT( IsRef( w ) );
-		CPPUNIT_ASSERT_EQUAL( sys_absent, RefToPtr4( w )[ REF_OFFSET_CONT ] );
+		CPPUNIT_ASSERT_EQUAL( SYS_ABSENT, RefToPtr4( w )[ REF_OFFSET_CONT ] );
 	}
 	//	SoftRef is not garbage-collected (no pressure).
 	{	
@@ -563,13 +563,13 @@ void GCTest::testAllRef() {
 	{
 		Ref w =  this->safeValof( "w" )->valof;
 		CPPUNIT_ASSERT( IsRef( w ) );
-		CPPUNIT_ASSERT_EQUAL( sys_absent, RefToPtr4( w )[ REF_OFFSET_CONT ] );
+		CPPUNIT_ASSERT_EQUAL( SYS_ABSENT, RefToPtr4( w )[ REF_OFFSET_CONT ] );
 	}
 	//	SoftRef is forced to be weak & therefore collected.
 	{
 		Ref s =  this->safeValof( "s" )->valof;
 		CPPUNIT_ASSERT( IsRef( s ) );
-		CPPUNIT_ASSERT_EQUAL( sys_absent, RefToPtr4( s )[ REF_OFFSET_CONT ] );
+		CPPUNIT_ASSERT_EQUAL( SYS_ABSENT, RefToPtr4( s )[ REF_OFFSET_CONT ] );
 	}	
 }
 
@@ -597,7 +597,7 @@ void GCTest::testMethodWeakness() {
 	this->checkAlpha( 2 );
 	
 	Valof * b = this->safeValof( "B" );
-	b->valof = sys_absent;
+	b->valof = SYS_ABSENT;
 	
 	//cerr << "GC[2]" << endl;
 	GCStats stats2;

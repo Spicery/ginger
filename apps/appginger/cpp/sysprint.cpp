@@ -136,7 +136,7 @@ void refPrint( std::ostream & out, const Ref r ) {
 		if ( k == sysSmallKey ) {
 			out << SmallToLong( r );
 		} else if ( k == sysBoolKey ) {
-			out << ( r == sys_false ? "false" : "true" );
+			out << ( r == SYS_FALSE ? "false" : "true" );
 		} else if ( k == sysAbsentKey ) {
 			out << "absent";
 		} else if ( k == sysCharKey ) {

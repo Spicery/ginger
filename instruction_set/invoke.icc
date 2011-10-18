@@ -27,7 +27,7 @@ if ( IsObj( subject ) ) {
 	//	Does the method cache contain this key?
 	{
 		Ref method_table = pc[ 1 ];
-		while ( method_table != sys_absent ) {
+		while ( method_table != SYS_ABSENT ) {
 			Ref * entry_K = RefToPtr4( method_table );
 			if ( key == entry_K[ ASSOC_OFFSET_KEY ] ) {
 				Ref fn = entry_K[ ASSOC_OFFSET_VALUE ];
@@ -56,7 +56,7 @@ if ( IsObj( subject ) ) {
 	if ( IsObj( key ) ) {
 		//Ref * key_K = RefToPtr4( key );	
 		Ref dispatch_table = pc[2];
-		while ( dispatch_table != sys_absent ) {
+		while ( dispatch_table != SYS_ABSENT ) {
 			Ref * entry_K = RefToPtr4( dispatch_table );
 			if ( key == entry_K[ ASSOC_OFFSET_KEY ] ) {	
 				Ref fn = entry_K[ ASSOC_OFFSET_VALUE ];

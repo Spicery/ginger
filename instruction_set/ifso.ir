@@ -1,5 +1,5 @@
 RETURN(
-	*( VMVP-- ) == sys_false ?
+	*( VMVP-- ) == SYS_FALSE ?
 	pc + 2 :
 	pc + ToLong( pc[ 1 ] ) + 1
 );

@@ -42,25 +42,25 @@ static Ref *spcfn_div( Ref *pc, Machine vm ) {
 
 static Ref *spcfn_eq( Ref *pc, Machine vm ) {
     Ref r = *( VMVP-- );
-    *( VMVP ) = *( VMVP ) == r ? sys_true : sys_false;
+    *( VMVP ) = *( VMVP ) == r ? SYS_TRUE : SYS_FALSE;
     RETURN( pc + 1 );
 }
 
 static Ref *spcfn_neq( Ref *pc, Machine vm ) {
     Ref r = *( VMVP-- );
-    *( VMVP ) = *( VMVP ) == r ? sys_false : sys_true;
+    *( VMVP ) = *( VMVP ) == r ? SYS_FALSE : SYS_TRUE;
     RETURN( pc + 1 );
 }
 
 static Ref *spcfn_gt( Ref *pc, Machine vm ) {
     long b = ToLong( *( VMVP-- ) );
-    *( VMVP ) = ToLong( *( VMVP ) ) > b ? sys_true : sys_false;
+    *( VMVP ) = ToLong( *( VMVP ) ) > b ? SYS_TRUE : SYS_FALSE;
     RETURN( pc + 1 );
 }
 
 static Ref *spcfn_gte( Ref *pc, Machine vm ) {
     long b = ToLong( *( VMVP-- ) );
-    *( VMVP ) = ToLong( *( VMVP ) ) >= b ? sys_true : sys_false;
+    *( VMVP ) = ToLong( *( VMVP ) ) >= b ? SYS_TRUE : SYS_FALSE;
     RETURN( pc + 1 );
 }
 
@@ -101,13 +101,13 @@ static Ref *spcfn_incr_by( Ref *pc, Machine vm ) {
 
 static Ref *spcfn_lt( Ref *pc, Machine vm ) {
     long b = ToLong( *( VMVP-- ) );
-    *( VMVP ) = ToLong( *( VMVP ) ) < b ? sys_true : sys_false;
+    *( VMVP ) = ToLong( *( VMVP ) ) < b ? SYS_TRUE : SYS_FALSE;
     RETURN( pc + 1 );
 }
 
 static Ref *spcfn_lte( Ref *pc, Machine vm ) {
     long b = ToLong( *( VMVP-- ) );
-    *( VMVP ) = ToLong( *( VMVP ) ) <= b ? sys_true : sys_false;
+    *( VMVP ) = ToLong( *( VMVP ) ) <= b ? SYS_TRUE : SYS_FALSE;
     RETURN( pc + 1 );
 }
 
@@ -360,10 +360,10 @@ static Ref *spcfn_halt( Ref *pc, Machine vm ) {
 
 static Ref *spcfn_ifnot( Ref *pc, Machine vm ) {
     #ifdef DBG_SPECIAL
-    fprintf( stderr, "IFNOT finds %x on the stack (cf. %x & %x)\n", (unt)(*( VMVP )), (unt)(sys_false), (unt)(sys_true) );
+    fprintf( stderr, "IFNOT finds %x on the stack (cf. %x & %x)\n", (unt)(*( VMVP )), (unt)(SYS_FALSE), (unt)(SYS_TRUE) );
     #endif
     RETURN(
-    	*( VMVP-- ) == sys_false ?
+    	*( VMVP-- ) == SYS_FALSE ?
     	pc + ToLong( pc[ 1 ] ) + 1:
     	pc + 2
     );
@@ -371,7 +371,7 @@ static Ref *spcfn_ifnot( Ref *pc, Machine vm ) {
 
 static Ref *spcfn_ifso( Ref *pc, Machine vm ) {
     RETURN(
-    	*( VMVP-- ) == sys_false ?
+    	*( VMVP-- ) == SYS_FALSE ?
     	pc + 2 :
     	pc + ToLong( pc[ 1 ] ) + 1
     );
@@ -407,7 +407,7 @@ static Ref *spcfn_invoke( Ref *pc, Machine vm ) {
     	//	Does the method cache contain this key?
     	{
     		Ref method_table = pc[ 1 ];
-    		while ( method_table != sys_absent ) {
+    		while ( method_table != SYS_ABSENT ) {
     			Ref * entry_K = RefToPtr4( method_table );
     			if ( key == entry_K[ ASSOC_OFFSET_KEY ] ) {
     				Ref fn = entry_K[ ASSOC_OFFSET_VALUE ];
@@ -436,7 +436,7 @@ static Ref *spcfn_invoke( Ref *pc, Machine vm ) {
     	if ( IsObj( key ) ) {
     		//Ref * key_K = RefToPtr4( key );	
     		Ref dispatch_table = pc[2];
-    		while ( dispatch_table != sys_absent ) {
+    		while ( dispatch_table != SYS_ABSENT ) {
     			Ref * entry_K = RefToPtr4( dispatch_table );
     			if ( key == entry_K[ ASSOC_OFFSET_KEY ] ) {	
     				Ref fn = entry_K[ ASSOC_OFFSET_VALUE ];
@@ -538,7 +538,7 @@ static Ref *spcfn_neq_ss( Ref *pc, Machine vm ) {
 }
 
 static Ref *spcfn_not( Ref *pc, Machine vm ) {
-    *VMVP = ( *VMVP == sys_false ? sys_true : sys_false );
+    *VMVP = ( *VMVP == SYS_FALSE ? SYS_TRUE : SYS_FALSE );
     RETURN( pc + 1 );
 }
 
@@ -555,7 +555,7 @@ static Ref *spcfn_pop_local( Ref *pc, Machine vm ) {
 
 static Ref *spcfn_push_global( Ref *pc, Machine vm ) {
     Valof * id = (Valof *)( *( ++pc ) );
-    if ( sys_undef == ( *( ++VMVP ) = id->valof ) ) {
+    if ( SYS_UNDEF == ( *( ++VMVP ) = id->valof ) ) {
     	//	TO DO: Two problems here. Firstly it is not efficient to
     	//	do this check more than once. Secondly, the error message
     	//	does not supply enough context.

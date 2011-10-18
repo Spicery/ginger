@@ -1,3 +1,3 @@
 Ref r = *( VMVP-- );
-*( VMVP ) = *( VMVP ) == r ? sys_false : sys_true;
+*( VMVP ) = *( VMVP ) == r ? SYS_FALSE : SYS_TRUE;
 RETURN( pc + 1 );

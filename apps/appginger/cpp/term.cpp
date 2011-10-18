@@ -250,7 +250,7 @@ Term term_new_list_empty() {
 Term term_new_bool( const bool flag ) {
 	return 
 		shared< TermClass >(
-			new ItemTermClass( fnc_bool, flag ? sys_true : sys_false )
+			new ItemTermClass( fnc_bool, flag ? SYS_TRUE : SYS_FALSE )
 		)
 	;	
 }
@@ -258,7 +258,7 @@ Term term_new_bool( const bool flag ) {
 Term term_new_absent() {
 	return 
 		shared< TermClass >(
-			new ItemTermClass( fnc_absent, sys_absent )
+			new ItemTermClass( fnc_absent, SYS_ABSENT )
 		)
 	;	
 }

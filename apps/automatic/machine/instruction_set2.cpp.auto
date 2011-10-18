@@ -42,25 +42,25 @@ static void spcfn_div( void ) {
 
 static void spcfn_eq( void ) {
     Ref r = *( VMVP-- );
-    *( VMVP ) = *( VMVP ) == r ? sys_true : sys_false;
+    *( VMVP ) = *( VMVP ) == r ? SYS_TRUE : SYS_FALSE;
     RETURN( pc + 1 );
 }
 
 static void spcfn_neq( void ) {
     Ref r = *( VMVP-- );
-    *( VMVP ) = *( VMVP ) == r ? sys_false : sys_true;
+    *( VMVP ) = *( VMVP ) == r ? SYS_FALSE : SYS_TRUE;
     RETURN( pc + 1 );
 }
 
 static void spcfn_gt( void ) {
     long b = ToLong( *( VMVP-- ) );
-    *( VMVP ) = ToLong( *( VMVP ) ) > b ? sys_true : sys_false;
+    *( VMVP ) = ToLong( *( VMVP ) ) > b ? SYS_TRUE : SYS_FALSE;
     RETURN( pc + 1 );
 }
 
 static void spcfn_gte( void ) {
     long b = ToLong( *( VMVP-- ) );
-    *( VMVP ) = ToLong( *( VMVP ) ) >= b ? sys_true : sys_false;
+    *( VMVP ) = ToLong( *( VMVP ) ) >= b ? SYS_TRUE : SYS_FALSE;
     RETURN( pc + 1 );
 }
 
@@ -101,13 +101,13 @@ static void spcfn_incr_by( void ) {
 
 static void spcfn_lt( void ) {
     long b = ToLong( *( VMVP-- ) );
-    *( VMVP ) = ToLong( *( VMVP ) ) < b ? sys_true : sys_false;
+    *( VMVP ) = ToLong( *( VMVP ) ) < b ? SYS_TRUE : SYS_FALSE;
     RETURN( pc + 1 );
 }
 
 static void spcfn_lte( void ) {
     long b = ToLong( *( VMVP-- ) );
-    *( VMVP ) = ToLong( *( VMVP ) ) <= b ? sys_true : sys_false;
+    *( VMVP ) = ToLong( *( VMVP ) ) <= b ? SYS_TRUE : SYS_FALSE;
     RETURN( pc + 1 );
 }
 
@@ -360,10 +360,10 @@ static void spcfn_halt( void ) {
 
 static void spcfn_ifnot( void ) {
     #ifdef DBG_SPECIAL
-    fprintf( stderr, "IFNOT finds %x on the stack (cf. %x & %x)\n", (unt)(*( VMVP )), (unt)(sys_false), (unt)(sys_true) );
+    fprintf( stderr, "IFNOT finds %x on the stack (cf. %x & %x)\n", (unt)(*( VMVP )), (unt)(SYS_FALSE), (unt)(SYS_TRUE) );
     #endif
     RETURN(
-    	*( VMVP-- ) == sys_false ?
+    	*( VMVP-- ) == SYS_FALSE ?
     	pc + ToLong( pc[ 1 ] ) + 1:
     	pc + 2
     );
@@ -371,7 +371,7 @@ static void spcfn_ifnot( void ) {
 
 static void spcfn_ifso( void ) {
     RETURN(
-    	*( VMVP-- ) == sys_false ?
+    	*( VMVP-- ) == SYS_FALSE ?
     	pc + 2 :
     	pc + ToLong( pc[ 1 ] ) + 1
     );
@@ -407,7 +407,7 @@ static void spcfn_invoke( void ) {
     	//	Does the method cache contain this key?
     	{
     		Ref method_table = pc[ 1 ];
-    		while ( method_table != sys_absent ) {
+    		while ( method_table != SYS_ABSENT ) {
     			Ref * entry_K = RefToPtr4( method_table );
     			if ( key == entry_K[ ASSOC_OFFSET_KEY ] ) {
     				Ref fn = entry_K[ ASSOC_OFFSET_VALUE ];
@@ -436,7 +436,7 @@ static void spcfn_invoke( void ) {
     	if ( IsObj( key ) ) {
     		//Ref * key_K = RefToPtr4( key );	
     		Ref dispatch_table = pc[2];
-    		while ( dispatch_table != sys_absent ) {
+    		while ( dispatch_table != SYS_ABSENT ) {
     			Ref * entry_K = RefToPtr4( dispatch_table );
     			if ( key == entry_K[ ASSOC_OFFSET_KEY ] ) {	
     				Ref fn = entry_K[ ASSOC_OFFSET_VALUE ];
@@ -538,7 +538,7 @@ static void spcfn_neq_ss( void ) {
 }
 
 static void spcfn_not( void ) {
-    *VMVP = ( *VMVP == sys_false ? sys_true : sys_false );
+    *VMVP = ( *VMVP == SYS_FALSE ? SYS_TRUE : SYS_FALSE );
     RETURN( pc + 1 );
 }
 
@@ -555,7 +555,7 @@ static void spcfn_pop_local( void ) {
 
 static void spcfn_push_global( void ) {
     Valof * id = (Valof *)( *( ++pc ) );
-    if ( sys_undef == ( *( ++VMVP ) = id->valof ) ) {
+    if ( SYS_UNDEF == ( *( ++VMVP ) = id->valof ) ) {
     	//	TO DO: Two problems here. Firstly it is not efficient to
     	//	do this check more than once. Secondly, the error message
     	//	does not supply enough context.

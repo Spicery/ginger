@@ -53,7 +53,7 @@ Ref * sysGetEnv( Ref * pc, class MachineClass * vm ) {
 	char * result = getenv( data );
 	
 	if ( result == NULL ) {
-		vm->fastPeek() = sys_absent;
+		vm->fastPeek() = SYS_ABSENT;
 	} else {
 		vm->fastPeek() = vm->heap().copyString( pc, result );
 	}

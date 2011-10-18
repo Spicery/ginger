@@ -70,7 +70,7 @@ Ref * sysNewListOnto( Ref * pc, class MachineClass * vm ) {
 
 Ref * sysIsNil( Ref * pc, class MachineClass * vm ) {
 	if ( vm->count == 1 ) {
-		vm->fastPeek() = IsNil( vm->fastPeek() ) ? sys_true : sys_false;
+		vm->fastPeek() = IsNil( vm->fastPeek() ) ? SYS_TRUE : SYS_FALSE;
 		return pc;
 	} else {
 		throw Ginger::Mishap( "Wrong number of arguments for head" );
@@ -80,7 +80,7 @@ Ref * sysIsNil( Ref * pc, class MachineClass * vm ) {
 Ref * sysIsList( Ref * pc, class MachineClass * vm ) {
 	if ( vm->count == 1 ) {
 		Ref r = vm->fastPeek();
-		vm->fastPeek() = IsPair( r ) || IsNil( r ) ? sys_true : sys_false;
+		vm->fastPeek() = IsPair( r ) || IsNil( r ) ? SYS_TRUE : SYS_FALSE;
 		return pc;
 	} else {
 		throw Ginger::Mishap( "Wrong number of arguments for head" );

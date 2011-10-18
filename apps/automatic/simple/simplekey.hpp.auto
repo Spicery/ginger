@@ -65,7 +65,7 @@
 #define sysHashMapDataKey MAKE_KEY( 24, 0, 4, 2 )
 #define UndefID 25
 #define sysUndefKey MAKE_KEY( 25, 0, 0, 0 )
-#define ElementKeyID 26
-#define sysElementKeyKey MAKE_KEY( 26, 2, 1, 1 )
-#define AttributesKeyID 27
-#define sysAttributesKeyKey MAKE_KEY( 27, 0, 6, 2 )
+#define ElementID 26
+#define sysElementKey MAKE_KEY( 26, 2, 1, 1 )
+#define AttrMapID 27
+#define sysAttrMapKey MAKE_KEY( 27, 0, 6, 2 )

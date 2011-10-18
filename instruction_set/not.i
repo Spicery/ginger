@@ -1,2 +1,2 @@
-*VMVP = ( *VMVP == sys_false ? sys_true : sys_false );
+*VMVP = ( *VMVP == SYS_FALSE ? SYS_TRUE : SYS_FALSE );
 RETURN( pc + 1 );

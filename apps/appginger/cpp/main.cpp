@@ -149,13 +149,13 @@ static void printHelpLicense() {
 
 static void printHelpHex() {
 	cout << hex;
-	cout << "absent         :\t" << sys_absent << endl;
-	cout << "true           :\t" << sys_true << endl;
-	cout << "false          :\t" << sys_false << endl;
+	cout << "absent         :\t" << SYS_ABSENT << endl;
+	cout << "true           :\t" << SYS_TRUE << endl;
+	cout << "false          :\t" << SYS_FALSE << endl;
 	cout << "nil            :\t" << SYS_NIL << endl;
 	cout << "termin         :\t" << SYS_TERMIN << endl;
 	cout << "system_only    :\t" << SYS_SYSTEM_ONLY << endl;
-	cout << "undef          :\t" << sys_undef << endl;
+	cout << "undef          :\t" << SYS_UNDEF << endl;
 	cout << "Function       :\t" << sysFunctionKey << endl;
 	cout << "CoreFunction   :\t" << sysCoreFunctionKey << endl;
 	cout << "Method         :\t" << sysMethodKey << endl;

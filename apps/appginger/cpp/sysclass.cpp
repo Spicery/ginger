@@ -174,7 +174,7 @@ Ref * sysNewRecordClass( Ref * pc, MachineClass * vm ) {
 			xfr.xfrRef( nfields );
 			xfr.setOrigin();
 			xfr.xfrRef( sysVectorKey );
-			xfr.xfrDup( sys_absent, n );
+			xfr.xfrDup( SYS_ABSENT, n );
 			vm->fastPeek() = xfr.makeRef();
 		}
 		{
@@ -190,7 +190,7 @@ Ref * sysNewRecordClass( Ref * pc, MachineClass * vm ) {
 			xfr.xfrRef( sysKeyKey );
 			xfr.xfrRef( title );
 			xfr.xfrRef( nfields );
-			xfr.xfrRef( sys_absent );
+			xfr.xfrRef( SYS_ABSENT );
 			xfr.xfrRef( slots );
 			
 			vm->fastPeek() = xfr.makeRef();
@@ -205,7 +205,7 @@ static Ref * sysargRecognise( Ref * pc, MachineClass * vm ) {
 	if ( vm->count != 1 ) throw Ginger::Mishap( "Wrong number of arguments" );
 	Ref this_item = vm->fastPeek();
 	Ref that_key = pc[ -1 ];
-	vm->fastPeek() = refKey( this_item ) == that_key ? sys_true : sys_false;
+	vm->fastPeek() = refKey( this_item ) == that_key ? SYS_TRUE : SYS_FALSE;
 	return pc;
 }
 

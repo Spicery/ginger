@@ -473,9 +473,9 @@ void PlantClass::compileTerm( Term term ) {
 		/*case fnc_sysfn: {
 			Package * p = this->vm->getPackage( STANDARD_LIBRARY_PACKAGE );
 			Ident id = p->fetchDefinitionIdent( term_sysfn_cont( term ) );  
-			if ( id->value_of->valof == sys_undef ) {
-				Ref r = makeSysFn( this, term_sysfn_cont( term ), sys_undef );
-				if ( r == sys_undef ) {
+			if ( id->value_of->valof == SYS_UNDEF ) {
+				Ref r = makeSysFn( this, term_sysfn_cont( term ), SYS_UNDEF );
+				if ( r == SYS_UNDEF ) {
 					throw Ginger::Mishap( "No such system function" ).culprit( "Function", term_sysfn_cont( term ) );
 				}
 				id->value_of->valof = r;
@@ -484,8 +484,8 @@ void PlantClass::compileTerm( Term term ) {
 			break;
 		}*/
 		case fnc_sysfn: {
-			Ref r = makeSysFn( this, term_sysfn_cont( term ), sys_undef );
-			if ( r == sys_undef ) {
+			Ref r = makeSysFn( this, term_sysfn_cont( term ), SYS_UNDEF );
+			if ( r == SYS_UNDEF ) {
 				throw Ginger::Mishap( "No such system function" ).culprit( "Function", term_sysfn_cont( term ) );
 			}
 			vmiPUSHQ( this, r );			

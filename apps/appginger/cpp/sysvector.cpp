@@ -48,8 +48,8 @@ Ref * sysVectorAppend( Ref * pc, class MachineClass * vm ) {
 		
 		if ( lhs_key != rhs_key || !IsSimpleKey( lhs_key ) || KindOfSimpleKey( lhs_key ) != VECTOR_KIND ) throw Ginger::Mishap( "Invalid arguments in vectorAppend" );
 	
-		lhs_n = sizeAfterKeyOfVector( lhs_K );
-		rhs_n = sizeAfterKeyOfVector( rhs_K );
+		lhs_n = sizeAfterKeyOfVectorLayout( lhs_K );
+		rhs_n = sizeAfterKeyOfVectorLayout( rhs_K );
 		N = lhs_n + rhs_n;
 	
 	}
@@ -99,7 +99,7 @@ Ref * sysVectorExplode( Ref *pc, class MachineClass * vm ) {
 	if ( !IsVectorKind( r ) ) throw Ginger::Mishap( "Argument mismatch for vectorExplode" );
 	
 	Ref *obj_K = RefToPtr4( r );
-	unsigned long n = sizeAfterKeyOfVector( obj_K );
+	unsigned long n = sizeAfterKeyOfVectorLayout( obj_K );
 	vm->checkStackRoom( n );
 	memcpy( vm->vp + 1, obj_K + 1, n * sizeof( Ref ));
 	vm->vp += n;
@@ -113,14 +113,14 @@ Ref * sysVectorLength( Ref *pc, class MachineClass * vm ) {
 	if ( !IsVector( r ) ) throw Ginger::Mishap( "Argument mismatch for vectorLength" );
 	Ref * obj_K = RefToPtr4( r );
 	
-	vm->fastPeek() = LongToSmall( sizeAfterKeyOfVector( obj_K ) );
+	vm->fastPeek() = LongToSmall( sizeAfterKeyOfVectorLayout( obj_K ) );
 	return pc;
 }
 
 Ref * sysFastVectorLength( Ref *pc, class MachineClass * vm ) {
 	Ref r = vm->fastPeek();
 	Ref * obj_K = RefToPtr4( r );
-	vm->fastPeek() = LongToSmall( sizeAfterKeyOfVector( obj_K ) );
+	vm->fastPeek() = LongToSmall( sizeAfterKeyOfVectorLayout( obj_K ) );
 	return pc;
 }
 

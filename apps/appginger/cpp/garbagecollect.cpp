@@ -401,7 +401,7 @@ private:
 	}
 	
 	void advanceRecord( Ref * obj_K ) {
-		unsigned long n = sizeAfterKeyOfRecord( obj_K );
+		unsigned long n = sizeAfterKeyOfRecordLayout( obj_K );
 		for ( unsigned long i = 1; i <= n; i++ ) {
 			this->forward( obj_K[ i ] );
 		}
@@ -482,7 +482,7 @@ private:
 					if ( key == sysHashMapDataKey ) {
 						//obj_K[ METHOD_OFFSET_CACHE ] = SYS_ABSENT;
 						//this->assoc_chains.push_back( &obj_K[ METHOD_OFFSET_DISPATCH_TABLE ] );
-						long n = sizeAfterKeyOfVector( obj_K );
+						long n = sizeAfterKeyOfVectorLayout( obj_K );
 						Ref * obj_K1 = obj_K + 1;
 						for ( long i = 0; i < n; i++ ) {
 							Ref * chain = &obj_K1[ i ];
@@ -491,7 +491,7 @@ private:
 							}
 						}						
 					} else {
-						long n = sizeAfterKeyOfVector( obj_K );
+						long n = sizeAfterKeyOfVectorLayout( obj_K );
 						Ref * obj_K1 = obj_K + 1;
 						for ( long i = 0; i < n; i++ ) {
 							this->forward( obj_K1[ i ] );

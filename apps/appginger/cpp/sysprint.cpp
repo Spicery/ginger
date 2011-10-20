@@ -69,7 +69,7 @@ static void refVectorPrint( std::ostream & out, Ref * vec_K ) {
 }
 
 static void refRecordPrint( std::ostream & out, Ref * rec_K ) {
-	unsigned long len = lengthOfRecord( rec_K );
+	unsigned long len = lengthOfRecordLayout( rec_K );
 	bool sep = false;
 	out << "record{";
 	for ( unsigned long i = 1; i <= len; i++ ) {

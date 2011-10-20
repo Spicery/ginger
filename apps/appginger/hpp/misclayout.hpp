@@ -48,8 +48,8 @@
 //	Full records
 ////////////////////////////////////////////////////////////////////////////////
 
-unsigned long sizeAfterKeyOfRecord( Ref * key );
-unsigned long lengthOfRecord( Ref * key );
+unsigned long sizeAfterKeyOfRecordLayout( Ref * key );
+unsigned long lengthOfRecordLayout( Ref * key );
 
 
 
@@ -57,7 +57,7 @@ unsigned long lengthOfRecord( Ref * key );
 //	Full vectors
 ////////////////////////////////////////////////////////////////////////////////
 
-unsigned long sizeAfterKeyOfVector( Ref * key );
+unsigned long sizeAfterKeyOfVectorLayout( Ref * key );
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -65,8 +65,8 @@ unsigned long sizeAfterKeyOfVector( Ref * key );
 ////////////////////////////////////////////////////////////////////////////////
 
 
-unsigned long sizeAfterKeyOfString( Ref * key );
-unsigned long lengthOfString( Ref * key );
+unsigned long sizeAfterKeyOfStringLayout( Ref * key );
+unsigned long lengthOfStringLayout( Ref * key );
 
 
 ////////////////////////////////////////////////////////////////////////////////

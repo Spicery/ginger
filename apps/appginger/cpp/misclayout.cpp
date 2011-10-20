@@ -25,25 +25,25 @@
 #include "key.hpp"
 #include "mishap.hpp"
 
-unsigned long sizeAfterKeyOfRecord( Ref * key ) {
+unsigned long sizeAfterKeyOfRecordLayout( Ref * key ) {
 	return ( ToULong( *key ) & LENGTH_MASK ) >> LENGTH_OFFSET;
 }
 
-unsigned long lengthOfRecord( Ref * key ) {
-	return sizeAfterKeyOfRecord( key );
+unsigned long lengthOfRecordLayout( Ref * key ) {
+	return sizeAfterKeyOfRecordLayout( key );
 }
 
-unsigned long sizeAfterKeyOfVector( Ref * key ) {
+unsigned long sizeAfterKeyOfVectorLayout( Ref * key ) {
 	return ToULong( *( key - 1 ) ) >> TAG;
 }
 
 //	Add 1 for null.
-unsigned long sizeAfterKeyOfString( Ref * key ) {
-	return ( sizeAfterKeyOfVector( key ) + sizeof( long ) - 1 + 1 ) / sizeof( long );
+unsigned long sizeAfterKeyOfStringLayout( Ref * key ) {
+	return ( sizeAfterKeyOfVectorLayout( key ) + sizeof( long ) - 1 + 1 ) / sizeof( long );
 }
 
-unsigned long lengthOfString( Ref * key ) {
-	return sizeAfterKeyOfVector( key );
+unsigned long lengthOfStringLayout( Ref * key ) {
+	return sizeAfterKeyOfVectorLayout( key );
 }
 
 //
@@ -63,7 +63,7 @@ void findObjectLimits( Ref * obj_K, Ref * & obj_A, Ref * & obj_Z1 ) {
 				assert( LayoutOfSimpleKey( key ) == RECORD_LAYOUT );
 				assert( KindOfSimpleKey( key ) == PAIR_KIND || KindOfSimpleKey( key ) == MAP_KIND || KindOfSimpleKey( key ) == RECORD_KIND );
 				obj_A = obj_K;
-				obj_Z1 = obj_K1 + sizeAfterKeyOfRecord( obj_K );
+				obj_Z1 = obj_K1 + sizeAfterKeyOfRecordLayout( obj_K );
 				return;
 			}
 			case VECTOR_LAYOUT: {
@@ -71,7 +71,7 @@ void findObjectLimits( Ref * obj_K, Ref * & obj_A, Ref * & obj_Z1 ) {
 				assert( LayoutOfSimpleKey( key ) == VECTOR_LAYOUT );
 				assert( KindOfSimpleKey( key ) == VECTOR_KIND );
 				obj_A = obj_K - 1;
-				obj_Z1 = obj_K1 + sizeAfterKeyOfVector( obj_K );
+				obj_Z1 = obj_K1 + sizeAfterKeyOfVectorLayout( obj_K );
 				return;
 			}
 			case STRING_LAYOUT: {
@@ -79,7 +79,7 @@ void findObjectLimits( Ref * obj_K, Ref * & obj_A, Ref * & obj_Z1 ) {
 				assert( LayoutOfSimpleKey( key ) == STRING_LAYOUT );
 				assert( KindOfSimpleKey( key ) == STRING_KIND );
 				obj_A = obj_K - 1;
-				long d = sizeAfterKeyOfString( obj_K );
+				long d = sizeAfterKeyOfStringLayout( obj_K );
 				obj_Z1 = obj_K1 + d;
 				return;
 			}
@@ -162,21 +162,21 @@ unsigned long lengthAfterObjectKey( Ref * obj_K ) {
 			//case RECORD_KIND: {
 				assert( LayoutOfSimpleKey( key ) == RECORD_LAYOUT );
 				assert( KindOfSimpleKey( key ) == PAIR_KIND || KindOfSimpleKey( key ) == MAP_KIND  || KindOfSimpleKey( key ) == RECORD_KIND );
-				return sizeAfterKeyOfRecord( obj_K );
+				return sizeAfterKeyOfRecordLayout( obj_K );
 				break;
 			}
 			case VECTOR_LAYOUT: {
 			//case VECTOR_KIND: {
 				assert( LayoutOfSimpleKey( key ) == VECTOR_LAYOUT );
 				assert( KindOfSimpleKey( key ) == VECTOR_KIND );
-				return sizeAfterKeyOfVector( obj_K );
+				return sizeAfterKeyOfVectorLayout( obj_K );
 				break;
 			}
 			case STRING_LAYOUT: {
 			//case STRING_KIND: {
 				assert( LayoutOfSimpleKey( key ) == STRING_LAYOUT );
 				assert( KindOfSimpleKey( key ) == STRING_KIND );
-				return sizeAfterKeyOfString( obj_K );
+				return sizeAfterKeyOfStringLayout( obj_K );
 				break;
 			}
 			default: 

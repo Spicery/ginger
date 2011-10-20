@@ -65,8 +65,8 @@ static unsigned long trivHash( Ref r ) {
 }
 
 static bool refVectorEquals( Ref * vx, Ref * vy ) {
-	unsigned long lx = sizeAfterKeyOfVector( vx );
-	unsigned long ly = sizeAfterKeyOfVector( vy );
+	unsigned long lx = sizeAfterKeyOfVectorLayout( vx );
+	unsigned long ly = sizeAfterKeyOfVectorLayout( vy );
 	if ( lx == ly ) {
 		for ( unsigned long i = 1; i <= lx; i++ ) {
 			if ( ! refEquals( vx[ i ], vx[ i ] ) ) return false;
@@ -78,7 +78,7 @@ static bool refVectorEquals( Ref * vx, Ref * vy ) {
 }
 
 static bool refRecordEquals( Ref * rx, Ref * ry ) {
-	unsigned long n = sizeAfterKeyOfRecord( rx );
+	unsigned long n = sizeAfterKeyOfRecordLayout( rx );
 	for ( unsigned long i = 1; i <= n; i++ ) {
 		if ( !refEquals( rx[ i ], ry[ i ] ) ) return false;
 	}
@@ -95,8 +95,8 @@ static bool refPairEquals( Ref rx, Ref ry ) {
 }
 
 static bool refStringEquals( Ref * rx, Ref * ry ) {
-	unsigned long lx = lengthOfString( rx );
-	unsigned long ly = lengthOfString( ry );
+	unsigned long lx = lengthOfStringLayout( rx );
+	unsigned long ly = lengthOfStringLayout( ry );
 	if ( lx == ly ) {
 		char * cx = reinterpret_cast< char * >( &rx[1] );
 		char * cy = reinterpret_cast< char * >( &ry[1] );
@@ -165,7 +165,7 @@ unsigned long gngEqHash( Ref r ) {
 			switch ( KindOfSimpleKey( key ) ) {
 				case VECTOR_KIND: {
 					HashEngine e( ToULong( key ) );
-					unsigned long n = sizeAfterKeyOfVector( obj_K );
+					unsigned long n = sizeAfterKeyOfVectorLayout( obj_K );
 					e.add( n );
 					if ( n > 0 ) {
 						e.add( trivHash( obj_K[1] ) );
@@ -181,7 +181,7 @@ unsigned long gngEqHash( Ref r ) {
 				case PAIR_KIND:
 				case RECORD_KIND: {
 					HashEngine e( ToULong( key ) );
-					unsigned long n = sizeAfterKeyOfRecord( obj_K );
+					unsigned long n = sizeAfterKeyOfRecordLayout( obj_K );
 					e.add( n );
 					if ( n > 0 ) {
 						e.add( trivHash( obj_K[1] ) );
@@ -191,7 +191,7 @@ unsigned long gngEqHash( Ref r ) {
 				}
 				case STRING_KIND: {
 					HashEngine e( ToULong( key ) );
-					unsigned long n = lengthOfString( obj_K );
+					unsigned long n = lengthOfStringLayout( obj_K );
 					char * obj_K1 = (char *)( obj_K + 1 );
 					if ( n > 0 ) {
 						e.add( obj_K1[ 0 ] );

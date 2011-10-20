@@ -113,7 +113,7 @@ Ref * sysMakeSymbol( Ref *pc, MachineClass * vm ) {
 		Ref r = vm->fastPeek();
 		if ( IsString( r ) ) {
 			Ref * str_K = RefToPtr4( r );
-			const std::string s( ToChars( str_K + 1 ), lengthOfString( str_K ) );
+			const std::string s( ToChars( str_K + 1 ), lengthOfStringLayout( str_K ) );
 			vm->fastPeek() = refMakeSymbol( s );
 			return pc;
 		} else {

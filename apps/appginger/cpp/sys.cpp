@@ -213,7 +213,7 @@ Ref * sysExplode( Ref *pc, class MachineClass * vm ) {
 					}
 					case RECORD_KIND: {
 						vm->fastDrop( 1 );
-						unsigned long n = sizeAfterKeyOfRecord( obj_K );
+						unsigned long n = sizeAfterKeyOfRecordLayout( obj_K );
 						vm->checkStackRoom( n );
 						memcpy( vm->vp + 1, obj_K + 1, n * sizeof( Ref ) );
 						vm->vp += n;
@@ -263,7 +263,7 @@ Ref * sysLength( Ref *pc, class MachineClass * vm ) {
 			} else if ( IsSimpleKey( key ) ) {
 				switch ( KindOfSimpleKey( key ) ) {
 					case VECTOR_KIND: {
-						vm->fastPeek() = LongToSmall( sizeAfterKeyOfVector( obj_K ) );	// Same as pc = sysFastVectorLength( pc, vm );
+						vm->fastPeek() = LongToSmall( sizeAfterKeyOfVectorLayout( obj_K ) );	// Same as pc = sysFastVectorLength( pc, vm );
 						break;
 					}
 					case PAIR_KIND: {
@@ -271,11 +271,11 @@ Ref * sysLength( Ref *pc, class MachineClass * vm ) {
 						break;
 					}
 					case RECORD_KIND: {
-						vm->fastPeek() = LongToSmall( sizeAfterKeyOfRecord( obj_K ) );
+						vm->fastPeek() = LongToSmall( sizeAfterKeyOfRecordLayout( obj_K ) );
 						break;
 					}
 					case STRING_KIND: {
-						vm->fastPeek() = LongToSmall( sizeAfterKeyOfVector( obj_K ) );	// Same as pc = sysStringLength( pc, vm );
+						vm->fastPeek() = LongToSmall( sizeAfterKeyOfVectorLayout( obj_K ) );	// Same as pc = sysStringLength( pc, vm );
 						break;
 					}
 					case ATTR_KIND:

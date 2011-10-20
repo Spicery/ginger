@@ -45,8 +45,8 @@ Ref * sysStringAppend( Ref * pc, class MachineClass * vm ) {
 		
 		if ( lhs_key != rhs_key || !IsSimpleKey( lhs_key ) || KindOfSimpleKey( lhs_key ) != STRING_KIND ) throw Ginger::Mishap( "Invalid arguments in stringAppend" );
 
-		lhs_n = lengthOfString( lhs_K );
-		rhs_n = lengthOfString( rhs_K );
+		lhs_n = lengthOfStringLayout( lhs_K );
+		rhs_n = lengthOfStringLayout( rhs_K );
 		//	+ 1 for null byte
 		N = ( lhs_n + rhs_n + 1 + sizeof( Ref ) - 1 ) / sizeof( Ref );
 	}
@@ -94,7 +94,7 @@ Ref * sysStringExplode( Ref *pc, class MachineClass * vm ) {
 	if ( !IsStringKind( r ) ) throw Ginger::Mishap( "Argument mismatch for stringExplode" );
 	Ref *obj_K = RefToPtr4( r );
 	
-	unsigned long n = sizeAfterKeyOfVector( obj_K );
+	unsigned long n = sizeAfterKeyOfVectorLayout( obj_K );
 	vm->checkStackRoom( n );
 	char * p = reinterpret_cast< char * >( obj_K + 1 );
 	for ( unsigned long i = 0; i < n; i++ ) {
@@ -110,7 +110,7 @@ Ref * sysStringLength( Ref *pc, class MachineClass * vm ) {
 	if ( !IsStringKind( r ) ) throw Ginger::Mishap( "Argument mismatch for stringLength" );
 	Ref *obj_K = RefToPtr4( r );
 	
-	vm->fastPeek() = LongToSmall( sizeAfterKeyOfVector( obj_K ) );
+	vm->fastPeek() = LongToSmall( sizeAfterKeyOfVectorLayout( obj_K ) );
 	return pc;
 }
 

@@ -137,11 +137,11 @@ KEYLESS_KIND
 #define IsRefSimpleKey( k )		( ( SimpleKeyID( k ) >> 2 ) == 4 )
 #define IsRefKey( k )			( IsSimpleKey( k ) && IsRefSimpleKey( k ) )
 
-#define IsMapSimpleKey( k )		( ( SimpleKeyID( k ) >> 2 ) == 5 )
 #define IsMapKey( k )			( IsSimpleKey( k ) && IsMapSimpleKey( k ) )
+#define IsMapSimpleKey( k )		( ( SimpleKeyID( k ) >> 2 ) == 5 )
 #define MapKeyEq( k )			( ( SimpleKeyID( k ) & 0x2 ) == 0 )
-#define IsAttrMapKey( k )		( k == sysAttrMapKey )
 
+#define IsAttrMapKey( k )		( IsSimpleKey( k ) && KindOfSimpleKey( k ) == ATTR_KIND )
 
 //	Recognisers
 #define IsPair( x )				( IsObj( x ) && ( *RefToPtr4( x ) == sysPairKey ) )

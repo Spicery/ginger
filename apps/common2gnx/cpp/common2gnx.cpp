@@ -26,7 +26,7 @@ int main( int argc, char **argv, char **envp ) {
 			syslog( LOG_INFO, "Converting %s", argv[1] );
 		} else {
 			in = stdin;
-			syslog( LOG_INFO, "Converting standard input", argv[1] );
+			syslog( LOG_INFO, "Converting standard input (%s)", argv[1] );
 		}
 		for (;;) {
 			//try {

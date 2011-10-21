@@ -289,7 +289,8 @@ Node ReadStateClass::read_syscall() {
 	ItemFactory ifact = this->item_factory;	
 	Item it = ifact->read();
 	if ( it->tok_type == tokty_id ) {
-		NodeFactory sc( "sysfn" );
+		NodeFactory sc( "constant" );
+		sc.putAttr( "type", "sysfn" );
 		sc.putAttr( "value", it->nameString() );
 		return sc.node();	//term_new_ref( tokty_syscall, (Ref)sc );
 	} else {
@@ -410,9 +411,10 @@ Node ReadStateClass::prefix_processing() {
 			unary.addNode( this->read_expr_prec( item->precedence ) );
 			return unary.node();
 		} else if ( role.IsSys() ) {
-			NodeFactory sysapp( "sysfn" );
-			sysapp.putAttr( "value", tok_type_as_sysapp( fnc ) );
-			return sysapp.node();
+			NodeFactory sf( "constant" );
+			sf.putAttr( "type", "sysfn" );
+			sf.putAttr( "value", tok_type_as_sysapp( fnc ) );
+			return sf.node();
 		} else {
 			throw;	// 	Unreachable.
 		}

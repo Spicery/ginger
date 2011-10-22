@@ -4,16 +4,26 @@ import java.io.PrintWriter;
 
 
 public class FullVectorClassGenerator extends DataClassGenerator {
-
+	
+	private MethodOptions options;
+	
 	public FullVectorClassGenerator( final LogCreated sysconsts, String className ) {
+		this( sysconsts, className, new MethodOptions( "CIR" ) );
+	}
+
+	public FullVectorClassGenerator( final LogCreated sysconsts, String className, MethodOptions options ) {
 		super( sysconsts, className );
+		this.options = options;
 	}
 
 	@Override
 	public void generate( final PrintWriter cpp, final PrintWriter hpp ) {
-		this.generateConstructor( cpp, hpp );
-		this.generateRecogniser( cpp, hpp );
-		this.generateAccessor( cpp, hpp );
+		if ( options.isGenConstructor() ) this.generateConstructor( cpp, hpp );
+		cpp.format( "\n" );		
+		if (  options.isGenRecogniser()  ) this.generateRecogniser( cpp, hpp );
+		cpp.format( "\n" );		
+		if (  options.isGenIndexer()  ) this.generateAccessor( cpp, hpp );
+		cpp.format( "\n" );		
 	}
 
 	private void generateAccessor( PrintWriter cpp, PrintWriter hpp ) {		
@@ -36,7 +46,6 @@ public class FullVectorClassGenerator extends DataClassGenerator {
 		cpp.format( "       throw Mishap( \"Wrong number of arguments for index\" );\n" );
 		cpp.format( "   }\n" );
 		cpp.format( "}\n" );
-		cpp.format( "\n" );		
 		
 		hpp.format( "extern Ref * %s( Ref * pc, MachineClass * vm );\n", this.indexName() );
 		this.addSysConst( "index" + this.dataKeyRoot, 2, 1, this.indexName() );

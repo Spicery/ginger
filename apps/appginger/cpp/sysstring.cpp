@@ -20,6 +20,7 @@
 #include "sysvector.hpp"
 #include "key.hpp"
 #include "misclayout.hpp"
+#include "stringlayout.hpp"
 
 Ref * sysStringAppend( Ref * pc, class MachineClass * vm ) {
 
@@ -93,10 +94,10 @@ Ref * sysStringExplode( Ref *pc, class MachineClass * vm ) {
 	if ( !IsStringKind( r ) ) throw Ginger::Mishap( "Argument mismatch for stringExplode" );
 	Ref *obj_K = RefToPtr4( r );
 	
-	unsigned long n = sizeAfterKeyOfVectorLayout( obj_K );
+	long n = SmallToLong( obj_K[ STRING_LAYOUT_OFFSET_LENGTH ] );
 	vm->checkStackRoom( n );
 	char * p = reinterpret_cast< char * >( obj_K + 1 );
-	for ( unsigned long i = 0; i < n; i++ ) {
+	for ( long i = 0; i < n; i++ ) {
 		vm->fastPush( CharToCharacter( p[ i ] ) );
 	}
 	
@@ -109,7 +110,7 @@ Ref * sysStringLength( Ref *pc, class MachineClass * vm ) {
 	if ( !IsStringKind( r ) ) throw Ginger::Mishap( "Argument mismatch for stringLength" );
 	Ref *obj_K = RefToPtr4( r );
 	
-	vm->fastPeek() = LongToSmall( sizeAfterKeyOfVectorLayout( obj_K ) );
+	vm->fastPeek() = obj_K[ STRING_LAYOUT_OFFSET_LENGTH ];
 	return pc;
 }
 

@@ -319,5 +319,9 @@ public abstract class GeneralInstructionSet {
 		return new GenericInstruction();	
 	}
 	
+	public Instruction mixediterate_i() {
+		return new GenericInstruction();	
+	}
+	
 
 }

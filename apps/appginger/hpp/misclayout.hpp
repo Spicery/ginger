@@ -54,7 +54,7 @@ extern unsigned long sizeAfterKeyOfRecordLayout( Ref * key );
 extern unsigned long lengthOfRecordLayout( Ref * key );
 
 
-
+/*
 ////////////////////////////////////////////////////////////////////////////////
 //	Full vectors
 ////////////////////////////////////////////////////////////////////////////////
@@ -68,7 +68,7 @@ extern unsigned long lengthOfRecordLayout( Ref * key );
 extern unsigned long sizeAfterKeyOfVectorLayout( Ref * key );
 extern unsigned long lengthOfVectorLayout( Ref * key );
 extern Ref fastVectorLength( Ref r );
-
+*/
 
 ////////////////////////////////////////////////////////////////////////////////
 //	Mixed vectors
@@ -80,7 +80,7 @@ extern unsigned long sizeAfterKeyOfMixedLayout( Ref * key );
 extern unsigned long lengthOfMixedLayout( Ref * key );
 extern unsigned long numFieldsOfMixedLayout( Ref * key );
 
-
+/*
 ////////////////////////////////////////////////////////////////////////////////
 //	Strings
 ////////////////////////////////////////////////////////////////////////////////
@@ -94,7 +94,7 @@ extern unsigned long numFieldsOfMixedLayout( Ref * key );
 extern unsigned long sizeAfterKeyOfStringLayout( Ref * key );
 extern unsigned long lengthOfStringLayout( Ref * key );
 extern unsigned long fastStringLength( Ref r );
-
+*/
 
 ////////////////////////////////////////////////////////////////////////////////
 //	Objects

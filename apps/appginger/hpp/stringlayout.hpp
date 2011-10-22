@@ -16,17 +16,23 @@
     along with AppGinger.  If not, see <http://www.gnu.org/licenses/>.
 \******************************************************************************/
 
-* * * * * * * * * * * * * * * * *
- NOW REPLACED BY MISCLAYOUT.HPP 
-* * * * * * * * * * * * * * * * *
-
 #ifndef STRING_LAYOUT_HPP
 #define STRING_LAYOUT_HPP
 
-#include "common.hpp"
+////////////////////////////////////////////////////////////////////////////////
+//	Strings
+////////////////////////////////////////////////////////////////////////////////
 
+//	Deprecate this in favour of STRING_LAYOUT_OFFSET_LENGTH.
 #define STRING_OFFSET_LENGTH -1
 
-extern unsigned long fastStringLength( Ref r );
+//	This conforms to the current naming convention.
+#define STRING_LAYOUT_OFFSET_LENGTH -1
 
+extern long sizeAfterKeyOfStringLayout( Ref * key );
+extern long lengthOfStringLayout( Ref * key );
+
+////////////////////////////////////////////////////////////////////////////////
+//	End of File
+////////////////////////////////////////////////////////////////////////////////
 #endif

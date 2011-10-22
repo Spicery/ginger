@@ -138,6 +138,7 @@ public:
 public:
 	virtual Ref sysFastListIterator();
 	virtual Ref sysFastVectorIterator();
+	virtual Ref sysFastMixedIterator();
 	virtual Ref sysFastStringIterator();
 	
 public:

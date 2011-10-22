@@ -19,6 +19,8 @@
 #include <cassert>
 
 #include "misclayout.hpp"
+#include "vectorlayout.hpp"
+#include "stringlayout.hpp"
 #include "classlayout.hpp"
 
 #include "common.hpp"
@@ -41,7 +43,7 @@ unsigned long lengthOfRecordLayout( Ref * key ) {
 ////////////////////////////////////////////////////////////////////////////////
 //	Full vectors
 ////////////////////////////////////////////////////////////////////////////////
-
+/*
 unsigned long sizeAfterKeyOfVectorLayout( Ref * key ) {
 	return SmallToULong( key[ VECTOR_OFFSET_LENGTH ] );
 	//return ToULong( *( key - 1 ) ) >> TAG;
@@ -54,7 +56,7 @@ unsigned long lengthOfVectorLayout( Ref * key ) {
 Ref fastVectorLength( Ref r ) {
 	return RefToPtr4( r )[ VECTOR_OFFSET_LENGTH ];
 }
-
+*/
 
 ////////////////////////////////////////////////////////////////////////////////
 //	Mixed vectors
@@ -62,7 +64,7 @@ Ref fastVectorLength( Ref r ) {
 
 unsigned long sizeAfterKeyOfMixedLayout( Ref * key ) {
 	return 
-		SmallToULong( key[ VECTOR_LAYOUT_OFFSET_LENGTH ] ) + 
+		SmallToULong( key[ MIXED_LAYOUT_OFFSET_LENGTH ] ) + 
 		LengthOfSimpleKey( *key );
 }
 
@@ -71,7 +73,7 @@ unsigned long numFieldsOfMixedLayout( Ref * key ) {
 }
 
 unsigned long lengthOfMixedLayout( Ref * key ) {
-	return SmallToULong( key[ VECTOR_LAYOUT_OFFSET_LENGTH ] );
+	return SmallToULong( key[ MIXED_LAYOUT_OFFSET_LENGTH ] );
 }
 
 
@@ -79,6 +81,7 @@ unsigned long lengthOfMixedLayout( Ref * key ) {
 //	Strings
 ////////////////////////////////////////////////////////////////////////////////
 
+/*
 //	Add 1 for null.
 unsigned long sizeAfterKeyOfStringLayout( Ref * key ) {
 	return ( sizeAfterKeyOfVectorLayout( key ) + sizeof( long ) - 1 + 1 ) / sizeof( long );
@@ -91,6 +94,7 @@ unsigned long lengthOfStringLayout( Ref * key ) {
 unsigned long fastStringLength( Ref str ) {
 	return ToULong( RefToPtr4( str )[ STRING_LAYOUT_OFFSET_LENGTH ] ) >> TAG;
 }
+*/
 
 ////////////////////////////////////////////////////////////////////////////////
 //	Objects

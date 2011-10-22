@@ -5,7 +5,7 @@ import java.io.PrintWriter;
 public class FullRecordClassGenerator extends DataClassGenerator {
 	
 	private final String[] fieldNames;
-
+	
 
 	public FullRecordClassGenerator( final LogCreated sysconsts, String className, String... fieldNames ) {
 		super( sysconsts, className );
@@ -14,7 +14,7 @@ public class FullRecordClassGenerator extends DataClassGenerator {
 
 
 	public void generate( final PrintWriter cpp, final PrintWriter hpp ) {
-		for ( String aname : this.alternativeKeyRoots() ) {
+		for ( String aname : this.allKeyRoots() ) {
 			this.generateConstructor( aname, cpp, hpp );
 		}
 		this.generateRecogniser( cpp, hpp );

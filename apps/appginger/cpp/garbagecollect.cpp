@@ -26,6 +26,7 @@
 #include "gctracker.hpp"
 #include "key.hpp"
 #include "misclayout.hpp"
+#include "vectorlayout.hpp"
 #include "classlayout.hpp"
 #include "scandict.hpp"
 #include "machine.hpp"

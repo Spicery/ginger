@@ -666,7 +666,7 @@ void Machine3::core( bool init_mode, Ref *pc ) {
         //	without a stack check.
         
         Ref * vector = RefToPtr4( VMVP[0] );
-        Ref len_as_small = vector[ VECTOR_OFFSET_LENGTH ];
+        Ref len_as_small = vector[ VECTOR_LAYOUT_OFFSET_LENGTH ];
         Ref index = VMVP[-1];
         
         //	Is is safe to compare smalls this way.
@@ -675,6 +675,28 @@ void Machine3::core( bool init_mode, Ref *pc ) {
         } else {
         	VMVP[-1] = vector[ SmallToLong( index ) ];
         	VMVP[0] = ToRef( (long)index + (long)LongToSmall( 1 ) );			//	It is safe to add smalls like this too.
+        }
+        
+        VMPCFUNC = VMLINKFUNC;
+        RETURN( VMLINK );
+    }
+    L_mixediterate: {
+        //	This instruction implements the fast iterator for mixed record/vectors.
+        //	It may assume that there 2 items on the stack (i:Small, v:Mixed) on input.
+        //	Since there were 2 inputs, it may therefore safely return 2 items
+        //	without a stack check.
+        
+        Ref * mixed = RefToPtr4( VMVP[0] );
+        const int delta = LengthOfSimpleKey( *mixed );
+        Ref len_as_small = AddSmall( mixed[ MIXED_LAYOUT_OFFSET_LENGTH ], LongToSmall( delta ) );
+        Ref index = VMVP[-1];
+        
+        //	Is is safe to compare smalls this way.
+        if ( index > len_as_small ) {
+        	VMVP[0]	= SYS_TERMIN;
+        } else {
+        	VMVP[-1] = mixed[ SmallToLong( index ) + delta ];
+        	VMVP[0] = AddSmall( index, LongToSmall( 1 ) );			//	It is safe to add smalls like this too.
         }
         
         VMPCFUNC = VMLINKFUNC;
@@ -748,6 +770,7 @@ void Machine3::core( bool init_mode, Ref *pc ) {
         ins.spc_syscall_argdat = &&L_syscall_argdat;
         ins.spc_sysreturn = &&L_sysreturn;
         ins.spc_vectoriterate = &&L_vectoriterate;
+        ins.spc_mixediterate = &&L_mixediterate;
         return;
     }
 }

@@ -66,6 +66,7 @@ const char * InstructionSet::name( Ref spc ) const {
         spc == spc_syscall_argdat ? "syscall_argdat" :
         spc == spc_sysreturn ? "sysreturn" :
         spc == spc_vectoriterate ? "vectoriterate" :
+        spc == spc_mixediterate ? "mixediterate" :
         "?"
     );
 }
@@ -181,6 +182,7 @@ Ref InstructionSet::lookup( Instruction instr ) const {
     case vmc_syscall_argdat: return this->spc_syscall_argdat;
     case vmc_sysreturn: return this->spc_sysreturn;
     case vmc_vectoriterate: return this->spc_vectoriterate;
+    case vmc_mixediterate: return this->spc_mixediterate;
     }
     throw Mishap( "Bad instruction" );
 }

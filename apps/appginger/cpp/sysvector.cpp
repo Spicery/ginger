@@ -18,7 +18,7 @@
 
 #include "key.hpp"
 #include "common.hpp"
-#include "misclayout.hpp"
+#include "vectorlayout.hpp"
 #include "sysvector.hpp"
 
 #include <string.h>

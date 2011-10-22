@@ -29,6 +29,7 @@ using namespace std;
 #include "machine.hpp"
 #include "classlayout.hpp"
 #include "misclayout.hpp"
+#include "vectorlayout.hpp"
 #include "roots.hpp"
 #include "sysmethod.hpp"
 #include "sysprint.hpp"
@@ -42,9 +43,9 @@ static long preflightNewClass( MachineClass * vm ) {
 	if ( !IsVector( parents ) ) throw Ginger::Mishap(  "Vector needed" );	
 	if ( !IsVector( slots ) ) throw Ginger::Mishap(  "Vector needed" );	
 	
-	long sofar = SmallToLong( fastVectorLength( slots ) );
+	long sofar = lengthOfVectorLayout( RefToPtr4( slots ) );
 		
-	const long N = SmallToLong( fastVectorLength( parents ) );
+	const long N = lengthOfVectorLayout( RefToPtr4( parents ) );
 	for ( long i = 1; i <= N; i++ ) {
 		Ref c = INDEX( parents, i );
 		if ( !IsClass( c ) ) throw Ginger::Mishap(  "Class needed" );
@@ -77,18 +78,18 @@ static Ref * sysClassSlots( Ref * pc, MachineClass * vm ) {
 	set< Ref > seen;
 	{
 		// 	Add overrides to initial 'seen'.
-		const long n = SmallToLong( fastVectorLength( overrides ) );
+		const long n = lengthOfVectorLayout( RefToPtr4( overrides ) );
 		for ( long i = 0; i < n; i++ ) {
 			seen.insert( INDEX( overrides, i ) );
 		}
 	}
 	{
 		//	Add parents to the slots.
-		const long n = SmallToLong( fastVectorLength( parents ) );
+		const long n = lengthOfVectorLayout( RefToPtr4( parents ) );
 		for ( long i = 1; i <= n; i++ ) {
 			Ref gclass = INDEX( parents, i );
 			Ref parent_slots = INDEX( gclass, CLASS_OFFSET_SLOTS );
-			const long nfields = SmallToLong( fastVectorLength( parent_slots ) );
+			const long nfields = lengthOfVectorLayout( RefToPtr4( parent_slots ) );
 			for ( long j = 1; j <= nfields; j++ ) {
 				Ref m = INDEX( parent_slots, j );
 				if ( seen.find( m ) == seen.end() ) {
@@ -100,7 +101,7 @@ static Ref * sysClassSlots( Ref * pc, MachineClass * vm ) {
 	}
 	{
 		//	Add primary slots.
-		const long n = SmallToLong( fastVectorLength( primary_slots ) );
+		const long n = lengthOfVectorLayout( RefToPtr4( primary_slots ) );
 		for ( long i = 1; i <= n; i++ ) {
 			Ref m = INDEX( primary_slots, i );
 			if ( seen.find( m ) == seen.end() ) {	
@@ -140,7 +141,7 @@ Ref * sysNewClass( Ref * pc, MachineClass * vm ) {
 	//	Save the slots list and compute a new class object.
 	Roots roots( vm );
 	Ref & slots = roots.ref( vm->fastPeek() );
-	vm->fastPeek() = fastVectorLength( slots );
+	vm->fastPeek() = RefToPtr4( slots )[ VECTOR_LAYOUT_OFFSET_LENGTH ];
 	
 	//	Compute the new class object.
 	vm->count = 2;
@@ -148,7 +149,7 @@ Ref * sysNewClass( Ref * pc, MachineClass * vm ) {
 	Ref & gclass = roots.ref( vm->fastPop() );
 	
 	//	For each position, set up the slot.
-	const long nslots = SmallToLong( fastVectorLength( slots ) );
+	const long nslots = lengthOfVectorLayout( RefToPtr4( slots ) );
 	for ( long i = 1; i <= nslots; i++ ) {
 		vm->count = 3;
 		vm->fastPush( gclass );

@@ -16,17 +16,28 @@
     along with AppGinger.  If not, see <http://www.gnu.org/licenses/>.
 \******************************************************************************/
 
-* * * * * * * * * * * * * * * * *
- NOW REPLACED BY MISCLAYOUT.HPP 
-* * * * * * * * * * * * * * * * *
 
 #ifndef VECTOR_LAYOUT_HPP
 #define VECTOR_LAYOUT_HPP
 
 #include "common.hpp"
 
+////////////////////////////////////////////////////////////////////////////////
+//	Full vectors
+////////////////////////////////////////////////////////////////////////////////
+
+//	Deprecate this in favour of VECTOR_LAYOUT_OFFSET_LENGTH.
 #define VECTOR_OFFSET_LENGTH -1
 
-Ref fastVectorLength( Ref r );
+//	This conforms to the current naming convention.
+#define VECTOR_LAYOUT_OFFSET_LENGTH -1
+
+extern long sizeAfterKeyOfVectorLayout( Ref * key );
+extern long lengthOfVectorLayout( Ref * key );
+extern Ref refVectorLayoutLength( Ref r );
+
+////////////////////////////////////////////////////////////////////////////////
+//	End of file
+////////////////////////////////////////////////////////////////////////////////
 
 #endif

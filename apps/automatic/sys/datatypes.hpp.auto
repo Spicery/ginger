@@ -2,3 +2,4 @@
 #include "pair.hpp.auto"
 #include "maplet.hpp.auto"
 #include "vector.hpp.auto"
+#include "attrmap.hpp.auto"

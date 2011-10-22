@@ -16,19 +16,22 @@ public class SimpleKeyGenerator {
 	 * 	2.	The generic functions defined in sys.cpp, sysequals.cpp, sysprint.cpp, sysstring.cpp, sysvector.cpp
 	 */
 	
-	//	3 bits.
+	//	3 bits. The "Layout" is the pattern by which the store of an object
+	//	is positioned around a key. It is the level at which the garbage collector
+	//	needs to understand heap contents.
 	static enum Layout {
 		KEYLESS_LAYOUT,
 		RECORD_LAYOUT,
 		VECTOR_LAYOUT,
 		STRING_LAYOUT,
-		UNUSED4_LAYOUT,
+		MIXED_LAYOUT,
 		UNUSED5_LAYOUT,
 		UNUSED6_LAYOUT,
 		UNUSED7_LAYOUT
 	};
 
-	//	4 bits.
+	//	4 bits. The "Kind" is a subdivision of layouts. Objects that are the
+	//	same kind share method implementations.
 	static enum Kind {
 		KEYLESS_KIND( Layout.KEYLESS_LAYOUT ),
 		RECORD_KIND( Layout.RECORD_LAYOUT ),
@@ -36,7 +39,8 @@ public class SimpleKeyGenerator {
 		MAP_KIND( Layout.RECORD_LAYOUT ),
 		VECTOR_KIND( Layout.VECTOR_LAYOUT ),
 		STRING_KIND( Layout.STRING_LAYOUT ),
-		ATTR_KIND( Layout.VECTOR_LAYOUT );
+		ATTR_KIND( Layout.MIXED_LAYOUT ),
+		MIXED_KIND( Layout.MIXED_LAYOUT );
 		
 		private Layout layout;
 		
@@ -108,8 +112,8 @@ public class SimpleKeyGenerator {
 		//	More arbitrary keys.
 		add( "HashMapData", 	24, 0,	Kind.VECTOR_KIND	);
 		add( "Undef", 			25, 0,	Kind.KEYLESS_KIND	);
-		add( "Element",      26, 2, 	Kind.RECORD_KIND	);
-		add( "AttrMap",	27, 0, 	Kind.ATTR_KIND		);
+		add( "Element",      	26, 2, 	Kind.RECORD_KIND	);
+		add( "AttrMap",			27,	1,	Kind.ATTR_KIND		);
 	}
 	
 	public void generate( final File outputFolder ) throws IOException {

@@ -64,3 +64,4 @@
 	Ref spc_syscall_argdat;
 	Ref spc_sysreturn;
 	Ref spc_vectoriterate;
+	Ref spc_mixediterate;

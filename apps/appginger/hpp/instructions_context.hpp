@@ -26,5 +26,7 @@
 #include "key.hpp"
 #include "sys.hpp"
 #include "misclayout.hpp"
+#include "vectorlayout.hpp"
+#include "stringlayout.hpp"
 
 #endif

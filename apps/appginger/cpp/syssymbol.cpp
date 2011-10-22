@@ -23,6 +23,7 @@
 #include "key.hpp"
 #include "mishap.hpp"
 #include "misclayout.hpp"
+#include "stringlayout.hpp"
 using namespace std;
 
 /*

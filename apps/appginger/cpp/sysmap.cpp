@@ -33,6 +33,7 @@ using namespace std;
 #include "mishap.hpp"
 #include "maplayout.hpp"
 #include "misclayout.hpp"
+#include "vectorlayout.hpp"
 #include "maplayout.hpp"
 
 typedef unsigned int ub4;

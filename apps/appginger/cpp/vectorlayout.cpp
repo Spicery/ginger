@@ -16,14 +16,36 @@
     along with AppGinger.  If not, see <http://www.gnu.org/licenses/>.
 \******************************************************************************/
 
-* * * * * * * * * * * * * * * * *
- NOW REPLACED BY MISCLAYOUT.CPP 
-* * * * * * * * * * * * * * * * *
+
+
+#include <cassert>
 
 #include "vectorlayout.hpp"
+#include "misclayout.hpp"
+#include "classlayout.hpp"
 
+#include "common.hpp"
 #include "key.hpp"
+#include "mishap.hpp"
 
-Ref fastVectorLength( Ref r ) {
+
+////////////////////////////////////////////////////////////////////////////////
+//	Full vectors
+////////////////////////////////////////////////////////////////////////////////
+
+long sizeAfterKeyOfVectorLayout( Ref * key ) {
+	return SmallToLong( key[ VECTOR_OFFSET_LENGTH ] );
+	//return ToULong( *( key - 1 ) ) >> TAG;
+}
+
+long lengthOfVectorLayout( Ref * key ) {
+	return SmallToULong( key[ VECTOR_OFFSET_LENGTH ] );
+}
+
+Ref refVectorLayoutLength( Ref r ) {
 	return RefToPtr4( r )[ VECTOR_OFFSET_LENGTH ];
 }
+
+////////////////////////////////////////////////////////////////////////////////
+//	End of file
+////////////////////////////////////////////////////////////////////////////////

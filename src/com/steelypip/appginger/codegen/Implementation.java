@@ -78,6 +78,7 @@ public abstract class Implementation extends GeneralInstructionSet {
 		answer.add( this.syscall_argdat_ircr().init( "syscall_argdat", "ircr" ) );
 		answer.add( this.sysreturn_i().init( "sysreturn", "i" ) );
 		answer.add( this.vectoriterate_i().init( "vectoriterate", "i" ) );
+		answer.add( this.mixediterate_i().init( "mixediterate", "i" ) );
 		return this.cached = answer;
 	}
 	

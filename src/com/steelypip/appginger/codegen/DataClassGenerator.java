@@ -18,7 +18,7 @@ public abstract class DataClassGenerator {
 		this.log = sysconsts;
 	}
 	
-	public List< String > alternativeKeyRoots() {
+	public List< String > allKeyRoots() {
 		if ( this.altKeyRoots.isEmpty() ) {
 			this.altKeyRoots.add( "" ); 
 		}
@@ -85,9 +85,9 @@ public abstract class DataClassGenerator {
 		cpp.format( "        vm->fastPeek() = %s( r ) ? SYS_TRUE : SYS_FALSE;\n", this.isName() );
 		cpp.format( "        return pc;\n" );
 		cpp.format( "    } else {\n" );
-		cpp.format( "        throw Mishap( \"Wrong number of arguments for head\" );\n" );
+		cpp.format( "        throw Mishap( \"Wrong number of arguments for recogniser\" );\n" );
 		cpp.format( "    }\n" );
-		cpp.format( "}\n\n" );
+		cpp.format( "}\n" );
 		
 		hpp.format( "extern Ref * %s( Ref * pc, MachineClass * vm );\n", recogniserName );
 		this.addSysConst( "is" + this.dataKeyRoot, 1, 1, recogniserName );

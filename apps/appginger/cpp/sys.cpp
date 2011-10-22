@@ -30,7 +30,9 @@
 #include "cage.hpp"
 #include "mishap.hpp"
 #include "garbagecollect.hpp"
+
 #include "misclayout.hpp"
+#include "vectorlayout.hpp"
 
 #include "syscgi.hpp"
 #include "syslist.hpp"
@@ -112,7 +114,7 @@ Ref * sysFastGetFastIterator( Ref * pc, class MachineClass * vm ) {
 				case MIXED_KIND: {
 					vm->fastPush( LongToRef(1) );	//	Iteration state.
 					vm->fastPush( r );				//	Iteration context, a dummy.
-					vm->fastPush( vm->sysFastVectorIterator() );
+					vm->fastPush( vm->sysFastMixedIterator() );
 					break;
 				}
 				default: {
@@ -183,7 +185,7 @@ Ref * sysIndex( Ref *pc, class MachineClass * vm ) {
 		if ( IsSimpleKey( *map_K ) ) {
 			switch ( KindOfSimpleKey( *map_K ) ) {
 				case VECTOR_KIND: return pc = sysVectorIndex( pc, vm );
-				case MIXED_KIND: return pc = sysMixedIndex( pc, vm );
+				case MIXED_KIND: return pc = sysMixedKindIndex( pc, vm, *map_K );
 				case PAIR_KIND: return pc = sysListIndex( pc, vm );
 				case STRING_KIND: return pc = sysStringIndex( pc, vm );
 				case MAP_KIND: return pc = sysMapIndex( pc, vm );
@@ -216,7 +218,7 @@ Ref * sysExplode( Ref *pc, class MachineClass * vm ) {
 						break;
 					}
 					case MIXED_KIND: {
-						pc = sysMixedExplode( pc, vm );
+						pc = sysMixedKindExplode( pc, vm, key );
 						break;
 					}
 					case PAIR_KIND: {
@@ -276,11 +278,11 @@ Ref * sysLength( Ref *pc, class MachineClass * vm ) {
 			} else if ( IsSimpleKey( key ) ) {
 				switch ( KindOfSimpleKey( key ) ) {
 					case VECTOR_KIND: {
-						vm->fastPeek() = LongToSmall( sizeAfterKeyOfVectorLayout( obj_K ) );	// Same as pc = sysFastVectorLength( pc, vm );
+						vm->fastPeek() = obj_K[ VECTOR_LAYOUT_OFFSET_LENGTH ];
 						break;
 					}
 					case MIXED_KIND: {
-						vm->fastPeek() = LongToSmall( sizeAfterKeyOfMixedLayout( obj_K ) );	// Same as pc = sysFastVectorLength( pc, vm );
+						vm->fastPeek() = obj_K[ MIXED_LAYOUT_OFFSET_LENGTH ];
 						break;
 					}
 					case PAIR_KIND: {

@@ -23,10 +23,10 @@
 #include "machine.hpp"
 #include "mishap.hpp"
 
-extern Ref * sysMixedExplode( Ref *pc, class MachineClass * vm );
-extern Ref * sysMixedIndex( Ref *pc, class MachineClass * vm );
-extern Ref * sysMixedLength( Ref *pc, class MachineClass * vm );
-extern Ref * sysFastMixedLength( Ref *pc, class MachineClass * vm );
+extern Ref * sysMixedKindExplode( Ref *pc, class MachineClass * vm, Ref key );
+extern Ref * sysMixedKindIndex( Ref *pc, class MachineClass * vm, Ref key );
+extern Ref * sysMixedKindLength( Ref *pc, class MachineClass * vm, Ref key );
+extern Ref * sysFastMixedKindLength( Ref *pc, class MachineClass * vm, Ref key );
 
 
 #endif

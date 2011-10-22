@@ -59,7 +59,7 @@ const char * keyName( Ref key );
 
 #define IntToChar( i )		( (Ref)( ( i ) << TAGGG | CHAR_TAGGG ) )
 
-
+#define AddSmall( a, b )	ToRef( ToLong( a ) + ToLong( b ) )
 
 ////////////////////////////////////////////////////////////////////////
 // ---.yyy.11 tags
@@ -157,6 +157,7 @@ KEYLESS_KIND
 #define IsAttrMap( x ) 			( IsObj( x ) && IsAttrMapKey( *RefToPtr4( x ) ) )
 
 #define IsVectorKind( x )		( IsObj( x ) && KindOfSimpleKey( *RefToPtr4( x ) ) == VECTOR_KIND )
+#define IsMixedKind( x )		( IsObj( x ) && KindOfSimpleKey( *RefToPtr4( x ) ) == MIXED_KIND )
 #define IsRecordKind( x )		( IsObj( x ) && KindOfSimpleKey( *RefToPtr4( x ) ) == RECORD_KIND )
 #define IsStringKind( x )		( IsObj( x ) && KindOfSimpleKey( *RefToPtr4( x ) ) == STRING_KIND )
 

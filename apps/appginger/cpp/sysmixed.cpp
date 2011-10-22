@@ -16,21 +16,23 @@
     along with AppGinger.  If not, see <http://www.gnu.org/licenses/>.
 \******************************************************************************/
 
+#include "sysmixed.hpp"
+
 #include "key.hpp"
 #include "common.hpp"
 #include "misclayout.hpp"
-#include "sysvector.hpp"
 
 #include <string.h>
 
 
-Ref * sysMixedIndex( Ref *pc, class MachineClass * vm ) {
+Ref * sysMixedKindIndex( Ref *pc, class MachineClass * vm, Ref key ) {
 	if ( vm->count != 2 ) throw Ginger::Mishap( "ArgsMismatch" );
 	Ref idx = vm->fastPop();
 	if ( !IsSmall( idx ) ) throw Ginger::Mishap( "TypeError" );
 	Ref vec = vm->fastPeek();
 	if ( !IsMixedKind( vec ) ) throw Ginger::Mishap( "TypeError" );
 	Ref * vec_K = RefToPtr4( vec );
+	if ( *vec_K != key ) throw Ginger::Mishap( "Argument mismatch for mixedExplode" );
 	
 	const long I = SmallToLong( idx );
 	const long N = SmallToLong( vec_K[ MIXED_LAYOUT_OFFSET_LENGTH ] );
@@ -44,14 +46,15 @@ Ref * sysMixedIndex( Ref *pc, class MachineClass * vm ) {
 	return pc;
 }
 
-Ref * sysMixedExplode( Ref *pc, class MachineClass * vm ) {
+Ref * sysMixedKindExplode( Ref *pc, class MachineClass * vm, Ref key ) {
 	if ( vm->count != 1 ) throw Ginger::Mishap( "Wrong number of arguments for mixedExplode" );
 	
-	Ref r = vm->fastPop();
-	
+	Ref r = vm->fastPop();	
 	if ( !IsMixedKind( r ) ) throw Ginger::Mishap( "Argument mismatch for mixedExplode" );
 	
 	Ref *obj_K = RefToPtr4( r );
+	if ( *obj_K != r ) throw Ginger::Mishap( "Argument mismatch for mixedExplode" );
+	
 	unsigned long n = lengthOfMixedLayout( obj_K );
 	vm->checkStackRoom( n );
 	memcpy( vm->vp + 1, obj_K + 1 + numFieldsOfMixedLayout( obj_K ), n * sizeof( Ref ) );
@@ -60,17 +63,18 @@ Ref * sysMixedExplode( Ref *pc, class MachineClass * vm ) {
 	return pc;
 }
 
-Ref * sysMixedLength( Ref *pc, class MachineClass * vm ) {
+Ref * sysMixedKindLength( Ref *pc, class MachineClass * vm, Ref key ) {
 	if ( vm->count != 1 ) throw Ginger::Mishap( "Wrong number of arguments for mixedLength" );
 	Ref r = vm->fastPeek();
 	if ( !IsMixedKind( r ) ) throw Ginger::Mishap( "Argument mismatch for mixedLength" );
 	Ref * obj_K = RefToPtr4( r );
+	if ( *obj_K != key ) throw Ginger::Mishap( "Argument mismatch for mixedExplode" );
 	
 	vm->fastPeek() = LongToSmall( lengthOfMixedLayout( obj_K ) );
 	return pc;
 }
 
-Ref * sysFastMixedLength( Ref *pc, class MachineClass * vm ) {
+Ref * sysFastMixedKindLength( Ref *pc, class MachineClass * vm ) {
 	Ref r = vm->fastPeek();
 	Ref * obj_K = RefToPtr4( r );
 	vm->fastPeek() = LongToSmall( lengthOfMixedLayout( obj_K ) );

@@ -63,4 +63,5 @@
     vmc_syscall_dat,
     vmc_syscall_argdat,
     vmc_sysreturn,
-    vmc_vectoriterate
+    vmc_vectoriterate,
+    vmc_mixediterate

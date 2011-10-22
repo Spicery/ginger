@@ -20,10 +20,9 @@ Ref * sysIsMaplet( Ref * pc, class MachineClass * vm ) {
         vm->fastPeek() = IsMaplet( r ) ? SYS_TRUE : SYS_FALSE;
         return pc;
     } else {
-        throw Mishap( "Wrong number of arguments for head" );
+        throw Mishap( "Wrong number of arguments for recogniser" );
     }
 }
-
 Ref * sysMapletKeyField( Ref * pc, class MachineClass * vm ) {
     if ( vm->count == 1 ) {
         Ref x = vm->fastPeek();

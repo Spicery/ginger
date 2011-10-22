@@ -5,11 +5,12 @@
 #define VECTOR_KIND 4
 #define STRING_KIND 5
 #define ATTR_KIND 6
+#define MIXED_KIND 7
 #define KEYLESS_LAYOUT 0
 #define RECORD_LAYOUT 1
 #define VECTOR_LAYOUT 2
 #define STRING_LAYOUT 3
-#define UNUSED4_LAYOUT 4
+#define MIXED_LAYOUT 4
 #define UNUSED5_LAYOUT 5
 #define UNUSED6_LAYOUT 6
 #define UNUSED7_LAYOUT 7
@@ -68,4 +69,4 @@
 #define ElementID 26
 #define sysElementKey MAKE_KEY( 26, 2, 1, 1 )
 #define AttrMapID 27
-#define sysAttrMapKey MAKE_KEY( 27, 0, 6, 2 )
+#define sysAttrMapKey MAKE_KEY( 27, 1, 6, 4 )

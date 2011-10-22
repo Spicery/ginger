@@ -46,7 +46,11 @@ public class Main {
 		new FullVectorClassGenerator(
 			sysconsts, "Vector"
 		).generate( outputFolder, "vector" );
-		
+			
+		new FullMixedClassGenerator(
+			sysconsts, "AttrMap", new MethodOptions( "CRF" ), "attrMapName"
+		).generate( outputFolder, "attrmap" );
+			
 		//	Generate the unified CPP and unified HPP include files.
 		{
 			

@@ -17,7 +17,6 @@
 \******************************************************************************/
 
 #include "sysstring.hpp"
-#include "stringlayout.hpp"
 #include "sysvector.hpp"
 #include "key.hpp"
 #include "misclayout.hpp"

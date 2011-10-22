@@ -112,6 +112,11 @@ Term mnxToTerm( shared< Ginger::Mnx > mnx ) {
 	if ( name == "fn" && nkids == 2 ) {
 		return term_new_fn( mnx->attribute( "name", "" ), mnxChildToTerm( mnx, 0 ), mnxChildToTerm( mnx, 1 ) );
 	} else if ( mnx->hasAttribute( "value" ) && mnx->hasAttribute( "type" ) ) {
+	
+		/*OK THIS IS WRONG - sysfn can never be reached as it will not have a 'type' attribute.
+		There are a couple of ways out of this but regardless of what I choose I need to
+		define some regression tests first.*/
+
 		const string & type = mnx->attribute( "type" );
 		const string & value = mnx->attribute( "value" );
 		if ( type == "int" ) {

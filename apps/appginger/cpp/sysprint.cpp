@@ -68,6 +68,24 @@ static void refVectorPrint( std::ostream & out, Ref * vec_K ) {
 	out << "}";
 }
 
+static void refMixedPrint( std::ostream & out, Ref * mix_K ) {
+	bool sep = false;
+	out << "mixed[";
+	long len = numFieldsOfMixedLayout( mix_K );
+	for ( long i = 1; i <= len; i++ ) {
+		if ( sep ) { out << ","; } else { sep = true; }
+		refPrint( mix_K[ i ] ); 
+	}	
+	out <<"]{";
+	sep = false;
+	len = RefToLong( mix_K[ MIXED_LAYOUT_OFFSET_LENGTH ] );
+	for ( long i = 1; i <= len; i++ ) {
+		if ( sep ) { out << ","; } else { sep = true; }
+		refPrint( mix_K[ i ] ); 
+	}
+	out << "}";
+}
+
 static void refRecordPrint( std::ostream & out, Ref * rec_K ) {
 	unsigned long len = lengthOfRecordLayout( rec_K );
 	bool sep = false;
@@ -97,11 +115,15 @@ void refPrint( std::ostream & out, const Ref r ) {
 		Ref * obj_K = RefToPtr4( r );
 		const Ref key = * obj_K;
 		if ( IsFunctionKey( key ) ) {
-			out << "<function " << numInputsOfFn( obj_K ) << ":" << numOutputsOfFn( obj_K ) << ">";
+			out << "<function>";
 		} else if ( IsSimpleKey( key ) ) {
 			switch ( KindOfSimpleKey( key ) ) {
 				case VECTOR_KIND: {
 					refVectorPrint( out, obj_K );
+					break;
+				}
+				case MIXED_KIND: {
+					refMixedPrint( out, obj_K );
 					break;
 				}
 				case PAIR_KIND: {

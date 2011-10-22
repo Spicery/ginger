@@ -27,7 +27,7 @@ using namespace std;
 #include "key.hpp"
 #include "garbagecollect.hpp"
 #include "gcstats.hpp"
-#include "vectorlayout.hpp"
+#include "misclayout.hpp"
 #include "listlayout.hpp"
 #include "reflayout.hpp"
 #include "sysmap.hpp"

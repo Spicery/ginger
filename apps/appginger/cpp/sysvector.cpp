@@ -20,7 +20,6 @@
 #include "common.hpp"
 #include "misclayout.hpp"
 #include "sysvector.hpp"
-#include "vectorlayout.hpp"
 
 #include <string.h>
 
@@ -96,7 +95,7 @@ Ref * sysVectorExplode( Ref *pc, class MachineClass * vm ) {
 	
 	Ref r = vm->fastPop();
 	
-	if ( !IsVectorKind( r ) ) throw Ginger::Mishap( "Argument mismatch for vectorExplode" );
+	if ( !IsVector( r ) ) throw Ginger::Mishap( "Argument mismatch for vectorExplode" );
 	
 	Ref *obj_K = RefToPtr4( r );
 	unsigned long n = sizeAfterKeyOfVectorLayout( obj_K );

@@ -38,7 +38,6 @@
 #include "syssymbol.hpp"
 #include "functionlayout.hpp"
 #include "reflayout.hpp"
-#include "vectorlayout.hpp"
 #include "sysmap.hpp"
 
 using namespace std;
@@ -474,7 +473,6 @@ private:
 					break;
 				}
 				case VECTOR_LAYOUT: {
-				//case VECTOR_KIND: {
 					assert( LayoutOfSimpleKey( key ) == VECTOR_LAYOUT );
 					assert( KindOfSimpleKey( key ) == VECTOR_KIND );
 				
@@ -492,6 +490,31 @@ private:
 						}						
 					} else {
 						long n = sizeAfterKeyOfVectorLayout( obj_K );
+						Ref * obj_K1 = obj_K + 1;
+						for ( long i = 0; i < n; i++ ) {
+							this->forward( obj_K1[ i ] );
+						}
+					}
+					if ( this->tracker ) this->tracker->endVector( obj_K );
+					break;
+				}
+				case MIXED_LAYOUT: {
+					assert( LayoutOfSimpleKey( key ) == MIXED_LAYOUT );
+				
+					if ( this->tracker ) this->tracker->startVector( obj_K );
+					if ( key == sysHashMapDataKey ) {
+						//obj_K[ METHOD_OFFSET_CACHE ] = SYS_ABSENT;
+						//this->assoc_chains.push_back( &obj_K[ METHOD_OFFSET_DISPATCH_TABLE ] );
+						long n = sizeAfterKeyOfMixedLayout( obj_K );
+						Ref * obj_K1 = obj_K + 1;
+						for ( long i = 0; i < n; i++ ) {
+							Ref * chain = &obj_K1[ i ];
+							if ( *chain != SYS_ABSENT ) {
+								this->assoc_chains.push_back( chain );
+							}
+						}						
+					} else {
+						long n = sizeAfterKeyOfMixedLayout( obj_K );
 						Ref * obj_K1 = obj_K + 1;
 						for ( long i = 0; i < n; i++ ) {
 							this->forward( obj_K1[ i ] );

@@ -16,6 +16,10 @@
     along with AppGinger.  If not, see <http://www.gnu.org/licenses/>.
 \******************************************************************************/
 
+* * * * * * * * * * * * * * * * *
+ NOW REPLACED BY MISCLAYOUT.HPP 
+* * * * * * * * * * * * * * * * *
+
 #ifndef STRING_LAYOUT_HPP
 #define STRING_LAYOUT_HPP
 

@@ -31,11 +31,12 @@ Ref * sysAttrMapExplode( Ref *pc, class MachineClass * vm ) {
 	if ( !IsAttrMap( amap ) ) throw Ginger::Mishap( "Map needed" ).culprit( "Object", refToString( amap ) );
 	
 	Ref * amap_K = RefToPtr4( amap );
-	long N = SmallToLong( amap_K[ ATTR_MAP_OFFSET_LENGTH ] );
+	const long N = SmallToLong( amap_K[ ATTR_MAP_OFFSET_LENGTH ] );
 	vm->checkStackRoom( N );   // More than needed, strictly speaking.
 
-	for ( long i = 1; i < N; i += 2 ) {
-		vm->fastPush( amap_K[ i + 1 ] );
+	Ref * v = &amap_K[ ATTR_MAP_OFFSET_VECTOR ];
+	for ( long i = 0; i < (N - 1); i += 2 ) {
+		vm->fastPush( v[ i + 1 ] );
 	}
 	return pc;
 }
@@ -48,12 +49,13 @@ Ref * sysAttrMapIndex( Ref *pc, class MachineClass * vm ) {
 	if ( !IsAttrMap( amap ) ) throw Ginger::Mishap( "Map needed" ).culprit( "Object", refToString( amap ) );
 	
 	Ref * amap_K = RefToPtr4( amap );
-	long N = RefToLong( amap_K[ ATTR_MAP_OFFSET_LENGTH ] );
+	const long N = RefToLong( amap_K[ ATTR_MAP_OFFSET_LENGTH ] );
 
-	for ( long i = 1; i < N; i += 2 ) {
-		Ref key_i = amap_K[ i ];
+	Ref * v = &amap_K[ ATTR_MAP_OFFSET_VECTOR ];
+	for ( long i = 0; i < (N - 1); i += 2 ) {
+		Ref key_i = v[ i ];
 		if ( refEquals( key_i, idx ) ) {
-			vm->fastPush( amap_K[ i + 1 ] );
+			vm->fastPush( v[ i + 1 ] );
 			return pc;
 		}
 	}

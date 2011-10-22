@@ -16,17 +16,18 @@
     along with AppGinger.  If not, see <http://www.gnu.org/licenses/>.
 \******************************************************************************/
 
-* * * * * * * * * * * * * * * * *
- NOW REPLACED BY MISCLAYOUT.HPP 
-* * * * * * * * * * * * * * * * *
-
-#ifndef VECTOR_LAYOUT_HPP
-#define VECTOR_LAYOUT_HPP
+#ifndef SYS_MIXED_HPP
+#define SYS_MIXED_HPP
 
 #include "common.hpp"
+#include "machine.hpp"
+#include "mishap.hpp"
 
-#define VECTOR_OFFSET_LENGTH -1
+extern Ref * sysMixedExplode( Ref *pc, class MachineClass * vm );
+extern Ref * sysMixedIndex( Ref *pc, class MachineClass * vm );
+extern Ref * sysMixedLength( Ref *pc, class MachineClass * vm );
+extern Ref * sysFastMixedLength( Ref *pc, class MachineClass * vm );
 
-Ref fastVectorLength( Ref r );
 
 #endif
+

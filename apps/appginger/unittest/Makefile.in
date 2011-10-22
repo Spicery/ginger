@@ -4,7 +4,7 @@ CC=g++
 CXXFLAGS=-g -I../hpp -I../../libgng/hpp -L/opt/local/lib -L../cpp -I/opt/local/include -I../../automatic/machine -I../../automatic/sys -I../../automatic/simple -Wall -Wnon-virtual-dtor
 CFLAGS=-Wmissing-prototypes 
 LDFLAGS=-ldl -lboost_iostreams
-OBJS=example.o testrunner.o gctest.o gcstats.o archtest.o simplekeytest.o
+OBJS=example.o testrunner.o gctest.o gcstats.o archtest.o simplekeytest.o constants.o
 
 all: testrunner
 

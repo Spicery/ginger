@@ -64,7 +64,7 @@ static unsigned long trivHash( Ref r ) {
 	}
 }
 
-static bool refVectorEquals( Ref * vx, Ref * vy ) {
+static bool refVectorAndMixedEquals( Ref * vx, Ref * vy ) {
 	unsigned long lx = sizeAfterKeyOfVectorLayout( vx );
 	unsigned long ly = sizeAfterKeyOfVectorLayout( vy );
 	if ( lx == ly ) {
@@ -128,7 +128,8 @@ bool refEquals( Ref x, Ref y ) {
 			} else if ( IsSimpleKey( xkey ) ) {
 				if ( xkey == ykey ) {
 					switch ( KindOfSimpleKey( xkey ) ) {
-						case VECTOR_KIND: 	return refVectorEquals( x_K, y_K );
+						case MIXED_KIND:	//	Shares implementation with Vector.
+						case VECTOR_KIND: 	return refVectorAndMixedEquals( x_K, y_K );
 						case PAIR_KIND: 	return refPairEquals( x, y );
 						case MAP_KIND:		return refMapEquals( x_K, y_K );
 						case RECORD_KIND: 	return refRecordEquals( x_K, y_K );
@@ -166,6 +167,16 @@ unsigned long gngEqHash( Ref r ) {
 				case VECTOR_KIND: {
 					HashEngine e( ToULong( key ) );
 					unsigned long n = sizeAfterKeyOfVectorLayout( obj_K );
+					e.add( n );
+					if ( n > 0 ) {
+						e.add( trivHash( obj_K[1] ) );
+						e.add( trivHash( obj_K[n] ) );
+					}
+					return e.hash();
+				}
+				case MIXED_KIND: {
+					HashEngine e( ToULong( key ) );
+					unsigned long n = sizeAfterKeyOfMixedLayout( obj_K );
 					e.add( n );
 					if ( n > 0 ) {
 						e.add( trivHash( obj_K[1] ) );

@@ -43,6 +43,7 @@ const char * keyName( Ref key );
 #define LongToSmall( i ) 	( (Ref)( ToULong( i ) << TAG | INT_TAG ) )
 #define RefToLong( r )   	( (long)( ToLong( r ) >> TAG ) )
 #define SmallToLong( r )	( (long)( ToLong( r ) >> TAG ) )
+#define SmallToULong( r )	( (unsigned long)( ToLong( r ) >> TAG ) )
 
 #define ULongToSmall( x ) 	ToRef( ( x ) << TAG | INT_TAG )
 
@@ -113,6 +114,7 @@ KEYLESS_KIND
 #define LAYOUT_WIDTH			3
 #define LAYOUT_OFFSET			TAGG
 #define LAYOUT_MASK				( 0x7 << LAYOUT_OFFSET )
+
 #define KIND_WIDTH				4
 #define KIND_OFFSET				( LAYOUT_OFFSET + LAYOUT_WIDTH )
 #define KIND_MASK				( 0xF << ( TAGG + LAYOUT_WIDTH ) )
@@ -123,6 +125,7 @@ KEYLESS_KIND
 #define LEN_WIDTH				8
 #define LENGTH_OFFSET 			( KIND_WIDTH + KIND_OFFSET )
 #define LENGTH_MASK				( 0xFF << LENGTH_OFFSET )
+#define LengthOfSimpleKey( k ) 	( ( ToULong( k ) & LENGTH_MASK ) >> LENGTH_OFFSET )
 
 #define SIM_KEY_ID_OFFSET		( LENGTH_OFFSET + LEN_WIDTH )
 #define SimpleKeyID( k ) 		( ToULong(k) >> SIM_KEY_ID_OFFSET )

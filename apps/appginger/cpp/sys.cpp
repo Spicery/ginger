@@ -35,6 +35,7 @@
 #include "syscgi.hpp"
 #include "syslist.hpp"
 #include "sysvector.hpp"
+#include "sysmixed.hpp"
 #include "sysstring.hpp"
 #include "sysmap.hpp"
 #include "syskey.hpp"
@@ -108,6 +109,12 @@ Ref * sysFastGetFastIterator( Ref * pc, class MachineClass * vm ) {
 					vm->fastPush( vm->sysFastVectorIterator() );
 					break;
 				}
+				case MIXED_KIND: {
+					vm->fastPush( LongToRef(1) );	//	Iteration state.
+					vm->fastPush( r );				//	Iteration context, a dummy.
+					vm->fastPush( vm->sysFastVectorIterator() );
+					break;
+				}
 				default: {
 					throw Ginger::Mishap( "ToBeDone" );
 				}
@@ -176,6 +183,7 @@ Ref * sysIndex( Ref *pc, class MachineClass * vm ) {
 		if ( IsSimpleKey( *map_K ) ) {
 			switch ( KindOfSimpleKey( *map_K ) ) {
 				case VECTOR_KIND: return pc = sysVectorIndex( pc, vm );
+				case MIXED_KIND: return pc = sysMixedIndex( pc, vm );
 				case PAIR_KIND: return pc = sysListIndex( pc, vm );
 				case STRING_KIND: return pc = sysStringIndex( pc, vm );
 				case MAP_KIND: return pc = sysMapIndex( pc, vm );
@@ -207,11 +215,16 @@ Ref * sysExplode( Ref *pc, class MachineClass * vm ) {
 						pc = sysVectorExplode( pc, vm );
 						break;
 					}
+					case MIXED_KIND: {
+						pc = sysMixedExplode( pc, vm );
+						break;
+					}
 					case PAIR_KIND: {
 						pc = sysListExplode( pc, vm );
 						break;
 					}
 					case RECORD_KIND: {
+						//	ARGUABLY THIS IS INCORRECT.
 						vm->fastDrop( 1 );
 						unsigned long n = sizeAfterKeyOfRecordLayout( obj_K );
 						vm->checkStackRoom( n );
@@ -264,6 +277,10 @@ Ref * sysLength( Ref *pc, class MachineClass * vm ) {
 				switch ( KindOfSimpleKey( key ) ) {
 					case VECTOR_KIND: {
 						vm->fastPeek() = LongToSmall( sizeAfterKeyOfVectorLayout( obj_K ) );	// Same as pc = sysFastVectorLength( pc, vm );
+						break;
+					}
+					case MIXED_KIND: {
+						vm->fastPeek() = LongToSmall( sizeAfterKeyOfMixedLayout( obj_K ) );	// Same as pc = sysFastVectorLength( pc, vm );
 						break;
 					}
 					case PAIR_KIND: {

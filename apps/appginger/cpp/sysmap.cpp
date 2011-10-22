@@ -32,7 +32,7 @@ using namespace std;
 #include "machine.hpp"
 #include "mishap.hpp"
 #include "maplayout.hpp"
-#include "vectorlayout.hpp"
+#include "misclayout.hpp"
 #include "maplayout.hpp"
 
 typedef unsigned int ub4;

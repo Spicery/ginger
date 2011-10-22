@@ -16,17 +16,22 @@
     along with AppGinger.  If not, see <http://www.gnu.org/licenses/>.
 \******************************************************************************/
 
-* * * * * * * * * * * * * * * * *
- NOW REPLACED BY MISCLAYOUT.HPP 
-* * * * * * * * * * * * * * * * *
+#ifndef CONSTANTS_HPP
+#define CONSTANTS_HPP
 
-#ifndef VECTOR_LAYOUT_HPP
-#define VECTOR_LAYOUT_HPP
+#include <cppunit/extensions/HelperMacros.h>
+#include <cppunit/TestFixture.h>
 
-#include "common.hpp"
+class ConstantsTest : public CppUnit::TestFixture {
+	
+	CPPUNIT_TEST_SUITE( ConstantsTest );
+	CPPUNIT_TEST( testOK );
+	CPPUNIT_TEST_SUITE_END();
+	
+protected:
+	void testOK();
 
-#define VECTOR_OFFSET_LENGTH -1
+};
 
-Ref fastVectorLength( Ref r );
 
 #endif

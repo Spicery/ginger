@@ -16,6 +16,10 @@
     along with AppGinger.  If not, see <http://www.gnu.org/licenses/>.
 \******************************************************************************/
 
+* * * * * * * * * * * * * * * * *
+ NOW REPLACED BY MISCLAYOUT.CPP 
+* * * * * * * * * * * * * * * * *
+
 #include "stringlayout.hpp"
 
 #include "key.hpp"

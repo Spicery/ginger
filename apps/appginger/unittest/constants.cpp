@@ -16,17 +16,14 @@
     along with AppGinger.  If not, see <http://www.gnu.org/licenses/>.
 \******************************************************************************/
 
-* * * * * * * * * * * * * * * * *
- NOW REPLACED BY MISCLAYOUT.HPP 
-* * * * * * * * * * * * * * * * *
+#include <iostream>
 
-#ifndef VECTOR_LAYOUT_HPP
-#define VECTOR_LAYOUT_HPP
+#include "constants.hpp"
+#include <cppunit/TestAssert.h>
 
-#include "common.hpp"
+void ConstantsTest::testOK() {
+	//std::cout << "testOK" << std::endl;
+	//CPPUNIT_FAIL( "Testing a failure" );
+}
 
-#define VECTOR_OFFSET_LENGTH -1
-
-Ref fastVectorLength( Ref r );
-
-#endif
+CPPUNIT_TEST_SUITE_REGISTRATION( ConstantsTest );

@@ -41,15 +41,17 @@
 //	Generic layout parameters
 ////////////////////////////////////////////////////////////////////////////////
 
-
+//	This is a hard limit on the numbers of fields that may be set to the 
+//	left of the key.
 #define MAX_OFFSET_FROM_START_TO_KEY	4
+
 
 ////////////////////////////////////////////////////////////////////////////////
 //	Full records
 ////////////////////////////////////////////////////////////////////////////////
 
-unsigned long sizeAfterKeyOfRecordLayout( Ref * key );
-unsigned long lengthOfRecordLayout( Ref * key );
+extern unsigned long sizeAfterKeyOfRecordLayout( Ref * key );
+extern unsigned long lengthOfRecordLayout( Ref * key );
 
 
 
@@ -57,24 +59,52 @@ unsigned long lengthOfRecordLayout( Ref * key );
 //	Full vectors
 ////////////////////////////////////////////////////////////////////////////////
 
-unsigned long sizeAfterKeyOfVectorLayout( Ref * key );
+//	Deprecate this in favour of VECTOR_LAYOUT_OFFSET_LENGTH.
+#define VECTOR_OFFSET_LENGTH -1
+
+//	This conforms to the current naming convention.
+#define VECTOR_LAYOUT_OFFSET_LENGTH -1
+
+extern unsigned long sizeAfterKeyOfVectorLayout( Ref * key );
+extern unsigned long lengthOfVectorLayout( Ref * key );
+extern Ref fastVectorLength( Ref r );
+
+
+////////////////////////////////////////////////////////////////////////////////
+//	Mixed vectors
+////////////////////////////////////////////////////////////////////////////////
+
+#define MIXED_LAYOUT_OFFSET_LENGTH -1
+
+extern unsigned long sizeAfterKeyOfMixedLayout( Ref * key );
+extern unsigned long lengthOfMixedLayout( Ref * key );
+extern unsigned long numFieldsOfMixedLayout( Ref * key );
 
 
 ////////////////////////////////////////////////////////////////////////////////
 //	Strings
 ////////////////////////////////////////////////////////////////////////////////
 
+//	Deprecate this in favour of STRING_LAYOUT_OFFSET_LENGTH.
+#define STRING_OFFSET_LENGTH -1
 
-unsigned long sizeAfterKeyOfStringLayout( Ref * key );
-unsigned long lengthOfStringLayout( Ref * key );
+//	This conforms to the current naming convention.
+#define STRING_LAYOUT_OFFSET_LENGTH -1
+
+extern unsigned long sizeAfterKeyOfStringLayout( Ref * key );
+extern unsigned long lengthOfStringLayout( Ref * key );
+extern unsigned long fastStringLength( Ref r );
 
 
 ////////////////////////////////////////////////////////////////////////////////
 //	Objects
 ////////////////////////////////////////////////////////////////////////////////
 
-void findObjectLimits( Ref * object, Ref * & start, Ref * & end );
-Ref * findObjectKey( Ref * obj_A );
-unsigned long lengthAfterObjectKey( Ref * obj_K );
+extern void findObjectLimits( Ref * object, Ref * & start, Ref * & end );
+extern Ref * findObjectKey( Ref * obj_A );
+extern unsigned long lengthAfterObjectKey( Ref * obj_K );
+
+
+////////////////////////////////////////////////////////////////////////////////
 
 #endif

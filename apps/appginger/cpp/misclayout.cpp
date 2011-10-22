@@ -25,6 +25,11 @@
 #include "key.hpp"
 #include "mishap.hpp"
 
+
+////////////////////////////////////////////////////////////////////////////////
+//	Full records
+////////////////////////////////////////////////////////////////////////////////
+
 unsigned long sizeAfterKeyOfRecordLayout( Ref * key ) {
 	return ( ToULong( *key ) & LENGTH_MASK ) >> LENGTH_OFFSET;
 }
@@ -33,9 +38,46 @@ unsigned long lengthOfRecordLayout( Ref * key ) {
 	return sizeAfterKeyOfRecordLayout( key );
 }
 
+////////////////////////////////////////////////////////////////////////////////
+//	Full vectors
+////////////////////////////////////////////////////////////////////////////////
+
 unsigned long sizeAfterKeyOfVectorLayout( Ref * key ) {
-	return ToULong( *( key - 1 ) ) >> TAG;
+	return SmallToULong( key[ VECTOR_OFFSET_LENGTH ] );
+	//return ToULong( *( key - 1 ) ) >> TAG;
 }
+
+unsigned long lengthOfVectorLayout( Ref * key ) {
+	return SmallToULong( key[ VECTOR_OFFSET_LENGTH ] );
+}
+
+Ref fastVectorLength( Ref r ) {
+	return RefToPtr4( r )[ VECTOR_OFFSET_LENGTH ];
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+//	Mixed vectors
+////////////////////////////////////////////////////////////////////////////////
+
+unsigned long sizeAfterKeyOfMixedLayout( Ref * key ) {
+	return 
+		SmallToULong( key[ VECTOR_LAYOUT_OFFSET_LENGTH ] ) + 
+		LengthOfSimpleKey( *key );
+}
+
+unsigned long numFieldsOfMixedLayout( Ref * key ) {
+	return LengthOfSimpleKey( *key );
+}
+
+unsigned long lengthOfMixedLayout( Ref * key ) {
+	return SmallToULong( key[ VECTOR_LAYOUT_OFFSET_LENGTH ] );
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+//	Strings
+////////////////////////////////////////////////////////////////////////////////
 
 //	Add 1 for null.
 unsigned long sizeAfterKeyOfStringLayout( Ref * key ) {
@@ -45,6 +87,14 @@ unsigned long sizeAfterKeyOfStringLayout( Ref * key ) {
 unsigned long lengthOfStringLayout( Ref * key ) {
 	return sizeAfterKeyOfVectorLayout( key );
 }
+
+unsigned long fastStringLength( Ref str ) {
+	return ToULong( RefToPtr4( str )[ STRING_LAYOUT_OFFSET_LENGTH ] ) >> TAG;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+//	Objects
+////////////////////////////////////////////////////////////////////////////////
 
 //
 //	This computes obj_A and obj_Z1 from obj_K. 
@@ -72,6 +122,12 @@ void findObjectLimits( Ref * obj_K, Ref * & obj_A, Ref * & obj_Z1 ) {
 				assert( KindOfSimpleKey( key ) == VECTOR_KIND );
 				obj_A = obj_K - 1;
 				obj_Z1 = obj_K1 + sizeAfterKeyOfVectorLayout( obj_K );
+				return;
+			}
+			case MIXED_LAYOUT: {
+				assert( LayoutOfSimpleKey( key ) == MIXED_LAYOUT );
+				obj_A = obj_K - 1;
+				obj_Z1 = obj_K1 + sizeAfterKeyOfMixedLayout( obj_K );
 				return;
 			}
 			case STRING_LAYOUT: {
@@ -172,6 +228,11 @@ unsigned long lengthAfterObjectKey( Ref * obj_K ) {
 				return sizeAfterKeyOfVectorLayout( obj_K );
 				break;
 			}
+			case MIXED_LAYOUT: {
+				assert( LayoutOfSimpleKey( key ) == MIXED_LAYOUT );
+				return sizeAfterKeyOfMixedLayout( obj_K );
+				break;
+			}
 			case STRING_LAYOUT: {
 			//case STRING_KIND: {
 				assert( LayoutOfSimpleKey( key ) == STRING_LAYOUT );
@@ -191,3 +252,6 @@ unsigned long lengthAfterObjectKey( Ref * obj_K ) {
 	}
 }
 
+////////////////////////////////////////////////////////////////////////////////
+//	End of file
+////////////////////////////////////////////////////////////////////////////////

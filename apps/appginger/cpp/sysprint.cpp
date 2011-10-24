@@ -122,6 +122,7 @@ void refPrint( std::ostream & out, const Ref r ) {
 					refVectorPrint( out, obj_K );
 					break;
 				}
+				case ATTR_KIND:
 				case MIXED_KIND: {
 					refMixedPrint( out, obj_K );
 					break;

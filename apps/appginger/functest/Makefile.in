@@ -10,5 +10,6 @@ check: smoke.pass literals.pass full_lexical_binding.pass records.pass
 	
 clean:
 	rm -f *.pass
+	rm -f *.fail
 	
 .SUFFIXES: .pass .tests

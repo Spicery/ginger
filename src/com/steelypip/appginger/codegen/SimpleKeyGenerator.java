@@ -112,7 +112,7 @@ public class SimpleKeyGenerator {
 		//	More arbitrary keys.
 		add( "HashMapData", 	24, 0,	Kind.VECTOR_KIND	);
 		add( "Undef", 			25, 0,	Kind.KEYLESS_KIND	);
-		add( "Element",      	26, 2, 	Kind.RECORD_KIND	);
+		add( "Element",      	26, 1, 	Kind.MIXED_KIND	);
 		add( "AttrMap",			27,	1,	Kind.ATTR_KIND		);
 	}
 	

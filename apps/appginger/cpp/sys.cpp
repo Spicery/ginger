@@ -49,6 +49,7 @@
 #include "sysclass.hpp"
 #include "sysunix.hpp"
 #include "sysattrmap.hpp"
+#include "syselement.hpp"
 
 using namespace Ginger;
 
@@ -373,6 +374,7 @@ const SysMap::value_type rawData[] = {
 	SysMap::value_type( "functionOutArity", SysInfo( fnc_syscall, Arity( 1 ), Arity( 1 ), sysFunctionOutArity, "Output arity of a function" ) ),
 #include "sysattrmap.inc"
 #include "syscgi.inc"
+#include "syselement.inc"
 #include "sysprint.inc"
 #include "sysstring.inc"
 #include "sysunix.inc"

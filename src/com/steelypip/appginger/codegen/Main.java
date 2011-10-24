@@ -50,12 +50,11 @@ public class Main {
 		new FullMixedClassGenerator(
 			sysconsts, "AttrMap", new MethodOptions( "CRF" ), "attrMapName"
 		).generate( outputFolder, "attrmap" );
-			
-		//	Generate the unified CPP and unified HPP include files.
-		{
-			
-		}
 		
+		new FullMixedClassGenerator(
+			sysconsts, "Element", new MethodOptions( "CRIF" ), "elementAttrMap"
+		).generate(  outputFolder, "element" );
+					
 		//	Create the insert for the sysMap table.
 		{
 			final PrintWriter inc = new PrintWriter( new FileWriter( new File( outputFolder, "sysmap.inc.auto" ) ) );

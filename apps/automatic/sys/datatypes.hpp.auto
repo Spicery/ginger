@@ -3,3 +3,4 @@
 #include "maplet.hpp.auto"
 #include "vector.hpp.auto"
 #include "attrmap.hpp.auto"
+#include "element.hpp.auto"

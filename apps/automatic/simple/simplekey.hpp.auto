@@ -67,6 +67,6 @@
 #define UndefID 25
 #define sysUndefKey MAKE_KEY( 25, 0, 0, 0 )
 #define ElementID 26
-#define sysElementKey MAKE_KEY( 26, 2, 1, 1 )
+#define sysElementKey MAKE_KEY( 26, 1, 7, 4 )
 #define AttrMapID 27
 #define sysAttrMapKey MAKE_KEY( 27, 1, 6, 4 )

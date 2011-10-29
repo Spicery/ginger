@@ -442,6 +442,17 @@ Node ReadStateClass::prefix_processing() {
 			str.putAttr( "value", item->nameString() );	//	Prolly wrong.
 			return str.node();
 		}
+		//	Syntax:	${ ENVIRONMENT_VARIABLE }
+		/*case tokty_envvar: {
+			NodeFactory envvar( "sysapp" );
+			envvar.putAttr( "name", "sysGetEnv" );
+			envvar.start( "constant" );
+			envvar.putAttr( "type", "string" );
+			envvar.putAttr( "value", ifact->read()->nameString() );
+			envvar.end();		
+			this->check_token( tokty_cbrace );
+			return envvar.node();
+		}*/
 		case tokty_charseq: {
 			int n = item->nameString().size();
 			if ( n == 0 ) {
@@ -585,8 +596,8 @@ Node ReadStateClass::prefix_processing() {
 			
 			return imp.node();
 		}
-		default:
-			;
+		default: {
+		}
 	}
 	ifact->unread();
     return shared< NodeClass >();

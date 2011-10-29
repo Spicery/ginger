@@ -45,7 +45,7 @@ unsigned long sizeNeededForStrLen( size_t strlen_n ) {
 Ref * sysGetEnv( Ref * pc, class MachineClass * vm ) {
 	if ( vm->count != 1 ) throw Ginger::Mishap( "ArgsMismatch" );
 	
-	Ref r = vm->fastPop();
+	Ref r = vm->fastPeek();
 	if ( !IsStringKind( r ) ) throw Ginger::Mishap( "Non-string argument needed for getEnv" );	
 	Ref * str_K = RefToPtr4( r );
 	

@@ -45,6 +45,7 @@ typedef enum TokType {
      tokty_endif,
      tokty_endpackage,
      tokty_endunless,
+     //	tokty_envvar,	//	Add in token type for '${'
      tokty_equal,
      tokty_explode,
      tokty_fn,

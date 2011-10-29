@@ -53,33 +53,6 @@ distclean: clean
 check: all
 	$(MAKE) -C apps $@
 
-
-# This will become dist & distdir??
-snapshot:
-	rm -rf build/appginger
-	mkdir build/appginger
-	cp Makefile build/appginger/
-	cp *.txt build/appginger/
-	mkdir build/appginger/bin
-	mkdir build/appginger/apps
-	cp -r apps/Makefile build/appginger/apps/
-	cp -r apps/appginger build/appginger/apps/
-	cp -r apps/headers build/appginger/apps/
-	cp -r apps/automatic build/appginger/apps/
-	cp -r apps/common2gnx build/appginger/apps/
-	cp -r apps/gson2gnx build/appginger/apps/
-	cp -r apps/lnx2mnx build/appginger/apps/
-	cp -r apps/src2lnx build/appginger/apps/
-	cp -r apps/lnx2csv build/appginger/apps/
-	cp -r apps/tidymnx build/appginger/apps/
-	mkdir build/appginger/classes
-	mkdir build/appginger/docs
-	cp -r docs/syntax/*.txt build/appginger/docs/
-	cp -r examples build/appginger/
-	cp -r instructions build/appginger/
-	cp -r src build/appginger/
-	( cd ./build ; tar cf - appginger | gzip > appginger.tgz )
-
 # EPREFIX should be bound to PREFIX by default. This appears to be a lie.
 # As a consequence we override EPREFIX entirely. Probably incorrect but not
 # that interesting.
@@ -115,3 +88,17 @@ install: all
 	mkdir -p $(INSTALL_LIB)/lisp2gnx
 	/usr/bin/install -m a=r apps/lisp2gnx/lsp/lisp2gnx.lsp $(INSTALL_LIB)/lisp2gnx
 	/usr/bin/install $(EXECUTABLES) $(INSTALL_BIN)
+
+# Create a tarball for binary archive.
+tarball: all
+	rm -f build/usr-local-appginger.tgz
+	rm -rf build/usr
+	mkdir -p build/usr/local/bin
+	mkdir -p build/usr/local/share/appginger
+	cp $(EXECUTABLES) build/usr/local/bin
+	cp LICENSE.txt build/usr/local/share/appginger
+	mkdir -p build/usr/local/share/appginger/lisp2gnx/
+	cp apps/lisp2gnx/lsp/lisp2gnx.lsp build/usr/local/share/appginger/lisp2gnx/
+	cp -r projects/standard_library build/usr/local/share/appginger/
+	( cd ./build; find . -type d -name .svn | xargs /bin/rm -rf )
+	( cd ./build ; tar cf - usr | gzip > usr-local-appginger.tgz )

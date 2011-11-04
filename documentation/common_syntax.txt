@@ -1,0 +1,137 @@
+Package =
+	'package' PackageName ';' {Import} Statements 'endpackage' .
+	
+Import =
+	'import' {ImportQualifier} [Tags] from PackageName [ 'alias' AliasName ] [ 'into' Tags ] ';' .
+
+ImportQualifier =
+	'pervasive' |
+	'nonpervasive' |
+	'qualified' |
+	'unqualified' .
+	
+Tags = 
+	'(' ')' |
+	'(' Tag {',' Tag} ')' .
+
+Statements =
+    Statement { ';' Statements } .
+
+Statement =
+    Query |
+    Expr .
+
+Query =
+    Pattern ( 
+        ':=' Expr |
+        'in' Expr |
+        FromByTo
+    ) .
+    
+Pattern =
+	Literal |
+	[ [ 'var' | 'val' ] Tags ] Identifier |
+	Pattern ( (','|';') Pattern )+  |
+	'(' Pattern? ')' |
+	'[' Pattern? ']' |
+	'{' Pattern? '}' |
+	'{%' Pattern? '%}' |
+	ApplyPattern .
+
+ApplyPattern =
+	Expr '(' Pattern? ')' |
+	Pattern ( '.'|'@') ( Identifier | '(' Expr ')' ) Pattern .
+
+FromByTo =
+    'from' Expr ['by' Expr ] ['to' Expr] |
+    'by' Expr ['to' Expr] |
+    'to' Expr .
+
+Expr = 
+    PrimaryExpr { InfixOperator Expr } .
+	
+
+PrimaryExpr = 
+    AtomicExpr |
+	AssignExpr |
+	ApplyExpr |
+	LambdaExpr |
+    ListExpr |
+    VectorExpr |
+    ConditionalExpr |
+    LoopExpr  .
+
+AtomicExpr =
+    Literal |
+    Identifier |
+	'(' Statements? ')' .
+
+Literal =
+    'absent' |
+    ( 'true' | 'false' ) |
+    Number |
+    CharacterConstant |
+    String .
+	
+AssignExpr = 
+	Expr '->' TargetExpr .
+	
+TargetExpr = 
+	Identifier |
+	ApplyExpr |
+	ConditionalTarget .
+	
+ConditionalTarget =
+	'if' CoreConditionalTarget 'endif' |
+    'unless' CoreConditionalTarget 'endunless' .
+
+CoreConditionalTarget =
+    Expr then TargetExpr MoreConditionalTarget* 'else' TargetExpr .
+
+MoreConditionalTarget =
+    ( 'elseif' | 'elseunless' ) Expr then TargetExpr .
+	
+ApplyExpr =
+	AtomicExpr '(' Statements? ')' |
+	PrimaryExpr ( '.' | '@' ) AtomicExpr PrimaryExpr .
+	
+
+LambdaExpr =
+	'fn' AppExpr '=>' Statements 'endfn' .
+
+ListExpr =
+    '[' Expr* ( '|' Expr )? ']' .
+
+VectorExpr = 
+    '{' Expr '}' .
+
+ConditionalExpr =
+    'if' CoreConditional 'endif' |
+    'unless' CoreConditional 'endunless' .
+
+CoreConditional =
+    Expr then Statements MoreConditional* [ 'else' Statements ] .
+
+MoreConditional =
+    ( 'elseif' | 'elseunless' ) Expr then Statements .
+
+LoopExpr =
+    'for' Query 'do' Statements 'endfor' .
+
+
+Number =
+    digit+ ( '.' digit+ ) .
+
+String = 
+    '"' QuotedCharacter* '"' .
+
+CharacterConstant =
+    "'" QuotedCharacter "'" .
+	
+QuotedCharacter =
+	printing_character |
+	'\\' ( 'n' | 'r' | 's' | 't' | 'v' ) |
+	'\\&' HTMLEntity ';' |  
+	'\\(' Expr ')' .
+
+InfixOperator = ',' | '+' | '-' | '*' | '/' .

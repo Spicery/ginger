@@ -1,9 +1,6 @@
 all:
 	$(MAKE) -C apps $@
 	$(MAKE) -C projects $@
-	if [ ! -d bin ]; then mkdir -p bin; fi
-	cp apps/appginger/cpp/appginger bin/
-	cp apps/common2gnx/cpp/common2gnx bin/
 
 clean:
 	rm -rf build/appginger
@@ -89,16 +86,30 @@ install: all
 	/usr/bin/install -m a=r apps/lisp2gnx/lsp/lisp2gnx.lsp $(INSTALL_LIB)/lisp2gnx
 	/usr/bin/install $(EXECUTABLES) $(INSTALL_BIN)
 
+
 # Create a tarball for binary archive.
+TBBASE=appginger_files
+TBPREFIX=usr/local
+TBMAIN=${TBBASE}/${TBPREFIX}
+TBOUTPUT=appginger.tgz
+
 tarball: all
-	rm -f build/usr-local-appginger.tgz
-	rm -rf build/usr
-	mkdir -p build/usr/local/bin
-	mkdir -p build/usr/local/share/appginger
-	cp $(EXECUTABLES) build/usr/local/bin
-	cp LICENSE.txt build/usr/local/share/appginger
-	mkdir -p build/usr/local/share/appginger/lisp2gnx/
-	cp apps/lisp2gnx/lsp/lisp2gnx.lsp build/usr/local/share/appginger/lisp2gnx/
-	cp -r projects/standard_library build/usr/local/share/appginger/
-	( cd ./build; find . -type d -name .svn | xargs /bin/rm -rf )
-	( cd ./build ; tar cf - usr | gzip > usr-local-appginger.tgz )
+	$(MAKE) -C documentation tarball
+	rm -f build/$(TBOUTPUT)
+	rm -rf build/$(TBBASE)
+	mkdir -p build/$(TBPACKAGE)
+	mkdir -p build/$(TBMAIN)/bin
+	mkdir -p build/$(TBMAIN)/share/appginger
+	gzip -d documentation/build/documentation.tgz | ( cd build/$(TBBASE)/share/appginger; tar xf - )
+	( cd build_template; tar cf - . ) | ( cd build/$(TBPACKAGE); tar xf - )
+	cp $(EXECUTABLES) build/$(TBMAIN)/bin/
+	cp LICENSE.txt build/$(TBMAIN)/share/appginger
+	cp AUTHORS.txt build/$(TBMAIN)/share/appginger
+	mkdir -p build/$(TBMAIN)/share/appginger/lisp2gnx/
+	cp apps/lisp2gnx/lsp/lisp2gnx.lsp build/$(TBMAIN)/share/appginger/lisp2gnx/
+	cp -r projects/standard_library build/$(TBMAIN)/share/appginger/
+	find build -type d -name .svn | xargs /bin/rm -rf
+	find build -name '.DS_STORE' | xargs rm -f
+	find build -name '._*'
+	( cd build/$(TBBASE); tar cf - . ) | gzip > build/$(TBPACKAGE)/$(TBOUTPUT)
+	( cd build; tar cf - $(TBPACKAGE) ) | gzip > build/$(TBPACKAGE).tgz

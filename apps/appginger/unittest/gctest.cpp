@@ -28,6 +28,7 @@ using namespace std;
 #include "garbagecollect.hpp"
 #include "gcstats.hpp"
 #include "misclayout.hpp"
+#include "vectorlayout.hpp"
 #include "listlayout.hpp"
 #include "reflayout.hpp"
 #include "sysmap.hpp"

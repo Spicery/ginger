@@ -5,6 +5,7 @@
 
 #include "common.hpp"
 #include "key.hpp"
+#include "vectorlayout.hpp"
 
 static int inferredLayout( Ref simple_key ) {
 	int kind = KindOfSimpleKey( simple_key );
@@ -18,7 +19,8 @@ static int inferredLayout( Ref simple_key ) {
 		case STRING_KIND:
 			return STRING_LAYOUT;
 		case ATTR_KIND:
-			return VECTOR_LAYOUT;
+		case MIXED_KIND:
+			return MIXED_LAYOUT;
 		default:
 			return KEYLESS_LAYOUT;
 	}

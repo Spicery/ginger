@@ -442,8 +442,8 @@ Node ReadStateClass::prefix_processing() {
 			str.putAttr( "value", item->nameString() );	//	Prolly wrong.
 			return str.node();
 		}
-		//	Syntax:	${ ENVIRONMENT_VARIABLE }
-		/*case tokty_envvar: {
+		// changed for ${VAR} case study
+		case tokty_envvar: {
 			NodeFactory envvar( "sysapp" );
 			envvar.putAttr( "name", "sysGetEnv" );
 			envvar.start( "constant" );
@@ -452,7 +452,7 @@ Node ReadStateClass::prefix_processing() {
 			envvar.end();		
 			this->check_token( tokty_cbrace );
 			return envvar.node();
-		}*/
+		}
 		case tokty_charseq: {
 			int n = item->nameString().size();
 			if ( n == 0 ) {
@@ -504,8 +504,7 @@ Node ReadStateClass::prefix_processing() {
 			return list.node();
 		}
 		case tokty_obrace: {
-			NodeFactory list( "sysapp" );
-			list.putAttr( "name", "newVector" );
+			NodeFactory list( "vector" );
 			list.addNode( this->read_stmnts_check( tokty_cbrace ) );
 			return list.node();
 		}

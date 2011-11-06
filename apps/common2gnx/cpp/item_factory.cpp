@@ -234,7 +234,7 @@ Item ItemFactoryClass::read() {
         do {
             this->text.push_back( ch );
             ch = getc( this->file );
-        } while ( ispunct( ch ) );
+        } while ( ch != ';' && ispunct( ch ) );
         ungetc( ch, this->file );
         it = this->item = itemMap.lookup( this->text );
         if ( it == NULL ) {

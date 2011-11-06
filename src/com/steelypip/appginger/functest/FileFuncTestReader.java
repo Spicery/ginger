@@ -56,7 +56,7 @@ public class FileFuncTestReader {
 				final String value = line.substring( split + 1 );
 				if ( key.compareToIgnoreCase( "title" ) == 0 ) {
 					title = value;
-				} else if ( key.compareToIgnoreCase( "known" ) == 0 ) {
+				} else if ( key.compareToIgnoreCase( "known" ) == 0 || key.compareToIgnoreCase( "exit" ) == 0) {
 					known_defect = value;
 				}
 			}

@@ -77,8 +77,12 @@ public class SimpleFuncTest implements FuncTest {
 			boolean might_pass = true;
 			
 			final int exit_value = p.waitFor();
-			if ( exit_value != 0 ) {
+			
+			if ( this.known_defect == null && exit_value != 0 ) {
 				this.reasons.add( "Non-zero exit value " + exit_value );
+				might_pass = false;
+			} else if ( this.known_defect != null && !this.known_defect.trim().equals( exit_value + "" ) ) {
+				this.reasons.add( "Unexpected exit code " + exit_value );
 				might_pass = false;
 			}
 			

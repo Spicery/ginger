@@ -19,6 +19,17 @@ public:
 	
 private:
 	int trychar( int ch );
+	int eatsWhiteSpaceAndComments();
+	void readAtEndOfFile();
+	void readAtDigitOrMinus( int ch );
+	void readAtAlphaOrUnderbar( int ch );
+	void readAtQuoteCharType( int ch );
+	void readAtSeparatorCharType( int ch );
+	void readAtBracketCharType( int ch );
+	void readAtBracketDecorationCharType( int ch );
+	void readAtSelfGlueCharType( int ch );
+	void readAtSignCharType( int ch );
+
 
 public:
 	Item read();

@@ -444,6 +444,7 @@ Node ReadStateClass::prefix_processing() {
 		}
 		// changed for ${VAR} case study
 		case tokty_envvar: {
+			this->check_token( tokty_obrace );
 			NodeFactory envvar( "sysapp" );
 			envvar.putAttr( "name", "sysGetEnv" );
 			envvar.start( "constant" );

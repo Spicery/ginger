@@ -71,16 +71,51 @@ void ItemFactoryClass::unread() {
 	return text;
 }*/
 
-Item ItemFactoryClass::read() {
-    int ch;
-	Item it;
+enum CharType {
+	MiscCharType,
+	LineBreakCharType,
+	QuoteCharType,
+	UnderbarCharType,
+	SeparatorCharType,
+	BracketCharType,
+	BracketDecorationCharType,
+	SelfGlueCharType,
+	SignCharType
+};
 
-    if ( this->peeked ) {
-        this->peeked = false;
-        return this->item;
-    }
+CharType char_type( const char ch ) {
+	switch ( ch ) {
+		case '\n':
+		case '\r': 
+			return LineBreakCharType;
+		case '"':
+		case '\'': 
+			return QuoteCharType;
+		case '_': 
+			return UnderbarCharType;
+		case ',':
+		case ';': 
+			return SeparatorCharType;
+		case '(': case ')':
+		case '[': case ']':
+		case '{': case '}':
+			return BracketCharType;
+		case '%':
+			return BracketDecorationCharType;
+		case '.':
+		case '@':
+			return SelfGlueCharType;
+		default:
+			return ispunct( ch ) ? SignCharType : MiscCharType;	
+	}
+}
 
-    //  Get rid of white space and comments.
+bool isSignCharType( const char ch ) {
+	return char_type( ch ) == SignCharType;
+}
+
+int ItemFactoryClass::eatsWhiteSpaceAndComments() {
+	int ch;
     for(;;) {
         ch = getc( this->file );
         if ( isspace( ch ) ) continue;
@@ -88,167 +123,215 @@ Item ItemFactoryClass::read() {
             do
                 ch = getc( this->file );
             while ( ch != '\n' && ch != '\r' );
-            continue;
-        }
-        break;
+        } else {
+	        break;
+	    }
+    }
+    return ch;
+}
+
+void ItemFactoryClass::readAtEndOfFile() {
+	Item it = this->item = this->spare;
+	it->role = EofRole;
+	it->tok_type = tokty_eof;
+	it->nameString() = "<eof>";
+}
+
+void ItemFactoryClass::readAtDigitOrMinus( int ch ) {
+	//
+	//	Number
+	//
+	do {
+		this->text.push_back( (char)ch );
+		ch = getc( this->file );
+	} while ( isdigit( ch ) );
+	ungetc( ch, this->file );
+	if ( this->text.size() == 1 && this->text[ 0 ] == '-' ) {
+		this->item = itemMap.lookup( this->text );
+	} else {
+		Item it = this->item = this->spare;
+		it->tok_type = tokty_int;
+		it->role = LiteralRole;
+		it->nameString() = this->text;
+	}
+}
+
+void ItemFactoryClass::readAtAlphaOrUnderbar( int ch ) {
+	//	
+	//	Variables and keywords
+	//	
+	do {
+		this->text.push_back( ch );
+		ch = getc( this->file );
+	} while ( isalnum( ch ) || ch == '_' );
+	ungetc( ch, this->file );
+	this->item = itemMap.lookup( this->text );
+	if ( this->item == NULL ) {
+		Item it = this->item = this->spare;
+		it->tok_type = tokty_id;
+		it->role = PrefixRole;
+		it->nameString() = this->text;
+	}
+}
+
+void ItemFactoryClass::readAtQuoteCharType( int ch ) {
+	//
+	//	Strings and Character sequences
+	//
+	int open_quote = ch;
+	while ( ch = getc( this->file ), ch != open_quote && ch != '\n' ) {
+		if ( ch == '\\' ) {
+			ch = getc( this->file );
+			if ( ch == '\\' ) {
+				ch = '\\';
+			} else if ( ch == '"' ) {
+				//	nothing
+			} else if ( ch == 'n' ) {
+				ch = '\n';
+			} else if ( ch == 'r' ) {
+				ch = '\r';
+			} else if ( ch == 't' ) {
+				ch = '\t';
+			} else if ( ch == 's' ) {
+				ch = ' ';
+			} else {
+				throw "Invalid character after \\ in string";	// ch
+			}
+		}
+		this->text.push_back( ch );
+	}
+	if ( ch == '\n' ) {
+		throw "unterminated string (%s)";
+	}
+	Item it = this->item = this->spare;
+	it->tok_type = open_quote == '"' ? tokty_string : tokty_charseq;
+	it->role = it->tok_type == tokty_string ? StringRole : CharSeqRole;
+	it->nameString() = this->text;
+}
+
+void ItemFactoryClass::readAtSeparatorCharType( int ch ) {
+	//
+	//	Single character keywords
+	//
+	this->text.push_back( ch );
+	this->item = itemMap.lookup( this->text );
+	if ( this->item == NULL ) {
+		//	Never happens.
+		throw Mishap( "Invalid punctuation token" ); 
+	}
+}
+
+void ItemFactoryClass::readAtBracketCharType( int ch ) {
+	this->text.push_back( ch );
+	if ( ( ch = getc( this->file ) ) == '%' ) {
+		this->text.push_back( ch );
+	} else {
+		ungetc( ch, this->file );
+	}
+	this->item = itemMap.lookup( this->text );
+	if ( this->item == NULL ) {
+		throw Mishap( "Invalid punctuation token" ); 
+	}
+}
+
+void ItemFactoryClass::readAtBracketDecorationCharType( int ch ) {
+	this->text.push_back( ch );
+	ch = getc( this->file );
+	if ( strchr( "()[]{}", ch ) ) {    	
+		this->text.push_back( ch );
+	} else {
+		ungetc( ch, this->file );
+	}
+	this->item = itemMap.lookup( this->text );
+	if ( this->item == NULL ) {
+		throw Mishap( "Invalid punctuation token" ); 
+	}
+}
+
+void ItemFactoryClass::readAtSelfGlueCharType( int ch ) {
+	//	
+	//	Signs made of a single repeating character.
+	//		I wonder if semi-colon and comma should be in 
+	//		this section?
+	//
+	this->text.push_back( ch );
+	for (;;) {
+		char nextch = getc( this->file );
+		if ( nextch == ch ) {
+			this->text.push_back( ch );
+		} else {
+			ungetc( nextch, this->file );
+			break;
+		}
+	}
+	Item it = this->item = itemMap.lookup( this->text );
+	if ( it == NULL ) {
+		throw Mishap( "Invalid repeated-character sign" ).culprit( "Token", this->text );
+	}
+}
+
+void ItemFactoryClass::readAtSignCharType( int ch ) {
+	Item it;
+	//
+	//	Other punctuation treated as multi-character keywords.
+	//
+	//  ispunct()
+	//      checks  for  any printable character which is not a
+	//      space or an alphanumeric character.
+	//
+	do {
+		this->text.push_back( ch );
+		ch = getc( this->file );
+	} while ( isSignCharType( ch ) );
+	ungetc( ch, this->file );
+	it = this->item = itemMap.lookup( this->text );
+	if ( it == NULL ) {
+		throw Mishap( "Invalid sign (combination of special characters)" ).culprit( "Sign", this->text );
+	}
+}
+
+Item ItemFactoryClass::read() {
+    if ( this->peeked ) {
+        this->peeked = false;
+        return this->item;
     }
 
+	int ch = this->eatsWhiteSpaceAndComments();
     this->text.clear();
 
     if ( ch == EOF ) {
-		//
-		//	End of file
-		//
-		it = this->item = this->spare;
-		it->role = EofRole;
-		it->tok_type = tokty_eof;
-		it->nameString() = "<eof>";
+		this->readAtEndOfFile();
     } else if ( isdigit( ch ) || ( ch == '-' && isdigit( this->peekchar() ) ) ) {
-		//
-		//	Number
-		//
-        do {
-            this->text.push_back( (char)ch );
-            ch = getc( this->file );
-        } while ( isdigit( ch ) );
-        ungetc( ch, this->file );
-		if ( this->text.size() == 1 && this->text[ 0 ] == '-' ) {
-        	this->item = itemMap.lookup( this->text );
-		} else {
-			it = this->item = this->spare;
-			it->tok_type = tokty_int;
-            it->role = LiteralRole;
-			it->nameString() = this->text;
-		}
-    } else if ( ch == '"' || ch == '\'' ) {
-		//
-		//	Strings and Character sequences
-		//
-		int open_quote = ch;
-        while ( ch = getc( this->file ), ch != open_quote && ch != '\n' ) {
-			if ( ch == '\\' ) {
-				ch = getc( this->file );
-				if ( ch == '\\' ) {
-					ch = '\\';
-				} else if ( ch == '"' ) {
-					//	nothing
-				} else if ( ch == 'n' ) {
-					ch = '\n';
-				} else if ( ch == 'r' ) {
-					ch = '\r';
-				} else if ( ch == 't' ) {
-					ch = '\t';
-				} else if ( ch == 's' ) {
-					ch = ' ';
-				} else {
-					throw "Invalid character after \\ in string";	// ch
-				}
-			}
-            this->text.push_back( ch );
-        }
-        if ( ch == '\n' ) {
-            throw "unterminated string (%s)";
-        }
-		it = this->item = this->spare;
-		it->tok_type = open_quote == '"' ? tokty_string : tokty_charseq;
-		it->role = it->tok_type == tokty_string ? StringRole : CharSeqRole;
-		it->nameString() = this->text;
-		//it->extra = ToRef( it->nameString().c_str() );
-    } else if ( isalpha( ch ) || ch == '_' ) {
-		//	
-		//	Variables and keywords
-		//	
-        do {
-            this->text.push_back( ch );
-            ch = getc( this->file );
-        } while ( isalnum( ch ) || ch == '_' );
-        ungetc( ch, this->file );
-        this->item = itemMap.lookup( this->text );
-        if ( this->item == NULL ) {
-		    it = this->item = this->spare;
-		    it->tok_type = tokty_id;
-		    it->role = PrefixRole;
-			it->nameString() = this->text;
-		}
-    } else if ( strchr( ";,", ch ) ) {
-		//
-		//	Single character keywords
-		//
-        this->text.push_back( ch );
-        it = this->item = itemMap.lookup( this->text );
-        if ( this->item == NULL ) {
-        	//	Never happens.
-            throw Mishap( "Invalid punctuation token" ); 
-        }
-    } else if ( strchr( "()[]{}", ch ) ) {
-	    this->text.push_back( ch );
-    	if ( ( ch = getc( this->file ) ) == '%' ) {
-    		this->text.push_back( ch );
-    	} else {
-    		ungetc( ch, this->file );
-    	}
-		it = this->item = itemMap.lookup( this->text );
-		if ( this->item == NULL ) {
-            throw Mishap( "Invalid punctuation token" ); 
-		}
-    } else if ( ch == '%' ) {
-    	this->text.push_back( ch );
-   		ch = getc( this->file );
-    	if ( strchr( "()[]{}", ch ) ) {    	
-			this->text.push_back( ch );
-		} else {
-			ungetc( ch, this->file );
-		}
-		it = this->item = itemMap.lookup( this->text );
-		if ( this->item == NULL ) {
-            throw Mishap( "Invalid punctuation token" ); 
-		}
-    } else if ( strchr( ".@", ch ) ) {
-    	//	
-    	//	Signs made of a single repeating character.
-    	//		I wonder if semi-colon and comma should be in 
-    	//		this section?
-    	//
-    	this->text.push_back( ch );
-    	for (;;) {
-    		char nextch = getc( this->file );
-    		if ( nextch == ch ) {
-	    		this->text.push_back( ch );
-    		} else {
-    			ungetc( nextch, this->file );
-    			break;
-    		}
-    	}
-    	it = this->item = itemMap.lookup( this->text );
-    	if ( it == NULL ) {
-            throw Mishap( "Invalid repeated-character sign" ).culprit( "Token", this->text );
-        }
-    } else if ( ispunct( ch ) ) {
-		//
-		//	Other punctuation treated as multi-character keywords.
-		//
-        //  ispunct()
-        //      checks  for  any printable character which is not a
-        //      space or an alphanumeric character.
-        //
-        do {
-            this->text.push_back( ch );
-            ch = getc( this->file );
-        } while ( ch != ';' && ispunct( ch ) );
-        ungetc( ch, this->file );
-        it = this->item = itemMap.lookup( this->text );
-        if ( it == NULL ) {
-            throw Mishap( "Invalid sign (combination of special characters)" ).culprit( "Sign", this->text );
-        }
+    	this->readAtDigitOrMinus( ch );
+	} else if ( isalpha( ch ) || ch == '_' ) {
+		this->readAtAlphaOrUnderbar( ch );
     } else {
-		//
-		//	Definite error
-		//
-        throw "Invalid character (%c)"; //  ch );
-    }
+    	switch ( char_type( ch ) ) {
+    		case QuoteCharType:
+				this->readAtQuoteCharType( ch );
+				break;
+    		case SeparatorCharType:
+    			this->readAtSeparatorCharType( ch );
+				break;
+			case BracketCharType:
+    			this->readAtBracketCharType( ch );
+				break;
+    		case BracketDecorationCharType:
+				this->readAtBracketDecorationCharType( ch );
+				break;
+			case SelfGlueCharType:
+				this->readAtSelfGlueCharType( ch );
+				break;			
+    		case SignCharType:
+    			this->readAtSignCharType( ch );
+				break;
+    		default:
+				//	Definite error
+				throw "Invalid character (%c)"; //  ch );
+    	}
+	}
     return this->item;
 }
-
 
 Item ItemFactoryClass::peek() {
     Item it = this->read();

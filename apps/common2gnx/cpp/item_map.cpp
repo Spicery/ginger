@@ -27,7 +27,7 @@ void ItemMap::add( const char *n, TokType f, Role r, int p  ) {
 	
 ItemMap::ItemMap() {
 //	declare syntactic properties.
-	add( "${",          tokty_envvar,       PrF,        0           );	// changed for ${VAR} case study. 
+	add( "$",           tokty_envvar,       PrF,        0           );	// changed for ${VAR} case study. 
 	add( "-", 			tokty_sub, 			BSA, 		700			);
 	add( "->",			tokty_assign,		BFo,		2000		);
 	add( ",", 			tokty_comma, 		BFo, 		prec_comma	);

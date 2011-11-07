@@ -40,13 +40,17 @@ public class FileFuncTestReader {
 	private static boolean isMinorSeparator( final String s ) {
 		return isSeparator( '-', s );
 	}
+	
 
 	public FuncTest readTest() throws IOException {
 		
-		//	Read introduction.
 		String title = null;
 		String known_defect = null;
-		int nlines = this.reader.getLineNumber();
+		String input_string = null;
+		String expected_string = null;
+
+		//	Read introduction.
+		final int nlines = this.reader.getLineNumber();
 		for ( String line = this.reader.readLine(); line != null; line = this.reader.readLine() ) {
 			if ( isMinorSeparator( line ) ) break;
 			if ( isMajorSeparator( line ) ) return this.readTest();
@@ -63,26 +67,37 @@ public class FileFuncTestReader {
  		}
 		if ( nlines == this.reader.getLineNumber() ) return null;
 		
+		boolean at_end = false;
+		
 		//	Read input.
 		final StringBuilder input = new StringBuilder();
 		for ( String line = this.reader.readLine(); ; line = this.reader.readLine() ) {
-			if ( line == null || isMajorSeparator( line ) ) throw new RuntimeException( "Invalid test format (" + this.reader.getLineNumber() + ")" );
+			if ( line == null ) throw new RuntimeException( "Invalid test format (" + this.reader.getLineNumber() + ")" );
+			if ( isMajorSeparator( line ) ) {
+				at_end = true;
+				break;
+			}
 			if ( isMinorSeparator( line ) ) break;
 			input.append( line );
 			input.append( '\n' );
 		}
-		
-		//	Read expected.
-		final StringBuilder expected = new StringBuilder();
-		for ( String line = this.reader.readLine(); line != null; line = this.reader.readLine() ) {
-			if ( line == null || isMinorSeparator( line ) ) throw new RuntimeException( "Invalid test format (" + this.reader.getLineNumber() + ")" );
-			if ( isMajorSeparator( line ) ) break;
-			expected.append( line );
-			expected.append( '\n' );
+		input_string = input.toString();
+
+		if ( ! at_end ) {	
+			//	Read expected.
+			StringBuilder expected = new StringBuilder();
+			for ( String line = this.reader.readLine(); line != null; line = this.reader.readLine() ) {
+				if ( line == null || isMinorSeparator( line ) ) {
+					throw new RuntimeException( "Invalid test format (" + this.reader.getLineNumber() + ")" );
+				}
+				if ( isMajorSeparator( line ) ) break;
+				expected.append( line );
+				expected.append( '\n' );
+			}
+			expected_string = expected.toString();
 		}
 		
-		return new SimpleFuncTest( title, known_defect, this.command, input.toString(), expected.toString() );
+		return new SimpleFuncTest( title, known_defect, this.command, input_string, expected_string );
 	}
-	
 		
 }

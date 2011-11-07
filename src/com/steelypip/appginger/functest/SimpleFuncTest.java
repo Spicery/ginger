@@ -15,7 +15,7 @@ public class SimpleFuncTest implements FuncTest {
 	private final String known_defect;
 	private final String command;
 	private final String input;
-	private final String expected;
+	private final String expected;	//	May be null, meaning "don't care".
 	private boolean passed = false;
 	private final List< String > reasons = new ArrayList< String >(); 
 	
@@ -25,7 +25,7 @@ public class SimpleFuncTest implements FuncTest {
 		this.known_defect = known_defect;
 		this.command = command;
 		this.input = input;
-		this.expected = expected.trim();
+		this.expected = expected == null ? null : expected.trim();
 	}
 
 	public String name() {
@@ -111,10 +111,10 @@ public class SimpleFuncTest implements FuncTest {
 			
 			{
 				String actual = outstring.trim();
-				if ( ! actual.equals( expected ) ) {
+				if ( expected != null && ! actual.equals( this.expected ) ) {
 					this.reasons.add( "Unexpected output" );
-					this.reasons.add( "  Actual:   <" + actual + ">" );
-					this.reasons.add( "  Expected: <" + expected + ">" );
+					this.reasons.add( "  Actual:   " + actual );
+					this.reasons.add( "  Expected: " + this.expected );
 					might_pass = false;
 				}
 			}

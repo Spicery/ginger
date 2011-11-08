@@ -46,7 +46,7 @@ const char *tok_type_name( TokType fnc ) {
 	case tokty_endif : return "endif";
 	case tokty_endpackage: return "endpackage";
 	case tokty_endunless : return "endunless";
-	case tokty_envvar: return "$";
+	case tokty_envvar: return "$";	// changed for ${VAR} case study.
 	case tokty_equal : return "equal";
 	case tokty_explode: return "explode";
 	case tokty_fn : return "fn";

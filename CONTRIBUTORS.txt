@@ -1,0 +1,95 @@
+How to Contribute to the Ginger Toolkit
+=======================================
+
+This note explains what you need to do to get started on developing the Ginger Toolkit.
+
+
+Skills
+------
+The Ginger Toolkit is implemented primarily in GNU C++ but with some key sections being automatically generated using Java programs. You will definitely need to be competent in C++ but only basic Java skills are required for the Java sections.
+
+You will also need to know a bit about git, at least have a working knowledge, so as to be able to clone the repository and work on it.
+
+
+Tools and Other Dependencies
+----------------------------
+Java IDE: Although you actually could just use a plain text editor, we recommend using Eclipse for editing and compiling the Java.
+
+C++ IDE: We are a bit old-school and use the Unix command-line plus a plain-text editor. We use autoconf and make as our build tools. 
+
+C++ Libs: We make extremely modest use of Boost but it is probably easier to install the entire package. We do use the RudeCGI library and that will definitely need to be installed. At the moment we use CppUnit as our unit testing framework. 
+
+git: You'll need git installed to be able to work with the repository.
+
+Install Tools and Prerequisites (Mac)
+-------------------------------------
+
+[*] Install Eclipse: Go to http://www.eclipse.org/downloads/ and follow the instructions for installing the "Eclipse IDE for Java Developers".
+
+TO BE DONE
+
+[*] Install RudeCGI: Go to http://rudeserver.com/cgiparser/download.html and download the rudecgi-5.0.0.zip. Extract it and install it.
+
+	% unzip rudecgi-5.0.0.zip
+	% cd rudecgi-5.0.0
+	% ./configure
+	% make 
+	% make install
+
+[*] Install CppUnit
+
+TO BE DONE
+
+
+
+Install Tools and Prerequisites (Mac)
+-------------------------------------
+
+[1] Make sure you have the Developer tools installed. What really matters is that g++ exists.
+
+	% g++ -v
+	<You should get some reassuring output here>
+
+[2] Install Eclipse: Go to http://www.eclipse.org/downloads/ and follow the instructions for installing the "Eclipse IDE for Java Developers".
+
+[3] Install MacPorts, this is an easy way to get hold of Boost and CppUnit. Go to http://www.macports.org/ and follow the instructions for installing on Mac.
+
+[4] Then install Boost: 
+
+	%sudo port install boost
+
+[3] Install RudeCGI: Go to http://rudeserver.com/cgiparser/download.html and download the rudecgi-5.0.0.zip. 
+
+	% cd rudecgi-5.0.0
+	% ./configure
+	% make 
+	% make install
+
+[4] Install CppUnit
+
+	% sudo port install cppunit
+
+Get Started
+-----------
+To get started, decide on which folder you will use to store the Spicery repositories. Then add the $SPICERY environment variable to your $PATH by putting the following in your .bash_profile. (This variable is only used in documentation as a shorthand for "Your Spicery folder".)
+
+	# Add to your .bash_profile
+	export SPICERY=<new folder of your choice>
+	
+Now clone the repository into that $SPICERY folder.
+
+	% cd $SPICERY
+	% git clone git@github.com:Spicery/ginger
+
+At this point you are ready to build a working system.
+
+	% cd $SPICERY/ginger
+	% autoconf
+	% ./configure
+	% make
+
+If all goes well you are ready to start hacking!
+
+
+-----------------------------------------------------
+Stephen Leach <stephen.leach@steelypip.com>, Nov 2011

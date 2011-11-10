@@ -21,6 +21,8 @@ C++ Libs: We make extremely modest use of Boost but it is probably easier to ins
 
 git: You'll need git installed to be able to work with the repository.
 
+Guile: If you are working on the Lisp syntax you'll need this.
+
 Install Tools and Prerequisites (Ubuntu Linux)
 ----------------------------------------------
 
@@ -38,6 +40,8 @@ Install Tools and Prerequisites (Ubuntu Linux)
 
 [4] Install CppUnit: From Ubuntu software centre install "Unit Testing Library for C++", libcppunit.
 
+[5] Install Guile: 
+	% sudo apt-get install guile-1.8
 
 
 Install Tools and Prerequisites (Mac)
@@ -66,6 +70,10 @@ Install Tools and Prerequisites (Mac)
 [4] Install CppUnit
 
 	% sudo port install cppunit
+	
+[5] Install Guile:
+
+	% sudo port install guile
 
 Get Started
 -----------

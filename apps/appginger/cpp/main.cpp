@@ -49,7 +49,7 @@
 using namespace std;
 
 #define APPGINGER		"appginger"
-#define LICENSE_FILE	( INSTALL_LIB "/LICENSE.txt" )
+#define LICENSE_FILE	( INSTALL_LIB "/COPYING" )
 
 /*
 #define GNGMETAINFO		( INSTALL_BIN "/gngmetainfo" )

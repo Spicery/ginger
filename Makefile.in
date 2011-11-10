@@ -81,7 +81,7 @@ install: all
 	cp -r projects/standard_library $(INSTALL_LIB) 
 	echo Installing docs into $(INSTALL_DOC)
 	mkdir -p $(INSTALL_LIB)
-	/usr/bin/install -m a=r LICENSE.txt $(INSTALL_LIB)
+	/usr/bin/install -m a=r COPYING $(INSTALL_LIB)
 	mkdir -p $(INSTALL_LIB)/lisp2gnx
 	/usr/bin/install -m a=r apps/lisp2gnx/lsp/lisp2gnx.lsp $(INSTALL_LIB)/lisp2gnx
 	/usr/bin/install $(EXECUTABLES) $(INSTALL_BIN)
@@ -103,8 +103,8 @@ tarball: all
 	gzip -d documentation/build/documentation.tgz | ( cd build/$(TBBASE)/share/appginger; tar xf - )
 	( cd build_template; tar cf - . ) | ( cd build/$(TBPACKAGE); tar xf - )
 	cp $(EXECUTABLES) build/$(TBMAIN)/bin/
-	cp LICENSE.txt build/$(TBMAIN)/share/appginger
-	cp AUTHORS.txt build/$(TBMAIN)/share/appginger
+	cp COPYING build/$(TBMAIN)/share/appginger
+	cp AUTHORS build/$(TBMAIN)/share/appginger
 	mkdir -p build/$(TBMAIN)/share/appginger/lisp2gnx/
 	cp apps/lisp2gnx/lsp/lisp2gnx.lsp build/$(TBMAIN)/share/appginger/lisp2gnx/
 	cp -r projects/standard_library build/$(TBMAIN)/share/appginger/

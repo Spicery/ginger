@@ -21,24 +21,22 @@ C++ Libs: We make extremely modest use of Boost but it is probably easier to ins
 
 git: You'll need git installed to be able to work with the repository.
 
-Install Tools and Prerequisites (Mac)
--------------------------------------
+Install Tools and Prerequisites (Ubuntu Linux)
+----------------------------------------------
 
-[*] Install Eclipse: Go to http://www.eclipse.org/downloads/ and follow the instructions for installing the "Eclipse IDE for Java Developers".
+[1] Install Eclipse: From Ubuntu software centre install "Eclipse".
 
-TO BE DONE
+[2] Install Boost: From Ubuntu software centre install "Boost C++ Libraries", libboost.
 
-[*] Install RudeCGI: Go to http://rudeserver.com/cgiparser/download.html and download the rudecgi-5.0.0.zip. Extract it and install it.
+[3] Install RudeCGI: Go to http://rudeserver.com/cgiparser/download.html and download the rudecgi-5.0.0.zip. Extract it and install it.
 
 	% unzip rudecgi-5.0.0.zip
 	% cd rudecgi-5.0.0
 	% ./configure
 	% make 
-	% make install
+	% sudo make install
 
-[*] Install CppUnit
-
-TO BE DONE
+[4] Install CppUnit: From Ubuntu software centre install "Unit Testing Library for C++", libcppunit.
 
 
 

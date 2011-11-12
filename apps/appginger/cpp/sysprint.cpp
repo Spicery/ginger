@@ -86,6 +86,53 @@ static void refMixedPrint( std::ostream & out, Ref * mix_K ) {
 	out << "}";
 }
 
+enum Tag {
+	TAG_OPEN,
+	TAG_CLOSE,
+	TAG_EMPTY
+};
+
+//	WARNING: KNOWN ERRORS. There is not the proper quoting of characters 
+//	in the name, key or value.
+static void refAttrMapPrint( std::ostream & out, Ref * attrmap_K, enum Tag flag ) {
+	Ref name = attrmap_K[ 1 ];
+	if ( flag == TAG_CLOSE ) {
+		out << "</";
+		refPrint( out, name );
+		out << ">";
+	} else {
+		out << "<";
+		refPrint( out, name );
+		long length = SmallToULong( attrmap_K[ MIXED_LAYOUT_OFFSET_LENGTH ] );
+		for ( long i = 0; i < length; i += 2 ) {
+			out << " ";
+			refPrint( attrmap_K[ 2 + i ] );
+			out << "=\"";
+			refPrint( attrmap_K[ 3 + i ] );
+			out << "\"";
+		}
+		out << ( flag == TAG_OPEN ? ">" : "/>" );
+	}
+}
+
+static void refElementPrint( std::ostream & out, Ref * mix_K ) {
+	Ref attrmap = mix_K[ 1 ];
+	if ( ! IsAttrMap( attrmap ) ) {
+		throw Ginger::Mishap( "Attribute map needed" ).culprit( "Item", refToString( attrmap ) );
+	}
+	Ref * attrmap_K = RefToPtr4( attrmap );
+	long length = SmallToULong( mix_K[ MIXED_LAYOUT_OFFSET_LENGTH ] );
+	if ( length > 0 ) {
+		refAttrMapPrint( out, attrmap_K, TAG_OPEN );
+		for ( long i = 0; i < length; i++ ) {
+			refPrint( out, mix_K[ 2 + i ] );
+		}
+		refAttrMapPrint( out, attrmap_K, TAG_CLOSE );
+	} else {
+		refAttrMapPrint( out, attrmap_K, TAG_EMPTY );
+	}
+}
+
 static void refRecordPrint( std::ostream & out, Ref * rec_K ) {
 	unsigned long len = lengthOfRecordLayout( rec_K );
 	bool sep = false;
@@ -124,7 +171,11 @@ void refPrint( std::ostream & out, const Ref r ) {
 				}
 				case ATTR_KIND:
 				case MIXED_KIND: {
-					refMixedPrint( out, obj_K );
+					if ( sysElementKey == key ) {
+						refElementPrint( out, obj_K );
+					} else {
+						refMixedPrint( out, obj_K );
+					}
 					break;
 				}
 				case PAIR_KIND: {
@@ -142,7 +193,7 @@ void refPrint( std::ostream & out, const Ref r ) {
 				case STRING_KIND: {
 					refStringPrint( out, obj_K );
 					break;
-				}				
+				}
 				default: {
 					out << "<printing undefined>";
 					break;

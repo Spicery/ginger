@@ -86,6 +86,7 @@ static struct option long_options[] =
         { "cgi",            no_argument,            0, 'C' },
         { "interactive",    no_argument,            0, 'I' },
         { "batch",          no_argument,            0, 'B' },
+        { "engine",         required_argument,      0, 'E' },
         { "help",           optional_argument,      0, 'H' },
         { "metainfo",		no_argument,			0, 'M' },
         { "machine",        required_argument,      0, 'm' },
@@ -124,7 +125,7 @@ static void printUsage() {
 	cout << "-h, --help            print out this help info (see --help=help)" << endl;
 	cout << "-f, --projectfolder   add a project folder to the search path" << endl;
 	cout << "-l, --license         print out license information and exit" << endl;
-	cout << "-m<n>                 run using machine #n" << endl;
+	cout << "-E<n>                 run using engine #n" << endl;
 	cout << "-v, --version         print out version information and exit" << endl;
 	cout << endl;
 }	
@@ -391,7 +392,7 @@ int Main::run( int argc, char **argv, char **envp ) {
 	bool meta_info_needed = false;
     for(;;) {
         int option_index = 0;
-        int c = getopt_long( argc, argv, "CIBMH::m:Vd:L::f:", long_options, &option_index );
+        int c = getopt_long( argc, argv, "CIBMH::m:E:Vd:L::f:", long_options, &option_index );
         if ( c == -1 ) break;
         switch ( c ) {
             case 'C': {
@@ -443,6 +444,7 @@ int Main::run( int argc, char **argv, char **envp ) {
             	meta_info_needed = true;
             	break;
             }
+            case 'E':
             case 'm' : {
                 this->context.setMachineImplNum( atoi( optarg ) );
                 //printf( "Machine #%d (%s)\n", machine_impl_num, optarg );

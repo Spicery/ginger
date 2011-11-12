@@ -1,0 +1,15 @@
+Ginger Source File Hierarchy
+============================
+
+Top-level, ${SPICERY}/ginger
+----------------------------
+
+README				General information
+AUTHORS				Credits
+THANKS				Acknowledgments
+ChangeLog			A detailed changelog, intended for programmers
+NEWS				A basic changelog, intended for users
+INSTALL				Installation instructions
+COPYING / LICENSE	Copyright and licensing information
+BUGS				Known bugs and instructions on reporting new ones
+

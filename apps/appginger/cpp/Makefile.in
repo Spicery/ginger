@@ -38,6 +38,7 @@ OBJS= package_autoload.o term.o read_xml.o \
 	machine1.o instruction_set1.o \
 	machine2.o instruction_set2.o \
 	machine3.o instruction_set3.o \
+	machine4.o instruction_set4.o \
 	appcontext.o \
 	makesysfn.o
 

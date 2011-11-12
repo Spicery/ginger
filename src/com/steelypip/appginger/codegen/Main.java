@@ -143,6 +143,7 @@ public class Main {
 		list.add( new Implementation1() );
 		list.add( new Implementation2() );
 		list.add( new Implementation3() );
+		list.add( new Implementation4() );
 		return list;
 	}
 

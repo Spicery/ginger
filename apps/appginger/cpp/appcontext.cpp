@@ -48,6 +48,7 @@
 #include "machine1.hpp"
 #include "machine2.hpp"
 #include "machine3.hpp"
+#include "machine4.hpp"
 //#include "database.hpp"
 
 using namespace std;
@@ -72,6 +73,7 @@ MachineClass * AppContext::newMachine() {
         case 1: return new Machine1( *this );
         case 2: return new Machine2( *this );
         case 3: return new Machine3( *this );
+        case 4: return new Machine4( *this );
         default: {
             cerr <<  "Invalid implementation (" << this->machine_impl_num << ") using implementation 1" << endl;
             return new Machine1( *this );

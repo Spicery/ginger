@@ -19,6 +19,8 @@
 #include <string>
 #include <sstream>
 
+#include "mnx.hpp"
+
 #include "sysprint.hpp"
 #include "syskey.hpp"
 #include "misclayout.hpp"
@@ -95,20 +97,22 @@ enum Tag {
 //	WARNING: KNOWN ERRORS. There is not the proper quoting of characters 
 //	in the name, key or value.
 static void refAttrMapPrint( std::ostream & out, Ref * attrmap_K, enum Tag flag ) {
-	Ref name = attrmap_K[ 1 ];
+	std::string name( refToString( attrmap_K[ 1 ] ) );
 	if ( flag == TAG_CLOSE ) {
 		out << "</";
-		refPrint( out, name );
+		Ginger::mnxRenderText( out, name );
 		out << ">";
 	} else {
 		out << "<";
-		refPrint( out, name );
+		Ginger::mnxRenderText( out, name );
 		long length = SmallToULong( attrmap_K[ MIXED_LAYOUT_OFFSET_LENGTH ] );
 		for ( long i = 0; i < length; i += 2 ) {
 			out << " ";
-			refPrint( attrmap_K[ 2 + i ] );
+			std::string key( refToString( attrmap_K[ 2 + i ] ) );
+			Ginger::mnxRenderText( out, key );
 			out << "=\"";
-			refPrint( attrmap_K[ 3 + i ] );
+			std::string value( refToString( attrmap_K[ 3 + i ] ) );
+			Ginger::mnxRenderText( out, value );
 			out << "\"";
 		}
 		out << ( flag == TAG_OPEN ? ">" : "/>" );

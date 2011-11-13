@@ -54,8 +54,8 @@ private:
 	#endif
 
 public:
-	void setInteractiveMode() { this->mode = InteractiveMode; }
-	void setBatchMode() { this->mode = BatchMode; }
+	void setInteractiveMode() { this->mode = InteractiveMode; this->is_trapping_mishap = true; }
+	void setBatchMode() { this->mode = BatchMode; this->is_trapping_mishap = false; }
 	void setCgiMode() { this->mode = CGIMode; }
 	bool isInteractiveMode() { return this->mode == InteractiveMode; }
 	bool isBatchMode() { return this->mode == BatchMode; }

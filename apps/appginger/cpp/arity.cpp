@@ -113,6 +113,8 @@ Arity::Arity( Term term ) {
 			this->more = false;
 			break;
 		}
+		case fnc_assert_single:
+		case fnc_assert_bool:
 		case fnc_int:
 		case fnc_bool:
 		case fnc_char:

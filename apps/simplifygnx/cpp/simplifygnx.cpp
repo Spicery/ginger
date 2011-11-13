@@ -86,48 +86,6 @@ using namespace std;
 
 #define FETCHGNX ( INSTALL_BIN "/fetchgnx" )
 
-/*class Arity {
-private:
-	int 	count;
-	bool 	more;
-	
-public:
-	void add( const Arity & that ) {
-		this->count += that.count;
-		this->more = this->more || that.more;
-	}
-	
-	void unify( const Arity & that ) {
-		this->count = min( this->count, that.count );
-		this->more = this->more || that.more || ( this->count != that.count );
-	}
-	
-	const string toString() {
-		stringstream in;
-		in << ( this->count );
-		if ( this->more ) {
-			in << '+';
-		}
-		return in.str();
-	}
-	
-public:
-	Arity( int n ) :
-		count( n ),
-		more( false )
-	{
-	}
-	
-	Arity( const string & s ) {
-		int n;
-		stringstream out( s );
-		out >> n;
-		this->count = n;
-		this->more = s.find( '+' ) != string::npos;
-	}
-};*/
-
-
 class Main {
 private:
 	vector< string > 	project_folders;
@@ -145,6 +103,11 @@ public:
 
 public:
 	std::string package;
+
+private:
+	void simplify( shared< Ginger::Mnx > g );
+	bool resimplify( shared< Ginger::Mnx > g );
+
 
 public:
 	void parseArgs( int argc, char **argv, char **envp );
@@ -473,72 +436,100 @@ public:
 
 
 class ArityMarker : public Ginger::MnxVisitor {
+private:
+	bool changed;
+	
+public:
+	bool hasChanged() { return this->changed; }
+	
 public:
 	void startVisit( Ginger::Mnx & element ) {
 		element.clearAttribute( ARITY );	//	Throw away any previous marking.
 	}
 	
 	void endVisit( Ginger::Mnx & element ) {
-		if ( element.hasAttribute( "value" ) ) {
+		const string & x = element.name();
+		if ( x == "constant" ) {
 			element.putAttribute( ARITY, "1" );
-		} else {
-			const string & x = element.name();
-			if ( x == "id" || x == "fn" ) {
-				element.putAttribute( ARITY, "1" );
-			} else if ( x == "for" ) {
-				if ( element.hasAttribute( ARITY ) && element.attribute( ARITY ) == "0" ) {
-					element.putAttribute( ARITY, "0" );
-				}
-			} else if ( x == "set" || x == "bind" ) {
+		} else if ( x == "id" || x == "fn" ) {
+			element.putAttribute( ARITY, "1" );
+		} else if ( x == "for" ) {
+			if ( element.hasAttribute( ARITY ) && element.attribute( ARITY ) == "0" ) {
 				element.putAttribute( ARITY, "0" );
-			} else if ( x == "seq" ) {
-				bool all_have_arity = true;
-				for ( int i = 0; all_have_arity && i < element.size(); i++ ) {
-					all_have_arity = element.child( i )->hasAttribute( ARITY );
+			}
+		} else if ( x == "set" || x == "bind" ) {
+			element.putAttribute( ARITY, "0" );
+		} else if ( x == "seq" ) {
+			bool all_have_arity = true;
+			for ( int i = 0; all_have_arity && i < element.size(); i++ ) {
+				all_have_arity = element.child( i )->hasAttribute( ARITY );
+			}
+			if ( all_have_arity ) {
+				Ginger::Arity sofar( 0 );
+				for ( int i = 0; i < element.size(); i++ ) {
+					Ginger::Arity kid( element.child( i )->attribute( ARITY ) );
+					sofar = sofar.add( kid );
 				}
-				if ( all_have_arity ) {
-					Ginger::Arity sofar( 0 );
-					for ( int i = 0; i < element.size(); i++ ) {
+				element.putAttribute( ARITY, sofar.toString() );
+			}
+		} else if ( x == "if" ) {
+			bool has_odd_kids = ( element.size() % 2 ) == 1;
+			bool all_have_arity = true;
+			for ( int i = 1; all_have_arity && i < element.size(); i += 2 ) {
+				all_have_arity = element.child( i )->hasAttribute( ARITY );
+			}
+			if ( all_have_arity && has_odd_kids ) {
+				all_have_arity = element.lastChild()->hasAttribute( ARITY );
+			}
+			if ( all_have_arity ) {
+				const int N = element.size();
+				if ( N == 0 ) {
+					element.putAttribute( ARITY, "0" );
+				} else if ( N == 1 ) {
+					element.putAttribute( ARITY, element.child( 0 )->attribute( ARITY ) );
+				} else {
+					Ginger::Arity sofar( element.child( 1 )->attribute( ARITY ) );
+					for ( int i = 3; i < element.size(); i += 2 ) {
 						Ginger::Arity kid( element.child( i )->attribute( ARITY ) );
-						sofar = sofar.add( kid );
+						sofar = sofar.unify( kid );
+					}
+					if ( has_odd_kids ) {
+						sofar = sofar.unify( Ginger::Arity( element.lastChild()->attribute( ARITY ) ) );
 					}
 					element.putAttribute( ARITY, sofar.toString() );
 				}
-			} else if ( x == "if" ) {
-				bool has_odd_kids = ( element.size() % 2 ) == 1;
-				bool all_have_arity = true;
-				for ( int i = 1; all_have_arity && i < element.size(); i += 2 ) {
-					all_have_arity = element.child( i )->hasAttribute( ARITY );
+				
+			}
+		} else if ( x == "sysapp" ) {
+			element.putAttribute( ARITY, Ginger::outArity( element.attribute( "name" ) ).toString() );
+		} else if ( x == "assert" && element.size() == 1 ) {
+			if ( element.hasAttribute( "n", "1" ) ) {
+				if ( element.child( 0 )->hasAttribute( ARITY, "1" ) ) {
+					//	As we can prove the child satisfies the condition we should 
+					//	eliminate the parent. So we simply replace the contents of the 
+					//	node with the contents of the child!
+					shared< Ginger::Mnx > c = element.child( 0 );
+					element.copyFrom( *c );
+					//	Because we have changed something we should let the system know
+					//	in case it would synergise with other optimsations.
+					this->changed = true;
+				} else {
+					element.putAttribute( ARITY, "1" );
 				}
-				if ( all_have_arity && has_odd_kids ) {
-					all_have_arity = element.lastChild()->hasAttribute( ARITY );
+			} else if ( element.hasAttribute( "type" ) ) {
+				shared< Ginger::Mnx > c = element.child( 0 );
+				if ( c->name() == "constant" && element.attribute( "type" ) == c->attribute( "type" ) ) {
+					element.copyFrom( *c );
+					this->changed = true;
+				} else {
+					element.putAttribute( ARITY, "1" );
 				}
-				if ( all_have_arity ) {
-					const int N = element.size();
-					if ( N == 0 ) {
-						element.putAttribute( ARITY, "0" );
-					} else if ( N == 1 ) {
-						element.putAttribute( ARITY, element.child( 0 )->attribute( ARITY ) );
-					} else {
-						Ginger::Arity sofar( element.child( 1 )->attribute( ARITY ) );
-						for ( int i = 3; i < element.size(); i += 2 ) {
-							Ginger::Arity kid( element.child( i )->attribute( ARITY ) );
-							sofar = sofar.unify( kid );
-						}
-						if ( has_odd_kids ) {
-							sofar = sofar.unify( Ginger::Arity( element.lastChild()->attribute( ARITY ) ) );
-						}
-						element.putAttribute( ARITY, sofar.toString() );
-					}
-					
-				}
-			} else if ( x == "sysapp" ) {
-				element.putAttribute( ARITY, Ginger::outArity( element.attribute( "name" ) ).toString() );
 			}
 		} 
 	}
 	
 public:
+	ArityMarker() : changed( false ) {}
 	virtual ~ArityMarker() {}
 };
 
@@ -569,7 +560,7 @@ public:
 				if ( x.size() >= 1 ) {
 					element.lastChild()->orFlags( TAIL_CALL_MASK );
 				}
-			} 
+			}
 			//	else don't push the marker down. 
 			//	This includes <for>, <sysapp>, any constant,
 			//	<id>, <set>
@@ -827,6 +818,12 @@ public:
 		
 */
 class SysFold : public Ginger::MnxVisitor {
+private:
+	bool changed;
+	
+public:
+	bool hasChanged() { return this->changed; }
+	
 public:
 	void startVisit( Ginger::Mnx & element ) {
 	}
@@ -839,6 +836,7 @@ public:
 				element.clearAllAttributes();
 				element.putAttribute( "name", name );
 				element.name() = "sysfn";
+				this->changed = true;
 			}
 		} else if ( x == "app" ) {
 			if ( element.size() == 2 && element.child( 0 )->name() == "sysfn" ) {
@@ -847,6 +845,7 @@ public:
 				element.clearAllAttributes();
 				element.putAttribute( "name", name );
 				element.popFrontChild();
+				this->changed = true;
 			}
 		}
 	}
@@ -1025,6 +1024,93 @@ public:
 	virtual ~Flatten() {}
 };
 
+bool Main::resimplify( shared< Ginger::Mnx > g ) {
+	bool resimplify = false;
+	
+	if ( sysapp_processing ) {	
+		SysFold s;
+		g->visit( s );
+		//	We are not interested in the changed flag at this point
+		//	because folding is part of the monotonic change.
+	}
+	
+	if ( flatten_processing ) {
+		Flatten flatten;
+		g->visit( flatten );
+	}
+	
+	if ( arity_processing ) {
+		ArityMarker a;
+		g->visit( a );
+		//	We *do* care about changing here as it breaks the
+		//	otherwise monotonic process.
+		resimplify = resimplify || a.hasChanged();
+	}
+	
+	return resimplify;
+}
+
+void Main::simplify( shared< Ginger::Mnx > g ) {
+	bool resimplify = false;
+
+	//	If we are not doing absolute_processing we should assume we
+	//	will find outers.
+	bool outers_found = not absolute_processing;
+	
+	if ( scope_processing ) {
+		Scope scope;
+		g->visit( scope );
+		outers_found = scope.wereOutersFound();
+	}
+	
+	if ( absolute_processing ) {
+		Absolute a( this->project_folders, this->package );
+		g->visit( a );
+		//outers_found = a.wereOutersFound();
+	} 
+
+	if ( sysapp_processing ) {	
+		SysFold s;
+		g->visit( s );
+		//	N.B. We do not care about the changed flag as it cannot
+		//	cause rework at this point.
+	}
+	
+	if ( lift_processing ) {
+		//	Only proceed if we have determined that there are indeed
+		//	some variables which are declared as outers. Otherwise
+		//	this is just an expensive no-op!
+		if ( outers_found ) {
+			Lift lift;
+			g->visit( lift );
+			AddDeref addd;
+			g->visit( addd );
+		}
+	}
+	
+	if ( flatten_processing ) {
+		Flatten flatten;
+		g->visit( flatten );
+	}
+	
+	if ( arity_processing ) {
+		ArityMarker a;
+		g->visit( a );
+		resimplify = resimplify || a.hasChanged();
+	}
+	
+	while ( resimplify ) {
+		resimplify = this->resimplify( g );
+	}
+
+	if ( tailcall_processing ) {
+		g->orFlags( TAIL_CALL_MASK );
+		TailCall tc;
+		g->visit( tc );
+	}
+	
+}
+
 void Main::run() {
 	Ginger::MnxReader reader;
 	
@@ -1033,54 +1119,7 @@ void Main::run() {
 		shared< Ginger::Mnx > g( reader.readMnx() );
 		if ( not g ) break;
 	
-		//	If we are not doing absolute_processing we should assume we
-		//	will find outers.
-		bool outers_found = not absolute_processing;
-		
-		if ( scope_processing ) {
-			Scope scope;
-			g->visit( scope );
-			outers_found = scope.wereOutersFound();
-		}
-		
-		if ( absolute_processing ) {
-			Absolute a( this->project_folders, this->package );
-			g->visit( a );
-			//outers_found = a.wereOutersFound();
-		} 
-	
-		if ( sysapp_processing ) {	
-			SysFold s;
-			g->visit( s );
-		}
-		
-		if ( lift_processing ) {
-			//	Only proceed if we have determined that there are indeed
-			//	some variables which are declared as outers. Otherwise
-			//	this is just an expensive no-op!
-			if ( outers_found ) {
-				Lift lift;
-				g->visit( lift );
-				AddDeref addd;
-				g->visit( addd );
-			}
-		}
-		
-		if ( flatten_processing ) {
-			Flatten flatten;
-			g->visit( flatten );
-		}
-		
-		if ( tailcall_processing ) {
-			g->orFlags( TAIL_CALL_MASK );
-			TailCall tc;
-			g->visit( tc );
-		}
-		
-		if ( arity_processing ) {
-			ArityMarker a;
-			g->visit( a );
-		}
+		this->simplify( g );
 		
 		g->render();
 		cout << endl;

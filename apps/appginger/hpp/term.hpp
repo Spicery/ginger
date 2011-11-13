@@ -582,51 +582,7 @@ public:
 	virtual ~InTermClass() {}
 };
 
-//-- from ---------------------------------------------------------------
-
-/*class ImportTermClass : public NoChildrenTermMixin {
-private:
-	const FacetSet * 	match_tags;
-	
-public:
-	const std::string	from;
-	const std::string	alias;
-	bool				prot;
-	//const Facet *		into;
-	const FacetSet *	intos;
-	
-public:
-	const char * type_name() { return "ImportTermClass"; }
-	enum Functor functor() { return fnc_import; }
-	const FacetSet *	matchTags() { return this->match_tags; }
-	
-public:
-	ImportTermClass( 
-		const FacetSet * 	facets,
-		const std::string	from,
-		const std::string	alias,
-		bool				prot,
-		//const Facet *		into,
-		const FacetSet *	intos
-	) :
-		match_tags( facets ),
-		from( from ),
-		alias( alias ),
-		prot( prot ),
-		//into( into ),
-		intos( intos )
-	{
-	}
-	
-	virtual ~ImportTermClass() {}
-};*/
-
-//------------------------------------------------------------------------------
-
-
-
-
-
+//-----------------------------------------------------------------------
 
 
 Term term_new_basic0( Functor fnc );

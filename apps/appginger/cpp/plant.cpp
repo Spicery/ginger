@@ -38,6 +38,7 @@ using namespace std;
 #include "sys.hpp"
 #include "dict.hpp"
 #include "syssymbol.hpp"
+#include "syscheck.hpp"
 
 #ifndef NULL
 #define NULL 0
@@ -470,19 +471,6 @@ void PlantClass::compileTerm( Term term ) {
 			vmiSYS_CALL( this, sc );
 			break;
 		}
-		/*case fnc_sysfn: {
-			Package * p = this->vm->getPackage( STANDARD_LIBRARY_PACKAGE );
-			Ident id = p->fetchDefinitionIdent( term_sysfn_cont( term ) );  
-			if ( id->value_of->valof == SYS_UNDEF ) {
-				Ref r = makeSysFn( this, term_sysfn_cont( term ), SYS_UNDEF );
-				if ( r == SYS_UNDEF ) {
-					throw Ginger::Mishap( "No such system function" ).culprit( "Function", term_sysfn_cont( term ) );
-				}
-				id->value_of->valof = r;
-			}
-			vmiPUSHID( this, id );
-			break;
-		}*/
 		case fnc_sysfn: {
 			Ref r = makeSysFn( this, term_sysfn_cont( term ), SYS_UNDEF );
 			if ( r == SYS_UNDEF ) {
@@ -528,6 +516,17 @@ void PlantClass::compileTerm( Term term ) {
 			this->compile1( term_index( term, 0 ) );
 			vmiNOT( this );
 		 	break;
+		}
+		case fnc_assert_single: {
+			//	case-study: Adding New Element Type.
+			this->compile1( term_index( term, 0 ) );
+			break;
+		}
+		case fnc_assert_bool: {
+			//	case-study: Adding New Element Type.
+			this->compile1( term_index( term, 0 ) );
+			vmiSYS_CALL( this, sysCheckBool );
+			break;
 		}
 		case fnc_import: {
 			//	Skip - is a pure environment effect.

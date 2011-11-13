@@ -234,7 +234,16 @@ Term mnxToTerm( shared< Ginger::Mnx > mnx ) {
 	} else if ( name == "vector" ) {
 		vector< Term > kids;
 		fillKids( mnx, kids );
-		return makeSysApp( "newVector", kids );		
+		return makeSysApp( "newVector", kids );	
+	} else if ( name == "assert" && nkids == 1 ) {
+		//	Added in case-study: Adding New Element Type.
+		if ( mnx->hasAttribute( "type", "bool" ) ) {
+			return term_new_basic1( fnc_assert_bool, mnxChildToTerm( mnx, 0 ) );
+		} else if ( mnx->hasAttribute( "n", "1" ) ) {
+			return term_new_basic1( fnc_assert_single, mnxChildToTerm( mnx, 0 ) );
+		}
+		//	Fall through is treated as failure.
+		throw Ginger::SystemError( "Unrecognised assert form" );
 	} else if ( name == "import" ) {
 		throw Ginger::SystemError( "No longer handles import directly" );
 	} else {

@@ -95,6 +95,7 @@ const char * keyName( Ref key );
 #define IsMethodKey( key ) 			( ( key ) == sysMethodKey )
 #define IsFunction( ref )			( IsObj( ref ) && IsFunctionKey( *RefToPtr4( ref ) ) )
 #define IsMethod( ref )				( IsObj( ref ) && IsMethodKey( *RefToPtr4( ref ) ) )
+#define IsBoolean( ref )			( ( ( ref ) == SYS_FALSE ) || ( ( ref ) == SYS_TRUE ) )
 
 
 ////////////////////////////////////////////////////////////////////////

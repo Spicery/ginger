@@ -81,7 +81,6 @@ public class FuncTestMain {
 			}
 		}
 		if ( failed.isEmpty() ) {
-			int n = fname.lastIndexOf( '.' );
 			new File( fname.substring( 0, fname.lastIndexOf( '.' ) ) + ".pass" ).createNewFile();
 		} else {
 			new File( fname.substring( 0, fname.lastIndexOf( '.' ) ) + ".fail" ).createNewFile();

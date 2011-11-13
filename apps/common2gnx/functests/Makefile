@@ -4,7 +4,7 @@
 all:
 
 #	This is the top-level make
-check: example.pass envvar.pass
+check: example.pass envvar.pass element.pass
 
 .tests.pass:
 	java -cp ../../../classes com.steelypip.appginger.functest.FuncTestMain "../cpp/common2gnx" $< 

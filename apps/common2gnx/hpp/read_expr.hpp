@@ -25,6 +25,7 @@ private:
 	Node read_bindings();
 	Node read_conditions();
 	Node read_for();
+	Node read_atomic_expr();
 	std::string read_pkg_name();
 	
 public:

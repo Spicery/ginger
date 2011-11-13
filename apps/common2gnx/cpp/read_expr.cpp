@@ -393,6 +393,43 @@ static void readImportInto( ReadStateClass & r, NodeFactory & imp ) {
 	readTags( r, imp, "into", false );
 }
 
+static Node makeCharSequence( Item item ) {
+	int n = item->nameString().size();
+	if ( n == 0 ) {
+		NodeFactory skip( "seq" );
+		return skip.node();
+	} else {
+		NodeFactory charseq( "seq" );
+		const std::string & s = item->nameString();
+		std::string::const_iterator iter = s.begin();
+		for ( iter = s.begin(); iter != s.end(); ++iter ) {
+			charseq.start( "constant" );
+			charseq.putAttr( "type", "char" );
+			charseq.putAttr( "value", std::string() + *iter );	//	 WRONG
+			charseq.end();
+		}
+		return charseq.node();
+	}
+}
+
+Node ReadStateClass::read_atomic_expr() {
+	ItemFactory ifact = this->item_factory;
+	Item item = ifact->read();
+	TokType fnc = item->tok_type;
+	Role role = item->role;
+	if ( role.IsLiteral() ) {
+		NodeFactory simple( "constant" );
+		simple.putAttr( "type", tok_type_as_type( fnc ) );
+		simple.putAttr( "value", item->nameString() );
+	 	return simple.node();
+	} else if ( fnc == tokty_charseq ) {
+		return makeCharSequence( item );
+	} else if ( fnc == tokty_oparen ) {
+		return this->read_expr_check( tokty_cparen );
+	} else {
+		throw Mishap( "Unexpected token while reading attribute in element" ).culprit( "Token", item->nameString() );
+	}
+}
 
 Node ReadStateClass::prefix_processing() {
 	ItemFactory ifact = this->item_factory;
@@ -435,13 +472,14 @@ Node ReadStateClass::prefix_processing() {
 				return id.node();
 			}
 		}
+		/* Should never get here any more
 		case tokty_string: {
 			//printf( "Copying string %s\n", (char *)item->extra );
 			NodeFactory str( "constant" );
 			str.putAttr( "type", "string" );
 			str.putAttr( "value", item->nameString() );	//	Prolly wrong.
 			return str.node();
-		}
+		}*/
 		// changed for ${VAR} case study
 		case tokty_envvar: {
 			this->check_token( tokty_obrace );
@@ -455,22 +493,7 @@ Node ReadStateClass::prefix_processing() {
 			return envvar.node();
 		}
 		case tokty_charseq: {
-			int n = item->nameString().size();
-			if ( n == 0 ) {
-				NodeFactory skip( "seq" );
-				return skip.node();
-			} else {
-				NodeFactory charseq( "seq" );
-				const std::string & s = item->nameString();
-				std::string::const_iterator iter = s.begin();
-				for ( iter = s.begin(); iter != s.end(); ++iter ) {
-					charseq.start( "constant" );
-					charseq.putAttr( "type", "char" );
-					charseq.putAttr( "value", std::string() + *iter );	//	 WRONG
-					charseq.end();
-				}
-				return charseq.node();
-			}
+			return makeCharSequence( item );
 		}
 		case tokty_val:
         case tokty_var : {
@@ -561,6 +584,59 @@ Node ReadStateClass::prefix_processing() {
 			fn.addNode( args );
 			fn.addNode( body );
 			return fn.node();
+		}
+		case tokty_lt: {
+			NodeFactory element( "seq" );
+			for (;;) {
+				element.start( "sysapp" );
+				element.putAttr( "name", "newElement" );
+				element.start( "sysapp" );
+				element.putAttr( "name", "newAttrMap" );
+				
+				Item item = this->read_id_item();
+				string element_name( item->nameString() );
+				element.start( "constant" );
+				element.putAttr( "type", "string" );
+				element.putAttr( "value", element_name );
+				element.end( "constant" );
+				
+				bool closed = false;
+				for (;;) {
+					if ( this->try_token( tokty_gt ) ) break;
+					if ( this->try_token( tokty_slashgt ) ) { closed = true; break; }
+					Item item = this->read_id_item();
+					element.start( "constant" );
+					element.putAttr( "type", "string" );
+					element.putAttr( "value", item->nameString() );
+					element.end( "constant" );
+					this->check_token( tokty_equal );
+					element.start( "assert" );
+					element.putAttr( "n", "1" );
+					Node value = this->read_atomic_expr();
+					element.addNode( value );
+					element.end( "assert" );
+				}
+				element.end( "sysapp" ); 	// newAttrMap.
+				if ( not closed ) {
+					//	Read the children.
+					while ( not this->try_token( tokty_ltslash ) ) {
+						Node child = this->read_expr();
+						element.addNode( child );
+					}
+					Item item = this->read_id_item();
+					if ( item->nameString() != element_name ) {
+						throw Mishap( "Element close tag does not match open tag" ).culprit( "Open tag", element_name ).culprit( "Close tag", item->nameString() );
+					}
+					this->check_token( tokty_gt );
+				}
+				element.end( "sysapp" );	//	newElement.
+
+				//	Uniquely, at this point in the language, no semi-colon is
+				//	needed if the next item is ANOTHER element.
+				if ( not this->try_token( tokty_lt ) ) break;
+			}				
+			Node answer = element.node();
+			return answer->size() == 1 ? answer->child( 0 ) : answer;
 		}
 		case tokty_package: {
 			NodeFactory pkg( "package" );

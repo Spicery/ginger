@@ -278,10 +278,14 @@ void ItemFactoryClass::readAtSignCharType( int ch ) {
 	//      checks  for  any printable character which is not a
 	//      space or an alphanumeric character.
 	//
+	//	Note that >< is not a legal glue sequence; this allows us
+	//	to write <foo></bar>, for example.
+	int prev_ch;
 	do {
+		prev_ch = ch;
 		this->text.push_back( ch );
 		ch = getc( this->file );
-	} while ( isSignCharType( ch ) );
+	} while ( isSignCharType( ch ) && not( prev_ch == '>' && ch == '<') );
 	ungetc( ch, this->file );
 	it = this->item = itemMap.lookup( this->text );
 	if ( it == NULL ) {

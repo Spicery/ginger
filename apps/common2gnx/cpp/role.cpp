@@ -16,6 +16,6 @@ Role NoRole				= { DONTKNOW, DONTKNOW, NofixCode, NoSpecialCode };
 Role PostfixRole    	= { DONTKNOW, DONTKNOW, PostfixCode, NoSpecialCode };
 Role PrefixRole 		= { DONTKNOW, DONTKNOW, PrefixCode, NoSpecialCode };
 Role SkipRole			= { 0, 0, PrefixCode, NoSpecialCode };
-Role StringRole			= { 0, 1, PrefixCode, NoSpecialCode };
+Role StringRole			= { 0, 1, PrefixCode, LiteralCode };
 Role SuffixOpRole		= { 1, 1, PostfixCode, NoSpecialCode };
 Role UnarySysRole		= { 1, 1, PrefixCode, SysCode };

@@ -62,6 +62,7 @@ const char *tok_type_name( TokType fnc ) {
 	case tokty_int : return "int";
 	case tokty_lt : return "lt";
 	case tokty_lte : return "lte";
+	case tokty_ltslash: return "</";
 	case tokty_maplet: return "maplet";
 	case tokty_mul : return "mul";
 	case tokty_not : return "not";
@@ -77,6 +78,7 @@ const char *tok_type_name( TokType fnc ) {
 	case tokty_present : return "present";
 	case tokty_semi : return "semi";
 	case tokty_skip : return "skip";
+	case tokty_slashgt: return "/>"; 
 	case tokty_string : return "string";
 	case tokty_sub : return "sub";
 	case tokty_syscall : return "syscall";

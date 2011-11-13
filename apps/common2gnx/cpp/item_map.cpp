@@ -65,6 +65,8 @@ ItemMap::ItemMap() {
 	add( ">->",			tokty_syscall,		PrF,		0			);
 	add( ">", 			tokty_gt, 			BSA, 		1300		);
 	add( ">=", 			tokty_gte, 			BSA, 		1500		);
+	add( "</", 			tokty_ltslash,		Clo,		0			);
+	add( "/>",			tokty_slashgt,		Clo,		0			);
 	add( "|",           tokty_bar,          Clo,        0           );
 	add( "||", 			tokty_absor, 		BFo, 		1800		);
 	add( "and", 		tokty_and, 			BFo, 		1700		);

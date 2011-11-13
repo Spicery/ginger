@@ -33,6 +33,7 @@ distclean: clean
 	rm -f apps/tidymnx/Makefile
 	rm -f apps/tidymnx/cpp/Makefile
 	rm -f apps/simplifygnx/Makefile
+	rm -f apps/simplifygnx/cpp/Makefile
 	rm -f apps/simplifygnx/unittest/Makefile
 	rm -f apps/gson2gnx/Makefile
 	rm -f apps/gson2gnx/cpp/Makefile

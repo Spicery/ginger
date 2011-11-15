@@ -305,9 +305,9 @@ public:
 	void open() {
 		if ( this->count++ != 0 ) return;
 		cout << "Content-type: " << ctype << "\r\n\r\n";
-		cout << "<html><head><title>AppGinger</title></head><body>\n";
-		cout << "<H1>AppGinger Version " << VERSION << "</H1>\n";
-		cout << "<H2>Arguments</H2>";
+		//cout << "<html><head><title>AppGinger</title></head><body>\n";
+		//cout << "<H1>AppGinger Version " << VERSION << "</H1>\n";
+		//cout << "<H2>Arguments</H2>";
 	}
 	
 	void close() {
@@ -317,7 +317,7 @@ public:
 			cout << "Empty script\n";
 			cout << "</body></html>\n";
 		} else {
-			cout << "</body></html>\n";
+			//cout << "</body></html>\n";
 		}
 	}
 };

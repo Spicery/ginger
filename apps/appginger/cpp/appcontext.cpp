@@ -100,7 +100,7 @@ void AppContext::initCgi() {
 const char* AppContext::cgiValue( const char * fieldname ) {
 #ifdef RUDECGI
 	const char * answer = this->cgi == NULL ? "" : this->cgi->value( fieldname );
-	cout << "CGI " << fieldname << " = " << answer << endl;
+	//cout << "CGI " << fieldname << " = " << answer << endl;
 	return answer;
 #else
 	return "";

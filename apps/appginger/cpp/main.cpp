@@ -26,6 +26,8 @@
 #include <cstdlib>
 #include <sstream>
 
+#include <ext/stdio_filebuf.h> // __gnu_cxx::stdio_filebuf
+
 #include <unistd.h>
 #include <getopt.h>
 #include <syslog.h>
@@ -316,12 +318,23 @@ public:
 			cout << "<html><head><title>AppGinger</title></head><body>\n";
 			cout << "Empty script\n";
 			cout << "</body></html>\n";
-		} else {
+		//} else {
 			//cout << "</body></html>\n";
 		}
 	}
 };
 
+static string safeFileName( const string & filename ) {
+	string safe;
+	for ( string::const_iterator it = filename.begin(); it != filename.end(); ++it ) {
+		const char ch = *it;
+		if ( not isalnum( ch ) ) {
+			safe.push_back( '\\' );
+		}
+		safe.push_back( ch );
+	}
+	return safe;
+}
 
 /*
 	This is a stub that is left in as a reminder to be expanded later.
@@ -358,6 +371,45 @@ void Main::runAsCgi() {
 					}
 					if ( m->hasAttribute( "content-type" ) ) {
 						response.setContentType( m->attribute( "content-type" ) );
+					}
+					if ( m->hasAttribute( "language" ) ) {
+						//	We are guaranteed to be just after the '>' of
+						//	the option.
+						//	We need to skip forward until we find an end-of-line.
+						getline( filestr, line );
+					
+						if ( m->hasAttribute( "language", "common" ) ) {
+							response.open();
+							const int posn = filestr.tellg();
+							stringstream commstream;
+							//	tail is 1-indexed!
+							commstream << "/usr/bin/tail -c+" << ( posn + 1 );
+							commstream << " "<< safeFileName( *it );
+							commstream << " | common2gnx | simplifygnx -s";
+							string command( commstream.str() );
+							//cout << "Command so far: " << command << endl;
+							FILE * gnxfp = popen( command.c_str(), "r" );
+							if ( gnxfp == NULL ) {
+								throw Ginger::Mishap( "Failed to translate input" );
+							}
+							// ... open the file, with whatever, pipes or who-knows ...
+							// let's build a buffer from the FILE* descriptor ...
+							__gnu_cxx::stdio_filebuf<char> pipe_buf( gnxfp, ios_base::in );
+							// there we are, a regular istream is build upon the buffer :
+							istream stream_pipe_in( &pipe_buf );
+							
+							Ginger::MnxReader gnx_read( stream_pipe_in );
+							for (;;) {
+								shared< Ginger::Mnx > m = gnx_read.readMnx();
+								if ( not m ) break;
+								rcep.execGnx( m, cout );
+							}
+							
+							pclose( gnxfp );
+							break;
+						} else {
+							throw Ginger::Mishap( "Unrecognised language" ).culprit( "Language", m->attribute( "language" ) );
+						}
 					}
 				} else {
 					response.open();

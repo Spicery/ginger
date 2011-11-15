@@ -53,6 +53,10 @@ using namespace std;
 #define APPGINGER		"appginger"
 #define LICENSE_FILE	( INSTALL_LIB "/COPYING" )
 
+#define SIMPLIFYGNX		( INSTALL_BIN "/simplifygnx" )
+#define COMMON2GNX		( INSTALL_BIN "/common2gnx" )
+#define TAIL			"/usr/bin/tail"
+
 /*
 #define GNGMETAINFO		( INSTALL_BIN "/gngmetainfo" )
 */
@@ -307,9 +311,6 @@ public:
 	void open() {
 		if ( this->count++ != 0 ) return;
 		cout << "Content-type: " << ctype << "\r\n\r\n";
-		//cout << "<html><head><title>AppGinger</title></head><body>\n";
-		//cout << "<H1>AppGinger Version " << VERSION << "</H1>\n";
-		//cout << "<H2>Arguments</H2>";
 	}
 	
 	void close() {
@@ -318,8 +319,6 @@ public:
 			cout << "<html><head><title>AppGinger</title></head><body>\n";
 			cout << "Empty script\n";
 			cout << "</body></html>\n";
-		//} else {
-			//cout << "</body></html>\n";
 		}
 	}
 };
@@ -383,9 +382,9 @@ void Main::runAsCgi() {
 							const int posn = filestr.tellg();
 							stringstream commstream;
 							//	tail is 1-indexed!
-							commstream << "/usr/bin/tail -c+" << ( posn + 1 );
+							commstream << TAIL << " -c+" << ( posn + 1 );
 							commstream << " "<< safeFileName( *it );
-							commstream << " | common2gnx | simplifygnx -s";
+							commstream << " | " << COMMON2GNX << " | " << SIMPLIFYGNX << " -s";
 							string command( commstream.str() );
 							//cout << "Command so far: " << command << endl;
 							FILE * gnxfp = popen( command.c_str(), "r" );

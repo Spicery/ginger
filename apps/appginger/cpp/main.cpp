@@ -67,7 +67,7 @@ private:
 
 private:
 	int printLicense( const char * arg ) const;
-	void runAsCgi();
+	void runAsCgi( const bool run_init_cgi );
 	void mainLoop();
 
 public:
@@ -96,6 +96,7 @@ static struct option long_options[] =
         { "help",           optional_argument,      0, 'H' },
         { "metainfo",		no_argument,			0, 'M' },
         { "machine",        required_argument,      0, 'm' },
+        { "script",         no_argument,            0, 'S' },
         { "version",        no_argument,            0, 'V' },
         { "debug",          required_argument,      0, 'd' },
         { "license",        optional_argument,      0, 'L' },
@@ -126,6 +127,7 @@ static void printUsage() {
 	cout << "-C, --cgi             run as CGI script" << endl;
 	cout << "-I, --interactive     run interactively" << endl;
 	cout << "-M, --metainfo        dump meta-info XML file to stdout" << endl;
+	cout << "-S, --script          run as a shell ('shebang') script" << endl;
 	cout << "-T, --terminate       stop on mishap" << endl;
 	cout << "-d, --debug           add debug option (see --help=debug)" << endl;
 	cout << "-h, --help            print out this help info (see --help=help)" << endl;
@@ -297,11 +299,17 @@ static void printMetaInfo() {
 
 class CgiResponse {
 private:
+	bool run_init_cgi;
 	int count;
 	string ctype;
 
 public:
-	CgiResponse() : count( 0 ), ctype( "text/plain" ) {}
+	CgiResponse( const bool run_init_cgi ) : 
+		run_init_cgi( run_init_cgi ),
+		count( 0 ), 
+		ctype( "text/plain" ) 
+	{
+	}
 	
 public:
 	void setContentType( const string & type ) {
@@ -309,12 +317,12 @@ public:
 	}
 
 	void open() {
-		if ( this->count++ != 0 ) return;
+		if ( !run_init_cgi || this->count++ != 0 ) return;
 		cout << "Content-type: " << ctype << "\r\n\r\n";
 	}
 	
 	void close() {
-		if ( count == 0 ) {
+		if ( run_init_cgi && count == 0 ) {
 			cout << "Content-type: text/html\r\n\r\n";
 			cout << "<html><head><title>AppGinger</title></head><body>\n";
 			cout << "Empty script\n";
@@ -338,8 +346,10 @@ static string safeFileName( const string & filename ) {
 /*
 	This is a stub that is left in as a reminder to be expanded later.
 */
-void Main::runAsCgi() {
-	this->context.initCgi();
+void Main::runAsCgi( const bool run_init_cgi ) {
+	if ( run_init_cgi ) {
+		this->context.initCgi();
+	}
 	
 	MachineClass * vm = this->context.newMachine();
 	Package * interactive_pkg = this->context.initInteractivePackage( vm );
@@ -357,7 +367,7 @@ void Main::runAsCgi() {
 		}
 		if ( filestr.good() ) {
 			Ginger::MnxReader content( filestr );
-			CgiResponse response;
+			CgiResponse response( run_init_cgi );
 			for (;;) {
 				shared< Ginger::Mnx > m = content.readMnx();
 				if ( not m ) break;
@@ -443,12 +453,16 @@ int Main::run( int argc, char **argv, char **envp ) {
 	bool meta_info_needed = false;
     for(;;) {
         int option_index = 0;
-        int c = getopt_long( argc, argv, "CIBMH::m:E:Vd:L::f:", long_options, &option_index );
+        int c = getopt_long( argc, argv, "CSIBMH::m:E:Vd:L::f:", long_options, &option_index );
         if ( c == -1 ) break;
         switch ( c ) {
             case 'C': {
                 this->context.setCgiMode();
                 break;
+            }
+            case 'S': {
+            	this->context.setScriptMode();
+            	break;
             }
             case 'I': {
                 this->context.setInteractiveMode();
@@ -543,7 +557,9 @@ int Main::run( int argc, char **argv, char **envp ) {
     if ( this->context.isInteractiveMode() || this->context.isBatchMode() ) {
         this->mainLoop();
     } else if ( this->context.isCgiMode() ) {
-    	this->runAsCgi();
+    	this->runAsCgi( true );
+    } else if ( this->context.isScriptMode() ) {
+    	this->runAsCgi( false );
     } else {
         fprintf( stderr, "Invalid execute mode" );
         return EXIT_FAILURE;

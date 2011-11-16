@@ -41,7 +41,8 @@ private:
 	enum Mode {
 		InteractiveMode,
 		BatchMode,
-		CGIMode
+		CGIMode,
+		ScriptMode
 	} 					mode;
 	int 				machine_impl_num;
 	bool 				dbg_show_code;
@@ -58,9 +59,11 @@ public:
 	void setInteractiveMode() { this->mode = InteractiveMode; this->is_trapping_mishap = true; }
 	void setBatchMode() { this->mode = BatchMode; this->is_trapping_mishap = false; }
 	void setCgiMode() { this->mode = CGIMode; }
+	void setScriptMode() { this->mode = ScriptMode; }
 	bool isInteractiveMode() { return this->mode == InteractiveMode; }
 	bool isBatchMode() { return this->mode == BatchMode; }
 	bool isCgiMode() { return this->mode == CGIMode; }
+	bool isScriptMode() { return this->mode == ScriptMode; }
 	void setGCTrace( bool t ) { this->is_gctrace = t; }
 	bool isGCTrace() { return this->is_gctrace; }
 	void setTrappingMishap( bool t ) { this->is_trapping_mishap = t; }

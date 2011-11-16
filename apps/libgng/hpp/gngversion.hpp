@@ -19,6 +19,6 @@
 #ifndef GNGVERSION_HPP
 #define GNGVERSION_HPP
 
-#define APPGINGER_VERSION "0.7.0"
+#include "config.h"
 
 #endif

@@ -36,6 +36,7 @@
 	#include <rude/cgi.h>
 #endif
 
+#include "gngversion.hpp"
 #include "mnx.hpp"
 
 #include "appcontext.hpp"
@@ -50,7 +51,6 @@
 
 using namespace std;
 
-#define APPGINGER		"appginger"
 #define LICENSE_FILE	( INSTALL_LIB "/COPYING" )
 
 #define SIMPLIFYGNX		( INSTALL_BIN "/simplifygnx" )
@@ -120,7 +120,7 @@ void Main::printGPL( const char * start, const char * end ) const {
 }
 
 static void printUsage() {
-	cout << "Usage :  " << APPGINGER << " [options] [files]" << endl << endl;
+	cout << "Usage :  " << PACKAGE_NAME << " [options] [files]" << endl << endl;
 	cout << "OPTION                SUMMARY" << endl;
 	cout << "-B, --batch           run in batch mode" << endl;
 	cout << "-C, --cgi             run as CGI script" << endl;
@@ -206,7 +206,7 @@ int Main::printLicense( const char * arg ) const {
 }
 
 static void printWelcomeMessage() {
-	cout << "AppGinger " << VERSION << ", Copyright (c) 2010  Stephen Leach" << endl;
+	cout << PACKAGE_NAME << ": " << PACKAGE_VERSION << ", Copyright (c) 2010  Stephen Leach" << endl;
 	cout << "  +----------------------------------------------------------------------+" << endl;
 	cout << "  | This program comes with ABSOLUTELY NO WARRANTY. It is free software, |" << endl;
 	cout << "  | and you are welcome to redistribute it under certain conditions.     |" << endl;
@@ -257,7 +257,7 @@ static void printStdInfo() {
 
 static void printBuildInfo() {
 	cout << "  <release>" << endl;
-	cout << "    <version "; printAttr( "number", VERSION ); cout << "/>" << endl;
+	cout << "    <version "; printAttr( "number", APPGINGER_VERSION ); cout << "/>" << endl;
 	cout << "    <build ";
 	printAttr( "file", __FILE__ );
 	printAttr( "date", __DATE__ ); 
@@ -502,7 +502,7 @@ int Main::run( int argc, char **argv, char **envp ) {
                 break;
             }
             case 'V': {
-                cout << "appginger: version " << this->context.version() << " (" << __DATE__ << " " << __TIME__ << ")" << endl;
+                cout << APPGINGER_NAME ": version " << this->context.version() << " (" << __DATE__ << " " << __TIME__ << ")" << endl;
                 return EXIT_SUCCESS;
             }
             case 'L': {
@@ -553,7 +553,7 @@ int Main::run( int argc, char **argv, char **envp ) {
 
 
 int main( int argc, char **argv, char **envp ) {
-	openlog( APPGINGER, 0, LOG_LOCAL2 );
+	openlog( APPGINGER_NAME, 0, LOG_LOCAL2 );
 	setlogmask( LOG_UPTO( LOG_INFO ) );
 	try {
 		Main main;

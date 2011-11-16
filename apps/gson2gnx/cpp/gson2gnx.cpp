@@ -375,7 +375,7 @@ public:
 					exit( EXIT_SUCCESS );   //  Is that right?              
 				}
 				case 'V': {
-					cout << GSON2GNX << ": version " << this->version() << " (" << __DATE__ << " " << __TIME__ << ") part of AppGinger version " << APPGINGER_VERSION << endl;
+					cout << GSON2GNX << ": version " << this->version() << " (" << __DATE__ << " " << __TIME__ << ") part of " << PACKAGE_NAME << " version " << PACKAGE_VERSION << endl;
 					exit( EXIT_SUCCESS );   //  Is that right?
 				}
 				case '?': {

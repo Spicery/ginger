@@ -30,7 +30,8 @@
 
 #include "gngversion.hpp"
 
-#define VERSION APPGINGER_VERSION
+#define APPGINGER_NAME		"appginger"
+#define APPGINGER_VERSION	PACKAGE_VERSION
 
 class MachineClass;
 class Package;
@@ -66,7 +67,7 @@ public:
 	bool isTrappingMishap() { return this->is_trapping_mishap; }
 	void setMachineImplNum( const int n ) { this->machine_impl_num = n; }
 	int getMachineImplNum() { return this->machine_impl_num; }
-	const char * version() { return VERSION; }
+	const char * version() { return APPGINGER_VERSION; }
 	void setShowCode() { this->dbg_show_code = true; }
 	bool getShowCode() { return this->dbg_show_code; }
 	std::list< std::string > & getProjectFolderList() { return this->project_folder_list; }

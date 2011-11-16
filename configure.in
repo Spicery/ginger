@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.61)
-AC_INIT([appginger],[0.6.1],[http://trac6.assembla.com/ginger/],[appginger])
+AC_INIT([Ginger],[0.7],[http://trac6.assembla.com/ginger/],[ginger])
 AC_CONFIG_SRCDIR([appginger.png])
 AC_CONFIG_HEADER([config.h])
 

@@ -838,9 +838,9 @@ public:
 				element.name() = "sysfn";
 				this->changed = true;
 			}
-		} else if ( x == "app" ) {
-			if ( element.size() == 2 && element.child( 0 )->name() == "sysfn" ) {
-				const string name( element.child( 0 )->attribute( "name" ) );
+		} else if ( x == "app" && element.size() == 2 ) {
+			if ( element.child( 0 )->hasName( "constant" ) && element.child( 0 )->hasAttribute( "type", "sysfn" ) ) {
+				const string name( element.child( 0 )->attribute( "value" ) );
 				element.name() = "sysapp";
 				element.clearAllAttributes();
 				element.putAttribute( "name", name );

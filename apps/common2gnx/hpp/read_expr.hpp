@@ -1,9 +1,12 @@
 #ifndef READ_EXPR_H
 #define READ_EXPR_H
 
+#include "mnx.hpp"
+#include "shared.hpp"
+typedef shared< Ginger::Mnx > Node;
+
 #include "toktype.hpp"
 #include "item_factory.hpp"
-#include "node.hpp"
 
 class ReadStateClass {
 

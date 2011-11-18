@@ -16,31 +16,44 @@
 
 using namespace std;
 
+typedef Ginger::MnxBuilder NodeFactory;
 
 static Node makeApp( Node lhs, Node rhs ) {
-	if ( lhs->elementName() == "sysfn" ) {
-		NodeFactory sysapp( "sysapp" );
-		std::string name = lhs->get( "value" );
-		sysapp.putAttr( "name", name );
-		sysapp.addNode( rhs );
-		return sysapp.node();
+	if ( lhs->name() == "sysfn" ) {
+		NodeFactory sysapp;
+		sysapp.start( "sysapp" );
+		std::string name = lhs->attribute( "value" );
+		sysapp.put( "name", name );
+		sysapp.add( rhs );
+		sysapp.end();
+		return sysapp.build();
 	} else {
-		NodeFactory app( "app" );
-		app.addNode( lhs );
-		app.addNode( rhs );
-		return app.node();
+		NodeFactory app;
+		app.start( "app" );
+		app.add( lhs );
+		app.add( rhs );
+		app.end();
+		return app.build();
 	}
 }
 
+static void updateAsPattern( Node node ) {
+	if ( node->hasName( "id" ) ) {
+		node->name() = "var";
+		node->putAttribute( "protected", "true" );
+	}
+}
 
 Node ReadStateClass::read_id() {
 	Item it = this->item_factory->read();
 	if ( it->tok_type != tokty_id ) {
 		throw Ginger::Mishap( "Identifier expected" ).culprit( "Found", it->nameString() );
 	}
-	NodeFactory id( "id" );
-	id.putAttr( "name", it->nameString() );
-	return id.node();
+	NodeFactory id;
+	id.start( "id" );
+	id.put( "name", it->nameString() );
+	id.end();
+	return id.build();
 }
 
 string ReadStateClass::read_pkg_name() {
@@ -106,8 +119,10 @@ bool ReadStateClass::try_token( TokType fnc ) {
 Node ReadStateClass::read_stmnts() {
 	Node e = this->read_opt_expr_prec( prec_max );
 	if ( not e ) {
-		NodeFactory skip( "seq" );
-		return skip.node();
+		NodeFactory skip;
+		skip.start( "seq" );
+		skip.end();
+		return skip.build();
 	} else {
 		return e;
 	}
@@ -142,47 +157,59 @@ Node ReadStateClass::postfix_processing( Node lhs, Item item, int prec ) {
 	Role role = item->role;
 	TokType fnc = item->tok_type;
 	if ( role.IsPattern() ) {
-		lhs->updateAsPattern();
+		updateAsPattern( lhs );
 		switch ( fnc ) {
 			case tokty_bind: {
 				Node rhs = this->read_expr_prec( prec );
-				NodeFactory bind( "bind" );
-				bind.addNode( lhs );
-				bind.addNode( rhs );
-				return bind.node();
+				NodeFactory bind;
+				bind.start( "bind" );
+				bind.add( lhs );
+				bind.add( rhs );
+				bind.end();
+				return bind.build();
 			}
 			case tokty_from: {				
 				Node from_expr = this->read_expr();
 				this->check_token( tokty_to );
 				Node to_expr = this->read_expr_prec( prec );
-				NodeFactory node( "from" );
-				node.addNode( lhs );
-				node.addNode( from_expr );
-				node.addNode( to_expr );
-				return node.node();
+				NodeFactory node;
+				node.start( "from" );
+				node.add( lhs );
+				node.add( from_expr );
+				node.add( to_expr );
+				node.end();
+				return node.build();
 			}
 			case tokty_in: {				
 				Node in_expr = this->read_expr();
-				NodeFactory node( "in" );
-				node.addNode( lhs );
-				node.addNode( in_expr );
-				return node.node();
+				NodeFactory node;
+				node.start( "in" );
+				node.add( lhs );
+				node.add( in_expr );
+				node.end();
+				return node.build();
 			}
 			default: 
 				throw;
 		}
 	} else if ( role.IsBinary() ) {
 		if ( role.IsSys() ) {
-			NodeFactory a( "sysapp" );
-			a.putAttr( "name", tok_type_as_sysapp( fnc ) );
-			a.addNode( lhs );
-			a.addNode( this->read_expr_prec( prec ) );
-			return a.node();
+			NodeFactory a;
+			a.start( "sysapp" );
+			a.put( "name", tok_type_as_sysapp( fnc ) );
+			a.add( lhs );
+			Node x = this->read_expr_prec( prec );
+			a.add( x );
+			a.end();
+			return a.build();
 		} else if ( role.IsForm() ) {
-			NodeFactory a( tok_type_as_tag( fnc ) );
-			a.addNode( lhs );
-			a.addNode( this->read_expr_prec( prec ) );
-			return a.node();			
+			NodeFactory a;
+			a.start( tok_type_as_tag( fnc ) );
+			a.add( lhs );
+			Node x = this->read_expr_prec( prec );
+			a.add( x );
+			a.end();
+			return a.build();			
 		} else {
 			throw;
 		}
@@ -193,10 +220,12 @@ Node ReadStateClass::postfix_processing( Node lhs, Item item, int prec ) {
 				if ( not( rhs ) ) {
 					return lhs;
 				} else {
-					NodeFactory s( "seq" );
-					s.addNode( lhs );
-					s.addNode( rhs );
-					return s.node();
+					NodeFactory s;
+					s.start( "seq" );
+					s.add( lhs );
+					s.add( rhs );
+					s.end();
+					return s.build();
 				}
 			}
 			case tokty_oparen: {
@@ -207,27 +236,33 @@ Node ReadStateClass::postfix_processing( Node lhs, Item item, int prec ) {
 			case tokty_dot: {
 				Node func = this->read_expr_prec( prec_tight );
 				Node rhs = this->read_opt_expr_prec( prec );			
-				NodeFactory seq( "seq" );
-				seq.addNode( lhs );
-				if ( ! not rhs ) { seq.addNode( rhs ); }
-				return makeApp( func, seq.node() );
+				NodeFactory seq;
+				seq.start( "seq" );
+				seq.add( lhs );
+				if ( ! not rhs ) { seq.add( rhs ); }
+				seq.end();
+				return makeApp( func, seq.build() );
 			}
 			case tokty_int: {
-				NodeFactory add( "add" );
-				add.addNode( lhs );
+				NodeFactory add;
+				add.start( "add" );
+				add.add( lhs );
 				add.start( "constant" );
-				add.putAttr( "type", "int" );
-				add.putAttr( "value", item->nameString() );
-				add.end();	
-				Node t = add.node();
+				add.put( "type", "int" );
+				add.put( "value", item->nameString() );
+				add.end();
+				add.end();
+				Node t = add.build();
 				//fprintf( stderr, "DEBUG arity %d\n", term_arity( t ) );
 				return t;
 			}
 			case tokty_explode: {
-				NodeFactory expl( "sysapp" );
-				expl.putAttr( "name", "explode" );
-				expl.addNode( lhs );
-				Node t = expl.node();
+				NodeFactory expl;
+				expl.start( "sysapp" );
+				expl.put( "name", "explode" );
+				expl.add( lhs );
+				expl.end();
+				Node t = expl.build();
 				return t;
 			}
 			default: {
@@ -240,11 +275,11 @@ Node ReadStateClass::postfix_processing( Node lhs, Item item, int prec ) {
 
 static void predicate( TokType sense, NodeFactory & ifunless, Node pred ) {
 	if ( sense == tokty_if ) {
-		ifunless.addNode( pred );
+		ifunless.add( pred );
 	} else {
 		ifunless.start( "sysval" );
-		ifunless.putAttr( "name", "not" );
-		ifunless.addNode( pred );
+		ifunless.put( "name", "not" );
+		ifunless.add( pred );
 		ifunless.end();
 	}
 }
@@ -256,17 +291,22 @@ Node ReadStateClass::read_if( TokType sense, TokType closer ) {
 	}
 	Node then_part = this->read_stmnts();
 	if ( this->try_token( tokty_else ) ) {	
-		NodeFactory ifunless( "if" );
+		NodeFactory ifunless;
+		ifunless.start( "if" );
 		predicate( sense, ifunless, pred );
-		ifunless.addNode( then_part );
-		ifunless.addNode( this->read_stmnts_check( closer ) );
-		return ifunless.node();
+		ifunless.add( then_part );
+		Node x = this->read_stmnts_check( closer );
+		ifunless.add( x );
+		ifunless.end();
+		return ifunless.build();
 		//return term_new_basic3( sense, pred, then_part, this->read_stmnts_check( tokty_endif ) );
 	} else if ( this->try_token( closer ) ) {
-		NodeFactory ifunless( "if" );
+		NodeFactory ifunless;
+		ifunless.start( "if" );
 		predicate( sense, ifunless, pred );
-		ifunless.addNode( then_part );
-		return ifunless.node();
+		ifunless.add( then_part );
+		ifunless.end();
+		return ifunless.build();
 		//return term_new_basic2( sense, pred, then_part );
 	} else {
 		TokType new_sense;
@@ -276,11 +316,14 @@ Node ReadStateClass::read_if( TokType sense, TokType closer ) {
 			this->check_token( tokty_elseunless );
 			new_sense = tokty_unless;
 		}
-		NodeFactory ifunless( "if" );
+		NodeFactory ifunless;
+		ifunless.start( "if" );
 		predicate( sense, ifunless, pred );
-		ifunless.addNode( then_part );
-		ifunless.addNode( this->read_if( new_sense, closer ) );
-		return ifunless.node();
+		ifunless.add( then_part );
+		Node x = this->read_if( new_sense, closer );
+		ifunless.add( x );
+		ifunless.end();
+		return ifunless.build();
 		//return term_new_basic3( sense, pred, then_part, this->read_if( new_sense, closer ) );
 	}
 }
@@ -289,10 +332,12 @@ Node ReadStateClass::read_syscall() {
 	ItemFactory ifact = this->item_factory;	
 	Item it = ifact->read();
 	if ( it->tok_type == tokty_id ) {
-		NodeFactory sc( "constant" );
-		sc.putAttr( "type", "sysfn" );
-		sc.putAttr( "value", it->nameString() );
-		return sc.node();	//term_new_ref( tokty_syscall, (Ref)sc );
+		NodeFactory sc;
+		sc.start( "constant" );
+		sc.put( "type", "sysfn" );
+		sc.put( "value", it->nameString() );
+		sc.end();
+		return sc.build();	//term_new_ref( tokty_syscall, (Ref)sc );
 	} else {
 		throw Ginger::Mishap( "Invalid token after >-> (syscall) arrow" ).culprit( it->nameString() );
 	}
@@ -302,41 +347,43 @@ Node ReadStateClass::read_for() {
 	Node query = this->read_query();
 	this->check_token( tokty_do );
 	Node body = this->read_stmnts_check( tokty_endfor );
-	NodeFactory for_node( "for" );
-	for_node.addNode( query );
-	for_node.addNode( body );
-	return for_node.node();
+	NodeFactory for_node;
+	for_node.start( "for" );
+	for_node.add( query );
+	for_node.add( body );
+	for_node.end();
+	return for_node.build();
 }
 
 //	ap is only passed in for error reporting.
 static void squash( NodeFactory acc, Node rhs ) {
 	const std::string 
-	name = rhs->elementName();
+	name = rhs->name();
 	if ( name == "seq" ) {
 		int n = rhs->size();
 		for ( int i = 0; i < n; i++ ) {
 			squash( acc, rhs->child( i ) );
 		}
 	} else if ( name == "var" ) {
-		acc.addNode( rhs );
+		acc.add( rhs );
 	} else {
 		throw Ginger::Mishap( "Invalid form for definition" );
 	}
 }
 
 static void flatten( Node & ap, Node & fn, Node & args ) {
-	if ( 
-		ap->isElement() && 
-		ap->elementName() == std::string( "app" ) 
-	) {
+	if ( ap->name() == "app" ) {
 		fn = ap->child( 0 );
 		Node rhs = ap->child( 1 );
-		NodeFactory acc( "seq" );
+		NodeFactory acc;
+		acc.start( "seq" );
 		squash( acc, ap->child( 1 ) ); 
-		args = acc.node();
+		acc.end();
+		args = acc.build();
 	} else {
 		Ginger::Mishap mishap( "Invalid use of 'define'" );
-		if ( ap->elementName() == "sysapp" ) {
+		mishap.culprit( "Name", ap->name() );
+		if ( ap->name() == "sysapp" ) {
 			mishap.culprit( "Reason", "Trying to redefine a system function" );
 		}
 		throw mishap;
@@ -371,7 +418,7 @@ static void readTags( ReadStateClass & r, NodeFactory & imp, const char * prefix
 				Item item = ifact->read();
 				ostringstream s;
 				s << prefix << i;
-				imp.putAttr( s.str(), item->nameString() );
+				imp.put( s.str(), item->nameString() );
 				
 				item = ifact->read();
 				if ( item->tok_type != tokty_comma ) {
@@ -381,7 +428,7 @@ static void readTags( ReadStateClass & r, NodeFactory & imp, const char * prefix
 			}	
 		}
 	} else if ( add_default ) {
-		imp.putAttr( prefix, "public" );
+		imp.put( prefix, "public" );
 	}
 }
 
@@ -396,19 +443,23 @@ static void readImportInto( ReadStateClass & r, NodeFactory & imp ) {
 static Node makeCharSequence( Item item ) {
 	int n = item->nameString().size();
 	if ( n == 0 ) {
-		NodeFactory skip( "seq" );
-		return skip.node();
+		NodeFactory skip;
+		skip.start( "seq" );
+		skip.end();
+		return skip.build();
 	} else {
-		NodeFactory charseq( "seq" );
+		NodeFactory charseq;
+		charseq.start( "seq" );
 		const std::string & s = item->nameString();
 		std::string::const_iterator iter = s.begin();
 		for ( iter = s.begin(); iter != s.end(); ++iter ) {
 			charseq.start( "constant" );
-			charseq.putAttr( "type", "char" );
-			charseq.putAttr( "value", std::string() + *iter );	//	 WRONG
+			charseq.put( "type", "char" );
+			charseq.put( "value", std::string() + *iter );	//	 WRONG
 			charseq.end();
 		}
-		return charseq.node();
+		charseq.end();
+		return charseq.build();
 	}
 }
 
@@ -418,10 +469,12 @@ Node ReadStateClass::read_atomic_expr() {
 	TokType fnc = item->tok_type;
 	Role role = item->role;
 	if ( role.IsLiteral() ) {
-		NodeFactory simple( "constant" );
-		simple.putAttr( "type", tok_type_as_type( fnc ) );
-		simple.putAttr( "value", item->nameString() );
-	 	return simple.node();
+		NodeFactory simple;
+		simple.start( "constant" );
+		simple.put( "type", tok_type_as_type( fnc ) );
+		simple.put( "value", item->nameString() );
+		simple.end();
+	 	return simple.build();
 	} else if ( fnc == tokty_charseq ) {
 		return makeCharSequence( item );
 	} else if ( fnc == tokty_oparen ) {
@@ -438,20 +491,27 @@ Node ReadStateClass::prefix_processing() {
 	Role role = item->role;
 
 	if ( role.IsLiteral() ) {
-		NodeFactory simple( "constant" );
-		simple.putAttr( "type", tok_type_as_type( fnc ) );
-		simple.putAttr( "value", item->nameString() );
-	 	return simple.node();
+		NodeFactory simple;
+		simple.start( "constant" );
+		simple.put( "type", tok_type_as_type( fnc ) );
+		simple.put( "value", item->nameString() );
+		simple.end();
+	 	return simple.build();
 	} else if ( role.IsUnary() ) {
 		if ( role.IsForm() ) {
-			NodeFactory unary( tok_type_as_tag( fnc ) );
-			unary.addNode( this->read_expr_prec( item->precedence ) );
-			return unary.node();
+			NodeFactory unary;
+			unary.start( tok_type_as_tag( fnc ) );
+			Node x = this->read_expr_prec( item->precedence );
+			unary.add( x );
+			unary.end();
+			return unary.build();
 		} else if ( role.IsSys() ) {
-			NodeFactory sf( "constant" );
-			sf.putAttr( "type", "sysfn" );
-			sf.putAttr( "value", tok_type_as_sysapp( fnc ) );
-			return sf.node();
+			NodeFactory sf;
+			sf.start( "constant" );
+			sf.put( "type", "sysfn" );
+			sf.put( "value", tok_type_as_sysapp( fnc ) );
+			sf.end();
+			return sf.build();
 		} else {
 			throw;	// 	Unreachable.
 		}
@@ -462,81 +522,94 @@ Node ReadStateClass::prefix_processing() {
 			std::string & name = item->nameString();
 			SysConst * sysc = lookupSysConst( name );
 			if ( sysc != NULL ) {
-				NodeFactory constant( "constant" );
-				constant.putAttr( "type", sysc->tag );
-				constant.putAttr( "value", sysc->value );
-				return constant.node();
+				NodeFactory constant;
+				constant.start( "constant" );
+				constant.put( "type", sysc->tag );
+				constant.put( "value", sysc->value );
+				constant.end();
+				return constant.build();
 			} else {
-				NodeFactory id( this->pattern_mode ? "var" : "id" );
-				id.putAttr( "name", name );
-				return id.node();
+				NodeFactory id;
+				id.start( this->pattern_mode ? "var" : "id" );
+				id.put( "name", name );
+				id.end();
+				return id.build();
 			}
 		}
-		/* Should never get here any more
-		case tokty_string: {
-			//printf( "Copying string %s\n", (char *)item->extra );
-			NodeFactory str( "constant" );
-			str.putAttr( "type", "string" );
-			str.putAttr( "value", item->nameString() );	//	Prolly wrong.
-			return str.node();
-		}*/
 		// changed for ${VAR} case study
 		case tokty_envvar: {
 			this->check_token( tokty_obrace );
-			NodeFactory envvar( "sysapp" );
-			envvar.putAttr( "name", "sysGetEnv" );
+			NodeFactory envvar;
+			envvar.start( "sysapp" );
+			envvar.put( "name", "sysGetEnv" );
 			envvar.start( "constant" );
-			envvar.putAttr( "type", "string" );
-			envvar.putAttr( "value", ifact->read()->nameString() );
+			envvar.put( "type", "string" );
+			envvar.put( "value", ifact->read()->nameString() );
 			envvar.end();		
 			this->check_token( tokty_cbrace );
-			return envvar.node();
+			envvar.end();
+			return envvar.build();
 		}
 		case tokty_charseq: {
 			return makeCharSequence( item );
 		}
 		case tokty_val:
         case tokty_var : {
-	        NodeFactory bind( "bind" );
-	        NodeFactory var( "var" );
+	        NodeFactory bind;
+	        bind.start( "bind" );
+	        NodeFactory var;
+	        var.start( "var" );
 	        readTags( *this, var, "tag", true );
 	        Item item = this->read_id_item();
-	        var.putAttr( "name", item->nameString() );
+	        var.put( "name", item->nameString() );
 	        if ( fnc == tokty_val ) {
-	        	var.putAttr( "protected", "true" );
+	        	var.put( "protected", "true" );
 	        }
-	        bind.addNode( var.node() );
+	        var.end();
+	        Node v = var.build();
+	        bind.add( v );
 	        this->check_token( tokty_bind );
-	        bind.addNode( this->read_expr() );
-	        return bind.node();
+	        Node x = this->read_expr();
+	        bind.add( x );
+	        bind.end();
+	        return bind.build();
         }
 		case tokty_oparen: {
 			return this->read_stmnts_check( tokty_cparen );
 		}
 		case tokty_obracket: {
-			NodeFactory list( "sysapp" );
+			NodeFactory list;
+			list.start( "sysapp" );
 			Node stmnts = this->read_stmnts();
 			if ( this->try_token( tokty_bar ) ) {
-				list.putAttr( "name", "newListOnto" );
-				list.addNode( stmnts );
-				list.addNode( this->read_stmnts_check( tokty_cbracket ) );
+				list.put( "name", "newListOnto" );
+				list.add( stmnts );
+				Node x = this->read_stmnts_check( tokty_cbracket );
+				list.add( x );
 			} else {
 				this->check_token( tokty_cbracket );
-				list.putAttr( "name", "newList" );
-				list.addNode( stmnts );
+				list.put( "name", "newList" );
+				list.add( stmnts );
 			}
-			return list.node();
+			list.end();
+			return list.build();
 		}
 		case tokty_obrace: {
-			NodeFactory list( "vector" );
-			list.addNode( this->read_stmnts_check( tokty_cbrace ) );
-			return list.node();
+			NodeFactory list;
+			list.start( "vector" );
+			Node x = this->read_stmnts_check( tokty_cbrace );
+			list.add( x );
+			list.end();
+			return list.build();
 		}
 		case tokty_fat_obrace: {
-			NodeFactory list( "sysapp" );
-			list.putAttr( "name", "newMap" );
-			list.addNode( this->read_stmnts_check( tokty_fat_cbrace ) );
-			return list.node();
+			NodeFactory list;
+			list.start( "sysapp" );
+			list.put( "name", "newMap" );
+			Node x = this->read_stmnts_check( tokty_fat_cbrace );
+			list.add( x );
+			list.end();
+			return list.build();
 		}
 		case tokty_unless: {
 			return this->read_if( tokty_unless, tokty_endunless );
@@ -557,20 +630,22 @@ Node ReadStateClass::prefix_processing() {
 			Node fn;
 			Node args;
 			flatten( ap, fn, args );
-			const std::string name = fn->get( "name" );
+			const std::string name = fn->attribute( "name" );
 			this->check_token( tokty_arrow );
 			Node body = this->read_stmnts_check( tokty_enddefine );
-			NodeFactory def( "bind" );
+			NodeFactory def;
+			def.start( "bind" );
 			def.start( "var" );
-			def.putAttr( "name", name );
-			def.putAttr( "protected", "true" );
+			def.put( "name", name );
+			def.put( "protected", "true" );
 			def.end();
 			def.start( "fn" );
-			def.putAttr( "name", name );
-			def.addNode( args );
-			def.addNode( body );
+			def.put( "name", name );
+			def.add( args );
+			def.add( body );
 			def.end();
-			return def.node();
+			def.end();
+			return def.build();
 			//return term_new_basic3( tokty_define, fn, args, body );
 		}
 		case tokty_fn: {
@@ -580,25 +655,28 @@ Node ReadStateClass::prefix_processing() {
 			this->check_token( tokty_arrow );
 			//args = just_args( args );
 			Node body = this->read_stmnts_check( tokty_endfn );
-			NodeFactory fn( "fn" );
-			fn.addNode( args );
-			fn.addNode( body );
-			return fn.node();
+			NodeFactory fn;
+			fn.start( "fn" );
+			fn.add( args );
+			fn.add( body );
+			fn.end();
+			return fn.build();
 		}
 		case tokty_lt: {
-			NodeFactory element( "seq" );
+			NodeFactory element;
+			element.start( "seq" );
 			for (;;) {
 				element.start( "sysapp" );
-				element.putAttr( "name", "newElement" );
+				element.put( "name", "newElement" );
 				element.start( "sysapp" );
-				element.putAttr( "name", "newAttrMap" );
+				element.put( "name", "newAttrMap" );
 				
 				Item item = this->read_id_item();
 				string element_name( item->nameString() );
 				element.start( "constant" );
-				element.putAttr( "type", "string" );
-				element.putAttr( "value", element_name );
-				element.end( "constant" );
+				element.put( "type", "string" );
+				element.put( "value", element_name );
+				element.end();
 				
 				bool closed = false;
 				for (;;) {
@@ -606,22 +684,22 @@ Node ReadStateClass::prefix_processing() {
 					if ( this->try_token( tokty_slashgt ) ) { closed = true; break; }
 					Item item = this->read_id_item();
 					element.start( "constant" );
-					element.putAttr( "type", "string" );
-					element.putAttr( "value", item->nameString() );
-					element.end( "constant" );
+					element.put( "type", "string" );
+					element.put( "value", item->nameString() );
+					element.end();
 					this->check_token( tokty_equal );
 					element.start( "assert" );
-					element.putAttr( "n", "1" );
+					element.put( "n", "1" );
 					Node value = this->read_atomic_expr();
-					element.addNode( value );
-					element.end( "assert" );
+					element.add( value );
+					element.end();
 				}
-				element.end( "sysapp" ); 	// newAttrMap.
+				element.end(); 	// newAttrMap.
 				if ( not closed ) {
 					//	Read the children.
 					while ( not this->try_token( tokty_ltslash ) ) {
 						Node child = this->read_expr();
-						element.addNode( child );
+						element.add( child );
 					}
 					Item item = this->read_id_item();
 					if ( item->nameString() != element_name ) {
@@ -629,77 +707,84 @@ Node ReadStateClass::prefix_processing() {
 					}
 					this->check_token( tokty_gt );
 				}
-				element.end( "sysapp" );	//	newElement.
+				element.end();	//	newElement.
 
 				//	Uniquely, at this point in the language, no semi-colon is
 				//	needed if the next item is ANOTHER element.
 				if ( not this->try_token( tokty_lt ) ) break;
-			}				
-			Node answer = element.node();
+			}			
+			element.end();
+			Node answer = element.build();
 			return answer->size() == 1 ? answer->child( 0 ) : answer;
 		}
 		case tokty_package: {
-			NodeFactory pkg( "package" );
+			NodeFactory pkg;
+			pkg.start( "package" );
 			string url = this->read_pkg_name();
-			pkg.putAttr( "url", url );
+			pkg.put( "url", url );
 			this->check_token( tokty_semi );
 			Node body = this->read_stmnts_check( tokty_endpackage );
-			pkg.addNode( body );
-			return pkg.node();
+			pkg.add( body );
+			pkg.end();
+			return pkg.build();
 		}
 		case tokty_import: {
-			NodeFactory imp( "import" );
+			NodeFactory imp;
+			imp.start( "import" );
 			bool pervasive, qualified;
 			
 			readImportQualifiers( *this, pervasive, qualified );
-			imp.putAttr( "pervasive", pervasive ? "true" : "false" );
-			imp.putAttr( "qualified", qualified ? "true" : "false" );
+			imp.put( "pervasive", pervasive ? "true" : "false" );
+			imp.put( "qualified", qualified ? "true" : "false" );
 			
 			readImportMatch( *this, imp );
 			
 			this->check_token( tokty_from );
 			string url = this->read_pkg_name();
-			imp.putAttr( "from", url );
+			imp.put( "from", url );
 
 			if ( this->try_name( "alias" ) ) {
 	        	Item item = this->read_id_item();
-				imp.putAttr( "alias", item->nameString() );
+				imp.put( "alias", item->nameString() );
 			}
 			
 			if ( this->try_name( "into" ) ) {
 				readImportInto( *this, imp );
 			}
 			
-			return imp.node();
+			imp.end();
+			return imp.build();
 		}
 		default: {
 		}
 	}
 	ifact->unread();
-    return shared< NodeClass >();
+    return Node();
 }
 
 Node ReadStateClass::read_opt_expr_prec( int prec ) {
 	ItemFactory ifact = this->item_factory;
 	Node e = this->prefix_processing();
-	if ( not e ) return shared< NodeClass >();
+	if ( not e ) return Node();
 	for(;;){
 	    int q;
 		Item it = ifact->peek();
 		if ( it->item_is_neg_num() ) {
-			NodeFactory t( "sysapp" );
-			t.putAttr( "name", "+" );
-			t.addNode( e );			
+			NodeFactory t;
+			t.start( "sysapp" );
+			t.put( "name", "+" );
+			t.add( e );			
 			if ( it->tok_type == tokty_int ) {
 				t.start( "constant" );
-				t.putAttr( "type", "int" );
-				t.putAttr( "value", it->nameString() );
+				t.put( "type", "int" );
+				t.put( "value", it->nameString() );
 				t.end();
 			} else {
 				throw Ginger::Mishap( "Only integers supported so far" ).culprit( "Item", it->nameString() );
 			}
 			//fprintf( stderr, "DEBUG arity %d\n", term_arity( t ) );
-			e = t.node();
+			t.end();
+			e = t.build();
 			ifact->drop();
 		} else if ( it->item_is_postfix() ) {
 	        q = it->precedence;

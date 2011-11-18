@@ -27,7 +27,7 @@ using namespace std;
 		FILE * in;
 		if ( argc == 2 ) {
 			in = fopen( argv[1], "r" ); 
-			if ( in == NULL ) throw Mishap( "Cannot open file" ).culprit( "Filename", argv[1] );
+			if ( in == NULL ) throw Ginger::Mishap( "Cannot open file" ).culprit( "Filename", argv[1] );
 			syslog( LOG_INFO, "Converting %s", argv[1] );
 		} else {
 			in = stdin;
@@ -44,7 +44,7 @@ using namespace std;
 				input.checkSemi();
 			};
 		} 
-	} catch ( Mishap & m ) {
+	} catch ( Ginger::Mishap & m ) {
 		m.gnxReport();
 		return EXIT_FAILURE;
 	}
@@ -164,7 +164,7 @@ public:
 		}
 		
 		if ( argc > 0 ) {
-			throw Mishap( "Unused trailing argument" ).culprit( "Unused", argv[ argc - 1 ] );
+			throw Ginger::Mishap( "Unused trailing argument" ).culprit( "Unused", argv[ argc - 1 ] );
 		}
 
 	}
@@ -260,11 +260,11 @@ public:
 			} else {
 				const char * fname = input_file_name.c_str();
 				FILE * in = fopen( fname, "r" ); 
-				if ( in == NULL ) throw Mishap( "Cannot open file" ).culprit( "Filename", fname );
+				if ( in == NULL ) throw Ginger::Mishap( "Cannot open file" ).culprit( "Filename", fname );
 				run( in );
 			}
 	
-		} catch ( Mishap & m ) {
+		} catch ( Ginger::Mishap & m ) {
 			m.gnxReport();
 			return EXIT_FAILURE;
 		}
@@ -278,7 +278,7 @@ int main( int argc, char **argv, char **envp ) {
 		Main main;
 		main.parseArgs( argc, argv, envp );
 		return main.run();
-	} catch ( Mishap & p ) {
+	} catch ( Ginger::Mishap & p ) {
 		p.report();
 		return EXIT_FAILURE;
 	}

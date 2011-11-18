@@ -43,7 +43,7 @@ void ItemFactoryClass::unread() {
     int ch;
 
     if ( this->peeked ) {
-        throw Mishap( "Trying to read URL after pushback" );
+        throw Ginger::Mishap( "Trying to read URL after pushback" );
     }
     
     //  Get rid of white space and comments.
@@ -217,7 +217,7 @@ void ItemFactoryClass::readAtSeparatorCharType( int ch ) {
 	this->item = itemMap.lookup( this->text );
 	if ( this->item == NULL ) {
 		//	Never happens.
-		throw Mishap( "Invalid punctuation token" ); 
+		throw Ginger::Mishap( "Invalid punctuation token" ); 
 	}
 }
 
@@ -228,7 +228,7 @@ void ItemFactoryClass::readAtBracketCharType( int ch ) {
 	ungetc( ch, this->file );
 	this->item = itemMap.lookup( this->text );
 	if ( this->item == NULL ) {
-		throw Mishap( "Invalid punctuation token" ); 
+		throw Ginger::Mishap( "Invalid punctuation token" ); 
 	}
 }
 
@@ -243,7 +243,7 @@ void ItemFactoryClass::readAtBracketDecorationCharType( int ch ) {
 	}
 	this->item = itemMap.lookup( this->text );
 	if ( this->item == NULL ) {
-		throw Mishap( "Invalid punctuation token" ); 
+		throw Ginger::Mishap( "Invalid punctuation token" ); 
 	}
 }
 
@@ -265,7 +265,7 @@ void ItemFactoryClass::readAtSelfGlueCharType( int ch ) {
 	}
 	Item it = this->item = itemMap.lookup( this->text );
 	if ( it == NULL ) {
-		throw Mishap( "Invalid repeated-character sign" ).culprit( "Token", this->text );
+		throw Ginger::Mishap( "Invalid repeated-character sign" ).culprit( "Token", this->text );
 	}
 }
 
@@ -289,7 +289,7 @@ void ItemFactoryClass::readAtSignCharType( int ch ) {
 	ungetc( ch, this->file );
 	it = this->item = itemMap.lookup( this->text );
 	if ( it == NULL ) {
-		throw Mishap( "Invalid sign (combination of special characters)" ).culprit( "Sign", this->text );
+		throw Ginger::Mishap( "Invalid sign (combination of special characters)" ).culprit( "Sign", this->text );
 	}
 }
 

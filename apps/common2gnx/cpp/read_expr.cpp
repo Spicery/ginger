@@ -36,7 +36,7 @@ static Node makeApp( Node lhs, Node rhs ) {
 Node ReadStateClass::read_id() {
 	Item it = this->item_factory->read();
 	if ( it->tok_type != tokty_id ) {
-		throw Mishap( "Identifier expected" ).culprit( "Found", it->nameString() );
+		throw Ginger::Mishap( "Identifier expected" ).culprit( "Found", it->nameString() );
 	}
 	NodeFactory id( "id" );
 	id.putAttr( "name", it->nameString() );
@@ -51,7 +51,7 @@ string ReadStateClass::read_pkg_name() {
 Item ReadStateClass::read_id_item() {
 	Item it = this->item_factory->read();
 	if ( it->tok_type != tokty_id ) {
-		throw Mishap( "Identifier expected" ).culprit( "Found", it->nameString() );
+		throw Ginger::Mishap( "Identifier expected" ).culprit( "Found", it->nameString() );
 	}
 	return it;
 }
@@ -61,9 +61,9 @@ Node ReadStateClass::read_expr_prec( int prec ) {
 	if ( not e ) {
 		Item it = this->item_factory->peek();
 		if ( it->item_is_anyfix() ) {
-			throw Mishap( "Found reserved word" ).culprit( it->nameString() );
+			throw Ginger::Mishap( "Found reserved word" ).culprit( it->nameString() );
 		} else {
-			throw Mishap( "Unexpected end of expression" ).culprit( it->nameString() );
+			throw Ginger::Mishap( "Unexpected end of expression" ).culprit( it->nameString() );
 		}
 	}
 	return e;
@@ -74,7 +74,7 @@ void ReadStateClass::check_token( TokType fnc ) {
 	Item it = ifact->read();
 	ifact->drop();
 	if ( it->tok_type != fnc ) {
-		throw Mishap( "Unexpected token" ).culprit( "Found", it->nameString() ).culprit( "Expected", tok_type_name( fnc ) );
+		throw Ginger::Mishap( "Unexpected token" ).culprit( "Found", it->nameString() ).culprit( "Expected", tok_type_name( fnc ) );
 	}
 }
 
@@ -231,7 +231,7 @@ Node ReadStateClass::postfix_processing( Node lhs, Item item, int prec ) {
 				return t;
 			}
 			default: {
-				throw Mishap( "This keyword not handled" ).culprit( "Keyword", item->nameString() );
+				throw Ginger::Mishap( "This keyword not handled" ).culprit( "Keyword", item->nameString() );
 			}
 		}
 	}
@@ -294,7 +294,7 @@ Node ReadStateClass::read_syscall() {
 		sc.putAttr( "value", it->nameString() );
 		return sc.node();	//term_new_ref( tokty_syscall, (Ref)sc );
 	} else {
-		throw Mishap( "Invalid token after >-> (syscall) arrow" ).culprit( it->nameString() );
+		throw Ginger::Mishap( "Invalid token after >-> (syscall) arrow" ).culprit( it->nameString() );
 	}
 }
 
@@ -320,7 +320,7 @@ static void squash( NodeFactory acc, Node rhs ) {
 	} else if ( name == "var" ) {
 		acc.addNode( rhs );
 	} else {
-		throw Mishap( "Invalid form for definition" );
+		throw Ginger::Mishap( "Invalid form for definition" );
 	}
 }
 
@@ -335,7 +335,7 @@ static void flatten( Node & ap, Node & fn, Node & args ) {
 		squash( acc, ap->child( 1 ) ); 
 		args = acc.node();
 	} else {
-		Mishap mishap( "Invalid use of 'define'" );
+		Ginger::Mishap mishap( "Invalid use of 'define'" );
 		if ( ap->elementName() == "sysapp" ) {
 			mishap.culprit( "Reason", "Trying to redefine a system function" );
 		}
@@ -375,7 +375,7 @@ static void readTags( ReadStateClass & r, NodeFactory & imp, const char * prefix
 				
 				item = ifact->read();
 				if ( item->tok_type != tokty_comma ) {
-					if ( item->tok_type != tokty_cparen ) throw Mishap( "Expecting close parenthesis" );
+					if ( item->tok_type != tokty_cparen ) throw Ginger::Mishap( "Expecting close parenthesis" );
 					break;
 				}
 			}	
@@ -427,7 +427,7 @@ Node ReadStateClass::read_atomic_expr() {
 	} else if ( fnc == tokty_oparen ) {
 		return this->read_expr_check( tokty_cparen );
 	} else {
-		throw Mishap( "Unexpected token while reading attribute in element" ).culprit( "Token", item->nameString() );
+		throw Ginger::Mishap( "Unexpected token while reading attribute in element" ).culprit( "Token", item->nameString() );
 	}
 }
 
@@ -625,7 +625,7 @@ Node ReadStateClass::prefix_processing() {
 					}
 					Item item = this->read_id_item();
 					if ( item->nameString() != element_name ) {
-						throw Mishap( "Element close tag does not match open tag" ).culprit( "Open tag", element_name ).culprit( "Close tag", item->nameString() );
+						throw Ginger::Mishap( "Element close tag does not match open tag" ).culprit( "Open tag", element_name ).culprit( "Close tag", item->nameString() );
 					}
 					this->check_token( tokty_gt );
 				}
@@ -696,7 +696,7 @@ Node ReadStateClass::read_opt_expr_prec( int prec ) {
 				t.putAttr( "value", it->nameString() );
 				t.end();
 			} else {
-				throw Mishap( "Only integers supported so far" ).culprit( "Item", it->nameString() );
+				throw Ginger::Mishap( "Only integers supported so far" ).culprit( "Item", it->nameString() );
 			}
 			//fprintf( stderr, "DEBUG arity %d\n", term_arity( t ) );
 			e = t.node();

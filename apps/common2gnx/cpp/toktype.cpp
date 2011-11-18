@@ -13,7 +13,7 @@ const char *tok_type_name( TokType fnc ) {
 	case tokty_and : return "and";
 	case tokty_anon : return "anon";
 	case tokty_app : return "app";
-	case tokty_append : return "append";
+	case tokty_append: return "append";
 	case tokty_args : return "args";
 	case tokty_arrow : return "arrow";
 	case tokty_assign : return "assign";
@@ -100,7 +100,7 @@ const char * tok_type_as_tag( TokType fnc ) {
 	case tokty_comma : return "seq";
 	case tokty_or : return "or";
 	case tokty_semi : return "seq";
-	default: throw Mishap( "Internal error - unexpected tag" ).culprit( "Token Type", tok_type_name( fnc ) );
+	default: throw Ginger::Mishap( "Internal error - unexpected tag" ).culprit( "Token Type", tok_type_name( fnc ) );
 	}
 }
 
@@ -121,7 +121,7 @@ const char * tok_type_as_sysapp( TokType fnc ) {
 	case tokty_pow : return "**";
 	case tokty_sub : return "-";
 	case tokty_maplet : return "newMaplet";
-	default: throw Mishap( "Internal error - missing sysapp" ).culprit( "Token type", tok_type_name( fnc ) );
+	default: throw Ginger::Mishap( "Internal error - missing sysapp" ).culprit( "Token type", tok_type_name( fnc ) );
 	}
 }
 
@@ -133,6 +133,6 @@ const char *tok_type_as_type( TokType fnc ) {
 	case tokty_int : return "int";
 	case tokty_char : return "char";
 	case tokty_string : return "string";
-	default: throw Mishap( "Unreachable" );
+	default: throw Ginger::Mishap( "Unreachable" );
 	}
 }

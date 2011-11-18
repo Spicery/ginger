@@ -49,6 +49,7 @@ distclean: clean
 	rm -f config.log
 	rm -f autom4te.cache/*.* autom4te.cache/requests
 	rmdir -p autom4te.cache
+	rm -f configure
 
 check: all
 	$(MAKE) -C apps $@

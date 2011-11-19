@@ -1,0 +1,9 @@
+all:
+	$(MAKE) -C cpp $@
+
+clean:
+	$(MAKE) -C cpp $@
+	#$(MAKE) -C unittest $@
+
+check:
+	$(MAKE) -C unittest $@

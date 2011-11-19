@@ -1,0 +1,35 @@
+# EPREFIX should be bound to PREFIX by default. This appears to be a lie.
+# As a consequence we override EPREFIX entirely. Probably incorrect but not
+# that interesting.
+prefix=/usr/local
+exec_prefix=/usr/local
+datarootdir=${prefix}/share
+PACKAGE_TARNAME=appginger
+INSTALL_BIN=${exec_prefix}/bin
+INSTALL_LIB=${prefix}/share/appginger
+INSTALL_DOC=${datarootdir}/doc/${PACKAGE_TARNAME}
+
+EXEC_DIR="$(INSTALL_BIN)"
+
+CC=@CXX@
+
+CXXFLAGS=-DINSTALL_BIN='"$(INSTALL_BIN)"' -DINSTALL_LIB='"$(INSTALL_LIB)"' -DEXEC_DIR='$(EXEC_DIR)' -g -I../hpp -I../../libgng/hpp -I/opt/local/include -Wall -Wnon-virtual-dtor # -Weffc++
+CFLAGS=-Wmissing-prototypes 
+
+OBJS=metainfo.o
+
+all: libmetainfo.a
+
+# $@ is make shorthand for the target.
+# $@ is make shorthand for the dependencies
+# Note that calling ranlib should not be needed but I am seeing some weird stuff
+libmetainfo.a: $(OBJS)
+	ar -rcs $@ $+
+	ranlib $@
+	
+clean:
+	rm -f *.o
+	rm -f *.a
+
+#	Nothing needs doing.
+check:

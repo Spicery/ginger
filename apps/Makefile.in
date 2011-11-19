@@ -1,6 +1,7 @@
 all clean:
 	$(MAKE) -C libgng $@
 	$(MAKE) -C appginger $@
+	$(MAKE) -C libmetainfo $@
 	$(MAKE) -C common2gnx $@
 	$(MAKE) -C lisp2gnx $@
 	$(MAKE) -C fetchgnx $@

@@ -16,6 +16,7 @@ public:
 	}
 };
 
-SysConst * lookupSysConst( std::string key );
+extern SysConst * lookupSysConst( std::string key );
+//extern bool lookupSysConst( std::string key, const char ** tag, const char ** value );
 
 #endif

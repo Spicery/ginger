@@ -16,7 +16,6 @@ public:
 	SysConst * lookup( std::string & key ) {
 		Table::iterator it = this->table.find( key );
 		return it == this->table.end() ? NULL : it->second;
-	
 	}
 
 public:
@@ -29,31 +28,10 @@ public:
 		//	Booleans
 		this->table[ "true" ] = new SysConst( "bool", "true" );
 		this->table[ "false" ] = new SysConst( "bool", "false" );		
+		
+		//	Functions (I think this is debatable).
 		this->table[ "not" ] = new SysConst( "sysfn", "not" );
 		
-		//	Misc
-		SYSFN( "garbageCollect" );
-		SYSFN( "print" );
-		SYSFN( "println" );
-
-		SYSFN( "explode" );
-		SYSFN( "length" );
-		SYSFN( "append" );
-		
-		SYSFN( "listExplode" );
-		SYSFN( "listLength" );
-		SYSFN( "listAppend" );
-		
-		SYSFN( "vectorExplode" );
-		SYSFN( "vectorLength" );
-		SYSFN( "vectorAppend" );
-		
-		SYSFN( "stringExplode" );
-		SYSFN( "stringLength" );
-		SYSFN( "stringAppend" );
-		
-		//	Recordclasses & Vectorclasses
-		#include "sysconsts.inc.auto"
 	}
 } theSysConstTable;
 

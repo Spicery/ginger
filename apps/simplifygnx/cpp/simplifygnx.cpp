@@ -61,6 +61,42 @@ to it as a stream.
 #define SCOPE			"scope"
 #define PROTECTED		"protected"
 
+#define CONSTANT		"constant"
+#define CONSTANT_TYPE	"type"
+#define CONSTANT_VALUE	"value"
+
+#define	ID				"id"
+#define ID_NAME			"name"
+#define ID_DEF_PKG		"def.pkg"
+
+#define VAR				"var"
+#define VAR_NAME		"name"
+
+#define IF				"if"
+#define SET				"set"
+#define FOR				"for"
+#define BIND			"bind"
+#define SEQ				"seq"
+#define	BLOCK			"block"
+
+#define ASSERT			"assert"
+#define ASSERT_N		"n"
+#define ASSERT_TYPE		"type"
+
+#define APP				"app"
+
+#define SYSFN			"sysfn"
+#define SYSFN_VALUE		"value"
+
+#define SYSAPP			"sysapp"
+#define SYSAPP_NAME		"name"
+
+#define	FN				"fn"
+
+#define CULPRIT			"culprit"
+#define CULPRIT_NAME	"name"
+#define CULPRIT_VALUE	"value"
+
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -305,8 +341,8 @@ public:
 			this->def_pkg_name = attrs[ "def.pkg" ];
 		} else if ( name == "mishap" ) {
 			this->mishap.setMessage( attrs[ "message" ] );
-		} else if ( name == "culprit" ) {
-			mishap.culprit( attrs[ "name" ], attrs[ "value" ] );
+		} else if ( name == CULPRIT ) {
+			mishap.culprit( attrs[ CULPRIT_NAME ], attrs[ CULPRIT_VALUE ] );
 		} else {
 			throw Ginger::Mishap( "Unexpected element in response" ).culprit( "Element name", name );
 		}
@@ -449,17 +485,17 @@ public:
 	
 	void endVisit( Ginger::Mnx & element ) {
 		const string & x = element.name();
-		if ( x == "constant" ) {
+		if ( x == CONSTANT ) {
 			element.putAttribute( ARITY, "1" );
-		} else if ( x == "id" || x == "fn" ) {
+		} else if ( x == ID || x == FN ) {
 			element.putAttribute( ARITY, "1" );
-		} else if ( x == "for" ) {
+		} else if ( x == FOR ) {
 			if ( element.hasAttribute( ARITY ) && element.attribute( ARITY ) == "0" ) {
 				element.putAttribute( ARITY, "0" );
 			}
-		} else if ( x == "set" || x == "bind" ) {
+		} else if ( x == SET || x == BIND ) {
 			element.putAttribute( ARITY, "0" );
-		} else if ( x == "seq" ) {
+		} else if ( x == SEQ ) {
 			bool all_have_arity = true;
 			for ( int i = 0; all_have_arity && i < element.size(); i++ ) {
 				all_have_arity = element.child( i )->hasAttribute( ARITY );
@@ -472,7 +508,7 @@ public:
 				}
 				element.putAttribute( ARITY, sofar.toString() );
 			}
-		} else if ( x == "if" ) {
+		} else if ( x == IF ) {
 			bool has_odd_kids = ( element.size() % 2 ) == 1;
 			bool all_have_arity = true;
 			for ( int i = 1; all_have_arity && i < element.size(); i += 2 ) {
@@ -500,10 +536,10 @@ public:
 				}
 				
 			}
-		} else if ( x == "sysapp" ) {
-			element.putAttribute( ARITY, Ginger::outArity( element.attribute( "name" ) ).toString() );
-		} else if ( x == "assert" && element.size() == 1 ) {
-			if ( element.hasAttribute( "n", "1" ) ) {
+		} else if ( x == SYSAPP ) {
+			element.putAttribute( ARITY, Ginger::outArity( element.attribute( SYSAPP_NAME ) ).toString() );
+		} else if ( x == ASSERT && element.size() == 1 ) {
+			if ( element.hasAttribute( ASSERT_N, "1" ) ) {
 				if ( element.child( 0 )->hasAttribute( ARITY, "1" ) ) {
 					//	As we can prove the child satisfies the condition we should 
 					//	eliminate the parent. So we simply replace the contents of the 
@@ -516,9 +552,9 @@ public:
 				} else {
 					element.putAttribute( ARITY, "1" );
 				}
-			} else if ( element.hasAttribute( "type" ) ) {
+			} else if ( element.hasAttribute( ASSERT_TYPE ) ) {
 				shared< Ginger::Mnx > c = element.child( 0 );
-				if ( c->name() == "constant" && element.attribute( "type" ) == c->attribute( "type" ) ) {
+				if ( c->hasName( CONSTANT ) && element.attribute( ASSERT_TYPE ) == c->attribute( CONSTANT_TYPE ) ) {
 					element.copyFrom( *c );
 					this->changed = true;
 				} else {
@@ -543,12 +579,12 @@ public:
 	void startVisit( Ginger::Mnx & element ) {
 		const string & x = element.name();
 		element.clearAttribute( TAILCALL );	//	Throw away any previous marking.
-		if ( x == "fn" ) {
+		if ( x == FN ) {
 			element.lastChild()->orFlags( TAIL_CALL_MASK );
 		} else if ( element.hasAllFlags( TAIL_CALL_MASK ) ) {
-			if ( x == "app" ) {
+			if ( x == APP ) {
 				element.putAttribute( TAILCALL, "true" );
-			} else if ( x == "if" ) {
+			} else if ( x == IF ) {
 				bool has_odd_kids = ( x.size() % 2 ) == 1;
 				for ( int i = 1; i < element.size(); i += 2 ) {
 					element.child( i )->orFlags( TAIL_CALL_MASK );
@@ -556,7 +592,7 @@ public:
 				if ( has_odd_kids ) {
 					element.lastChild()->orFlags( TAIL_CALL_MASK );
 				}
-			} else if ( x == "seq" || x == "block" ) {
+			} else if ( x == SEQ || x == BLOCK ) {
 				if ( x.size() >= 1 ) {
 					element.lastChild()->orFlags( TAIL_CALL_MASK );
 				}
@@ -597,8 +633,8 @@ private:
 public:
 	void startVisit( Ginger::Mnx & element ) {
 		const string & x = element.name();
-		if ( x == "id" ) {
-			const string & name = element.attribute( "name" );
+		if ( x == ID ) {
+			const string & name = element.attribute( ID_NAME );
 			if ( element.hasAttribute( SCOPE, "global" ) ) {
 				if ( not element.hasAttribute( "def.pkg" ) ) {
 					const string & enc_pkg = element.hasAttribute( "enc.pkg" ) ? element.attribute( "enc.pkg" ) : this->package;
@@ -748,8 +784,8 @@ public:
 		element.clearAttribute( SCOPE );	//	Throw away any previous marking.
 		element.clearAttribute( OUTER_LEVEL );
 		element.clearAttribute( IS_OUTER );
-		if ( x == "id" ) {
-			const string & name = element.attribute( "name" );
+		if ( x == ID ) {
+			const string & name = element.attribute( ID_NAME );
 			VarInfo * v = this->findId( name );
 			if ( v != NULL ) {
 				element.putAttribute( UID, v->uid );
@@ -765,8 +801,8 @@ public:
 			if ( v != NULL && v->is_protected ) {
 				element.putAttribute( PROTECTED, "true" );
 			}
-		} else if ( x == "var" ) {
-			const string & name = element.attribute( "name" );
+		} else if ( x == VAR ) {
+			const string & name = element.attribute( VAR_NAME );
 			const int uid = this->newUid();
 			element.putAttribute( UID, uid );
 			if ( not element.hasAttribute( PROTECTED ) ) {
@@ -783,7 +819,7 @@ public:
 	
 	void endVisit( Ginger::Mnx & element ) {
 		const string & x = element.name();
-		if ( x == "fn" ) { //|| x == "block" || x == "for" ) {
+		if ( x == FN ) { //|| x == "block" || x == "for" ) {
 			int n = this->scopes.back();
 			this->scopes.pop_back();
 			this->vars.resize( n );
@@ -830,22 +866,29 @@ public:
 
 	void endVisit( Ginger::Mnx & element ) {
 		const string & x = element.name();
-		if ( x == "id" ) {
-			if ( element.hasAttribute( "def.pkg" ) && element.attribute( "def.pkg" ) == "ginger.library" ) {
-				const string name( element.attribute( "name" ) );
+		if ( x == ID ) {
+			if ( element.hasAttribute( ID_DEF_PKG, "ginger.library" ) ) {
+				//cout<<"IN 1" << endl;
+				const string name( element.attribute( ID_NAME ) );
 				element.clearAllAttributes();
-				element.putAttribute( "name", name );
-				element.name() = "sysfn";
+				element.putAttribute( CONSTANT_VALUE, name );
+				element.putAttribute( CONSTANT_TYPE, "sysfn" );
+				element.name() = CONSTANT;
 				this->changed = true;
+				//cout<<"OUT 1" << endl;
 			}
-		} else if ( x == "app" && element.size() == 2 ) {
-			if ( element.child( 0 )->hasName( "constant" ) && element.child( 0 )->hasAttribute( "type", "sysfn" ) ) {
-				const string name( element.child( 0 )->attribute( "value" ) );
-				element.name() = "sysapp";
+		} else if ( x == APP && element.size() == 2 ) {
+			if ( element.child( 0 )->hasName( CONSTANT ) && element.child( 0 )->hasAttribute( CONSTANT_TYPE, "sysfn" ) && element.child( 0 )->hasAttribute( CONSTANT_VALUE ) ) {
+				//cout<<"IN 2" << endl;
+				const string value( element.child( 0 )->attribute( CONSTANT_VALUE ) );
+				element.name() = SYSAPP;
 				element.clearAllAttributes();
-				element.putAttribute( "name", name );
+				element.putAttribute( SYSAPP_NAME, value );
 				element.popFrontChild();
 				this->changed = true;
+				//cout<<"OUT 2" << endl;
+				//element.render();
+				//cout << endl;
 			}
 		}
 	}
@@ -863,9 +906,9 @@ private:
 public:
 	void startVisit( Ginger::Mnx & element ) {
 		const string & x = element.name();
-		if ( x == "var" && element.hasAttribute( IS_OUTER ) && element.hasAttribute( UID ) ) {
+		if ( x == VAR && element.hasAttribute( IS_OUTER ) && element.hasAttribute( UID ) ) {
 			this->dec_outer[ element.attribute( UID ) ] = &element;
-		} else if ( x == "id" && element.hasAttribute( UID ) ) {
+		} else if ( x == ID && element.hasAttribute( UID ) ) {
 			map< string, Ginger::Mnx * >::iterator m = this->dec_outer.find( element.attribute( UID ) );
 			if ( m != this->dec_outer.end() ) {
 				element.putAttribute( IS_OUTER, "true" );
@@ -892,14 +935,14 @@ public:
 					#endif
 				}
 			}
-		} else if ( x == "fn" ) {
+		} else if ( x == FN ) {
 			this->capture_sets.push_back( set< string >() );
 		}
 	}
 	
 	//	method
 	shared< Ginger::Mnx > makeLocals( const char * tag ) {
-		shared< Ginger::Mnx > locals( new Ginger::Mnx( "seq" ) );
+		shared< Ginger::Mnx > locals( new Ginger::Mnx( SEQ ) );
 		for ( 
 			set< string >::iterator it = this->capture_sets.back().begin();
 			it != this->capture_sets.back().end();
@@ -922,7 +965,7 @@ public:
 	
 	void endVisit( Ginger::Mnx & element ) {
 		const string & x = element.name();
-		if ( x == "fn" ) {
+		if ( x == FN ) {
 			/*cout << "Capture set:" << element.attribute( "name", "[anon]" ) << ":";
 			for ( 
 				set< string >::iterator it = this->capture_sets.back().begin();
@@ -939,9 +982,9 @@ public:
 				//	capture set.
 				{
 					shared< Ginger::Mnx > arg( element.child( 0 ) );
-					shared< Ginger::Mnx > newarg( new Ginger::Mnx( "seq" ) );
+					shared< Ginger::Mnx > newarg( new Ginger::Mnx( SEQ ) );
 					newarg->addChild( arg );
-					newarg->addChild( this->makeLocals( "var" ) );
+					newarg->addChild( this->makeLocals( VAR ) );
 					
 					/*newarg->render();
 					cout << endl;*/
@@ -953,10 +996,10 @@ public:
 				//	to partapply onto the original function and 
 				//	the capture set.
 				{
-					shared< Ginger::Mnx > fn( new Ginger::Mnx( "fn" ) );
+					shared< Ginger::Mnx > fn( new Ginger::Mnx( FN ) );
 					fn->copyFrom( element );
-					shared< Ginger::Mnx > partapply( new Ginger::Mnx( "sysapp" ) );
-					partapply->putAttribute( "name", "partApply" );
+					shared< Ginger::Mnx > partapply( new Ginger::Mnx( SYSAPP ) );
+					partapply->putAttribute( SYSAPP_NAME, "partApply" );
 					partapply->addChild( this->makeLocals( "id" ) );
 					partapply->addChild( fn );
 					element.copyFrom( *partapply );
@@ -1006,9 +1049,9 @@ class Flatten : public Ginger::MnxVisitor {
 public:
 	void startVisit( Ginger::Mnx & element ) {
 		const string & x = element.name();
-		if ( x == "sysapp" || x == "seq" ) {
+		if ( x == SYSAPP || x == SEQ ) {
 			for ( int i = 0; i < element.size(); i++ ) {
-				if ( element.child( i )->name() == "seq" ) {
+				if ( element.child( i )->name() == SEQ ) {
 					element.flattenChild( i );
 					i -= 1;
 				}

@@ -3,7 +3,7 @@ all:
 	$(MAKE) -C projects $@
 
 clean:
-	rm -rf build/appginger
+	rm -rf _build/
 	rm -f bin/common2gnx
 	rm -f bin/appginger
 	$(MAKE) -C apps $@
@@ -86,7 +86,7 @@ install: all
 	echo Installing support files $(INSTALL_LIB)
 	mkdir -p $(INSTALL_LIB)
 	cp -r projects/standard_library $(INSTALL_LIB) 
-	echo Installing docs into $(INSTALL_DOC)
+	#echo Installing docs into $(INSTALL_DOC)
 	mkdir -p $(INSTALL_LIB)
 	/usr/bin/install -m a=r COPYING $(INSTALL_LIB)
 	mkdir -p $(INSTALL_LIB)/lisp2gnx
@@ -96,27 +96,28 @@ install: all
 
 # Create a tarball for binary archive.
 TBBASE=appginger_files
+TBPACKAGE=appginger
 TBPREFIX=usr/local
 TBMAIN=${TBBASE}/${TBPREFIX}
 TBOUTPUT=appginger.tgz
 
 tarball: all
-	$(MAKE) -C documentation tarball
-	rm -f build/$(TBOUTPUT)
-	rm -rf build/$(TBBASE)
-	mkdir -p build/$(TBPACKAGE)
-	mkdir -p build/$(TBMAIN)/bin
-	mkdir -p build/$(TBMAIN)/share/appginger
-	gzip -d documentation/build/documentation.tgz | ( cd build/$(TBBASE)/share/appginger; tar xf - )
-	( cd build_template; tar cf - . ) | ( cd build/$(TBPACKAGE); tar xf - )
-	cp $(EXECUTABLES) build/$(TBMAIN)/bin/
-	cp COPYING build/$(TBMAIN)/share/appginger
-	cp AUTHORS build/$(TBMAIN)/share/appginger
-	mkdir -p build/$(TBMAIN)/share/appginger/lisp2gnx/
-	cp apps/lisp2gnx/lsp/lisp2gnx.lsp build/$(TBMAIN)/share/appginger/lisp2gnx/
-	cp -r projects/standard_library build/$(TBMAIN)/share/appginger/
-	find build -type d -name .svn | xargs /bin/rm -rf
-	find build -name '.DS_STORE' | xargs rm -f
-	find build -name '._*'
-	( cd build/$(TBBASE); tar cf - . ) | gzip > build/$(TBPACKAGE)/$(TBOUTPUT)
-	( cd build; tar cf - $(TBPACKAGE) ) | gzip > build/$(TBPACKAGE).tgz
+	#$(MAKE) -C documentation tarball
+	rm -f _build/$(TBOUTPUT)
+	rm -rf _build/$(TBBASE)
+	mkdir -p _build/$(TBPACKAGE)
+	mkdir -p _build/$(TBMAIN)/bin
+	mkdir -p _build/$(TBMAIN)/share/appginger
+	#gzip -d documentation/_build/documentation.tgz | ( cd _build/$(TBBASE)/share/appginger; tar xf - )
+	( cd build_template; tar cf - . ) | ( cd _build/$(TBPACKAGE); tar xf - )
+	cp $(EXECUTABLES) _build/$(TBMAIN)/bin/
+	cp COPYING _build/$(TBMAIN)/share/appginger
+	cp AUTHORS _build/$(TBMAIN)/share/appginger
+	mkdir -p _build/$(TBMAIN)/share/appginger/lisp2gnx/
+	cp apps/lisp2gnx/lsp/lisp2gnx.lsp _build/$(TBMAIN)/share/appginger/lisp2gnx/
+	cp -r projects/standard_library _build/$(TBMAIN)/share/appginger/
+	find _build -type d -name .svn | xargs /bin/rm -rf
+	find _build -name '.DS_STORE' | xargs rm -f
+	find _build -name '._*'
+	( cd _build/$(TBBASE); tar cf - . ) | gzip > _build/$(TBPACKAGE)/$(TBOUTPUT)
+	( cd _build; tar cf - $(TBPACKAGE) ) | gzip > _build/$(TBPACKAGE).tgz

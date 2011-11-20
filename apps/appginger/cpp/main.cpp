@@ -55,6 +55,8 @@ using namespace std;
 
 #define SIMPLIFYGNX		( INSTALL_BIN "/simplifygnx" )
 #define COMMON2GNX		( INSTALL_BIN "/common2gnx" )
+#define LISP2GNX		( INSTALL_BIN "/lisp2gnx" )
+#define GSON2GNX		( INSTALL_BIN "/gson2gnx" )
 #define TAIL			"/usr/bin/tail"
 
 /*
@@ -387,38 +389,41 @@ void Main::runAsCgi( const bool run_init_cgi ) {
 						//	We need to skip forward until we find an end-of-line.
 						getline( filestr, line );
 					
-						if ( m->hasAttribute( "language", "common" ) ) {
-							response.open();
-							const int posn = filestr.tellg();
-							stringstream commstream;
-							//	tail is 1-indexed!
-							commstream << TAIL << " -c+" << ( posn + 1 );
-							commstream << " "<< safeFileName( *it );
-							commstream << " | " << COMMON2GNX << " | " << SIMPLIFYGNX << " -s";
-							string command( commstream.str() );
-							//cout << "Command so far: " << command << endl;
-							FILE * gnxfp = popen( command.c_str(), "r" );
-							if ( gnxfp == NULL ) {
-								throw Ginger::Mishap( "Failed to translate input" );
-							}
-							// ... open the file, with whatever, pipes or who-knows ...
-							// let's build a buffer from the FILE* descriptor ...
-							__gnu_cxx::stdio_filebuf<char> pipe_buf( gnxfp, ios_base::in );
-							// there we are, a regular istream is build upon the buffer :
-							istream stream_pipe_in( &pipe_buf );
-							
-							Ginger::MnxReader gnx_read( stream_pipe_in );
-							for (;;) {
-								shared< Ginger::Mnx > m = gnx_read.readMnx();
-								if ( not m ) break;
-								rcep.execGnx( m, cout );
-							}
-							
-							pclose( gnxfp );
-							break;
-						} else {
-							throw Ginger::Mishap( "Unrecognised language" ).culprit( "Language", m->attribute( "language" ) );
+						string lang(
+							m->hasAttribute( "language", "common" ) ? COMMON2GNX :
+							m->hasAttribute( "language", "lisp" ) ? LISP2GNX :
+							m->hasAttribute( "language", "gson" ) ? GSON2GNX :
+							( throw Ginger::Mishap( "Unrecognised language" ).culprit( "Language", m->attribute( "language" ) ) )
+						);
+					
+						response.open();
+						const int posn = filestr.tellg();
+						stringstream commstream;
+						//	tail is 1-indexed!
+						commstream << TAIL << " -c+" << ( posn + 1 );
+						commstream << " "<< safeFileName( *it );
+						commstream << " | " << lang << " | " << SIMPLIFYGNX << " -s";
+						string command( commstream.str() );
+						//cout << "Command so far: " << command << endl;
+						FILE * gnxfp = popen( command.c_str(), "r" );
+						if ( gnxfp == NULL ) {
+							throw Ginger::Mishap( "Failed to translate input" );
 						}
+						// ... open the file, with whatever, pipes or who-knows ...
+						// let's build a buffer from the FILE* descriptor ...
+						__gnu_cxx::stdio_filebuf<char> pipe_buf( gnxfp, ios_base::in );
+						// there we are, a regular istream is build upon the buffer :
+						istream stream_pipe_in( &pipe_buf );
+						
+						Ginger::MnxReader gnx_read( stream_pipe_in );
+						for (;;) {
+							shared< Ginger::Mnx > m = gnx_read.readMnx();
+							if ( not m ) break;
+							rcep.execGnx( m, cout );
+						}
+						
+						pclose( gnxfp );
+						break;
 					}
 				} else {
 					response.open();

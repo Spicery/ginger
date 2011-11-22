@@ -11,16 +11,14 @@ private:
 	std::map< std::string, ItemClass * > table;
 	
 private:
-	void add( const char *n, TokType f, Role r, int p );
+	void add( const bool check_mode, const char *n, TokType f, Role r, int p );
 	
 public:
-	ItemMap();
+	ItemMap( const bool cstyle_mode );
 	
 public:
 	ItemClass * lookup( const char * name );
 	ItemClass * lookup( const std::string & name );
 };
-
-extern ItemMap itemMap;
 
 #endif

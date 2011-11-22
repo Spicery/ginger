@@ -19,45 +19,13 @@ using namespace std;
 #define APP_TITLE 		"common2gnx"
 #define LOG_FACILITY	LOG_LOCAL2
 
-/*int main( int argc, char **argv, char **envp ) {
-	openlog( APP_TITLE, 0, LOG_FACILITY );
-	setlogmask( LOG_UPTO( LOG_INFO ) );
-
-	try {
-		FILE * in;
-		if ( argc == 2 ) {
-			in = fopen( argv[1], "r" ); 
-			if ( in == NULL ) throw Ginger::Mishap( "Cannot open file" ).culprit( "Filename", argv[1] );
-			syslog( LOG_INFO, "Converting %s", argv[1] );
-		} else {
-			in = stdin;
-			syslog( LOG_INFO, "Converting standard input (%s)", argv[1] );
-		}
-		for (;;) {
-			ItemFactoryClass ifact( in );
-			ReadStateClass input( &ifact );
-			for (;;) {
-				Node n = input.read_opt_expr();
-				if ( not n ) return EXIT_SUCCESS;
-				n->render( cout );
-				cout << endl;
-				input.checkSemi();
-			};
-		} 
-	} catch ( Ginger::Mishap & m ) {
-		m.gnxReport();
-		return EXIT_FAILURE;
-	}
-	return EXIT_SUCCESS;
-}*/
-
-
 extern char * optarg;
 static struct option long_options[] =
     {
+    	{ "csyntax",		no_argument,			0, 'c' },
     	{ "help",			optional_argument,		0, 'H' },
         { "license",        optional_argument,      0, 'L' },
-        { "tokenise",			no_argument,		0, 'T' },
+        { "tokenise",		no_argument,			0, 'T' },
         { "version",        no_argument,            0, 'V' },
         { 0, 0, 0, 0 }
     };
@@ -67,6 +35,7 @@ private:
 	bool use_stdin;
 	string input_file_name;
 	bool gen_lnx;
+	bool cstyle;
 
 public:
 	string version() {
@@ -93,12 +62,17 @@ public:
 	void parseArgs( int argc, char **argv, char **envp ) {
 		this->gen_lnx = false;
 		this->use_stdin = true;
+		this->cstyle = false;
 		
 		for(;;) {
 			int option_index = 0;
-			int c = getopt_long( argc, argv, "TH::L::V", long_options, &option_index );
+			int c = getopt_long( argc, argv, "cTH::L::V", long_options, &option_index );
 			if ( c == -1 ) break;
 			switch ( c ) {
+				case 'c' : {
+					cstyle = true;
+					break;
+				}
 				case 'T': {
 					this->gen_lnx = true;
 					break;
@@ -200,7 +174,7 @@ private:
 	void tokenise( FILE *in ) {
 		cout << "<item.stream V=\"\" R=\"\" T=\"\" P=\"\" L=\"\">" << endl;
 		for (;;) {
-			ItemFactoryClass ifact( in );
+			ItemFactoryClass ifact( in, this->cstyle );
 			Item item = ifact.read();
 			if ( item->tok_type == tokty_eof ) break;
 			cout << "<.";
@@ -229,8 +203,9 @@ private:
 
 	void parse( FILE * in ) {
 		for (;;) {
-			ItemFactoryClass ifact( in );
+			ItemFactoryClass ifact( in, this->cstyle );
 			ReadStateClass input( &ifact );
+			input.setCStyleMode( this->cstyle );
 			for (;;) {
 				Node n = input.read_opt_expr();
 				if ( not n ) return;
@@ -253,7 +228,7 @@ public:
 	int run() {
 		openlog( APP_TITLE, 0, LOG_FACILITY );
 		setlogmask( LOG_UPTO( LOG_INFO ) );
-	
+		
 		try {
 			if ( this->use_stdin ) {
 				run( stdin );

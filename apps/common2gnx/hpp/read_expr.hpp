@@ -13,6 +13,7 @@ class ReadStateClass {
 public:
 	ItemFactory item_factory;
 	bool		pattern_mode;
+	bool		cstyle_mode;
 	
 private:
 	Node prefix_processing();
@@ -29,11 +30,14 @@ private:
 	Node read_conditions();
 	Node read_for();
 	Node read_atomic_expr();
+	Node read_lambda();
+	Node read_definition();
 	std::string read_pkg_name();
 	
 public:
 	void setPatternMode() { this->pattern_mode = true; }
 	void clearPatternMode() { this->pattern_mode = false; }
+	void setCStyleMode( const bool flag ) { this->cstyle_mode = flag; }
 
 public:
 	Node read_expr();
@@ -43,13 +47,15 @@ public:
 	Node read_opt_expr_prec( int prec );
 	void checkSemi();
 	void check_token( TokType fnc );
+	void check_peek_token( TokType fnc );
 	bool try_token( TokType fnc );
 	bool try_name( const char * name );
 	
 public:
 	ReadStateClass( ItemFactory ifact ) :
 		item_factory( ifact ),
-		pattern_mode( false )
+		pattern_mode( false ),
+		cstyle_mode( false )
 	{
 	}
 	

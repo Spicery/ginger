@@ -83,9 +83,14 @@ Node ReadStateClass::read_expr_prec( int prec ) {
 }
 
 void ReadStateClass::check_token( TokType fnc ) {
-	ItemFactory ifact = this->item_factory;
-	Item it = ifact->read();
-	ifact->drop();
+	Item it = this->item_factory->read();
+	if ( it->tok_type != fnc ) {
+		throw Ginger::Mishap( "Unexpected token" ).culprit( "Found", it->nameString() ).culprit( "Expected", tok_type_name( fnc ) );
+	}
+}
+
+void ReadStateClass::check_peek_token( TokType fnc ) {
+	Item it = this->item_factory->peek();
 	if ( it->tok_type != fnc ) {
 		throw Ginger::Mishap( "Unexpected token" ).culprit( "Found", it->nameString() ).culprit( "Expected", tok_type_name( fnc ) );
 	}
@@ -117,7 +122,7 @@ bool ReadStateClass::try_token( TokType fnc ) {
 }
 
 Node ReadStateClass::read_stmnts() {
-	Node e = this->read_opt_expr_prec( prec_max );
+	Node e = this->read_opt_expr_prec( this->cstyle_mode ? prec_semi : prec_max );
 	if ( not e ) {
 		NodeFactory skip;
 		skip.start( "seq" );
@@ -285,29 +290,27 @@ static void predicate( TokType sense, NodeFactory & ifunless, Node pred ) {
 }
 
 Node ReadStateClass::read_if( TokType sense, TokType closer ) {
+	if ( this->cstyle_mode ) this->check_token( tokty_oparen );
 	Node pred = this->read_expr();
-	if ( ! this->try_token( tokty_then ) ) {
-		this->check_token( tokty_do );
-	}
+	this->check_token( this->cstyle_mode ? tokty_cparen : tokty_then );
 	Node then_part = this->read_stmnts();
 	if ( this->try_token( tokty_else ) ) {	
 		NodeFactory ifunless;
 		ifunless.start( "if" );
 		predicate( sense, ifunless, pred );
 		ifunless.add( then_part );
-		Node x = this->read_stmnts_check( closer );
+		Node x = this->read_stmnts();
+		if ( not this->cstyle_mode ) this->check_token( closer );
 		ifunless.add( x );
 		ifunless.end();
 		return ifunless.build();
-		//return term_new_basic3( sense, pred, then_part, this->read_stmnts_check( tokty_endif ) );
-	} else if ( this->try_token( closer ) ) {
+	} else if ( this->cstyle_mode || this->try_token( closer ) ) {
 		NodeFactory ifunless;
 		ifunless.start( "if" );
 		predicate( sense, ifunless, pred );
 		ifunless.add( then_part );
 		ifunless.end();
 		return ifunless.build();
-		//return term_new_basic2( sense, pred, then_part );
 	} else {
 		TokType new_sense;
 		if ( this->try_token( tokty_elseif ) ) {
@@ -324,7 +327,6 @@ Node ReadStateClass::read_if( TokType sense, TokType closer ) {
 		ifunless.add( x );
 		ifunless.end();
 		return ifunless.build();
-		//return term_new_basic3( sense, pred, then_part, this->read_if( new_sense, closer ) );
 	}
 }
 
@@ -337,16 +339,18 @@ Node ReadStateClass::read_syscall() {
 		sc.put( "type", "sysfn" );
 		sc.put( "value", it->nameString() );
 		sc.end();
-		return sc.build();	//term_new_ref( tokty_syscall, (Ref)sc );
+		return sc.build();
 	} else {
 		throw Ginger::Mishap( "Invalid token after >-> (syscall) arrow" ).culprit( it->nameString() );
 	}
 }
 
 Node ReadStateClass::read_for() {
+	if ( this->cstyle_mode ) this->check_token( tokty_oparen );
 	Node query = this->read_query();
-	this->check_token( tokty_do );
-	Node body = this->read_stmnts_check( tokty_endfor );
+	this->check_token( this->cstyle_mode ? tokty_cparen : tokty_do );
+	Node body = this->read_stmnts();
+	if ( not this->cstyle_mode ) this->check_token( tokty_endfor );
 	NodeFactory for_node;
 	for_node.start( "for" );
 	for_node.add( query );
@@ -355,7 +359,6 @@ Node ReadStateClass::read_for() {
 	return for_node.build();
 }
 
-//	ap is only passed in for error reporting.
 static void squash( NodeFactory acc, Node rhs ) {
 	const std::string 
 	name = rhs->name();
@@ -484,6 +487,50 @@ Node ReadStateClass::read_atomic_expr() {
 	}
 }
 
+Node ReadStateClass::read_lambda() {
+	ReadStateClass pattern( *this );
+	pattern.setPatternMode();
+	Node args = pattern.read_expr_prec( prec_arrow );
+	if ( not this->cstyle_mode ) this->check_token( tokty_arrow );
+	Node body = this->read_stmnts_check( tokty_endfn );
+	NodeFactory fn;
+	fn.start( "fn" );
+	fn.add( args );
+	fn.add( body );
+	fn.end();
+	return fn.build();			
+}
+
+Node ReadStateClass::read_definition() {
+	ReadStateClass pattern( *this );
+	pattern.setPatternMode();
+	Node ap = pattern.read_expr_prec( prec_arrow );
+	Node fn;
+	Node args;
+	flatten( ap, fn, args );
+	const std::string name = fn->attribute( "name" );
+	if ( this->cstyle_mode ) {
+		this->check_peek_token( tokty_obrace );
+	} else {
+		this->check_token( tokty_arrow );
+	}
+	Node body = this->read_stmnts();
+	if ( not this->cstyle_mode ) this->check_token( tokty_enddefine );
+	NodeFactory def;
+	def.start( "bind" );
+	def.start( "var" );
+	def.put( "name", name );
+	def.put( "protected", "true" );
+	def.end();
+	def.start( "fn" );
+	def.put( "name", name );
+	def.add( args );
+	def.add( body );
+	def.end();
+	def.end();
+	return def.build();
+}
+
 Node ReadStateClass::prefix_processing() {
 	ItemFactory ifact = this->item_factory;
 	Item item = ifact->read();
@@ -581,26 +628,38 @@ Node ReadStateClass::prefix_processing() {
 			NodeFactory list;
 			list.start( "sysapp" );
 			Node stmnts = this->read_stmnts();
-			if ( this->try_token( tokty_bar ) ) {
+			if ( not this->cstyle_mode && this->try_token( tokty_bar ) ) {
 				list.put( "name", "newListOnto" );
 				list.add( stmnts );
 				Node x = this->read_stmnts_check( tokty_cbracket );
 				list.add( x );
 			} else {
 				this->check_token( tokty_cbracket );
-				list.put( "name", "newList" );
+				list.put( "name", this->cstyle_mode ? "newVector" : "newList" );
 				list.add( stmnts );
 			}
 			list.end();
 			return list.build();
 		}
 		case tokty_obrace: {
-			NodeFactory list;
-			list.start( "vector" );
-			Node x = this->read_stmnts_check( tokty_cbrace );
-			list.add( x );
-			list.end();
-			return list.build();
+			if ( cstyle_mode ) {
+				NodeFactory seq;
+				seq.start( "block" );
+				while ( not this->try_token( tokty_cbrace ) ) {					
+					Node x = this->read_stmnts();
+					seq.add( x );
+					this->try_token( tokty_semi );	//	optional semi.
+				}
+				seq.end();
+				return seq.build();
+			} else {
+				NodeFactory list;
+				list.start( "vector" );
+				Node x = this->read_stmnts_check( tokty_cbrace );
+				list.add( x );
+				list.end();
+				return list.build();
+			}
 		}
 		case tokty_fat_obrace: {
 			NodeFactory list;
@@ -623,44 +682,18 @@ Node ReadStateClass::prefix_processing() {
 		case tokty_for: {
 		  	return this->read_for();
 		}
+		case tokty_function: {
+			if ( this->item_factory->peek()->tok_type == tokty_oparen ) {
+				return this->read_lambda();
+			} else {
+				return this->read_definition();
+			}
+		}
 		case tokty_define: {
-			ReadStateClass pattern( *this );
-			pattern.setPatternMode();
-			Node ap = pattern.read_expr_prec( prec_arrow );
-			Node fn;
-			Node args;
-			flatten( ap, fn, args );
-			const std::string name = fn->attribute( "name" );
-			this->check_token( tokty_arrow );
-			Node body = this->read_stmnts_check( tokty_enddefine );
-			NodeFactory def;
-			def.start( "bind" );
-			def.start( "var" );
-			def.put( "name", name );
-			def.put( "protected", "true" );
-			def.end();
-			def.start( "fn" );
-			def.put( "name", name );
-			def.add( args );
-			def.add( body );
-			def.end();
-			def.end();
-			return def.build();
-			//return term_new_basic3( tokty_define, fn, args, body );
+			return this->read_definition();
 		}
 		case tokty_fn: {
-			ReadStateClass pattern( *this );
-			pattern.setPatternMode();
-			Node args = pattern.read_expr_prec( prec_arrow );
-			this->check_token( tokty_arrow );
-			//args = just_args( args );
-			Node body = this->read_stmnts_check( tokty_endfn );
-			NodeFactory fn;
-			fn.start( "fn" );
-			fn.add( args );
-			fn.add( body );
-			fn.end();
-			return fn.build();
+			return this->read_lambda();
 		}
 		case tokty_lt: {
 			NodeFactory element;
@@ -782,7 +815,6 @@ Node ReadStateClass::read_opt_expr_prec( int prec ) {
 			} else {
 				throw Ginger::Mishap( "Only integers supported so far" ).culprit( "Item", it->nameString() );
 			}
-			//fprintf( stderr, "DEBUG arity %d\n", term_arity( t ) );
 			t.end();
 			e = t.build();
 			ifact->drop();

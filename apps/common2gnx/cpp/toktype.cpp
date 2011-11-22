@@ -1,8 +1,13 @@
 #include "toktype.hpp"
 #include "mishap.hpp"
 
+#define X(a,b) case a : return b;
 const char *tok_type_name( TokType fnc ) {
     switch ( fnc ) {
+  /*  
+#include "toktype.xdef"
+*/
+    
 	case tokty___default : return "__tokty_default";
 	case tokty_eof : return "eof";
 	case tokty_absand : return "absand";
@@ -52,6 +57,7 @@ const char *tok_type_name( TokType fnc ) {
 	case tokty_fn : return "fn";
 	case tokty_for : return "for";
 	case tokty_from : return "from";
+	case tokty_function: return "function";
 	case tokty_gt : return "gt";
 	case tokty_gte : return "gte";
 	case tokty_id : return "id";
@@ -92,6 +98,8 @@ const char *tok_type_name( TokType fnc ) {
     }
     return "?";
 }
+#undef X
+
 
 const char * tok_type_as_tag( TokType fnc ) {
     switch ( fnc ) {

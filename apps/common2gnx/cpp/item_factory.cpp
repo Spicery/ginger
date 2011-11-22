@@ -147,7 +147,7 @@ void ItemFactoryClass::readAtDigitOrMinus( int ch ) {
 	} while ( isdigit( ch ) );
 	ungetc( ch, this->file );
 	if ( this->text.size() == 1 && this->text[ 0 ] == '-' ) {
-		this->item = itemMap.lookup( this->text );
+		this->item = this->itemMap.lookup( this->text );
 	} else {
 		Item it = this->item = this->spare;
 		it->tok_type = tokty_int;
@@ -165,7 +165,7 @@ void ItemFactoryClass::readAtAlphaOrUnderbar( int ch ) {
 		ch = getc( this->file );
 	} while ( isalnum( ch ) || ch == '_' );
 	ungetc( ch, this->file );
-	this->item = itemMap.lookup( this->text );
+	this->item = this->itemMap.lookup( this->text );
 	if ( this->item == NULL ) {
 		Item it = this->item = this->spare;
 		it->tok_type = tokty_id;
@@ -214,7 +214,7 @@ void ItemFactoryClass::readAtSeparatorCharType( int ch ) {
 	//	Single character keywords
 	//
 	this->text.push_back( ch );
-	this->item = itemMap.lookup( this->text );
+	this->item = this->itemMap.lookup( this->text );
 	if ( this->item == NULL ) {
 		//	Never happens.
 		throw Ginger::Mishap( "Invalid punctuation token" ); 
@@ -226,7 +226,7 @@ void ItemFactoryClass::readAtBracketCharType( int ch ) {
 		this->text.push_back( ch );
 	} while ( ( ch = getc( this->file ) ) == '%' );
 	ungetc( ch, this->file );
-	this->item = itemMap.lookup( this->text );
+	this->item = this->itemMap.lookup( this->text );
 	if ( this->item == NULL ) {
 		throw Ginger::Mishap( "Invalid punctuation token" ); 
 	}
@@ -241,7 +241,7 @@ void ItemFactoryClass::readAtBracketDecorationCharType( int ch ) {
 	} else {
 		ungetc( ch, this->file );
 	}
-	this->item = itemMap.lookup( this->text );
+	this->item = this->itemMap.lookup( this->text );
 	if ( this->item == NULL ) {
 		throw Ginger::Mishap( "Invalid punctuation token" ); 
 	}
@@ -263,7 +263,7 @@ void ItemFactoryClass::readAtSelfGlueCharType( int ch ) {
 			break;
 		}
 	}
-	Item it = this->item = itemMap.lookup( this->text );
+	Item it = this->item = this->itemMap.lookup( this->text );
 	if ( it == NULL ) {
 		throw Ginger::Mishap( "Invalid repeated-character sign" ).culprit( "Token", this->text );
 	}
@@ -287,7 +287,7 @@ void ItemFactoryClass::readAtSignCharType( int ch ) {
 		ch = getc( this->file );
 	} while ( isSignCharType( ch ) && not( prev_ch == '>' && ch == '<') );
 	ungetc( ch, this->file );
-	it = this->item = itemMap.lookup( this->text );
+	it = this->item = this->itemMap.lookup( this->text );
 	if ( it == NULL ) {
 		throw Ginger::Mishap( "Invalid sign (combination of special characters)" ).culprit( "Sign", this->text );
 	}

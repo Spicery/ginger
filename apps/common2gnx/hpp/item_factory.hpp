@@ -6,11 +6,13 @@
 #include <stdio.h>
 
 #include "item.hpp"
+#include "item_map.hpp"
+
 
 class ItemFactoryClass {
 
 public:
-
+	ItemMap				itemMap;
 	FILE				*file;
     bool            	peeked;
     std::string			text;
@@ -42,7 +44,8 @@ public:
 	
 public:
 
-	ItemFactoryClass( FILE * f ) :
+	ItemFactoryClass( FILE * f, const bool cstyle ) :
+		itemMap( cstyle ),
 		file( f ),
 		peeked( false ),
 		item( NULL ),

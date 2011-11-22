@@ -1,6 +1,13 @@
 #ifndef TOKTYPE_HPP
 #define TOKTYPE_HPP
 
+/*#define X(a,b) a,
+typedef enum TokType {
+#include "toktype.xdef"
+} TokType;
+#undef X*/
+
+
 typedef enum TokType {
      tokty___default,
      tokty_eof,
@@ -51,6 +58,7 @@ typedef enum TokType {
      tokty_fn,
      tokty_for,
      tokty_from,
+     tokty_function,
      tokty_gt,
      tokty_gte,
      tokty_id,

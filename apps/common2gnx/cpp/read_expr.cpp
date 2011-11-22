@@ -220,6 +220,18 @@ Node ReadStateClass::postfix_processing( Node lhs, Item item, int prec ) {
 		}
 	} else {
 		switch ( fnc ) {
+			case tokty_bindrev: {
+				ReadStateClass pattern( *this );
+				pattern.setPatternMode();
+				Node rhs = pattern.read_expr_prec( prec );
+				NodeFactory bind;
+				bind.start( "bind" );
+				//	N.B. LHS & RHS swapped!
+				bind.add( rhs );
+				bind.add( lhs );
+				bind.end();
+				return bind.build();
+			}
 			case tokty_semi: {
 				Node rhs = this->read_opt_expr_prec( prec );
 				if ( not( rhs ) ) {

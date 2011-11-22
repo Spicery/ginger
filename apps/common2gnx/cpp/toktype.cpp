@@ -4,10 +4,9 @@
 #define X(a,b) case a : return b;
 const char *tok_type_name( TokType fnc ) {
     switch ( fnc ) {
-  /*  
 #include "toktype.xdef"
-*/
-    
+
+/*    
 	case tokty___default : return "__tokty_default";
 	case tokty_eof : return "eof";
 	case tokty_absand : return "absand";
@@ -94,7 +93,7 @@ const char *tok_type_name( TokType fnc ) {
 	case tokty_until : return "until";
 	case tokty_val: return "val";
 	case tokty_var : return "var";
-	case tokty_while : return "while";
+	case tokty_while : return "while";*/
     }
     return "?";
 }

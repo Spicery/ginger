@@ -12,5 +12,8 @@ check: example.pass envvar.pass element.pass
 clean:
 	rm -f *.pass
 	rm -f *.fail
-	
+
+ccheck: clean check
+
+
 .SUFFIXES: .pass .tests

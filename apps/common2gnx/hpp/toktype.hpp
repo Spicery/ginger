@@ -1,14 +1,14 @@
 #ifndef TOKTYPE_HPP
 #define TOKTYPE_HPP
 
-/*#define X(a,b) a,
+#define X(a,b) a,
 typedef enum TokType {
 #include "toktype.xdef"
 } TokType;
-#undef X*/
+#undef X
 
 
-typedef enum TokType {
+/*typedef enum TokType {
      tokty___default,
      tokty_eof,
      tokty_absand,
@@ -96,7 +96,7 @@ typedef enum TokType {
      tokty_val,
      tokty_var,
      tokty_while
-} TokType;
+} TokType;*/
 
 const char *tok_type_name( TokType fnc );
 const char *tok_type_as_tag( TokType fnc );

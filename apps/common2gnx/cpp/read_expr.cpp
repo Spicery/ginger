@@ -37,6 +37,18 @@ static Node makeApp( Node lhs, Node rhs ) {
 	}
 }
 
+static void pushAbsent( NodeFactory & f ) {
+	f.start( "constant" );
+	f.put( "type", "absent" );
+	f.put( "value", "absent" );
+	f.end();
+}
+
+static void pushEmpty( NodeFactory & f ) {
+	f.start( "seq" );
+	f.end();
+}
+
 static void updateAsPattern( Node node ) {
 	if ( node->hasName( "id" ) ) {
 		node->name() = "var";
@@ -125,8 +137,7 @@ Node ReadStateClass::read_stmnts() {
 	Node e = this->read_opt_expr_prec( this->cstyle_mode ? prec_semi : prec_max );
 	if ( not e ) {
 		NodeFactory skip;
-		skip.start( "seq" );
-		skip.end();
+		pushEmpty( skip );
 		return skip.build();
 	} else {
 		return e;
@@ -459,8 +470,7 @@ static Node makeCharSequence( Item item ) {
 	int n = item->nameString().size();
 	if ( n == 0 ) {
 		NodeFactory skip;
-		skip.start( "seq" );
-		skip.end();
+		pushEmpty( skip );
 		return skip.build();
 	} else {
 		NodeFactory charseq;
@@ -546,8 +556,12 @@ Node ReadStateClass::read_definition() {
 Node ReadStateClass::prefix_processing() {
 	ItemFactory ifact = this->item_factory;
 	Item item = ifact->read();
+	
 	TokType fnc = item->tok_type;
 	Role role = item->role;
+
+	//cout << "PREFIX PROCESSING: " << item->nameString() << endl;
+	//cout << "  tokty = " << tok_type_name( fnc ) << endl;
 
 	if ( role.IsLiteral() ) {
 		NodeFactory simple;
@@ -608,6 +622,96 @@ Node ReadStateClass::prefix_processing() {
 			this->check_token( tokty_cbrace );
 			envvar.end();
 			return envvar.build();
+		}
+		case tokty_throw: {
+			//	throw [ TAG_EXPR ! ] [ with EXPR ];
+			//	return [ \[ Missing \] ] [ { EXPR } ];	// C-style
+			NodeFactory thr;
+			thr.start( "returnthrow" );
+			if ( this->cstyle_mode ) {
+				if ( this->try_token( tokty_obracket ) ) {
+					Node e1 = this->read_expr_check( tokty_cbracket );
+					thr.add( e1 );
+				} else {
+					pushAbsent( thr );
+				}
+				if ( this->try_token( tokty_obrace ) ) {
+					this->read_stmnts_check( tokty_cbrace );
+				} else {
+					pushEmpty( thr );
+				}
+			} else {
+				Node e1 = this->read_opt_expr();
+				if ( not e1 ) {
+					pushAbsent( thr );
+					pushAbsent( thr );
+				} else {
+					thr.add( e1 );
+					pushAbsent( thr );
+				} 
+				if ( this->try_token( tokty_with ) ) {
+					Node e2 = this->read_expr();
+					thr.add( e2 );
+				} else {
+					pushEmpty( thr );
+				}
+			}
+			thr.end();
+			return thr.build();
+		}
+		case tokty_return: {
+			//	return [ with EXPR ];
+			//	return TAG_EXPR ! [ with EXPR ];
+			//	return [ TAG_EXPR ! ] EXPR [ with EXPR ];
+			//	return [ \[ Missing \] ] [ EXPR ] [ { EXPR } ];	// C-style
+			NodeFactory ret;
+			ret.start( "returnthrow" );
+			if ( this->cstyle_mode ) {
+				if ( this->try_token( tokty_obracket ) ) {
+					Node e1 = this->read_expr_check( tokty_cbracket );
+					ret.add( e1 );
+				} else {
+					pushAbsent( ret );
+				}
+				Node e = this->read_opt_expr();
+				if ( not e ) {
+					pushEmpty( ret );
+				} else {
+					ret.add( e );
+				}
+				if ( this->try_token( tokty_obrace ) ) {
+					this->read_stmnts_check( tokty_cbrace );
+				} else {
+					pushEmpty( ret );
+				}
+			} else {
+				Node e1 = this->read_opt_expr();
+				if ( not e1 ) {
+					pushAbsent( ret );
+					pushEmpty( ret );
+				} else {
+					if ( this->try_token( tokty_tag ) ) {
+						ret.add( e1 );
+						Node e2 = this->read_opt_expr();
+						if ( not e2 ) {
+							pushEmpty( ret );
+						} else {
+							ret.add( e2 );
+						}
+					} else {
+						pushAbsent( ret );
+						ret.add( e1 );
+					}
+				}
+				if ( this->try_token( tokty_with ) ) {
+					Node e3 = this->read_expr();
+					ret.add( e3 );
+				} else {
+					pushEmpty( ret );
+				}
+			}
+			ret.end();
+			return ret.build();
 		}
 		case tokty_charseq: {
 			return makeCharSequence( item );

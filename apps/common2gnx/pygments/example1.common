@@ -1,0 +1,52 @@
+###########################################################
+# Example of Common Syntax suitable for testing Pygments.
+# The program does not make much sense, it’s just a test.
+# This comment block tests out end-of-line comments.
+###########################################################
+
+# This illustrates the keyword val, the := operator, 
+# function calls, whitespace, symbols and punctuation.
+val name1 := cgiGet( 'name1' );
+val name2 := cgiGet( 'name2' );
+
+# This is a function definition which involves the
+# define/enddefine keywords and the => punctuation.
+define output() =>>
+    # Shows if/then/elseif/endif syntax and also
+    # strings and environment variable syntax.
+    if ${OUTPUT} = "html" then
+        # This illustrates the embedded XML syntax.
+        <html>
+            # Here we have text with interpolated expressions
+            # and an escaped HTML character entity.
+####        Issue: string interpolation.
+####        <title> "Welcome \(name1) \&amp; \(name2)" </title>
+            <body>
+        
+            </body>
+        </html>
+    elseif ${OUTPUT}... = "text"... then  # Shows explodes.
+        # Loops, lists and vectors with numeric literals.
+        # Note use of parallel iteration operator.
+        {
+            for i in [ 2, 3, 5, 7, 11 ] also n from 1 
+            do
+                tmp := newVector( i, i );
+                # Some arithmetic operators.
+                if 2 * n > i + 1 then
+                    # The other postfix function appl. syntax.
+                    # Also the indexing operator.
+                    n @factorise -> i[ 1 ]
+               endif
+            endfor
+        } =: v;    # Reverse short declaration operator.
+    else
+        # Shows postfix function application.
+        throw UnexpectedValue return _ with (
+            "$OUTPUT has unexpected value",
+            '$OUTPUT' -> ${OUTPUT}
+        )
+    endif
+enddefine;
+
+output().println; # And postfix function application.

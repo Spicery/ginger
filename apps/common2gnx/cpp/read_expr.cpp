@@ -37,6 +37,16 @@ static Node makeApp( Node lhs, Node rhs ) {
 	}
 }
 
+static Node makeIndex( Node lhs, Node rhs ) {
+	NodeFactory index;
+	index.start( "sysapp" );
+	index.put( "name", "index" );
+	index.add( lhs );
+	index.add( rhs );
+	index.end();
+	return index.build();
+}
+
 static void pushAbsent( NodeFactory & f ) {
 	f.start( "constant" );
 	f.put( "type", "absent" );
@@ -46,6 +56,11 @@ static void pushAbsent( NodeFactory & f ) {
 
 static void pushEmpty( NodeFactory & f ) {
 	f.start( "seq" );
+	f.end();
+}
+
+static void pushAnyPattern( NodeFactory & f ) {
+	f.start( "val" );
 	f.end();
 }
 
@@ -99,6 +114,11 @@ void ReadStateClass::check_token( TokType fnc ) {
 	if ( it->tok_type != fnc ) {
 		throw Ginger::Mishap( "Unexpected token" ).culprit( "Found", it->nameString() ).culprit( "Expected", tok_type_name( fnc ) );
 	}
+}
+
+bool ReadStateClass::try_peek_token( TokType fnc ) {
+	Item it = this->item_factory->peek();
+	return it->tok_type == fnc;
 }
 
 void ReadStateClass::check_peek_token( TokType fnc ) {
@@ -172,19 +192,43 @@ Node ReadStateClass::read_expr_check( TokType fnc ) {
 Node ReadStateClass::postfix_processing( Node lhs, Item item, int prec ) {
 	Role role = item->role;
 	TokType fnc = item->tok_type;
-	if ( role.IsPattern() ) {
-		updateAsPattern( lhs );
+	if ( role.IsBinary() ) {
+		const bool direction = tok_type_as_direction( fnc );
+		if ( role.IsSys() ) {
+			NodeFactory a;
+			a.start( "sysapp" );
+			a.put( "name", tok_type_as_sysapp( fnc ) );
+			Node rhs = this->read_expr_prec( prec );
+			a.add( direction ? lhs : rhs );
+			a.add( !direction ? lhs : rhs );
+			a.end();
+			return a.build();
+		} else if ( role.IsForm() ) {
+			NodeFactory a;
+			a.start( tok_type_as_tag( fnc ) );
+			Node rhs = this->read_expr_prec( prec );
+			a.add( direction ? lhs : rhs );
+			a.add( !direction ? lhs : rhs );
+			a.end();
+			return a.build();			
+		} else {
+			throw;
+		}
+	} else {
 		switch ( fnc ) {
+			case tokty_bindrev:
 			case tokty_bind: {
 				Node rhs = this->read_expr_prec( prec );
+				updateAsPattern( fnc == tokty_bind ? lhs : rhs );
 				NodeFactory bind;
 				bind.start( "bind" );
-				bind.add( lhs );
-				bind.add( rhs );
+				bind.add( fnc == tokty_bind ? lhs : rhs );
+				bind.add( fnc != tokty_bind ? lhs : rhs );
 				bind.end();
 				return bind.build();
 			}
 			case tokty_from: {				
+				updateAsPattern( lhs );
 				Node from_expr = this->read_expr();
 				this->check_token( tokty_to );
 				Node to_expr = this->read_expr_prec( prec );
@@ -197,6 +241,7 @@ Node ReadStateClass::postfix_processing( Node lhs, Item item, int prec ) {
 				return node.build();
 			}
 			case tokty_in: {				
+				updateAsPattern( lhs );
 				Node in_expr = this->read_expr();
 				NodeFactory node;
 				node.start( "in" );
@@ -204,44 +249,6 @@ Node ReadStateClass::postfix_processing( Node lhs, Item item, int prec ) {
 				node.add( in_expr );
 				node.end();
 				return node.build();
-			}
-			default: 
-				throw;
-		}
-	} else if ( role.IsBinary() ) {
-		if ( role.IsSys() ) {
-			NodeFactory a;
-			a.start( "sysapp" );
-			a.put( "name", tok_type_as_sysapp( fnc ) );
-			a.add( lhs );
-			Node x = this->read_expr_prec( prec );
-			a.add( x );
-			a.end();
-			return a.build();
-		} else if ( role.IsForm() ) {
-			NodeFactory a;
-			a.start( tok_type_as_tag( fnc ) );
-			a.add( lhs );
-			Node x = this->read_expr_prec( prec );
-			a.add( x );
-			a.end();
-			return a.build();			
-		} else {
-			throw;
-		}
-	} else {
-		switch ( fnc ) {
-			case tokty_bindrev: {
-				ReadStateClass pattern( *this );
-				pattern.setPatternMode();
-				Node rhs = pattern.read_expr_prec( prec );
-				NodeFactory bind;
-				bind.start( "bind" );
-				//	N.B. LHS & RHS swapped!
-				bind.add( rhs );
-				bind.add( lhs );
-				bind.end();
-				return bind.build();
 			}
 			case tokty_semi: {
 				Node rhs = this->read_opt_expr_prec( prec );
@@ -255,6 +262,11 @@ Node ReadStateClass::postfix_processing( Node lhs, Item item, int prec ) {
 					s.end();
 					return s.build();
 				}
+			}
+			case tokty_obracket: {
+				//	Indexing operator.
+				Node rhs = this->read_stmnts_check( tokty_cbracket );
+				return makeIndex( lhs, rhs );
 			}
 			case tokty_oparen: {
 				Node rhs = this->read_stmnts_check( tokty_cparen );
@@ -513,7 +525,7 @@ Node ReadStateClass::read_lambda() {
 	ReadStateClass pattern( *this );
 	pattern.setPatternMode();
 	Node args = pattern.read_expr_prec( prec_arrow );
-	if ( not this->cstyle_mode ) this->check_token( tokty_arrow );
+	if ( not this->cstyle_mode ) this->check_token( tokty_fnarrow );
 	Node body = this->read_stmnts_check( tokty_endfn );
 	NodeFactory fn;
 	fn.start( "fn" );
@@ -534,7 +546,7 @@ Node ReadStateClass::read_definition() {
 	if ( this->cstyle_mode ) {
 		this->check_peek_token( tokty_obrace );
 	} else {
-		this->check_token( tokty_arrow );
+		this->check_token( tokty_fnarrow );
 	}
 	Node body = this->read_stmnts();
 	if ( not this->cstyle_mode ) this->check_token( tokty_enddefine );
@@ -552,6 +564,73 @@ Node ReadStateClass::read_definition() {
 	def.end();
 	return def.build();
 }
+
+void ReadStateClass::read_try_catch( NodeFactory & ftry ) {
+	while( this->try_token( tokty_case ) ) {
+		ftry.start( "case" );
+		ReadStateClass pattern( *this );
+		pattern.setPatternMode();
+		Node case_patt = pattern.read_expr();
+		ftry.add( case_patt );
+		this->check_token( tokty_then );
+		Node then_stnmnts = this->read_stmnts();
+		ftry.add( then_stnmnts );
+		ftry.end();
+	}
+	if ( this->try_token( tokty_else ) ) {
+		ftry.start( "case" );
+		pushAnyPattern( ftry );
+		Node else_stmnts = this->read_stmnts();
+		ftry.add( else_stmnts );
+		ftry.end();
+	}
+}
+
+Node ReadStateClass::read_try( const bool try_vs_transaction ) {
+	// 	try APP ( catch ( case PATTERN then STMNTS )* [ else STMNTS ] )* endtry
+	//	<try> APP ( <catch> ... </catch> )* </try>
+	//	<catch> PATTERN ( <case> PATTERN STMNTS </case> )* </catch>
+	NodeFactory ftry;
+	ftry.start( try_vs_transaction ?"try" : "transaction" );
+	Node app = this->read_expr();
+	ftry.add( app );
+	if ( try_vs_transaction && this->try_peek_token( tokty_case ) ) {
+		ftry.start( "catch" );
+		pushAnyPattern( ftry ); 
+		this->read_try_catch( ftry );
+		ftry.end();
+	} else if ( try_vs_transaction && this->try_token( tokty_else ) ) {
+		ftry.start( "catch" );
+		pushAnyPattern( ftry );
+		ftry.start( "case" );
+		pushAnyPattern( ftry );
+		Node stmnts = this->read_stmnts();
+		ftry.add( stmnts );
+		ftry.end();
+		ftry.end();
+	} else if ( this->try_peek_token( tokty_catch ) ) {
+		while ( this->try_token( tokty_catch ) ) {
+			ftry.start( "catch" );
+			ReadStateClass pattern( *this );
+			pattern.setPatternMode();
+			Node catch_patt = pattern.read_expr();
+			ftry.add( catch_patt );
+			if ( try_vs_transaction ) {
+				this->read_try_catch( ftry );
+			} else {
+				this->check_token( tokty_then );
+				Node stmnts = this->read_stmnts();
+				ftry.add( stmnts );
+			}
+			ftry.end();
+		}
+	} 
+	this->check_token( try_vs_transaction? tokty_endtry : tokty_endtransaction );
+	ftry.end();
+	return ftry.build();
+}
+
+
 
 Node ReadStateClass::prefix_processing() {
 	ItemFactory ifact = this->item_factory;
@@ -624,94 +703,59 @@ Node ReadStateClass::prefix_processing() {
 			return envvar.build();
 		}
 		case tokty_throw: {
-			//	throw [ TAG_EXPR ! ] [ with EXPR ];
-			//	return [ \[ Missing \] ] [ { EXPR } ];	// C-style
+			//	throw [ ATOMIC_TAG_EXPR ] [ return EXPR ] [ with EXPR ];
+			//	throw [ ATOMIC_TAG_EXPR ] [ return EXPR ] [ { EXPR } ]; // C-style
 			NodeFactory thr;
-			thr.start( "returnthrow" );
-			if ( this->cstyle_mode ) {
-				if ( this->try_token( tokty_obracket ) ) {
-					Node e1 = this->read_expr_check( tokty_cbracket );
-					thr.add( e1 );
-				} else {
-					pushAbsent( thr );
-				}
-				if ( this->try_token( tokty_obrace ) ) {
-					this->read_stmnts_check( tokty_cbrace );
-				} else {
-					pushEmpty( thr );
-				}
+			thr.start( "throw" );
+			Node tag_expr = this->read_opt_expr();
+			if ( not tag_expr ) {
+				pushAbsent( thr );
 			} else {
-				Node e1 = this->read_opt_expr();
-				if ( not e1 ) {
-					pushAbsent( thr );
-					pushAbsent( thr );
-				} else {
-					thr.add( e1 );
-					pushAbsent( thr );
-				} 
-				if ( this->try_token( tokty_with ) ) {
-					Node e2 = this->read_expr();
-					thr.add( e2 );
-				} else {
-					pushEmpty( thr );
-				}
+				thr.add( tag_expr );
+			}
+			if ( this->try_token( tokty_return ) ) {
+				Node r = this->read_expr();
+				thr.add( r );
+			} else {
+				pushEmpty( thr );
+			}
+			if ( 
+				this->cstyle_mode && this->try_peek_token( tokty_obracket ) || 
+				!this->cstyle_mode && this->try_token( tokty_with ) 
+			) {
+				Node w = this->read_expr();
+				thr.add( w );
+			} else {
+				pushEmpty( thr );
 			}
 			thr.end();
 			return thr.build();
 		}
 		case tokty_return: {
-			//	return [ with EXPR ];
-			//	return TAG_EXPR ! [ with EXPR ];
-			//	return [ TAG_EXPR ! ] EXPR [ with EXPR ];
-			//	return [ \[ Missing \] ] [ EXPR ] [ { EXPR } ];	// C-style
+			//	return EXPR [ with EXPR ];
+			//	return EXPR [ { EXPR } ];	//	C-style
 			NodeFactory ret;
-			ret.start( "returnthrow" );
-			if ( this->cstyle_mode ) {
-				if ( this->try_token( tokty_obracket ) ) {
-					Node e1 = this->read_expr_check( tokty_cbracket );
-					ret.add( e1 );
-				} else {
-					pushAbsent( ret );
-				}
-				Node e = this->read_opt_expr();
-				if ( not e ) {
-					pushEmpty( ret );
-				} else {
-					ret.add( e );
-				}
-				if ( this->try_token( tokty_obrace ) ) {
-					this->read_stmnts_check( tokty_cbrace );
-				} else {
-					pushEmpty( ret );
-				}
+			ret.start( "throw" );
+			pushAbsent( ret );
+			Node r = this->read_expr();
+			ret.add( r );
+			if ( 
+				this->cstyle_mode && this->try_peek_token( tokty_obracket ) || 
+				!this->cstyle_mode && this->try_token( tokty_with ) 
+			) {
+				Node w = this->read_expr();
+				ret.add( w );
 			} else {
-				Node e1 = this->read_opt_expr();
-				if ( not e1 ) {
-					pushAbsent( ret );
-					pushEmpty( ret );
-				} else {
-					if ( this->try_token( tokty_tag ) ) {
-						ret.add( e1 );
-						Node e2 = this->read_opt_expr();
-						if ( not e2 ) {
-							pushEmpty( ret );
-						} else {
-							ret.add( e2 );
-						}
-					} else {
-						pushAbsent( ret );
-						ret.add( e1 );
-					}
-				}
-				if ( this->try_token( tokty_with ) ) {
-					Node e3 = this->read_expr();
-					ret.add( e3 );
-				} else {
-					pushEmpty( ret );
-				}
+				pushEmpty( ret );
 			}
 			ret.end();
 			return ret.build();
+		} 
+		case tokty_transaction: {
+			return this->read_try( false );
+		}
+		case tokty_try: {
+			return this->read_try( true );
 		}
 		case tokty_charseq: {
 			return makeCharSequence( item );

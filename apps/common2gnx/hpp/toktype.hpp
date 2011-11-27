@@ -98,10 +98,11 @@ typedef enum TokType {
      tokty_while
 } TokType;*/
 
-const char *tok_type_name( TokType fnc );
-const char *tok_type_as_tag( TokType fnc );
-const char *tok_type_as_sysapp( TokType fnc );
-const char *tok_type_as_type( TokType fnc );
+extern const bool tok_type_as_direction( TokType fnc );
+extern const char *tok_type_name( TokType fnc );
+extern const char *tok_type_as_tag( TokType fnc );
+extern const char *tok_type_as_sysapp( TokType fnc );
+extern const char *tok_type_as_type( TokType fnc );
 //const char *functor_as_value( Functor fnc );
 
 #endif

@@ -8,6 +8,8 @@ typedef shared< Ginger::Mnx > Node;
 #include "toktype.hpp"
 #include "item_factory.hpp"
 
+typedef Ginger::MnxBuilder NodeFactory;
+
 class ReadStateClass {
 
 public:
@@ -33,6 +35,10 @@ private:
 	Node read_lambda();
 	Node read_definition();
 	std::string read_pkg_name();
+	void read_try_catch( NodeFactory & ftry );
+	Node read_try( const bool try_vs_transaction );
+
+
 	
 public:
 	void setPatternMode() { this->pattern_mode = true; }
@@ -49,6 +55,7 @@ public:
 	void check_token( TokType fnc );
 	void check_peek_token( TokType fnc );
 	bool try_token( TokType fnc );
+	bool try_peek_token( TokType fnc );
 	bool try_name( const char * name );
 	
 public:

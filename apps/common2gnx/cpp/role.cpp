@@ -1,6 +1,5 @@
 #include "role.hpp"
 
-Role PatternRole		= { DONTKNOW, DONTKNOW, PostfixCode, PatternCode };
 Role IncrByRole			= { 1, 1, PrefixCode, NoSpecialCode };
 Role DecrByRole			= { 1, 1, PrefixCode, NoSpecialCode };
 Role AnonRole			= { 0, 1, PrefixCode, NoSpecialCode };

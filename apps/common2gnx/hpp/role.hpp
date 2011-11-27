@@ -29,7 +29,7 @@ enum CompileCode {
 	NoSpecialCode 		= 0,
 	EofCode				= 1,
 	LiteralCode			= 2,
-	PatternCode			= 3,
+	UnusedCompileCode3	= 3,
 	FormCode			= 4,	
 	SysCode    			= 5,
 	UnusedCompileCode6	= 6,
@@ -54,12 +54,10 @@ public:
 	bool IsLiteral() 	{ return this->compile_code == LiteralCode; }
 	bool IsForm() 		{ return this->compile_code == FormCode; }
 	bool IsSys() 		{ return this->compile_code == SysCode; }
-	bool IsPattern() 	{ return this->compile_code == PatternCode; }
 
 };
 
 
-extern Role PatternRole;
 extern Role IncrByRole;
 extern Role DecrByRole;
 extern Role AnonRole;

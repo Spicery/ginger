@@ -229,14 +229,15 @@ Node ReadStateClass::postfix_processing( Node lhs, Item item, int prec ) {
 			}
 			case tokty_from: {				
 				updateAsPattern( lhs );
-				Node from_expr = this->read_expr();
-				this->check_token( tokty_to );
-				Node to_expr = this->read_expr_prec( prec );
 				NodeFactory node;
 				node.start( "from" );
+				Node from_expr = this->read_expr();
 				node.add( lhs );
 				node.add( from_expr );
-				node.add( to_expr );
+				if ( this->try_token( tokty_to ) ) {
+					Node to_expr = this->read_expr_prec( prec );
+					node.add( to_expr );
+				}
 				node.end();
 				return node.build();
 			}

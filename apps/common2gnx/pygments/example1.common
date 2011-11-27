@@ -20,7 +20,7 @@ define output() =>>
             # Here we have text with interpolated expressions
             # and an escaped HTML character entity.
 ####        Issue: string interpolation.
-####        <title> "Welcome \(name1) \&amp; \(name2)" </title>
+           <title> "Welcome \(name1) \&amp; \(name2)" </title>
             <body>
         
             </body>
@@ -29,8 +29,7 @@ define output() =>>
         # Loops, lists and vectors with numeric literals.
         # Note use of parallel iteration operator.
         {
-            for i in [ 2, 3, 5, 7, 11 ] also n from 1 
-            do
+            for i in [ 2, 3, 5, 7, 11 ] also n from 1 do
                 tmp := newVector( i, i );
                 # Some arithmetic operators.
                 if 2 * n > i + 1 then

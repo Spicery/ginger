@@ -1,7 +1,8 @@
 #include <string>
 using namespace std;
 
-#include <stdio.h>
+#include <iostream>
+//#include <stdio.h>
 #include <ctype.h>
 #include <stdlib.h>
 #include <string.h>
@@ -194,8 +195,38 @@ void ItemFactoryClass::readAtQuoteCharType( int ch ) {
 				ch = '\t';
 			} else if ( ch == 's' ) {
 				ch = ' ';
+			} else if ( ch == '&' ) {
+				//	HTML entity.
+				string entity;
+				for (;;) {
+					ch = getc( this->file );
+					if ( ch == ';' ) break;
+					if ( isalpha( ch ) ) {
+						entity.push_back( (char)ch );
+					} else {
+						throw Ginger::Mishap( "Unexpected character while reading HTML character entity" ).culprit( "Char", (char)ch );
+					}
+				}
+				
+				//	TO-DO: this needs a lot of expansion but should wait until
+				//	the Unicode sprint is done.
+				if ( entity == "lt" ) {
+					this->text.append( "<" );
+				} else if ( entity == "gt" ) {
+					this->text.append( ">" );
+				} else if ( entity == "amp" ) {
+					this->text.append( "&" );
+				} else {
+					throw Ginger::Mishap( "Unrecognised HTML character entity" ).culprit( "Entity", entity );
+				}
+				continue;
+			} else if ( ch == '(' ) {
+				//	This should be a string interpolation. However, we are not
+				//	implementing that in this first release, so what we will do
+				//	is raise a warning.
+				std::cerr << "STRING INTERPOLATION NOT IMPLEMENTED YET" << std::endl;
 			} else {
-				throw "Invalid character after \\ in string";	// ch
+				throw Ginger::Mishap( "Unexpected character after \\ in string" ).culprit( "Character", (char)ch );	// ch
 			}
 		}
 		this->text.push_back( ch );

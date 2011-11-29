@@ -71,7 +71,7 @@ static void updateAsPattern( Node node ) {
 	}
 }
 
-Node ReadStateClass::read_id() {
+/*Node ReadStateClass::readId() {
 	Item it = this->item_factory->read();
 	if ( it->tok_type != tokty_id ) {
 		throw Ginger::Mishap( "Identifier expected" ).culprit( "Found", it->nameString() );
@@ -81,14 +81,14 @@ Node ReadStateClass::read_id() {
 	id.put( "name", it->nameString() );
 	id.end();
 	return id.build();
-}
+}*/
 
-string ReadStateClass::read_pkg_name() {
+string ReadStateClass::readPkgName() {
 	Item it = this->item_factory->read();
 	return it->nameString();
 }
 
-Item ReadStateClass::read_id_item() {
+Item ReadStateClass::readIdItem() {
 	Item it = this->item_factory->read();
 	if ( it->tok_type != tokty_id ) {
 		throw Ginger::Mishap( "Identifier expected" ).culprit( "Found", it->nameString() );
@@ -109,19 +109,19 @@ Node ReadStateClass::read_expr_prec( int prec ) {
 	return e;
 }
 
-void ReadStateClass::check_token( TokType fnc ) {
+void ReadStateClass::checkToken( TokType fnc ) {
 	Item it = this->item_factory->read();
 	if ( it->tok_type != fnc ) {
 		throw Ginger::Mishap( "Unexpected token" ).culprit( "Found", it->nameString() ).culprit( "Expected", tok_type_name( fnc ) );
 	}
 }
 
-bool ReadStateClass::try_peek_token( TokType fnc ) {
+bool ReadStateClass::tryPeekToken( TokType fnc ) {
 	Item it = this->item_factory->peek();
 	return it->tok_type == fnc;
 }
 
-void ReadStateClass::check_peek_token( TokType fnc ) {
+void ReadStateClass::checkPeekToken( TokType fnc ) {
 	Item it = this->item_factory->peek();
 	if ( it->tok_type != fnc ) {
 		throw Ginger::Mishap( "Unexpected token" ).culprit( "Found", it->nameString() ).culprit( "Expected", tok_type_name( fnc ) );
@@ -129,10 +129,10 @@ void ReadStateClass::check_peek_token( TokType fnc ) {
 }
 
 void ReadStateClass::checkSemi() {
-	this->check_token( tokty_semi );
+	this->checkToken( tokty_semi );
 }
 
-bool ReadStateClass::try_name( const char * name ) {
+bool ReadStateClass::tryName( const char * name ) {
 	ItemFactory ifact = this->item_factory;
 	Item it = ifact->peek();
 	if ( it->nameString() == name ) {
@@ -143,7 +143,7 @@ bool ReadStateClass::try_name( const char * name ) {
 	}
 }
 
-bool ReadStateClass::try_token( TokType fnc ) {
+bool ReadStateClass::tryToken( TokType fnc ) {
 	ItemFactory ifact = this->item_factory;
 	if ( ifact->peek()->tok_type == fnc ) {
 		ifact->drop();
@@ -153,7 +153,7 @@ bool ReadStateClass::try_token( TokType fnc ) {
 	}
 }
 
-Node ReadStateClass::read_stmnts() {
+Node ReadStateClass::readStmnts() {
 	Node e = this->read_opt_expr_prec( this->cstyle_mode ? prec_semi : prec_max );
 	if ( not e ) {
 		NodeFactory skip;
@@ -164,9 +164,9 @@ Node ReadStateClass::read_stmnts() {
 	}
 }
 
-Node ReadStateClass::read_stmnts_check( TokType fnc ) {
-	Node t = this->read_stmnts();
-	this->check_token( fnc );
+Node ReadStateClass::readStmntsCheck( TokType fnc ) {
+	Node t = this->readStmnts();
+	this->checkToken( fnc );
 	return t;
 }
 	
@@ -183,13 +183,13 @@ Node ReadStateClass::read_opt_expr() {
 	return this->read_opt_expr_prec( prec_semi );
 }
 
-Node ReadStateClass::read_expr_check( TokType fnc ) {
+Node ReadStateClass::readExprCheck( TokType fnc ) {
 	Node t = this->read_expr();
-	this->check_token( fnc );
+	this->checkToken( fnc );
 	return t;
 }
 
-Node ReadStateClass::postfix_processing( Node lhs, Item item, int prec ) {
+Node ReadStateClass::postfixProcessing( Node lhs, Item item, int prec ) {
 	Role role = item->role;
 	TokType fnc = item->tok_type;
 	if ( role.IsBinary() ) {
@@ -234,7 +234,7 @@ Node ReadStateClass::postfix_processing( Node lhs, Item item, int prec ) {
 				Node from_expr = this->read_expr();
 				node.add( lhs );
 				node.add( from_expr );
-				if ( this->try_token( tokty_to ) ) {
+				if ( this->tryToken( tokty_to ) ) {
 					Node to_expr = this->read_expr_prec( prec );
 					node.add( to_expr );
 				}
@@ -266,11 +266,11 @@ Node ReadStateClass::postfix_processing( Node lhs, Item item, int prec ) {
 			}
 			case tokty_obracket: {
 				//	Indexing operator.
-				Node rhs = this->read_stmnts_check( tokty_cbracket );
+				Node rhs = this->readStmntsCheck( tokty_cbracket );
 				return makeIndex( lhs, rhs );
 			}
 			case tokty_oparen: {
-				Node rhs = this->read_stmnts_check( tokty_cparen );
+				Node rhs = this->readStmntsCheck( tokty_cparen );
 				return makeApp( lhs, rhs );
 			}
 			case tokty_at:
@@ -325,22 +325,22 @@ static void predicate( TokType sense, NodeFactory & ifunless, Node pred ) {
 	}
 }
 
-Node ReadStateClass::read_if( TokType sense, TokType closer ) {
-	if ( this->cstyle_mode ) this->check_token( tokty_oparen );
+Node ReadStateClass::readIf( TokType sense, TokType closer ) {
+	if ( this->cstyle_mode ) this->checkToken( tokty_oparen );
 	Node pred = this->read_expr();
-	this->check_token( this->cstyle_mode ? tokty_cparen : tokty_then );
-	Node then_part = this->read_stmnts();
-	if ( this->try_token( tokty_else ) ) {	
+	this->checkToken( this->cstyle_mode ? tokty_cparen : tokty_then );
+	Node then_part = this->readStmnts();
+	if ( this->tryToken( tokty_else ) ) {	
 		NodeFactory ifunless;
 		ifunless.start( "if" );
 		predicate( sense, ifunless, pred );
 		ifunless.add( then_part );
-		Node x = this->read_stmnts();
-		if ( not this->cstyle_mode ) this->check_token( closer );
+		Node x = this->readStmnts();
+		if ( not this->cstyle_mode ) this->checkToken( closer );
 		ifunless.add( x );
 		ifunless.end();
 		return ifunless.build();
-	} else if ( this->cstyle_mode || this->try_token( closer ) ) {
+	} else if ( this->cstyle_mode || this->tryToken( closer ) ) {
 		NodeFactory ifunless;
 		ifunless.start( "if" );
 		predicate( sense, ifunless, pred );
@@ -349,24 +349,24 @@ Node ReadStateClass::read_if( TokType sense, TokType closer ) {
 		return ifunless.build();
 	} else {
 		TokType new_sense;
-		if ( this->try_token( tokty_elseif ) ) {
+		if ( this->tryToken( tokty_elseif ) ) {
 			new_sense = tokty_if;
 		} else {
-			this->check_token( tokty_elseunless );
+			this->checkToken( tokty_elseunless );
 			new_sense = tokty_unless;
 		}
 		NodeFactory ifunless;
 		ifunless.start( "if" );
 		predicate( sense, ifunless, pred );
 		ifunless.add( then_part );
-		Node x = this->read_if( new_sense, closer );
+		Node x = this->readIf( new_sense, closer );
 		ifunless.add( x );
 		ifunless.end();
 		return ifunless.build();
 	}
 }
 
-Node ReadStateClass::read_syscall() {
+Node ReadStateClass::readSyscall() {
 	ItemFactory ifact = this->item_factory;	
 	Item it = ifact->read();
 	if ( it->tok_type == tokty_id ) {
@@ -381,12 +381,12 @@ Node ReadStateClass::read_syscall() {
 	}
 }
 
-Node ReadStateClass::read_for() {
-	if ( this->cstyle_mode ) this->check_token( tokty_oparen );
+Node ReadStateClass::readFor() {
+	if ( this->cstyle_mode ) this->checkToken( tokty_oparen );
 	Node query = this->read_query();
-	this->check_token( this->cstyle_mode ? tokty_cparen : tokty_do );
-	Node body = this->read_stmnts();
-	if ( not this->cstyle_mode ) this->check_token( tokty_endfor );
+	this->checkToken( this->cstyle_mode ? tokty_cparen : tokty_do );
+	Node body = this->readStmnts();
+	if ( not this->cstyle_mode ) this->checkToken( tokty_endfor );
 	NodeFactory for_node;
 	for_node.start( "for" );
 	for_node.add( query );
@@ -434,13 +434,13 @@ static void readImportQualifiers( ReadStateClass & r, bool & pervasive, bool & q
 	pervasive = true;
 	qualified = false;
 	for (;;) {
-		if ( r.try_name( "pervasive" ) ) {
+		if ( r.tryName( "pervasive" ) ) {
 			pervasive = true;
-		} else if ( r.try_name( "nonpervasive" ) ) {
+		} else if ( r.tryName( "nonpervasive" ) ) {
 			pervasive = false;
-		} else if ( r.try_name( "qualified" ) ) {
+		} else if ( r.tryName( "qualified" ) ) {
 			qualified = true;
-		} else if ( r.try_name( "unqualified" ) ) {
+		} else if ( r.tryName( "unqualified" ) ) {
 			qualified = false;
 		} else {
 			break;
@@ -450,7 +450,7 @@ static void readImportQualifiers( ReadStateClass & r, bool & pervasive, bool & q
 
 
 static void readTags( ReadStateClass & r, NodeFactory & imp, const char * prefix, const bool add_default ) {
-	if ( r.try_token( tokty_oparen ) ) {
+	if ( r.tryToken( tokty_oparen ) ) {
 		ItemFactory ifact = r.item_factory;
 		if ( ifact->peek()->tok_type != tokty_cparen ) {
 			for ( int i = 0; true; i++ ) {
@@ -501,7 +501,7 @@ static Node makeCharSequence( Item item ) {
 	}
 }
 
-Node ReadStateClass::read_atomic_expr() {
+Node ReadStateClass::readAtomicExpr() {
 	ItemFactory ifact = this->item_factory;
 	Item item = ifact->read();
 	TokType fnc = item->tok_type;
@@ -516,18 +516,18 @@ Node ReadStateClass::read_atomic_expr() {
 	} else if ( fnc == tokty_charseq ) {
 		return makeCharSequence( item );
 	} else if ( fnc == tokty_oparen ) {
-		return this->read_expr_check( tokty_cparen );
+		return this->readExprCheck( tokty_cparen );
 	} else {
 		throw Ginger::Mishap( "Unexpected token while reading attribute in element" ).culprit( "Token", item->nameString() );
 	}
 }
 
-Node ReadStateClass::read_lambda() {
+Node ReadStateClass::readLambda() {
 	ReadStateClass pattern( *this );
 	pattern.setPatternMode();
 	Node args = pattern.read_expr_prec( prec_arrow );
-	if ( not this->cstyle_mode ) this->check_token( tokty_fnarrow );
-	Node body = this->read_stmnts_check( tokty_endfn );
+	if ( not this->cstyle_mode ) this->checkToken( tokty_fnarrow );
+	Node body = this->readStmntsCheck( tokty_endfn );
 	NodeFactory fn;
 	fn.start( "fn" );
 	fn.add( args );
@@ -536,7 +536,7 @@ Node ReadStateClass::read_lambda() {
 	return fn.build();			
 }
 
-Node ReadStateClass::read_definition() {
+Node ReadStateClass::readDefinition() {
 	ReadStateClass pattern( *this );
 	pattern.setPatternMode();
 	Node ap = pattern.read_expr_prec( prec_arrow );
@@ -545,12 +545,12 @@ Node ReadStateClass::read_definition() {
 	flatten( ap, fn, args );
 	const std::string name = fn->attribute( "name" );
 	if ( this->cstyle_mode ) {
-		this->check_peek_token( tokty_obrace );
+		this->checkPeekToken( tokty_obrace );
 	} else {
-		this->check_token( tokty_fnarrow );
+		this->checkToken( tokty_fnarrow );
 	}
-	Node body = this->read_stmnts();
-	if ( not this->cstyle_mode ) this->check_token( tokty_enddefine );
+	Node body = this->readStmnts();
+	if ( not this->cstyle_mode ) this->checkToken( tokty_enddefine );
 	NodeFactory def;
 	def.start( "bind" );
 	def.start( "var" );
@@ -566,28 +566,28 @@ Node ReadStateClass::read_definition() {
 	return def.build();
 }
 
-void ReadStateClass::read_try_catch( NodeFactory & ftry ) {
-	while( this->try_token( tokty_case ) ) {
+void ReadStateClass::readTryCatch( NodeFactory & ftry ) {
+	while( this->tryToken( tokty_case ) ) {
 		ftry.start( "case" );
 		ReadStateClass pattern( *this );
 		pattern.setPatternMode();
 		Node case_patt = pattern.read_expr();
 		ftry.add( case_patt );
-		this->check_token( tokty_then );
-		Node then_stnmnts = this->read_stmnts();
+		this->checkToken( tokty_then );
+		Node then_stnmnts = this->readStmnts();
 		ftry.add( then_stnmnts );
 		ftry.end();
 	}
-	if ( this->try_token( tokty_else ) ) {
+	if ( this->tryToken( tokty_else ) ) {
 		ftry.start( "case" );
 		pushAnyPattern( ftry );
-		Node else_stmnts = this->read_stmnts();
+		Node else_stmnts = this->readStmnts();
 		ftry.add( else_stmnts );
 		ftry.end();
 	}
 }
 
-Node ReadStateClass::read_try( const bool try_vs_transaction ) {
+Node ReadStateClass::readTry( const bool try_vs_transaction ) {
 	// 	try APP ( catch ( case PATTERN then STMNTS )* [ else STMNTS ] )* endtry
 	//	<try> APP ( <catch> ... </catch> )* </try>
 	//	<catch> PATTERN ( <case> PATTERN STMNTS </case> )* </catch>
@@ -595,45 +595,45 @@ Node ReadStateClass::read_try( const bool try_vs_transaction ) {
 	ftry.start( try_vs_transaction ?"try" : "transaction" );
 	Node app = this->read_expr();
 	ftry.add( app );
-	if ( try_vs_transaction && this->try_peek_token( tokty_case ) ) {
+	if ( try_vs_transaction && this->tryPeekToken( tokty_case ) ) {
 		ftry.start( "catch" );
 		pushAnyPattern( ftry ); 
-		this->read_try_catch( ftry );
+		this->readTryCatch( ftry );
 		ftry.end();
-	} else if ( try_vs_transaction && this->try_token( tokty_else ) ) {
+	} else if ( try_vs_transaction && this->tryToken( tokty_else ) ) {
 		ftry.start( "catch" );
 		pushAnyPattern( ftry );
 		ftry.start( "case" );
 		pushAnyPattern( ftry );
-		Node stmnts = this->read_stmnts();
+		Node stmnts = this->readStmnts();
 		ftry.add( stmnts );
 		ftry.end();
 		ftry.end();
-	} else if ( this->try_peek_token( tokty_catch ) ) {
-		while ( this->try_token( tokty_catch ) ) {
+	} else if ( this->tryPeekToken( tokty_catch ) ) {
+		while ( this->tryToken( tokty_catch ) ) {
 			ftry.start( "catch" );
 			ReadStateClass pattern( *this );
 			pattern.setPatternMode();
 			Node catch_patt = pattern.read_expr();
 			ftry.add( catch_patt );
 			if ( try_vs_transaction ) {
-				this->read_try_catch( ftry );
+				this->readTryCatch( ftry );
 			} else {
-				this->check_token( tokty_then );
-				Node stmnts = this->read_stmnts();
+				this->checkToken( tokty_then );
+				Node stmnts = this->readStmnts();
 				ftry.add( stmnts );
 			}
 			ftry.end();
 		}
 	} 
-	this->check_token( try_vs_transaction? tokty_endtry : tokty_endtransaction );
+	this->checkToken( try_vs_transaction? tokty_endtry : tokty_endtransaction );
 	ftry.end();
 	return ftry.build();
 }
 
 
 
-Node ReadStateClass::prefix_processing() {
+Node ReadStateClass::prefixProcessing() {
 	ItemFactory ifact = this->item_factory;
 	Item item = ifact->read();
 	
@@ -691,7 +691,7 @@ Node ReadStateClass::prefix_processing() {
 		}
 		// changed for ${VAR} case study
 		case tokty_envvar: {
-			this->check_token( tokty_obrace );
+			this->checkToken( tokty_obrace );
 			NodeFactory envvar;
 			envvar.start( "sysapp" );
 			envvar.put( "name", "sysGetEnv" );
@@ -699,7 +699,7 @@ Node ReadStateClass::prefix_processing() {
 			envvar.put( "type", "string" );
 			envvar.put( "value", ifact->read()->nameString() );
 			envvar.end();		
-			this->check_token( tokty_cbrace );
+			this->checkToken( tokty_cbrace );
 			envvar.end();
 			return envvar.build();
 		}
@@ -714,15 +714,15 @@ Node ReadStateClass::prefix_processing() {
 			} else {
 				thr.add( tag_expr );
 			}
-			if ( this->try_token( tokty_return ) ) {
+			if ( this->tryToken( tokty_return ) ) {
 				Node r = this->read_expr();
 				thr.add( r );
 			} else {
 				pushEmpty( thr );
 			}
 			if ( 
-				this->cstyle_mode && this->try_peek_token( tokty_obracket ) || 
-				!this->cstyle_mode && this->try_token( tokty_with ) 
+				this->cstyle_mode && this->tryPeekToken( tokty_obracket ) || 
+				!this->cstyle_mode && this->tryToken( tokty_with ) 
 			) {
 				Node w = this->read_expr();
 				thr.add( w );
@@ -741,8 +741,8 @@ Node ReadStateClass::prefix_processing() {
 			Node r = this->read_expr();
 			ret.add( r );
 			if ( 
-				this->cstyle_mode && this->try_peek_token( tokty_obracket ) || 
-				!this->cstyle_mode && this->try_token( tokty_with ) 
+				this->cstyle_mode && this->tryPeekToken( tokty_obracket ) || 
+				!this->cstyle_mode && this->tryToken( tokty_with ) 
 			) {
 				Node w = this->read_expr();
 				ret.add( w );
@@ -753,10 +753,10 @@ Node ReadStateClass::prefix_processing() {
 			return ret.build();
 		} 
 		case tokty_transaction: {
-			return this->read_try( false );
+			return this->readTry( false );
 		}
 		case tokty_try: {
-			return this->read_try( true );
+			return this->readTry( true );
 		}
 		case tokty_charseq: {
 			return makeCharSequence( item );
@@ -768,7 +768,7 @@ Node ReadStateClass::prefix_processing() {
 	        NodeFactory var;
 	        var.start( "var" );
 	        readTags( *this, var, "tag", true );
-	        Item item = this->read_id_item();
+	        Item item = this->readIdItem();
 	        var.put( "name", item->nameString() );
 	        if ( fnc == tokty_val ) {
 	        	var.put( "protected", "true" );
@@ -776,26 +776,26 @@ Node ReadStateClass::prefix_processing() {
 	        var.end();
 	        Node v = var.build();
 	        bind.add( v );
-	        this->check_token( tokty_bind );
+	        this->checkToken( tokty_bind );
 	        Node x = this->read_expr();
 	        bind.add( x );
 	        bind.end();
 	        return bind.build();
         }
 		case tokty_oparen: {
-			return this->read_stmnts_check( tokty_cparen );
+			return this->readStmntsCheck( tokty_cparen );
 		}
 		case tokty_obracket: {
 			NodeFactory list;
 			list.start( "sysapp" );
-			Node stmnts = this->read_stmnts();
-			if ( not this->cstyle_mode && this->try_token( tokty_bar ) ) {
+			Node stmnts = this->readStmnts();
+			if ( not this->cstyle_mode && this->tryToken( tokty_bar ) ) {
 				list.put( "name", "newListOnto" );
 				list.add( stmnts );
-				Node x = this->read_stmnts_check( tokty_cbracket );
+				Node x = this->readStmntsCheck( tokty_cbracket );
 				list.add( x );
 			} else {
-				this->check_token( tokty_cbracket );
+				this->checkToken( tokty_cbracket );
 				list.put( "name", this->cstyle_mode ? "newVector" : "newList" );
 				list.add( stmnts );
 			}
@@ -806,17 +806,17 @@ Node ReadStateClass::prefix_processing() {
 			if ( cstyle_mode ) {
 				NodeFactory seq;
 				seq.start( "block" );
-				while ( not this->try_token( tokty_cbrace ) ) {					
-					Node x = this->read_stmnts();
+				while ( not this->tryToken( tokty_cbrace ) ) {					
+					Node x = this->readStmnts();
 					seq.add( x );
-					this->try_token( tokty_semi );	//	optional semi.
+					this->tryToken( tokty_semi );	//	optional semi.
 				}
 				seq.end();
 				return seq.build();
 			} else {
 				NodeFactory list;
 				list.start( "vector" );
-				Node x = this->read_stmnts_check( tokty_cbrace );
+				Node x = this->readStmntsCheck( tokty_cbrace );
 				list.add( x );
 				list.end();
 				return list.build();
@@ -826,35 +826,35 @@ Node ReadStateClass::prefix_processing() {
 			NodeFactory list;
 			list.start( "sysapp" );
 			list.put( "name", "newMap" );
-			Node x = this->read_stmnts_check( tokty_fat_cbrace );
+			Node x = this->readStmntsCheck( tokty_fat_cbrace );
 			list.add( x );
 			list.end();
 			return list.build();
 		}
 		case tokty_unless: {
-			return this->read_if( tokty_unless, tokty_endunless );
+			return this->readIf( tokty_unless, tokty_endunless );
 		}
 		case tokty_if: {
-			return this->read_if( tokty_if, tokty_endif );
+			return this->readIf( tokty_if, tokty_endif );
 		}
 		case tokty_syscall: {
-			return this->read_syscall();
+			return this->readSyscall();
 		}
 		case tokty_for: {
-		  	return this->read_for();
+		  	return this->readFor();
 		}
 		case tokty_function: {
 			if ( this->item_factory->peek()->tok_type == tokty_oparen ) {
-				return this->read_lambda();
+				return this->readLambda();
 			} else {
-				return this->read_definition();
+				return this->readDefinition();
 			}
 		}
 		case tokty_define: {
-			return this->read_definition();
+			return this->readDefinition();
 		}
 		case tokty_fn: {
-			return this->read_lambda();
+			return this->readLambda();
 		}
 		case tokty_lt: {
 			NodeFactory element;
@@ -865,7 +865,7 @@ Node ReadStateClass::prefix_processing() {
 				element.start( "sysapp" );
 				element.put( "name", "newAttrMap" );
 				
-				Item item = this->read_id_item();
+				Item item = this->readIdItem();
 				string element_name( item->nameString() );
 				element.start( "constant" );
 				element.put( "type", "string" );
@@ -874,38 +874,38 @@ Node ReadStateClass::prefix_processing() {
 				
 				bool closed = false;
 				for (;;) {
-					if ( this->try_token( tokty_gt ) ) break;
-					if ( this->try_token( tokty_slashgt ) ) { closed = true; break; }
-					Item item = this->read_id_item();
+					if ( this->tryToken( tokty_gt ) ) break;
+					if ( this->tryToken( tokty_slashgt ) ) { closed = true; break; }
+					Item item = this->readIdItem();
 					element.start( "constant" );
 					element.put( "type", "string" );
 					element.put( "value", item->nameString() );
 					element.end();
-					this->check_token( tokty_equal );
+					this->checkToken( tokty_equal );
 					element.start( "assert" );
 					element.put( "n", "1" );
-					Node value = this->read_atomic_expr();
+					Node value = this->readAtomicExpr();
 					element.add( value );
 					element.end();
 				}
 				element.end(); 	// newAttrMap.
 				if ( not closed ) {
 					//	Read the children.
-					while ( not this->try_token( tokty_ltslash ) ) {
+					while ( not this->tryToken( tokty_ltslash ) ) {
 						Node child = this->read_expr();
 						element.add( child );
 					}
-					Item item = this->read_id_item();
+					Item item = this->readIdItem();
 					if ( item->nameString() != element_name ) {
 						throw Ginger::Mishap( "Element close tag does not match open tag" ).culprit( "Open tag", element_name ).culprit( "Close tag", item->nameString() );
 					}
-					this->check_token( tokty_gt );
+					this->checkToken( tokty_gt );
 				}
 				element.end();	//	newElement.
 
 				//	Uniquely, at this point in the language, no semi-colon is
 				//	needed if the next item is ANOTHER element.
-				if ( not this->try_token( tokty_lt ) ) break;
+				if ( not this->tryToken( tokty_lt ) ) break;
 			}			
 			element.end();
 			Node answer = element.build();
@@ -914,10 +914,10 @@ Node ReadStateClass::prefix_processing() {
 		case tokty_package: {
 			NodeFactory pkg;
 			pkg.start( "package" );
-			string url = this->read_pkg_name();
+			string url = this->readPkgName();
 			pkg.put( "url", url );
-			this->check_token( tokty_semi );
-			Node body = this->read_stmnts_check( tokty_endpackage );
+			this->checkToken( tokty_semi );
+			Node body = this->readStmntsCheck( tokty_endpackage );
 			pkg.add( body );
 			pkg.end();
 			return pkg.build();
@@ -933,16 +933,16 @@ Node ReadStateClass::prefix_processing() {
 			
 			readImportMatch( *this, imp );
 			
-			this->check_token( tokty_from );
-			string url = this->read_pkg_name();
+			this->checkToken( tokty_from );
+			string url = this->readPkgName();
 			imp.put( "from", url );
 
-			if ( this->try_name( "alias" ) ) {
-	        	Item item = this->read_id_item();
+			if ( this->tryName( "alias" ) ) {
+	        	Item item = this->readIdItem();
 				imp.put( "alias", item->nameString() );
 			}
 			
-			if ( this->try_name( "into" ) ) {
+			if ( this->tryName( "into" ) ) {
 				readImportInto( *this, imp );
 			}
 			
@@ -958,9 +958,9 @@ Node ReadStateClass::prefix_processing() {
 
 Node ReadStateClass::read_opt_expr_prec( int prec ) {
 	ItemFactory ifact = this->item_factory;
-	Node e = this->prefix_processing();
+	Node e = this->prefixProcessing();
 	if ( not e ) return Node();
-	for(;;){
+	while ( this->isPostfixAllowed() ) {
 	    int q;
 		Item it = ifact->peek();
 		if ( it->item_is_neg_num() ) {
@@ -983,7 +983,7 @@ Node ReadStateClass::read_opt_expr_prec( int prec ) {
 	        q = it->precedence;
             if ( q >= prec ) break;
 	        ifact->drop();
-	        e = this->postfix_processing( e, it, q );
+	        e = this->postfixProcessing( e, it, q );
 		} else {
 			break;
 		}

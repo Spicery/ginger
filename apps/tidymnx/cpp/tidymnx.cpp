@@ -150,10 +150,26 @@ public:
 	}
 	
 public:
-	void run() {
-		MnxReader reader;
+	void run( std::istream & in ) {
+		MnxReader reader( in );
 		SharedMnx g( reader.readMnx() );
 		g->prettyPrint( this->indent );
+	}
+
+	int run() {
+		try {
+			if ( this->use_stdin ) {
+				run( std::cin );
+			} else {
+				ifstream in( input_file_name.c_str() );
+				if ( in.bad() ) throw Ginger::Mishap( "Cannot open file" ).culprit( "Filename", input_file_name );
+				run( in );
+			}
+		} catch ( Ginger::Mishap & m ) {
+			m.gnxReport();
+			return EXIT_FAILURE;
+		}
+		return EXIT_SUCCESS;
 	}
 };
 
@@ -161,8 +177,7 @@ int main( int argc, char **argv, char **envp ) {
 	try {
 		Main main;
 		main.parseArgs( argc, argv, envp );
-		main.run();
-	    return EXIT_SUCCESS;
+		return main.run();
 	} catch ( Ginger::SystemError & p ) {
 		p.report();
 		return EXIT_FAILURE;

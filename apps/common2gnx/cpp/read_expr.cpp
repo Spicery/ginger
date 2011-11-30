@@ -14,6 +14,7 @@
 #include "role.hpp"
 #include "sysconst.hpp"
 
+
 using namespace std;
 
 typedef Ginger::MnxBuilder NodeFactory;
@@ -96,8 +97,8 @@ Item ReadStateClass::readIdItem() {
 	return it;
 }
 
-Node ReadStateClass::read_expr_prec( int prec ) {
-	Node e = this->read_opt_expr_prec( prec );
+Node ReadStateClass::readExprPrec( int prec ) {
+	Node e = this->readOptExprPrec( prec );
 	if ( not e ) {
 		Item it = this->item_factory->peek();
 		if ( it->item_is_anyfix() ) {
@@ -154,7 +155,11 @@ bool ReadStateClass::tryToken( TokType fnc ) {
 }
 
 Node ReadStateClass::readStmnts() {
-	Node e = this->read_opt_expr_prec( this->cstyle_mode ? prec_semi : prec_max );
+	return this->readStmntsPrec( this->cstyle_mode ? prec_semi : prec_max );
+}
+
+Node ReadStateClass::readStmntsPrec( const int prec ) {
+	Node e = this->readOptExprPrec( prec );
 	if ( not e ) {
 		NodeFactory skip;
 		pushEmpty( skip );
@@ -170,21 +175,21 @@ Node ReadStateClass::readStmntsCheck( TokType fnc ) {
 	return t;
 }
 	
-Node ReadStateClass::read_expr() {
-	return this->read_expr_prec( prec_semi );
+Node ReadStateClass::readExpr() {
+	return this->readExprPrec( prec_semi );
 }
 
 //	1st approximation. It is too permissive as it stands.
-Node ReadStateClass::read_query() {
-	return this->read_expr();
+Node ReadStateClass::readQuery() {
+	return this->readExpr();
 }
 
-Node ReadStateClass::read_opt_expr() {
-	return this->read_opt_expr_prec( prec_semi );
+Node ReadStateClass::readOptExpr() {
+	return this->readOptExprPrec( prec_semi );
 }
 
 Node ReadStateClass::readExprCheck( TokType fnc ) {
-	Node t = this->read_expr();
+	Node t = this->readExpr();
 	this->checkToken( fnc );
 	return t;
 }
@@ -198,7 +203,7 @@ Node ReadStateClass::postfixProcessing( Node lhs, Item item, int prec ) {
 			NodeFactory a;
 			a.start( "sysapp" );
 			a.put( "name", tok_type_as_sysapp( fnc ) );
-			Node rhs = this->read_expr_prec( prec );
+			Node rhs = this->readExprPrec( prec );
 			a.add( direction ? lhs : rhs );
 			a.add( !direction ? lhs : rhs );
 			a.end();
@@ -206,7 +211,7 @@ Node ReadStateClass::postfixProcessing( Node lhs, Item item, int prec ) {
 		} else if ( role.IsForm() ) {
 			NodeFactory a;
 			a.start( tok_type_as_tag( fnc ) );
-			Node rhs = this->read_expr_prec( prec );
+			Node rhs = this->readExprPrec( prec );
 			a.add( direction ? lhs : rhs );
 			a.add( !direction ? lhs : rhs );
 			a.end();
@@ -218,7 +223,7 @@ Node ReadStateClass::postfixProcessing( Node lhs, Item item, int prec ) {
 		switch ( fnc ) {
 			case tokty_bindrev:
 			case tokty_bind: {
-				Node rhs = this->read_expr_prec( prec );
+				Node rhs = this->readExprPrec( prec );
 				updateAsPattern( fnc == tokty_bind ? lhs : rhs );
 				NodeFactory bind;
 				bind.start( "bind" );
@@ -231,11 +236,11 @@ Node ReadStateClass::postfixProcessing( Node lhs, Item item, int prec ) {
 				updateAsPattern( lhs );
 				NodeFactory node;
 				node.start( "from" );
-				Node from_expr = this->read_expr();
+				Node from_expr = this->readExpr();
 				node.add( lhs );
 				node.add( from_expr );
 				if ( this->tryToken( tokty_to ) ) {
-					Node to_expr = this->read_expr_prec( prec );
+					Node to_expr = this->readExprPrec( prec );
 					node.add( to_expr );
 				}
 				node.end();
@@ -243,7 +248,7 @@ Node ReadStateClass::postfixProcessing( Node lhs, Item item, int prec ) {
 			}
 			case tokty_in: {				
 				updateAsPattern( lhs );
-				Node in_expr = this->read_expr();
+				Node in_expr = this->readExpr();
 				NodeFactory node;
 				node.start( "in" );
 				node.add( lhs );
@@ -252,7 +257,7 @@ Node ReadStateClass::postfixProcessing( Node lhs, Item item, int prec ) {
 				return node.build();
 			}
 			case tokty_semi: {
-				Node rhs = this->read_opt_expr_prec( prec );
+				Node rhs = this->readOptExprPrec( prec );
 				if ( not( rhs ) ) {
 					return lhs;
 				} else {
@@ -275,8 +280,8 @@ Node ReadStateClass::postfixProcessing( Node lhs, Item item, int prec ) {
 			}
 			case tokty_at:
 			case tokty_dot: {
-				Node func = this->read_expr_prec( prec_tight );
-				Node rhs = this->read_opt_expr_prec( prec );			
+				Node func = this->readExprPrec( prec_tight );
+				Node rhs = this->readOptExprPrec( prec );			
 				NodeFactory seq;
 				seq.start( "seq" );
 				seq.add( lhs );
@@ -327,7 +332,7 @@ static void predicate( TokType sense, NodeFactory & ifunless, Node pred ) {
 
 Node ReadStateClass::readIf( TokType sense, TokType closer ) {
 	if ( this->cstyle_mode ) this->checkToken( tokty_oparen );
-	Node pred = this->read_expr();
+	Node pred = this->readExpr();
 	this->checkToken( this->cstyle_mode ? tokty_cparen : tokty_then );
 	Node then_part = this->readStmnts();
 	if ( this->tryToken( tokty_else ) ) {	
@@ -383,7 +388,7 @@ Node ReadStateClass::readSyscall() {
 
 Node ReadStateClass::readFor() {
 	if ( this->cstyle_mode ) this->checkToken( tokty_oparen );
-	Node query = this->read_query();
+	Node query = this->readQuery();
 	this->checkToken( this->cstyle_mode ? tokty_cparen : tokty_do );
 	Node body = this->readStmnts();
 	if ( not this->cstyle_mode ) this->checkToken( tokty_endfor );
@@ -523,11 +528,22 @@ Node ReadStateClass::readAtomicExpr() {
 }
 
 Node ReadStateClass::readLambda() {
+	//cerr << "LAMBDA" << endl;
 	ReadStateClass pattern( *this );
 	pattern.setPatternMode();
-	Node args = pattern.read_expr_prec( prec_arrow );
-	if ( not this->cstyle_mode ) this->checkToken( tokty_fnarrow );
-	Node body = this->readStmntsCheck( tokty_endfn );
+	//cerr << "About to read pattern" << endl;
+	Node args = pattern.readExprPrec( prec_arrow );
+	//cerr << "Pattern read" << endl;
+	this->checkToken( this->cstyle_mode ? tokty_obrace : tokty_fnarrow );
+	Node body = this->readStmntsPrec( prec_max );
+	this->checkToken( this->cstyle_mode ? tokty_cbrace : tokty_endfn );
+	//cerr << "About to check stuff????? <-----<" << endl;
+	if ( this->cstyle_mode ) {
+		//cerr << "postfix NOT allowed" << endl;
+		this->is_postfix_allowed = false;
+	} else {
+		//cerr << "Huh?" << endl;
+	}
 	NodeFactory fn;
 	fn.start( "fn" );
 	fn.add( args );
@@ -537,20 +553,23 @@ Node ReadStateClass::readLambda() {
 }
 
 Node ReadStateClass::readDefinition() {
+	//cerr << "LAMBDA" << endl;
 	ReadStateClass pattern( *this );
 	pattern.setPatternMode();
-	Node ap = pattern.read_expr_prec( prec_arrow );
+	Node ap = pattern.readExprPrec( prec_arrow );
 	Node fn;
 	Node args;
 	flatten( ap, fn, args );
 	const std::string name = fn->attribute( "name" );
+	this->checkToken( this->cstyle_mode ? tokty_obrace : tokty_fnarrow );
+	Node body = this->readStmntsPrec( prec_max );
+	this->checkToken( this->cstyle_mode ? tokty_cbrace : tokty_enddefine );
 	if ( this->cstyle_mode ) {
-		this->checkPeekToken( tokty_obrace );
+		//cerr << "postfix NOT allowed (2)" << endl;
+		this->is_postfix_allowed = false;
 	} else {
-		this->checkToken( tokty_fnarrow );
+		//cerr << "Huh?" << endl;
 	}
-	Node body = this->readStmnts();
-	if ( not this->cstyle_mode ) this->checkToken( tokty_enddefine );
 	NodeFactory def;
 	def.start( "bind" );
 	def.start( "var" );
@@ -571,7 +590,7 @@ void ReadStateClass::readTryCatch( NodeFactory & ftry ) {
 		ftry.start( "case" );
 		ReadStateClass pattern( *this );
 		pattern.setPatternMode();
-		Node case_patt = pattern.read_expr();
+		Node case_patt = pattern.readExpr();
 		ftry.add( case_patt );
 		this->checkToken( tokty_then );
 		Node then_stnmnts = this->readStmnts();
@@ -593,7 +612,7 @@ Node ReadStateClass::readTry( const bool try_vs_transaction ) {
 	//	<catch> PATTERN ( <case> PATTERN STMNTS </case> )* </catch>
 	NodeFactory ftry;
 	ftry.start( try_vs_transaction ?"try" : "transaction" );
-	Node app = this->read_expr();
+	Node app = this->readExpr();
 	ftry.add( app );
 	if ( try_vs_transaction && this->tryPeekToken( tokty_case ) ) {
 		ftry.start( "catch" );
@@ -614,7 +633,7 @@ Node ReadStateClass::readTry( const bool try_vs_transaction ) {
 			ftry.start( "catch" );
 			ReadStateClass pattern( *this );
 			pattern.setPatternMode();
-			Node catch_patt = pattern.read_expr();
+			Node catch_patt = pattern.readExpr();
 			ftry.add( catch_patt );
 			if ( try_vs_transaction ) {
 				this->readTryCatch( ftry );
@@ -637,6 +656,8 @@ Node ReadStateClass::prefixProcessing() {
 	ItemFactory ifact = this->item_factory;
 	Item item = ifact->read();
 	
+	//cerr << "First item was " << tok_type_name( item->tok_type ) << endl;
+	
 	TokType fnc = item->tok_type;
 	Role role = item->role;
 
@@ -654,7 +675,7 @@ Node ReadStateClass::prefixProcessing() {
 		if ( role.IsForm() ) {
 			NodeFactory unary;
 			unary.start( tok_type_as_tag( fnc ) );
-			Node x = this->read_expr_prec( item->precedence );
+			Node x = this->readExprPrec( item->precedence );
 			unary.add( x );
 			unary.end();
 			return unary.build();
@@ -708,14 +729,14 @@ Node ReadStateClass::prefixProcessing() {
 			//	throw [ ATOMIC_TAG_EXPR ] [ return EXPR ] [ { EXPR } ]; // C-style
 			NodeFactory thr;
 			thr.start( "throw" );
-			Node tag_expr = this->read_opt_expr();
+			Node tag_expr = this->readOptExpr();
 			if ( not tag_expr ) {
 				pushAbsent( thr );
 			} else {
 				thr.add( tag_expr );
 			}
 			if ( this->tryToken( tokty_return ) ) {
-				Node r = this->read_expr();
+				Node r = this->readExpr();
 				thr.add( r );
 			} else {
 				pushEmpty( thr );
@@ -724,7 +745,7 @@ Node ReadStateClass::prefixProcessing() {
 				this->cstyle_mode && this->tryPeekToken( tokty_obracket ) || 
 				!this->cstyle_mode && this->tryToken( tokty_with ) 
 			) {
-				Node w = this->read_expr();
+				Node w = this->readExpr();
 				thr.add( w );
 			} else {
 				pushEmpty( thr );
@@ -738,13 +759,13 @@ Node ReadStateClass::prefixProcessing() {
 			NodeFactory ret;
 			ret.start( "throw" );
 			pushAbsent( ret );
-			Node r = this->read_expr();
+			Node r = this->readExpr();
 			ret.add( r );
 			if ( 
 				this->cstyle_mode && this->tryPeekToken( tokty_obracket ) || 
 				!this->cstyle_mode && this->tryToken( tokty_with ) 
 			) {
-				Node w = this->read_expr();
+				Node w = this->readExpr();
 				ret.add( w );
 			} else {
 				pushEmpty( ret );
@@ -777,7 +798,7 @@ Node ReadStateClass::prefixProcessing() {
 	        Node v = var.build();
 	        bind.add( v );
 	        this->checkToken( tokty_bind );
-	        Node x = this->read_expr();
+	        Node x = this->readExpr();
 	        bind.add( x );
 	        bind.end();
 	        return bind.build();
@@ -844,13 +865,19 @@ Node ReadStateClass::prefixProcessing() {
 		  	return this->readFor();
 		}
 		case tokty_function: {
+			//cerr << "FUNCTION" << endl;
 			if ( this->item_factory->peek()->tok_type == tokty_oparen ) {
-				return this->readLambda();
+				Node x = this->readLambda();
+				this->is_postfix_allowed = false;
+				return x;
 			} else {
-				return this->readDefinition();
+				Node x = this->readDefinition();
+				this->is_postfix_allowed = false;
+				return x;
 			}
 		}
 		case tokty_define: {
+			//cerr << "DEFINE" << endl;
 			return this->readDefinition();
 		}
 		case tokty_fn: {
@@ -892,7 +919,7 @@ Node ReadStateClass::prefixProcessing() {
 				if ( not closed ) {
 					//	Read the children.
 					while ( not this->tryToken( tokty_ltslash ) ) {
-						Node child = this->read_expr();
+						Node child = this->readExpr();
 						element.add( child );
 					}
 					Item item = this->readIdItem();
@@ -956,12 +983,14 @@ Node ReadStateClass::prefixProcessing() {
     return Node();
 }
 
-Node ReadStateClass::read_opt_expr_prec( int prec ) {
+Node ReadStateClass::readOptExprPrec( int prec ) {
 	ItemFactory ifact = this->item_factory;
 	Node e = this->prefixProcessing();
 	if ( not e ) return Node();
+	//cerr << "starting postfix checking ... " << this->isPostfixAllowed() << endl;
 	while ( this->isPostfixAllowed() ) {
 	    int q;
+	    //cerr << "peeking" << endl;
 		Item it = ifact->peek();
 		if ( it->item_is_neg_num() ) {
 			NodeFactory t;

@@ -25,6 +25,7 @@ private:
 	Node postfixProcessing( Node lhs, Item item, int prec );
 	Node readStmntsCheck( TokType fnc );
 	Node readStmnts();
+	Node readStmntsPrec( const int prec );
 	//Node readId();
 	Item readIdItem();
 	Node readExprCheck( TokType fnc );
@@ -46,13 +47,14 @@ public:
 	void clearPatternMode() { this->pattern_mode = false; }
 	void setCStyleMode( const bool flag ) { this->cstyle_mode = flag; }
 	bool isPostfixAllowed() { return this->is_postfix_allowed; }
+	void reset() { this->is_postfix_allowed = true; }
 
 public:
-	Node read_expr();
-	Node read_query();
-	Node read_expr_prec( int prec );
-	Node read_opt_expr();
-	Node read_opt_expr_prec( int prec );
+	Node readExpr();
+	Node readQuery();
+	Node readExprPrec( int prec );
+	Node readOptExpr();
+	Node readOptExprPrec( int prec );
 	void checkSemi();
 	void checkToken( TokType fnc );
 	void checkPeekToken( TokType fnc );

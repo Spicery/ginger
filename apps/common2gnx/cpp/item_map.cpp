@@ -30,7 +30,8 @@ ItemMap::ItemMap( const bool cstyle ) {
 	add( true,	 	"->",			tokty_assign,		BFo,		2000		);
 	add( true,	 	"<-",			tokty_assignrev,	BFo,		2000		);
 	add( true,	 	",", 			tokty_comma, 		BFo, 		prec_comma	);
-	add( true,	 	";", 			tokty_semi, 		PoF, 		prec_semi	);
+	add( !cstyle, 	";", 			tokty_semi, 		PoF, 		prec_semi	);
+	add( cstyle, 	";", 			tokty_semi, 		Clo, 		0	);
 	add( true,	 	":-", 			tokty_maplet, 		BSA, 		2000		);
 	add( true,	 	":=", 			tokty_bind, 		PoF, 		2000		);
 	add( true,	 	"=:", 			tokty_bindrev, 		PoF, 		2000		);
@@ -45,7 +46,8 @@ ItemMap::ItemMap( const bool cstyle ) {
 	add( true,	 	"[", 			tokty_obracket, 	BoF, 		100			);
 	add( true,	 	"[%", 			tokty_fat_obracket, PrF, 		100			);
 	add( true,	 	"]", 			tokty_cbracket, 	Clo, 		0			);
-	add( true,	 	"{", 			tokty_obrace, 		PrF, 		100			);
+	add( !cstyle, 	"{", 			tokty_obrace, 		PrF, 		100			);
+	add( cstyle, 	"{", 			tokty_obrace, 		Clo, 		100			);
 	add( true,	 	"{%", 			tokty_fat_obrace, 	PrF, 		100			);
 	add( true,	 	"}", 			tokty_cbrace, 		Clo, 		0			);
 	add( true,		"@", 			tokty_at, 			PoF, 		900			);
@@ -104,7 +106,7 @@ ItemMap::ItemMap( const bool cstyle ) {
 	add( true,		"to",			tokty_to,			PrF,		0			);
 	add( true,		"transaction",	tokty_transaction,	PrF,		0			);
 	add( true,		"try",			tokty_try,			PrF,		0			);
-	add( true,		"unless",		tokty_unless,		PrF, 		0			);
+	add( !cstyle,	"unless",		tokty_unless,		PrF, 		0			);
 	add( true,		"until", 		tokty_until,		PrF, 		0			);
 	add( true,		"val",			tokty_val,			PrF, 		0			);
 	add( true,	 	"var",			tokty_var,			PrF,		0			);

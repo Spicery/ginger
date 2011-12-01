@@ -60,6 +60,10 @@ static void pushEmpty( NodeFactory & f ) {
 	f.end();
 }
 
+static Node makeEmpty() {
+	return shared< Ginger::Mnx >( new Ginger::Mnx( "seq" ) );
+}
+
 static void pushAnyPattern( NodeFactory & f ) {
 	f.start( "val" );
 	f.end();
@@ -72,17 +76,6 @@ static void updateAsPattern( Node node ) {
 	}
 }
 
-/*Node ReadStateClass::readId() {
-	Item it = this->item_factory->read();
-	if ( it->tok_type != tokty_id ) {
-		throw Ginger::Mishap( "Identifier expected" ).culprit( "Found", it->nameString() );
-	}
-	NodeFactory id;
-	id.start( "id" );
-	id.put( "name", it->nameString() );
-	id.end();
-	return id.build();
-}*/
 
 string ReadStateClass::readPkgName() {
 	Item it = this->item_factory->read();
@@ -154,20 +147,50 @@ bool ReadStateClass::tryToken( TokType fnc ) {
 	}
 }
 
-Node ReadStateClass::readStmnts() {
-	return this->readStmntsPrec( this->cstyle_mode ? prec_semi : prec_max );
-}
-
-Node ReadStateClass::readStmntsPrec( const int prec ) {
-	Node e = this->readOptExprPrec( prec );
-	if ( not e ) {
-		NodeFactory skip;
-		pushEmpty( skip );
-		return skip.build();
+Node ReadStateClass::readCompoundStmnts( bool obrace_read ) {
+	if ( this->cstyle_mode ) {
+		NodeFactory stmnts;
+		stmnts.start( "seq" );
+		if ( not obrace_read ) this->checkToken( tokty_obrace );
+		while ( not this->tryToken( tokty_cbrace ) ) {
+			Node n = this->readSingleStmnt();
+			stmnts.add( n );
+		}
+		stmnts.end();
+		return stmnts.build();
 	} else {
-		return e;
+		return this->readStmnts();
 	}
 }
+
+Node ReadStateClass::readSingleStmnt() {
+	if ( this->cstyle_mode ) {
+		Item it = this->item_factory->read();
+		cerr << "SINGLE " << tok_type_name( it->tok_type ) << endl;
+		switch ( it->tok_type ) {
+			case tokty_obrace: return this->readCompoundStmnts( true );
+			case tokty_function: return this->readDefinition();
+			case tokty_if: return this->readIf( tokty_if, tokty_endif );
+			case tokty_for: return this->readFor();
+			case tokty_semi: return makeEmpty();
+			default: ;
+		}
+	}
+	
+	//	Fall thru!
+	Node n = this->readOptEmptyExpr();
+	this->checkToken( tokty_semi );
+	return n;
+}
+
+Node ReadStateClass::readStmnts() {
+	if ( this->cstyle_mode ) {
+		return this->readSingleStmnt();
+	} else {
+		return this->readOptEmptyExpr();
+	}
+}
+
 
 Node ReadStateClass::readStmntsCheck( TokType fnc ) {
 	Node t = this->readStmnts();
@@ -186,6 +209,21 @@ Node ReadStateClass::readQuery() {
 
 Node ReadStateClass::readOptExpr() {
 	return this->readOptExprPrec( prec_semi );
+}
+
+Node ReadStateClass::readOptEmptyExpr() {
+	Node n = this->readOptExpr();
+	if ( not n ) {
+		return makeEmpty();
+	} else {
+		return n;
+	}
+}
+
+Node ReadStateClass::readOptEmptyExprCheck( TokType fnc ) {
+	Node n = this->readOptEmptyExpr();
+	this->checkToken( fnc );
+	return n;
 }
 
 Node ReadStateClass::readExprCheck( TokType fnc ) {
@@ -274,8 +312,8 @@ Node ReadStateClass::postfixProcessing( Node lhs, Item item, int prec ) {
 				Node rhs = this->readStmntsCheck( tokty_cbracket );
 				return makeIndex( lhs, rhs );
 			}
-			case tokty_oparen: {
-				Node rhs = this->readStmntsCheck( tokty_cparen );
+			case tokty_oparen: {	
+				Node rhs = this->readOptEmptyExprCheck( tokty_cparen );
 				return makeApp( lhs, rhs );
 			}
 			case tokty_at:
@@ -285,7 +323,7 @@ Node ReadStateClass::postfixProcessing( Node lhs, Item item, int prec ) {
 				NodeFactory seq;
 				seq.start( "seq" );
 				seq.add( lhs );
-				if ( ! not rhs ) { seq.add( rhs ); }
+				if ( not not rhs ) { seq.add( rhs ); }
 				seq.end();
 				return makeApp( func, seq.build() );
 			}
@@ -487,9 +525,7 @@ static void readImportInto( ReadStateClass & r, NodeFactory & imp ) {
 static Node makeCharSequence( Item item ) {
 	int n = item->nameString().size();
 	if ( n == 0 ) {
-		NodeFactory skip;
-		pushEmpty( skip );
-		return skip.build();
+		return makeEmpty();
 	} else {
 		NodeFactory charseq;
 		charseq.start( "seq" );
@@ -534,16 +570,10 @@ Node ReadStateClass::readLambda() {
 	//cerr << "About to read pattern" << endl;
 	Node args = pattern.readExprPrec( prec_arrow );
 	//cerr << "Pattern read" << endl;
-	this->checkToken( this->cstyle_mode ? tokty_obrace : tokty_fnarrow );
-	Node body = this->readStmntsPrec( prec_max );
-	this->checkToken( this->cstyle_mode ? tokty_cbrace : tokty_endfn );
+	if ( not this->cstyle_mode ) this->checkToken( tokty_fnarrow );
+	Node body = this->readCompoundStmnts( false );
+	if ( not this->cstyle_mode ) this->checkToken( tokty_endfn );
 	//cerr << "About to check stuff????? <-----<" << endl;
-	if ( this->cstyle_mode ) {
-		//cerr << "postfix NOT allowed" << endl;
-		this->is_postfix_allowed = false;
-	} else {
-		//cerr << "Huh?" << endl;
-	}
 	NodeFactory fn;
 	fn.start( "fn" );
 	fn.add( args );
@@ -553,7 +583,7 @@ Node ReadStateClass::readLambda() {
 }
 
 Node ReadStateClass::readDefinition() {
-	//cerr << "LAMBDA" << endl;
+	//cerr << "DEFINITION" << endl;
 	ReadStateClass pattern( *this );
 	pattern.setPatternMode();
 	Node ap = pattern.readExprPrec( prec_arrow );
@@ -561,9 +591,9 @@ Node ReadStateClass::readDefinition() {
 	Node args;
 	flatten( ap, fn, args );
 	const std::string name = fn->attribute( "name" );
-	this->checkToken( this->cstyle_mode ? tokty_obrace : tokty_fnarrow );
-	Node body = this->readStmntsPrec( prec_max );
-	this->checkToken( this->cstyle_mode ? tokty_cbrace : tokty_enddefine );
+	if ( not this->cstyle_mode ) this->checkToken( tokty_fnarrow );
+	Node body = this->readCompoundStmnts( false );
+	if ( not this->cstyle_mode ) this->checkToken( tokty_enddefine );
 	if ( this->cstyle_mode ) {
 		//cerr << "postfix NOT allowed (2)" << endl;
 		this->is_postfix_allowed = false;
@@ -650,7 +680,26 @@ Node ReadStateClass::readTry( const bool try_vs_transaction ) {
 	return ftry.build();
 }
 
-
+Node ReadStateClass::readVarVal( TokType fnc ) {
+	NodeFactory bind;
+	bind.start( "bind" );
+	NodeFactory var;
+	var.start( "var" );
+	readTags( *this, var, "tag", true );
+	Item item = this->readIdItem();
+	var.put( "name", item->nameString() );
+	if ( fnc == tokty_val ) {
+		var.put( "protected", "true" );
+	}
+	var.end();
+	Node v = var.build();
+	bind.add( v );
+	this->checkToken( tokty_bind );
+	Node x = this->readExpr();
+	bind.add( x );
+	bind.end();
+	return bind.build();
+}
 
 Node ReadStateClass::prefixProcessing() {
 	ItemFactory ifact = this->item_factory;
@@ -754,24 +803,33 @@ Node ReadStateClass::prefixProcessing() {
 			return thr.build();
 		}
 		case tokty_return: {
-			//	return EXPR [ with EXPR ];
-			//	return EXPR [ { EXPR } ];	//	C-style
-			NodeFactory ret;
-			ret.start( "throw" );
-			pushAbsent( ret );
-			Node r = this->readExpr();
-			ret.add( r );
-			if ( 
-				this->cstyle_mode && this->tryPeekToken( tokty_obracket ) || 
-				!this->cstyle_mode && this->tryToken( tokty_with ) 
-			) {
-				Node w = this->readExpr();
-				ret.add( w );
+			//	This syntax is in flux. Right now we have a clear
+			//	explanation for the Javascript like syntax.
+			if ( this->cstyle_mode ) {
+				//	return EXPR;
+				Node r = this->readExpr();
+				NodeFactory ret;
+				ret.start( "return" );
+				ret.end();
+				return ret.build();
 			} else {
-				pushEmpty( ret );
+				//	No longer the solution that I am looking for.
+				//	return EXPR [ with EXPR ];
+				//	return EXPR [ { EXPR } ];	//	C-style
+				NodeFactory ret;
+				ret.start( "throw" );
+				pushAbsent( ret );
+				Node r = this->readExpr();
+				ret.add( r );
+				if ( this->tryToken( tokty_with ) ) {
+					Node w = this->readExpr();
+					ret.add( w );
+				} else {
+					pushEmpty( ret );
+				}
+				ret.end();
+				return ret.build();
 			}
-			ret.end();
-			return ret.build();
 		} 
 		case tokty_transaction: {
 			return this->readTry( false );
@@ -784,27 +842,10 @@ Node ReadStateClass::prefixProcessing() {
 		}
 		case tokty_val:
         case tokty_var : {
-	        NodeFactory bind;
-	        bind.start( "bind" );
-	        NodeFactory var;
-	        var.start( "var" );
-	        readTags( *this, var, "tag", true );
-	        Item item = this->readIdItem();
-	        var.put( "name", item->nameString() );
-	        if ( fnc == tokty_val ) {
-	        	var.put( "protected", "true" );
-	        }
-	        var.end();
-	        Node v = var.build();
-	        bind.add( v );
-	        this->checkToken( tokty_bind );
-	        Node x = this->readExpr();
-	        bind.add( x );
-	        bind.end();
-	        return bind.build();
+	        return this->readVarVal( fnc );
         }
 		case tokty_oparen: {
-			return this->readStmntsCheck( tokty_cparen );
+			return this->readOptEmptyExprCheck( tokty_cparen );
 		}
 		case tokty_obracket: {
 			NodeFactory list;
@@ -824,24 +865,12 @@ Node ReadStateClass::prefixProcessing() {
 			return list.build();
 		}
 		case tokty_obrace: {
-			if ( cstyle_mode ) {
-				NodeFactory seq;
-				seq.start( "block" );
-				while ( not this->tryToken( tokty_cbrace ) ) {					
-					Node x = this->readStmnts();
-					seq.add( x );
-					this->tryToken( tokty_semi );	//	optional semi.
-				}
-				seq.end();
-				return seq.build();
-			} else {
-				NodeFactory list;
-				list.start( "vector" );
-				Node x = this->readStmntsCheck( tokty_cbrace );
-				list.add( x );
-				list.end();
-				return list.build();
-			}
+			NodeFactory list;
+			list.start( "vector" );
+			Node x = this->readStmntsCheck( tokty_cbrace );
+			list.add( x );
+			list.end();
+			return list.build();
 		}
 		case tokty_fat_obrace: {
 			NodeFactory list;
@@ -856,24 +885,22 @@ Node ReadStateClass::prefixProcessing() {
 			return this->readIf( tokty_unless, tokty_endunless );
 		}
 		case tokty_if: {
+			if ( this->cstyle_mode ) break;
 			return this->readIf( tokty_if, tokty_endif );
 		}
 		case tokty_syscall: {
 			return this->readSyscall();
 		}
 		case tokty_for: {
+			if ( this->cstyle_mode ) break;
 		  	return this->readFor();
 		}
 		case tokty_function: {
 			//cerr << "FUNCTION" << endl;
 			if ( this->item_factory->peek()->tok_type == tokty_oparen ) {
-				Node x = this->readLambda();
-				this->is_postfix_allowed = false;
-				return x;
+				return this->readLambda();
 			} else {
-				Node x = this->readDefinition();
-				this->is_postfix_allowed = false;
-				return x;
+				break;
 			}
 		}
 		case tokty_define: {
@@ -981,6 +1008,12 @@ Node ReadStateClass::prefixProcessing() {
 	}
 	ifact->unread();
     return Node();
+}
+
+bool ReadStateClass::isAtEndOfInput() {
+	ItemFactory ifact = this->item_factory;
+	Item it = ifact->peek();
+	return it->tok_type == tokty_eof;
 }
 
 Node ReadStateClass::readOptExprPrec( int prec ) {

@@ -202,18 +202,21 @@ private:
 	}
 
 	void parse( FILE * in ) {
-		for (;;) {
-			ItemFactoryClass ifact( in, this->cstyle );
-			ReadStateClass input( &ifact );
-			input.setCStyleMode( this->cstyle );
-			for (;;) {
-				Node n = input.read_opt_expr();
-				if ( not n ) return;
-				n->render( cout );
-				cout << endl;
-				input.checkSemi();
-			};
-		} 
+		ItemFactoryClass ifact( in, this->cstyle );
+		ReadStateClass input( &ifact );
+		input.setCStyleMode( this->cstyle );
+		while ( not input.isAtEndOfInput() ) {
+			input.reset();
+			//cerr << "reset ... " << input.isPostfixAllowed() << endl;
+			//cerr << "about to read" << endl;
+			Node n = input.readSingleStmnt();
+			//cerr << "read expr" << endl;
+			if ( not n ) return;
+			//cerr << "about to render" << endl;
+			n->render( cout );
+			//cerr << "rendered" << endl;
+			cout << endl;
+		}
 	}
 
 	void run( FILE * in ) {

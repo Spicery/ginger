@@ -21,26 +21,22 @@ private:
 
 private:
 	Node prefixProcessing();
-	//Node postfixProcessing();
 	Node postfixProcessing( Node lhs, Item item, int prec );
 	Node readStmntsCheck( TokType fnc );
 	Node readStmnts();
-	Node readStmntsPrec( const int prec );
-	//Node readId();
+	Node readCompoundStmnts( bool obrace_read );
 	Item readIdItem();
 	Node readExprCheck( TokType fnc );
 	Node readIf( TokType sense, TokType closer );
 	Node readSyscall();
-	//Node readBindings();
-	//Node readConditions();
 	Node readFor();
 	Node readAtomicExpr();
 	Node readLambda();
 	Node readDefinition();
+	Node readVarVal( TokType fnc );
 	std::string readPkgName();
 	void readTryCatch( NodeFactory & ftry );
 	Node readTry( const bool try_vs_transaction );
-
 	
 public:
 	void setPatternMode() { this->pattern_mode = true; }
@@ -54,13 +50,18 @@ public:
 	Node readQuery();
 	Node readExprPrec( int prec );
 	Node readOptExpr();
+	Node readOptEmptyExpr();
+	Node readOptEmptyExprCheck( TokType fnc );
 	Node readOptExprPrec( int prec );
+	Node readSingleStmnt();
 	void checkSemi();
 	void checkToken( TokType fnc );
 	void checkPeekToken( TokType fnc );
 	bool tryToken( TokType fnc );
 	bool tryPeekToken( TokType fnc );
 	bool tryName( const char * name );
+	bool isAtEndOfInput();
+
 	
 public:
 	ReadStateClass( ItemFactory ifact ) :

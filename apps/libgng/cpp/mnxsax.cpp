@@ -78,10 +78,11 @@ void MnxSaxParser::readName( std::string & name ) {
 }
 
 void MnxSaxParser::readAttributeValue( std::string & attr ) {
-	this->mustReadChar( '\"' );
+	const char q = this->nextChar();
+	if ( q != '"' && q != '\'' ) throw Mishap( "Attribute value not quoted" ).culprit( "Character", q );
 	for (;;) {
 		char ch = this->nextChar();
-		if ( ch == '\"' ) break;
+		if ( ch == q ) break;
 		if ( ch == '&' ) {
 			std::string esc;
 			while ( ch = this->nextChar(), ch != ';' ) {

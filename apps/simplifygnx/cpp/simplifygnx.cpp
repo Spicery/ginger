@@ -823,6 +823,14 @@ public:
 			int n = this->scopes.back();
 			this->scopes.pop_back();
 			this->vars.resize( n );
+		} else if ( 
+			x == SET && 
+			element.size() == 2 &&
+			element.firstChild()->name() == ID &&
+			element.firstChild()->hasAttribute( PROTECTED, "true" ) &&
+			element.firstChild()->hasAttribute( ID_NAME )
+		) {
+			throw Ginger::Mishap( "Assigning to a protected variable" ).culprit( "Variable", element.firstChild()->attribute( ID_NAME ) );
 		}
 	}
 public:
@@ -1179,10 +1187,10 @@ int main( int argc, char ** argv, char **envp ) {
 		main.run();
 	    return EXIT_SUCCESS;
 	} catch ( Ginger::SystemError & p ) {
-		p.report();
+		p.gnxReport();
 		return EXIT_FAILURE;
 	} catch ( Ginger::Problem & p ) {
-		p.report();
+		p.gnxReport();
 		return EXIT_FAILURE;
 	}
 }

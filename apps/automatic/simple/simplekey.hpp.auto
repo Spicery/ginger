@@ -70,3 +70,5 @@
 #define sysElementKey MAKE_KEY( 26, 1, 7, 4 )
 #define AttrMapID 27
 #define sysAttrMapKey MAKE_KEY( 27, 1, 6, 4 )
+#define ExceptionID 28
+#define sysExceptionKey MAKE_KEY( 28, 3, 1, 1 )

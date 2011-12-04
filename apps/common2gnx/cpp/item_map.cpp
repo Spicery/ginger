@@ -91,6 +91,8 @@ ItemMap::ItemMap( const bool cstyle ) {
 	add( !cstyle,	"endtransaction", tokty_endtransaction, Clo,	0			);
 	add( !cstyle,	"endtry",		tokty_endtry,		Clo,		0			);
 	add( !cstyle,	"endunless",	tokty_endunless, 	Clo, 		0			);
+	add( true,		"escape",		tokty_escape, 		PrF, 		0			);
+	add( true,		"failover",		tokty_failover,		PrF, 		0			);
 	add( !cstyle,	"fn",			tokty_fn,			PrF, 		0			);
 	add( true,	 	"for",			tokty_for,			PrF, 		0			);
 	add( true,	 	"from",			tokty_from,			PoF,		2000		);
@@ -100,7 +102,9 @@ ItemMap::ItemMap( const bool cstyle ) {
 	add( true,	 	"in",			tokty_in,			PoF,		2000		);
 	add( true,	 	"or",			tokty_or,			BFo, 		1800		);
 	add( true,	 	"package",		tokty_package,		PrF, 		0			);
+	add( true,		"panic",		tokty_panic, 		PrF, 		0			);
 	add( true,	 	"return",		tokty_return,		PrF, 		0			);
+	add( true,		"rollback",		tokty_rollback, 	PrF, 		0			);
 	add( !cstyle,	"then",			tokty_then,			Clo, 		0			);
 	add( true,		"throw",		tokty_throw,		PrF,		0			);
 	add( true,		"to",			tokty_to,			PrF,		0			);

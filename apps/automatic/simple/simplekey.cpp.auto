@@ -26,3 +26,4 @@ case 24: return "HashMapData";
 case 25: return "Undef";
 case 26: return "Element";
 case 27: return "AttrMap";
+case 28: return "Exception";

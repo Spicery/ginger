@@ -132,8 +132,6 @@ void RCEP::execGnx( shared< Ginger::Mnx > mnx, std::ostream & output ) {
 	    }
 	} catch ( Ginger::NormalExit ) {
 		//	Do nothing! Just exit nicely.	
-	} catch ( Ginger::Problem & m ) {
-		m.report();
 	}
     output.flush();
 }
@@ -227,9 +225,6 @@ bool RCEP::read_comp_exec_print( istream & input, std::ostream & output ) {
 			return unsafe_read_comp_exec_print( input, output );
 		} catch ( Ginger::Mishap & m ) {
 			m.report();
-		} catch ( Ginger::SystemError & m ) {
-			m.report();
-			throw m;
 		}
 	}
 }

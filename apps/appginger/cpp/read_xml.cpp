@@ -235,6 +235,8 @@ Term mnxToTerm( shared< Ginger::Mnx > mnx ) {
 		vector< Term > kids;
 		fillKids( mnx, kids );
 		return makeSysApp( "newVector", kids );	
+	} else if ( name == "throw" && nkids == 1 ) {
+		return term_new_basic1( fnc_throw, mnxChildToTerm( mnx, 0 ) );
 	} else if ( name == "assert" && nkids == 1 ) {
 		//	Added in case-study: Adding New Element Type.
 		if ( mnx->hasAttribute( "type", "bool" ) ) {

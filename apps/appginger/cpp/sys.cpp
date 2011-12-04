@@ -50,6 +50,7 @@
 #include "sysunix.hpp"
 #include "sysattrmap.hpp"
 #include "syselement.hpp"
+#include "sysexception.hpp"
 
 using namespace Ginger;
 
@@ -375,6 +376,7 @@ const SysMap::value_type rawData[] = {
 #include "sysattrmap.inc"
 #include "syscgi.inc"
 #include "syselement.inc"
+#include "sysexception.inc"
 #include "sysprint.inc"
 #include "sysstring.inc"
 #include "sysunix.inc"

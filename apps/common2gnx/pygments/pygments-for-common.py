@@ -23,7 +23,7 @@ class CommonLexer(RegexLexer):
 			(r'\s+', Token.Text),									# Whitespace.
 			
 			# This is a complete list of the reserved words of Common.
-			(r'also|case|catch|define|do|else|elseif|elseunless|enddefine|endfn|endfor|endif|endpackage|endswitch|endtransaction|endtry|endunless|fn|for|from|if|import|in|package|return|switch|then|throw|to|transaction|try|unless|until|val|var|while|with', Token.Keyword.Reserved ),
+			(r'also|case|catch|define|do|else|elseif|elseunless|enddefine|endfn|endfor|endif|endpackage|endswitch|endtransaction|endtry|endunless|escape|failover|fn|for|from|if|import|in|package|panic|return|rollback|switch|then|throw|to|transaction|try|unless|until|val|var|while|with', Token.Keyword.Reserved ),
 
 			# This is an incomplete definition of names, mainly because the
 			# ASCII escape syntax is not properly defined.

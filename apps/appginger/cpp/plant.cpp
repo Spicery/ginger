@@ -39,6 +39,7 @@ using namespace std;
 #include "dict.hpp"
 #include "syssymbol.hpp"
 #include "syscheck.hpp"
+#include "sysexception.hpp"
 
 #ifndef NULL
 #define NULL 0
@@ -517,6 +518,11 @@ void PlantClass::compileTerm( Term term ) {
 			vmiNOT( this );
 		 	break;
 		}
+		case fnc_throw: {
+			this->compile1( term_index( term, 0 ) );
+			vmiSET_SYS_CALL( this, sysPanic, 1 );
+			break;
+		}
 		case fnc_assert_single: {
 			//	case-study: Adding New Element Type.
 			this->compile1( term_index( term, 0 ) );
@@ -525,7 +531,7 @@ void PlantClass::compileTerm( Term term ) {
 		case fnc_assert_bool: {
 			//	case-study: Adding New Element Type.
 			this->compile1( term_index( term, 0 ) );
-			vmiSYS_CALL( this, sysCheckBool );
+			vmiSET_SYS_CALL( this, sysCheckBool, 1 );
 			break;
 		}
 		case fnc_import: {

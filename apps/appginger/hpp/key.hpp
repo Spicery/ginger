@@ -157,6 +157,7 @@ KEYLESS_KIND
 #define IsMap( x ) 				( IsObj( x ) && IsMapKey( *RefToPtr4( x ) ) )
 #define IsAttrMap( x ) 			( IsObj( x ) && IsAttrMapKey( *RefToPtr4( x ) ) )
 #define IsElement( x )			( IsObj( x ) && ( *RefToPtr4( x ) == sysElementKey ) )
+#define IsException( x )		( IsObj( x ) && ( *RefToPtr4( x ) == sysExceptionKey ) )
 
 #define IsVectorKind( x )		( IsObj( x ) && KindOfSimpleKey( *RefToPtr4( x ) ) == VECTOR_KIND )
 #define IsMixedKind( x )		( IsObj( x ) && KindOfSimpleKey( *RefToPtr4( x ) ) == MIXED_KIND )

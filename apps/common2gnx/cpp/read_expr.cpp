@@ -48,7 +48,7 @@ static Node makeIndex( Node lhs, Node rhs ) {
 	return index.build();
 }
 
-static void pushAbsent( NodeFactory & f ) {
+/*static void pushAbsent( NodeFactory & f ) {
 	f.start( "constant" );
 	f.put( "type", "absent" );
 	f.put( "value", "absent" );
@@ -57,6 +57,13 @@ static void pushAbsent( NodeFactory & f ) {
 
 static void pushEmpty( NodeFactory & f ) {
 	f.start( "seq" );
+	f.end();
+}*/
+
+static void pushStringConstant( NodeFactory & f, const string & s ) {
+	f.start( "constant" );
+	f.put( "type", "string" );
+	f.put( "value", s );
 	f.end();
 }
 
@@ -773,70 +780,51 @@ Node ReadStateClass::prefixProcessing() {
 			envvar.end();
 			return envvar.build();
 		}
-		case tokty_throw: {
-			//	throw [ ATOMIC_TAG_EXPR ] [ return EXPR ] [ with EXPR ];
-			//	throw [ ATOMIC_TAG_EXPR ] [ return EXPR ] [ { EXPR } ]; // C-style
-			NodeFactory thr;
-			thr.start( "throw" );
-			Node tag_expr = this->readOptExpr();
-			if ( not tag_expr ) {
-				pushAbsent( thr );
-			} else {
-				thr.add( tag_expr );
-			}
-			if ( this->tryToken( tokty_return ) ) {
-				Node r = this->readExpr();
-				thr.add( r );
-			} else {
-				pushEmpty( thr );
-			}
-			if ( 
-				this->cstyle_mode && this->tryPeekToken( tokty_obracket ) || 
-				!this->cstyle_mode && this->tryToken( tokty_with ) 
-			) {
-				Node w = this->readExpr();
-				thr.add( w );
-			} else {
-				pushEmpty( thr );
-			}
-			thr.end();
-			return thr.build();
-		}
 		case tokty_return: {
-			//	This syntax is in flux. Right now we have a clear
-			//	explanation for the Javascript like syntax.
-			if ( this->cstyle_mode ) {
-				//	return EXPR;
-				Node r = this->readExpr();
-				NodeFactory ret;
-				ret.start( "return" );
-				ret.end();
-				return ret.build();
+			NodeFactory ret;
+			ret.start( "assert" );
+			ret.put( "tailcall", "true" );
+			Node n = this->readExpr();
+			ret.add( n );
+			ret.end();
+			return ret.build();
+		}
+		case tokty_throw:
+		case tokty_escape:
+		case tokty_rollback:
+		case tokty_failover:
+		case tokty_panic: {
+			NodeFactory panic;
+			panic.start( "throw" );
+			Item item = readIdItem();
+			if ( this->tryToken( tokty_oparen ) ) {
+				panic.start( "sysapp" );
+				panic.put( "name", "withExceptionDetails" );
+				
+				panic.start( "sysapp" );
+				panic.put( "name", "newException" );
+				pushStringConstant( panic, item->nameString() );
+				panic.end();
+				
+				Node d = this->readExprCheck( tokty_cparen );
+				panic.add( d );
+				
+				panic.end();
 			} else {
-				//	No longer the solution that I am looking for.
-				//	return EXPR [ with EXPR ];
-				//	return EXPR [ { EXPR } ];	//	C-style
-				NodeFactory ret;
-				ret.start( "throw" );
-				pushAbsent( ret );
-				Node r = this->readExpr();
-				ret.add( r );
-				if ( this->tryToken( tokty_with ) ) {
-					Node w = this->readExpr();
-					ret.add( w );
-				} else {
-					pushEmpty( ret );
-				}
-				ret.end();
-				return ret.build();
+				panic.start( "sysapp" );
+				panic.put( "name", "newException" );
+				pushStringConstant( panic, item->nameString() );
+				panic.end();
 			}
-		} 
-		case tokty_transaction: {
+			panic.end();
+			return panic.build();
+		}
+		/*case tokty_transaction: {
 			return this->readTry( false );
 		}
 		case tokty_try: {
 			return this->readTry( true );
-		}
+		}*/
 		case tokty_charseq: {
 			return makeCharSequence( item );
 		}

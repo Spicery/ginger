@@ -121,3 +121,6 @@ tarball: all
 	find _build -name '._*'
 	( cd _build/$(TBBASE); tar cf - . ) | gzip > _build/$(TBPACKAGE)/$(TBOUTPUT)
 	( cd _build; tar cf - $(TBPACKAGE) ) | gzip > _build/$(TBPACKAGE).tgz
+
+test:
+	nosetests -v

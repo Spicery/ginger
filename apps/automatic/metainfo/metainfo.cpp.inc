@@ -51,6 +51,7 @@ MAPLET( "newClassConstructor", MetaInfo( Arity( 1, false ), Arity( 1, false ) ) 
 MAPLET( "newClassExploder", MetaInfo( Arity( 1, false ), Arity( 0, true ) ) ),
 MAPLET( "newClassRecogniser", MetaInfo( Arity( 1, false ), Arity( 1, false ) ) ),
 MAPLET( "newElement", MetaInfo( Arity( 1, true ), Arity( 1, false ) ) ),
+MAPLET( "newException", MetaInfo( Arity( 1, false ), Arity( 1, false ) ) ),
 MAPLET( "newHardIdMap", MetaInfo( Arity( 0, true ), Arity( 1, false ) ) ),
 MAPLET( "newHardRef", MetaInfo( Arity( 1, false ), Arity( 1, false ) ) ),
 MAPLET( "newList", MetaInfo( Arity( 0, true ), Arity( 1, false ) ) ),

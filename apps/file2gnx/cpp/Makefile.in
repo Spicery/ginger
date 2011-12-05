@@ -1,13 +1,11 @@
-# EPREFIX should be bound to PREFIX by default. This appears to be a lie.
-# As a consequence we override EPREFIX entirely. Probably incorrect but not
-# that interesting.
-prefix=/usr/local
-exec_prefix=/usr/local
-datarootdir=${prefix}/share
-PACKAGE_TARNAME=appginger
-INSTALL_BIN=${exec_prefix}/bin
-INSTALL_LIB=${prefix}/share/appginger
-INSTALL_DOC=${datarootdir}/doc/${PACKAGE_TARNAME}
+prefix=@prefix@
+exec_prefix=@prefix@
+datarootdir=@datarootdir@
+PACKAGE_TARNAME=@PACKAGE_TARNAME@
+INSTALL_BIN=@bindir@
+INSTALL_LIB=@datarootdir@/@PACKAGE_TARNAME@
+INSTALL_DOC=@docdir@
+
 
 EXEC_DIR="$(INSTALL_BIN)"
 

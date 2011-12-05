@@ -13,7 +13,7 @@ class Common2GNXTestCase(unittest.TestCase):
         self.outfn = cmn2gnx  + "%s.gnx"
 
     def test_common2gnx_print_define(self):
-        """common2gnx - print define"""
+        """common2gnx - simple print define"""
         fn = "print_define"
         res = commands.getoutput('cat %s | common2gnx' % (self.infn % fn))
         # print("Res %s" % res)
@@ -50,6 +50,20 @@ class Common2GNXTestCase(unittest.TestCase):
     def test_common2gnx_factorial_fncall(self):
         """common2gnx - factorial fncall"""
         fn = 'factorial_fncall'
+        res = commands.getoutput('cat %s | common2gnx' % (self.infn % fn))
+        # print("Res %s" % res)
+        self.assert_(res == open(self.outfn % fn).read())
+
+    def test_common2gnx_hello_define(self):
+        """common2gnx - hello define - multiple definitions in source"""
+        fn = "hello_define"
+        res = commands.getoutput('cat %s | common2gnx' % (self.infn % fn))
+        # print("Res %s" % res)
+        self.assert_(res == open(self.outfn % fn).read())
+
+    def test_common2gnx_hello_fncall(self):
+        """common2gnx - hello fncall"""
+        fn = 'hello_fncall'
         res = commands.getoutput('cat %s | common2gnx' % (self.infn % fn))
         # print("Res %s" % res)
         self.assert_(res == open(self.outfn % fn).read())

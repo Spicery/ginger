@@ -1,0 +1,3 @@
+<bind><var name="print" protected="true"/><fn name="print"><seq><var name="x"/></seq><app><id name="_print"/><id name="x"/></app></fn></bind>
+<bind><var name="println" protected="true"/><fn name="println"><seq><var name="x"/></seq><seq><app><id name="_print"/><id name="x"/></app><app><id name="_putchar"/><seq><constant type="char" value="&#10;"/></seq></app></seq></fn></bind>
+<bind><var name="hello" protected="true"/><fn name="hello"><seq/><app><id name="println"/><constant type="string" value="hello, world!"/></app></fn></bind>

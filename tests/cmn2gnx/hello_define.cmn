@@ -1,0 +1,14 @@
+#   This will be built-in at some point soon.
+define print( x ) =>>
+    _print( x )
+enddefine;
+
+#   So will this.
+define println( x ) =>>
+    _print( x );
+    _putchar( '\n' )
+enddefine;
+
+define hello() =>>
+    println( "hello, world!" )
+enddefine;

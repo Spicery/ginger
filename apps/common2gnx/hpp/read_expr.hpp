@@ -51,6 +51,7 @@ public:
 	Node readExprPrec( int prec );
 	Node readOptExpr();
 	Node readOptEmptyExpr();
+	Node readOptEmptyExprPrec( int prec );
 	Node readOptEmptyExprCheck( TokType fnc );
 	Node readOptExprPrec( int prec );
 	Node readSingleStmnt();

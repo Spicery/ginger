@@ -194,7 +194,7 @@ Node ReadStateClass::readStmnts() {
 	if ( this->cstyle_mode ) {
 		return this->readSingleStmnt();
 	} else {
-		return this->readOptEmptyExpr();
+		return this->readOptEmptyExprPrec( prec_max );
 	}
 }
 
@@ -218,13 +218,17 @@ Node ReadStateClass::readOptExpr() {
 	return this->readOptExprPrec( prec_semi );
 }
 
-Node ReadStateClass::readOptEmptyExpr() {
-	Node n = this->readOptExpr();
+Node ReadStateClass::readOptEmptyExprPrec( int prec ) {
+	Node n = this->readOptExprPrec( prec);
 	if ( not n ) {
 		return makeEmpty();
 	} else {
 		return n;
 	}
+}
+
+Node ReadStateClass::readOptEmptyExpr() {
+	return this->readOptEmptyExprPrec( prec_semi );
 }
 
 Node ReadStateClass::readOptEmptyExprCheck( TokType fnc ) {
@@ -833,7 +837,7 @@ Node ReadStateClass::prefixProcessing() {
 	        return this->readVarVal( fnc );
         }
 		case tokty_oparen: {
-			return this->readOptEmptyExprCheck( tokty_cparen );
+			return this->readStmntsCheck( tokty_cparen );
 		}
 		case tokty_obracket: {
 			NodeFactory list;

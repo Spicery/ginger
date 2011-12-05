@@ -11,5 +11,9 @@ check: smoke.pass literals.pass full_lexical_binding.pass records.pass assert.pa
 clean:
 	rm -f *.pass
 	rm -f *.fail
-	
+
+ccheck:
+	make clean
+	make check
+
 .SUFFIXES: .pass .tests

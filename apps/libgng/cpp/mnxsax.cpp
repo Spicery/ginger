@@ -55,12 +55,14 @@ void MnxSaxParser::mustReadChar( const char ch_want ) {
 }
 
 void MnxSaxParser::eatWhiteSpace() {
-	char ch;
-	while ( input.get( ch ) && isspace( ch ) ) {
-		//	Skip.
+	while ( input.good() ) {
+		char ch;
+		if ( not input.get( ch ) ) break;
+		if ( not isspace( ch ) ) {
+			input.putback( ch );
+			break;
+		}
 	}
-	//cout << "Ungetting '" << ch << "'" << endl;
-	input.putback( ch );
 }
 
 static bool is_name_char( const char ch ) {
@@ -145,7 +147,7 @@ void MnxSaxParser::read() {
 	this->input >> noskipws;
 	
 	this->eatWhiteSpace();
-	if ( this->input.eof() ) {
+	if ( not this->input.good() ) {
 		if ( this->finished ) {
 			throw Mishap( "Unexpected end of file" );
 		}

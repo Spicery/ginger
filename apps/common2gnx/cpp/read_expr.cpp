@@ -837,7 +837,11 @@ Node ReadStateClass::prefixProcessing() {
 	        return this->readVarVal( fnc );
         }
 		case tokty_oparen: {
-			return this->readStmntsCheck( tokty_cparen );
+			if ( this->cstyle_mode ) {
+				return this->readOptEmptyExprCheck( tokty_cparen );
+			} else {
+				return this->readStmntsCheck( tokty_cparen );
+			}
 		}
 		case tokty_obracket: {
 			NodeFactory list;

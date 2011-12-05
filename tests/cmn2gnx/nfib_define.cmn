@@ -1,0 +1,7 @@
+define nfib( n ) =>>
+    if n <= 1 then
+        1
+    else
+        1 + nfib( n - 1 ) + nfib( n - 2 )
+    endif
+enddefine;

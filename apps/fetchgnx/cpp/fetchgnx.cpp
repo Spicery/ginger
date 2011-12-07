@@ -286,43 +286,7 @@ void Main::run() {
 			break;
 		}
 	}
-	//cout.flush();
-}
-
-/*
-	Search search( this->sqlite_db_file, this->project_folders );
-	for (
-		std::vector< std::string >::iterator it = this->packages_to_load.begin();
-		it != this->packages_to_load.end();
-		++it
-	) {
-		syslog( LOG_INFO, "Loading package %s", it->c_str() );
-		search.loadPackage( *it );
-	}
-	for ( 
-		vector< Defn >::iterator it = this->definitions.begin();
-		it != this->definitions.end();
-		++it
-	) {
-		#if DBG_FETCHGNX
-			cout << it->pkg << "::" << it->var << endl;
-		#endif
-		try {
-			syslog( LOG_INFO, "Loading definition %s from package %s", it->var.c_str(), it->pkg.c_str() );
-			search.findDefinition( *it );
-		} catch ( Mishap &m ) {
-			//	NOTE: This is not correct because the values of package & variable must be escaped!
-			cout << "<mishap message=\"" << m.getMessage() << "\">";
-			int n = m.getCount();
-			for ( int i = 0; i < n; i++ ) {
-				pair< string, string > & p = m.getCulprit( i );
-				cout << "<culprit name=\"" << p.first << "\" value=\"" << p.second << "\"/>";
-			}
-			cout << "</mishap>" << endl;
-		}
-	}
-}*/
-			
+}		
 
 
 int main( int argc, char ** argv, char **envp ) {

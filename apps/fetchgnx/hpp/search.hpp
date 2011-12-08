@@ -56,7 +56,7 @@ public:
 	void resolveQualified( const std::string & pkg, const std::string & alias, const std::string & vname );
 	void resolveUnqualified( const std::string & pkg, const std::string & vname );
 	void fetchDefinition( const std::string & pkg, const std::string & vname );
-	void loadPackage( std::string & pkg );
+	void loadPackage( const std::string & pkg );
 	
 public:
 	//Search( std::string & sqlite_db_file, std::vector< std::string > & project_path );

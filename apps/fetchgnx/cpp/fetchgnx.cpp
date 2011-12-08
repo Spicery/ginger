@@ -41,7 +41,7 @@
 #include <getopt.h>
 #include <syslog.h>
 
-//#include "database.hpp"
+#include "mnx.hpp"
 #include "mishap.hpp"
 #include "defn.hpp"
 #include "search.hpp"
@@ -54,7 +54,8 @@ enum Task {
 	FETCH_DEFINITION,
 	RESOLVE_QUALIFIED,
 	RESOLVE_UNQUALIFIED,
-	LOAD_PACKAGE
+	LOAD_PACKAGE,
+	EXECUTE_COMMAND
 };
 
 class Main {
@@ -81,7 +82,7 @@ public:
 };
 
 std::string Main::version() {
-	return "0.3";
+	return "0.4";
 }
 
 //  struct option {
@@ -96,11 +97,12 @@ static struct option long_options[] =
     {
         { "alias",			required_argument,		0, 'a' },
         { "define",         no_argument,            0, 'D' },
+        { "execute",		no_argument,            0, 'X' },
         { "help",			optional_argument,		0, 'H' },
         { "initial",        no_argument,            0, 'I' },
         { "license",        optional_argument,      0, 'L' },
-        { "folder",  required_argument,      		0, 'f' },
-        { "project",  required_argument,      		0, 'j' },
+        { "folder",         required_argument,  	0, 'f' },
+        { "project",        required_argument,      0, 'j' },
         { "package",        required_argument,      0, 'p' },
 		{ "resolve",        no_argument,            0, 'R' },
         { "qualified",		required_argument,		0, 'q' },
@@ -115,7 +117,7 @@ void Main::parseArgs( int argc, char **argv, char **envp ) {
 	bool qualified = false;
     for(;;) {
         int option_index = 0;
-        int c = getopt_long( argc, argv, "RDH::IVL::j:f:p:a:v:", long_options, &option_index );
+        int c = getopt_long( argc, argv, "XRDH::IVL::j:f:p:a:v:", long_options, &option_index );
         if ( c == -1 ) break;
         switch ( c ) {
             case 'a' : {
@@ -202,6 +204,10 @@ void Main::parseArgs( int argc, char **argv, char **envp ) {
                 cout << FETCHGNX << ": version " << this->version() << " (" << __DATE__ << " " << __TIME__ << ")" << endl;
                 exit( EXIT_SUCCESS );   //  Is that right?
             }
+            case 'X': {
+            	task = EXECUTE_COMMAND;
+            	break;
+            }
             case '?': {
                 break;
             }
@@ -285,9 +291,41 @@ void Main::run() {
 			search.loadPackage( this->package_name );
 			break;
 		}
+		case EXECUTE_COMMAND: {
+			Ginger::MnxReader reader( std::cin );
+			shared< Ginger::Mnx > mnx = reader.readMnx();
+			if ( not mnx ) {
+			} else if ( 
+				mnx->hasName( "resolve.qualified" ) && 
+				mnx->hasAttribute( "pkg.name" ) &&
+				mnx->hasAttribute( "alias.name" ) &&
+				mnx->hasAttribute( "var.name" )
+			) {
+				search.resolveQualified( mnx->attribute( "pkg.name" ), mnx->attribute( "alias.name" ), mnx->attribute( "var.name" ) );	
+			} else if ( 
+				mnx->hasName( "resolve.unqualified" ) &&
+				mnx->hasAttribute( "pkg.name" ) &&
+				mnx->hasAttribute( "var.name" )
+			) {
+				search.resolveUnqualified( mnx->attribute( "pkg.name" ), mnx->attribute( "var.name" ) );
+			} else if ( 
+				mnx->hasName( "fetch.definition" ) &&
+				mnx->hasAttribute( "pkg.name" ) &&
+				mnx->hasAttribute( "var.name" )
+			) {
+				search.fetchDefinition( mnx->attribute( "pkg.name" ), mnx->attribute( "var.name" ) );
+			} else if ( 
+				mnx->hasName( "fetch.pkg.init" ) &&
+				mnx->hasAttribute( "pkg.name" )
+			) {
+				search.loadPackage( mnx->attribute( "pkg.name" ) );
+			} else {
+				Ginger::Mishap( "Invalid request" ).culprit( mnx->toString() );
+			}
+			break;
+		}
 	}
-}		
-
+}
 
 int main( int argc, char ** argv, char **envp ) {
 	openlog( FETCHGNX, 0, LOG_LOCAL2 );

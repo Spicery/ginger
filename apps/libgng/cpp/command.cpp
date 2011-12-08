@@ -40,7 +40,8 @@ Command::Command( const std::string command ) :
 	command( command ),
 	should_wait_on_close( false ),
 	child_pid( 0 ),
-	input_fd( -1 )
+	input_fd( -1 ),
+	output_fd( -1 )
 {
 }
 
@@ -154,6 +155,52 @@ int Command::runWithOutput() {
 			
 			this->input_fd = pipe_fd[0];
 			return this->input_fd;
+		}
+	}
+	throw Unreachable( __FILE__, __LINE__ );
+}
+
+void Command::runWithInputAndOutput() {
+
+	vector< char * > arg_vector;
+	this->fill( arg_vector );
+	
+	#ifdef DBG_COMMAND
+		cout << "Command: " << this->command << endl;
+		for ( 
+			vector< string >::iterator it = this->args.begin();
+			it != this->args.end();
+			++it
+		) {
+			cout << "Arg: " << *it << endl;
+		}
+	#endif	
+	
+	int pipe_fd[ 2 ];
+	pipe( pipe_fd );
+	pid_t pid = fork();
+	switch ( pid ) {
+		case -1: {	//	Something went wrong.
+			throw Mishap( "Child process unexpectedly failed" ).culprit( "Command", command );
+			break;
+		}
+		case 0: {	//	Child process - exec into command.
+			//	Attach stdin to the read descriptor.
+			dup2( pipe_fd[0], STDIN_FILENO );
+			//	Attach stdout to the write descriptor.
+			dup2( pipe_fd[1], STDOUT_FILENO );
+			execv( this->command.c_str(), &arg_vector[0] );
+			break;
+		}
+		default: {	// 	Parent process.
+			this->should_wait_on_close = true;
+			
+			//	Close the unused write descriptor.
+			close( pipe_fd[1] );
+			
+			this->input_fd = pipe_fd[0];
+			this->output_fd = pipe_fd[1];
+			return;
 		}
 	}
 	throw Unreachable( __FILE__, __LINE__ );

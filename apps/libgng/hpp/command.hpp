@@ -31,15 +31,19 @@ private:
 	bool								should_wait_on_close;
 	pid_t 								child_pid;
 	int									input_fd;
+	int									output_fd;
 	
 private:
 	void fill( std::vector< char * > & argv );
 	
 public:
 	void addArg( const std::string arg );
+	int getInputFD() { return this->input_fd; }
+	int getOutputFD() { return this->output_fd; }
 	
 public:
 	int runWithOutput();
+	void runWithInputAndOutput();
 	void runSilent();
 	
 public:

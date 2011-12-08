@@ -266,7 +266,7 @@ void Search::fetchDefinition( const string & pkg_name, const string & var_name )
 	this->printAbsoluteDefinition( pkg, var_name );
 }
 
-void Search::loadPackage( string & pkg ) {
+void Search::loadPackage( const string & pkg ) {
 	PackageCache * c = this->project_cache.fetchPackageCache( pkg );
 	string pathname = c->getLoadPath();
 	if ( pathname.size() > 0 ) {

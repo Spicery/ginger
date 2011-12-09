@@ -1,0 +1,39 @@
+Note on the Design of Exceptions
+
+The objective is to be able to implement the following 4 (!) types of
+exception. Note that all four are implemented as exceptions that do not
+capture the stack trace.
+
+  * Escape - an escape works rather like a return, except that it
+    has to be explicitly handled. The escape can pass out values
+    representing the alternative exit scenario.
+    
+    Failing to handle an escape escalates to a rollback.
+    
+  * Rollback - these are matched with transaction-catch blocks,
+    which are like try-catch with a super-power. When a transaction
+    is rolled back the state of the virtual machine is completely 
+    restored to the point at which the transaction is entered. Only
+    the simplest flags may survive a rollback.
+    
+    Obviously, transactions are potentially expensive - because they need
+    to ensure that all object updates can be reversed (possibly by
+    copying the entire virtual machine on entry!).
+    
+    If a rollback is not caught by a transaction block, it is promptly
+    escalated as a failover.
+
+  * Failover - I have not completely decided on the terminology here.
+    The basic idea is that this is an emergency shutdown of the current
+    virtual machine. The long term plan is that a Ginger application is
+    a group of virtual machines, so when one machine shutsdown, another
+    can pick up from where it left off.
+    
+    If a failover is not actually picked up by the Ginger Runtime, then
+    it escalates to a panic. (Maybe a better word is "emergency"?)
+    
+  * A panic is an invocation of the host operating systems' process exit.
+    Execution is brought to a swift halt.
+
+
+Stephen Leach, 9th Dec 2011

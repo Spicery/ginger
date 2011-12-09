@@ -176,8 +176,14 @@ void Command::runWithInputAndOutput() {
 		}
 	#endif	
 	
-	int pipe_fd[ 2 ];
-	pipe( pipe_fd );
+	//	In the child this is a read, in the parent it is write.
+	int pipe_incoming_fd[ 2 ];
+	
+	//	In the child this is a write, in the parent it is a read.
+	int pipe_outgoing_fd[ 2 ];
+	
+	pipe( pipe_outgoing_fd );
+	pipe( pipe_incoming_fd );
 	pid_t pid = fork();
 	switch ( pid ) {
 		case -1: {	//	Something went wrong.
@@ -185,21 +191,30 @@ void Command::runWithInputAndOutput() {
 			break;
 		}
 		case 0: {	//	Child process - exec into command.
+			//	Close the unused read descriptor.
+			close( pipe_outgoing_fd[0] );
+			//	Close the unused write descriptor.
+			close( pipe_incoming_fd[1] );
+			
 			//	Attach stdin to the read descriptor.
-			dup2( pipe_fd[0], STDIN_FILENO );
+			dup2( pipe_incoming_fd[0], STDIN_FILENO );
 			//	Attach stdout to the write descriptor.
-			dup2( pipe_fd[1], STDOUT_FILENO );
+			dup2( pipe_outgoing_fd[1], STDOUT_FILENO );
+			
 			execv( this->command.c_str(), &arg_vector[0] );
 			break;
 		}
 		default: {	// 	Parent process.
 			this->should_wait_on_close = true;
 			
-			//	Close the unused write descriptor.
-			close( pipe_fd[1] );
+			this->input_fd = pipe_outgoing_fd[0];
+			this->output_fd = pipe_incoming_fd[1];
 			
-			this->input_fd = pipe_fd[0];
-			this->output_fd = pipe_fd[1];
+			//	Close the unused write descriptor.
+			close( pipe_outgoing_fd[1] );
+			
+			// Close the unused read descriptor.
+			close( pipe_incoming_fd[0] );
 			return;
 		}
 	}

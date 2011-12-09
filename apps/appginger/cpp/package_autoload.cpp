@@ -29,8 +29,8 @@
 #include <syslog.h>
 #include <sys/errno.h>
 
-//#include <boost/iostreams/stream_buffer.hpp>
-//#include <boost/iostreams/device/file_descriptor.hpp>
+#include <boost/iostreams/stream.hpp>
+#include <boost/iostreams/device/file_descriptor.hpp>
 
 #include "sax.hpp"
 
@@ -43,12 +43,16 @@
 #include "rcep.hpp"
 #include "command.hpp"
 
-//using namespace boost; 
 using namespace std;
 
 #define FETCHGNX ( INSTALL_BIN "/fetchgnx" )
 
 //#define DBG_PACKAGE_AUTOLOAD
+
+//	This is a refactoring step, which I am using to allow both the original
+//	and the new -X options to coexist.
+#define OPTION_X 1
+
 
 class ResolveHandler : public Ginger::SaxHandler {
 public:
@@ -93,13 +97,25 @@ public:
 	ResolveHandler() : mishap( "" ), qualified( false ) {}
 };
 
-
+static void fRenderMnx( int fd, shared< Ginger::Mnx > mnx ) {
+	namespace io = boost::iostreams;
+	//cerr << "fd = " << fd << endl;
+	io::file_descriptor_sink fdsink( fd, io::never_close_handle );
+	io::stream_buffer< io::file_descriptor_sink > output_stream_buffer( fdsink );
+	std::ostream output( &output_stream_buffer );
+	mnx->render( output );
+	output.flush();
+}
 
 Ident OrdinaryPackage::unqualifiedAutoload( const std::string & c ) {
 	syslog( LOG_INFO, "Autoloading unqualified %s", c.c_str() );
 	
 	Ginger::Command cmd( FETCHGNX );
-	cmd.addArg( "-R" );
+	#if OPTION_X
+		cmd.addArg( "-X" );
+	#else
+		cmd.addArg( "-R" );
+	#endif
 	{
 		list< string > & folders = this->getMachine()->getAppContext().getProjectFolderList();
 		for ( 
@@ -111,19 +127,43 @@ Ident OrdinaryPackage::unqualifiedAutoload( const std::string & c ) {
 			cmd.addArg( *it );
 		}
 	}
-	cmd.addArg( "-p" );
-	cmd.addArg( this->title );
-	cmd.addArg( "-v" );
-	cmd.addArg( c );
-
+	
+	#if OPTION_X
+		Ginger::MnxBuilder qb;
+		qb.start( "resolve.unqualified" );
+		qb.put( "pkg.name", this->title );
+		qb.put( "var.name", c );
+		qb.end();
+		shared< Ginger::Mnx > query( qb.build() );
+	#else
+		cmd.addArg( "-p" );
+		cmd.addArg( this->title );
+		cmd.addArg( "-v" );
+		cmd.addArg( c );
+	#endif
 	//cerr << "About to run the command" << endl;
-	int fd = cmd.runWithOutput();		
-	//cerr << "Command run " << endl;
+	#if OPTION_X
+		cmd.runWithInputAndOutput();
+		int fd = cmd.getInputFD();   
+		fRenderMnx( cmd.getOutputFD(), query );
+		//write( cmd.getOutputFD(), "<resolve.unqualified pkg.name=\"ginger.interactive\" var.name=\"tail\"/>\n", sizeof( "<resolve.unqualified pkg.name=\"ginger.interactive\" var.name=\"tail\"/>\n" ) );
+		//close( cmd.getOutputFD() );
+	#else
+		int fd = cmd.runWithOutput();		
+	#endif
+	#ifdef DBG_PACKAGE_AUTOLOAD
+		cerr << "Command run " << endl;
+	#endif
 	stringstream prog;
 	for (;;) {
 		static char buffer[ 1024 ];
+		#ifdef DBG_PACKAGE_AUTOLOAD
+			cerr << "READING ... " << endl;
+		#endif
 		int n = read( fd, buffer, sizeof( buffer ) );
-		//cerr << "READ " << n << " bytes from the file descriptor" << endl;
+		#ifdef DBG_PACKAGE_AUTOLOAD
+			cerr << "READ " << n << " bytes from the file descriptor" << endl;
+		#endif
 		if ( n == 0 ) break;
 		if ( n < 0 ) {
 			if ( errno != EINTR ) {
@@ -131,15 +171,22 @@ Ident OrdinaryPackage::unqualifiedAutoload( const std::string & c ) {
 				throw Ginger::Mishap( "Failed to read" );
 			}
 		} else if ( n > 0 ) {
-			//cerr << "|";
-			//write( 2, buffer, n );
-			//cerr << "|" << endl;
+			#ifdef DBG_PACKAGE_AUTOLOAD
+				cerr << "|";
+				write( 2, buffer, n );
+				cerr << "|" << endl;
+			#endif
 			prog.write( buffer, n );
 		}
 	}
+
+	#if OPTION_X
+		close( cmd.getOutputFD() );
+	#endif
+
 		
 	#ifdef DBG_PACKAGE_AUTOLOAD
-		cout << "[[" << prog.str() << "]]" << endl;
+		cerr << "[[" << prog.str() << "]]" << endl;
 	#endif
 
 	ResolveHandler resolve;
@@ -159,7 +206,11 @@ Ident OrdinaryPackage::qualifiedAutoload( const std::string & alias, const std::
 	syslog( LOG_INFO, "Autoloading qualified %s", c.c_str() );
 	
 	Ginger::Command cmd( FETCHGNX );
-	cmd.addArg( "-R" );
+	#if OPTION_X
+		cmd.addArg( "-X" );
+	#else
+		cmd.addArg( "-R" );
+	#endif
 	{
 		list< string > & folders = this->getMachine()->getAppContext().getProjectFolderList();
 		for ( 
@@ -171,15 +222,34 @@ Ident OrdinaryPackage::qualifiedAutoload( const std::string & alias, const std::
 			cmd.addArg( *it );
 		}
 	}
-	cmd.addArg( "-p" );
-	cmd.addArg( this->title );
-	cmd.addArg( "-a" );
-	cmd.addArg( alias );
-	cmd.addArg( "-v" );
-	cmd.addArg( c );
+	
+	#if OPTION_X
+		Ginger::MnxBuilder qb;
+		qb.start( "resolve.qualified" );
+		qb.put( "pkg.name", this->title );
+		qb.put( "alias.name", alias );
+		qb.put( "var.name", c );
+		qb.end();
+		shared< Ginger::Mnx > query( qb.build() );
+	#else
+		cmd.addArg( "-p" );
+		cmd.addArg( this->title );
+		cmd.addArg( "-a" );
+		cmd.addArg( alias );
+		cmd.addArg( "-v" );
+		cmd.addArg( c );
+	#endif
 
-	//cerr << "About to run the command" << endl;
-	int fd = cmd.runWithOutput();		
+	#if OPTION_X
+		cmd.runWithInputAndOutput();
+		int fd = cmd.getInputFD();   
+		fRenderMnx( cmd.getOutputFD(), query );
+		//write( cmd.getOutputFD(), "<resolve.unqualified pkg.name=\"ginger.interactive\" var.name=\"tail\"/>\n", sizeof( "<resolve.unqualified pkg.name=\"ginger.interactive\" var.name=\"tail\"/>\n" ) );
+		//close( cmd.getOutputFD() );
+	#else
+		int fd = cmd.runWithOutput();		
+	#endif
+	
 	//cerr << "Command run " << endl;
 	stringstream prog;
 	for (;;) {
@@ -198,6 +268,11 @@ Ident OrdinaryPackage::qualifiedAutoload( const std::string & alias, const std::
 			prog.write( buffer, n );
 		}
 	}
+	
+	#if OPTION_X
+		close( cmd.getOutputFD() );
+	#endif
+
 		
 	#ifdef DBG_PACKAGE_AUTOLOAD
 		cout << "[[" << prog.str() << "]]" << endl;
@@ -219,7 +294,11 @@ Ident OrdinaryPackage::absoluteAutoload( const std::string & c ) {
 	syslog( LOG_INFO, "Autoloading is_absolute_ref %s", c.c_str() );
 	
 	Ginger::Command cmd( FETCHGNX );
-	cmd.addArg( "-D" );
+	#if OPTION_X
+		cmd.addArg( "-X" );
+	#else
+		cmd.addArg( "-D" );
+	#endif
 	{
 		list< string > & folders = this->getMachine()->getAppContext().getProjectFolderList();
 		for ( 
@@ -231,13 +310,33 @@ Ident OrdinaryPackage::absoluteAutoload( const std::string & c ) {
 			cmd.addArg( *it );
 		}
 	}
-	cmd.addArg( "-p" );
-	cmd.addArg( this->title );
-	cmd.addArg( "-v" );
-	cmd.addArg( c );
+	
+	#if OPTION_X
+		Ginger::MnxBuilder qb;
+		qb.start( "fetch.definition" );
+		qb.put( "pkg.name", this->title );
+		qb.put( "var.name", c );
+		qb.end();
+		shared< Ginger::Mnx > query( qb.build() );
+	#else
+		cmd.addArg( "-p" );
+		cmd.addArg( this->title );
+		cmd.addArg( "-v" );
+		cmd.addArg( c );
+	#endif
 
-	//cerr << "About to run the command" << endl;
-	int fd = cmd.runWithOutput();		
+	
+
+	#if OPTION_X
+		cmd.runWithInputAndOutput();
+		int fd = cmd.getInputFD();   
+		fRenderMnx( cmd.getOutputFD(), query );
+		//write( cmd.getOutputFD(), "<resolve.unqualified pkg.name=\"ginger.interactive\" var.name=\"tail\"/>\n", sizeof( "<resolve.unqualified pkg.name=\"ginger.interactive\" var.name=\"tail\"/>\n" ) );
+		//close( cmd.getOutputFD() );
+	#else
+		int fd = cmd.runWithOutput();		
+	#endif
+	
 	//cerr << "Command run " << endl;
 	stringstream prog;
 	for (;;) {
@@ -257,6 +356,10 @@ Ident OrdinaryPackage::absoluteAutoload( const std::string & c ) {
 		}
 	}
 		
+	#if OPTION_X
+		close( cmd.getOutputFD() );
+	#endif
+	
 	#ifdef DBG_PACKAGE_AUTOLOAD
 		cout << "[[" << prog.str() << "]]" << endl;
 	#endif

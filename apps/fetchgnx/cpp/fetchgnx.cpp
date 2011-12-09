@@ -292,9 +292,18 @@ void Main::run() {
 			break;
 		}
 		case EXECUTE_COMMAND: {
+			#ifdef DBG_FETCHGNX
+				cerr << "Entering Execute Command mode" << endl;
+			#endif
 			Ginger::MnxReader reader( std::cin );
 			shared< Ginger::Mnx > mnx = reader.readMnx();
+			#ifdef DBG_FETCHGNX
+				cerr << "Read GNX" << endl;
+			#endif
 			if ( not mnx ) {
+				#ifdef DBG_FETCHGNX
+					cerr << "Nothing read" << endl;
+				#endif
 			} else if ( 
 				mnx->hasName( "resolve.qualified" ) && 
 				mnx->hasAttribute( "pkg.name" ) &&
@@ -307,6 +316,9 @@ void Main::run() {
 				mnx->hasAttribute( "pkg.name" ) &&
 				mnx->hasAttribute( "var.name" )
 			) {
+				#ifdef DBG_FETCHGNX
+					cerr << "Resolve unqualified reference" << endl;
+				#endif
 				search.resolveUnqualified( mnx->attribute( "pkg.name" ), mnx->attribute( "var.name" ) );
 			} else if ( 
 				mnx->hasName( "fetch.definition" ) &&
@@ -320,7 +332,7 @@ void Main::run() {
 			) {
 				search.loadPackage( mnx->attribute( "pkg.name" ) );
 			} else {
-				Ginger::Mishap( "Invalid request" ).culprit( mnx->toString() );
+				throw Ginger::Mishap( "Invalid request" ).culprit( mnx->toString() );
 			}
 			break;
 		}

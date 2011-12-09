@@ -1,0 +1,68 @@
+ * A toolchain that consists of 
+     - common2gnx:     a front-end for Common, converts to GingerXML. [docs]
+     - cstyle2gnx:     a front-end for a C-family syntax, converts to GingerXML. [docs+rename]
+     - simplifygnx:    a GingerXML simplifier and annotation tool. [docs]
+     - tidymnx:        a tool for pretty-printing MinXML (superset of GingerXML). [docs]
+     - fetchgnx:       a tool for accessing Project contents [docs+revise]
+     - executegnx:     a GingerXML interpreter (renaming of appginger). [docs+rename??]
+   These tools are not supposed to be on the $PATH of a typical user and will 
+   probably be installed somewhere like /usr/local/ginger/bin
+
+ * A command-line interpreter, ginger, that coordinates the toolchain components to
+   provide an interactive shell for exploratory programming in a terminal. [design+docs+implement]
+     - only intended for interactive work.
+     - provides GNI readline editing.
+     - panics are trapped.
+     - errors are logged to the terminal.
+     - long term development would be to become a terminal-based Project IDE suitable 
+       for use over SSH.
+     - uses a user/team/department/.../world preferences hierarchy 
+
+ * A CGI script runner, ginger-cgi (o.n.o.), that can be used to write CGI scripts [docs+spawn]
+     - includes scripts invoked through Apache Action/AddHandler, CGIMapExtensions.
+     - includes #!/usr/local/bin/ginger-cgi (hanh-bang) scripts.
+     - can be used interactively for testing.
+
+ * A scripting tool, ginger-script (o.n.o.), that can be used to write UNIX scripts [design+docs+spawn]
+     - includes hash-bang scripting.
+     - includes executing from the standard input.
+
+ * A basic set of Ginger language features including [done]
+     - binding to single variables
+     - assignment to single variables
+     - if/unless N-way conditionals and switch expressions
+     - short circuit conditionals (boolean & absent-oriented)
+     - function applications and partial applications
+     - higher-order functions with full lexical scoping
+     - panics (uncatchable exceptions)
+     - garbage collection
+     - autoloading and autoconversion
+
+ * A basic set of built-in datatypes including [done]
+     -simple primitives: absent, booleans, undefined
+     - small integers and small integer arithmetic
+     - ASCII strings, symbols and characters
+     - singly linked lists (Lisp-style)
+     - 1D arrays (vectors)
+     - maps and maplets, including weak hash tables
+     - class objects, for structured reflection
+
+ * A basic standard library including [docs]
+     - equality
+     - simple I/O
+     - access to environment variables
+
+ * Documentation for
+     - a overview of the Ginger project, the manifesto, the motivation, the roadmap. [todo]
+     - all the tools in the toolchain (common2gnx, cstyle2gnx, simplifygnx, 
+       tidymnx, fetchgnx, resolvegnx, appginger) [todo]
+     - all the source formats (Common syntax, C-style syntax, GingerXML, MinimalMnx) 
+       used in the toolchain. [todo]
+     - the programs (ginger, ginger-cgi, ginger-script) [todo]
+     - the Ginger language features [todo]
+     - the Ginger classes and standard library [todo]
+
+ * Integration with the Sublime 2 text editor [todo]
+     - includes syntax colouring for the supported syntaxes (Common [done], C-Style [to be done]).
+     - evaluation of supported syntaxes using ginger-script.
+

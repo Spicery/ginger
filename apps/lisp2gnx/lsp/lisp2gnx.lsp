@@ -266,14 +266,14 @@
 		(quote-atom sexp)))
 		
 (define (quote-atom sexp)
-	(let ((val `((value ,sexp))))
+	(let ((val `(value ,sexp)))
 		(cond
-			((number? sexp) `(int ,val))
-			((string? sexp) `(string ,val))
-			((boolean? sexp) `(bool ,val))
-			((char? sexp) `(char ,val))
-			((symbol? sexp) `(symbol ,val))
-			((null? sexp) '(list ((value empty))))
+			((number? sexp) `(constant ((type int) ,val)))
+			((string? sexp) `(constant ((type string) ,val)))
+			((boolean? sexp) `(constant ((type bool) ,val)))
+			((char? sexp) `(constant ((type char) ,val)))
+			((symbol? sexp) `(constant ((type symbol) ,val)))
+			((null? sexp) '(constant ((type list) (value empty))))
 			(else (throw 'badsexp sexp)))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

@@ -1,4 +1,4 @@
 <bind>
 	<var name="hello" protected="true" tag="public"/>
-	<string value="Hello, world!"/>
+	<constant type="string" value="Hello, world!"/>
 </bind>

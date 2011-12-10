@@ -24,6 +24,7 @@
 #include "mishap.hpp"
 
 using namespace std;
+using namespace Ginger;
 
 #define APP_TITLE		"file2gnx"
 #define LOG_FACILITY	LOG_LOCAL2
@@ -78,12 +79,12 @@ int main( int argc, char ** argv ) {
 		run( cmdpath, pathname );
 		
 		return EXIT_SUCCESS;
-	} catch ( Mishap & m ) {
-		p.culprit( "Detected by", FILE2GNX );
+	} catch ( Ginger::Mishap & m ) {
+		m.culprit( "Detected by", APP_TITLE );
 		m.gnxReport();
 		return EXIT_FAILURE;
-	} catch ( Problem & m ) {
-		p.culprit( "Detected by", FILE2GNX );
+	} catch ( Ginger::Problem & m ) {
+		m.culprit( "Detected by", APP_TITLE );
 		m.gnxReport();
 		return EXIT_FAILURE;
 	}

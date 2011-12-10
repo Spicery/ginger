@@ -11,17 +11,17 @@ EXEC_DIR="$(INSTALL_BIN)"
 
 CC=@CXX@
 
-CXXFLAGS=-DEXEC_DIR='$(EXEC_DIR)' -g -I../hpp -I/usr/local/boost_1_43_0 -Wall -Wnon-virtual-dtor # -Weffc++
+CXXFLAGS=-DEXEC_DIR='$(EXEC_DIR)' -g -I../hpp -I../../libgng/hpp -I/usr/local/boost_1_43_0 -Wall -Wnon-virtual-dtor # -Weffc++
 CFLAGS=-Wmissing-prototypes 
 
-OBJS=file2gnx.o mishap.o 
+OBJS=file2gnx.o
 
 all: file2gnx
 
 # $@ is make shorthand for the target.
 # $@ is make shorthand for the dependencies
 file2gnx: $(OBJS)
-	@CXX@ $(CXXFLAGS) $(BOOST_CPPFLAGS) -o $@ $(OBJS)
+	@CXX@ $(CXXFLAGS) $(BOOST_CPPFLAGS) -o $@ $(OBJS) ../../libgng/cpp/libgng.a
 	
 clean:
 	rm -f *.o

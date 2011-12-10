@@ -1187,9 +1187,11 @@ int main( int argc, char ** argv, char **envp ) {
 		main.run();
 	    return EXIT_SUCCESS;
 	} catch ( Ginger::SystemError & p ) {
+		p.culprit( "Detected by", SIMPLIFYGNX );
 		p.gnxReport();
 		return EXIT_FAILURE;
 	} catch ( Ginger::Problem & p ) {
+		p.culprit( "Detected by", SIMPLIFYGNX );
 		p.gnxReport();
 		return EXIT_FAILURE;
 	}

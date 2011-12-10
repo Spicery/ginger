@@ -39,7 +39,7 @@ protected:
 	std::string message;
 	std::vector< std::pair< std::string, std::string > > culprits;
 
-protected:	
+public:	
 	Problem & culprit( const char * reason, const std::string arg );
 	Problem & culprit( const char * reason, const char * arg );
 	Problem & culprit( const std::string reason, const std::string arg );

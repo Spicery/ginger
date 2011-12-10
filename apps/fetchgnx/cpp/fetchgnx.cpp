@@ -352,10 +352,12 @@ int main( int argc, char ** argv, char **envp ) {
 		main.run();
 	    return EXIT_SUCCESS;
 	} catch ( Ginger::SystemError & p ) {
-		p.report();
+		p.culprit( "Detected by", FETCHGNX );
+		p.gnxReport();
 		return EXIT_FAILURE;
 	} catch ( Ginger::Problem & p ) {
-		p.report();
+		p.culprit( "Detected by", FETCHGNX );
+		p.gnxReport();
 		return EXIT_FAILURE;
 	}
 }

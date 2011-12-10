@@ -178,11 +178,13 @@ int main( int argc, char **argv, char **envp ) {
 		Main main;
 		main.parseArgs( argc, argv, envp );
 		return main.run();
-	} catch ( Ginger::SystemError & p ) {
-		p.report();
+	} catch ( Ginger::Mishap & p ) {
+		p.culprit( "Detected by", TIDYMNX );
+		p.gnxReport();
 		return EXIT_FAILURE;
 	} catch ( Ginger::Problem & p ) {
-		p.report();
+		p.culprit( "Detected by", TIDYMNX );
+		p.gnxReport();
 		return EXIT_FAILURE;
 	}
 }

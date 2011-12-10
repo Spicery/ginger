@@ -79,6 +79,11 @@ int main( int argc, char ** argv ) {
 		
 		return EXIT_SUCCESS;
 	} catch ( Mishap & m ) {
+		p.culprit( "Detected by", FILE2GNX );
+		m.gnxReport();
+		return EXIT_FAILURE;
+	} catch ( Problem & m ) {
+		p.culprit( "Detected by", FILE2GNX );
 		m.gnxReport();
 		return EXIT_FAILURE;
 	}

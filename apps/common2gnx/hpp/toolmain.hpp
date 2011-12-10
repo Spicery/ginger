@@ -16,27 +16,27 @@
     along with AppGinger.  If not, see <http://www.gnu.org/licenses/>.
 \******************************************************************************/
 
-#include <cstdlib>
-#include "mishap.hpp"
+class ToolMain {
+private:
+	bool use_stdin;
+	std::string input_file_name;
+	bool gen_lnx;
+	bool cstyle;
+	const char * app_title;
+	
+public:
+	ToolMain( bool cstyle, const char * title ) : cstyle( cstyle ), app_title( title ) {}
 
-#include "toolmain.hpp"
+public:
+	std::string version() { return "0.2"; }
+	void printGPL( const char * start, const char * end );
+	void parseArgs( int argc, char **argv, char **envp );
 
-using namespace std;
+private:
+	void tokenise( FILE *in );
+	void parse( FILE * in );
+	void run( FILE * in );
 
-#define APP_TITLE 		"common2gnx"
-
-int main( int argc, char **argv, char **envp ) {
-	try {
-		ToolMain main( false, APP_TITLE );
-		main.parseArgs( argc, argv, envp );
-		return main.run();
-	} catch ( Ginger::Mishap & p ) {
-		p.culprit( "Detected by", APP_TITLE );
-		p.gnxReport();
-		return EXIT_FAILURE;
-	} catch ( Ginger::Problem & p ) {
-		p.culprit( "Detected by", APP_TITLE );
-		p.gnxReport();
-		return EXIT_FAILURE;
-	}
-}
+public:
+	int run();
+};

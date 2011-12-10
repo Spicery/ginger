@@ -23,11 +23,11 @@
 
 using namespace std;
 
-#define APP_TITLE 		"common2gnx"
+#define APP_TITLE 		"cstyle2gnx"
 
 int main( int argc, char **argv, char **envp ) {
 	try {
-		ToolMain main( false, APP_TITLE );
+		ToolMain main( true, APP_TITLE );
 		main.parseArgs( argc, argv, envp );
 		return main.run();
 	} catch ( Ginger::Mishap & p ) {

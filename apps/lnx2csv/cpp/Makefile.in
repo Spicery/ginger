@@ -13,7 +13,7 @@ CFLAGS=-Wmissing-prototypes
 
 OBJS=lnx2csv.o
 
-tidymnx: $(OBJS)
+lnx2csv: $(OBJS)
 	g++ $(CXXFLAGS) $(BOOST_CPPFLAGS) -o lnx2csv $(OBJS) ../../libgng/cpp/libgng.a
 
 clean:

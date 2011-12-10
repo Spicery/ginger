@@ -14,7 +14,7 @@ CFLAGS=-Wmissing-prototypes
 
 OBJS=src2lnx.o state.o action.o node.o match.o grammar.o arc.o mapping.o
 
-xson2gnx: $(OBJS)
+src2lnx: $(OBJS)
 	@CXX@ $(CXXFLAGS) $(BOOST_CPPFLAGS) -o src2lnx $(OBJS) ../../libgng/cpp/libgng.a
 
 clean:

@@ -20,7 +20,7 @@
 
  * A CGI script runner, ginger-cgi (o.n.o.), that can be used to write CGI scripts [docs+spawn]
      - includes scripts invoked through Apache Action/AddHandler, CGIMapExtensions.
-     - includes #!/usr/local/bin/ginger-cgi (hanh-bang) scripts.
+     - includes #!/usr/local/bin/ginger-cgi (hash-bang) scripts.
      - can be used interactively for testing.
 
  * A scripting tool, ginger-script (o.n.o.), that can be used to write UNIX scripts [design+docs+spawn]

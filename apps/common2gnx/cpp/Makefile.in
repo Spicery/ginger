@@ -15,4 +15,4 @@ cstyle2gnx: cstyle2gnx.o $(OBJS)
 
 clean:
 	rm -f *.o
-	rm -f common2gnx
+	rm -f common2gnx cstyle2gnx

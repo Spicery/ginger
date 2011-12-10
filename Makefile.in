@@ -4,8 +4,6 @@ all:
 
 clean:
 	rm -rf _build/
-	rm -f bin/common2gnx
-	rm -f bin/appginger
 	$(MAKE) -C apps $@
 	$(MAKE) -C projects $@
 
@@ -73,6 +71,7 @@ EXECUTABLES=\
 	apps/fetchgnx/cpp/fetchgnx \
 	apps/file2gnx/cpp/file2gnx \
 	apps/common2gnx/cpp/common2gnx \
+	apps/common2gnx/cpp/cstyle2gnx \
 	apps/lisp2gnx/lsp/lisp2gnx \
 	apps/simplifygnx/cpp/simplifygnx \
 	apps/tidymnx/cpp/tidymnx \

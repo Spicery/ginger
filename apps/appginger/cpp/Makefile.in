@@ -19,7 +19,7 @@ INSTALLDIRS=-DINSTALL_BIN='"$(INSTALL_BIN)"' -DINSTALL_LIB='"$(INSTALL_LIB)"' -D
 CXXFLAGS=-DRUDECGI $(INSTALLDIRS) -g -I../hpp -I../../libgng/hpp -I../../automatic/machine -I../../automatic/sys -I../../automatic/simple -I/opt/local/include -Wall -Wnon-virtual-dtor -L/opt/local/lib 
 CFLAGS=-Wmissing-prototypes 
 
-OBJS= package_autoload.o term.o read_xml.o \
+OBJS=package_autoload.o term.o read_xml.o \
 	functor.o plant.o cage.o vmi.o registers.o roots.o \
 	rcep.o arity.o resolve.o lift.o ident.o \
 	dict.o package.o \
@@ -43,17 +43,27 @@ OBJS= package_autoload.o term.o read_xml.o \
 	appcontext.o \
 	makesysfn.o
 
-all: appginger
+all: appginger ginger-cgi ginger-script
 
 # $@ is make shorthand for the target.
 # $@ is make shorthand for the dependencies
-appginger: libappginger.a main.o
+appginger: libappginger.a toolmain.o main.o
 	ranlib libappginger.a ../../libgng/cpp/libgng.a
-	@CXX@ $(CXXFLAGS) $(BOOST_CPPFLAGS) -o $@ main.o libappginger.a ../../libgng/cpp/libgng.a /usr/local/lib/librudecgi.a  -lboost_iostreams
-	
+	@CXX@ $(CXXFLAGS) $(BOOST_CPPFLAGS) -o $@ main.o toolmain.o libappginger.a ../../libgng/cpp/libgng.a /usr/local/lib/librudecgi.a  -lboost_iostreams
+
+ginger-cgi: libappginger.a toolmain.o cgimain.o
+	ranlib libappginger.a ../../libgng/cpp/libgng.a
+	@CXX@ $(CXXFLAGS) $(BOOST_CPPFLAGS) -o $@ cgimain.o toolmain.o libappginger.a ../../libgng/cpp/libgng.a /usr/local/lib/librudecgi.a  -lboost_iostreams
+
+ginger-script: libappginger.a toolmain.o scriptmain.o
+	ranlib libappginger.a ../../libgng/cpp/libgng.a
+	@CXX@ $(CXXFLAGS) $(BOOST_CPPFLAGS) -o $@ scriptmain.o toolmain.o libappginger.a ../../libgng/cpp/libgng.a /usr/local/lib/librudecgi.a  -lboost_iostreams
+
+
+
 clean:
 	rm -f *.o
-	rm -f appginger
+	rm -f appginger ginger-cgi ginger-script
 	rm -f *.a
 
 #	Nothing needs doing.

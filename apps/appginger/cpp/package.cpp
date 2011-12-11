@@ -42,8 +42,6 @@
 //using namespace boost; 
 using namespace std;
 
-//#define FETCHGNX ( INSTALL_BIN "/fetchgnx" )
-
 //#define DBG_PACKAGE
 
 Package::~Package() {

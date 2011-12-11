@@ -45,7 +45,7 @@
 
 using namespace std;
 
-#define FETCHGNX ( INSTALL_BIN "/fetchgnx" )
+#define FETCHGNX ( INSTALL_TOOL "/fetchgnx" )
 
 //#define DBG_PACKAGE_AUTOLOAD
 

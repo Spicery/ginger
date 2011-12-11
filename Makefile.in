@@ -82,7 +82,8 @@ EXECUTABLES=\
 	apps/lnx2mnx/cpp/lnx2mnx
 
 install: all
-	echo Installing binaries into $(INSTALL_BIN)
+	echo Installing user binaries into $(INSTALL_BIN)
+	echo Installing toolchain binaries into $(INSTALL_TOOL)
 	echo Installing support files $(INSTALL_LIB)
 	mkdir -p $(INSTALL_LIB)
 	cp -r projects/standard_library $(INSTALL_LIB) 
@@ -91,7 +92,7 @@ install: all
 	/usr/bin/install -m a=r COPYING $(INSTALL_LIB)
 	mkdir -p $(INSTALL_LIB)/lisp2gnx
 	/usr/bin/install -m a=r apps/lisp2gnx/lsp/lisp2gnx.lsp $(INSTALL_LIB)/lisp2gnx
-	/usr/bin/install $(EXECUTABLES) $(INSTALL_BIN)
+	/usr/bin/install $(EXECUTABLES) $(INSTALL_TOOL)
 
 # Create a tarball for binary archive.
 TBBASE=appginger_files

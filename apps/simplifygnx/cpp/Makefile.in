@@ -6,6 +6,7 @@ exec_prefix=@prefix@
 datarootdir=@datarootdir@
 PACKAGE_TARNAME=@PACKAGE_TARNAME@
 INSTALL_BIN=@bindir@
+INSTALL_TOOL=@libexecdir@/@PACKAGE_TARNAME@
 INSTALL_LIB=@datarootdir@/@PACKAGE_TARNAME@
 INSTALL_DOC=@docdir@
 
@@ -15,7 +16,10 @@ INSTALL_DOC=@docdir@
 
 CC=@CXX@
 
-CXXFLAGS=-DINSTALL_BIN='"$(INSTALL_BIN)"' -DINSTALL_LIB='"$(INSTALL_LIB)"' -g -I../hpp -I../../libgng/hpp  -I/opt/local/include -L/opt/local/lib -Wall -Wnon-virtual-dtor
+INSTALLDIRS=-DINSTALL_BIN='"$(INSTALL_BIN)"' -DINSTALL_LIB='"$(INSTALL_LIB)"' -DINSTALL_TOOL='"$(INSTALL_TOOL)"'
+
+
+CXXFLAGS=$(INSTALLDIRS) -g -I../hpp -I../../libgng/hpp  -I/opt/local/include -L/opt/local/lib -Wall -Wnon-virtual-dtor
 CFLAGS=-Wmissing-prototypes 
 
 OBJS= simplifygnx.o

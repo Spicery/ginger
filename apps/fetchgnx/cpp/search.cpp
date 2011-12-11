@@ -118,7 +118,7 @@ static void run( string command, string pathname, ostream & out ) {
 
 void Search::cacheDefinitionFile( PackageCache * c, const string & name, const string & pathname ) {
 	ostringstream out;
-	run( EXEC_DIR "/" FILE2GNX, pathname, out );
+	run( INSTALL_TOOL "/" FILE2GNX, pathname, out );
 	cout << out.str();
 }
 
@@ -270,7 +270,7 @@ void Search::loadPackage( const string & pkg ) {
 	PackageCache * c = this->project_cache.fetchPackageCache( pkg );
 	string pathname = c->getLoadPath();
 	if ( pathname.size() > 0 ) {
-		run( EXEC_DIR "/" FILE2GNX, pathname, cout );
+		run( INSTALL_TOOL "/" FILE2GNX, pathname, cout );
 	} else {
 		//cout << "<seq><!-- load path was not defined --></seq>" << endl;
 	}

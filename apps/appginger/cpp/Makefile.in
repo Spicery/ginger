@@ -3,6 +3,7 @@ exec_prefix=@prefix@
 datarootdir=@datarootdir@
 PACKAGE_TARNAME=@PACKAGE_TARNAME@
 INSTALL_BIN=@bindir@
+INSTALL_TOOL=@libexecdir@/@PACKAGE_TARNAME@
 INSTALL_LIB=@datarootdir@/@PACKAGE_TARNAME@
 INSTALL_DOC=@docdir@
 
@@ -13,7 +14,9 @@ INSTALL_DOC=@docdir@
 
 CC=@CXX@
 
-CXXFLAGS=-DRUDECGI -DINSTALL_BIN='"$(INSTALL_BIN)"' -DINSTALL_LIB='"$(INSTALL_LIB)"' -g -I../hpp -I../../libgng/hpp -I../../automatic/machine -I../../automatic/sys -I../../automatic/simple -I/opt/local/include -Wall -Wnon-virtual-dtor -L/opt/local/lib 
+INSTALLDIRS=-DINSTALL_BIN='"$(INSTALL_BIN)"' -DINSTALL_LIB='"$(INSTALL_LIB)"' -DINSTALL_TOOL='"$(INSTALL_TOOL)"'
+
+CXXFLAGS=-DRUDECGI $(INSTALLDIRS) -g -I../hpp -I../../libgng/hpp -I../../automatic/machine -I../../automatic/sys -I../../automatic/simple -I/opt/local/include -Wall -Wnon-virtual-dtor -L/opt/local/lib 
 CFLAGS=-Wmissing-prototypes 
 
 OBJS= package_autoload.o term.o read_xml.o \

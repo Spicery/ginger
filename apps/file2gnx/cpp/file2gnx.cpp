@@ -29,8 +29,8 @@ using namespace Ginger;
 #define APP_TITLE		"file2gnx"
 #define LOG_FACILITY	LOG_LOCAL2
 
-#define COMMON2GNX		( EXEC_DIR "/common2gnx" )
-#define LISP2GNX 		( EXEC_DIR "/lisp2gnx" )
+#define COMMON2GNX		( INSTALL_TOOL "/common2gnx" )
+#define LISP2GNX 		( INSTALL_TOOL "/lisp2gnx" )
 #define GNX2GNX     	( "/bin/cat" )
 
 //

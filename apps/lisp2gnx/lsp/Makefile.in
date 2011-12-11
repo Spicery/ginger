@@ -3,6 +3,7 @@ exec_prefix=@prefix@
 datarootdir=@datarootdir@
 PACKAGE_TARNAME=@PACKAGE_TARNAME@
 INSTALL_BIN=@bindir@
+INSTALL_TOOL=@libexecdir@/@PACKAGE_TARNAME@
 INSTALL_LIB=@datarootdir@/@PACKAGE_TARNAME@
 INSTALL_DOC=@docdir@
 

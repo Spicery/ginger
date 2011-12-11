@@ -3,13 +3,16 @@ exec_prefix=@prefix@
 datarootdir=@datarootdir@
 PACKAGE_TARNAME=@PACKAGE_TARNAME@
 INSTALL_BIN=@bindir@
+INSTALL_TOOL=@libexecdir@/@PACKAGE_TARNAME@
 INSTALL_LIB=@datarootdir@/@PACKAGE_TARNAME@
 INSTALL_DOC=@docdir@
 
 
 CC=@CXX@
 
-CXXFLAGS=-DINSTALL_BIN='"$(INSTALL_BIN)"' -DINSTALL_LIB='"$(INSTALL_LIB)"' -I../hpp -I../../libgng/hpp -I/usr/local/boost_1_43_0 -Wall -g
+INSTALLDIRS=-DINSTALL_BIN='"$(INSTALL_BIN)"' -DINSTALL_LIB='"$(INSTALL_LIB)"' -DINSTALL_TOOL='"$(INSTALL_TOOL)"'
+
+CXXFLAGS=$(INSTALLDIRS) -I../hpp -I../../libgng/hpp -I/usr/local/boost_1_43_0 -Wall -g
 CFLAGS=-Wmissing-prototypes 
 
 OBJS=gson2gnx.o item_factory.o item.o toktype.o

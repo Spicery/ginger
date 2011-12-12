@@ -69,7 +69,8 @@ INSTALL_DOC=@docdir@
 
 USEREXECUTABLES=\
 	apps/appginger/cpp/ginger-cgi \
-	apps/appginger/cpp/ginger-script
+	apps/appginger/cpp/ginger-script \
+	apps/appginger/cpp/ginger
 
 LIBEXECUTABLES=\
 	apps/appginger/cpp/appginger \

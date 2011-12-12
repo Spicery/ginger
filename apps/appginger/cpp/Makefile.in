@@ -43,13 +43,19 @@ OBJS=package_autoload.o term.o read_xml.o \
 	appcontext.o \
 	makesysfn.o
 
-all: appginger ginger-cgi ginger-script
+USEREXECUTABLES=appginger ginger-cgi ginger-script ginger
+
+all: $(USEREXECUTABLES)
 
 # $@ is make shorthand for the target.
 # $@ is make shorthand for the dependencies
 appginger: libappginger.a toolmain.o main.o
 	ranlib libappginger.a ../../libgng/cpp/libgng.a
 	@CXX@ $(CXXFLAGS) $(BOOST_CPPFLAGS) -o $@ main.o toolmain.o libappginger.a ../../libgng/cpp/libgng.a /usr/local/lib/librudecgi.a  -lboost_iostreams
+
+ginger: libappginger.a toolmain.o gingermain.o
+	ranlib libappginger.a ../../libgng/cpp/libgng.a
+	@CXX@ $(CXXFLAGS) $(BOOST_CPPFLAGS) -o $@ gingermain.o toolmain.o libappginger.a ../../libgng/cpp/libgng.a /usr/local/lib/librudecgi.a  -lboost_iostreams
 
 ginger-cgi: libappginger.a toolmain.o cgimain.o
 	ranlib libappginger.a ../../libgng/cpp/libgng.a
@@ -63,7 +69,7 @@ ginger-script: libappginger.a toolmain.o scriptmain.o
 
 clean:
 	rm -f *.o
-	rm -f appginger ginger-cgi ginger-script
+	rm -f $(USEREXECUTABLES)
 	rm -f *.a
 
 #	Nothing needs doing.

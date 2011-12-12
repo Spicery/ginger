@@ -81,7 +81,8 @@ static struct option long_options[] =
         { "license",        optional_argument,      0, 'L' },
         { "project",		required_argument,		0, 'j' },
         { "stdin",			no_argument,			0, 'i' },
-        { "print",			optional_argument,		0, 'p' },
+        { "print",			no_argument,			0, 'p' },
+        { "printmore",		no_argument,			0, 'P' },
         { 0, 0, 0, 0 }
     };
 
@@ -111,7 +112,7 @@ static void printUsage() {
 	cout << "-i, --stdin           compile from stdin" << endl;
 	cout << "-l, --license         print out license information and exit" << endl;
 	cout << "-M, --metainfo        dump meta-info XML file to stdout" << endl;
-	cout << "-p<n>, --print        set the print level (0,1,2)" << endl;
+	cout << "-p, -P                set the print level to 1 or 2" << endl;
 	cout << "-v, --version         print out version information and exit" << endl;
 	cout << endl;
 }	
@@ -284,7 +285,7 @@ bool ToolMain::parseArgs( int argc, char **argv, char **envp ) {
 	bool meta_info_needed = false;
     for(;;) {
         int option_index = 0;
-        int c = getopt_long( argc, argv, "p::iMH::m:E:Vd:L::f:", long_options, &option_index );
+        int c = getopt_long( argc, argv, "pPiMH::m:E:Vd:L::f:", long_options, &option_index );
         if ( c == -1 ) break;
         switch ( c ) {
             case 'd': {
@@ -338,12 +339,12 @@ bool ToolMain::parseArgs( int argc, char **argv, char **envp ) {
             	meta_info_needed = true;
             	break;
             }
+            case 'P': {
+            	this->context.printLevel() = 2;
+            	break;
+            }
             case 'p': {
-            	if ( optarg == NULL ) {
-            		this->context.printLevel() = 1;
-            	} else {
-            		this->context.printLevel() = atoi( optarg );
-            	}
+             	this->context.printLevel() = 1;
             	break;
             }
             case 'V': {
@@ -359,13 +360,11 @@ bool ToolMain::parseArgs( int argc, char **argv, char **envp ) {
         }
     }
 
+	//	Aggregate the remaining arguments, which are effectively filenames (paths).
 	if ( optind < argc ) {
-		 //cout << "non-option ARGV-elements: ";
 		 while ( optind < argc ) {
-		   	//cout << argv[ optind++ ] << " ";
 		   	this->context.addArgument( argv[ optind++ ] );
 		 }
-		 //cout << endl;
 	}
 	
 	if ( meta_info_needed ) {

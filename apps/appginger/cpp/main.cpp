@@ -17,6 +17,7 @@
 \******************************************************************************/
 
 #include <iostream>
+#include <cstdlib>
 
 #include <syslog.h>
 
@@ -24,6 +25,7 @@
 
 #include "appcontext.hpp"
 #include "toolmain.hpp"
+#include "rcep.hpp"
 
 using namespace std;
 
@@ -36,31 +38,32 @@ static void printWelcomeMessage() {
 	cout << "  +----------------------------------------------------------------------+" << endl;
 }
 
-
-
 class Main : public ToolMain {
+private:
+	void mainLoop() {
+		MachineClass * vm = this->context.newMachine();
+		Package * interactive_pkg = this->context.initInteractivePackage( vm );
+	 
+		#ifdef DBG_APPCONTEXT
+			clog << "RCEP ..." << endl;
+		#endif
+	
+		RCEP rcep( interactive_pkg );
+		while ( rcep.read_comp_exec_print( std::cin, std::cout ) ) {};
+	}
+
 public:
 	virtual int run() {
-	    if ( this->context.isInteractiveMode() ) {
-			printWelcomeMessage();
-		}
-    	
-
-		if ( this->context.isInteractiveMode() || this->context.isBatchMode() ) {
-			this->mainLoop();
-		/*} else if ( this->context.isCgiMode() ) {
-			this->runAsCgi( true );
-		} else if ( this->context.isScriptMode() ) {
-			this->runAsCgi( false );*/
-		} else {
-			fprintf( stderr, "Invalid execute mode" );
-			return EXIT_FAILURE;
-		}
+		printWelcomeMessage();
+		this->mainLoop();
 		return EXIT_SUCCESS;
 	}
 
 public:
-	Main( const char * name ) : ToolMain( name ) {}
+	Main( const char * name ) : ToolMain( name ) {
+		this->context.printLevel() = 2;
+	}
+	
 	virtual ~Main() {}
 };
 

@@ -46,6 +46,7 @@ public:
 
 public:
 	MachineClass * getMachine() { return this->current_package->getMachine(); } 
+	void printResults( std::ostream & output, float time_taken );
 	
 	//	Does not trap mishap.
 	bool unsafe_read_comp_exec_print( std::istream & input, std::ostream & output );

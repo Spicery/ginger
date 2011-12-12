@@ -32,10 +32,6 @@
 #include <getopt.h>
 #include <syslog.h>
 
-#ifdef RUDECGI
-	#include <rude/cgi.h>
-#endif
-
 #include "gngversion.hpp"
 #include "mnx.hpp"
 
@@ -76,18 +72,16 @@ using namespace std;
 extern char * optarg;
 static struct option long_options[] =
     {
-        { "cgi",            no_argument,            0, 'C' },
-        { "interactive",    no_argument,            0, 'I' },
-        { "batch",          no_argument,            0, 'B' },
         { "engine",         required_argument,      0, 'E' },
         { "help",           optional_argument,      0, 'H' },
         { "metainfo",		no_argument,			0, 'M' },
         { "machine",        required_argument,      0, 'm' },
-        { "script",         no_argument,            0, 'S' },
         { "version",        no_argument,            0, 'V' },
         { "debug",          required_argument,      0, 'd' },
         { "license",        optional_argument,      0, 'L' },
         { "project",		required_argument,		0, 'j' },
+        { "stdin",			no_argument,			0, 'i' },
+        { "print",			optional_argument,		0, 'p' },
         { 0, 0, 0, 0 }
     };
 
@@ -110,17 +104,14 @@ void ToolMain::printGPL( const char * start, const char * end ) const {
 static void printUsage() {
 	cout << "Usage :  " << PACKAGE_NAME << " [options] [files]" << endl << endl;
 	cout << "OPTION                SUMMARY" << endl;
-	cout << "-B, --batch           run in batch mode" << endl;
-	cout << "-C, --cgi             run as CGI script" << endl;
-	cout << "-I, --interactive     run interactively" << endl;
-	cout << "-M, --metainfo        dump meta-info XML file to stdout" << endl;
-	cout << "-S, --script          run as a shell ('shebang') script" << endl;
-	cout << "-T, --terminate       stop on mishap" << endl;
 	cout << "-d, --debug           add debug option (see --help=debug)" << endl;
-	cout << "-h, --help            print out this help info (see --help=help)" << endl;
-	cout << "-f, --projectfolder   add a project folder to the search path" << endl;
-	cout << "-l, --license         print out license information and exit" << endl;
 	cout << "-E<n>                 run using engine #n" << endl;
+	cout << "-f, --projectfolder   add a project folder to the search path" << endl;
+	cout << "-h, --help            print out this help info (see --help=help)" << endl;
+	cout << "-i, --stdin           compile from stdin" << endl;
+	cout << "-l, --license         print out license information and exit" << endl;
+	cout << "-M, --metainfo        dump meta-info XML file to stdout" << endl;
+	cout << "-p<n>, --print        set the print level (0,1,2)" << endl;
 	cout << "-v, --version         print out version information and exit" << endl;
 	cout << endl;
 }	
@@ -133,7 +124,6 @@ static void printHelpOptions() {
 
 static void printHelpDebug() {
 	cout << "--debug=showcode      Causes the generated instructions to be displayed." << endl;
-	cout << "--debug=notrap        Prevents mishaps being caught, for use with gdb." << endl;
 	cout << "--debug=gctrace       Causes the garbage collector to emit debugging statistics." << endl;
 }
 
@@ -288,53 +278,19 @@ string ToolMain::safeFileName( const string & filename ) {
 	return safe;
 }
 
-void ToolMain::mainLoop() {
-	MachineClass * vm = this->context.newMachine();
-	Package * interactive_pkg = this->context.initInteractivePackage( vm );
- 
-	#ifdef DBG_APPCONTEXT
-		clog << "RCEP ..." << endl;
-	#endif
-
-	RCEP rcep( interactive_pkg );
-	if ( this->context.isTrappingMishap() ) {
-		while ( rcep.read_comp_exec_print( std::cin, std::cout ) ) {};
-	} else {
-		while ( rcep.unsafe_read_comp_exec_print( std::cin, std::cout ) ) {};
-	}
-}
-
 // Return true for an early exit, false to continue processing.
 bool ToolMain::parseArgs( int argc, char **argv, char **envp ) {
 	this->context.setEnvironmentVariables( envp );
 	bool meta_info_needed = false;
     for(;;) {
         int option_index = 0;
-        int c = getopt_long( argc, argv, "CSIBMH::m:E:Vd:L::f:", long_options, &option_index );
+        int c = getopt_long( argc, argv, "p::iMH::m:E:Vd:L::f:", long_options, &option_index );
         if ( c == -1 ) break;
         switch ( c ) {
-            case 'C': {
-                this->context.setCgiMode();
-                break;
-            }
-            case 'S': {
-            	this->context.setScriptMode();
-            	break;
-            }
-            case 'I': {
-                this->context.setInteractiveMode();
-                break;
-            }
-            case 'B': {
-                this->context.setBatchMode();
-                break;
-            }
             case 'd': {
                 //std::string option( optarg );
                 if ( std::string( optarg ) == std::string( "showcode" ) ) {
                     this->context.setShowCode();
-                } else if ( std::string( optarg ) == std::string( "notrap" ) ) {
-                    this->context.setTrappingMishap( false );
                 } else if ( std::string( optarg ) == std::string( "gctrace" ) ) {
                     this->context.setGCTrace( true );
                 } else {
@@ -342,6 +298,15 @@ bool ToolMain::parseArgs( int argc, char **argv, char **envp ) {
                     return false;
                 }
                 break;
+            }
+            case 'E':
+            case 'm' : {
+                this->context.setMachineImplNum( atoi( optarg ) );
+                break;
+            }
+            case 'f': {
+            	this->context.addProjectFolder( optarg );
+            	break;
             }
             case 'H': {
                 //  Eventually we will have a "home" for our auxillary
@@ -362,26 +327,28 @@ bool ToolMain::parseArgs( int argc, char **argv, char **envp ) {
                 }
 				return false;
             }
-            case 'M' : {
-            	meta_info_needed = true;
+            case 'i': {
+            	this->context.useStdin() = true;
             	break;
-            }
-            case 'E':
-            case 'm' : {
-                this->context.setMachineImplNum( atoi( optarg ) );
-                //printf( "Machine #%d (%s)\n", machine_impl_num, optarg );
-                break;
-            }
-            case 'V': {
-                cout << this->appName() << ": version " << this->context.version() << " (" << __DATE__ << " " << __TIME__ << ")" << endl;
-                return false;
             }
             case 'L': {
             	return printLicense( optarg );
             }
-            case 'f': {
-            	this->context.addProjectFolder( optarg );
+            case 'M' : {
+            	meta_info_needed = true;
             	break;
+            }
+            case 'p': {
+            	if ( optarg == NULL ) {
+            		this->context.printLevel() = 1;
+            	} else {
+            		this->context.printLevel() = atoi( optarg );
+            	}
+            	break;
+            }
+            case 'V': {
+                cout << this->appName() << ": version " << this->context.version() << " (" << __DATE__ << " " << __TIME__ << ")" << endl;
+                return false;
             }
             case '?': {
                 break;

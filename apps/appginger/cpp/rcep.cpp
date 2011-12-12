@@ -229,4 +229,6 @@ bool RCEP::read_comp_exec_print( istream & input, std::ostream & output ) {
 	}
 }
 
-
+void RCEP::printResults( std::ostream & output, float time_taken ) {
+	this->getMachine()->printResults( output, time_taken );
+}

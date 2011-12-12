@@ -67,7 +67,11 @@ INSTALL_TOOL=@libexecdir@/@PACKAGE_TARNAME@
 INSTALL_LIB=@datarootdir@/@PACKAGE_TARNAME@
 INSTALL_DOC=@docdir@
 
-EXECUTABLES=\
+USEREXECUTABLES=\
+	apps/appginger/cpp/ginger-cgi \
+	apps/appginger/cpp/ginger-script
+
+LIBEXECUTABLES=\
 	apps/appginger/cpp/appginger \
 	apps/fetchgnx/cpp/fetchgnx \
 	apps/file2gnx/cpp/file2gnx \
@@ -93,7 +97,8 @@ install: all
 	/usr/bin/install -m a=r COPYING $(INSTALL_LIB)
 	mkdir -p $(INSTALL_LIB)/lisp2gnx
 	/usr/bin/install -m a=r apps/lisp2gnx/lsp/lisp2gnx.lsp $(INSTALL_LIB)/lisp2gnx
-	/usr/bin/install $(EXECUTABLES) $(INSTALL_TOOL)
+	/usr/bin/install $(LIBEXECUTABLES) $(INSTALL_TOOL)
+	/usr/bin/install $(USEREXECUTABLES) $(INSTALL_BIN)
 
 # Create a tarball for binary archive.
 TBBASE=appginger_files
@@ -114,7 +119,8 @@ tarball: all
 	mkdir -p _build/$(TBMAIN)/share/appginger
 	#gzip -d documentation/_build/documentation.tgz | ( cd _build/$(TBBASE)/share/appginger; tar xf - )
 	( cd build_template; tar cf - . ) | ( cd _build/$(TBPACKAGE); tar xf - )
-	cp $(EXECUTABLES) _build/$(TBTOOL)
+	cp $(LIBEXECUTABLES) _build/$(TBTOOL)
+	cp $(USEREXECUTABLES) _build/$(TBBIN)
 	cp COPYING _build/$(TBMAIN)/share/appginger
 	cp AUTHORS _build/$(TBMAIN)/share/appginger
 	mkdir -p _build/$(TBMAIN)/share/appginger/lisp2gnx/

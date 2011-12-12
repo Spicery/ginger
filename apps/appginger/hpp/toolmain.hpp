@@ -27,8 +27,6 @@ protected:
 protected:
 	std::string safeFileName( const std::string & filename );
 	int printLicense( const char * arg ) const;
-	void runAsCgi( const bool run_init_cgi );
-	void mainLoop();
 
 public:
 	bool parseArgs( int argc, char **argv, char **envp );

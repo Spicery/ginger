@@ -16,37 +16,18 @@
     along with AppGinger.  If not, see <http://www.gnu.org/licenses/>.
 \******************************************************************************/
 
-//#include <iostream>
 #include <fstream>
-//#include <vector>
 #include <string>
-
-//#include <cstdio>
-//#include <cstdlib>
 #include <sstream>
-
-#include <ext/stdio_filebuf.h> // __gnu_cxx::stdio_filebuf
-
-//#include <unistd.h>
-//#include <getopt.h>
-//#include <syslog.h>
-
-//#include "gngversion.hpp"
-#include "mnx.hpp"
-
-//#include "appcontext.hpp"
-#include "rcep.hpp"
-//#include "term.hpp"
-//#include "sys.hpp"
-//#include "machine1.hpp"
-//#include "machine2.hpp"
-//#include "machine3.hpp"
-
 
 #include <syslog.h>
 
+#include <ext/stdio_filebuf.h> // __gnu_cxx::stdio_filebuf
+
+#include "mnx.hpp"
 #include "mishap.hpp"
 
+#include "rcep.hpp"
 #include "appcontext.hpp"
 #include "toolmain.hpp"
 
@@ -58,11 +39,19 @@
 #define GSON2GNX		( INSTALL_TOOL "/gson2gnx" )
 #define TAIL			"/usr/bin/tail"
 
-
 using namespace std;
 
-
 class ScriptMain : public ToolMain {
+private:
+	void runFrom( RCEP & rcep, Ginger::MnxReader & gnx_read ) {
+		for (;;) {
+			shared< Ginger::Mnx > m = gnx_read.readMnx();
+			if ( not m ) break;
+			rcep.execGnx( m, cout );
+			rcep.printResults( cout, 0 );
+		}			
+	}
+	
 public:
 	int run() {		
 		MachineClass * vm = this->context.newMachine();
@@ -71,13 +60,11 @@ public:
 	
 		vector< string > & args = this->context.arguments();
 		for ( vector< string >::iterator it = args.begin(); it != args.end(); ++it ) {
-			//cout << "<H2>" << *it << "</H2>" << endl;
 			fstream filestr( it->c_str(), fstream::in );
 			string line;
 			if ( filestr.good() ) {
 				//	Chew off first line.
 				getline( filestr, line );
-				//cout << line << "<BR/>" << endl;
 			}
 			if ( filestr.good() ) {
 				Ginger::MnxReader content( filestr );
@@ -123,28 +110,28 @@ public:
 							istream stream_pipe_in( &pipe_buf );
 							
 							Ginger::MnxReader gnx_read( stream_pipe_in );
-							for (;;) {
-								shared< Ginger::Mnx > m = gnx_read.readMnx();
-								if ( not m ) break;
-								rcep.execGnx( m, cout );
-							}
+							this->runFrom( rcep, gnx_read );
 							
 							pclose( gnxfp );
 							break;
 						}
 					} else {
 						rcep.execGnx( m, cout );
+						rcep.printResults( cout, 0 );
 					}
 				}
 			}
 			filestr.close();
-		}	
+		}
+		if ( this->context.useStdin() ) {
+			Ginger::MnxReader gnx_read( cin );
+			this->runFrom( rcep, gnx_read );			
+		}
 	    return EXIT_SUCCESS;
 	}
 
 public:
 	ScriptMain( const char * name ) : ToolMain( name ) {
-		this->context.setCgiMode();
 	}
 	
 	virtual ~ScriptMain() {}

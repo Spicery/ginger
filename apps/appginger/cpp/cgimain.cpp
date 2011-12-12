@@ -187,7 +187,6 @@ public:
 
 public:
 	CgiMain( const char * name ) : ToolMain( name ) {
-		this->context.setCgiMode();
 	}
 	
 	virtual ~CgiMain() {}

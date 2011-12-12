@@ -38,15 +38,8 @@ class Package;
 
 class AppContext {
 private:
-	enum Mode {
-		InteractiveMode,
-		BatchMode,
-		CGIMode,
-		ScriptMode
-	} 					mode;
 	int 				machine_impl_num;
 	bool 				dbg_show_code;
-	bool 				is_trapping_mishap;
 	bool 				is_gctrace;
 	std::list< std::string >		project_folder_list;
 	char **				envp;
@@ -54,20 +47,12 @@ private:
 	#ifdef RUDECGI
 		rude::CGI * 		cgi;
 	#endif
+	bool				use_stdin;
+	int					print_level;
 
 public:
-	void setInteractiveMode() { this->mode = InteractiveMode; this->is_trapping_mishap = true; }
-	void setBatchMode() { this->mode = BatchMode; this->is_trapping_mishap = false; }
-	void setCgiMode() { this->mode = CGIMode; }
-	void setScriptMode() { this->mode = ScriptMode; }
-	bool isInteractiveMode() { return this->mode == InteractiveMode; }
-	bool isBatchMode() { return this->mode == BatchMode; }
-	bool isCgiMode() { return this->mode == CGIMode; }
-	bool isScriptMode() { return this->mode == ScriptMode; }
 	void setGCTrace( bool t ) { this->is_gctrace = t; }
 	bool isGCTrace() { return this->is_gctrace; }
-	void setTrappingMishap( bool t ) { this->is_trapping_mishap = t; }
-	bool isTrappingMishap() { return this->is_trapping_mishap; }
 	void setMachineImplNum( const int n ) { this->machine_impl_num = n; }
 	int getMachineImplNum() { return this->machine_impl_num; }
 	const char * version() { return APPGINGER_VERSION; }
@@ -80,6 +65,8 @@ public:
 	void setEnvironmentVariables( char ** e ) { this->envp = e; }
 	void addArgument( const char * s ) { this->arg_list.push_back( s ); }
 	std::vector< std::string > & arguments() { return this->arg_list; }
+	bool & useStdin() { return this->use_stdin; }
+	int & printLevel() { return this->print_level; }
 	const char* cgiValue( const char* fieldname );
 	void initCgi();
 
@@ -89,11 +76,13 @@ public:
 
 public:
 	AppContext() :
-		mode( InteractiveMode ),
+		//mode( InteractiveMode ),
 		machine_impl_num( 1 ),
 		dbg_show_code( false ),
-		is_trapping_mishap( true ),
-		is_gctrace( false )
+		//is_trapping_mishap( true ),
+		is_gctrace( false ),
+		use_stdin( false ),
+		print_level( 0 )
 	{
 		#ifdef RUDECGI	
 			this->cgi = NULL;

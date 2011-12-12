@@ -226,26 +226,27 @@ void MachineClass::printResults( float time_taken ) {
 }
 
 void MachineClass::printResults( std::ostream & out, float time_taken ) {
-	const bool quiet = this->appg.isBatchMode();
-
-	int n = this->vp - this->vp_base;
-
-	if ( !quiet ) {
-		out << "There " << ( n == 1 ? "is" : "are" ) << " " << 
-		n << " result" << ( n == 1 ? "" : "s" ) << "\t(" << 
-		time_taken << "s)" << endl;
-	}
-	for ( int i = 0; i < n; i++ ) {
-		if ( !quiet ) {
-			out << ( i + 1 ) << ".\t";
-		}
-		refPrint( out, this->vp[ 1 + i - n ] );
-		out << endl;
-	}
-	if ( !quiet ) {
-		out << endl;
-	}
+	if ( this->appg.printLevel() >= 1 ) {
+		const bool chatty = this->appg.printLevel() >= 2;
 	
+		int n = this->vp - this->vp_base;
+	
+		if ( chatty ) {
+			out << "There " << ( n == 1 ? "is" : "are" ) << " " << 
+			n << " result" << ( n == 1 ? "" : "s" ) << "\t(" << 
+			time_taken << "s)" << endl;
+		}
+		for ( int i = 0; i < n; i++ ) {
+			if ( chatty ) {
+				out << ( i + 1 ) << ".\t";
+			}
+			refPrint( out, this->vp[ 1 + i - n ] );
+			out << endl;
+		}
+		if ( chatty ) {
+			out << endl;
+		}
+	}	
 	this->vp = this->vp_base;
 }
 

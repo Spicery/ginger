@@ -77,7 +77,7 @@ void Problem::report() {
 }
 
 void Problem::gnxReport() {
-	cout << "<Problem message=\"" << this->message << "\">";
+	cout << "<problem message=\"" << this->message << "\">";
 	for ( 	
 		vector< pair< string, string > >::iterator it = this->culprits.begin();
 		it != this->culprits.end();
@@ -85,7 +85,7 @@ void Problem::gnxReport() {
 	) {
 		cout << "<culprit name=\"" << it->first << "\" value=\"" << it->second << "\" />";
 	}
-	cout << "</Problem>" << endl;
+	cout << "</problem>" << endl;
 	
 }
 

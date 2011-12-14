@@ -69,7 +69,8 @@ INSTALL_DOC=@docdir@
 
 USEREXECUTABLES=\
 	apps/appginger/cpp/ginger-cgi \
-	apps/appginger/cpp/ginger-script
+	apps/appginger/cpp/ginger-script \
+	apps/appginger/cpp/ginger
 
 LIBEXECUTABLES=\
 	apps/appginger/cpp/appginger \
@@ -110,15 +111,18 @@ TBTOOL=${TBMAIN}/libexec
 TBBIN=${TBMAIN}/bin
 TBOUTPUT=ginger.tgz
 
-tarball: all
-	#$(MAKE) -C documentation tarball
+tarball-clean:
+	mkdir -p _build
 	rm -f _build/$(TBOUTPUT)
 	rm -rf _build/$(TBBASE)
+
+
+tarball: all
+	make clean-tarball
 	mkdir -p _build/$(TBPACKAGE)
 	mkdir -p _build/$(TBTOOL)
 	mkdir -p _build/$(TBBIN)
 	mkdir -p _build/$(TBMAIN)/share/ginger
-	#gzip -d documentation/_build/documentation.tgz | ( cd _build/$(TBBASE)/share/ginger; tar xf - )
 	( cd build_template; tar cf - . ) | ( cd _build/$(TBPACKAGE); tar xf - )
 	cp $(LIBEXECUTABLES) _build/$(TBTOOL)
 	cp $(USEREXECUTABLES) _build/$(TBBIN)

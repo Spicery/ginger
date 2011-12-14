@@ -41,31 +41,36 @@ OBJS=package_autoload.o term.o read_xml.o \
 	machine3.o instruction_set3.o \
 	machine4.o instruction_set4.o \
 	appcontext.o \
-	makesysfn.o
+	makesysfn.o \
+	toolmain.o
 
-USEREXECUTABLES=appginger ginger-cgi ginger-script ginger-cli
+USEREXECUTABLES=appginger ginger-cgi ginger-script ginger-cli ginger
 
 all: $(USEREXECUTABLES)
 
 # $@ is make shorthand for the target.
 # $@ is make shorthand for the dependencies
-appginger: libappginger.a toolmain.o main.o
+appginger: libappginger.a main.o
 	ranlib libappginger.a ../../libgng/cpp/libgng.a
-	@CXX@ $(CXXFLAGS) $(BOOST_CPPFLAGS) -o $@ main.o toolmain.o libappginger.a ../../libgng/cpp/libgng.a /usr/local/lib/librudecgi.a  -lboost_iostreams
+	@CXX@ $(CXXFLAGS) $(BOOST_CPPFLAGS) -o $@ main.o libappginger.a ../../libgng/cpp/libgng.a /usr/local/lib/librudecgi.a  -lboost_iostreams
 
-ginger-cli: libappginger.a toolmain.o climain.o
+ginger-cli: libappginger.a climain.o
 	ranlib libappginger.a ../../libgng/cpp/libgng.a
-	@CXX@ $(CXXFLAGS) $(BOOST_CPPFLAGS) -o $@ climain.o toolmain.o libappginger.a ../../libgng/cpp/libgng.a /usr/local/lib/librudecgi.a  -lboost_iostreams
+	@CXX@ $(CXXFLAGS) $(BOOST_CPPFLAGS) -o $@ climain.o libappginger.a ../../libgng/cpp/libgng.a /usr/local/lib/librudecgi.a  -lboost_iostreams
 
-ginger-cgi: libappginger.a toolmain.o cgimain.o
+ginger-cgi: libappginger.a cgimain.o
 	ranlib libappginger.a ../../libgng/cpp/libgng.a
-	@CXX@ $(CXXFLAGS) $(BOOST_CPPFLAGS) -o $@ cgimain.o toolmain.o libappginger.a ../../libgng/cpp/libgng.a /usr/local/lib/librudecgi.a  -lboost_iostreams
+	@CXX@ $(CXXFLAGS) $(BOOST_CPPFLAGS) -o $@ cgimain.o libappginger.a ../../libgng/cpp/libgng.a /usr/local/lib/librudecgi.a  -lboost_iostreams
 
-ginger-script: libappginger.a toolmain.o scriptmain.o
+ginger-script: libappginger.a scriptmain.o
 	ranlib libappginger.a ../../libgng/cpp/libgng.a
-	@CXX@ $(CXXFLAGS) $(BOOST_CPPFLAGS) -o $@ scriptmain.o toolmain.o libappginger.a ../../libgng/cpp/libgng.a /usr/local/lib/librudecgi.a  -lboost_iostreams
+	@CXX@ $(CXXFLAGS) $(BOOST_CPPFLAGS) -o $@ scriptmain.o libappginger.a ../../libgng/cpp/libgng.a /usr/local/lib/librudecgi.a  -lboost_iostreams
 
-
+ginger:
+	touch ginger
+	echo "#!/bin/sh" > ginger
+	echo `which rlwrap`\ -pGreen\ -S\'\>\>\>\ \'\ /usr/local/libexec/ginger/ginger-cli '$@' >> ginger
+	chmod a-w,a+x ginger
 
 clean:
 	rm -f *.o

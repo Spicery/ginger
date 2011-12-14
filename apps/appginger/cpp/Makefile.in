@@ -43,7 +43,7 @@ OBJS=package_autoload.o term.o read_xml.o \
 	appcontext.o \
 	makesysfn.o
 
-USEREXECUTABLES=appginger ginger-cgi ginger-script ginger
+USEREXECUTABLES=appginger ginger-cgi ginger-script ginger-cli
 
 all: $(USEREXECUTABLES)
 
@@ -53,9 +53,9 @@ appginger: libappginger.a toolmain.o main.o
 	ranlib libappginger.a ../../libgng/cpp/libgng.a
 	@CXX@ $(CXXFLAGS) $(BOOST_CPPFLAGS) -o $@ main.o toolmain.o libappginger.a ../../libgng/cpp/libgng.a /usr/local/lib/librudecgi.a  -lboost_iostreams
 
-ginger: libappginger.a toolmain.o gingermain.o
+ginger-cli: libappginger.a toolmain.o climain.o
 	ranlib libappginger.a ../../libgng/cpp/libgng.a
-	@CXX@ $(CXXFLAGS) $(BOOST_CPPFLAGS) -o $@ gingermain.o toolmain.o libappginger.a ../../libgng/cpp/libgng.a /usr/local/lib/librudecgi.a  -lboost_iostreams
+	@CXX@ $(CXXFLAGS) $(BOOST_CPPFLAGS) -o $@ climain.o toolmain.o libappginger.a ../../libgng/cpp/libgng.a /usr/local/lib/librudecgi.a  -lboost_iostreams
 
 ginger-cgi: libappginger.a toolmain.o cgimain.o
 	ranlib libappginger.a ../../libgng/cpp/libgng.a

@@ -17,9 +17,12 @@
 \******************************************************************************/
 
 #include <iostream>
+#include <sstream>
 #include <cstdlib>
 
 #include <syslog.h>
+
+#include <ext/stdio_filebuf.h> // __gnu_cxx::stdio_filebuf
 
 #include "mishap.hpp"
 
@@ -28,6 +31,13 @@
 #include "rcep.hpp"
 
 #define APP_TITLE "ginger"
+
+#define SIMPLIFYGNX		( INSTALL_TOOL "/simplifygnx" )
+#define COMMON2GNX		( INSTALL_TOOL "/common2gnx" )
+#define LISP2GNX		( INSTALL_TOOL "/lisp2gnx" )
+#define GSON2GNX		( INSTALL_TOOL "/gson2gnx" )
+
+#define RLCAT			( INSTALL_TOOL "/rlcat" )
 
 using namespace std;
 
@@ -51,7 +61,34 @@ private:
 		#endif
 	
 		RCEP rcep( interactive_pkg );
-		while ( rcep.read_comp_exec_print( std::cin, std::cout ) ) {};
+		
+		/*string lang(
+			m->hasAttribute( "language", "common" ) ? COMMON2GNX :
+			m->hasAttribute( "language", "lisp" ) ? LISP2GNX :
+			m->hasAttribute( "language", "gson" ) ? GSON2GNX :
+			( throw Ginger::Mishap( "Unrecognised language" ).culprit( "Language", m->attribute( "language" ) ) )
+		);*/
+		string lang( COMMON2GNX );
+	
+		stringstream commstream;
+		//	tail is 1-indexed!
+		commstream << lang << " | " << SIMPLIFYGNX << " -s";
+		string command( commstream.str() );
+		
+		//cerr << "Command so far: " << command << endl;
+		FILE * gnxfp = popen( command.c_str(), "r" );
+		if ( gnxfp == NULL ) {
+			throw Ginger::Mishap( "Failed to translate input" );
+		}
+		// ... open the file, with whatever, pipes or who-knows ...
+		// let's build a buffer from the FILE* descriptor ...
+		__gnu_cxx::stdio_filebuf<char> pipe_buf( gnxfp, ios_base::in );
+		// there we are, a regular istream is build upon the buffer :
+		istream stream_pipe_in( &pipe_buf );
+		
+		while ( rcep.read_comp_exec_print( stream_pipe_in, std::cout ) ) {};
+		
+		pclose( gnxfp );
 	}
 
 public:

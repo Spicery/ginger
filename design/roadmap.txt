@@ -10,6 +10,7 @@
 
    * A command-line interpreter, ginger, that coordinates the toolchain components to
     provide an interactive shell for exploratory programming in a terminal. [design+docs+implement]
+      - Traps keyboard-interrupts
       - Long term development would be to become a terminal-based Project IDE suitable 
         for use over SSH.
       - Uses a user/team/department/.../world preferences hierarchy 

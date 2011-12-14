@@ -1,0 +1,24 @@
+Supported Platforms for Ginger
+==============================
+
+Unix
+----
+
+Ginger is designed as a FOSS UNIX tool, to be run in a UNIX toolchain. Priority is given to FOSS systems. 
+
+  * Linux
+  * Mac OS X
+  * Cygwin (not tested for a year but did compile pretty easily)
+
+What about Free BSD?
+--------------------
+
+It should be in the list. I simply don't have a Free BSD setup. I hope someone will pick this one up early.
+
+What about native Windows?
+--------------------------
+
+When we get around to doing the Ginger IDE, we'll pick up a cross-platform GUI like wxWindows or Qt. At that point it'll be worth taking a serious look at whether or not we can make Ginger properly cross-platform. Until then, Cygwin will be the way to go.
+
+-----
+Stephen Leach <stephen.leach@steelypip.com>, Dec 2011

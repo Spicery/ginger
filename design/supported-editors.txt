@@ -1,0 +1,11 @@
+Supported Text Editors
+======================
+
+This is a bit of a wish list at the moment.
+
+ * Emacs users. 
+ * Eclipse users.
+ * A popular free open source text editor (Bluefish? jEdit) running under Linux.
+ * A funky and popular commercial text editor (e.g. Sublime Text 2, TextMate 2)
+----
+Stephen Leach <stephen.leach@steelypip.com>, Dec 2011

@@ -69,11 +69,11 @@ INSTALL_DOC=@docdir@
 
 USEREXECUTABLES=\
 	apps/appginger/cpp/ginger-cgi \
-	apps/appginger/cpp/ginger-script \
-	apps/appginger/cpp/ginger
+	apps/appginger/cpp/ginger-script
 
 LIBEXECUTABLES=\
 	apps/appginger/cpp/appginger \
+	apps/appginger/cpp/ginger-cli \
 	apps/fetchgnx/cpp/fetchgnx \
 	apps/file2gnx/cpp/file2gnx \
 	apps/common2gnx/cpp/common2gnx \
@@ -102,13 +102,13 @@ install: all
 	/usr/bin/install $(USEREXECUTABLES) $(INSTALL_BIN)
 
 # Create a tarball for binary archive.
-TBBASE=appginger_files
-TBPACKAGE=appginger
+TBBASE=ginger_files
+TBPACKAGE=ginger
 TBPREFIX=usr/local
 TBMAIN=${TBBASE}/${TBPREFIX}
 TBTOOL=${TBMAIN}/libexec
 TBBIN=${TBMAIN}/bin
-TBOUTPUT=appginger.tgz
+TBOUTPUT=ginger.tgz
 
 tarball: all
 	#$(MAKE) -C documentation tarball
@@ -117,16 +117,16 @@ tarball: all
 	mkdir -p _build/$(TBPACKAGE)
 	mkdir -p _build/$(TBTOOL)
 	mkdir -p _build/$(TBBIN)
-	mkdir -p _build/$(TBMAIN)/share/appginger
-	#gzip -d documentation/_build/documentation.tgz | ( cd _build/$(TBBASE)/share/appginger; tar xf - )
+	mkdir -p _build/$(TBMAIN)/share/ginger
+	#gzip -d documentation/_build/documentation.tgz | ( cd _build/$(TBBASE)/share/ginger; tar xf - )
 	( cd build_template; tar cf - . ) | ( cd _build/$(TBPACKAGE); tar xf - )
 	cp $(LIBEXECUTABLES) _build/$(TBTOOL)
 	cp $(USEREXECUTABLES) _build/$(TBBIN)
-	cp COPYING _build/$(TBMAIN)/share/appginger
-	cp AUTHORS _build/$(TBMAIN)/share/appginger
-	mkdir -p _build/$(TBMAIN)/share/appginger/lisp2gnx/
-	cp apps/lisp2gnx/lsp/lisp2gnx.lsp _build/$(TBMAIN)/share/appginger/lisp2gnx/
-	cp -r projects/standard_library _build/$(TBMAIN)/share/appginger/
+	cp COPYING _build/$(TBMAIN)/share/ginger
+	cp AUTHORS _build/$(TBMAIN)/share/ginger
+	mkdir -p _build/$(TBMAIN)/share/ginger/lisp2gnx/
+	cp apps/lisp2gnx/lsp/lisp2gnx.lsp _build/$(TBMAIN)/share/ginger/lisp2gnx/
+	cp -r projects/standard_library _build/$(TBMAIN)/share/ginger/
 	find _build -type d -name .svn | xargs /bin/rm -rf
 	find _build -name '.DS_STORE' | xargs rm -f
 	find _build -name '._*'

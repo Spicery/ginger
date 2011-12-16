@@ -49,6 +49,8 @@ private:
 	#endif
 	bool				use_stdin;
 	int					print_level;
+	bool				welcoming;
+	std::string         initial_syntax;
 
 public:
 	void setGCTrace( bool t ) { this->is_gctrace = t; }
@@ -69,6 +71,9 @@ public:
 	int & printLevel() { return this->print_level; }
 	const char* cgiValue( const char* fieldname );
 	void initCgi();
+	bool & welcomeBanner() { return this->welcoming; }
+	std::string syntax(); 
+	void setSyntax( const std::string s ) { this->initial_syntax = s; }
 
 public:
 	MachineClass * newMachine();
@@ -82,7 +87,8 @@ public:
 		//is_trapping_mishap( true ),
 		is_gctrace( false ),
 		use_stdin( false ),
-		print_level( 0 )
+		print_level( 0 ),
+		welcoming( true )
 	{
 		#ifdef RUDECGI	
 			this->cgi = NULL;

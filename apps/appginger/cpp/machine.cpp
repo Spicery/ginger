@@ -45,6 +45,7 @@ MachineClass::MachineClass( AppContext & application ) :
 	program_counter( 0 ),
 	veto_count( 0 )
 {
+	this->sigint_flag = false;
 	this->vp_base = new Ref[ RANDOM_SIZE ];
 	this->vp_end = this->vp_base + RANDOM_SIZE;
 	this->vp = this->vp_base;

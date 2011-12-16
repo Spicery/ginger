@@ -21,10 +21,12 @@
 #include <cstdlib>
 
 #include <syslog.h>
+#include <signal.h>
 
 #include <ext/stdio_filebuf.h> // __gnu_cxx::stdio_filebuf
 
 #include "mishap.hpp"
+#include "gngversion.hpp"
 
 #include "appcontext.hpp"
 #include "toolmain.hpp"
@@ -37,7 +39,6 @@
 #define LISP2GNX		( INSTALL_TOOL "/lisp2gnx" )
 #define GSON2GNX		( INSTALL_TOOL "/gson2gnx" )
 
-#define RLCAT			( INSTALL_TOOL "/rlcat" )
 
 using namespace std;
 
@@ -50,10 +51,44 @@ static void printWelcomeMessage() {
 	cout << "  +----------------------------------------------------------------------+" << endl;
 }
 
+static bool sigint_dummy;
+static bool * SIGINT_FLAG = &sigint_dummy;
+
+void sigint_handler( int s ){
+	cout << "Caught signal " << s << endl;
+	*SIGINT_FLAG = true;
+}
+
+class Popen {
+private:
+	FILE * gnufp;
+	
+public:
+	FILE * file() { return this->gnufp; }
+	
+public:
+	Popen( string command ) : gnufp( NULL ) {
+		this->gnufp = popen( command.c_str(), "r" );
+		if ( this->gnufp == NULL ) {
+			throw Ginger::SystemError( "Failed to open subprocesses" );	
+		}
+	}
+	~Popen() { if ( this->gnufp != NULL ) pclose( this->gnufp ); }
+};
+
 class GingerMain : public ToolMain {
 private:
 	void mainLoop() {
+	
 		MachineClass * vm = this->context.newMachine();
+		SIGINT_FLAG = &vm->sigint_flag;
+
+		struct sigaction sigIntHandler;
+		sigIntHandler.sa_handler = sigint_handler;
+		sigemptyset( &sigIntHandler.sa_mask );
+		sigIntHandler.sa_flags = SA_RESTART;
+		sigaction( SIGINT, &sigIntHandler, NULL );
+
 		Package * interactive_pkg = this->context.initInteractivePackage( vm );
 	 
 		#ifdef DBG_APPCONTEXT
@@ -62,38 +97,44 @@ private:
 	
 		RCEP rcep( interactive_pkg );
 		
-		/*string lang(
-			m->hasAttribute( "language", "common" ) ? COMMON2GNX :
-			m->hasAttribute( "language", "lisp" ) ? LISP2GNX :
-			m->hasAttribute( "language", "gson" ) ? GSON2GNX :
-			( throw Ginger::Mishap( "Unrecognised language" ).culprit( "Language", m->attribute( "language" ) ) )
-		);*/
-		string lang( COMMON2GNX );
-	
+		//cout << "Using syntax: " << this->context.syntax() << endl;
+		
 		stringstream commstream;
 		//	tail is 1-indexed!
-		commstream << lang << " | " << SIMPLIFYGNX << " -s";
+		commstream << this->context.syntax() << " | " << SIMPLIFYGNX << " -s";
 		string command( commstream.str() );
 		
-		//cerr << "Command so far: " << command << endl;
-		FILE * gnxfp = popen( command.c_str(), "r" );
-		if ( gnxfp == NULL ) {
-			throw Ginger::Mishap( "Failed to translate input" );
+		for (;;) {
+			try {
+				{
+					//	This block is required to neatly force the closure of the
+					//	piped.
+					Popen p( commstream.str() );		
+					// ... open the file, with whatever, pipes or who-knows ...
+					// let's build a buffer from the FILE* descriptor ...
+					__gnu_cxx::stdio_filebuf<char> pipe_buf( p.file(), ios_base::in );
+					// there we are, a regular istream is build upon the buffer :
+					istream stream_pipe_in( &pipe_buf );
+					
+					while ( rcep.read_comp_exec_print( stream_pipe_in, std::cout ) ) {}
+				}
+	
+				//	Check whether or not we were interrupted by a signal.			
+				if ( not vm->sigint_flag ) break;
+				cout << "SIGINT got trapped" << endl;
+				vm->sigint_flag = false;
+			} catch ( Ginger::CompileTimeError & e ) {
+				e.report();
+				cout << endl << SYS_MSG_PREFIX << "Reset..." << endl;
+				vm->resetMachine();
+			}
 		}
-		// ... open the file, with whatever, pipes or who-knows ...
-		// let's build a buffer from the FILE* descriptor ...
-		__gnu_cxx::stdio_filebuf<char> pipe_buf( gnxfp, ios_base::in );
-		// there we are, a regular istream is build upon the buffer :
-		istream stream_pipe_in( &pipe_buf );
-		
-		while ( rcep.read_comp_exec_print( stream_pipe_in, std::cout ) ) {};
-		
-		pclose( gnxfp );
+
 	}
 
 public:
 	virtual int run() {
-		printWelcomeMessage();
+		if ( this->context.welcomeBanner() ) printWelcomeMessage();
 		this->mainLoop();
 		return EXIT_SUCCESS;
 	}
@@ -112,7 +153,7 @@ int main( int argc, char **argv, char **envp ) {
 	try {
 		GingerMain main( APP_TITLE );
 		return main.parseArgs( argc, argv, envp ) ? main.run() : EXIT_SUCCESS;
-	} catch ( Ginger::SystemError & e ) {
+	} catch ( Ginger::Problem & e ) {
 		e.report();
 		return EXIT_FAILURE;
 	}

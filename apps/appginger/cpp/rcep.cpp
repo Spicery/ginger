@@ -225,6 +225,8 @@ bool RCEP::read_comp_exec_print( istream & input, std::ostream & output ) {
 			return unsafe_read_comp_exec_print( input, output );
 		} catch ( Ginger::Mishap & m ) {
 			m.report();
+			Machine vm = this->getMachine();
+			vm->resetMachine();
 		}
 	}
 }

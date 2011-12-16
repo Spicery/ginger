@@ -48,6 +48,7 @@ public:
 	Problem & culprit( const std::string reason, const char N );
 	
 public:
+	virtual const char * severity() = 0;
 	void setMessage( const std::string & msg ) { this->message = msg; }
 	void report();
 	void gnxReport();
@@ -68,7 +69,10 @@ public:
 	Mishap & culprit( const std::string arg ) { this->Problem::culprit( arg ); return *this; }
 	Mishap & culprit( const std::string arg, const long N ) { this->Problem::culprit( arg, N ); return *this; }
 	Mishap & culprit( const std::string arg, const char N ) { this->Problem::culprit( arg, N ); return *this; }
-	
+
+public:
+	virtual const char * severity() { return "rollback"; }
+
 public:
 	Mishap( const std::string & msg ) : Problem( msg ) {}
 	virtual ~Mishap() throw() {}
@@ -80,11 +84,30 @@ public:
 	SystemError & culprit( const std::string arg ) { this->Problem::culprit( arg ); return *this; }
 	SystemError & culprit( const std::string arg, const long N ) { this->Problem::culprit( arg, N ); return *this; }
 	SystemError & culprit( const std::string arg, const char N ) { this->Problem::culprit( arg, N ); return *this; }
+
+public:	
+	virtual const char * severity() { return "failover"; }
 	
 public:
 	SystemError( const std::string & msg ) : Problem( msg ) {}
 	SystemError() : Problem( "System Error (see log file)" ) {}
 	virtual ~SystemError()  throw() {}
+};
+
+class CompileTimeError : public Problem {
+public:
+	CompileTimeError & culprit( const std::string reason, const std::string arg ) { this->Problem::culprit( reason, arg ); return *this; }
+	CompileTimeError & culprit( const std::string arg ) { this->Problem::culprit( arg ); return *this; }
+	CompileTimeError & culprit( const std::string arg, const long N ) { this->Problem::culprit( arg, N ); return *this; }
+	CompileTimeError & culprit( const std::string arg, const char N ) { this->Problem::culprit( arg, N ); return *this; }
+
+public:	
+	virtual const char * severity() { return "failover"; }
+	
+public:
+	CompileTimeError( const std::string & msg ) : Problem( msg ) {}
+	CompileTimeError() : Problem( "Compilation Error (see log file)" ) {}
+	virtual ~CompileTimeError()  throw() {}
 };
 
 class Unreachable : public SystemError {

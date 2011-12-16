@@ -25,6 +25,7 @@
 #include <stdlib.h>
 
 #include "mishap.hpp"
+#include "gngversion.hpp"
 
 namespace Ginger {
 using namespace std;
@@ -66,18 +67,18 @@ Problem & Problem::culprit( const std::string arg ) {
 }
 
 void Problem::report() {
-	cerr << "Problem: " << this->message << endl;
+	cerr << SYS_MSG_PREFIX << "Error: " << this->message << endl;
 	for ( 	
 		vector< pair< string, string > >::iterator it = this->culprits.begin();
 		it != this->culprits.end();
 		++it
 	) {
-		cerr << it->first << " : " << it->second << endl;
+		cerr << SYS_MSG_PREFIX << it->first << " : " << it->second << endl;
 	}
 }
 
 void Problem::gnxReport() {
-	cout << "<problem message=\"" << this->message << "\">";
+	cout << "<problem message=\"" << this->message << "\" severity=\"" << this->severity() << "\"" << ">";
 	for ( 	
 		vector< pair< string, string > >::iterator it = this->culprits.begin();
 		it != this->culprits.end();
@@ -85,8 +86,7 @@ void Problem::gnxReport() {
 	) {
 		cout << "<culprit name=\"" << it->first << "\" value=\"" << it->second << "\" />";
 	}
-	cout << "</problem>" << endl;
-	
+	cout << "</problem>" << endl;	
 }
 
 std::string Problem::getMessage() {

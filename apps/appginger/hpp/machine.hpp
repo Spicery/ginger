@@ -79,6 +79,7 @@ private:
 
 public:
 	Registers						registers;
+	bool							sigint_flag;
 	
 private:
 	std::auto_ptr<PackageManager>	package_mgr_aptr;

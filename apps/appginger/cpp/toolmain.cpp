@@ -83,6 +83,8 @@ static struct option long_options[] =
         { "stdin",			no_argument,			0, 'i' },
         { "print",			no_argument,			0, 'p' },
         { "printmore",		no_argument,			0, 'P' },
+        { "quiet",          no_argument,            0, 'q' },
+        { "syntax",			required_argument,		0, 's' },
         { 0, 0, 0, 0 }
     };
 
@@ -113,6 +115,8 @@ static void printUsage() {
 	cout << "-l, --license         print out license information and exit" << endl;
 	cout << "-M, --metainfo        dump meta-info XML file to stdout" << endl;
 	cout << "-p, -P                set the print level to 1 or 2" << endl;
+	cout << "-q, --quiet           no welcome banner" << endl;
+	cout << "-s, --syntax=LANG     select syntax" << endl;
 	cout << "-v, --version         print out version information and exit" << endl;
 	cout << endl;
 }	
@@ -285,7 +289,7 @@ bool ToolMain::parseArgs( int argc, char **argv, char **envp ) {
 	bool meta_info_needed = false;
     for(;;) {
         int option_index = 0;
-        int c = getopt_long( argc, argv, "pPiMH::m:E:Vd:L::f:", long_options, &option_index );
+        int c = getopt_long( argc, argv, "s:qpPiMH::m:E:Vd:L::f:", long_options, &option_index );
         if ( c == -1 ) break;
         switch ( c ) {
             case 'd': {
@@ -345,6 +349,14 @@ bool ToolMain::parseArgs( int argc, char **argv, char **envp ) {
             }
             case 'p': {
              	this->context.printLevel() = 1;
+            	break;
+            }
+            case 'q': {
+            	this->context.welcomeBanner() = false;
+            	break;
+            }
+            case 's': {
+            	this->context.setSyntax( optarg );
             	break;
             }
             case 'V': {

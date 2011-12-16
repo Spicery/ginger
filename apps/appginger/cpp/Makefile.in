@@ -67,10 +67,16 @@ ginger-script: libappginger.a scriptmain.o
 	@CXX@ $(CXXFLAGS) $(BOOST_CPPFLAGS) -o $@ scriptmain.o libappginger.a ../../libgng/cpp/libgng.a /usr/local/lib/librudecgi.a  -lboost_iostreams
 
 ginger:
-	touch ginger
-	echo "#!/bin/sh" > ginger
-	echo `which rlwrap`\ -pGreen\ -S\'\>\>\>\ \'\ /usr/local/libexec/ginger/ginger-cli '$@' >> ginger
-	chmod a-w,a+x ginger
+	echo "#!/bin/sh" > ginger-tmp
+	echo 'echo "Ginger: @PACKAGE_VERSION@, Copyright (c) 2010  Stephen Leach"' >> ginger-tmp
+	echo 'echo "+----------------------------------------------------------------------+"'  >> ginger-tmp
+	echo 'echo "| This program comes with ABSOLUTELY NO WARRANTY. It is free software, |"' >> ginger-tmp
+	echo 'echo "| and you are welcome to redistribute it under certain conditions.     |"' >> ginger-tmp
+	echo 'echo "| Use option --help=license for details.                               |"' >> ginger-tmp
+	echo 'echo "+----------------------------------------------------------------------+"' >> ginger-tmp
+	echo `which rlwrap`\ -pGreen\ -S\'\>\>\>\ \'\ $(INSTALL_TOOL)/ginger-cli -q $$\@ >> ginger-tmp
+	chmod a-w,a+x ginger-tmp
+	mv ginger-tmp ginger
 
 clean:
 	rm -f *.o

@@ -21,4 +21,6 @@
 
 #include "config.h"
 
+#define SYS_MSG_PREFIX "*** "
+
 #endif

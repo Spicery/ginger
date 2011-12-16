@@ -28,6 +28,13 @@
  * \subsection step1 Step 1: Opening the box
 */
 
+#define SIMPLIFYGNX		( INSTALL_TOOL "/simplifygnx" )
+#define COMMON2GNX		( INSTALL_TOOL "/common2gnx" )
+#define CSTYLE2GNX		( INSTALL_TOOL "/cstyle2gnx" )
+#define LISP2GNX		( INSTALL_TOOL "/lisp2gnx" )
+#define GSON2GNX		( INSTALL_TOOL "/gson2gnx" )
+#define GNX2GNX			"/bin/cat" 
+
 
 #include <iostream>
 #include <fstream>
@@ -105,4 +112,18 @@ const char* AppContext::cgiValue( const char * fieldname ) {
 #else
 	return "";
 #endif
+}
+
+string AppContext::syntax() { 
+	if ( this->initial_syntax == "gnx" ) {
+		return GNX2GNX;
+	} else if ( this->initial_syntax == "" || this->initial_syntax == "common" ) {
+		return COMMON2GNX;
+	} else if ( this->initial_syntax == "lisp" ) {
+		return LISP2GNX;
+	} else if ( ( this->initial_syntax == "cstyle" ) || ( this->initial_syntax == "javascript" ) ) {
+		return CSTYLE2GNX;
+	} else {
+		throw Ginger::Mishap( "Unrecognised language" ).culprit( "Language", this->initial_syntax );
+	}
 }

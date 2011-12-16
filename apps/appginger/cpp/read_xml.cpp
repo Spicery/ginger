@@ -106,6 +106,16 @@ static Term mnxChildToTerm( shared< Ginger::Mnx > mnx, int n  ) {
 	return mnxToTerm( mnx->child( n ) );
 }
 
+static void addCulprits( shared< Ginger::Mnx > mnx, Ginger::Problem & p ) {
+	Ginger::MnxChildIterator kids( mnx );
+	while ( kids.hasNext() ) {
+		shared< Ginger::Mnx > kid( kids.next() );
+		if ( kid->hasAttribute( "name" ) && kid->hasAttribute( "value" ) ) {
+			p.culprit( kid->attribute( "name" ), kid->attribute( "value" ) );
+		}
+	}
+}
+
 Term mnxToTerm( shared< Ginger::Mnx > mnx ) {
 	const string name( mnx->name() );
 	const int nkids = mnx->size();
@@ -248,9 +258,14 @@ Term mnxToTerm( shared< Ginger::Mnx > mnx ) {
 		throw Ginger::SystemError( "Unrecognised assert form" );
 	} else if ( name == "import" ) {
 		throw Ginger::SystemError( "No longer handles import directly" );
+	} else if ( name == "problem" ) {
+		Ginger::CompileTimeError mishap( mnx->attribute( "message" ) );
+		addCulprits( mnx, mishap );
+		throw mishap;
 	} else {
-		cerr << "name = " << name << endl;
-		cerr << "#kids = " << nkids << endl;
-		throw Ginger::SystemError( "Unrecognised term" );
+		Ginger::CompileTimeError syserr( "Unrecognised term" );
+		syserr.culprit( "Name", name );
+		syserr.culprit( "#Kids", (long)nkids );
+		throw syserr;
 	}
 }

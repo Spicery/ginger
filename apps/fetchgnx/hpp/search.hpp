@@ -29,30 +29,15 @@
 
 class Search {
 private:
-	//Ginger::SqliteDb 				sqlite_db;	
 	ProjectCache					project_cache;
+	const bool						undefined_allowed;
 	
-public:
-	//Ginger::SqliteDb & 	sqliteDb() { return this->sqlite_db; }
-
 private:
 	bool file_exists( std::string fullpathname );
-	//void printUnqualifiedDefinition( PackageCache * c, const std::string name );
 	void printAbsoluteDefinition( PackageCache * c, const std::string name );
-	//void printQualifiedDefinition( PackageCache * c, const std::string alias, const std::string name );
 	void cacheDefinitionFile( PackageCache * c, const std::string & name, const std::string & pathname );
-	//void cachePackageFile( PackageCache * c, const std::string & pathname );
-	//void cachePackage( PackageCache * c );
-	//void cacheUnqualifiedLookup( const std::string & pkg_cxt, const std::string & name_cxt, const std::string & pkg_defn, const std::string & name_defn );
-	//void assertDefinition( std::string & pkg, const std::string & var, std::string & body );
-	//void assertPackageLoad( std::string & pkg, std::string & body );
-	//bool isCached( const std::string & pkg, const std::string & var );
-	//bool hasLoadedPackage( std::string & pkg );
-	
-public:
-	//bool try_serve( std::string fullname );
-	//void findDefinition( const Defn & defn );
 
+public:
 	void resolveQualified( const std::string & pkg, const std::string & alias, const std::string & vname );
 	void resolveUnqualified( const std::string & pkg, const std::string & vname );
 	void fetchDefinition( const std::string & pkg, const std::string & vname );
@@ -60,7 +45,7 @@ public:
 	
 public:
 	//Search( std::string & sqlite_db_file, std::vector< std::string > & project_path );
-	Search( std::vector< std::string > & project_path );
+	Search( std::vector< std::string > & project_path, const bool undefined_allowed );
 	~Search();
 };
 

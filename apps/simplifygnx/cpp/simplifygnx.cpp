@@ -93,6 +93,7 @@ to it as a stream.
 
 #define	FN				"fn"
 
+#define PROBLEM			"problem"
 #define CULPRIT			"culprit"
 #define CULPRIT_NAME	"name"
 #define CULPRIT_VALUE	"value"
@@ -139,6 +140,7 @@ public:
 
 public:
 	std::string package;
+	bool undefined_allowed;
 
 private:
 	void simplify( shared< Ginger::Mnx > g );
@@ -161,7 +163,8 @@ public:
 		scope_processing( false ),
 		sysapp_processing( false ),
 		tailcall_processing( false ),
-		val_processing( false )
+		val_processing( false ),
+		undefined_allowed( false )
 	{}
 };
 
@@ -187,6 +190,7 @@ static struct option long_options[] =
         { "license",        optional_argument,      0, 'L' },
         { "package",		required_argument,		0, 'p' },
         { "standard",		no_argument,			0, 's' },
+        { "undefined",      no_argument,            0, 'u' },
         { "version",        no_argument,            0, 'V' },
         { 0, 0, 0, 0 }
     };
@@ -194,7 +198,7 @@ static struct option long_options[] =
 void Main::parseArgs( int argc, char **argv, char **envp ) {
     for(;;) {
         int option_index = 0;
-        int c = getopt_long( argc, argv, "123456f:H::L::p:sV", long_options, &option_index );
+        int c = getopt_long( argc, argv, "123456789f:H::L::p:suV", long_options, &option_index );
         if ( c == -1 ) break;
         switch ( c ) {
         	case '1': {
@@ -296,6 +300,10 @@ void Main::parseArgs( int argc, char **argv, char **envp ) {
             	this->package = optarg;
             	break;
             }
+            case 'u': {
+            	this->undefined_allowed = true;
+            	break;
+            }
             case 'V': {
                 cout << SIMPLIFYGNX << ": version " << this->version() << " (" << __DATE__ << " " << __TIME__ << ")" << endl;
                 exit( EXIT_SUCCESS );   //  Is that right?
@@ -339,7 +347,7 @@ public:
 			//this->enc_pkg_name = attrs[ "enc.pkg" ];
 			//this->alias_name = attrs[ "alias" ];
 			this->def_pkg_name = attrs[ "def.pkg" ];
-		} else if ( name == "mishap" ) {
+		} else if ( name == PROBLEM ) {
 			this->mishap.setMessage( attrs[ "message" ] );
 		} else if ( name == CULPRIT ) {
 			mishap.culprit( attrs[ CULPRIT_NAME ], attrs[ CULPRIT_VALUE ] );
@@ -349,7 +357,7 @@ public:
 	}
 	
 	void endTag( std::string & name ) {
-		if ( name == "mishap" ) {
+		if ( name == PROBLEM ) {
 			throw mishap;
 		}
 	}
@@ -363,9 +371,12 @@ public:
 	ResolveHandler() : mishap( "" ) {}
 };
 
-std::string resolveUnqualified( vector< string > & project_folders, const std::string & enc_pkg, const std::string & name ) {
+std::string resolveUnqualified( vector< string > & project_folders, const std::string & enc_pkg, const std::string & name, const bool undefined_allowed ) {
 	Ginger::Command cmd( FETCHGNX );
 	cmd.addArg( "-R" );
+	if ( undefined_allowed ) {
+		cmd.addArg( "-u" );
+	}
 	{
 		for ( 
 			vector< string >::iterator it = project_folders.begin();
@@ -409,10 +420,14 @@ std::string resolveQualified(
 	vector< string > & project_folders, 
 	const std::string & enc_pkg, 
 	const std::string & alias, 
-	const std::string & name 
+	const std::string & name ,
+	const bool undefined_allowed
 ) {
 	Ginger::Command cmd( FETCHGNX );
 	cmd.addArg( "-R" );
+	if ( undefined_allowed ) {
+		cmd.addArg( "-u" );
+	}
 	{
 		for ( 
 			vector< string >::iterator it = project_folders.begin();
@@ -580,7 +595,8 @@ public:
 		const string & x = element.name();
 		element.clearAttribute( TAILCALL );	//	Throw away any previous marking.
 		if ( x == FN ) {
-			element.lastChild()->orFlags( TAIL_CALL_MASK );
+			shared< Ginger::Mnx > ch( element.lastChild() );
+			ch->orFlags( TAIL_CALL_MASK );
 		} else if ( element.hasAllFlags( TAIL_CALL_MASK ) ) {
 			if ( x == APP ) {
 				element.putAttribute( TAILCALL, "true" );
@@ -593,8 +609,9 @@ public:
 					element.lastChild()->orFlags( TAIL_CALL_MASK );
 				}
 			} else if ( x == SEQ || x == BLOCK ) {
-				if ( x.size() >= 1 ) {
-					element.lastChild()->orFlags( TAIL_CALL_MASK );
+				if ( element.size() >= 1 ) {
+					shared< Ginger::Mnx > ch = element.lastChild();
+					ch->orFlags( TAIL_CALL_MASK );
 				}
 			}
 			//	else don't push the marker down. 
@@ -629,6 +646,7 @@ class Absolute : public Ginger::MnxVisitor {
 private:
 	vector< string > & project_folders;
 	std::string package;
+	const bool undefined_allowed;
 		
 public:
 	void startVisit( Ginger::Mnx & element ) {
@@ -641,12 +659,12 @@ public:
 					if ( element.hasAttribute( "alias" ) ) {
 						const string & alias = element.attribute( "alias" );
 						//cout << "RESOLVE (QUALIFIED): name=" << name << ", alias=" << alias << ", enc.pkg=" << enc_pkg << endl;
-						const string def_pkg( resolveQualified( this->project_folders, enc_pkg, alias, name ) );
+						const string def_pkg( resolveQualified( this->project_folders, enc_pkg, alias, name, this->undefined_allowed ) );
 						//cout << "   def = " << def_pkg << endl;
 						element.putAttribute( "def.pkg", def_pkg );
 					} else {
 						//cout << "RESOLVE (UNQUALIFIED): name=" << name << ", enc.pkg=" << enc_pkg << endl;
-						const string def_pkg( resolveUnqualified( this->project_folders, enc_pkg, name ) );
+						const string def_pkg( resolveUnqualified( this->project_folders, enc_pkg, name, this->undefined_allowed ) );
 						//cout << "   def = " << def_pkg << endl;
 						element.putAttribute( "def.pkg", def_pkg );						
 					}
@@ -666,9 +684,10 @@ public:
 	}
 	
 public:
-	Absolute( vector< string > & folders, const std::string & enc_pkg ) : 
+	Absolute( vector< string > & folders, const std::string & enc_pkg, const bool undefined_allowed ) : 
 		project_folders( folders ),
-		package( enc_pkg )
+		package( enc_pkg ),
+		undefined_allowed( undefined_allowed )
 	{
 	}
 
@@ -1115,7 +1134,7 @@ void Main::simplify( shared< Ginger::Mnx > g ) {
 	}
 	
 	if ( absolute_processing ) {
-		Absolute a( this->project_folders, this->package );
+		Absolute a( this->project_folders, this->package, this->undefined_allowed );
 		g->visit( a );
 		//outers_found = a.wereOutersFound();
 	} 

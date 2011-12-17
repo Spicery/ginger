@@ -101,7 +101,7 @@ private:
 		
 		stringstream commstream;
 		//	tail is 1-indexed!
-		commstream << this->context.syntax() << " | " << SIMPLIFYGNX << " -s";
+		commstream << this->context.syntax() << " | " << SIMPLIFYGNX << " -su";
 		string command( commstream.str() );
 		
 		for (;;) {

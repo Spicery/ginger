@@ -67,7 +67,7 @@ private:
 	string						variable_name;
 	std::vector< std::string > 	packages_to_load;
 	std::vector< Defn > 		definitions;
-	std::string					sqlite_db_file;
+	bool						undefined_allowed;
 	
 public:
 	void parseArgs( int argc, char **argv, char **envp );
@@ -78,7 +78,7 @@ public:
 	std::string version();
 	
 public:
-	Main() : task( FETCH_DEFINITION ) {}
+	Main() : task( FETCH_DEFINITION ), undefined_allowed( false ) {}
 };
 
 std::string Main::version() {
@@ -105,9 +105,7 @@ static struct option long_options[] =
         { "project",        required_argument,      0, 'j' },
         { "package",        required_argument,      0, 'p' },
 		{ "resolve",        no_argument,            0, 'R' },
-        { "qualified",		required_argument,		0, 'q' },
-    	{ "sqlite",			required_argument,		0, 's' }, 	//	or --cache???
-        { "unqualified",	required_argument,		0, 'u' },
+        { "undefined",		required_argument,		0, 'u' },
         { "variable",       required_argument,      0, 'v' },
         { "version",        no_argument,            0, 'V' },
         { 0, 0, 0, 0 }
@@ -117,7 +115,7 @@ void Main::parseArgs( int argc, char **argv, char **envp ) {
 	bool qualified = false;
     for(;;) {
         int option_index = 0;
-        int c = getopt_long( argc, argv, "XRDH::IVL::j:f:p:a:v:", long_options, &option_index );
+        int c = getopt_long( argc, argv, "uXRDH::IVL::j:f:p:a:v:", long_options, &option_index );
         if ( c == -1 ) break;
         switch ( c ) {
             case 'a' : {
@@ -153,6 +151,7 @@ void Main::parseArgs( int argc, char **argv, char **envp ) {
                     printf( "-p, --package=NAME    sets the package name\n" );
                     printf( "-a, --alias=NAME      sets the alias name, optional\n" );
                     printf( "-v, --variable=NAME   sets the variable name\n" );
+                    printf( "-U, --undefined       allow undefined variables\n" );
                     printf( "\n" );
                 } else if ( std::string( optarg ) == "help" ) {
                     cout << "--help=help           this short help" << endl;
@@ -192,8 +191,8 @@ void Main::parseArgs( int argc, char **argv, char **envp ) {
             	task = RESOLVE_UNQUALIFIED;
             	break;
             }
-            case 's': {
-            	this->sqlite_db_file = string( optarg );
+            case 'u': {
+            	this->undefined_allowed = true;
             	break;
             }
             case 'v': {
@@ -273,7 +272,7 @@ void Main::init() {
 }
 
 void Main::run() {
-	Search search( this->project_folders );
+	Search search( this->project_folders, this->undefined_allowed );
 	switch ( this->task ) {
 		case RESOLVE_QUALIFIED: {
 			search.resolveQualified( this->package_name, this->alias_name, this->variable_name );

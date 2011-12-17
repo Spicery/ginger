@@ -63,8 +63,9 @@ static void renderText( const std::string & str ) {
 	renderText( cout, str );
 }
 
-Search::Search( vector< string > & project_folders ) :
-	project_cache( ProjectCache( this, project_folders ) )
+Search::Search( vector< string > & project_folders, const bool undefined_allowed ) :
+	project_cache( ProjectCache( this, project_folders ) ),
+	undefined_allowed( undefined_allowed )
 {
 }
 
@@ -218,11 +219,15 @@ void Search::resolveUnqualified( const string & enc_pkg_name, const string & nam
 			//this->cacheUnqualifiedLookup( x->getPackageName(), name, def_pkg->getPackageName(), name );
 			//this->cacheDefinitionFile( def_pkg, name, vfile->getPathName() );
 		} else {
-			throw  (
-				Mishap( "Cannot find variable" ).
-				culprit( "Variable", name ).
-				culprit( "Package", x->getPackageName() )
-			);
+			if ( this->undefined_allowed ) {
+				outputUnqualified( enc_pkg_name, name, enc_pkg_name );
+			} else {	
+				throw  (
+					Mishap( "Cannot find variable" ).
+					culprit( "Variable", name ).
+					culprit( "Package", x->getPackageName() )
+				);
+			}
 		}
 	}
 }
@@ -252,11 +257,15 @@ void Search::resolveQualified( const string & enc_pkg_name, const string & alias
 		//this->cacheUnqualifiedLookup( x->getPackageName(), name, def_pkg->getPackageName(), name );
 		//this->cacheDefinitionFile( def_pkg, name, vfile->getPathName() );
 	} else {
-		throw  (
-			Mishap( "Cannot find variable" ).
-			culprit( "Variable", var_name ).
-			culprit( "Package", enc_pkg_name )
-		);
+		if ( this->undefined_allowed ) {
+			outputQualified( enc_pkg_name, alias_name, var_name, enc_pkg_name );
+		} else {
+			throw  (
+				Mishap( "Cannot find variable" ).
+				culprit( "Variable", var_name ).
+				culprit( "Package", enc_pkg_name )
+			);
+		}
 	}
 }
 
@@ -275,3 +284,4 @@ void Search::loadPackage( const string & pkg ) {
 		//cout << "<seq><!-- load path was not defined --></seq>" << endl;
 	}
 }
+	

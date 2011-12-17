@@ -107,17 +107,17 @@ void ToolMain::printGPL( const char * start, const char * end ) const {
 static void printUsage() {
 	cout << "Usage :  " << PACKAGE_NAME << " [options] [files]" << endl << endl;
 	cout << "OPTION                SUMMARY" << endl;
-	cout << "-d, --debug           add debug option (see --help=debug)" << endl;
+	cout << "-d, --debug=OPTION    add debug option (see --help=debug)" << endl;
 	cout << "-E<n>                 run using engine #n" << endl;
-	cout << "-f, --projectfolder   add a project folder to the search path" << endl;
-	cout << "-h, --help            print out this help info (see --help=help)" << endl;
+	cout << "-j, --project=PATH    add a project folder to the search path" << endl;
+	cout << "-H, --help            print out this help info (see --help=help)" << endl;
 	cout << "-i, --stdin           compile from stdin" << endl;
-	cout << "-l, --license         print out license information and exit" << endl;
+	cout << "-L, --license         print out license information and exit" << endl;
 	cout << "-M, --metainfo        dump meta-info XML file to stdout" << endl;
 	cout << "-p, -P                set the print level to 1 or 2" << endl;
 	cout << "-q, --quiet           no welcome banner" << endl;
 	cout << "-s, --syntax=LANG     select syntax" << endl;
-	cout << "-v, --version         print out version information and exit" << endl;
+	cout << "-V, --version         print out version information and exit" << endl;
 	cout << endl;
 }	
 
@@ -289,7 +289,7 @@ bool ToolMain::parseArgs( int argc, char **argv, char **envp ) {
 	bool meta_info_needed = false;
     for(;;) {
         int option_index = 0;
-        int c = getopt_long( argc, argv, "s:qpPiMH::m:E:Vd:L::f:", long_options, &option_index );
+        int c = getopt_long( argc, argv, "s:qpPiMH::m:E:Vd:L::j:", long_options, &option_index );
         if ( c == -1 ) break;
         switch ( c ) {
             case 'd': {
@@ -364,10 +364,13 @@ bool ToolMain::parseArgs( int argc, char **argv, char **envp ) {
                 return false;
             }
             case '?': {
-                break;
+            	//	Invalid option: exit.
+                return false;
             }
             default: {
-                printf( "?? getopt returned character code 0%x ??\n", static_cast< int >( c ) );
+            	//	This should not happen. It indicates that the option string 
+            	//	does not conform to the cases of this switch statement.
+            	throw Ginger::SystemError( "Unrecognised option" ).culprit( "Option code", static_cast< long >( c ) );
             }
         }
     }

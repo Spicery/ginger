@@ -25,10 +25,12 @@ void DictClass::reset() {
 	for (
 		map< string, Ident >::iterator it = this->table.begin();
 		it != this->table.end();
-		++it
 	) {
-		if ( it->second->value_of->valof == SYS_UNDEF ) {
+		Ident id = it->second;
+		if ( id->value_of->valof == SYS_UNDEF ) {
 			this->table.erase( it++ );
+		} else {
+			++it;
 		}
 	}
 }

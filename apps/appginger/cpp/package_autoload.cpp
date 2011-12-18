@@ -381,6 +381,7 @@ Ident OrdinaryPackage::absoluteAutoload( const std::string & c ) {
 			this->retractForwardDeclare( c );
 		}
 		syslog( LOG_ERR, "Autoloading %s failed due to an exception", c.c_str() );
+		throw e;
 	}
 	
 	//	No autoloading implemented yet - just fail.

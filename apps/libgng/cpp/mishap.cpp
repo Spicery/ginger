@@ -18,6 +18,7 @@
 
 #include <iostream>
 #include <sstream>
+#include <iomanip>
 
 
 #include <stdio.h>
@@ -66,14 +67,30 @@ Problem & Problem::culprit( const std::string arg ) {
 	return *this;
 }
 
+static const char * ERR_MSG = "Error";
+
+
 void Problem::report() {
-	cerr << SYS_MSG_PREFIX << "Error: " << this->message << endl;
+
+	size_t width = strlen( ERR_MSG );	
 	for ( 	
 		vector< pair< string, string > >::iterator it = this->culprits.begin();
 		it != this->culprits.end();
 		++it
 	) {
-		cerr << SYS_MSG_PREFIX << it->first << " : " << it->second << endl;
+		size_t n = it->first.size();
+		if ( n > width ) width = n;
+	}
+	
+
+	cerr << endl;
+	cerr << SYS_MSG_PREFIX << left << setw( width ) << ERR_MSG << " : " << this->message << endl;
+	for ( 	
+		vector< pair< string, string > >::iterator it = this->culprits.begin();
+		it != this->culprits.end();
+		++it
+	) {
+		cerr << SYS_MSG_PREFIX << left << setw( width ) << it->first << " : " << it->second << endl;
 	}
 }
 

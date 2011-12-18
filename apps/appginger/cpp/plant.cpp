@@ -539,7 +539,8 @@ void PlantClass::compileTerm( Term term ) {
 			break;
 		}
 		default: {
-			throw Ginger::Mishap( "PLANT_TERM: Not implemented yet" ).culprit( "functor", functor_name( fnc ) );
+			//cerr << "ABOUT TO THROW" << endl;
+			throw Ginger::Mishap( "Syntax not implemented yet" ).culprit( "functor", functor_name( fnc ) );
 		}
 	}
 }

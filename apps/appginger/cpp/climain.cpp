@@ -27,6 +27,7 @@
 
 #include "mishap.hpp"
 #include "gngversion.hpp"
+#include "command.hpp"
 
 #include "appcontext.hpp"
 #include "toolmain.hpp"
@@ -55,11 +56,45 @@ static bool sigint_dummy;
 static bool * SIGINT_FLAG = &sigint_dummy;
 
 void sigint_handler( int s ){
-	cout << "Caught signal " << s << endl;
+	cerr << "Interrupted (signal " << s << ")" << endl;
 	*SIGINT_FLAG = true;
 }
 
-class Popen {
+class Popen : public Ginger::Command {
+private:
+	FILE * fp;
+	
+public:
+	FILE * file() { return this->fp; }
+	
+	void cleanShutdown() {
+		this->fp = NULL;
+	}
+
+public:
+	Popen( const string command ) : 
+		Command( "/bin/sh" )
+	{
+		this->addArg( "-c" );
+		this->addArg( command );
+		this->runWithOutput();
+		fp = fdopen( this->getInputFD(), "r" );
+		//cerr << "Opening popen " << this->child_pid << endl;
+	}
+	
+	~Popen() {
+		//cerr << "Closing popen" << endl;
+		if ( fp != NULL ) {
+			//cerr << "Interrupting" << endl;
+			//this->interrupt();
+			//cerr << "Closing (1)" << endl;
+			fclose( fp );
+			//cerr << "Closing (2)" << endl;
+		}
+	}
+};
+
+/*class Popen {
 private:
 	FILE * gnufp;
 	
@@ -73,8 +108,12 @@ public:
 			throw Ginger::SystemError( "Failed to open subprocesses" );	
 		}
 	}
-	~Popen() { if ( this->gnufp != NULL ) pclose( this->gnufp ); }
-};
+	~Popen() { 
+		cout << "CLOSING PIPE (1)" << endl;
+		if ( this->gnufp != NULL ) pclose( this->gnufp ); 
+		cout << "CLOSING PIPE (2)" << endl;
+	}
+};*/
 
 class GingerMain : public ToolMain {
 private:
@@ -104,28 +143,34 @@ private:
 		commstream << this->context.syntax() << " | " << SIMPLIFYGNX << " -su";
 		string command( commstream.str() );
 		
-		for (;;) {
+		bool cont = true;
+		while ( cont ) {
 			try {
-				{
+				Popen p( commstream.str() );		
+				// ... open the file, with whatever, pipes or who-knows ...
+				// let's build a buffer from the FILE* descriptor ...
+				__gnu_cxx::stdio_filebuf<char> pipe_buf( p.file(), ios_base::in );
+				// there we are, a regular istream is build upon the buffer :
+				istream stream_pipe_in( &pipe_buf );
+					
+				while ( cont ) {
 					//	This block is required to neatly force the closure of the
 					//	piped.
-					Popen p( commstream.str() );		
-					// ... open the file, with whatever, pipes or who-knows ...
-					// let's build a buffer from the FILE* descriptor ...
-					__gnu_cxx::stdio_filebuf<char> pipe_buf( p.file(), ios_base::in );
-					// there we are, a regular istream is build upon the buffer :
-					istream stream_pipe_in( &pipe_buf );
-					
-					while ( rcep.read_comp_exec_print( stream_pipe_in, std::cout ) ) {}
+					try {
+						while ( rcep.unsafe_read_comp_exec_print( stream_pipe_in, std::cout ) ) {}
+						cont = false;
+					} catch ( Ginger::Mishap & e ) {
+						//cerr << "CAUGHT #2" << endl;
+						e.report();
+						cerr << endl << SYS_MSG_PREFIX << "Reset after runtime error ..." << endl;
+						vm->resetMachine();
+						//cout << "Continuing" << endl;
+					} 			
 				}
-	
-				//	Check whether or not we were interrupted by a signal.			
-				if ( not vm->sigint_flag ) break;
-				cout << "SIGINT got trapped" << endl;
-				vm->sigint_flag = false;
 			} catch ( Ginger::CompileTimeError & e ) {
+				//cerr << "CAUGHT #1" << endl;
 				e.report();
-				cout << endl << SYS_MSG_PREFIX << "Reset..." << endl;
+				cerr << endl << SYS_MSG_PREFIX << "Reset after compilation error ..." << endl;
 				vm->resetMachine();
 			}
 		}

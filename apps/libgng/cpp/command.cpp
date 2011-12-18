@@ -22,6 +22,7 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <signal.h>
 
 //#include <boost/iostreams/stream_buffer.hpp>
 //#include <boost/iostreams/device/file_descriptor.hpp>
@@ -46,10 +47,20 @@ Command::Command( const std::string command ) :
 }
 
 Command::~Command() {
+	//cerr << "~Command" << endl;
+	//cerr << "this->should_wait_on_close = " << this->should_wait_on_close << endl;
+	//cerr << "this->child_pid = " << this->child_pid << endl;
 	if ( this->should_wait_on_close && this->child_pid != 0 ) {
 		int return_value_of_child;
+		//cerr << "Waiting ... " << this->child_pid << endl;
 		wait( &return_value_of_child );
+		//cerr << "OK!" << endl;
 	}
+}
+
+void Command::interrupt() {
+	//cerr << "Killing " << this->child_pid << endl;
+	kill( this->child_pid, SIGKILL );
 }
 
 void Command::addArg( const std::string arg ) {
@@ -133,8 +144,8 @@ int Command::runWithOutput() {
 	
 	int pipe_fd[ 2 ];
 	pipe( pipe_fd );
-	pid_t pid = fork();
-	switch ( pid ) {
+	this->child_pid = fork();
+	switch ( this->child_pid ) {
 		case -1: {	//	Something went wrong.
 			throw Mishap( "Child process unexpectedly failed" ).culprit( "Command", command );
 			break;
@@ -184,8 +195,8 @@ void Command::runWithInputAndOutput() {
 	
 	pipe( pipe_outgoing_fd );
 	pipe( pipe_incoming_fd );
-	pid_t pid = fork();
-	switch ( pid ) {
+	this->child_pid  = fork();
+	switch ( this->child_pid ) {
 		case -1: {	//	Something went wrong.
 			throw Mishap( "Child process unexpectedly failed" ).culprit( "Command", command );
 			break;

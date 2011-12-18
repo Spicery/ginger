@@ -25,7 +25,7 @@
 namespace Ginger {
 
 class Command {
-private:
+protected:
 	std::string 						command;
 	std::vector< std::string > 			args;
 	bool								should_wait_on_close;
@@ -45,6 +45,7 @@ public:
 	int runWithOutput();
 	void runWithInputAndOutput();
 	void runSilent();
+	void interrupt();
 	
 public:
 	Command( const std::string command );

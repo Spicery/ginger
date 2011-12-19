@@ -259,11 +259,23 @@ Term mnxToTerm( shared< Ginger::Mnx > mnx ) {
 	} else if ( name == "import" ) {
 		throw Ginger::SystemError( "No longer handles import directly" );
 	} else if ( name == "problem" ) {
+	
+		#if DBG_READ_XML
+			cerr << "Throwing compile-time error" << endl;
+			cerr << "Name " << mnx->name() << endl;
+			mnx->render();
+		#endif
+		
 		Ginger::CompileTimeError mishap( mnx->attribute( "message" ) );
 		addCulprits( mnx, mishap );
 		throw mishap;
 	} else {
-		Ginger::CompileTimeError syserr( "Unrecognised term" );
+
+		#if DBG_READ_XML
+			cerr << "Throwing system error" << endl;
+		#endif
+
+		Ginger::Mishap syserr( "Internal Error - Unrecognised term" );
 		syserr.culprit( "Name", name );
 		syserr.culprit( "#Kids", (long)nkids );
 		throw syserr;

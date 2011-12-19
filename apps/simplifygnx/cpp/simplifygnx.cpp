@@ -185,7 +185,7 @@ static struct option long_options[] =
         { "sysapp",			no_argument,			0, '7' },
         { "tailcall",		no_argument,			0, '8' },
         { "val",         	no_argument,			0, '9' },
-		{ "projectfolder",	required_argument,		0, 'f' },
+		{ "project",		required_argument,		0, 'j' },
         { "help",			optional_argument,		0, 'H' },
         { "license",        optional_argument,      0, 'L' },
         { "package",		required_argument,		0, 'p' },
@@ -255,7 +255,7 @@ void Main::parseArgs( int argc, char **argv, char **envp ) {
         		this->val_processing = true;        		
         		break;
         	}
-        	case 'f' : {
+        	case 'j' : {
         		this->project_folders.push_back( optarg );
         		break;
         	}
@@ -266,6 +266,7 @@ void Main::parseArgs( int argc, char **argv, char **envp ) {
                 if ( optarg == NULL ) {
                     printf( "Usage:  simplifygnx -p PACKAGE OPTIONS < GNX_IN > GNX_OUT\n" );
                     printf( "OPTIONS\n" );
+                    printf( "-j, --project=PATH    adds a project folder onto the search path" );
                     printf( "-p, --package=PACKAGE defines the enclosing package\n" );
                     printf( "-H, --help[=TOPIC]    help info on optional topic (see --help=help)\n" );
                     printf( "-V, --version         print out version information and exit\n" );
@@ -392,7 +393,7 @@ std::string resolveUnqualified( vector< string > & project_folders, const std::s
 	cmd.addArg( "-v" );
 	cmd.addArg( name );
 
-	//cerr << "About to run the command" << endl;
+	//cerr << "About to run the command. Package: " << enc_pkg << endl;
 	int fd = cmd.runWithOutput();		
 	//cerr << "Command run " << endl;
 	stringstream prog;
@@ -663,9 +664,9 @@ public:
 						//cout << "   def = " << def_pkg << endl;
 						element.putAttribute( "def.pkg", def_pkg );
 					} else {
-						//cout << "RESOLVE (UNQUALIFIED): name=" << name << ", enc.pkg=" << enc_pkg << endl;
+						//cerr << "RESOLVE (UNQUALIFIED): name=" << name << ", enc.pkg=" << enc_pkg << endl;
 						const string def_pkg( resolveUnqualified( this->project_folders, enc_pkg, name, this->undefined_allowed ) );
-						//cout << "   def = " << def_pkg << endl;
+						//cerr << "   def = " << def_pkg << endl;
 						element.putAttribute( "def.pkg", def_pkg );						
 					}
 				}

@@ -374,14 +374,13 @@ Ident OrdinaryPackage::absoluteAutoload( const std::string & c ) {
 		rcep.setPrinting( false );	//	Turn off result printing.
 		rcep.unsafe_read_comp_exec_print( prog, cout );		
 		return id;		
-	} catch ( std::exception & e ) {
+	} catch ( Ginger::Problem & e ) {
 		//	Undo the forward declaration.
 		if ( id->value_of->valof == SYS_UNDEF ) {
 			//	The autoloading failed. Undo the declaration.
 			this->retractForwardDeclare( c );
 		}
 		syslog( LOG_ERR, "Autoloading %s failed due to an exception", c.c_str() );
-		throw e;
 	}
 	
 	//	No autoloading implemented yet - just fail.

@@ -25,7 +25,7 @@ protected:
 	AppContext context;
 
 protected:
-	std::string safeFileName( const std::string & filename );
+	std::string shellSafeName( const std::string & filename );
 	int printLicense( const char * arg ) const;
 
 public:

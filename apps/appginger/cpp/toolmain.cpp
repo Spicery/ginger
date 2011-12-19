@@ -271,7 +271,7 @@ static void printMetaInfo() {
 }
 
 
-string ToolMain::safeFileName( const string & filename ) {
+string ToolMain::shellSafeName( const string & filename ) {
 	string safe;
 	for ( string::const_iterator it = filename.begin(); it != filename.end(); ++it ) {
 		const char ch = *it;

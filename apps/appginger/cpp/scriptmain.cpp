@@ -95,7 +95,7 @@ public:
 							stringstream commstream;
 							//	tail is 1-indexed!
 							commstream << TAIL << " -c+" << ( posn + 1 );
-							commstream << " "<< safeFileName( *it );
+							commstream << " "<< shellSafeName( *it );
 							commstream << " | " << lang << " | " << SIMPLIFYGNX << " -s";
 							string command( commstream.str() );
 							//cout << "Command so far: " << command << endl;

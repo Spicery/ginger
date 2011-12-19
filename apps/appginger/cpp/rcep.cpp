@@ -153,9 +153,21 @@ bool RCEP::unsafe_read_comp_exec_print( istream & input, std::ostream & output )
 	try {
 		shared< Ginger::Mnx > mnx( read_xml.readMnx() );
 		if ( not mnx ) return false;
-		term = mnxToTerm( mnx );
-        //term = read_xml.readElement();
-        
+		
+		//	DEBUG.
+		#ifdef DBG_RCEP
+			cerr << "RCEP EXPRESSION: ";
+			mnx->render();
+			cout << endl;
+		
+			cerr << "Converting to term" << endl;
+		#endif
+			term = mnxToTerm( mnx );
+		#ifdef DBG_RCEP
+			cerr << "Converted to term" << endl;
+			//term = read_xml.readElement();
+		#endif
+		
         if ( not term ) return false;
 
         #ifdef DBG_RCEP
@@ -182,6 +194,10 @@ bool RCEP::unsafe_read_comp_exec_print( istream & input, std::ostream & output )
 			fflush( stderr );
         #endif
 
+		#ifdef DBG_RCEP
+			cerr << "Planting" << endl;
+	    #endif
+
 	    plant = vm->plant();
 	    vmiFUNCTION( plant, 0, 0 );
 	    vmiENTER( plant );
@@ -189,6 +205,11 @@ bool RCEP::unsafe_read_comp_exec_print( istream & input, std::ostream & output )
 	    vmiRETURN( plant );
 	    r = vmiENDFUNCTION( plant );
 	    start = clock();
+	    
+		#ifdef DBG_RCEP
+			cerr << "Queuing up" << endl;
+		#endif
+	    
 	    vm->addToQueue( r );
 	    if ( this->isTopLevel() ) {
         	#ifdef DBG_RCEP

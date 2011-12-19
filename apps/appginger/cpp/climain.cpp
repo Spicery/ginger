@@ -86,7 +86,7 @@ public:
 		//cerr << "Closing popen" << endl;
 		if ( fp != NULL ) {
 			//cerr << "Interrupting" << endl;
-			//this->interrupt();
+			this->interrupt();
 			//cerr << "Closing (1)" << endl;
 			fclose( fp );
 			//cerr << "Closing (2)" << endl;
@@ -140,7 +140,10 @@ private:
 		
 		stringstream commstream;
 		//	tail is 1-indexed!
+		
+		
 		commstream << this->context.syntax() << " | " << SIMPLIFYGNX << " -su";
+		commstream << " -p" << shellSafeName( interactive_pkg->getTitle() );
 		string command( commstream.str() );
 		
 		bool cont = true;

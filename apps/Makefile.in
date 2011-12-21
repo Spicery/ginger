@@ -1,14 +1,15 @@
 all clean:
-	$(MAKE) -C libgng $@
 	$(MAKE) -C appginger $@
-	$(MAKE) -C libmetainfo $@
 	$(MAKE) -C common2gnx $@
-	$(MAKE) -C lisp2gnx $@
 	$(MAKE) -C fetchgnx $@
 	$(MAKE) -C file2gnx $@
-	$(MAKE) -C simplifygnx $@
-	$(MAKE) -C tidymnx $@
 	$(MAKE) -C gson2gnx $@
-	$(MAKE) -C lnx2mnx $@
-	$(MAKE) -C src2lnx $@
+	$(MAKE) -C libgng $@
+	$(MAKE) -C libmetainfo $@
+	$(MAKE) -C lisp2gnx $@
 	$(MAKE) -C lnx2csv $@
+	$(MAKE) -C lnx2mnx $@
+	$(MAKE) -C shebang $@
+	$(MAKE) -C simplifygnx $@
+	$(MAKE) -C src2lnx $@
+	$(MAKE) -C tidymnx $@

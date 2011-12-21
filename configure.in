@@ -74,11 +74,11 @@ AC_CONFIG_FILES([Makefile
                  apps/appginger/cpp/Makefile
                  apps/appginger/functest/Makefile
                  apps/appginger/unittest/Makefile
+                 apps/common2gnx/Makefile
+                 apps/common2gnx/cpp/Makefile
                  apps/lisp2gnx/Makefile
                  apps/lisp2gnx/lsp/Makefile
                  apps/lisp2gnx/functest/Makefile
-                 apps/common2gnx/Makefile
-                 apps/common2gnx/cpp/Makefile
                  apps/fetchgnx/Makefile
                  apps/fetchgnx/cpp/Makefile
                  apps/fetchgnx/unittest/Makefile
@@ -91,6 +91,8 @@ AC_CONFIG_FILES([Makefile
                  apps/libmetainfo/Makefile
                  apps/libmetainfo/cpp/Makefile
                  apps/libmetainfo/unittest/Makefile
+                 apps/shebang/Makefile
+                 apps/shebang/cpp/Makefile
                  apps/simplifygnx/Makefile
                  apps/simplifygnx/cpp/Makefile
                  apps/simplifygnx/unittest/Makefile

@@ -1,0 +1,39 @@
+# EPREFIX should be bound to PREFIX by default. This appears to be a lie.
+# As a consequence we override EPREFIX entirely. Probably incorrect but not
+# that interesting.
+prefix=@prefix@
+exec_prefix=@prefix@
+datarootdir=@datarootdir@
+PACKAGE_TARNAME=@PACKAGE_TARNAME@
+INSTALL_BIN=@bindir@
+INSTALL_TOOL=@libexecdir@/@PACKAGE_TARNAME@
+INSTALL_LIB=@datarootdir@/@PACKAGE_TARNAME@
+INSTALL_DOC=@docdir@
+
+#LICENSE_FILE="$(INSTALL_LIB)/COPYING"
+#LICENSE_FILE="$(INSTALL_LIB)/COPYING"
+
+
+CC=@CXX@
+
+INSTALLDIRS=-DINSTALL_BIN='"$(INSTALL_BIN)"' -DINSTALL_LIB='"$(INSTALL_LIB)"' -DINSTALL_TOOL='"$(INSTALL_TOOL)"'
+
+
+CXXFLAGS=$(INSTALLDIRS) -O -Wall -Wnon-virtual-dtor
+CFLAGS=-Wmissing-prototypes 
+
+OBJS= shebang.o
+
+all: shebang
+
+# $@ is make shorthand for the target.
+# $@ is make shorthand for the dependencies
+shebang: $(OBJS)
+	@CXX@ $(CXXFLAGS) $(BOOST_CPPFLAGS) -o $@ $^
+	
+clean:
+	rm -f *.o
+	rm -f shebang
+
+#	Nothing needs doing.
+check:

@@ -1,0 +1,8 @@
+all:
+	$(MAKE) -C cpp $@
+	
+clean:
+	$(MAKE) -C cpp $@
+
+# Not implemented yet.
+check:

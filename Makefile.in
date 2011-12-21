@@ -33,6 +33,8 @@ distclean: clean
 	rm -f apps/lisp2gnx/functest/Makefile
 	rm -f apps/tidymnx/Makefile
 	rm -f apps/tidymnx/cpp/Makefile
+	rm -f apps/shebang/Makefile
+	rm -f apps/shebang/cpp/Makefile
 	rm -f apps/simplifygnx/Makefile
 	rm -f apps/simplifygnx/cpp/Makefile
 	rm -f apps/simplifygnx/unittest/Makefile
@@ -80,6 +82,7 @@ LIBEXECUTABLES=\
 	apps/common2gnx/cpp/common2gnx \
 	apps/common2gnx/cpp/cstyle2gnx \
 	apps/lisp2gnx/lsp/lisp2gnx \
+	apps/shebang/cpp/shebang \
 	apps/simplifygnx/cpp/simplifygnx \
 	apps/tidymnx/cpp/tidymnx \
 	apps/gson2gnx/cpp/gson2gnx \

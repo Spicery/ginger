@@ -58,10 +58,21 @@ void MnxSaxParser::eatWhiteSpace() {
 	while ( input.good() ) {
 		char ch;
 		if ( not input.get( ch ) ) break;
-		if ( not isspace( ch ) ) {
-			input.putback( ch );
-			break;
+		if ( isspace( ch ) ) continue;
+		//cerr << "ch = " << ch << " level = " << level << endl;
+		if ( ch == '#' && this->level == 0 ) {
+			//	EOL comment.
+			while ( input.good() ) {
+				char x;
+				if ( not input.get( x ) ) break;
+				if ( x == '\n' ) break;
+			}
+			continue;
 		}
+		
+		//	Otherwise we should stop.
+		input.putback( ch );
+		break;
 	}
 }
 
@@ -94,7 +105,15 @@ void MnxSaxParser::readAttributeValue( std::string & attr ) {
 					throw Mishap( "Malformed escape" );
 				}
 			}
-			if ( esc == "lt" ) {
+			if ( esc.size() >= 2 && esc[0] == '#' ) {
+				stringstream s( &esc[1] );
+				int n;
+				if ( s >> n && n == static_cast< char >( n ) ) {
+					attr.push_back( static_cast< char >( n ) );
+				} else {
+					throw Mishap( "Unexpected numeric sequence after &#" ).culprit( "Sequence", esc );
+				}
+			} else if ( esc == "lt" ) {
 				attr.push_back( '<' );
 			} else if ( esc == "gt" ) {
 				attr.push_back( '>' );
@@ -105,7 +124,7 @@ void MnxSaxParser::readAttributeValue( std::string & attr ) {
 			} else if ( esc == "apos" ) {
 				attr.push_back( '\'' );
 			} else {
-				throw Mishap( "Unexpected escape sequence after &" ).culprit( "Character", esc );
+				throw Mishap( "Unexpected escape sequence after &" ).culprit( "Sequence", esc );
 			}
 		} else {
 			attr.push_back( ch );

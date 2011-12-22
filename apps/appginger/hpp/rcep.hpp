@@ -40,6 +40,10 @@ public:
 		this->printing = p;
 	}
 	
+	bool & isPrinting() {
+		return this->printing;
+	}
+	
 	bool isTopLevel() {
 		return level == 1;
 	}

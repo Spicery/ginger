@@ -114,7 +114,7 @@ const char* AppContext::cgiValue( const char * fieldname ) {
 #endif
 }
 
-string AppContext::syntax() { 
+const char * AppContext::syntax() { 
 	if ( this->initial_syntax == "gnx" ) {
 		return GNX2GNX;
 	} else if ( this->initial_syntax == "" || this->initial_syntax == "common" ) {
@@ -126,4 +126,21 @@ string AppContext::syntax() {
 	} else {
 		throw Ginger::Mishap( "Unrecognised language" ).culprit( "Language", this->initial_syntax );
 	}
+}
+
+const char * AppContext::syntax( const std::string & filename ) { 
+	std::string::size_type idx = filename.rfind( '.' );
+	if ( idx != std::string::npos ) {
+		std::string extension = filename.substr( idx );
+ 		if ( extension == ".gnx" ) {
+			return GNX2GNX;
+		} else if ( extension == ".cmn" || extension == "common" ) {
+			return COMMON2GNX;
+		} else if ( extension == ".lisp" ) {
+			return LISP2GNX;
+		} else if ( extension == ".cstyle" ) {
+			return CSTYLE2GNX;
+		}
+	}
+	return this->syntax();
 }

@@ -211,6 +211,18 @@ void vmiPUSHID( Plant plant, Ident id ) {
 	}
 }
 
+void vmiDEREF( Plant plant ) {
+	vmiSYS_CALL( plant, sysIndirectionCont );
+}
+
+void vmiMAKEREF( Plant plant ) {
+	vmiSYS_CALL( plant, sysNewIndirection );
+}
+
+void vmiSETCONT( Plant plant ) {
+	vmiSYS_CALL( plant, sysSetIndirectionCont );
+}
+
 void vmiSET( Plant plant, int A ) {
 	emitSPC( plant, vmc_set );
 	emitRef( plant, ToRef( A ) );

@@ -90,7 +90,9 @@ LIBEXECUTABLES=\
 	apps/lnx2csv/cpp/lnx2csv \
 	apps/lnx2mnx/cpp/lnx2mnx
 
-install: all
+install: all plaininstall
+
+plaininstall:
 	echo Installing user binaries into $(INSTALL_BIN)
 	echo Installing toolchain binaries into $(INSTALL_TOOL)
 	echo Installing support files $(INSTALL_LIB)

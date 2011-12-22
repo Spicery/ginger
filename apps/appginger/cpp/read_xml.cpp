@@ -245,6 +245,12 @@ Term mnxToTerm( shared< Ginger::Mnx > mnx ) {
 		vector< Term > kids;
 		fillKids( mnx, kids );
 		return makeSysApp( "newVector", kids );	
+	} else if ( name == "deref" && mnx->size() == 1 ) {
+		return term_new_basic1( fnc_deref, mnxChildToTerm( mnx, 0 ) );
+	} else if ( name == "makeref"  && mnx->size() == 1 ) {
+		return term_new_basic1( fnc_makeref, mnxChildToTerm( mnx, 0 ) );
+	} else if ( name == "setcont"  && mnx->size() == 2 ) {
+		return term_new_basic2( fnc_setcont, mnxChildToTerm( mnx, 0 ), mnxChildToTerm( mnx, 1 ) );
 	} else if ( name == "throw" && nkids == 1 ) {
 		return term_new_basic1( fnc_throw, mnxChildToTerm( mnx, 0 ) );
 	} else if ( name == "assert" && nkids == 1 ) {

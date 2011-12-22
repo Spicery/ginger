@@ -21,12 +21,18 @@
 
 #include "common.hpp"
 
+//	DEPRECATED
 extern Ref * sysMakeIndirection( Ref * pc, class MachineClass * vm );
 extern Ref * sysCopyIndirection( Ref * pc, class MachineClass * vm );
 extern Ref * sysPushIndirection( Ref * pc, class MachineClass * vm );
 extern Ref * sysPopIndirection( Ref * pc, class MachineClass * vm );
 
+//	OK
 extern Ref & fastIndirectionCont( Ref indirection );
 
+//	NEW VERSIONS
+Ref * sysSetIndirectionCont( Ref * pc, class MachineClass * vm );
+Ref * sysIndirectionCont( Ref * pc, class MachineClass * vm );
+Ref * sysNewIndirection( Ref * pc, class MachineClass * vm );
 
 #endif

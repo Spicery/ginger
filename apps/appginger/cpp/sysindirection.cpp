@@ -34,6 +34,7 @@ using namespace std;
 	slot number of the variable to be updated. It is inherently
 	fast and dangerous!
 */
+//	DEPRECATING
 Ref * sysMakeIndirection( Ref * pc, class MachineClass * vm ) {
 	XfrClass xfr( vm->heap().preflight( pc, INDIRECTION_SIZE ) );
 	xfr.setOrigin();
@@ -43,6 +44,19 @@ Ref * sysMakeIndirection( Ref * pc, class MachineClass * vm ) {
 	vm->sp[ ToULong( pc[-1] ) ] = r;
 	#ifdef DBG_LIFTING
 		cerr << "Made indirection " << r << endl;
+	#endif
+	return pc;
+}
+
+//	NEW VERSION
+Ref * sysNewIndirection( Ref * pc, class MachineClass * vm ) {
+	XfrClass xfr( vm->heap().preflight( pc, INDIRECTION_SIZE ) );
+	xfr.setOrigin();
+	xfr.xfrRef( sysIndirectionKey );
+	xfr.xfrRef( vm->fastPeek() );
+	vm->fastPeek() = xfr.makeRef();
+	#ifdef DBG_LIFTING
+		cerr << "Made new indirection " << r << endl;
 	#endif
 	return pc;
 }
@@ -59,6 +73,7 @@ Ref & fastIndirectionCont( Ref indirection ) {
 	slot number of the variable to be updated. It is inherently
 	fast and dangerous!
 */
+//	DEPRECATED
 Ref * sysCopyIndirection( Ref * pc, class MachineClass * vm ) {
 	Ref & var = vm->vp[ ToULong( pc[-1] ) ];
 	XfrClass xfr( vm->heap().preflight( pc, INDIRECTION_SIZE ) );
@@ -74,19 +89,35 @@ Ref * sysCopyIndirection( Ref * pc, class MachineClass * vm ) {
 	slot number of the variable to be pushed. It is inherently
 	fast and dangerous!
 */
+//	DEPRECATED
 Ref * sysPushIndirection( Ref * pc, class MachineClass * vm ) {
 	Ref var = vm->sp[ ToULong( pc[-1] ) ];
 	vm->fastPush( fastIndirectionCont( var ) );
 	return pc;
 }
 
+//	NEW VERSION
+Ref * sysIndirectionCont( Ref * pc, class MachineClass * vm ) {
+	vm->fastPeek() = fastIndirectionCont( vm->fastPeek() );
+	return pc;
+}
+
+
 /**
 	sysPopIndirection will be called with pc[-1] storing the
 	slot number of the variable to be popped. It is inherently
 	fast and dangerous!
 */
+//	DEPRECATED
 Ref * sysPopIndirection( Ref * pc, class MachineClass * vm ) {
 	Ref var = vm->sp[ ToULong( pc[-1] ) ];
+	fastIndirectionCont( var ) = vm->fastPop();
+	return pc;
+}
+
+//	NEW VERSION
+Ref * sysSetIndirectionCont( Ref * pc, class MachineClass * vm ) {
+	Ref var = vm->fastPop();
 	fastIndirectionCont( var ) = vm->fastPop();
 	return pc;
 }

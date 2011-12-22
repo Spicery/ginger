@@ -1,7 +1,7 @@
 ================================================================================
 Title: K
 --------------------------------------------------------------------------------
-<!-- define K( x ) => fn y => x endfn enddefine -->
+<!-- define K( x ) =>> fn y =>> x endfn enddefine -->
 <bind>
 	<var name="K" protected="true" />
 	<fn name="outer">
@@ -23,16 +23,16 @@ true
 Title: Stateful
 --------------------------------------------------------------------------------
 <!--
-	define foo() =>
+	define foo() =>>
 		var x := 0;
-		fn () => x + 1 -> x; x endfn
+		fn () =>> x + 1 -> x; x endfn
 	enddefine;
 	var f := foo();
 	f();
 	f();
 	f();
 -->
-<bind><var name="foo" protected="true"/><fn name="foo"><seq/><seq><bind><var name="x" tag="public"/><constant type="int" value="0"/></bind><fn><seq/><seq><set><sysapp name="+"><id name="x"/><constant type="int" value="1"/></sysapp><id name="x"/></set><id name="x"/></seq></fn></seq></fn></bind>
+<bind><var name="foo" protected="true"/><fn name="foo"><seq/><seq><bind><var name="x" protected="false" tag="public"/><constant type="int" value="0"/></bind><fn><seq/><seq><set><sysapp name="+"><id name="x"/><constant type="int" value="1"/></sysapp><id name="x"/></set><id name="x"/></seq></fn></seq></fn></bind>
 <bind><var name="f" tag="public"/><app><id name="foo"/><seq/></app></bind>
 <app><id name="f"/><seq/></app>
 <app><id name="f"/><seq/></app>

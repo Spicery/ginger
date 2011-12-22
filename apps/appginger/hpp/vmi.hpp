@@ -73,6 +73,10 @@ extern void vmiIF_EQ_ID_ID( Plant plant, Ident id1, Ident id2, DestinationClass 
 extern void vmiIF_NEQ_ID_CONSTANT( Plant plant, Ident id, Ref constant, DestinationClass & d );
 extern void vmiIF_NEQ_ID_ID( Plant plant, Ident id1, Ident id2, DestinationClass & d );
 //extern void vmiEQQ( Plant plant, Ref r );
+extern void vmiSETCONT( Plant plant );
+extern void vmiDEREF( Plant plant );
+extern void vmiMAKEREF( Plant plant );
+
 
 
 class VmiRelOpFactory {

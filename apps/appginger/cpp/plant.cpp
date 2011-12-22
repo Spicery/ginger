@@ -381,6 +381,26 @@ void PlantClass::compileTerm( Term term ) {
 			}
 			break;
 		}
+		case fnc_deref: {
+			Term id = term_index( term, 0 );
+			if ( term_functor( id ) != fnc_id ) throw Ginger::SystemError( "Internal Error - deref" );
+			this->compile1( id );
+			vmiDEREF( this );
+			break;
+		}
+		case fnc_makeref: {
+			this->compile1( term_index( term, 0 ) );
+			vmiMAKEREF( this );
+			break;
+		}
+		case fnc_setcont: {
+			Term id = term_index( term, 1 );
+			if ( term_functor( id ) != fnc_id ) throw Ginger::SystemError( "Internal Error - setcont" );
+			this->compile1( term_index( term, 0 ) );
+			this->compile1( id );
+			vmiSETCONT( this );
+			break;
+		}
 		case fnc_bind: {
 			Term var = term_index( term, 0 );
 			if ( term_functor( var ) != fnc_var ) throw;

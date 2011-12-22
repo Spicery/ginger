@@ -430,7 +430,12 @@ Term ResolveStateClass::resolve( Term term ) {
         case fnc_assign: {
         	this->generalResolve( term );
         	NamedTermMixin * t = dynamic_cast< NamedTermMixin * >( term->child(1).get() );
-        	t->ident()->setAssigned();
+        	if ( not t ) {
+        		throw Ginger::SystemError( "Internal error - fnc_assign" );
+        	} else {
+	        	t->ident()->setAssigned();
+	        }
+        	return term;
         }
         default: {
             if ( term_count( term ) == 0 ) {

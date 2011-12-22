@@ -38,19 +38,19 @@ class Package;
 
 class AppContext {
 private:
-	int 				machine_impl_num;
-	bool 				dbg_show_code;
-	bool 				is_gctrace;
-	std::list< std::string >		project_folder_list;
-	char **				envp;
-	std::vector< std::string > arg_list;
+	int 						machine_impl_num;
+	bool 						dbg_show_code;
+	bool 						is_gctrace;
+	std::list< std::string >	project_folder_list;
+	char **						envp;
+	std::vector< std::string > 	arg_list;
 	#ifdef RUDECGI
-		rude::CGI * 		cgi;
+		rude::CGI * 			cgi;
 	#endif
-	bool				use_stdin;
-	int					print_level;
-	bool				welcoming;
-	std::string         initial_syntax;
+	bool						use_stdin;
+	int							print_level;
+	bool						welcoming;
+	std::string         		initial_syntax;
 
 public:
 	void setGCTrace( bool t ) { this->is_gctrace = t; }
@@ -72,7 +72,8 @@ public:
 	const char* cgiValue( const char* fieldname );
 	void initCgi();
 	bool & welcomeBanner() { return this->welcoming; }
-	std::string syntax(); 
+	const char * syntax(); 
+	const char * syntax( const std::string & filename ); 
 	void setSyntax( const std::string s ) { this->initial_syntax = s; }
 
 public:

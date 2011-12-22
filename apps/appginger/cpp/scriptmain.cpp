@@ -60,78 +60,54 @@ public:
 	
 		vector< string > & args = this->context.arguments();
 		for ( vector< string >::iterator it = args.begin(); it != args.end(); ++it ) {
-			fstream filestr( it->c_str(), fstream::in );
-			string line;
-			if ( filestr.good() ) {
-				//	Chew off first line.
-				getline( filestr, line );
+			stringstream commstream;
+			//	tail is 1-indexed!
+			commstream << this->context.syntax( *it ) << " < " << shellSafeName( *it ) << " | ";
+			commstream << SIMPLIFYGNX << " -su";
+			commstream << " -p " << shellSafeName( interactive_pkg->getTitle() );
+			string command( commstream.str() );
+			//	cerr << "Command so far: " << command << endl;
+			FILE * gnxfp = popen( command.c_str(), "r" );
+			if ( gnxfp == NULL ) {
+				throw Ginger::Mishap( "Failed to translate input" );
 			}
-			if ( filestr.good() ) {
-				Ginger::MnxReader content( filestr );
-				for (;;) {
-					shared< Ginger::Mnx > m = content.readMnx();
-					if ( not m ) break;
-					if ( m->name() == "option" ) {
-						if ( m->hasAttribute( "projectFolder" ) ) {
-							this->context.addProjectFolder( m->attribute( "projectFolder" ) );
-						}
-						if ( m->hasAttribute( "machine" ) ) {
-							this->context.setMachineImplNum( atoi( m->attribute( "machine" ).c_str() ) );	
-						}
-						if ( m->hasAttribute( "language" ) ) {
-							//	We are guaranteed to be just after the '>' of
-							//	the option.
-							//	We need to skip forward until we find an end-of-line.
-							getline( filestr, line );
-						
-							string lang(
-								m->hasAttribute( "language", "common" ) ? COMMON2GNX :
-								m->hasAttribute( "language", "lisp" ) ? LISP2GNX :
-								m->hasAttribute( "language", "gson" ) ? GSON2GNX :
-								( throw Ginger::Mishap( "Unrecognised language" ).culprit( "Language", m->attribute( "language" ) ) )
-							);
-						
-							const int posn = filestr.tellg();
-							stringstream commstream;
-							//	tail is 1-indexed!
-							commstream << TAIL << " -c+" << ( posn + 1 );
-							commstream << " "<< shellSafeName( *it );
-							commstream << " | " << lang << " | " << SIMPLIFYGNX << " -s";
-							string command( commstream.str() );
-							//cout << "Command so far: " << command << endl;
-							FILE * gnxfp = popen( command.c_str(), "r" );
-							if ( gnxfp == NULL ) {
-								throw Ginger::Mishap( "Failed to translate input" );
-							}
-							// ... open the file, with whatever, pipes or who-knows ...
-							// let's build a buffer from the FILE* descriptor ...
-							__gnu_cxx::stdio_filebuf<char> pipe_buf( gnxfp, ios_base::in );
-							// there we are, a regular istream is build upon the buffer :
-							istream stream_pipe_in( &pipe_buf );
-							
-							Ginger::MnxReader gnx_read( stream_pipe_in );
-							this->runFrom( rcep, gnx_read );
-							
-							pclose( gnxfp );
-							break;
-						}
-					} else {
-						rcep.execGnx( m, cout );
-						rcep.printResults( cout, 0 );
-					}
-				}
-			}
-			filestr.close();
+			// ... open the file, with whatever, pipes or who-knows ...
+			// let's build a buffer from the FILE* descriptor ...
+			__gnu_cxx::stdio_filebuf<char> pipe_buf( gnxfp, ios_base::in );
+			
+			// there we are, a regular istream is build upon the buffer.
+			istream stream_pipe_in( &pipe_buf );
+			
+			while ( rcep.unsafe_read_comp_exec_print( stream_pipe_in, std::cout ) ) {}
+
+			pclose( gnxfp );
 		}
 		if ( this->context.useStdin() ) {
-			Ginger::MnxReader gnx_read( cin );
-			this->runFrom( rcep, gnx_read );			
+		
+			stringstream commstream;
+			//	tail is 1-indexed!
+			commstream << this->context.syntax() << " | ";
+			commstream << SIMPLIFYGNX << " -su";
+			commstream << " -p " << shellSafeName( interactive_pkg->getTitle() );
+			string command( commstream.str() );
+
+			FILE * gnxfp = popen( command.c_str(), "r" );
+			if ( gnxfp == NULL ) {
+				throw Ginger::Mishap( "Failed to translate input" );
+			}
+		
+			__gnu_cxx::stdio_filebuf<char> pipe_buf( gnxfp, ios_base::in );
+			istream stream_pipe_in( &pipe_buf );
+			while ( rcep.unsafe_read_comp_exec_print( stream_pipe_in, std::cout ) ) {}
+			
+			pclose( gnxfp );
 		}
 	    return EXIT_SUCCESS;
 	}
 
 public:
 	ScriptMain( const char * name ) : ToolMain( name ) {
+		this->context.printLevel() = 1;
 	}
 	
 	virtual ~ScriptMain() {}
@@ -143,7 +119,7 @@ int main( int argc, char **argv, char **envp ) {
 	try {
 		ScriptMain main( APP_TITLE );
 		return main.parseArgs( argc, argv, envp ) ? main.run() : EXIT_SUCCESS;
-	} catch ( Ginger::SystemError & e ) {
+	} catch ( Ginger::Problem & e ) {
 		e.report();
 		return EXIT_FAILURE;
 	}

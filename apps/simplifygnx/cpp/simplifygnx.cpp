@@ -72,6 +72,10 @@ to it as a stream.
 #define VAR				"var"
 #define VAR_NAME		"name"
 
+#define MAKEREF			"makeref"
+#define DEREF			"deref"
+#define SETCONT			"setcont"
+
 #define IF				"if"
 #define SET				"set"
 #define FOR				"for"
@@ -818,8 +822,8 @@ public:
 					element.putAttribute( OUTER_LEVEL, v->max_diff_use_level );
 				}
 			}
-			if ( v != NULL && v->is_protected ) {
-				element.putAttribute( PROTECTED, "true" );
+			if ( v != NULL ) {
+				element.putAttribute( PROTECTED, v->is_protected ? "true" : "false" );
 			}
 		} else if ( x == VAR ) {
 			const string & name = element.attribute( VAR_NAME );
@@ -1045,27 +1049,49 @@ public:
 class AddDeref : public Ginger::MnxVisitor {
 public:
 	
-	void startVisit( Ginger::Mnx & element ) {
-	}
-	
-	//	This has to be an endVisit. If it is a startVisit, it might
-	//	generate an infinite loop, generating and infinitely deep
-	//	chain of derefs. It could be a start visit IF we added/removed
-	//	a flag attribute.
+	//	This has to EITHER be an endVisit or add a processed flag.
+	//	If it is a startVisit, it might generate an infinite loop, generating an
+	//	infinitely deep chain of derefs. So we alter the IS_OUTER flag attribute
+	//	and test it to inhibit the loop. [Or we could just move it to be an 
+	//	endVisit]
 	//
-	void endVisit( Ginger::Mnx & element ) {
+	void startVisit( Ginger::Mnx & element ) {
 		const string & x = element.name();
 		if ( element.hasAttribute( IS_OUTER, "true" ) && element.hasAttribute( PROTECTED, "false" ) && ( x == "var" || x == "id" ) ) {
+			element.putAttribute( IS_OUTER, "deref" );			//	Mark as processed.
 			shared< Ginger::Mnx > t( new Ginger::Mnx( x ) );
 			t->copyFrom( element );
 			shared< Ginger::Mnx > d( new Ginger::Mnx( "deref" ) );
 			d->addChild( t );
 			element.copyFrom( *d );
-		/*} else if ( x == "bind" && element.child(0).name() == "deref" ) {
-			//	<bind><deref><var></deref>EXPR</bind> 
-			//	<bind><var><makeref>EXPR</makeref></bind>
-			GOT HERE*/
-		}
+		}	
+	}
+	
+	void endVisit( Ginger::Mnx & element ) {
+		const string & x = element.name();
+		if ( 
+			x == BIND && 
+			element.size() == 2 &&
+			element.child(0)->name() == DEREF &&
+			element.child(0)->size() == 1
+		) {
+			//	<bind><deref><var...></deref>EXPR</bind> 
+			//	<bind><var...><makeref>EXPR</makeref></bind>			
+			shared< Ginger::Mnx > makeref( new Ginger::Mnx( MAKEREF ) );
+			makeref->addChild( element.child(1) );
+			element.child(0) = element.child(0)->child(0);
+			element.child(1) = makeref;
+		} else if (
+			x == SET &&
+			element.size() == 2 &&
+			element.child(1)->name() == DEREF &&
+			element.child(1)->size() == 1
+		) {
+			//	<set> EXPR <deref><var...></deref> </bind> 
+			//	<setcont> EXPR <var...> </bind>		
+			element.name() = SETCONT;
+			element.child(1) = element.child(1)->child(0);
+		} 
 	}
 	
 public:

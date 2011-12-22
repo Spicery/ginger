@@ -699,9 +699,7 @@ Node ReadStateClass::readVarVal( TokType fnc ) {
 	readTags( *this, var, "tag", true );
 	Item item = this->readIdItem();
 	var.put( "name", item->nameString() );
-	if ( fnc == tokty_val ) {
-		var.put( "protected", "true" );
-	}
+	var.put( "protected", fnc == tokty_val ? "true" : "false" );
 	var.end();
 	Node v = var.build();
 	bind.add( v );

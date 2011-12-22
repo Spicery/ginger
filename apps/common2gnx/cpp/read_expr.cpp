@@ -173,7 +173,7 @@ Node ReadStateClass::readCompoundStmnts( bool obrace_read ) {
 Node ReadStateClass::readSingleStmnt() {
 	if ( this->cstyle_mode ) {
 		Item it = this->item_factory->read();
-		cerr << "SINGLE " << tok_type_name( it->tok_type ) << endl;
+		//cerr << "SINGLE " << tok_type_name( it->tok_type ) << endl;
 		switch ( it->tok_type ) {
 			case tokty_obrace: return this->readCompoundStmnts( true );
 			case tokty_function: return this->readDefinition();

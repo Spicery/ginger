@@ -13,6 +13,11 @@ integral part of the compiler-interpreter.
 *arity*:: 
 	This attribute is used to attach a proven arity.  It applies to
 	all elements.
+	
+*is.assigned*::
+	This attributes marks +var+ and +id+ elements as to whether or not they
+	are assigned to (target of +set+). The value is "true" if the element is
+	assigned to at some point. Otherwise it is omitted.
 
 *is.outer*:: [Debug only]
 	This tag is used during the lifting process, marking +var+ elements that

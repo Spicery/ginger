@@ -215,10 +215,10 @@ Ref * sysClassRecogniser( Ref * pc, MachineClass *vm ) {
 	Ref kk = vm->fastPeek();
 	if ( !IsObj( kk ) || *RefToPtr4( kk ) != sysKeyKey ) throw Ginger::Mishap( "Key needed" );
 	Plant plant = vm->plant();
-	vmiFUNCTION( plant, 1, 1 );
-	vmiSYS_CALL_ARG( plant, sysargRecognise, kk );
-	vmiSYS_RETURN( plant );
-	vm->fastPeek() = vmiENDFUNCTION( plant );
+	plant->vmiFUNCTION( 1, 1 );
+	plant->vmiSYS_CALL_ARG( sysargRecognise, kk );
+	plant->vmiSYS_RETURN();
+	vm->fastPeek() = plant->vmiENDFUNCTION();
 	return pc;
 }
 
@@ -248,11 +248,11 @@ Ref * sysClassConstructor( Ref * pc, MachineClass *vm ) {
 	Ref * obj_K = RefToPtr4( kk );
 	long n = SmallToLong( obj_K[ CLASS_OFFSET_NFIELDS ] );
 	Plant plant = vm->plant();
-	vmiFUNCTION( plant, n, 1 );
+	plant->vmiFUNCTION( n, 1 );
 	//vmiCHECK_COUNT( plant, n );
-	vmiSYS_CALL_ARGDAT( plant, sysargdatConstruct, kk, n );
-	vmiSYS_RETURN( plant );
-	vm->fastPeek() = vmiENDFUNCTION( plant );
+	plant->vmiSYS_CALL_ARGDAT( sysargdatConstruct, kk, n );
+	plant->vmiSYS_RETURN();
+	vm->fastPeek() = plant->vmiENDFUNCTION();
 	return pc;
 }
 
@@ -279,10 +279,10 @@ Ref * sysClassAccessor( Ref * pc, MachineClass *vm ) {
 	long index = SmallToLong( N );
 	if ( 1 <= index && index <= nargs ) {
 		Plant plant = vm->plant();
-		vmiFUNCTION( plant, 1, 1 );
-		vmiSYS_CALL_ARGDAT( plant, sysargdatAccess, kk, index );
-		vmiSYS_RETURN( plant );
-		vm->fastPeek() = vmiENDFUNCTION( plant );
+		plant->vmiFUNCTION( 1, 1 );
+		plant->vmiSYS_CALL_ARGDAT( sysargdatAccess, kk, index );
+		plant->vmiSYS_RETURN();
+		vm->fastPeek() = plant->vmiENDFUNCTION();
 	} else {
 		throw Ginger::Mishap( "ToBeDone" );
 	}
@@ -299,10 +299,10 @@ Ref * sysClassUnsafeAccessor( Ref * pc, MachineClass *vm ) {
 	long index = SmallToLong( N );
 	if ( 1 <= index && index <= nargs ) {
 		Plant plant = vm->plant();
-		vmiFUNCTION( plant, 1, 1 );
-		vmiFIELD( plant, index );
-		vmiSYS_RETURN( plant );
-		vm->fastPeek() = vmiENDFUNCTION( plant );
+		plant->vmiFUNCTION( 1, 1 );
+		plant->vmiFIELD( index );
+		plant->vmiSYS_RETURN();
+		vm->fastPeek() = plant->vmiENDFUNCTION();
 	} else {
 		throw Ginger::Mishap( "ToBeDone" );
 	}
@@ -332,9 +332,9 @@ Ref * sysClassExploder( Ref * pc, MachineClass * vm ) {
 	const long N = SmallToLong( key_K[ CLASS_OFFSET_NFIELDS ] );
 
 	Plant plant = vm->plant();
-	vmiFUNCTION( plant, 1, N );
-	vmiSYS_CALL_ARG( plant, sysargExplode, key );
-	vmiSYS_RETURN( plant );
-	vm->fastPeek() = vmiENDFUNCTION( plant );
+	plant->vmiFUNCTION( 1, N );
+	plant->vmiSYS_CALL_ARG( sysargExplode, key );
+	plant->vmiSYS_RETURN();
+	vm->fastPeek() = plant->vmiENDFUNCTION();
 	return pc;
 }

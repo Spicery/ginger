@@ -25,60 +25,6 @@
 #include "ident.hpp"
 #include "instruction.hpp"
 
-extern void vmiOPERATOR( Plant plant, Functor fnc );
-extern void vmiFIELD( Plant plant, long index );
-extern void vmiINCR( Plant plant, int n );
-extern void vmiPUSHQ( Plant plant, Ref obj );
-extern void vmiNEWID( Plant plant, Ident id );
-extern void vmiCOPYID( Plant plant, Ident id );
-extern void vmiPUSHID( Plant plant, Ident id );
-extern void vmiPUSH_INNER_SLOT( Plant plant, int slot );
-extern void vmiPOPID( Plant plant, Ident id );
-extern void vmiINSTRUCTION( Plant plant, Instruction instr );
-extern void vmiINVOKE( Plant plant );
-extern void vmiSYS_CALL( Plant plant, SysCall * r );
-extern void vmiSYS_CALL_ARG( Plant plant, SysCall * r, Ref ref );
-extern void vmiSYS_CALL_DAT( Plant plant, SysCall * r, unsigned long data );
-extern void vmiSYS_CALL_ARGDAT( Plant plant, SysCall * r, Ref ref, unsigned long data );
-extern void vmiSET_SYS_CALL( Plant plant, SysCall * r, int A );
-extern void vmiSYS_RETURN( Plant plant );
-extern void vmiRETURN( Plant plant );
-extern void vmiENTER( Plant plant );
-extern void vmiFUNCTION( Plant plant, int N, int A );
-extern Ref vmiENDFUNCTION( Plant plant );
-extern Ref vmiENDFUNCTION( Plant plant, bool in_heap );
-extern Ref vmiENDFUNCTION( Plant plant, Ref fnkey );
-extern void vmiSTART_MARK( Plant plant, int N );
-extern void vmiEND_MARK( Plant plant, int N );
-extern void vmiCHAIN_LITE( Plant plant, Ref fn, long N );
-extern void vmiCHECK_COUNT( Plant plant, int N );
-extern void vmiCHECK_MARK1( Plant plant, int N );
-extern void vmiCHECK_MARK0( Plant plant, int N );
-extern void vmiCALLS( Plant plant );
-extern void vmiIFNOT( Plant plant, DestinationClass & d );
-extern void vmiIFSO( Plant plant, DestinationClass & d );
-extern void vmiIF( bool sense, Plant plant, DestinationClass & d );
-extern void vmiGOTO( Plant plant, DestinationClass & d );
-extern void vmiIF_RELOP( Plant plant, bool sense, char flag1, int arg1, char op, char flag2, int arg2, DestinationClass & dst );
-extern void vmiIFSO_RELOP( Plant plant, char flag1, int arg1, char op, char flag2, int arg2, DestinationClass & dst );
-extern void vmiIFNOT_RELOP( Plant plant, char flag1, int arg1, char op, char flag2, int arg2, DestinationClass & dst );
-extern void vmiEND1_CALLS( Plant plant, int var );
-extern void vmiSET_CALLS( Plant plant, int in_arity );
-extern void vmiEND_CALL_ID( Plant plant, int var, Ident ident );
-extern void vmiSET_CALL_ID( Plant plant, int in_arity, Ident ident );
-extern void vmiSET( Plant plant, int A );
-extern void vmiNOT( Plant plant );
-extern void vmiIF_EQ_ID_CONSTANT( Plant plant, Ident id, Ref constant, DestinationClass & d );
-extern void vmiIF_EQ_ID_ID( Plant plant, Ident id1, Ident id2, DestinationClass & d );
-extern void vmiIF_NEQ_ID_CONSTANT( Plant plant, Ident id, Ref constant, DestinationClass & d );
-extern void vmiIF_NEQ_ID_ID( Plant plant, Ident id1, Ident id2, DestinationClass & d );
-//extern void vmiEQQ( Plant plant, Ref r );
-extern void vmiSETCONT( Plant plant );
-extern void vmiDEREF( Plant plant );
-extern void vmiMAKEREF( Plant plant );
-
-
-
 class VmiRelOpFactory {
 private:
 	Plant plant;

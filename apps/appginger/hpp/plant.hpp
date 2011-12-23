@@ -94,18 +94,80 @@ private:
 	std::vector< DestinationClass > 	destination_vector;
 	
 public:
-
 	DestinationClass & newDestination();
 	
 public:
-
 	std::vector< Ref > dump_data;
 	int 		nresults;
 	int			nlocals;
 	int 		ninputs;
 	int 		slot;
 	MachineClass 	*vm;
+
+public:
+	void emitSPC( Instruction instr );
+	void emitRef( Ref ref );
+	void emitValof( Valof *v );
 	
+private:
+	void vmiCMP_ID_CONSTANT( bool flag, Ident id, Ref r, DestinationClass & d );
+	void vmiCMP_ID_ID( bool flag, Ident id1, Ident id2, DestinationClass & d );
+
+public:
+	void vmiOPERATOR( Functor fnc );
+	void vmiFIELD( long index );
+	void vmiINCR( int n );
+	void vmiPUSHQ( Ref obj );
+	void vmiNEWID( Ident id );
+	void vmiCOPYID( Ident id );
+	void vmiPUSHID( Ident id );
+	void vmiPUSH_INNER_SLOT( int slot );
+	void vmiPOPID( Ident id );
+	void vmiPOP_INNER_SLOT( int slot );
+	void vmiINSTRUCTION( Instruction instr );
+	void vmiINVOKE();
+	void vmiSYS_CALL( SysCall * r );
+	void vmiSYS_CALL_ARG( SysCall * r, Ref ref );
+	void vmiSYS_CALL_DAT( SysCall * r, unsigned long data );
+	void vmiSYS_CALL_ARGDAT( SysCall * r, Ref ref, unsigned long data );
+	void vmiSET_SYS_CALL( SysCall * r, int A );
+	void vmiSYS_RETURN();
+	void vmiRETURN();
+	void vmiENTER();
+	void vmiFUNCTION( int N, int A );
+	Ref vmiENDFUNCTION();
+	Ref vmiENDFUNCTION( bool in_heap );
+	Ref vmiENDFUNCTION( Ref fnkey );
+	Ref vmiENDFUNCTION( bool in_heap, Ref fnkey );
+	void vmiSTART_MARK( int N );
+	void vmiEND_MARK( int N );
+	void vmiCHAIN_LITE( Ref fn, long N );
+	void vmiCHECK_COUNT( int N );
+	void vmiCHECK_MARK1( int N );
+	void vmiCHECK_MARK0( int N );
+	void vmiCALLS();
+	void vmiIFNOT( DestinationClass & d );
+	void vmiIFSO( DestinationClass & d );
+	void vmiIF( bool sense, DestinationClass & d );
+	void vmiGOTO( DestinationClass & d );
+	void vmiIF_RELOP( bool sense, char flag1, int arg1, char op, char flag2, int arg2, DestinationClass & dst );
+	void vmiIFSO_RELOP( char flag1, int arg1, char op, char flag2, int arg2, DestinationClass & dst );
+	void vmiIFNOT_RELOP( char flag1, int arg1, char op, char flag2, int arg2, DestinationClass & dst );
+	void vmiEND1_CALLS( int var );
+	void vmiSET_CALLS( int in_arity );
+	void vmiEND_CALL_ID( int var, Ident ident );
+	void vmiSET_CALL_ID( int in_arity, Ident ident );
+	void vmiSET( int A );
+	void vmiNOT();
+	void vmiIF_EQ_ID_CONSTANT( Ident id, Ref constant, DestinationClass & d );
+	void vmiIF_EQ_ID_ID( Ident id1, Ident id2, DestinationClass & d );
+	void vmiIF_NEQ_ID_CONSTANT( Ident id, Ref constant, DestinationClass & d );
+	void vmiIF_NEQ_ID_ID( Ident id1, Ident id2, DestinationClass & d );
+	void vmiSETCONT();
+	void vmiDEREF();
+	void vmiMAKEREF();
+
+
 private:
 	void compileQueryInit( Term query );
 	void compileQueryNext( Term query );

@@ -62,12 +62,12 @@ Ref * sysPartApply( Ref *pc, class MachineClass * vm ) {
 
 	//	This seems very unlikely to be correct. We can't just go around
 	//	substracting arities.
-	vmiFUNCTION( plant, F_in_arity - N, F_out_arity );
+	plant->vmiFUNCTION( F_in_arity - N, F_out_arity );
 	for ( int i = 0; i < N; i++ ) {
-		vmiPUSHQ( plant, vm->vp[ i ] );
+		plant->vmiPUSHQ( vm->vp[ i ] );
 	}
-	vmiCHAIN_LITE( plant, F, N );
-	Ref part_apply = vmiENDFUNCTION( plant );
+	plant->vmiCHAIN_LITE( F, N );
+	Ref part_apply = plant->vmiENDFUNCTION();
 	
 	vm->fastPeek() = part_apply;
 

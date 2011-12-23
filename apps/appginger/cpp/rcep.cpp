@@ -114,11 +114,11 @@ void RCEP::execGnx( shared< Ginger::Mnx > mnx, std::ostream & output ) {
         #endif
 
 	    plant = vm->plant();
-	    vmiFUNCTION( plant, 0, 0 );
-	    vmiENTER( plant );
+	    plant->vmiFUNCTION( 0, 0 );
+	    plant->vmiENTER();
         plant->compileTerm( term );
-	    vmiRETURN( plant );
-	    r = vmiENDFUNCTION( plant );
+	    plant->vmiRETURN();
+	    r = plant->vmiENDFUNCTION();
 	    vm->addToQueue( r );
 	    if ( this->isTopLevel() ) {
         	#ifdef DBG_RCEP
@@ -199,11 +199,11 @@ bool RCEP::unsafe_read_comp_exec_print( istream & input, std::ostream & output )
 	    #endif
 
 	    plant = vm->plant();
-	    vmiFUNCTION( plant, 0, 0 );
-	    vmiENTER( plant );
+	    plant->vmiFUNCTION( 0, 0 );
+	    plant->vmiENTER();
         plant->compileTerm( term );
-	    vmiRETURN( plant );
-	    r = vmiENDFUNCTION( plant );
+	    plant->vmiRETURN();
+	    r = plant->vmiENDFUNCTION();
 	    start = clock();
 	    
 		#ifdef DBG_RCEP

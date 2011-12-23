@@ -90,19 +90,19 @@ void MachineClass::executeQueue() {
 	    this->execute( r );
 	} else {		
 		Plant plant = this->plant();
-	    vmiFUNCTION( plant, 0, 0 );
-	    vmiENTER( plant );
+	    plant->vmiFUNCTION( 0, 0 );
+	    plant->vmiENTER();
         for ( 
         	vector< Ref >::iterator it = this->queue.begin();
         	it != this->queue.end();
         	++it
         ) {
-        	vmiPUSHQ( plant, *it );
-        	vmiSET_CALLS( plant, 0 );
+        	plant->vmiPUSHQ( *it );
+        	plant->vmiSET_CALLS( 0 );
         }
         this->queue.clear();
-	    vmiRETURN( plant );
-	    Ref r = vmiENDFUNCTION( plant );
+	    plant->vmiRETURN();
+	    Ref r =  plant->vmiENDFUNCTION();
 		this->gcLiftAllVetoes();
 		this->execute( r );
 	}
@@ -266,9 +266,9 @@ Ref MachineClass::sysFastListIterator() {
 	if ( iterator != NULL ) return iterator;
 	
 	PlantClass * plant = this->plant();
-	vmiFUNCTION( plant, 2, 2 );
-	vmiINSTRUCTION( plant, vmc_listiterate );
-	iterator = vmiENDFUNCTION( plant, false );
+	plant->vmiFUNCTION( 2, 2 );
+	plant->vmiINSTRUCTION( vmc_listiterate );
+	iterator = plant->vmiENDFUNCTION( false );
 
 	return iterator;
 }
@@ -280,9 +280,9 @@ Ref MachineClass::sysFastVectorIterator() {
 	if ( iterator != NULL ) return iterator;
 	
 	PlantClass * plant = this->plant();
-	vmiFUNCTION( plant, 2, 2 );
-	vmiINSTRUCTION( plant, vmc_vectoriterate );
-	iterator = vmiENDFUNCTION( plant, false );
+	plant->vmiFUNCTION( 2, 2 );
+	plant->vmiINSTRUCTION( vmc_vectoriterate );
+	iterator = plant->vmiENDFUNCTION( false );
 
 	return iterator;
 }
@@ -293,9 +293,9 @@ Ref MachineClass::sysFastMixedIterator() {
 	if ( iterator != NULL ) return iterator;
 	
 	PlantClass * plant = this->plant();
-	vmiFUNCTION( plant, 2, 2 );
-	vmiINSTRUCTION( plant, vmc_mixediterate );
-	iterator = vmiENDFUNCTION( plant, false );
+	plant->vmiFUNCTION( 2, 2 );
+	plant->vmiINSTRUCTION( vmc_mixediterate );
+	iterator = plant->vmiENDFUNCTION( false );
 
 	return iterator;
 }
@@ -307,9 +307,9 @@ Ref MachineClass::sysFastStringIterator() {
 	if ( iterator != NULL ) return iterator;
 	
 	PlantClass * plant = this->plant();
-	vmiFUNCTION( plant, 2, 2 );
-	vmiINSTRUCTION( plant, vmc_stringiterate );
-	iterator = vmiENDFUNCTION( plant, false );
+	plant->vmiFUNCTION( 2, 2 );
+	plant->vmiINSTRUCTION( vmc_stringiterate );
+	iterator = plant->vmiENDFUNCTION( false );
 
 	return iterator;
 }

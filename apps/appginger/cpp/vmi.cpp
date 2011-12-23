@@ -20,69 +20,54 @@ static void this_never_happens() {
 	throw Ginger::Unreachable( __FILE__, __LINE__ );
 }
 
-static void emitSPC( Plant plant, Instruction instr ) {
-	const InstructionSet & ins = plant->instructionSet();
-	Ref instr_ptr = ins.lookup( instr );
-	plant->plantRef( instr_ptr );
+void PlantClass::vmiINSTRUCTION( Instruction instr ) {
+	this->emitSPC( instr );
 }
 
-static void emitRef( Plant plant, Ref ref ) {
-	plant->plantRef( ref );
-}
-
-static void emitValof( Plant plant, Valof *v ) {
-	plant->plantRef( ToRef( v ) );
-}
-
-void vmiINSTRUCTION( Plant plant, Instruction instr ) {
-	emitSPC( plant, instr );
-}
-
-void vmiSYS_CALL( Plant plant, SysCall * r ) {
-	emitSPC( plant, vmc_syscall );
-	emitRef( plant, ToRef( r ) );
+void PlantClass::vmiSYS_CALL( SysCall * r ) {
+	this->emitSPC( vmc_syscall );
+	this->emitRef( ToRef( r ) );
 }
 
 /**
 	Plants a non-garbage collectable reference as extra data for
 	the system call, to be accessed via pc[-1].
-	@param plant the code-planter
+	@param this the code-planter
 	@param r the system call
 	@param data arbitrary data, size compatible with void*
 */
-void vmiSYS_CALL_ARG( Plant plant, SysCall * sys, Ref ref ) {
-	emitSPC( plant, vmc_syscall_arg );
-	emitRef( plant, ToRef( sys ) );
-	emitRef( plant, ref );
+void PlantClass::vmiSYS_CALL_ARG( SysCall * sys, Ref ref ) {
+	this->emitSPC( vmc_syscall_arg );
+	this->emitRef( ToRef( sys ) );
+	this->emitRef( ref );
 }
 
-void vmiSYS_CALL_DAT( Plant plant, SysCall * sys, unsigned long data ) {
-	emitSPC( plant, vmc_syscall_dat );
-	emitRef( plant, ToRef( sys ) );
-	emitRef( plant, ToRef( data ) );
+void PlantClass::vmiSYS_CALL_DAT( SysCall * sys, unsigned long data ) {
+	this->emitSPC( vmc_syscall_dat );
+	this->emitRef( ToRef( sys ) );
+	this->emitRef( ToRef( data ) );
 }
 
-void vmiSYS_CALL_ARGDAT( Plant plant, SysCall * sys, Ref ref, unsigned long data ) {
-	emitSPC( plant, vmc_syscall_argdat );
-	emitRef( plant, ToRef( sys ) );
-	emitRef( plant, ref );
-	emitRef( plant, ToRef( data ) );
+void PlantClass::vmiSYS_CALL_ARGDAT( SysCall * sys, Ref ref, unsigned long data ) {
+	this->emitSPC( vmc_syscall_argdat );
+	this->emitRef( ToRef( sys ) );
+	this->emitRef( ref );
+	this->emitRef( ToRef( data ) );
 }
 
 
-void vmiSET_SYS_CALL( Plant plant, SysCall * r, int A ) {
-	emitSPC( plant, vmc_set_syscall );
-	emitRef( plant, ToRef( A ) );
-	emitRef( plant, ToRef( r ) );
+void PlantClass::vmiSET_SYS_CALL( SysCall * r, int A ) {
+	this->emitSPC( vmc_set_syscall );
+	this->emitRef( ToRef( A ) );
+	this->emitRef( ToRef( r ) );
 }
 
-void vmiSYS_RETURN( Plant plant ) {
-	emitSPC( plant, vmc_sysreturn );
+void PlantClass::vmiSYS_RETURN() {
+	this->emitSPC( vmc_sysreturn );
 }
 
-void vmiOPERATOR( Plant plant, Functor fnc ) {
-	vmiINSTRUCTION(
-		plant,
+void PlantClass::vmiOPERATOR( Functor fnc ) {
+	this->vmiINSTRUCTION(
         fnc == fnc_eq ? vmc_eq :
         fnc == fnc_lt ? vmc_lt :
         fnc == fnc_lte ? vmc_lte :
@@ -100,36 +85,36 @@ void vmiOPERATOR( Plant plant, Functor fnc ) {
 	);
 }
 
-void vmiFIELD( Plant plant, long index ) {
-	emitSPC( plant, vmc_field );
-	emitRef( plant, ToRef( index ) );
+void PlantClass::vmiFIELD( long index ) {
+	this->emitSPC( vmc_field );
+	this->emitRef( ToRef( index ) );
 }
 
 
-void vmiINCR( Plant plant, int n ) {
+void PlantClass::vmiINCR( int n ) {
 	switch ( n ) {
 		case 0: {
 			return;
 		}
 		case 1: {
-			emitSPC( plant, vmc_incr );
+			this->emitSPC( vmc_incr );
 			return;
 		}
 		case -1: {
-			emitSPC( plant, vmc_decr );
+			this->emitSPC( vmc_decr );
 			return;
 		}
 		default: {
-			emitSPC( plant, vmc_incr_by );
-			emitRef( plant, ToRef( LongToSmall( n ) ) );
+			this->emitSPC( vmc_incr_by );
+			this->emitRef( ToRef( LongToSmall( n ) ) );
 		}
 	}
 }
 
-void vmiCHAIN_LITE( Plant plant, Ref fn, long N ) {
-	emitSPC( plant, vmc_chainlite );
-	emitRef( plant, fn );
-	emitRef( plant, ToRef( N ) );
+void PlantClass::vmiCHAIN_LITE( Ref fn, long N ) {
+	this->emitSPC( vmc_chainlite );
+	this->emitRef( fn );
+	this->emitRef( ToRef( N ) );
 }
 
 /** vmiNEWID only affects mutable outer variables. If a
@@ -142,13 +127,13 @@ void vmiCHAIN_LITE( Plant plant, Ref fn, long N ) {
 	vmiNEWID allocates the Indirection, initialises its value to
 	the constant -undef-, and assigns that to the slot.
 	
-	@param plant a code-planter
+	@param this a code-planter
     @param id an ident-record 
 
 */
-void vmiNEWID( Plant plant, Ident id ) {
+void PlantClass::vmiNEWID( Ident id ) {
 	if ( id->isShared() ) {
-		vmiSYS_CALL_DAT( plant, sysMakeIndirection, id->getFinalSlot() );
+		this->vmiSYS_CALL_DAT( sysMakeIndirection, id->getFinalSlot() );
 	}
 }
 
@@ -161,277 +146,271 @@ void vmiNEWID( Plant plant, Ident id ) {
 	in from-to loops where the outer variable is used to 
 	maintain state information, which is really an optimisation.
 	
- 	@param plant a code-planter
+ 	@param this a code-planter
     @param id an ident-record 
 */
-void vmiCOPYID( Plant plant, Ident id ) {
+void PlantClass::vmiCOPYID( Ident id ) {
 	if ( id->isShared() ) {
-		vmiSYS_CALL_DAT( plant, sysCopyIndirection, id->getFinalSlot() );
+		this->vmiSYS_CALL_DAT( sysCopyIndirection, id->getFinalSlot() );
 	}
 }
 
-void vmiPOP_INNER_SLOT( Plant plant, int slot ) {
-	emitSPC( plant, vmc_pop_local );
-	emitRef( plant, ToRef( slot ) );	
+void PlantClass::vmiPOP_INNER_SLOT( int slot ) {
+	this->emitSPC( vmc_pop_local );
+	this->emitRef( ToRef( slot ) );	
 }
 
-void vmiPOPID( Plant plant, Ident id ) {
+void PlantClass::vmiPOPID( Ident id ) {
 	if ( id->isShared() ) {
-		vmiSYS_CALL_DAT( plant, sysPopIndirection, id->getFinalSlot() );
+		this->vmiSYS_CALL_DAT( sysPopIndirection, id->getFinalSlot() );
 	} else if ( id->isLocal() ) {
-		vmiPOP_INNER_SLOT( plant, id->getFinalSlot() );
+		this->vmiPOP_INNER_SLOT( id->getFinalSlot() );
 	} else {
-		emitSPC( plant, vmc_pop_global );
-		emitValof( plant, id->value_of );
+		this->emitSPC( vmc_pop_global );
+		this->emitValof( id->value_of );
 	}
 }
 
-void vmiPUSH_INNER_SLOT( Plant plant, int slot ) {
+void PlantClass::vmiPUSH_INNER_SLOT( int slot ) {
 	switch ( slot ) {
 	case 0:
-		emitSPC( plant, vmc_push_local0 );
+		this->emitSPC( vmc_push_local0 );
 		return;
 	case 1:
-		emitSPC( plant, vmc_push_local1 );
+		this->emitSPC( vmc_push_local1 );
 		return;
 	default:	
-		emitSPC( plant, vmc_push_local );
-		emitRef( plant, ToRef( slot ) );
+		this->emitSPC( vmc_push_local );
+		this->emitRef( ToRef( slot ) );
 	}
 }
 
-void vmiPUSHID( Plant plant, Ident id ) {
+void PlantClass::vmiPUSHID( Ident id ) {
 	if ( id->isShared() ) {
-		vmiSYS_CALL_DAT( plant, sysPushIndirection, id->getFinalSlot() );
+		this->vmiSYS_CALL_DAT( sysPushIndirection, id->getFinalSlot() );
 	} else if ( id->isLocal() ) {
-		vmiPUSH_INNER_SLOT( plant, id->getFinalSlot() );
+		this->vmiPUSH_INNER_SLOT( id->getFinalSlot() );
 	} else {
-		emitSPC( plant, vmc_push_global );
-		emitValof( plant, id->value_of );
+		this->emitSPC( vmc_push_global );
+		this->emitValof( id->value_of );
 	}
 }
 
-void vmiDEREF( Plant plant ) {
-	vmiSYS_CALL( plant, sysIndirectionCont );
+void PlantClass::vmiDEREF() {
+	this->vmiSYS_CALL( sysIndirectionCont );
 }
 
-void vmiMAKEREF( Plant plant ) {
-	vmiSYS_CALL( plant, sysNewIndirection );
+void PlantClass::vmiMAKEREF() {
+	this->vmiSYS_CALL( sysNewIndirection );
 }
 
-void vmiSETCONT( Plant plant ) {
-	vmiSYS_CALL( plant, sysSetIndirectionCont );
+void PlantClass::vmiSETCONT() {
+	this->vmiSYS_CALL( sysSetIndirectionCont );
 }
 
-void vmiSET( Plant plant, int A ) {
-	emitSPC( plant, vmc_set );
-	emitRef( plant, ToRef( A ) );
+void PlantClass::vmiSET( int A ) {
+	this->emitSPC( vmc_set );
+	this->emitRef( ToRef( A ) );
 }
 
-void vmiINVOKE( Plant plant ) {
-	emitSPC( plant, vmc_invoke );
-	emitRef( plant, SYS_ABSENT );	//	Cache.
-	emitRef( plant, SYS_ABSENT );	//	Method table.
+void PlantClass::vmiINVOKE() {
+	this->emitSPC( vmc_invoke );
+	this->emitRef( SYS_ABSENT );	//	Cache.
+	this->emitRef( SYS_ABSENT );	//	Method table.
 }
 
-void vmiCALLS( Plant plant ) {
-	emitSPC( plant, vmc_calls );
+void PlantClass::vmiCALLS() {
+	this->emitSPC( vmc_calls );
 }
 
-void vmiEND_CALL_ID( Plant plant, int var, Ident ident ) {
+void PlantClass::vmiEND_CALL_ID( int var, Ident ident ) {
 	if ( ident->isLocal() ) {
-		vmiEND_MARK( plant, var );
-		vmiPUSHID( plant, ident );
-		emitSPC( plant, vmc_calls );
+		this->vmiEND_MARK( var );
+		this->vmiPUSHID( ident );
+		this->emitSPC( vmc_calls );
 	} else {
-		emitSPC( plant, vmc_end_call_global );
-		emitRef( plant, ToRef( var ) );
-		emitValof( plant, ident->value_of );
+		this->emitSPC( vmc_end_call_global );
+		this->emitRef( ToRef( var ) );
+		this->emitValof( ident->value_of );
 	}
 }
 
-void vmiSET_CALL_ID( Plant plant, int in_arity, Ident ident ) {
+void PlantClass::vmiSET_CALL_ID( int in_arity, Ident ident ) {
 	if ( ident->isLocal() ) {
-		vmiSET( plant, in_arity );
-		vmiPUSHID( plant, ident );
-		emitSPC( plant, vmc_calls );
+		this->vmiSET( in_arity );
+		this->vmiPUSHID( ident );
+		this->emitSPC( vmc_calls );
 	} else {
-		emitSPC( plant, vmc_set_call_global );
-		emitRef( plant, ToRef( in_arity ) );
-		emitValof( plant, ident->value_of );
+		this->emitSPC( vmc_set_call_global );
+		this->emitRef( ToRef( in_arity ) );
+		this->emitValof( ident->value_of );
 	}
 }
 
-void vmiEND1_CALLS( Plant plant, int var ) {
-	emitSPC( plant, vmc_end1_calls );
-	emitRef( plant, ToRef( var ) );
+void PlantClass::vmiEND1_CALLS( int var ) {
+	this->emitSPC( vmc_end1_calls );
+	this->emitRef( ToRef( var ) );
 }
 
-void vmiSET_CALLS( Plant plant, int in_arity ) {
-	emitSPC( plant, vmc_set_calls );
-	emitRef( plant, ToRef( in_arity ) );
+void PlantClass::vmiSET_CALLS( int in_arity ) {
+	this->emitSPC( vmc_set_calls );
+	this->emitRef( ToRef( in_arity ) );
 }
 
-void vmiSTART_MARK( Plant plant, int v ) {
-	emitSPC( plant, vmc_start_mark );
-	emitRef( plant, ToRef( v ) );
+void PlantClass::vmiSTART_MARK( int v ) {
+	this->emitSPC( vmc_start_mark );
+	this->emitRef( ToRef( v ) );
 }
 
-void vmiEND_MARK( Plant plant, int v ) {
-	emitSPC( plant, vmc_end_mark );
-	emitRef( plant, ToRef( v ) );
+void PlantClass::vmiEND_MARK( int v ) {
+	this->emitSPC( vmc_end_mark );
+	this->emitRef( ToRef( v ) );
 }
 
-void vmiCHECK_COUNT( Plant plant, int v ) {
-	emitSPC( plant, vmc_check_count );
-	emitRef( plant, ToRef( v ) );
+void PlantClass::vmiCHECK_COUNT( int v ) {
+	this->emitSPC( vmc_check_count );
+	this->emitRef( ToRef( v ) );
 }
 
-void vmiCHECK_MARK1( Plant plant, int v ) {
-	emitSPC( plant, vmc_check_mark1 );
-	emitRef( plant, ToRef( v ) );
+void PlantClass::vmiCHECK_MARK1( int v ) {
+	this->emitSPC( vmc_check_mark1 );
+	this->emitRef( ToRef( v ) );
 }
 
 //	Do we ever generate this?
-void vmiCHECK_MARK0( Plant plant, int v ) {
-	emitSPC( plant, vmc_check_mark0 );
-	emitRef( plant, ToRef( v ) );
+void PlantClass::vmiCHECK_MARK0( int v ) {
+	this->emitSPC( vmc_check_mark0 );
+	this->emitRef( ToRef( v ) );
 }
 
-void vmiPUSHQ( Plant plant, Ref obj ) {
-	emitSPC( plant, vmc_pushq );
-	emitRef( plant, obj );
+void PlantClass::vmiPUSHQ( Ref obj ) {
+	this->emitSPC( vmc_pushq );
+	this->emitRef( obj );
 }
 
 
-void vmiRETURN( Plant plant ) {
-	emitSPC( plant, vmc_return );
+void PlantClass::vmiRETURN() {
+	this->emitSPC( vmc_return );
 }
 
-void vmiENTER( Plant plant ) {
-	emitSPC(
-		plant,
-		plant->ninputs == 0 ? vmc_enter0 :
-		plant->ninputs == 1 ? vmc_enter1 :
+void PlantClass::vmiENTER() {
+	this->emitSPC(
+		this->ninputs == 0 ? vmc_enter0 :
+		this->ninputs == 1 ? vmc_enter1 :
 		vmc_enter
 	);
 }
 
-void vmiFUNCTION( Plant plant, int N, int A ) {
-	plant->vm->gcVeto();
-	plant->save( N, A );
+void PlantClass::vmiFUNCTION( int N, int A ) {
+	this->vm->gcVeto();
+	this->save( N, A );
 }
 
-Ref vmiENDFUNCTION( Plant plant, bool in_heap, Ref fnkey ) {
+Ref PlantClass::vmiENDFUNCTION( bool in_heap, Ref fnkey ) {
 	Ref r;
 
-	r = plant->detach( in_heap, fnkey );
+	r = this->detach( in_heap, fnkey );
 	#ifndef DBG_VMI
-		if ( plant->vm->getShowCode() ) {
-			plant->vm->printfn( std::clog, r );
+		if ( this->vm->getShowCode() ) {
+			this->vm->printfn( std::clog, r );
 		}
 	#else
-		plant->vm->printfn( std::clog, r );
+		this->vm->printfn( std::clog, r );
 		Ref * p = RefToPtr4( r );
 		std::clog << "Scanning ... " << std::endl;
-		ScanFunc scan( plant->vm->instructionSet(), p );
+		ScanFunc scan( this->vm->instructionSet(), p );
 		for (;;) {
 			Ref * pc = scan.next();
 			if ( !pc ) break;
 			std::clog << "Ref at offset " << ( pc - p ) << std::endl;
 		}
 	#endif
-	plant->restore();
+	this->restore();
 	
-	plant->vm->gcLiftVeto();
+	this->vm->gcLiftVeto();
 	return r;
 }
 
-Ref vmiENDFUNCTION( Plant plant ) {
-	return vmiENDFUNCTION( plant, true, sysFunctionKey );
+Ref PlantClass::vmiENDFUNCTION() {
+	return this->vmiENDFUNCTION( true, sysFunctionKey );
 }
 
-Ref vmiENDFUNCTION( Plant plant, Ref fnkey ) {
-	return vmiENDFUNCTION( plant, true, fnkey );
+Ref PlantClass::vmiENDFUNCTION( Ref fnkey ) {
+	return this->vmiENDFUNCTION( true, fnkey );
 }
 
-Ref vmiENDFUNCTION( Plant plant, bool in_heap ) {
-	return vmiENDFUNCTION( plant, in_heap, in_heap ? sysFunctionKey : sysCoreFunctionKey );
+Ref PlantClass::vmiENDFUNCTION( bool in_heap ) {
+	return this->vmiENDFUNCTION( in_heap, in_heap ? sysFunctionKey : sysCoreFunctionKey );
 }
 
-void vmiNOT( Plant plant ) {
-	emitSPC( plant, vmc_not );
+void PlantClass::vmiNOT() {
+	this->emitSPC( vmc_not );
 }
 
-void vmiIFNOT( Plant plant, DestinationClass & d ) {
-	emitSPC( plant, vmc_ifnot );
+void PlantClass::vmiIFNOT( DestinationClass & d ) {
+	this->emitSPC( vmc_ifnot );
 	d.destinationInsert();
 }
 
-void vmiIFSO( Plant plant, DestinationClass & d ) {
-	emitSPC( plant, vmc_ifso );
+void PlantClass::vmiIFSO( DestinationClass & d ) {
+	this->emitSPC( vmc_ifso );
 	d.destinationInsert();
 }
 
-void vmiIF( bool sense, Plant plant, DestinationClass & dst ) {
+void PlantClass::vmiIF( bool sense, DestinationClass & dst ) {
 	if ( sense ) {
-		vmiIFSO( plant, dst );
+		this->vmiIFSO( dst );
 	} else {
-		vmiIFNOT( plant, dst );
+		this->vmiIFNOT( dst );
 	}
 }
 
-void vmiGOTO( Plant plant, DestinationClass & d ) {
-	emitSPC( plant, vmc_goto );
+void PlantClass::vmiGOTO( DestinationClass & d ) {
+	this->emitSPC( vmc_goto );
 	d.destinationInsert();
 }
 
-static void vmiCMP_ID_CONSTANT( bool flag, Plant plant, Ident id, Ref r, DestinationClass & d ) {
-	emitSPC( plant, ( flag ? vmc_eq_si : vmc_neq_si ) );
+void PlantClass::vmiCMP_ID_CONSTANT( bool flag, Ident id, Ref r, DestinationClass & d ) {
+	this->emitSPC( ( flag ? vmc_eq_si : vmc_neq_si ) );
 	if ( id->isLocal() ) {
-		emitRef( plant, ToRef( id->getFinalSlot() ) );
+		this->emitRef( ToRef( id->getFinalSlot() ) );
 	} else {
-		emitValof( plant, id->value_of );
+		this->emitValof( id->value_of );
 	}
-	emitRef( plant, r );
+	this->emitRef( r );
 	d.destinationInsert();
 }
 
-static void vmiCMP_ID_ID( bool flag, Plant plant, Ident id1, Ident id2, DestinationClass & d ) {
-	emitSPC( plant, flag ? vmc_eq_ss : vmc_neq_ss );
+void PlantClass::vmiCMP_ID_ID( bool flag, Ident id1, Ident id2, DestinationClass & d ) {
+	this->emitSPC( flag ? vmc_eq_ss : vmc_neq_ss );
 	if ( id1->isLocal() ) {
-		emitRef( plant, ToRef( id1->getFinalSlot() ) );
+		this->emitRef( ToRef( id1->getFinalSlot() ) );
 	} else {
-		emitValof( plant, id1->value_of );
+		this->emitValof( id1->value_of );
 	}
 	if ( id2->isLocal() ) {
-		emitRef( plant, ToRef( id2->getFinalSlot() ) );
+		this->emitRef( ToRef( id2->getFinalSlot() ) );
 	} else {
-		emitValof( plant, id2->value_of );
+		this->emitValof( id2->value_of );
 	}
 	d.destinationInsert();
 }
 
-void vmiIF_EQ_ID_CONSTANT( Plant plant, Ident id, Ref constant, DestinationClass & d ) {
-	vmiCMP_ID_CONSTANT( true, plant, id, constant, d );
+void PlantClass::vmiIF_EQ_ID_CONSTANT( Ident id, Ref constant, DestinationClass & d ) {
+	this->vmiCMP_ID_CONSTANT( true, id, constant, d );
 }
 
-void vmiIF_EQ_ID_ID( Plant plant, Ident id1, Ident id2, DestinationClass & d ) {
-	vmiCMP_ID_ID( true, plant, id1, id2, d );
+void PlantClass::vmiIF_EQ_ID_ID( Ident id1, Ident id2, DestinationClass & d ) {
+	this->vmiCMP_ID_ID( true, id1, id2, d );
 }
 
-void vmiIF_NEQ_ID_CONSTANT( Plant plant, Ident id, Ref constant, DestinationClass & d ) {
-	vmiCMP_ID_CONSTANT( false, plant, id, constant, d );
+void PlantClass::vmiIF_NEQ_ID_CONSTANT( Ident id, Ref constant, DestinationClass & d ) {
+	this->vmiCMP_ID_CONSTANT( false, id, constant, d );
 }
 
-void vmiIF_NEQ_ID_ID( Plant plant, Ident id1, Ident id2, DestinationClass & d ) {
-	vmiCMP_ID_ID( false, plant, id1, id2, d );
+void PlantClass::vmiIF_NEQ_ID_ID( Ident id1, Ident id2, DestinationClass & d ) {
+	this->vmiCMP_ID_ID( false, id1, id2, d );
 }
-
-//void vmiEQQ( Plant plant, Ref ref ) {
-//	emitSPC( plant, vmc_eqq );
-//	emitRef( plant, ref );
-//}
 
 static bool eval_relop( char op, int a, int b ) {
 	return(
@@ -471,22 +450,21 @@ static char rev_relop( char op ) {
 //		'g'		>=
 */
 
-void vmiIF_RELOP( Plant plant, bool sense, char flag1, int arg1, char op, char flag2, int arg2, DestinationClass & dst ) {
+void PlantClass::vmiIF_RELOP( bool sense, char flag1, int arg1, char op, char flag2, int arg2, DestinationClass & dst ) {
 	if ( sense ) {
-		vmiIFSO_RELOP( plant, flag1, arg1, op, flag2, arg2, dst );
+		this->vmiIFSO_RELOP( flag1, arg1, op, flag2, arg2, dst );
 	} else {
-		vmiIFNOT_RELOP( plant, flag1, arg1, op, flag2, arg2, dst );
+		this->vmiIFNOT_RELOP( flag1, arg1, op, flag2, arg2, dst );
 	}
 }
 
-void vmiIFSO_RELOP( Plant plant, char flag1, int arg1, char op, char flag2, int arg2, DestinationClass & dst ) {
+void PlantClass::vmiIFSO_RELOP( char flag1, int arg1, char op, char flag2, int arg2, DestinationClass & dst ) {
 	if ( flag1 == 'i' && flag2 == 'i' ) {
-		if ( eval_relop( op, arg1, arg2 ) ) vmiGOTO( plant, dst );
+		if ( eval_relop( op, arg1, arg2 ) ) this->vmiGOTO( dst );
 	} else if ( flag1 == 'i' && flag2 == 's' ) {
-		vmiIFSO_RELOP( plant, flag2, arg2, rev_relop( op ), flag1, arg1, dst );
+		this->vmiIFSO_RELOP( flag2, arg2, rev_relop( op ), flag1, arg1, dst );
 	} else if ( flag1 == 's' && flag2 == 'i' ) {
-		emitSPC(
-			plant,
+		this->emitSPC(
 		    op == 'g' ? vmc_gte_si :
 		    op == '>' ? vmc_gt_si :
 		    op == '=' ? vmc_eq_si :
@@ -495,12 +473,11 @@ void vmiIFSO_RELOP( Plant plant, char flag1, int arg1, char op, char flag2, int 
 		    op == 'l' ? vmc_lte_si :
 		    ( this_never_happens(), (Instruction)0 )
 		);
-		emitRef( plant, ToRef( arg1 ) );
-		emitRef( plant, LongToSmall( arg2 ) );
+		this->emitRef( ToRef( arg1 ) );
+		this->emitRef( LongToSmall( arg2 ) );
 		dst.destinationInsert();
 	} else if ( flag1 == 's' && flag2 == 's' ) {
-		emitSPC(
-			plant,
+		this->emitSPC(
 		    op == 'g' ? vmc_gte_ss :
 		    op == '>' ? vmc_gt_ss :
 		    op == '=' ? vmc_eq_ss :
@@ -509,17 +486,21 @@ void vmiIFSO_RELOP( Plant plant, char flag1, int arg1, char op, char flag2, int 
 		    op == 'l' ? vmc_lte_ss :
 		    ( this_never_happens(), (Instruction)0 )
 		);
-		emitRef( plant, ToRef( arg1 ) );
-		emitRef( plant, ToRef( arg2 ) );
+		this->emitRef( ToRef( arg1 ) );
+		this->emitRef( ToRef( arg2 ) );
 		dst.destinationInsert();
 	} else {
 		this_never_happens();
 	}
 }
 
-void vmiIFNOT_RELOP( Plant plant, char flag1, int arg1, char op, char flag2, int arg2, DestinationClass & dst ) {
-	vmiIFSO_RELOP( plant, flag1, arg1, rev_relop( op ), flag2, arg2, dst );
+void PlantClass::vmiIFNOT_RELOP( char flag1, int arg1, char op, char flag2, int arg2, DestinationClass & dst ) {
+	this->vmiIFSO_RELOP( flag1, arg1, rev_relop( op ), flag2, arg2, dst );
 }
+
+
+
+
 
 void VmiRelOpFactory::setLeft( int arg ) {
 	this->flag1 = 'i';
@@ -572,11 +553,11 @@ void VmiRelOpFactory::negate() {
 void VmiRelOpFactory::compilePushLeft() {
 	switch ( this->flag1 ) {
 		case 'i': {
-			emitRef( this->plant, LongToSmall( this->int1 ) );
+			this->plant->emitRef( LongToSmall( this->int1 ) );
 			break;
 		}
 		case 's': {
-			vmiPUSHID( this->plant, this->ident1 );
+			this->plant->vmiPUSHID( this->ident1 );
 			break;
 		}
 		default: throw;			//	Never happens.
@@ -586,11 +567,11 @@ void VmiRelOpFactory::compilePushLeft() {
 void VmiRelOpFactory::compilePushRight() {
 	switch ( this->flag2 ) {
 		case 'i': {
-			emitRef( this->plant, LongToSmall( this->int2 ) );
+			this->plant->emitRef( LongToSmall( this->int2 ) );
 			break;
 		}
 		case 's': {
-			vmiPUSHID( this->plant, this->ident2 );
+			this->plant->vmiPUSHID( this->ident2 );
 			break;
 		}
 		default: throw;			//	Never happens.
@@ -598,8 +579,7 @@ void VmiRelOpFactory::compilePushRight() {
 }
 
 void VmiRelOpFactory::compileOp() {
-	vmiOPERATOR( 
-		this->plant,
+	this->plant->vmiOPERATOR( 
 		op == 'g' ? fnc_gte :
 		op == '>' ? fnc_gt :
 		op == '=' ? fnc_eq  :
@@ -621,12 +601,12 @@ void VmiRelOpFactory::ifSo( DestinationClass &dst ) {
 	) {
 		int arg1 = this->flag1 == 'i' ? this->int1 : this->ident1->getFinalSlot();
 		int arg2 = this->flag1 == 'i' ? this->int2 : this->ident2->getFinalSlot();
-		vmiIFSO_RELOP( this->plant, this->flag1, arg1, this->op, this->flag2, arg2, dst );
+		this->plant->vmiIFSO_RELOP( this->flag1, arg1, this->op, this->flag2, arg2, dst );
 	} else {
 		this->compilePushLeft();
 		this->compilePushRight();
 		this->compileOp();
-		vmiIFSO( this->plant, dst );
+		this->plant->vmiIFSO( dst );
 	}
 }
 
@@ -642,12 +622,12 @@ void VmiRelOpFactory::ifNot( DestinationClass &dst ) {
 	) {
 		int arg1 = this->flag1 == 'i' ? this->int1 : this->ident1->getFinalSlot();
 		int arg2 = this->flag1 == 'i' ? this->int2 : this->ident2->getFinalSlot();
-		vmiIFNOT_RELOP( this->plant, this->flag1, arg1, this->op, this->flag2, arg2, dst );
+		this->plant->vmiIFNOT_RELOP( this->flag1, arg1, this->op, this->flag2, arg2, dst );
 	} else {
 		this->compilePushLeft();
 		this->compilePushRight();
 		this->compileOp();
-		vmiIFNOT( this->plant, dst );
+		this->plant->vmiIFNOT( dst );
 	}
 }
 

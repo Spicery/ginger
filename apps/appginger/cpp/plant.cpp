@@ -178,13 +178,13 @@ void PlantClass::compileIf( bool sense, Term term, DestinationClass & dst ) {
 				break;
 			}
 			
-			vmiIF_RELOP( this, sense, flag1, arg1, op, flag2, arg2, dst );
+			this->vmiIF_RELOP( sense, flag1, arg1, op, flag2, arg2, dst );
 			return;
 	    }
 	    default: {}
 	}
 	this->compile1( term );
-	vmiIF( sense, this, dst );
+	this->vmiIF( sense, dst );
 }
 
 
@@ -207,12 +207,12 @@ void PlantClass::compileQueryInit( Term query ) {
 			
 			Term start_expr = q->child( 1 );
 			this->compile1( start_expr );
-			vmiPOPID( this, ident );
+			this->vmiPOPID( ident );
 			
 			Term end_expr = q->child( 2 );
 			q->end_expr_ident = this->newTmpIdent();
 			this->compile1( end_expr );
-			vmiPOPID( this, q->end_expr_ident );
+			this->vmiPOPID( q->end_expr_ident );
 			
 			break;
 		}
@@ -220,13 +220,13 @@ void PlantClass::compileQueryInit( Term query ) {
 			InTermClass * q = dynamic_cast< InTermClass * >( query.get() );
 			
 			this->compile1( q->child( 1 ) );
-			vmiINSTRUCTION( this, vmc_getiterator );
+			this->vmiINSTRUCTION( vmc_getiterator );
 			q->next_fn = this->newTmpIdent();
 			q->context = this->newTmpIdent();
 			q->state = this->newTmpIdent();
-			vmiPOPID( this, q->next_fn );
-			vmiPOPID( this, q->context );
-			vmiPOPID( this, q->state );
+			this->vmiPOPID( q->next_fn );
+			this->vmiPOPID( q->context );
+			this->vmiPOPID( q->state );
 			
 			break;
 		}
@@ -245,9 +245,9 @@ void PlantClass::compileQueryNext( Term query ) {
 			Ident & ident = v->ident();
 			
 			//	Obvious candidate for a merged instruction.
-			vmiPUSHID( this, ident );
-			vmiINSTRUCTION( this, vmc_incr );
-			vmiPOPID( this, ident );
+			this->vmiPUSHID( ident );
+			this->vmiINSTRUCTION( vmc_incr );
+			this->vmiPOPID( ident );
 			
 			break;
 		}
@@ -288,12 +288,12 @@ void PlantClass::compileQueryIfSo( Term query, DestinationClass & dst ) {
 			Ident & context = q->context;
 			Ident & next_fn = q->next_fn;
 
-			vmiPUSHID( this, state );	
-			vmiPUSHID( this, context );	
-			vmiSET_CALL_ID( this, 2, next_fn );
-			vmiPOPID( this, state );
-			vmiPOPID( this, loopident );
-			vmiIF_NEQ_ID_CONSTANT( this, state, SYS_TERMIN, dst );
+			this->vmiPUSHID( state );	
+			this->vmiPUSHID( context );	
+			this->vmiSET_CALL_ID( 2, next_fn );
+			this->vmiPOPID( state );
+			this->vmiPOPID( loopident );
+			this->vmiIF_NEQ_ID_CONSTANT( state, SYS_TERMIN, dst );
 			
 			break;
 		}
@@ -306,7 +306,7 @@ void PlantClass::compileFor( Term query, Term body ) {
 	DestinationClass body_label( this );
 	DestinationClass test_label( this );
 	this->compileQueryInit( query );
-	vmiGOTO( this, test_label );
+	this->vmiGOTO( test_label );
 	body_label.destinationSet();
 	this->compileTerm( body );
 	this->compileQueryNext( query );
@@ -324,11 +324,10 @@ void PlantClass::compileTerm( Term term ) {
 		case fnc_char:
 		case fnc_list:
 		case fnc_vector:
-			vmiPUSHQ( this, term_ref_cont( term ) );
+			this->vmiPUSHQ( term_ref_cont( term ) );
 			return;
 		case fnc_string: {
-			vmiPUSHQ(
-				this,
+			this->vmiPUSHQ(
 				this->vm->heap().copyString(
 					term_string_cont( term )
 				)
@@ -336,7 +335,7 @@ void PlantClass::compileTerm( Term term ) {
 			break;
 		}
 		case fnc_symbol: {
-			vmiPUSHQ( this, refMakeSymbol( term_symbol_cont( term ) ) );
+			this->vmiPUSHQ( refMakeSymbol( term_symbol_cont( term ) ) );
 			break;
 		}
         case fnc_eq:
@@ -350,14 +349,14 @@ void PlantClass::compileTerm( Term term ) {
 		case fnc_add: {
 			this->compile1( term_index( term, 0 ) );
 			this->compile1( term_index( term, 1 ) );
-			vmiOPERATOR( this, fnc );
+			this->vmiOPERATOR( fnc );
 			break;
 		}
 		case fnc_incr_by:
 		case fnc_decr_by: {
 			int n = term_int_cont( term_index( term, 1 ) );
 			this->compile1( term_index( term, 0 ) );
-			vmiINCR( this, fnc == fnc_incr_by ? n : -n );
+			this->vmiINCR( fnc == fnc_incr_by ? n : -n );
 			break;
 		}
 		case fnc_package:
@@ -375,7 +374,7 @@ void PlantClass::compileTerm( Term term ) {
 				if ( id->isLocal() && id->getFinalSlot() < 0 ) {
 					throw Ginger::Mishap( "Ident record not assigned slot" ).culprit( "Identifier",  t->name().c_str() );
 				}
-				vmiPUSHID( this, id );
+				this->vmiPUSHID( id );
 			} else {
 				throw Ginger::Mishap( "Unlifted identifier" ).culprit( "Identifier",  t->name().c_str() );
 			}
@@ -385,12 +384,12 @@ void PlantClass::compileTerm( Term term ) {
 			Term id = term_index( term, 0 );
 			if ( term_functor( id ) != fnc_id ) throw Ginger::SystemError( "Internal Error - deref" );
 			this->compile1( id );
-			vmiDEREF( this );
+			this->vmiDEREF();
 			break;
 		}
 		case fnc_makeref: {
 			this->compile1( term_index( term, 0 ) );
-			vmiMAKEREF( this );
+			this->vmiMAKEREF();
 			break;
 		}
 		case fnc_setcont: {
@@ -398,7 +397,7 @@ void PlantClass::compileTerm( Term term ) {
 			if ( term_functor( id ) != fnc_id ) throw Ginger::SystemError( "Internal Error - setcont" );
 			this->compile1( term_index( term, 0 ) );
 			this->compile1( id );
-			vmiSETCONT( this );
+			this->vmiSETCONT();
 			break;
 		}
 		case fnc_bind: {
@@ -408,8 +407,8 @@ void PlantClass::compileTerm( Term term ) {
 			Ident & ident = v->ident();
 			Term body = term_index( term, 1 );
 			this->compile1( body );
-			vmiNEWID( this, ident );
-			vmiPOPID( this, ident );
+			this->vmiNEWID( ident );
+			this->vmiPOPID( ident );
 			break;
 		}
 		case fnc_assign: {
@@ -419,7 +418,7 @@ void PlantClass::compileTerm( Term term ) {
 				Ident & ident = t->ident();
 				Term source = term_index( term, 0 );
 				this->compile1( source );
-				vmiPOPID( this, ident );
+				this->vmiPOPID( ident );
 			} else {
 				throw Ginger::Mishap( "TO BE DONE" ).culprit( "Term", functor_name( term_functor( target ) ) );
 			}
@@ -435,18 +434,18 @@ void PlantClass::compileTerm( Term term ) {
 				#endif
 				int N = ftc->sizeOuters();
 				for ( int i = 0; i < N; i++ ) {
-					vmiPUSH_INNER_SLOT( this, ftc->outer( i )->getFinalSlot() );
+					this->vmiPUSH_INNER_SLOT( ftc->outer( i )->getFinalSlot() );
 				}
 			}
 			
-			vmiFUNCTION( this, ftc->nlocals(), ftc->ninputs() );
-			vmiENTER( this );
+			this->vmiFUNCTION( ftc->nlocals(), ftc->ninputs() );
+			this->vmiENTER();
 			this->compileTerm( body );
-			vmiRETURN( this );
-			vmiPUSHQ( this, vmiENDFUNCTION( this ) );
+			this->vmiRETURN();
+			this->vmiPUSHQ( this->vmiENDFUNCTION() );
 			
 			if ( ftc->hasOuters() ) {
-				vmiSET_SYS_CALL( this, sysPartApply, ftc->sizeOuters() + 1 );
+				this->vmiSET_SYS_CALL( sysPartApply, ftc->sizeOuters() + 1 );
 			}
 			
 			break;
@@ -460,23 +459,23 @@ void PlantClass::compileTerm( Term term ) {
 			if ( iterm ) {
 				if ( aargs.isntExact() ) { 
 					int v = tmpvar( this );
-		        	vmiSTART_MARK( this, v );
+		        	this->vmiSTART_MARK( v );
 					this->compileTerm( args );
-					vmiEND_CALL_ID( this, v, iterm->ident() );
+					this->vmiEND_CALL_ID( v, iterm->ident() );
 				} else {
 					this->compileTerm( args );
-					vmiSET_CALL_ID( this, aargs.count(), iterm->ident() );
+					this->vmiSET_CALL_ID( aargs.count(), iterm->ident() );
 				}
 			} else if ( aargs.isntExact() ) {
 				int v = tmpvar( this );
-		        vmiSTART_MARK( this, v );
+		        this->vmiSTART_MARK( v );
 		        this->compileTerm(  args );
 				this->compile1( fn );
-				vmiEND1_CALLS( this, v );
+				this->vmiEND1_CALLS( v );
 			} else {
 				this->compileTerm( args );
 				this->compile1( fn );
-				vmiSET_CALLS( this, aargs.count() );
+				this->vmiSET_CALLS( aargs.count() );
 			}
 			break;
 		}
@@ -486,10 +485,10 @@ void PlantClass::compileTerm( Term term ) {
 			SysCall * sc = (SysCall *)( term_ref_cont( term ) );
 			
 			int v = tmpvar( this );
-			vmiSTART_MARK( this, v );
+			this->vmiSTART_MARK( v );
 			this->compileArgs( term );
-			vmiSET( this, v );
-			vmiSYS_CALL( this, sc );
+			this->vmiSET( v );
+			this->vmiSYS_CALL( sc );
 			break;
 		}
 		case fnc_sysfn: {
@@ -497,7 +496,7 @@ void PlantClass::compileTerm( Term term ) {
 			if ( r == SYS_UNDEF ) {
 				throw Ginger::Mishap( "No such system function" ).culprit( "Function", term_sysfn_cont( term ) );
 			}
-			vmiPUSHQ( this, r );			
+			this->vmiPUSHQ( r );			
 			break;
 		}
 		case fnc_for: {
@@ -524,7 +523,7 @@ void PlantClass::compileTerm( Term term ) {
 				//	vmiIFNOT( plant, e );
 				this->compileIfNot( term_index( term, 0 ), e );
 				this->compileTerm( term_index( term, 1 ) );
-				vmiGOTO( this, d );
+				this->vmiGOTO( d );
 				e.destinationSet();
 				this->compileTerm( term_index( term, 2 ) );
 				d.destinationSet();
@@ -535,12 +534,12 @@ void PlantClass::compileTerm( Term term ) {
 		}
 		case fnc_not: {
 			this->compile1( term_index( term, 0 ) );
-			vmiNOT( this );
+			this->vmiNOT();
 		 	break;
 		}
 		case fnc_throw: {
 			this->compile1( term_index( term, 0 ) );
-			vmiSET_SYS_CALL( this, sysPanic, 1 );
+			this->vmiSET_SYS_CALL( sysPanic, 1 );
 			break;
 		}
 		case fnc_assert_single: {
@@ -551,7 +550,7 @@ void PlantClass::compileTerm( Term term ) {
 		case fnc_assert_bool: {
 			//	case-study: Adding New Element Type.
 			this->compile1( term_index( term, 0 ) );
-			vmiSET_SYS_CALL( this, sysCheckBool, 1 );
+			this->vmiSET_SYS_CALL( sysCheckBool, 1 );
 			break;
 		}
 		case fnc_import: {
@@ -577,9 +576,9 @@ void PlantClass::compile1( Term term ) {
 	if ( a.isntExact() ) {
 		int n = this->slot;
 		int v = tmpvar( this );
-		vmiSTART_MARK( this, v );
+		this->vmiSTART_MARK( v );
 		this->compileTerm( term );
-		vmiCHECK_MARK1( this, v );
+		this->vmiCHECK_MARK1( v );
 		this->slot = n;
 	} else if ( a.count() == 1 ) {
 		this->compileTerm( term );
@@ -593,9 +592,9 @@ void PlantClass::compile0( Term term ) {
 	if ( a.isntExact() ) {
 		int n = this->slot;
 		int v = tmpvar( this );
-		vmiSTART_MARK( this, v );
+		this->vmiSTART_MARK( v );
 		this->compileTerm( term );
-		vmiCHECK_MARK0( this, v );
+		this->vmiCHECK_MARK0( v );
 		this->slot = n;
 	} else if ( a.count() == 0 ) {
 		this->compileTerm( term );
@@ -603,3 +602,19 @@ void PlantClass::compile0( Term term ) {
 		throw Ginger::Mishap( "Wrong number of results in zero context" ).culprit( "#Results", "" + a.count() );
 	}
 }
+
+void PlantClass::emitSPC( Instruction instr ) {
+	const InstructionSet & ins = this->instructionSet();
+	Ref instr_ptr = ins.lookup( instr );
+	this->plantRef( instr_ptr );
+}
+
+void PlantClass::emitRef( Ref ref ) {
+	this->plantRef( ref );
+}
+
+void PlantClass::emitValof( Valof *v ) {
+	this->plantRef( ToRef( v ) );
+}
+
+

@@ -36,9 +36,9 @@ Ref * sysNewMethod( Ref * pc, MachineClass * vm ) {
 	if ( !IsSmall( noutputs ) || !IsSmall( ninputs ) ) throw Ginger::Mishap( "Invalid arguments" ).culprit( "#Outputs", refToString( noutputs ) ).culprit( "Inputs", refToString( ninputs ) );
 	
 	Plant plant = vm->plant();
-	vmiFUNCTION( plant, SmallToLong( ninputs ), SmallToLong( noutputs ) );
-	vmiINVOKE( plant );
-	Ref r = vmiENDFUNCTION( plant, sysMethodKey );
+	plant->vmiFUNCTION( SmallToLong( ninputs ), SmallToLong( noutputs ) );
+	plant->vmiINVOKE();
+	Ref r = plant->vmiENDFUNCTION( sysMethodKey );
 	vm->fastPush( r );	//	No check needed, as stack has room for 3.
 	return pc;
 }
@@ -91,10 +91,10 @@ Ref * sysSetSlot( Ref * pc, MachineClass * vm ) {
 	//	service function.
 	{
 		Plant plant = vm->plant();
-		vmiFUNCTION( plant, 1, 1 );
-		vmiFIELD( plant, pos );
-		vmiSYS_RETURN( plant );
-		vm->fastPush( vmiENDFUNCTION( plant ) );
+		plant->vmiFUNCTION( 1, 1 );
+		plant->vmiFIELD( pos );
+		plant->vmiSYS_RETURN();
+		vm->fastPush( plant->vmiENDFUNCTION() );
 	}
 
 	//	We do not need to modify vm->count, it's already 3.

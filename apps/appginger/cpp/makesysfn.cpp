@@ -32,7 +32,7 @@ Ref makeSysFn( Plant plant, std::string fn_name, Ref default_value ) {
 	Ref x = info.coreFunctionObject;
 	if ( x != NULL ) return x;
 
-	vmiFUNCTION( plant, info.in_arity.count(), info.out_arity.count() );
+	plant->vmiFUNCTION( info.in_arity.count(), info.out_arity.count() );
 	
 	//	We have two different kinds of system functions. Those that are
 	//	implemented as native instructions and those that are implemented
@@ -44,13 +44,13 @@ Ref makeSysFn( Plant plant, std::string fn_name, Ref default_value ) {
 	//
 	if ( info.syscall != NULL ) {
 		//	Hand-written function.
-		vmiSYS_CALL( plant, info.syscall );	
+		plant->vmiSYS_CALL( info.syscall );	
 	} else {
 		//	Native instruction.
-		vmiOPERATOR( plant, info.functor );
+		plant->vmiOPERATOR( info.functor );
 	}
-	vmiSYS_RETURN( plant );
-	Ref r = vmiENDFUNCTION( plant, false );
+	plant->vmiSYS_RETURN();
+	Ref r = plant->vmiENDFUNCTION( false );
 	
 	info.coreFunctionObject = r;
 	return r;

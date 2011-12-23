@@ -194,9 +194,6 @@ public:
 
 typedef class PlantClass *Plant;
 
-#include "term.hpp"
-#include "machine.hpp"
-#include "plant.hpp"
 
 
 #endif

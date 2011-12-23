@@ -835,6 +835,7 @@ public:
 		element.clearAttribute( SCOPE );		//	Throw away any previous marking.
 		element.clearAttribute( OUTER_LEVEL );	//	Throw away any previous marking.
 		element.clearAttribute( IS_OUTER );		//	Throw away any previous marking.
+		element.clearAttribute( IS_ASSIGNED );	//	Throw away any previous marking.
 		if ( x == ID ) {
 			const string & name = element.attribute( ID_NAME );
 			VarInfo * v = this->findId( name );

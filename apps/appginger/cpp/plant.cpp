@@ -61,6 +61,20 @@ DestinationClass & PlantClass::newDestination() {
 	return this->destination_vector.back();
 }
 
+void PlantClass::emitSPC( Instruction instr ) {
+	const InstructionSet & ins = this->instructionSet();
+	Ref instr_ptr = ins.lookup( instr );
+	this->plantRef( instr_ptr );
+}
+
+void PlantClass::emitRef( Ref ref ) {
+	this->plantRef( ref );
+}
+
+void PlantClass::emitValof( Valof *v ) {
+	this->plantRef( ToRef( v ) );
+}
+
 
 #define REFBITS ( 8 * sizeof( Ref ) )
 
@@ -231,7 +245,7 @@ void PlantClass::compileQueryInit( Term query ) {
 			break;
 		}
 		default:
-			throw;
+			throw Ginger::SystemError( "Not implemented general queries" );
 	}
 }
 
@@ -602,19 +616,4 @@ void PlantClass::compile0( Term term ) {
 		throw Ginger::Mishap( "Wrong number of results in zero context" ).culprit( "#Results", "" + a.count() );
 	}
 }
-
-void PlantClass::emitSPC( Instruction instr ) {
-	const InstructionSet & ins = this->instructionSet();
-	Ref instr_ptr = ins.lookup( instr );
-	this->plantRef( instr_ptr );
-}
-
-void PlantClass::emitRef( Ref ref ) {
-	this->plantRef( ref );
-}
-
-void PlantClass::emitValof( Valof *v ) {
-	this->plantRef( ToRef( v ) );
-}
-
 

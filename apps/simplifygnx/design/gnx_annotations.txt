@@ -1,0 +1,50 @@
+Annotations made by SimplifyGNX
+===============================
+
+The simplifygnx rewrites the GNX tree and adds quite a few attributes to
+elements that are intended to be used by the compiler-interpreter. The 
+idea is to offload some of the basic analysis. 
+
+These annotations are trusted and the interpreter is allowed to exploit them to
+generate otherwise unsafe, fast code. Because of this, the simplifier is an
+integral part of the compiler-interpreter.
+
+
+*arity*:: 
+	This attribute is used to attach a proven arity.  It applies to
+	all elements.
+
+*is.outer*:: [Debug only]
+	This tag is used during the lifting process, marking +var+ elements that
+	are declared in one scope but referenced by an inner +fn+ block. During
+	lifting it is propagated to the matching +id+ elements. However the lifting
+	process introduces new declarations making these annotations incorrect.
+	Hence this info is stripped unless the -d flag is supplied.
+	
+*outer.level*:: [Debug only]
+	This tag is used during the lifting process. It is a count of deeply
+	nested inside +fn+ blocks an +id+ element is, relative to its matching
+	+var+ declaration. The lifting process adds new declarations that
+	invalidates this info. Hence this annotation is stripped unless the
+	-d flag is supplied.
+
+*protected*::
+	Every variable +var+ and identifier +id+ is tagged explicitly as
+	being protected from assignment ("true") or available for assignment
+	("false"). This is done by propagating the user annotations and
+	making the default ("true") explicit.
+	
+*scope*::
+	Every variable +var+ and identifier +id+ is tagged as being "local" or
+	"global". Local means that it is declared in the GNX being simplified and
+	global means it is declared outside (if at all).
+	
+*tailcall*::
+	This marks +app+ elements that are in a tail-call position. It has a value
+	of "true" for +app+ elements that are tail-call. It is omitted otherwise.
+	
+*uid*::
+	Every variable +var+ and identifier +id+ is assigned a unique ID. The ID
+	is only guaranteed to be unique for the top-level GNX expression that
+	is being simplified.
+

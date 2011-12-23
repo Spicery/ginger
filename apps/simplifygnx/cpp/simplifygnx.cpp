@@ -60,6 +60,7 @@ to it as a stream.
 #define IS_OUTER		"is.outer"
 #define SCOPE			"scope"
 #define PROTECTED		"protected"
+#define IS_ASSIGNED		"is.assigned"
 
 #define CONSTANT		"constant"
 #define CONSTANT_TYPE	"type"
@@ -145,6 +146,7 @@ public:
 public:
 	std::string package;
 	bool undefined_allowed;
+	bool retain_debug_info;
 
 private:
 	void simplify( shared< Ginger::Mnx > g );
@@ -168,7 +170,8 @@ public:
 		sysapp_processing( false ),
 		tailcall_processing( false ),
 		val_processing( false ),
-		undefined_allowed( false )
+		undefined_allowed( false ),
+		retain_debug_info( false )
 	{}
 };
 
@@ -189,8 +192,9 @@ static struct option long_options[] =
         { "sysapp",			no_argument,			0, '7' },
         { "tailcall",		no_argument,			0, '8' },
         { "val",         	no_argument,			0, '9' },
-		{ "project",		required_argument,		0, 'j' },
+        { "debug",			no_argument,			0, 'd' },
         { "help",			optional_argument,		0, 'H' },
+		{ "project",		required_argument,		0, 'j' },
         { "license",        optional_argument,      0, 'L' },
         { "package",		required_argument,		0, 'p' },
         { "standard",		no_argument,			0, 's' },
@@ -202,7 +206,7 @@ static struct option long_options[] =
 void Main::parseArgs( int argc, char **argv, char **envp ) {
     for(;;) {
         int option_index = 0;
-        int c = getopt_long( argc, argv, "123456789f:H::L::p:suV", long_options, &option_index );
+        int c = getopt_long( argc, argv, "123456789dj:H::L::p:suV", long_options, &option_index );
         if ( c == -1 ) break;
         switch ( c ) {
         	case '1': {
@@ -259,6 +263,10 @@ void Main::parseArgs( int argc, char **argv, char **envp ) {
         		this->val_processing = true;        		
         		break;
         	}
+        	case 'd' : {
+        		this->retain_debug_info = true;
+        		break;
+        	}
         	case 'j' : {
         		this->project_folders.push_back( optarg );
         		break;
@@ -270,11 +278,12 @@ void Main::parseArgs( int argc, char **argv, char **envp ) {
                 if ( optarg == NULL ) {
                     printf( "Usage:  simplifygnx -p PACKAGE OPTIONS < GNX_IN > GNX_OUT\n" );
                     printf( "OPTIONS\n" );
-                    printf( "-j, --project=PATH    adds a project folder onto the search path" );
-                    printf( "-p, --package=PACKAGE defines the enclosing package\n" );
+                    printf( "-d, --debug           retain debugging information\n" );
                     printf( "-H, --help[=TOPIC]    help info on optional topic (see --help=help)\n" );
-                    printf( "-V, --version         print out version information and exit\n" );
+                    printf( "-j, --project=PATH    adds a project folder onto the search path" );
                     printf( "-L, --license[=PART]  print out license information and exit (see --help=license)\n" );
+                    printf( "-p, --package=PACKAGE defines the enclosing package\n" );
+                    printf( "-V, --version         print out version information and exit\n" );
                     printf( "\n" );
                 } else if ( std::string( optarg ) == "help" ) {
                     cout << "--help=help           this short help" << endl;
@@ -296,8 +305,7 @@ void Main::parseArgs( int argc, char **argv, char **envp ) {
                 } else if ( std::string( optarg ) == std::string( "conditions" ) ) {
                     this->printGPL( "TERMS AND CONDITIONS", "END OF TERMS AND CONDITIONS" );
                 } else {
-                    std::cerr << "Unknown license option: " << optarg << std::endl;
-                    exit( EXIT_FAILURE );
+                	throw Ginger::Mishap( "Unknown license option" ).culprit( "Option", optarg );
                 }
                 exit( EXIT_SUCCESS );   //  Is that right?              
             }
@@ -750,8 +758,13 @@ private:
 	int var_uid;
 	bool outers_found;
 
-	vector< int > scopes;
-	vector< VarInfo > vars;
+	//	These maps are used to propagate assignment info.
+	set< int > is_assigned_to;
+	map< int, Ginger:: Mnx * > var_of_uid;
+	map< int, list< Ginger::Mnx * > > xrefs_to_uid;
+	
+	vector< int > scopes;		//	How many variables were declared in each of the nested scopes.
+	vector< VarInfo > vars;		//	A nested stack of variables, scoped using the counts in "scopes".
 	
 private:
 	bool isGlobalScope() {
@@ -785,8 +798,8 @@ private:
 			if ( name == *(it->name) ) {
 				long d = this->scopes.size() - it->dec_level;
 				if ( it->is_local && d != 0 ) {
-					//cout << "We have detected an outer declaration: " << name << endl;
-					//cout << "Declared at level " << it->dec_level << " but used at level " << this->scopes.size() << endl;
+					//cerr << "We have detected an outer declaration: " << name << endl;
+					//cerr << "Declared at level " << it->dec_level << " but used at level " << this->scopes.size() << endl;
 					it->max_diff_use_level = max( d, it->max_diff_use_level );
 					this->outers_found = true;
 					it->element->putAttribute( IS_OUTER, "true" );
@@ -796,6 +809,20 @@ private:
 		}
 		return NULL;
 	}
+
+	void markAsAssigned( shared< Ginger::Mnx > id ) {
+		if ( id->hasAttribute( PROTECTED, "true" ) ) {
+			throw Ginger::Mishap( "Assigning to a protected variable" ).culprit( "Variable", id->attribute( ID_NAME, "<unknown>" ) );
+		} else {
+			stringstream uidstream( id->attribute( UID, "" ) );
+			int uid;
+			if ( uidstream >> uid ) {
+				this->is_assigned_to.insert( uid );
+			} else {
+				throw Ginger::SystemError( "Missing UID" );
+			}
+		}
+	}
 	
 public:
 	bool wereOutersFound() {
@@ -804,15 +831,16 @@ public:
 	
 	void startVisit( Ginger::Mnx & element ) {
 		const string & x = element.name();
-		element.clearAttribute( UID );		//	Throw away any previous marking.
-		element.clearAttribute( SCOPE );	//	Throw away any previous marking.
-		element.clearAttribute( OUTER_LEVEL );
-		element.clearAttribute( IS_OUTER );
+		element.clearAttribute( UID );			//	Throw away any previous marking.
+		element.clearAttribute( SCOPE );		//	Throw away any previous marking.
+		element.clearAttribute( OUTER_LEVEL );	//	Throw away any previous marking.
+		element.clearAttribute( IS_OUTER );		//	Throw away any previous marking.
 		if ( x == ID ) {
 			const string & name = element.attribute( ID_NAME );
 			VarInfo * v = this->findId( name );
 			if ( v != NULL ) {
 				element.putAttribute( UID, v->uid );
+				this->xrefs_to_uid[ v->uid ].push_back( &element );
 			}
 			if ( v == NULL || v->isGlobal() ) {
 				element.putAttribute( SCOPE, "global" );
@@ -828,6 +856,7 @@ public:
 		} else if ( x == VAR ) {
 			const string & name = element.attribute( VAR_NAME );
 			const int uid = this->newUid();
+			this->var_of_uid[ uid ] = &element;
 			element.putAttribute( UID, uid );
 			if ( not element.hasAttribute( PROTECTED ) ) {
 				element.putAttribute( PROTECTED, "true" );
@@ -835,7 +864,9 @@ public:
 			const bool is_protected = element.attribute( PROTECTED ) == "true";
 			const bool is_global = this->isGlobalScope();
 			element.putAttribute( SCOPE, is_global ? "global" : "local" );
-			this->vars.push_back( VarInfo( &element, &name, uid, this->vars.size(), is_protected, not is_global ) );
+			//cerr << "Declaring " << name << " at level " << this->vars.size() << endl;
+			//cerr << "  -- but should it be " << this->scopes.size() << endl;
+			this->vars.push_back( VarInfo( &element, &name, uid, this->scopes.size(), is_protected, not is_global ) );
 		} else if ( x == "fn" ) { //|| x == "block" || x == "for" ) {
 			this->scopes.push_back( this->vars.size() );
 		}
@@ -850,13 +881,12 @@ public:
 		} else if ( 
 			x == SET && 
 			element.size() == 2 &&
-			element.firstChild()->name() == ID &&
-			element.firstChild()->hasAttribute( PROTECTED, "true" ) &&
-			element.firstChild()->hasAttribute( ID_NAME )
+			element.child( 1 )->name() == ID 
 		) {
-			throw Ginger::Mishap( "Assigning to a protected variable" ).culprit( "Variable", element.firstChild()->attribute( ID_NAME ) );
+			this->markAsAssigned( element.child( 1 ) );
 		}
 	}
+	
 public:
 	Scope() : 
 		var_uid( 0 ),
@@ -864,7 +894,29 @@ public:
 	{
 	}
 
-	virtual ~Scope() {}
+	virtual ~Scope() {
+		//	Now mark all assigned var+id elements as IS_ASSIGNED. This
+		//	is useful for lifting and also for constant folding (to be done).
+		for ( 
+			set< int >::iterator it = this->is_assigned_to.begin();
+			it != this->is_assigned_to.end();
+			++it
+		) {
+			//cerr << endl;
+			//cerr << "VAR[" << this->var_of_uid[ *it ]->attribute( VAR_NAME ) << "] has " << xrefs.size() << " references" << endl;
+			//	Mark the var declaration as IS_ASSIGNED.
+			this->var_of_uid[ *it ]->putAttribute( IS_ASSIGNED, "true" );
+			//	And now mark all the id cross-refs to that declaration the same.
+			list< Ginger::Mnx * > & xrefs = this->xrefs_to_uid[ *it ];		
+			for (
+				list< Ginger::Mnx * >::iterator xt = xrefs.begin();
+				xt != xrefs.end();
+				++xt
+			) {
+				(*xt)->putAttribute( IS_ASSIGNED, "true" );
+			}
+		}
+	}
 };
 
 /*
@@ -1121,6 +1173,21 @@ public:
 	virtual ~Flatten() {}
 };
 
+class StripOuterAttributes : public Ginger::MnxVisitor {
+public:
+	void startVisit( Ginger::Mnx & element ) {
+		element.clearAttribute( IS_OUTER );
+		element.clearAttribute( OUTER_LEVEL );
+	}
+	
+	void endVisit( Ginger::Mnx & element ) {
+	}	
+
+public:
+	StripOuterAttributes() {}
+	virtual ~StripOuterAttributes() {}
+};
+
 bool Main::resimplify( shared< Ginger::Mnx > g ) {
 	bool resimplify = false;
 	
@@ -1180,8 +1247,14 @@ void Main::simplify( shared< Ginger::Mnx > g ) {
 		if ( outers_found ) {
 			Lift lift;
 			g->visit( lift );
+			
 			AddDeref addd;
 			g->visit( addd );
+		}
+		
+		if ( not retain_debug_info ) {
+			StripOuterAttributes strip;
+			g->visit( strip );
 		}
 	}
 	
@@ -1209,18 +1282,13 @@ void Main::simplify( shared< Ginger::Mnx > g ) {
 }
 
 void Main::run() {
-	Ginger::MnxReader reader;
-	
-	for (;;) {
-	
+	Ginger::MnxReader reader;	
+	for (;;) {	
 		shared< Ginger::Mnx > g( reader.readMnx() );
-		if ( not g ) break;
-	
-		this->simplify( g );
-		
+		if ( not g ) break;	
+		this->simplify( g );		
 		g->render();
-		cout << endl;
-		
+		cout << endl;		
 	}
 }
 

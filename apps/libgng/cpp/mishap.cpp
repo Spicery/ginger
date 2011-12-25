@@ -19,7 +19,7 @@
 #include <iostream>
 #include <sstream>
 #include <iomanip>
-
+#include <cstring> 
 
 #include <stdio.h>
 #include <stdarg.h>

@@ -180,7 +180,9 @@ Node ReadStateClass::readSingleStmnt() {
 			case tokty_if: return this->readIf( tokty_if, tokty_endif );
 			case tokty_for: return this->readFor();
 			case tokty_semi: return makeEmpty();
-			default: ;
+			default: 
+				this->item_factory->unread();
+				// --- Fall-through --- //
 		}
 	}
 	

@@ -20,7 +20,7 @@
 
 #include "ident.hpp"
 #include "key.hpp"
-#include "term.hpp"
+//#include "term.hpp"
 
 IdentClass::IdentClass( const std::string & nm ) : //, const FacetSet * facets ) :
 	name_data( nm ),
@@ -58,7 +58,7 @@ bool IdentClass::isSame( IdentClass * other ) {
 	return this->name_data == other->name_data;
 }
 
-Ident identNewLocal( const std::string & nm, FnTermClass * fn ) {
+/*Ident identNewLocal( const std::string & nm, FnTermClass * fn ) {
 	shared< IdentClass > id( new IdentClass( nm, fn ) );
 	id->setLocal();
 	fn->addInner( id );
@@ -70,7 +70,7 @@ Ident identNewLastArg( const std::string & nm, FnTermClass * fn ) {
 	Ident id = identNewLocal( nm, fn );
 	id->setSlot( fn->nlocals()++ );
 	return id;
-}
+}*/
 
 Ident identNewTmp( const int n ) {
 	IdentClass * id = new IdentClass( std::string( "tmpvar" ), (FnTermClass *)NULL );

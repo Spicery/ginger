@@ -38,6 +38,7 @@ public abstract class Implementation extends GeneralInstructionSet {
 		answer.add( this.enter1_i().init( "enter1", "i" ) );
 		answer.add( this.eq_si_irrr().init( "eq_si", "irrr" ) );
 		answer.add( this.eq_ss_irrr().init( "eq_ss", "irrr" ) );
+		answer.add( this.erase_i().init( "erase", "i" ) );
 		answer.add( this.field_ir().init( "field", "ir" ) );
 		answer.add( this.getiterator_i().init( "getiterator", "i" ) );
 		answer.add( this.goto_ir().init( "goto", "ir" ) );
@@ -64,8 +65,17 @@ public abstract class Implementation extends GeneralInstructionSet {
 		answer.add( this.push_local0_i().init( "push_local0", "i" ) );
 		answer.add( this.push_local1_i().init( "push_local1", "i" ) );
 		answer.add( this.pushq_ic().init( "pushq", "ic" ) );
+		answer.add( this.push_local_ret_ir().init( "push_local_ret", "ir" ) );
+		answer.add( this.push_local0_ret_i().init( "push_local0_ret", "i" ) );
+		answer.add( this.push_local1_ret_i().init( "push_local1_ret", "i" ) );
+		answer.add( this.pushq_ret_ic().init( "pushq_ret", "ic" ) );
 		answer.add( this.reset_i().init( "reset", "i" ) );
 		answer.add( this.return_i().init( "return", "i" ) );
+		answer.add( this.return_ifso_i().init( "return_ifso", "i" ) );
+		answer.add( this.return_ifnot_i().init( "return_ifnot", "i" ) );
+		answer.add( this.self_call_i().init( "self_call", "i" ) );
+		answer.add( this.self_call_n_ir().init( "self_call_n", "ir" ) );
+		answer.add( this.self_constant_i().init( "self_constant", "i" ) );
 		answer.add( this.set_ir().init( "set", "ir" ) );
 		answer.add( this.set_call_global_irv().init( "set_call_global", "irv" ) );
 		answer.add( this.set_calls_ir().init( "set_calls", "ir" ) );

@@ -462,7 +462,7 @@ Ident StandardLibraryPackage::qualifiedAutoload( const std::string & alias, cons
 }
 
 Ident StandardLibraryPackage::absoluteAutoload( const std::string & c ) {
-	Ref r = makeSysFn( this->pkgmgr->vm->plant(), c, SYS_UNDEF );
+	Ref r = makeSysFn( this->pkgmgr->vm->codegen(), c, SYS_UNDEF );
 	if ( r == SYS_UNDEF ) {
 		//	Doesn't match a system call. Fail.
 		return shared< IdentClass >();

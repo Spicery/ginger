@@ -37,7 +37,7 @@
 
 #include "appcontext.hpp"
 #include "rcep.hpp"
-#include "term.hpp"
+//#include "term.hpp"
 #include "mishap.hpp"
 #include "sys.hpp"
 #include "machine1.hpp"

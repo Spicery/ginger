@@ -63,7 +63,7 @@ public:
 			stringstream commstream;
 			//	tail is 1-indexed!
 			commstream << this->context.syntax( *it ) << " < " << shellSafeName( *it ) << " | ";
-			commstream << SIMPLIFYGNX << " -su";
+			commstream << SIMPLIFYGNX << " -suA";
 			commstream << " -p " << shellSafeName( interactive_pkg->getTitle() );
 			string command( commstream.str() );
 			//	cerr << "Command so far: " << command << endl;
@@ -83,11 +83,10 @@ public:
 			pclose( gnxfp );
 		}
 		if ( this->context.useStdin() ) {
-		
 			stringstream commstream;
 			//	tail is 1-indexed!
 			commstream << this->context.syntax() << " | ";
-			commstream << SIMPLIFYGNX << " -su";
+			commstream << SIMPLIFYGNX << " -suA";
 			commstream << " -p " << shellSafeName( interactive_pkg->getTitle() );
 			string command( commstream.str() );
 

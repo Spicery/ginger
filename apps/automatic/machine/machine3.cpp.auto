@@ -53,13 +53,25 @@ void Machine3::core( bool init_mode, Ref *pc ) {
         RETURN( pc + 1 );
     }
     L_gt: {
-        long b = ToLong( *( VMVP-- ) );
-        *( VMVP ) = ToLong( *( VMVP ) ) > b ? SYS_TRUE : SYS_FALSE;
+        Ref b = *( VMVP-- );
+        Ref a = *( VMVP );
+        
+        if ( not( IsSmall( a ) ) or not( IsSmall( b ) ) ) {
+        	throw Mishap( "Small integers needed" );
+        }
+        
+        *( VMVP ) = ToLong( a ) > ToLong( b ) ? SYS_TRUE : SYS_FALSE;
         RETURN( pc + 1 );
     }
     L_gte: {
-        long b = ToLong( *( VMVP-- ) );
-        *( VMVP ) = ToLong( *( VMVP ) ) >= b ? SYS_TRUE : SYS_FALSE;
+        Ref b = *( VMVP-- );
+        Ref a = *VMVP;
+        
+        if ( not( IsSmall( a ) ) or not( IsSmall( b ) ) ) {
+        	throw Mishap( "Small integers needed" );
+        }
+        
+        *( VMVP ) = ToLong( a ) >= ToLong( b ) ? SYS_TRUE : SYS_FALSE;
         RETURN( pc + 1 );
     }
     L_incr: {
@@ -96,13 +108,25 @@ void Machine3::core( bool init_mode, Ref *pc ) {
         } 
     }
     L_lt: {
-        long b = ToLong( *( VMVP-- ) );
-        *( VMVP ) = ToLong( *( VMVP ) ) < b ? SYS_TRUE : SYS_FALSE;
+        Ref b = *( VMVP-- );
+        Ref a = *( VMVP );
+        
+        if ( not IsSmall( a ) or not IsSmall( b ) ) {
+        	throw Mishap( "Small integers only" );
+        }
+        
+        *( VMVP ) = ToLong( a ) < ToLong( b ) ? SYS_TRUE : SYS_FALSE;
         RETURN( pc + 1 );
     }
     L_lte: {
-        long b = ToLong( *( VMVP-- ) );
-        *( VMVP ) = ToLong( *( VMVP ) ) <= b ? SYS_TRUE : SYS_FALSE;
+        Ref b = *( VMVP-- );
+        Ref a = *( VMVP );
+        
+        if ( not( IsSmall( a ) ) or not( IsSmall( b ) ) ) {
+        	throw Mishap( "Small integers needed" );
+        }
+        
+        *( VMVP ) = ToLong( a ) <= ToLong( b ) ? SYS_TRUE : SYS_FALSE;
         RETURN( pc + 1 );
     }
     L_mul: {
@@ -285,6 +309,12 @@ void Machine3::core( bool init_mode, Ref *pc ) {
         long d = ToLong( pc[3] );
         RETURN( ToLong( LOCAL( s ) ) == ToLong( LOCAL( t ) ) ? pc + d + 3 : pc + 4 );
     }
+    L_erase: {
+        {
+        	VMVP--;					//	Decrement the value-stack pointer.
+        	RETURN( pc + 1 );		//	Return the next instruction.
+        }
+    }
     L_field: {
         unsigned long N = ToULong( *++pc );
         VMVP[0] = RefToPtr4( VMVP[0] )[ N ];
@@ -302,32 +332,60 @@ void Machine3::core( bool init_mode, Ref *pc ) {
     }
     L_gt_si: {
         long s = ToLong( pc[1] );
-        long i = ToLong( pc[2] );
-        RETURN( ToLong( LOCAL( s ) ) > i ? pc + ToLong( pc[3] ) + 3 : pc + 4 );
+        Ref a = LOCAL( s );
+        Ref b = pc[2];
+        
+        if ( not( IsSmall( a ) ) or not( IsSmall( b ) ) ) {
+        	throw Mishap( "Small integers needed" );
+        }
+        
+        RETURN( ToLong( a ) > ToLong( b ) ? pc + ToLong( pc[3] ) + 3 : pc + 4 );
     }
     L_gt_ss: {
         long s = ToLong( pc[1] );
         long t = ToLong( pc[2] );
+        Ref a = LOCAL( s );
+        Ref b = LOCAL( t );
+        
+        if ( not( IsSmall( a ) ) or not( IsSmall( b ) ) ) {
+        	throw Mishap( "Small integers needed" );
+        }
+        
         long d = ToLong( pc[3] );
-        RETURN( ToLong( LOCAL( s ) ) > ToLong( LOCAL( t ) ) ? pc + d + 3 : pc + 4 );
+        RETURN( ToLong( a ) > ToLong( b ) ? pc + d + 3 : pc + 4 );
     }
     L_gte_si: {
         long s = ToLong( pc[1] );
-        long i = ToLong( pc[2] );
+        Ref a = LOCAL( s );
+        Ref b = pc[2];
+        
+        if ( not( IsSmall( a ) ) or not( IsSmall( b ) ) ) {
+        	throw Mishap( "Small integers needed" );
+        }
+        
         long d = ToLong( pc[3] );
-        RETURN( ToLong( LOCAL( s ) ) >= i ? pc + d + 3: pc + 4 );
+        RETURN( ToLong( a ) >= ToLong( b ) ? pc + d + 3: pc + 4 );
     }
     L_gte_ss: {
         long s = ToLong( pc[1] );
         long t = ToLong( pc[2] );
+        
+        Ref a = LOCAL( s );
+        Ref b = LOCAL( t );
+        
+        if ( not IsSmall( a ) or not IsSmall( b ) ) {
+        	throw Mishap( "Small integers only" );
+        }
+        
         long d = ToLong( pc[3] );
-        RETURN( ToLong( LOCAL( s ) ) >= ToLong( LOCAL( t ) ) ? pc + d + 3 : pc + 4 );
+        RETURN( ToLong( a ) >= ToLong( b ) ? pc + d + 3 : pc + 4 );
     }
     L_halt: {
         #ifdef DBG_SPECIAL	
         printf( "\nhalt\n" );
         #endif
-        exit( EXIT_SUCCESS );
+        fprintf( stderr, "Compilation error - fell off the end of a function\n" );
+        exit( EXIT_FAILURE );
     }
     L_ifnot: {
         #ifdef DBG_SPECIAL
@@ -465,27 +523,54 @@ void Machine3::core( bool init_mode, Ref *pc ) {
     }
     L_lt_si: {
         long s = ToLong( pc[1] );
-        long i = ToLong( pc[2] );
+        Ref a = LOCAL( s );
+        Ref b = pc[2];
+        
+        if ( not( IsSmall( a ) ) or not( IsSmall( b ) ) ) {
+        	throw Mishap( "Small integers needed" );
+        }
+        
         long d = ToLong( pc[3] );
-        RETURN( ToLong( LOCAL( s ) ) < i ? pc + d + 3 : pc + 4 );
+        RETURN( ToLong( a ) < ToLong( b ) ? pc + d + 3 : pc + 4 );
     }
     L_lt_ss: {
         long s = ToLong( pc[1] );
         long t = ToLong( pc[2] );
+        
+        Ref a = LOCAL( s );
+        Ref b = LOCAL( t );
+        
+        if ( not( IsSmall( a ) ) or not( IsSmall( b ) ) ) {
+        	throw Mishap( "Small integers needed" );
+        }
+        
         long d = ToLong( pc[3] );
-        RETURN( ToLong( LOCAL( s ) ) < ToLong( LOCAL( t ) ) ? pc + d + 3 : pc + 4 );
+        RETURN( ToLong( a ) < ToLong( b ) ? pc + d + 3 : pc + 4 );
     }
     L_lte_si: {
         long s = ToLong( pc[1] );
-        long i = ToLong( pc[2] );
+        Ref a = LOCAL( s );
+        Ref b = pc[2];
+        
+        if ( not( IsSmall( a ) ) or not( IsSmall( b ) ) ) {
+        	throw Mishap( "Small integers needed" );
+        }
+        
         long d = ToLong( pc[3] );
-        RETURN( ToLong( LOCAL( s ) ) <= i ? pc + d + 3 : pc + 4 );
+        RETURN( ToLong( a ) <= ToLong( b ) ? pc + d + 3 : pc + 4 );
     }
     L_lte_ss: {
         long s = ToLong( pc[1] );
         long t = ToLong( pc[2] );
+        Ref a = LOCAL( s );
+        Ref b = LOCAL( t );
+        
+        if ( not( IsSmall( a ) ) or not( IsSmall( b ) ) ) {
+        	throw Mishap( "Small integers needed" );
+        }
+        
         long d = ToLong( pc[3] );
-        RETURN( ToLong( LOCAL( s ) ) <= ToLong( LOCAL( t ) ) ? pc + d + 3 : pc + 4 );
+        RETURN( ToLong( a ) <= ToLong( b ) ? pc + d + 3 : pc + 4 );
     }
     L_neq_si: {
         long s = ToLong( pc[1] );
@@ -495,8 +580,10 @@ void Machine3::core( bool init_mode, Ref *pc ) {
     L_neq_ss: {
         long s = ToLong( pc[1] );
         long t = ToLong( pc[2] );
+        Ref a = LOCAL( s );
+        Ref b = LOCAL( t );
         long d = ToLong( pc[3] );
-        RETURN( ToLong( LOCAL( s ) ) != ToLong( LOCAL( t ) ) ? pc + d + 3 : pc + 4 );
+        RETURN( a != b ? pc + d + 3 : pc + 4 );
     }
     L_not: {
         *VMVP = ( *VMVP == SYS_FALSE ? SYS_TRUE : SYS_FALSE );
@@ -537,6 +624,54 @@ void Machine3::core( bool init_mode, Ref *pc ) {
         *( ++VMVP ) = *( ++pc );
         RETURN( pc + 1 );
     }
+    L_push_local_ret: {
+        *( ++VMVP ) = LOCAL( ToLong( *( ++pc ) ) );
+        Ref *linkptr;
+        VMPCFUNC = ToRefRef( VMSP[ SP_FUNC ] );
+        linkptr = ToRefRef( VMSP[ SP_LINK ] );				//	recover return address
+        VMSP = ToRefRef( VMSP[ SP_PREV_SP ] );				//	restore stack pointer
+        #ifdef DBG_SPECIAL
+        	printf( "Recover link = %x\n", ToUInt( link ) );
+        	printf( "Stack pointer recovered as %x\n", ToUInt( VMSP ) );
+        #endif
+        RETURN( linkptr );
+    }
+    L_push_local0_ret: {
+        *( ++VMVP ) = LOCAL(0);
+        Ref *linkptr;
+        VMPCFUNC = ToRefRef( VMSP[ SP_FUNC ] );
+        linkptr = ToRefRef( VMSP[ SP_LINK ] );				//	recover return address
+        VMSP = ToRefRef( VMSP[ SP_PREV_SP ] );				//	restore stack pointer
+        #ifdef DBG_SPECIAL
+        	printf( "Recover link = %x\n", ToUInt( link ) );
+        	printf( "Stack pointer recovered as %x\n", ToUInt( VMSP ) );
+        #endif
+        RETURN( linkptr );
+    }
+    L_push_local1_ret: {
+        *( ++VMVP ) = LOCAL(1);
+        Ref *linkptr;
+        VMPCFUNC = ToRefRef( VMSP[ SP_FUNC ] );
+        linkptr = ToRefRef( VMSP[ SP_LINK ] );				//	recover return address
+        VMSP = ToRefRef( VMSP[ SP_PREV_SP ] );				//	restore stack pointer
+        #ifdef DBG_SPECIAL
+        	printf( "Recover link = %x\n", ToUInt( link ) );
+        	printf( "Stack pointer recovered as %x\n", ToUInt( VMSP ) );
+        #endif
+        RETURN( linkptr );
+    }
+    L_pushq_ret: {
+        *( ++VMVP ) = *( ++pc );
+        Ref *linkptr;
+        VMPCFUNC = ToRefRef( VMSP[ SP_FUNC ] );
+        linkptr = ToRefRef( VMSP[ SP_LINK ] );				//	recover return address
+        VMSP = ToRefRef( VMSP[ SP_PREV_SP ] );				//	restore stack pointer
+        #ifdef DBG_SPECIAL
+        	printf( "Recover link = %x\n", ToUInt( link ) );
+        	printf( "Stack pointer recovered as %x\n", ToUInt( VMSP ) );
+        #endif
+        RETURN( linkptr );
+    }
     L_reset: {
         FREEZE;
         throw NormalExit();
@@ -551,6 +686,47 @@ void Machine3::core( bool init_mode, Ref *pc ) {
         	printf( "Stack pointer recovered as %x\n", ToUInt( VMSP ) );
         #endif
         RETURN( linkptr );
+    }
+    L_return_ifso: {
+        if( *( VMVP-- ) == SYS_FALSE ) {
+        	RETURN( pc + 1 );									//	Go onto the next instruction.
+        } else {
+        	Ref *linkptr;
+        	VMPCFUNC = ToRefRef( VMSP[ SP_FUNC ] );
+        	linkptr = ToRefRef( VMSP[ SP_LINK ] );				//	Recover return address.
+        	VMSP = ToRefRef( VMSP[ SP_PREV_SP ] );				//	Restore stack pointer.
+        	RETURN( linkptr );
+        }
+    }
+    L_return_ifnot: {
+        if( *( VMVP-- ) != SYS_FALSE ) {
+        	RETURN( pc + 1 );									//	Go onto the next instruction.
+        } else {
+        	Ref *linkptr;
+        	VMPCFUNC = ToRefRef( VMSP[ SP_FUNC ] );
+        	linkptr = ToRefRef( VMSP[ SP_LINK ] );				//	recover return address
+        	VMSP = ToRefRef( VMSP[ SP_PREV_SP ] );				//	restore stack pointer
+        	RETURN( linkptr );
+        }
+    }
+    L_self_call: {
+        {    
+            VMLINK = pc + 1;
+            VMLINKFUNC = VMPCFUNC;
+            RETURN( VMPCFUNC + 1 );
+        }
+    }
+    L_self_call_n: {
+        VMCOUNT = ToLong( pc[ 1 ] );
+        {    
+            VMLINK = pc + 2;
+            VMLINKFUNC = VMPCFUNC;
+            RETURN( VMPCFUNC + 1 );
+        }
+    }
+    L_self_constant: {
+        *( ++VMVP ) = VMPCFUNC;
+        RETURN( pc + 1 );
     }
     L_set: {
         VMCOUNT = VMVP - (Ref *)LOCAL( ToLong( pc[ 1 ] ) );
@@ -730,6 +906,7 @@ void Machine3::core( bool init_mode, Ref *pc ) {
         ins.spc_enter1 = &&L_enter1;
         ins.spc_eq_si = &&L_eq_si;
         ins.spc_eq_ss = &&L_eq_ss;
+        ins.spc_erase = &&L_erase;
         ins.spc_field = &&L_field;
         ins.spc_getiterator = &&L_getiterator;
         ins.spc_goto = &&L_goto;
@@ -756,8 +933,17 @@ void Machine3::core( bool init_mode, Ref *pc ) {
         ins.spc_push_local0 = &&L_push_local0;
         ins.spc_push_local1 = &&L_push_local1;
         ins.spc_pushq = &&L_pushq;
+        ins.spc_push_local_ret = &&L_push_local_ret;
+        ins.spc_push_local0_ret = &&L_push_local0_ret;
+        ins.spc_push_local1_ret = &&L_push_local1_ret;
+        ins.spc_pushq_ret = &&L_pushq_ret;
         ins.spc_reset = &&L_reset;
         ins.spc_return = &&L_return;
+        ins.spc_return_ifso = &&L_return_ifso;
+        ins.spc_return_ifnot = &&L_return_ifnot;
+        ins.spc_self_call = &&L_self_call;
+        ins.spc_self_call_n = &&L_self_call_n;
+        ins.spc_self_constant = &&L_self_constant;
         ins.spc_set = &&L_set;
         ins.spc_set_call_global = &&L_set_call_global;
         ins.spc_set_calls = &&L_set_calls;

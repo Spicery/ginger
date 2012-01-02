@@ -1,3 +1,9 @@
 long s = ToLong( pc[1] );
-long i = ToLong( pc[2] );
-RETURN( ToLong( LOCAL( s ) ) > i ? pc + ToLong( pc[3] ) + 3 : pc + 4 );
+Ref a = LOCAL( s );
+Ref b = pc[2];
+
+if ( not( IsSmall( a ) ) or not( IsSmall( b ) ) ) {
+	throw Mishap( "Small integers needed" );
+}
+
+RETURN( ToLong( a ) > ToLong( b ) ? pc + ToLong( pc[3] ) + 3 : pc + 4 );

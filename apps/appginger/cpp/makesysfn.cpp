@@ -18,10 +18,46 @@
 
 #include "makesysfn.hpp"
 #include "sys.hpp"
-#include "vmi.hpp"
+#include "codegen.hpp"
 #include "mishap.hpp"
 
-Ref makeSysFn( Plant plant, std::string fn_name, Ref default_value ) {
+//	Ref makeSysFn( Plant plant, std::string fn_name, Ref default_value ) {
+//	
+//		SysMap::iterator smit = sysMap.find( fn_name );
+//		if ( smit == sysMap.end() ) {
+//			return default_value;
+//		}
+//		SysInfo & info = smit->second;
+//		
+//		Ref x = info.coreFunctionObject;
+//		if ( x != NULL ) return x;
+//	
+//		plant->vmiFUNCTION( info.in_arity.count(), info.out_arity.count() );
+//		
+//		//	We have two different kinds of system functions. Those that are
+//		//	implemented as native instructions and those that are implemented
+//		//	by hand-written functions.
+//		//
+//		//	The test that distinguishes them is unsatidfactory because it fails
+//		//	to distinguish my stupidity in leaving something out from a genuine choice.
+//		//	REFACTOR.
+//		//
+//		if ( info.syscall != NULL ) {
+//			//	Hand-written function.
+//			plant->vmiSYS_CALL( info.syscall );	
+//		} else {
+//			//	Native instruction.
+//			plant->vmiOPERATOR( info.functor );
+//		}
+//		plant->vmiSYS_RETURN();
+//		Ref r = plant->vmiENDFUNCTION( false );
+//		
+//		info.coreFunctionObject = r;
+//		return r;
+//		
+//	}
+//	
+Ref makeSysFn( CodeGen codegen, std::string fn_name, Ref default_value ) {
 
 	SysMap::iterator smit = sysMap.find( fn_name );
 	if ( smit == sysMap.end() ) {
@@ -32,7 +68,7 @@ Ref makeSysFn( Plant plant, std::string fn_name, Ref default_value ) {
 	Ref x = info.coreFunctionObject;
 	if ( x != NULL ) return x;
 
-	plant->vmiFUNCTION( info.in_arity.count(), info.out_arity.count() );
+	codegen->vmiFUNCTION( info.in_arity.count(), info.out_arity.count() );
 	
 	//	We have two different kinds of system functions. Those that are
 	//	implemented as native instructions and those that are implemented
@@ -42,15 +78,17 @@ Ref makeSysFn( Plant plant, std::string fn_name, Ref default_value ) {
 	//	to distinguish my stupidity in leaving something out from a genuine choice.
 	//	REFACTOR.
 	//
-	if ( info.syscall != NULL ) {
+	if ( info.isSysCall() ) {
 		//	Hand-written function.
-		plant->vmiSYS_CALL( info.syscall );	
-	} else {
+		codegen->vmiSYS_CALL( info.syscall );	
+	} else if ( info.isVMOp() ) {
 		//	Native instruction.
-		plant->vmiOPERATOR( info.functor );
+		codegen->vmiINSTRUCTION( info.instruction );
+	} else {
+		throw Ginger::SystemError( "Internal error" );
 	}
-	plant->vmiSYS_RETURN();
-	Ref r = plant->vmiENDFUNCTION( false );
+	codegen->vmiSYS_RETURN();
+	Ref r = codegen->vmiENDFUNCTION( false );
 	
 	info.coreFunctionObject = r;
 	return r;

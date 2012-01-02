@@ -16,42 +16,32 @@
     along with AppGinger.  If not, see <http://www.gnu.org/licenses/>.
 \******************************************************************************/
 
-#ifndef ARITY_HPP
-#define ARITY_HPP
+#include "gnxconstants.hpp"
+#include "mishap.hpp"
 
-#include "term.hpp"
-#include "dontknow.hpp"
-#include <string>
+#include "vident.hpp"
 
-//int arity_add( const int a, const int b );
-//int arity_join( const int a, const int b );
-//int arity_analysis( Term term );
+#include "package.cpp"
 
-class Arity {
-private:
-	//	These fields should fit into 1 word (4 bytes)
-	bool more;
-	short arity;
-	
-public:
-	std::string toString() const;
-	Arity add( const Arity that ) const;
-	Arity join( const Arity that ) const;
-	void check( const Arity that ) const;
-	void check( const int actual_nargs ) const;
-	bool isOK( const Arity that ) const;
-	bool isOK( const int actual_nargs ) const;
-	bool isZero() const;
-	bool isntZero() const;
-	bool isExact() const;
-	bool isntExact() const;
-	int count() const;
-	
-public:
-	Arity( int a ) : more( false ), arity( a ) {}
-	Arity( int a, bool m ) : more( m ), arity( a ) {}
-	Arity( Term t );
-};
 
-#endif
-
+VIdent::VIdent( CodeGen codegen, shared< Ginger::Mnx > vid ) {
+	const string & nm = vid->name();
+	if ( nm == ID || nm == VAR ) {
+		if ( vid->hasAttribute( VID_SCOPE, "local" ) ) {
+			this->flavour = LOCAL_FLAVOUR;
+			this->slot = vid->attributeToInt( VID_SLOT );
+			this->valof = NULL;
+		} else {	
+			this->flavour = GLOBAL_FLAVOUR;
+			Package * def_pkg = codegen->vm->getPackage( vid->attribute( VID_DEF_PKG ) );
+			Ident ident = def_pkg->fetchDefinitionIdent( vid->attribute( VID_NAME ) );
+			this->valof = ident->value_of;
+			this->slot = 0;
+		}
+	} else if ( nm == CONSTANT ) {
+		this->flavour = CONSTANT_FLAVOUR;
+		this->valof = NULL;
+		this->slot = NULL;
+		this->ref = codegen->calcConstant( vid );
+	}
+}

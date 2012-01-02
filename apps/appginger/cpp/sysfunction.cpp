@@ -21,7 +21,7 @@
 #include "cage.hpp"
 #include "key.hpp"
 #include "mishap.hpp"
-#include "vmi.hpp"
+//#include "vmi.hpp"
 
 
 /*
@@ -36,7 +36,7 @@
 	been some N+1 arguments.
 */
 Ref * sysPartApply( Ref *pc, class MachineClass * vm ) {
-	PlantClass * plant = vm->plant();
+	CodeGen codegen = vm->codegen();
 	
 	//	We have to do a heap check immediately. This is intended to 
 	//	ensure that garbage collection cannot occur before we exit this
@@ -62,12 +62,12 @@ Ref * sysPartApply( Ref *pc, class MachineClass * vm ) {
 
 	//	This seems very unlikely to be correct. We can't just go around
 	//	substracting arities.
-	plant->vmiFUNCTION( F_in_arity - N, F_out_arity );
+	codegen->vmiFUNCTION( F_in_arity - N, F_out_arity );
 	for ( int i = 0; i < N; i++ ) {
-		plant->vmiPUSHQ( vm->vp[ i ] );
+		codegen->vmiPUSHQ( vm->vp[ i ] );
 	}
-	plant->vmiCHAIN_LITE( F, N );
-	Ref part_apply = plant->vmiENDFUNCTION();
+	codegen->vmiCHAIN_LITE( F, N );
+	Ref part_apply = codegen->vmiENDFUNCTION();
 	
 	vm->fastPeek() = part_apply;
 

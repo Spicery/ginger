@@ -29,14 +29,14 @@
 #include "mnx.hpp"
 
 #include "common.hpp"
-#include "read_xml.hpp"
-#include "plant.hpp"
+//#include "read_xml.hpp"
+//#include "codegen.hpp"
 #include "machine.hpp"
 #include "rcep.hpp"
-#include "vmi.hpp"
+//#include "vmi.hpp"
 #include "mishap.hpp"
-#include "lift.hpp"
-#include "resolve.hpp"
+//#include "lift.hpp"
+//#include "resolve.hpp"
 
 using namespace std;
 
@@ -83,42 +83,18 @@ int RCEP::level = 0;
 
 void RCEP::execGnx( shared< Ginger::Mnx > mnx, std::ostream & output ) {
 	Machine vm = this->getMachine();
-    Plant plant;
+    CodeGen codegen;
     Ref r;
     
 	try {
-		Term term = mnxToTerm( mnx );
-        
-        #ifdef DBG_RCEP
-			fprintf( stderr, "Before lifting\n" );
-        	term_print( term );
-			fprintf( stderr, "Lifting ...\n" );
-			fflush( stderr );
-        #endif
-
-		bool needs_lifting;
-		term = resolveTerm( this->current_package, term, needs_lifting );
-		
-		#ifdef DBG_LIFTING
-			cerr << "Lifting needed? " << needs_lifting << endl;
-		#endif
-		if ( needs_lifting ) {
-			term = liftTerm( this->current_package, term );	
-		}
-
-        #ifdef DBG_RCEP
-			fprintf( stderr, "After lifting\n" );
-        	term_print( term );
-			fprintf( stderr, "---\n" );
-			fflush( stderr );
-        #endif
-
-	    plant = vm->plant();
-	    plant->vmiFUNCTION( 0, 0 );
-	    plant->vmiENTER();
-        plant->compileTerm( term );
-	    plant->vmiRETURN();
-	    r = plant->vmiENDFUNCTION();
+	    codegen = vm->codegen();
+	    codegen->vmiFUNCTION( 0, 0 );
+	    codegen->vmiENTER();
+	    LabelClass retn( codegen, true );
+        codegen->compileGnx( mnx, &retn );
+        retn.labelSet();
+	    codegen->vmiRETURN();				//	TODO: We might be able to eliminate this.
+	    r = codegen->vmiENDFUNCTION();
 	    vm->addToQueue( r );
 	    if ( this->isTopLevel() ) {
         	#ifdef DBG_RCEP
@@ -138,9 +114,9 @@ void RCEP::execGnx( shared< Ginger::Mnx > mnx, std::ostream & output ) {
 
 bool RCEP::unsafe_read_comp_exec_print( istream & input, std::ostream & output ) {
 	Machine vm = this->getMachine();
-    Plant plant;
+    CodeGen codegen;
     Ref r;
-    Term term;
+    //Term term;
 	volatile clock_t start, finish;
 	//ReadXmlClass read_xml( input );
 	Ginger::MnxReader read_xml( input );
@@ -159,51 +135,20 @@ bool RCEP::unsafe_read_comp_exec_print( istream & input, std::ostream & output )
 			cerr << "RCEP EXPRESSION: ";
 			mnx->render();
 			cout << endl;
-		
-			cerr << "Converting to term" << endl;
-		#endif
-			term = mnxToTerm( mnx );
-		#ifdef DBG_RCEP
-			cerr << "Converted to term" << endl;
-			//term = read_xml.readElement();
 		#endif
 		
-        if ( not term ) return false;
-
-        #ifdef DBG_RCEP
-			fprintf( stderr, "Before lifting\n" );
-        	term_print( term );
-			fprintf( stderr, "Lifting ...\n" );
-			fflush( stderr );
-        #endif
-
-		bool needs_lifting;
-		term = resolveTerm( this->current_package, term, needs_lifting );
-		
-		#ifdef DBG_LIFTING
-			cerr << "Lifting needed? " << needs_lifting << endl;
-		#endif
-		if ( needs_lifting ) {
-			term = liftTerm( this->current_package, term );	
-		}
-
-        #ifdef DBG_RCEP
-			fprintf( stderr, "After lifting\n" );
-        	term_print( term );
-			fprintf( stderr, "---\n" );
-			fflush( stderr );
-        #endif
-
 		#ifdef DBG_RCEP
 			cerr << "Planting" << endl;
 	    #endif
 
-	    plant = vm->plant();
-	    plant->vmiFUNCTION( 0, 0 );
-	    plant->vmiENTER();
-        plant->compileTerm( term );
-	    plant->vmiRETURN();
-	    r = plant->vmiENDFUNCTION();
+	    codegen = vm->codegen();
+	    codegen->vmiFUNCTION( 0, 0 );
+	    codegen->vmiENTER();
+	    LabelClass retn( codegen, true );
+        codegen->compileGnx( mnx, &retn );
+        retn.labelSet();
+	    codegen->vmiRETURN();				//	TODO: We might be able to eliminate this.
+	    r = codegen->vmiENDFUNCTION();
 	    start = clock();
 	    
 		#ifdef DBG_RCEP

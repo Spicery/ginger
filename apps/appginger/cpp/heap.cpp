@@ -69,7 +69,7 @@ CageClass * HeapClass::preflight( int size ) {
  * Copy string into a cage of the heap, possibly incurring a GC.
  * We add a null-termination byte too.
  */
-Ref HeapClass::copyString( Ref * & pc, const char *s ) {
+Ref HeapClass::copyString( Ref * & pc, const char * s ) {
 	//	Strings have a two Ref overhead & must be ref aligned and have
 	//	an additional 1-byte overhead for null-byte.
 	size_t n = strlen( s );

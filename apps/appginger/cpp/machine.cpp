@@ -23,13 +23,13 @@
 #include "machine2.hpp"
 #include "common.hpp"
 #include "machine.hpp"
-#include "plant.hpp"
+#include "codegen.hpp"
 #include "heap.hpp"
 #include "key.hpp"
 #include "sys.hpp"
 #include "sysprint.hpp"
 #include "mishap.hpp"
-#include "vmi.hpp"
+//#include "vmi.hpp"
 
 using namespace std;
 
@@ -39,7 +39,7 @@ using namespace std;
 
 MachineClass::MachineClass( AppContext & application ) :
 	appg( application ),
-	plant_aptr( new PlantClass( this ) ),
+	codegen_aptr( new CodeGenClass( this ) ),
 	heap_aptr( new HeapClass( this ) ),
 	package_mgr_aptr( new PackageManager( this ) ),
 	program_counter( 0 ),
@@ -89,20 +89,20 @@ void MachineClass::executeQueue() {
 		this->gcLiftAllVetoes();
 	    this->execute( r );
 	} else {		
-		Plant plant = this->plant();
-	    plant->vmiFUNCTION( 0, 0 );
-	    plant->vmiENTER();
+		CodeGen codegen = this->codegen();
+	    codegen->vmiFUNCTION( 0, 0 );
+	    codegen->vmiENTER();
         for ( 
         	vector< Ref >::iterator it = this->queue.begin();
         	it != this->queue.end();
         	++it
         ) {
-        	plant->vmiPUSHQ( *it );
-        	plant->vmiSET_CALLS( 0 );
+        	codegen->vmiPUSHQ( *it );
+        	codegen->vmiSET_CALLS( 0 );
         }
         this->queue.clear();
-	    plant->vmiRETURN();
-	    Ref r =  plant->vmiENDFUNCTION();
+	    codegen->vmiRETURN();
+	    Ref r =  codegen->vmiENDFUNCTION();
 		this->gcLiftAllVetoes();
 		this->execute( r );
 	}
@@ -117,12 +117,12 @@ bool MachineClass::isGCTrace() {
 }
 
 void MachineClass::resetMachine() {
-	this->plant_aptr.reset( new PlantClass( this ) );
+	this->codegen_aptr.reset( new CodeGenClass( this ) );
 	this->package_mgr_aptr->reset();
 }
 
-PlantClass * MachineClass::plant() {
-	return this->plant_aptr.get();
+CodeGen MachineClass::codegen() {
+	return this->codegen_aptr.get();
 }
 
 
@@ -195,7 +195,7 @@ Ref * MachineClass::instructionShow( ostream & out, Ref *pc ) {
 				break;
 			}
 			case 'r': {
-				out << (unsigned long)( *pc ) << " ";
+				out << (long)( *pc ) << " ";
 				break;
 			}
 			case 'c': {
@@ -265,10 +265,10 @@ Ref MachineClass::sysFastListIterator() {
 	static Ref iterator = NULL;
 	if ( iterator != NULL ) return iterator;
 	
-	PlantClass * plant = this->plant();
-	plant->vmiFUNCTION( 2, 2 );
-	plant->vmiINSTRUCTION( vmc_listiterate );
-	iterator = plant->vmiENDFUNCTION( false );
+	CodeGen codegen = this->codegen();
+	codegen->vmiFUNCTION( 2, 2 );
+	codegen->vmiINSTRUCTION( vmc_listiterate );
+	iterator = codegen->vmiENDFUNCTION( false );
 
 	return iterator;
 }
@@ -279,10 +279,10 @@ Ref MachineClass::sysFastVectorIterator() {
 	static Ref iterator = NULL;
 	if ( iterator != NULL ) return iterator;
 	
-	PlantClass * plant = this->plant();
-	plant->vmiFUNCTION( 2, 2 );
-	plant->vmiINSTRUCTION( vmc_vectoriterate );
-	iterator = plant->vmiENDFUNCTION( false );
+	CodeGen codegen = this->codegen();
+	codegen->vmiFUNCTION( 2, 2 );
+	codegen->vmiINSTRUCTION( vmc_vectoriterate );
+	iterator = codegen->vmiENDFUNCTION( false );
 
 	return iterator;
 }
@@ -292,10 +292,10 @@ Ref MachineClass::sysFastMixedIterator() {
 	static Ref iterator = NULL;
 	if ( iterator != NULL ) return iterator;
 	
-	PlantClass * plant = this->plant();
-	plant->vmiFUNCTION( 2, 2 );
-	plant->vmiINSTRUCTION( vmc_mixediterate );
-	iterator = plant->vmiENDFUNCTION( false );
+	CodeGen codegen = this->codegen();
+	codegen->vmiFUNCTION( 2, 2 );
+	codegen->vmiINSTRUCTION( vmc_mixediterate );
+	iterator = codegen->vmiENDFUNCTION( false );
 
 	return iterator;
 }
@@ -306,10 +306,10 @@ Ref MachineClass::sysFastStringIterator() {
 	static Ref iterator = NULL;
 	if ( iterator != NULL ) return iterator;
 	
-	PlantClass * plant = this->plant();
-	plant->vmiFUNCTION( 2, 2 );
-	plant->vmiINSTRUCTION( vmc_stringiterate );
-	iterator = plant->vmiENDFUNCTION( false );
+	CodeGen codegen = this->codegen();
+	codegen->vmiFUNCTION( 2, 2 );
+	codegen->vmiINSTRUCTION( vmc_stringiterate );
+	iterator = codegen->vmiENDFUNCTION( false );
 
 	return iterator;
 }

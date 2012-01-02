@@ -18,14 +18,23 @@
 
 #include <iostream>
 #include <cstdlib>
+#include <sstream>
+#include <string>
+
 
 #include <syslog.h>
+
+#include <ext/stdio_filebuf.h> // __gnu_cxx::stdio_filebuf
+
 
 #include "mishap.hpp"
 
 #include "appcontext.hpp"
 #include "toolmain.hpp"
 #include "rcep.hpp"
+
+#define SIMPLIFYGNX		( INSTALL_TOOL "/simplifygnx" )
+
 
 using namespace std;
 
@@ -49,7 +58,25 @@ private:
 		#endif
 	
 		RCEP rcep( interactive_pkg );
-		while ( rcep.read_comp_exec_print( std::cin, std::cout ) ) {};
+		//while ( rcep.read_comp_exec_print( std::cin, std::cout ) ) {};
+		
+		
+		stringstream commstream;
+		//	tail is 1-indexed!
+		commstream << SIMPLIFYGNX << " -suA";
+		commstream << " -p " << shellSafeName( interactive_pkg->getTitle() );
+		string command( commstream.str() );
+
+		FILE * gnxfp = popen( command.c_str(), "r" );
+		if ( gnxfp == NULL ) {
+			throw Ginger::Mishap( "Failed to translate input" );
+		}
+	
+		__gnu_cxx::stdio_filebuf<char> pipe_buf( gnxfp, ios_base::in );
+		istream stream_pipe_in( &pipe_buf );
+		while ( rcep.unsafe_read_comp_exec_print( stream_pipe_in, std::cout ) ) {}
+		
+		pclose( gnxfp );		
 	}
 
 public:

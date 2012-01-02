@@ -20,19 +20,19 @@
 using namespace std;
 
 #include "destination.hpp"
-#include "plant.hpp"
+#include "codegen.hpp"
 #include "mishap.hpp"
 
 //#define DBG_DESTINATION
 
-DestinationClass::DestinationClass( Plant plant ) {
-	this->plant = plant;
+DestinationClass::DestinationClass( CodeGen codegen ) {
+	this->codegen = codegen;
 	this->is_set = false;
 	this->location = -1;
 }
 
 void DestinationClass::destinationSet() {
-	int here = this->plant->codePosition();
+	int here = this->codegen->codePosition();
 	#ifdef DBG_DESTINATION
 		clog << "Setting destination at [" << here << "]" << endl;
 	#endif
@@ -48,23 +48,23 @@ void DestinationClass::destinationSet() {
 		#ifdef DBG_DESTINATION
 			clog << "Pending update of [" << there << "] with jump " << ( here - there ) << endl;
 		#endif
-		this->plant->codeUpdate( there, ( Ref )( here - there ) );
+		this->codegen->codeUpdate( there, ( Ref )( here - there ) );
 	}
 }
 
 void DestinationClass::destinationInsert() {
-	int where = this->plant->codePosition();
+	int where = this->codegen->codePosition();
 	if ( this->is_set ) {
 		#ifdef DBG_DESTINATION
 			clog << "Backward goto at [" << where << "] with jump " << where - this->location << endl;
 		#endif
-		this->plant->plantRef( ( Ref )( this->location - where ) );
+		this->codegen->codegenRef( ( Ref )( this->location - where ) );
 	} else {
 		#ifdef DBG_DESTINATION
 			clog << "Forward goto at [" << where << "]" << endl;
 		#endif
 		this->pending_vector.push_back( where );
-		this->plant->plantRef( (Ref)(-1) );
+		this->codegen->codegenRef( (Ref)(-1) );
 	}
 }
 

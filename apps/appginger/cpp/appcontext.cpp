@@ -49,7 +49,7 @@
 #include "common.hpp"
 #include "rcep.hpp"
 #include "appcontext.hpp"
-#include "term.hpp"
+//#include "term.hpp"
 #include "mishap.hpp"
 #include "sys.hpp"
 #include "machine1.hpp"

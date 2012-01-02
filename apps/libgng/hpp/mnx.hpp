@@ -44,6 +44,38 @@ public:
 	virtual ~MnxVisitor();
 };
 
+class MnxWalkPath {
+private:
+	Mnx &			mnx;
+	int				index;
+	MnxWalkPath *	prev;
+
+public:
+	Mnx & 			getMnx() { return this->mnx; }
+	int				getIndex() { return this->index; }
+	MnxWalkPath *	getPrevious() { return this->prev; }
+
+public:
+	MnxWalkPath( 
+		Mnx &			mnx,
+		int				index,
+		MnxWalkPath * 	prev
+	) : 
+		mnx( mnx ),
+		index( index ),
+		prev( prev )
+	{}
+};
+
+class MnxWalker {
+public:
+	virtual void startWalk( Mnx & element, MnxWalkPath * p ) = 0;
+	virtual void endWalk( Mnx & element, MnxWalkPath * p ) = 0;
+
+public:
+	virtual ~MnxWalker();
+};
+
 template <class T>
 class Iterator {
 public:
@@ -92,6 +124,8 @@ private:
 public:
 	const std::string & attribute( const std::string & key ) const;
 	const std::string & attribute( const std::string & key, const std::string & def ) const;
+	int attributeToInt( const std::string & key ) const;
+	int attributeToInt( const std::string & key, const int def ) const;
 	bool hasAttribute( const std::string & key ) const;
 	bool hasAttribute( const std::string & key, const std::string & eqval ) const;
 	shared< Mnx > & child( int n );
@@ -128,6 +162,7 @@ public:
 	void prettyPrint( const std::string & indentation );
 	void prettyPrint();
 	void visit( MnxVisitor & v );
+	void walk( MnxWalker & w, MnxWalkPath * p = 0 );
 	
 public:
 	Mnx( const std::string & name );

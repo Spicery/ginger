@@ -70,7 +70,7 @@ public:
 			//	tail is 1-indexed!
 			commstream << this->context.syntax( filename ) << " < " ;
 			commstream << shellSafeName( filename ) << " | ";
-			commstream << SIMPLIFYGNX << " -su";
+			commstream << SIMPLIFYGNX << " -suA";
 			commstream << " -p " << shellSafeName( interactive_pkg->getTitle() );
 			string command( commstream.str() );
 			//cerr << "Command so far: " << command << endl;

@@ -22,7 +22,7 @@
 #include "machine.hpp"
 
 #include "mishap.hpp"
-#include "vmi.hpp"
+//#include "vmi.hpp"
 #include "sysprint.hpp"
 
 Ref * sysNewMethod( Ref * pc, MachineClass * vm ) {
@@ -35,10 +35,10 @@ Ref * sysNewMethod( Ref * pc, MachineClass * vm ) {
 	
 	if ( !IsSmall( noutputs ) || !IsSmall( ninputs ) ) throw Ginger::Mishap( "Invalid arguments" ).culprit( "#Outputs", refToString( noutputs ) ).culprit( "Inputs", refToString( ninputs ) );
 	
-	Plant plant = vm->plant();
-	plant->vmiFUNCTION( SmallToLong( ninputs ), SmallToLong( noutputs ) );
-	plant->vmiINVOKE();
-	Ref r = plant->vmiENDFUNCTION( sysMethodKey );
+	CodeGen codegen = vm->codegen();
+	codegen->vmiFUNCTION( SmallToLong( ninputs ), SmallToLong( noutputs ) );
+	codegen->vmiINVOKE();
+	Ref r = codegen->vmiENDFUNCTION( sysMethodKey );
 	vm->fastPush( r );	//	No check needed, as stack has room for 3.
 	return pc;
 }
@@ -90,11 +90,11 @@ Ref * sysSetSlot( Ref * pc, MachineClass * vm ) {
 	//	The following block should not be in-lined but extracted as a 
 	//	service function.
 	{
-		Plant plant = vm->plant();
-		plant->vmiFUNCTION( 1, 1 );
-		plant->vmiFIELD( pos );
-		plant->vmiSYS_RETURN();
-		vm->fastPush( plant->vmiENDFUNCTION() );
+		CodeGen codegen = vm->codegen();
+		codegen->vmiFUNCTION( 1, 1 );
+		codegen->vmiFIELD( pos );
+		codegen->vmiSYS_RETURN();
+		vm->fastPush( codegen->vmiENDFUNCTION() );
 	}
 
 	//	We do not need to modify vm->count, it's already 3.

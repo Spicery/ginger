@@ -53,14 +53,26 @@ case vmc_neq: {
 }; break;
 
 case vmc_gt: {
-    long b = ToLong( *( VMVP-- ) );
-    *( VMVP ) = ToLong( *( VMVP ) ) > b ? SYS_TRUE : SYS_FALSE;
+    Ref b = *( VMVP-- );
+    Ref a = *( VMVP );
+    
+    if ( not( IsSmall( a ) ) or not( IsSmall( b ) ) ) {
+    	throw Mishap( "Small integers needed" );
+    }
+    
+    *( VMVP ) = ToLong( a ) > ToLong( b ) ? SYS_TRUE : SYS_FALSE;
     RETURN( pc + 1 );
 }; break;
 
 case vmc_gte: {
-    long b = ToLong( *( VMVP-- ) );
-    *( VMVP ) = ToLong( *( VMVP ) ) >= b ? SYS_TRUE : SYS_FALSE;
+    Ref b = *( VMVP-- );
+    Ref a = *VMVP;
+    
+    if ( not( IsSmall( a ) ) or not( IsSmall( b ) ) ) {
+    	throw Mishap( "Small integers needed" );
+    }
+    
+    *( VMVP ) = ToLong( a ) >= ToLong( b ) ? SYS_TRUE : SYS_FALSE;
     RETURN( pc + 1 );
 }; break;
 
@@ -100,14 +112,26 @@ case vmc_incr_by: {
 }; break;
 
 case vmc_lt: {
-    long b = ToLong( *( VMVP-- ) );
-    *( VMVP ) = ToLong( *( VMVP ) ) < b ? SYS_TRUE : SYS_FALSE;
+    Ref b = *( VMVP-- );
+    Ref a = *( VMVP );
+    
+    if ( not IsSmall( a ) or not IsSmall( b ) ) {
+    	throw Mishap( "Small integers only" );
+    }
+    
+    *( VMVP ) = ToLong( a ) < ToLong( b ) ? SYS_TRUE : SYS_FALSE;
     RETURN( pc + 1 );
 }; break;
 
 case vmc_lte: {
-    long b = ToLong( *( VMVP-- ) );
-    *( VMVP ) = ToLong( *( VMVP ) ) <= b ? SYS_TRUE : SYS_FALSE;
+    Ref b = *( VMVP-- );
+    Ref a = *( VMVP );
+    
+    if ( not( IsSmall( a ) ) or not( IsSmall( b ) ) ) {
+    	throw Mishap( "Small integers needed" );
+    }
+    
+    *( VMVP ) = ToLong( a ) <= ToLong( b ) ? SYS_TRUE : SYS_FALSE;
     RETURN( pc + 1 );
 }; break;
 
@@ -306,6 +330,13 @@ case vmc_eq_ss: {
     RETURN( ToLong( LOCAL( s ) ) == ToLong( LOCAL( t ) ) ? pc + d + 3 : pc + 4 );
 }; break;
 
+case vmc_erase: {
+    {
+    	VMVP--;					//	Decrement the value-stack pointer.
+    	RETURN( pc + 1 );		//	Return the next instruction.
+    }
+}; break;
+
 case vmc_field: {
     unsigned long N = ToULong( *++pc );
     VMVP[0] = RefToPtr4( VMVP[0] )[ N ];
@@ -326,36 +357,64 @@ case vmc_goto: {
 
 case vmc_gt_si: {
     long s = ToLong( pc[1] );
-    long i = ToLong( pc[2] );
-    RETURN( ToLong( LOCAL( s ) ) > i ? pc + ToLong( pc[3] ) + 3 : pc + 4 );
+    Ref a = LOCAL( s );
+    Ref b = pc[2];
+    
+    if ( not( IsSmall( a ) ) or not( IsSmall( b ) ) ) {
+    	throw Mishap( "Small integers needed" );
+    }
+    
+    RETURN( ToLong( a ) > ToLong( b ) ? pc + ToLong( pc[3] ) + 3 : pc + 4 );
 }; break;
 
 case vmc_gt_ss: {
     long s = ToLong( pc[1] );
     long t = ToLong( pc[2] );
+    Ref a = LOCAL( s );
+    Ref b = LOCAL( t );
+    
+    if ( not( IsSmall( a ) ) or not( IsSmall( b ) ) ) {
+    	throw Mishap( "Small integers needed" );
+    }
+    
     long d = ToLong( pc[3] );
-    RETURN( ToLong( LOCAL( s ) ) > ToLong( LOCAL( t ) ) ? pc + d + 3 : pc + 4 );
+    RETURN( ToLong( a ) > ToLong( b ) ? pc + d + 3 : pc + 4 );
 }; break;
 
 case vmc_gte_si: {
     long s = ToLong( pc[1] );
-    long i = ToLong( pc[2] );
+    Ref a = LOCAL( s );
+    Ref b = pc[2];
+    
+    if ( not( IsSmall( a ) ) or not( IsSmall( b ) ) ) {
+    	throw Mishap( "Small integers needed" );
+    }
+    
     long d = ToLong( pc[3] );
-    RETURN( ToLong( LOCAL( s ) ) >= i ? pc + d + 3: pc + 4 );
+    RETURN( ToLong( a ) >= ToLong( b ) ? pc + d + 3: pc + 4 );
 }; break;
 
 case vmc_gte_ss: {
     long s = ToLong( pc[1] );
     long t = ToLong( pc[2] );
+    
+    Ref a = LOCAL( s );
+    Ref b = LOCAL( t );
+    
+    if ( not IsSmall( a ) or not IsSmall( b ) ) {
+    	throw Mishap( "Small integers only" );
+    }
+    
     long d = ToLong( pc[3] );
-    RETURN( ToLong( LOCAL( s ) ) >= ToLong( LOCAL( t ) ) ? pc + d + 3 : pc + 4 );
+    RETURN( ToLong( a ) >= ToLong( b ) ? pc + d + 3 : pc + 4 );
 }; break;
 
 case vmc_halt: {
     #ifdef DBG_SPECIAL	
     printf( "\nhalt\n" );
     #endif
-    exit( EXIT_SUCCESS );
+    fprintf( stderr, "Compilation error - fell off the end of a function\n" );
+    exit( EXIT_FAILURE );
 }; break;
 
 case vmc_ifnot: {
@@ -498,30 +557,57 @@ case vmc_listiterate: {
 
 case vmc_lt_si: {
     long s = ToLong( pc[1] );
-    long i = ToLong( pc[2] );
+    Ref a = LOCAL( s );
+    Ref b = pc[2];
+    
+    if ( not( IsSmall( a ) ) or not( IsSmall( b ) ) ) {
+    	throw Mishap( "Small integers needed" );
+    }
+    
     long d = ToLong( pc[3] );
-    RETURN( ToLong( LOCAL( s ) ) < i ? pc + d + 3 : pc + 4 );
+    RETURN( ToLong( a ) < ToLong( b ) ? pc + d + 3 : pc + 4 );
 }; break;
 
 case vmc_lt_ss: {
     long s = ToLong( pc[1] );
     long t = ToLong( pc[2] );
+    
+    Ref a = LOCAL( s );
+    Ref b = LOCAL( t );
+    
+    if ( not( IsSmall( a ) ) or not( IsSmall( b ) ) ) {
+    	throw Mishap( "Small integers needed" );
+    }
+    
     long d = ToLong( pc[3] );
-    RETURN( ToLong( LOCAL( s ) ) < ToLong( LOCAL( t ) ) ? pc + d + 3 : pc + 4 );
+    RETURN( ToLong( a ) < ToLong( b ) ? pc + d + 3 : pc + 4 );
 }; break;
 
 case vmc_lte_si: {
     long s = ToLong( pc[1] );
-    long i = ToLong( pc[2] );
+    Ref a = LOCAL( s );
+    Ref b = pc[2];
+    
+    if ( not( IsSmall( a ) ) or not( IsSmall( b ) ) ) {
+    	throw Mishap( "Small integers needed" );
+    }
+    
     long d = ToLong( pc[3] );
-    RETURN( ToLong( LOCAL( s ) ) <= i ? pc + d + 3 : pc + 4 );
+    RETURN( ToLong( a ) <= ToLong( b ) ? pc + d + 3 : pc + 4 );
 }; break;
 
 case vmc_lte_ss: {
     long s = ToLong( pc[1] );
     long t = ToLong( pc[2] );
+    Ref a = LOCAL( s );
+    Ref b = LOCAL( t );
+    
+    if ( not( IsSmall( a ) ) or not( IsSmall( b ) ) ) {
+    	throw Mishap( "Small integers needed" );
+    }
+    
     long d = ToLong( pc[3] );
-    RETURN( ToLong( LOCAL( s ) ) <= ToLong( LOCAL( t ) ) ? pc + d + 3 : pc + 4 );
+    RETURN( ToLong( a ) <= ToLong( b ) ? pc + d + 3 : pc + 4 );
 }; break;
 
 case vmc_neq_si: {
@@ -533,8 +619,10 @@ case vmc_neq_si: {
 case vmc_neq_ss: {
     long s = ToLong( pc[1] );
     long t = ToLong( pc[2] );
+    Ref a = LOCAL( s );
+    Ref b = LOCAL( t );
     long d = ToLong( pc[3] );
-    RETURN( ToLong( LOCAL( s ) ) != ToLong( LOCAL( t ) ) ? pc + d + 3 : pc + 4 );
+    RETURN( a != b ? pc + d + 3 : pc + 4 );
 }; break;
 
 case vmc_not: {
@@ -584,6 +672,58 @@ case vmc_pushq: {
     RETURN( pc + 1 );
 }; break;
 
+case vmc_push_local_ret: {
+    *( ++VMVP ) = LOCAL( ToLong( *( ++pc ) ) );
+    Ref *linkptr;
+    VMPCFUNC = ToRefRef( VMSP[ SP_FUNC ] );
+    linkptr = ToRefRef( VMSP[ SP_LINK ] );				//	recover return address
+    VMSP = ToRefRef( VMSP[ SP_PREV_SP ] );				//	restore stack pointer
+    #ifdef DBG_SPECIAL
+    	printf( "Recover link = %x\n", ToUInt( link ) );
+    	printf( "Stack pointer recovered as %x\n", ToUInt( VMSP ) );
+    #endif
+    RETURN( linkptr );
+}; break;
+
+case vmc_push_local0_ret: {
+    *( ++VMVP ) = LOCAL(0);
+    Ref *linkptr;
+    VMPCFUNC = ToRefRef( VMSP[ SP_FUNC ] );
+    linkptr = ToRefRef( VMSP[ SP_LINK ] );				//	recover return address
+    VMSP = ToRefRef( VMSP[ SP_PREV_SP ] );				//	restore stack pointer
+    #ifdef DBG_SPECIAL
+    	printf( "Recover link = %x\n", ToUInt( link ) );
+    	printf( "Stack pointer recovered as %x\n", ToUInt( VMSP ) );
+    #endif
+    RETURN( linkptr );
+}; break;
+
+case vmc_push_local1_ret: {
+    *( ++VMVP ) = LOCAL(1);
+    Ref *linkptr;
+    VMPCFUNC = ToRefRef( VMSP[ SP_FUNC ] );
+    linkptr = ToRefRef( VMSP[ SP_LINK ] );				//	recover return address
+    VMSP = ToRefRef( VMSP[ SP_PREV_SP ] );				//	restore stack pointer
+    #ifdef DBG_SPECIAL
+    	printf( "Recover link = %x\n", ToUInt( link ) );
+    	printf( "Stack pointer recovered as %x\n", ToUInt( VMSP ) );
+    #endif
+    RETURN( linkptr );
+}; break;
+
+case vmc_pushq_ret: {
+    *( ++VMVP ) = *( ++pc );
+    Ref *linkptr;
+    VMPCFUNC = ToRefRef( VMSP[ SP_FUNC ] );
+    linkptr = ToRefRef( VMSP[ SP_LINK ] );				//	recover return address
+    VMSP = ToRefRef( VMSP[ SP_PREV_SP ] );				//	restore stack pointer
+    #ifdef DBG_SPECIAL
+    	printf( "Recover link = %x\n", ToUInt( link ) );
+    	printf( "Stack pointer recovered as %x\n", ToUInt( VMSP ) );
+    #endif
+    RETURN( linkptr );
+}; break;
+
 case vmc_reset: {
     FREEZE;
     throw NormalExit();
@@ -599,6 +739,52 @@ case vmc_return: {
     	printf( "Stack pointer recovered as %x\n", ToUInt( VMSP ) );
     #endif
     RETURN( linkptr );
+}; break;
+
+case vmc_return_ifso: {
+    if( *( VMVP-- ) == SYS_FALSE ) {
+    	RETURN( pc + 1 );									//	Go onto the next instruction.
+    } else {
+    	Ref *linkptr;
+    	VMPCFUNC = ToRefRef( VMSP[ SP_FUNC ] );
+    	linkptr = ToRefRef( VMSP[ SP_LINK ] );				//	Recover return address.
+    	VMSP = ToRefRef( VMSP[ SP_PREV_SP ] );				//	Restore stack pointer.
+    	RETURN( linkptr );
+    }
+}; break;
+
+case vmc_return_ifnot: {
+    if( *( VMVP-- ) != SYS_FALSE ) {
+    	RETURN( pc + 1 );									//	Go onto the next instruction.
+    } else {
+    	Ref *linkptr;
+    	VMPCFUNC = ToRefRef( VMSP[ SP_FUNC ] );
+    	linkptr = ToRefRef( VMSP[ SP_LINK ] );				//	recover return address
+    	VMSP = ToRefRef( VMSP[ SP_PREV_SP ] );				//	restore stack pointer
+    	RETURN( linkptr );
+    }
+}; break;
+
+case vmc_self_call: {
+    {    
+        VMLINK = pc + 1;
+        VMLINKFUNC = VMPCFUNC;
+        RETURN( VMPCFUNC + 1 );
+    }
+}; break;
+
+case vmc_self_call_n: {
+    VMCOUNT = ToLong( pc[ 1 ] );
+    {    
+        VMLINK = pc + 2;
+        VMLINKFUNC = VMPCFUNC;
+        RETURN( VMPCFUNC + 1 );
+    }
+}; break;
+
+case vmc_self_constant: {
+    *( ++VMVP ) = VMPCFUNC;
+    RETURN( pc + 1 );
 }; break;
 
 case vmc_set: {

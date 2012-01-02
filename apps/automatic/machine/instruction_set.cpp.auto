@@ -26,6 +26,7 @@ const char * InstructionSet::name( Ref spc ) const {
         spc == spc_enter1 ? "enter1" :
         spc == spc_eq_si ? "eq_si" :
         spc == spc_eq_ss ? "eq_ss" :
+        spc == spc_erase ? "erase" :
         spc == spc_field ? "field" :
         spc == spc_getiterator ? "getiterator" :
         spc == spc_goto ? "goto" :
@@ -52,8 +53,17 @@ const char * InstructionSet::name( Ref spc ) const {
         spc == spc_push_local0 ? "push_local0" :
         spc == spc_push_local1 ? "push_local1" :
         spc == spc_pushq ? "pushq" :
+        spc == spc_push_local_ret ? "push_local_ret" :
+        spc == spc_push_local0_ret ? "push_local0_ret" :
+        spc == spc_push_local1_ret ? "push_local1_ret" :
+        spc == spc_pushq_ret ? "pushq_ret" :
         spc == spc_reset ? "reset" :
         spc == spc_return ? "return" :
+        spc == spc_return_ifso ? "return_ifso" :
+        spc == spc_return_ifnot ? "return_ifnot" :
+        spc == spc_self_call ? "self_call" :
+        spc == spc_self_call_n ? "self_call_n" :
+        spc == spc_self_constant ? "self_constant" :
         spc == spc_set ? "set" :
         spc == spc_set_call_global ? "set_call_global" :
         spc == spc_set_calls ? "set_calls" :
@@ -102,6 +112,9 @@ const char * InstructionSet::signature( Ref x ) const {
     if ( x == spc_push_global ) return "iv";
     if ( x == spc_push_local ) return "ir";
     if ( x == spc_pushq ) return "ic";
+    if ( x == spc_push_local_ret ) return "ir";
+    if ( x == spc_pushq_ret ) return "ic";
+    if ( x == spc_self_call_n ) return "ir";
     if ( x == spc_set ) return "ir";
     if ( x == spc_set_call_global ) return "irv";
     if ( x == spc_set_calls ) return "ir";
@@ -142,6 +155,7 @@ Ref InstructionSet::lookup( Instruction instr ) const {
     case vmc_enter1: return this->spc_enter1;
     case vmc_eq_si: return this->spc_eq_si;
     case vmc_eq_ss: return this->spc_eq_ss;
+    case vmc_erase: return this->spc_erase;
     case vmc_field: return this->spc_field;
     case vmc_getiterator: return this->spc_getiterator;
     case vmc_goto: return this->spc_goto;
@@ -168,8 +182,17 @@ Ref InstructionSet::lookup( Instruction instr ) const {
     case vmc_push_local0: return this->spc_push_local0;
     case vmc_push_local1: return this->spc_push_local1;
     case vmc_pushq: return this->spc_pushq;
+    case vmc_push_local_ret: return this->spc_push_local_ret;
+    case vmc_push_local0_ret: return this->spc_push_local0_ret;
+    case vmc_push_local1_ret: return this->spc_push_local1_ret;
+    case vmc_pushq_ret: return this->spc_pushq_ret;
     case vmc_reset: return this->spc_reset;
     case vmc_return: return this->spc_return;
+    case vmc_return_ifso: return this->spc_return_ifso;
+    case vmc_return_ifnot: return this->spc_return_ifnot;
+    case vmc_self_call: return this->spc_self_call;
+    case vmc_self_call_n: return this->spc_self_call_n;
+    case vmc_self_constant: return this->spc_self_constant;
     case vmc_set: return this->spc_set;
     case vmc_set_call_global: return this->spc_set_call_global;
     case vmc_set_calls: return this->spc_set_calls;

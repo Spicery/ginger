@@ -23,7 +23,6 @@
 #include <stdio.h>
 #include <string.h>
 
-
 #include "machine.hpp"
 #include "sys.hpp"
 #include "key.hpp"
@@ -55,7 +54,6 @@
 using namespace Ginger;
 
 //#define DBG_SYS
-
 
 /*
  * Does not check vmcount. Which is good because we do not guarantee
@@ -325,54 +323,56 @@ Ref * sysLength( Ref *pc, class MachineClass * vm ) {
 	}
 }
 
+
 #include "datatypes.cpp.auto"
 
 typedef std::map< std::string, SysInfo > SysMap;
 const SysMap::value_type rawData[] = {
-	SysMap::value_type( "+", SysInfo( fnc_add, Arity( 2 ), Arity( 1 ), 0, "Adds two numbers" ) ),
-	SysMap::value_type( "-", SysInfo( fnc_sub, Arity( 2 ), Arity( 1 ), 0, "Substracts two numbers" ) ),
-	SysMap::value_type( "*", SysInfo( fnc_mul, Arity( 2 ), Arity( 1 ), 0, "Multiplies two numbers" ) ),
-	SysMap::value_type( "/", SysInfo( fnc_div, Arity( 2 ), Arity( 1 ), 0, "Divides two numbers, result is a float" ) ),
-	SysMap::value_type( "**", SysInfo( fnc_pow, Arity( 2 ), Arity( 1 ), 0, "Exponentiates two numbers, result is float" ) ),
-	SysMap::value_type( "<", SysInfo( fnc_lt, Arity( 2 ), Arity( 1 ), 0, "Less than, compares two real numbers" ) ),
-	SysMap::value_type( "<=", SysInfo( fnc_lte, Arity( 2 ), Arity( 1 ), 0, "Less than or equal to, compares two real number" ) ),
-	SysMap::value_type( "==", SysInfo( fnc_eq, Arity( 2 ), Arity( 1 ), 0, "Identity two two values, result is boolean" ) ),
-	SysMap::value_type( ">", SysInfo( fnc_gt, Arity( 2 ), Arity( 1 ), 0, "Greater than, compares two real numbers" ) ),
-	SysMap::value_type( ">=", SysInfo( fnc_gte, Arity( 2 ), Arity( 1 ), 0, "Greater than or equal to, compares two real numbers" ) ),	
-	SysMap::value_type( "instanceClass", SysInfo( fnc_syscall, Arity( 1 ), Arity( 1 ), sysObjectKey, "Returns the key of any value" ) ),
-	SysMap::value_type( "newRecordClass", SysInfo( fnc_syscall, Arity( 2 ), Arity( 1 ), sysNewRecordClass, "Returns a new class object for records" ) ),
-	SysMap::value_type( "newClass", SysInfo( fnc_syscall, Arity( 4 ), Arity( 1 ), sysNewClass, "Returns a new class object for instances" ) ),
-	SysMap::value_type( "newClassRecogniser", SysInfo( fnc_syscall, Arity( 1 ), Arity( 1 ), sysClassRecogniser, "Returns a function that recognises a given class" ) ),
-	SysMap::value_type( "newClassConstructor", SysInfo( fnc_syscall, Arity( 1 ), Arity( 1 ), sysClassConstructor, "Returns the constructor for a given class" ) ),
-	SysMap::value_type( "newClassAccessor", SysInfo( fnc_syscall, Arity( 1 ), Arity( 1 ), sysClassAccessor, "Returns the accessor for a given class" ) ),
-	SysMap::value_type( "newClassExploder", SysInfo( fnc_syscall, Arity( 1 ), Arity( 0, true ), sysClassExploder, "Returns the exploder for a given class" ) ),
-	SysMap::value_type( "newMethod", SysInfo( fnc_syscall, Arity( 3 ), Arity( 1 ), sysNewMethod, "Constructs a new empty method" ) ),
-	SysMap::value_type( "setMethod", SysInfo( fnc_syscall, Arity( 3 ), Arity( 0 ), sysSetMethod, "Sets the function for a method on an object" ) ),
-	SysMap::value_type( "setSlot", SysInfo( fnc_syscall, Arity( 3 ), Arity( 0 ), sysSetSlot, "Sets a method as the Nth slot of a class" ) ),
-	SysMap::value_type( "=", SysInfo( fnc_syscall, Arity( 2 ), Arity( 1 ), sysEquals, "Compare any two values as equal" ) ),
-	SysMap::value_type( "gc", SysInfo( fnc_syscall, Arity( 0 ), Arity( 0 ), sysGarbageCollect, "Forces a garbage collection - useful for tests" ) ),
-	SysMap::value_type( "hash", SysInfo( fnc_syscall, Arity( 1 ), Arity( 1 ), sysHash, "Computes a hash code for any value, returns a positive Small" ) ),
-	SysMap::value_type( "index", SysInfo( fnc_syscall, Arity( 2 ), Arity( 1 ), sysIndex, "Indexes any sequence" ) ),
-	SysMap::value_type( "mapIndex", SysInfo( fnc_syscall, Arity( 2 ), Arity( 1 ), sysMapIndex, "Indexes a map" ) ),
-	SysMap::value_type( "listIndex", SysInfo( fnc_syscall, Arity( 2 ), Arity( 1 ), sysListIndex, "Indexes a list" ) ),
-	SysMap::value_type( "explode", SysInfo( fnc_syscall, Arity( 1 ), Arity( 0, true ), sysExplode, "Explodes any sequence into its members" ) ),
-	SysMap::value_type( "listExplode", SysInfo( fnc_syscall, Arity( 1 ), Arity( 0, true ), sysListExplode, "Explodes a list into its members" ) ),
-	SysMap::value_type( "length", SysInfo( fnc_syscall, Arity( 1 ), Arity( 1 ), sysLength, "Returns the length of any sequence" ) ),	
-	SysMap::value_type( "listLength", SysInfo( fnc_syscall, Arity( 1 ), Arity( 1 ), sysListLength, "Returns the length of a list" ) ),	
-	SysMap::value_type( "append", SysInfo( fnc_syscall, Arity( 2 ), Arity( 1 ), sysAppend, "Appends two sequences of the same type, result is a sequence of the same type" ) ),	
-	SysMap::value_type( "listAppend", SysInfo( fnc_syscall, Arity( 2 ), Arity( 1 ), sysListAppend, "Appends two lists" ) ),	
-	SysMap::value_type( "isNil", SysInfo( fnc_syscall, Arity( 1 ), Arity( 1 ), sysIsNil, "Tests whether a list is empty or not" ) ),
-	SysMap::value_type( "isList", SysInfo( fnc_syscall, Arity( 1 ), Arity( 1 ), sysIsList, "Tests whether an object is a list or not" ) ),
-	SysMap::value_type( "newList", SysInfo( fnc_syscall, Arity( 0, true ), Arity( 1 ), sysNewList, "Builds a list from the arguments" ) ),
-	SysMap::value_type( "newListOnto", SysInfo( fnc_syscall, Arity( 1, true ), Arity( 1 ), sysNewListOnto, "Builds a list from the first N-1 args and appends that to the last argument" ) ),
-	SysMap::value_type( "newMap", SysInfo( fnc_syscall, Arity( 0, true ), Arity( 1 ), sysNewHardEqMap, "Builds a new map from maps and maplets" ) ),
-	SysMap::value_type( "newHardIdMap", SysInfo( fnc_syscall, Arity( 0, true ), Arity( 1 ), sysNewHardIdMap, "Builds a new map from maps and maplets that uses identity (==) for the equality test" ) ),
-	SysMap::value_type( "newWeakIdMap", SysInfo( fnc_syscall, Arity( 0, true ), Arity( 1 ), sysNewWeakIdMap, "Builds a new map from maps and maplets that only weakly retains its entries" ) ),
-	SysMap::value_type( "newCacheMap", SysInfo( fnc_syscall, Arity( 0, true ), Arity( 1 ), sysNewCacheEqMap, "Builds a new map from maps and maplets that the garbage collector can clear under pressure" ) ),
-	SysMap::value_type( "mapIndex", SysInfo( fnc_syscall, Arity( 2 ), Arity( 1 ), sysMapIndex, "Looks up a map for a given index" ) ),
-	SysMap::value_type( "partApply", SysInfo( fnc_syscall, Arity( 1, true ), Arity( 1 ), sysPartApply, "Freezes arguments and a function together to make a new function" ) ),
-	SysMap::value_type( "functionInArity", SysInfo( fnc_syscall, Arity( 1  ), Arity( 1 ), sysFunctionInArity, "Input arity of a function" ) ),
-	SysMap::value_type( "functionOutArity", SysInfo( fnc_syscall, Arity( 1 ), Arity( 1 ), sysFunctionOutArity, "Output arity of a function" ) ),
+	SysMap::value_type( "not", SysInfo( vmc_not, Arity( 1 ), Arity( 1 ), "Negates a boolean value" ) ),
+	SysMap::value_type( "+", SysInfo( vmc_add, Arity( 2 ), Arity( 1 ), "Adds two numbers" ) ),
+	SysMap::value_type( "-", SysInfo( vmc_sub, Arity( 2 ), Arity( 1 ), "Substracts two numbers" ) ),
+	SysMap::value_type( "*", SysInfo( vmc_mul, Arity( 2 ), Arity( 1 ), "Multiplies two numbers" ) ),
+	SysMap::value_type( "/", SysInfo( vmc_div, Arity( 2 ), Arity( 1 ), "Divides two numbers, result is a float" ) ),
+	//SysMap::value_type( "**", SysInfo( VM_OP_FLAVOUR, vmc_pow, fnc_pow, Arity( 2 ), Arity( 1 ), 0, "Exponentiates two numbers, result is float" ) ),
+	SysMap::value_type( "<", SysInfo( CMP_LT, Arity( 2 ), Arity( 1 ), "Less than, compares two real numbers" ) ),
+	SysMap::value_type( "<=", SysInfo( CMP_LTE, Arity( 2 ), Arity( 1 ), "Less than or equal to, compares two real number" ) ),
+	SysMap::value_type( "==", SysInfo( CMP_EQ, Arity( 2 ), Arity( 1 ), "Identity two two values, result is boolean" ) ),
+	SysMap::value_type( ">", SysInfo( CMP_GT, Arity( 2 ), Arity( 1 ), "Greater than, compares two real numbers" ) ),
+	SysMap::value_type( ">=", SysInfo( CMP_GTE, Arity( 2 ), Arity( 1 ), "Greater than or equal to, compares two real numbers" ) ),	
+	SysMap::value_type( "instanceClass", SysInfo( Arity( 1 ), Arity( 1 ), sysObjectKey, "Returns the key of any value" ) ),
+	SysMap::value_type( "newRecordClass", SysInfo( Arity( 2 ), Arity( 1 ), sysNewRecordClass, "Returns a new class object for records" ) ),
+	SysMap::value_type( "newClass", SysInfo( Arity( 4 ), Arity( 1 ), sysNewClass, "Returns a new class object for instances" ) ),
+	SysMap::value_type( "newClassRecogniser", SysInfo( Arity( 1 ), Arity( 1 ), sysClassRecogniser, "Returns a function that recognises a given class" ) ),
+	SysMap::value_type( "newClassConstructor", SysInfo( Arity( 1 ), Arity( 1 ), sysClassConstructor, "Returns the constructor for a given class" ) ),
+	SysMap::value_type( "newClassAccessor", SysInfo( Arity( 1 ), Arity( 1 ), sysClassAccessor, "Returns the accessor for a given class" ) ),
+	SysMap::value_type( "newClassExploder", SysInfo( Arity( 1 ), Arity( 0, true ), sysClassExploder, "Returns the exploder for a given class" ) ),
+	SysMap::value_type( "newMethod", SysInfo( Arity( 3 ), Arity( 1 ), sysNewMethod, "Constructs a new empty method" ) ),
+	SysMap::value_type( "setMethod", SysInfo( Arity( 3 ), Arity( 0 ), sysSetMethod, "Sets the function for a method on an object" ) ),
+	SysMap::value_type( "setSlot", SysInfo( Arity( 3 ), Arity( 0 ), sysSetSlot, "Sets a method as the Nth slot of a class" ) ),
+	SysMap::value_type( "=", SysInfo( Arity( 2 ), Arity( 1 ), sysEquals, "Compare any two values as equal" ) ),
+	SysMap::value_type( "gc", SysInfo( Arity( 0 ), Arity( 0 ), sysGarbageCollect, "Forces a garbage collection - useful for tests" ) ),
+	SysMap::value_type( "hash", SysInfo( Arity( 1 ), Arity( 1 ), sysHash, "Computes a hash code for any value, returns a positive Small" ) ),
+	SysMap::value_type( "index", SysInfo( Arity( 2 ), Arity( 1 ), sysIndex, "Indexes any sequence" ) ),
+	SysMap::value_type( "mapIndex", SysInfo( Arity( 2 ), Arity( 1 ), sysMapIndex, "Indexes a map" ) ),
+	SysMap::value_type( "listIndex", SysInfo( Arity( 2 ), Arity( 1 ), sysListIndex, "Indexes a list" ) ),
+	SysMap::value_type( "explode", SysInfo( Arity( 1 ), Arity( 0, true ), sysExplode, "Explodes any sequence into its members" ) ),
+	SysMap::value_type( "listExplode", SysInfo( Arity( 1 ), Arity( 0, true ), sysListExplode, "Explodes a list into its members" ) ),
+	SysMap::value_type( "length", SysInfo( Arity( 1 ), Arity( 1 ), sysLength, "Returns the length of any sequence" ) ),	
+	SysMap::value_type( "listLength", SysInfo( Arity( 1 ), Arity( 1 ), sysListLength, "Returns the length of a list" ) ),	
+	SysMap::value_type( "append", SysInfo( Arity( 2 ), Arity( 1 ), sysAppend, "Appends two sequences of the same type, result is a sequence of the same type" ) ),	
+	SysMap::value_type( "listAppend", SysInfo( Arity( 2 ), Arity( 1 ), sysListAppend, "Appends two lists" ) ),	
+	SysMap::value_type( "isNil", SysInfo( Arity( 1 ), Arity( 1 ), sysIsNil, "Tests whether a list is empty or not" ) ),
+	SysMap::value_type( "isList", SysInfo( Arity( 1 ), Arity( 1 ), sysIsList, "Tests whether an object is a list or not" ) ),
+	SysMap::value_type( "newList", SysInfo( Arity( 0, true ), Arity( 1 ), sysNewList, "Builds a list from the arguments" ) ),
+	SysMap::value_type( "newListOnto", SysInfo( Arity( 1, true ), Arity( 1 ), sysNewListOnto, "Builds a list from the first N-1 args and appends that to the last argument" ) ),
+	SysMap::value_type( "newMap", SysInfo( Arity( 0, true ), Arity( 1 ), sysNewHardEqMap, "Builds a new map from maps and maplets" ) ),
+	SysMap::value_type( "newHardIdMap", SysInfo( Arity( 0, true ), Arity( 1 ), sysNewHardIdMap, "Builds a new map from maps and maplets that uses identity (==) for the equality test" ) ),
+	SysMap::value_type( "newWeakIdMap", SysInfo( Arity( 0, true ), Arity( 1 ), sysNewWeakIdMap, "Builds a new map from maps and maplets that only weakly retains its entries" ) ),
+	SysMap::value_type( "newCacheMap", SysInfo( Arity( 0, true ), Arity( 1 ), sysNewCacheEqMap, "Builds a new map from maps and maplets that the garbage collector can clear under pressure" ) ),
+	SysMap::value_type( "mapIndex", SysInfo( Arity( 2 ), Arity( 1 ), sysMapIndex, "Looks up a map for a given index" ) ),
+	SysMap::value_type( "partApply", SysInfo( Arity( 1, true ), Arity( 1 ), sysPartApply, "Freezes arguments and a function together to make a new function" ) ),
+	SysMap::value_type( "functionInArity", SysInfo( Arity( 1  ), Arity( 1 ), sysFunctionInArity, "Input arity of a function" ) ),
+	SysMap::value_type( "functionOutArity", SysInfo( Arity( 1 ), Arity( 1 ), sysFunctionOutArity, "Output arity of a function" ) ),
 #include "sysattrmap.inc"
 #include "syscgi.inc"
 #include "syselement.inc"
@@ -385,3 +385,4 @@ const SysMap::value_type rawData[] = {
 };
 const int numElems = sizeof rawData / sizeof rawData[0];
 SysMap sysMap( rawData, rawData + numElems );
+

@@ -41,7 +41,7 @@ public class LogCreated {
 		for ( String ginger_name : mapping.keySet() ) {
 			SysInfo p = this.mapping.get( ginger_name );
 			inc.format( 
-				"SysMap::value_type( \"%s\", SysInfo( fnc_syscall, %s, %s, %s, NULL ) ),\n",
+				"SysMap::value_type( \"%s\", SysInfo( %s, %s, %s, NULL ) ),\n",
 				ginger_name,
 				p.getInArity(),
 				p.getOutArity(),

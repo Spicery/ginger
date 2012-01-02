@@ -22,8 +22,12 @@
 #include <map>
 #include <iostream>
 
-#include "common.hpp"
 #include "arity.hpp"
+
+
+#include "functor.hpp"
+#include "common.hpp"
+#include "cmp.hpp"
 
 class MachineClass;
 
@@ -36,16 +40,43 @@ extern Ref * sysFastGetFastIterator( Ref * pc, class MachineClass * vm );
 
 #include "datatypes.hpp.auto"
 
+enum InfoFlavour {
+	VM_OP_FLAVOUR,
+	CMP_OP_FLAVOUR,
+	SYS_CALL_FLAVOUR
+};
+
+
 struct SysInfo { 
-	Functor functor; 
-	Arity in_arity;
-	Arity out_arity; 
-	SysCall * syscall; 
+	InfoFlavour flavour;		//	Is this system routine implemented as a VM instruction, comparison operator or as a system-call.
+	Instruction instruction;	//	Populated if VM_OP_FLAVOUR (else vmc_halt).
+	CMP_OP cmp_op;				//	Populated if CMP_OP_FLAVOUR (else CMP_EQ)
+	Ginger::Arity in_arity;
+	Ginger::Arity out_arity; 
+	SysCall * syscall; 			//	Populated if SYS_CALL_FLAVOUR (else NULL).
 	const char * docstring;
-	Ref coreFunctionObject;
+	Ref coreFunctionObject;		//	Memo cache.
 	
-	SysInfo( Functor f, Arity in, Arity out, SysCall * s, const char * ds ) :
-		functor( f ),
+	bool isSysCall() const { return this->flavour == SYS_CALL_FLAVOUR; }
+	bool isCmpOp() const { return this->flavour == CMP_OP_FLAVOUR; }
+	bool isVMOp() const { return this->flavour == VM_OP_FLAVOUR; }
+	
+	SysInfo( Instruction ins, Ginger::Arity in, Ginger::Arity out, const char * ds ) :
+		flavour( VM_OP_FLAVOUR ),
+		instruction( ins ),
+		cmp_op( CMP_EQ ),
+		in_arity( in ),
+		out_arity( out ),
+		syscall( NULL ),
+		docstring( ds ),
+		coreFunctionObject( NULL )
+	{
+	}
+	
+	SysInfo( Ginger::Arity in, Ginger::Arity out, SysCall * s, const char * ds ) :
+		flavour( SYS_CALL_FLAVOUR ),
+		instruction( vmc_halt ),
+		cmp_op( CMP_EQ ),
 		in_arity( in ),
 		out_arity( out ),
 		syscall( s ),
@@ -53,7 +84,18 @@ struct SysInfo {
 		coreFunctionObject( NULL )
 	{
 	}
-	
+
+	SysInfo( const CMP_OP cmp_op, Ginger::Arity in, Ginger::Arity out, const char * ds ) :
+		flavour( CMP_OP_FLAVOUR ),
+		instruction( vmc_halt ),
+		cmp_op( cmp_op ),
+		in_arity( in ),
+		out_arity( out ),
+		syscall( NULL ),
+		docstring( ds ),
+		coreFunctionObject( NULL )
+	{
+	}
 	
 };
 typedef std::map< std::string, SysInfo > SysMap;

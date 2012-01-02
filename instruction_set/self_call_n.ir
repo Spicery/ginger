@@ -1,0 +1,6 @@
+VMCOUNT = ToLong( pc[ 1 ] );
+{    
+    VMLINK = pc + 2;
+    VMLINKFUNC = VMPCFUNC;
+    RETURN( VMPCFUNC + 1 );
+}

@@ -90,9 +90,36 @@ const std::string & Mnx::attribute( const std::string & key ) const {
 	}
 }
 
+int Mnx::attributeToInt( const std::string & key ) const {
+	std::map< std::string, std::string >::const_iterator it = this->attributes.find( key );
+	if ( it != this->attributes.end() ) {
+		stringstream s( it->second );
+		int n;
+		if ( s >> n ) {
+			return n;
+		} else {
+			throw Mishap( "Integer attribute value needed" ).culprit( "Attribute", key ).culprit( "Value", it->second );
+		}
+	} else {
+		throw Mishap( "No such key" ).culprit( "Key", key );
+	}
+}
+
 const std::string & Mnx::attribute( const std::string & key, const std::string & def  ) const {
 	std::map< std::string, std::string >::const_iterator it = this->attributes.find( key );
 	return it != this->attributes.end() ? it->second : def;
+}
+
+int Mnx::attributeToInt( const std::string & key, const int def  ) const {
+	std::map< std::string, std::string >::const_iterator it = this->attributes.find( key );
+	if ( it == this->attributes.end() ) return def;
+	stringstream s( it->second );
+	int n;
+	if ( s >> n ) {
+		return n;
+	} else {
+		throw Mishap( "Integer attribute value needed" ).culprit( "Attribute", key ).culprit( "Value", it->second );
+	}
 }
 
 bool Mnx::hasAttribute( const std::string & key ) const {
@@ -195,6 +222,9 @@ shared< Mnx > MnxReader::readMnx() {
 MnxVisitor::~MnxVisitor() {
 }
 
+MnxWalker::~MnxWalker() {
+}
+
 string & Mnx::name() {
 	return this->element_name;
 }
@@ -245,6 +275,20 @@ void Mnx::visit( MnxVisitor & v ) {
 		(*it)->visit( v );
 	}
 	v.endVisit( *this );
+}
+
+void Mnx::walk( MnxWalker & v, MnxWalkPath * path ) {
+	v.startWalk( *this, path );
+	int n = 0;
+	for ( 
+		vector< shared< Mnx > >::iterator it = this->children.begin();
+		it != this->children.end();
+		++it
+	) {
+		MnxWalkPath newpath( *this, n++, path );
+		(*it)->walk( v, &newpath );
+	}
+	v.endWalk( *this, path );
 }
 
 bool Mnx::hasAnyFlags( int mask ) {

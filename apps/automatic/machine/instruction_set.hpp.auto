@@ -24,6 +24,7 @@
 	Ref spc_enter1;
 	Ref spc_eq_si;
 	Ref spc_eq_ss;
+	Ref spc_erase;
 	Ref spc_field;
 	Ref spc_getiterator;
 	Ref spc_goto;
@@ -50,8 +51,17 @@
 	Ref spc_push_local0;
 	Ref spc_push_local1;
 	Ref spc_pushq;
+	Ref spc_push_local_ret;
+	Ref spc_push_local0_ret;
+	Ref spc_push_local1_ret;
+	Ref spc_pushq_ret;
 	Ref spc_reset;
 	Ref spc_return;
+	Ref spc_return_ifso;
+	Ref spc_return_ifnot;
+	Ref spc_self_call;
+	Ref spc_self_call_n;
+	Ref spc_self_constant;
 	Ref spc_set;
 	Ref spc_set_call_global;
 	Ref spc_set_calls;

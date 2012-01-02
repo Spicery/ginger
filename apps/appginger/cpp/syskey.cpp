@@ -21,7 +21,7 @@
 #include "common.hpp"
 #include "key.hpp"
 #include "mishap.hpp"
-#include "vmi.hpp"
+//#include "vmi.hpp"
 #include "machine.hpp"
 #include "classlayout.hpp"
 

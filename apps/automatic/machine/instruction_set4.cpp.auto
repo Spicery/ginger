@@ -24,6 +24,7 @@
     this->spc_enter1 = (Ref)vmc_enter1;
     this->spc_eq_si = (Ref)vmc_eq_si;
     this->spc_eq_ss = (Ref)vmc_eq_ss;
+    this->spc_erase = (Ref)vmc_erase;
     this->spc_field = (Ref)vmc_field;
     this->spc_getiterator = (Ref)vmc_getiterator;
     this->spc_goto = (Ref)vmc_goto;
@@ -50,8 +51,17 @@
     this->spc_push_local0 = (Ref)vmc_push_local0;
     this->spc_push_local1 = (Ref)vmc_push_local1;
     this->spc_pushq = (Ref)vmc_pushq;
+    this->spc_push_local_ret = (Ref)vmc_push_local_ret;
+    this->spc_push_local0_ret = (Ref)vmc_push_local0_ret;
+    this->spc_push_local1_ret = (Ref)vmc_push_local1_ret;
+    this->spc_pushq_ret = (Ref)vmc_pushq_ret;
     this->spc_reset = (Ref)vmc_reset;
     this->spc_return = (Ref)vmc_return;
+    this->spc_return_ifso = (Ref)vmc_return_ifso;
+    this->spc_return_ifnot = (Ref)vmc_return_ifnot;
+    this->spc_self_call = (Ref)vmc_self_call;
+    this->spc_self_call_n = (Ref)vmc_self_call_n;
+    this->spc_self_constant = (Ref)vmc_self_constant;
     this->spc_set = (Ref)vmc_set;
     this->spc_set_call_global = (Ref)vmc_set_call_global;
     this->spc_set_calls = (Ref)vmc_set_calls;

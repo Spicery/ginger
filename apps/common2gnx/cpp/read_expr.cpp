@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <assert.h>
 
+#include "gnxconstants.hpp"
 #include "shared.hpp"
 #include "mishap.hpp"
 
@@ -845,24 +846,29 @@ Node ReadStateClass::prefixProcessing() {
 		}
 		case tokty_obracket: {
 			NodeFactory list;
-			list.start( "sysapp" );
+			list.start( this->cstyle_mode ? VECTOR : LIST );
 			Node stmnts = this->readStmnts();
 			if ( not this->cstyle_mode && this->tryToken( tokty_bar ) ) {
-				list.put( "name", "newListOnto" );
 				list.add( stmnts );
+				list.end();
+				Node L = list.build();
+				NodeFactory append;
+				append.start( LIST_APPEND );
+				append.add( L );
 				Node x = this->readStmntsCheck( tokty_cbracket );
-				list.add( x );
+				append.add( x );
+				append.end();
+				return append.build();
 			} else {
 				this->checkToken( tokty_cbracket );
-				list.put( "name", this->cstyle_mode ? "newVector" : "newList" );
 				list.add( stmnts );
+				list.end();
+				return list.build();
 			}
-			list.end();
-			return list.build();
 		}
 		case tokty_obrace: {
 			NodeFactory list;
-			list.start( "vector" );
+			list.start( VECTOR );
 			Node x = this->readStmntsCheck( tokty_cbrace );
 			list.add( x );
 			list.end();
@@ -870,8 +876,8 @@ Node ReadStateClass::prefixProcessing() {
 		}
 		case tokty_fat_obrace: {
 			NodeFactory list;
-			list.start( "sysapp" );
-			list.put( "name", "newMap" );
+			list.start( SYSAPP );
+			list.put( SYSAPP_NAME, "newMap" );
 			Node x = this->readStmntsCheck( tokty_fat_cbrace );
 			list.add( x );
 			list.end();
@@ -908,7 +914,7 @@ Node ReadStateClass::prefixProcessing() {
 		}
 		case tokty_lt: {
 			NodeFactory element;
-			element.start( "seq" );
+			element.start( SEQ );
 			for (;;) {
 				element.start( "sysapp" );
 				element.put( "name", "newElement" );

@@ -45,6 +45,12 @@ public:
 	int count() const;
 	
 public:
+    bool operator==( const Arity &that ) const {
+		return this->arity == that.arity and this->more == that.more;
+    }
+
+public:
+	Arity( const Arity & a ) : more( a.more ), arity( a.arity ) {}
 	Arity( const std::string & text );
 	Arity( int a ) : more( false ), arity( a ) {}
 	Arity( int a, bool m ) : more( m ), arity( a ) {}

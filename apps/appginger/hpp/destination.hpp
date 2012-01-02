@@ -21,19 +21,19 @@
 
 #include <vector>
 
-class PlantClass;
+typedef class CodeGenClass * CodeGen;
 
 class DestinationClass {
 private:
 	std::vector< int >	pending_vector;
 	
 public:
-	PlantClass *		plant;
+	CodeGen 			codegen;
 	bool				is_set;
 	int					location;
 	
 public:
-	DestinationClass( PlantClass * plant );
+	DestinationClass( CodeGen codegen );
 	
 public:
 	void destinationSet();

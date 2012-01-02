@@ -24,15 +24,15 @@
 #include <vector>
 
 #include "dict.hpp"
-#include "plant.hpp"
+#include "codegen.hpp"
 #include "instruction_set.hpp"
 #include "heap.hpp"
 #include "appcontext.hpp"
 #include "package.hpp"
 #include "registers.hpp"
 
-class PlantClass;
-typedef PlantClass * Plant;
+class CodeGenClass;
+typedef CodeGenClass * CodeGen;
 
 class Pressure {
 private:
@@ -72,7 +72,7 @@ friend class GarbageCollect;
 
 private:
 	AppContext &					appg;
-	std::auto_ptr<PlantClass>		plant_aptr;
+	std::auto_ptr<CodeGenClass>		codegen_aptr;
 	std::auto_ptr<HeapClass>		heap_aptr;
 	Pressure						pressure;
 	std::vector< Ref >				queue;
@@ -131,7 +131,7 @@ public:
 	Ref*			instructionShow( Ref * pc );
 	Ref*			instructionShow( std::ostream & out, Ref * pc );
 	void			resetMachine();
-	PlantClass *	plant();		
+	CodeGenClass *	codegen();		
 	HeapClass &		heap();
 	AppContext &	getAppContext();
 

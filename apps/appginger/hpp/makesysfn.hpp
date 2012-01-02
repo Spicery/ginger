@@ -20,8 +20,10 @@
 #define MAKE_SYS_FN_HPP
 
 #include <string>
-#include "plant.hpp"
+//#include "plant.hpp"
+#include "codegen.hpp"
 
-Ref makeSysFn( Plant plant, std::string fn_name, Ref default_value );
+//Ref makeSysFn( Plant plant, std::string fn_name, Ref default_value );
+Ref makeSysFn( CodeGen codegen, std::string fn_name, Ref default_value );
 
 #endif

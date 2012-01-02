@@ -1,4 +1,6 @@
 long s = ToLong( pc[1] );
 long t = ToLong( pc[2] );
+Ref a = LOCAL( s );
+Ref b = LOCAL( t );
 long d = ToLong( pc[3] );
-RETURN( ToLong( LOCAL( s ) ) != ToLong( LOCAL( t ) ) ? pc + d + 3 : pc + 4 );
+RETURN( a != b ? pc + d + 3 : pc + 4 );

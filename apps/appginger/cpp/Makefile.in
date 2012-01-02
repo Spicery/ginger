@@ -7,22 +7,19 @@ INSTALL_TOOL=@libexecdir@/@PACKAGE_TARNAME@
 INSTALL_LIB=@datarootdir@/@PACKAGE_TARNAME@
 INSTALL_DOC=@docdir@
 
-
 #LICENSE_FILE="$(INSTALL_LIB)/COPYING"
 #LICENSE_FILE="$(INSTALL_LIB)/COPYING"
-
 
 CC=@CXX@
 
 INSTALLDIRS=-DINSTALL_BIN='"$(INSTALL_BIN)"' -DINSTALL_LIB='"$(INSTALL_LIB)"' -DINSTALL_TOOL='"$(INSTALL_TOOL)"'
 
-CXXFLAGS=-DRUDECGI $(INSTALLDIRS) -g -I../hpp -I../../libgng/hpp -I../../automatic/machine -I../../automatic/sys -I../../automatic/simple -I/opt/local/include -Wall -Wnon-virtual-dtor -L/opt/local/lib 
-CFLAGS=-Wmissing-prototypes 
+CXXFLAGS=-DRUDECGI $(INSTALLDIRS) -g -I../hpp -I../../libgng/hpp -I../../automatic/machine -I../../automatic/sys -I../../automatic/simple -I/opt/local/include -Wall -Wnon-virtual-dtor -L/opt/local/lib
+CFLAGS=-Wmissing-prototypes
 
-OBJS=package_autoload.o term.o read_xml.o \
-	functor.o plant.o cage.o vmi.o registers.o roots.o \
-	rcep.o arity.o resolve.o lift.o ident.o \
-	dict.o package.o \
+OBJS=vident.o codegen.o package_autoload.o \
+	functor.o cage.o registers.o roots.o cmp.o \
+	rcep.o ident.o label.o dict.o package.o \
 	sys.o syskey.o sysclass.o sysequals.o sysprint.o syslist.o sysvector.o \
 	sysstring.o syssymbol.o sysmap.o sysindirection.o sysinstance.o \
 	syselement.o syscheck.o sysexception.o \
@@ -33,8 +30,7 @@ OBJS=package_autoload.o term.o read_xml.o \
 	maplayout.o functionlayout.o \
 	vectorlayout.o stringlayout.o \
 	heapcrawl.o cagecrawl.o callstackcrawl.o fnobjcrawl.o \
-	garbagecollect.o \
-	scanfunc.o scandict.o \
+	garbagecollect.o scanfunc.o scandict.o \
 	machine.o instruction_set.o \
 	machine1.o instruction_set1.o \
 	machine2.o instruction_set2.o \

@@ -16,58 +16,48 @@
     along with AppGinger.  If not, see <http://www.gnu.org/licenses/>.
 \******************************************************************************/
 
-#ifndef VMI_HPP
-#define VMI_HPP
+#ifndef LABEL_HPP
+#define LABEL_HPP
 
-#include "destination.hpp"
-#include "plant.hpp"
-#include "common.hpp"
-#include "ident.hpp"
-#include "instruction.hpp"
+#include <vector>
 
-class VmiRelOpFactory {
+class CodeGenClass;
+
+class LabelClass {
 private:
-	Plant plant;
-	char flag1;
-	Ident ident1;
-	int int1;
-	char op;
-	char flag2;
-	Ident ident2;
-	int int2;
-	
-public:
-	void setLeft( int arg1 );
-	void setLeft( Ident id );
-	void setRight( int arg1 );
-	void setRight( Ident id );
-	void setLT();
-	void setGT();
-	void setLTE();
-	void setGTE();
-	void setEQ();
-	void setNEQ();
-	void negate();
+	std::vector< int >	pending_vector;
 	
 private:
-	void compilePushLeft();
-	void compilePushRight();
-	void compileOp();
-
+	CodeGenClass *		codegen;
+	bool				is_set;
+	bool				is_return;
+	int					the_location;
 	
 public:
-	void ifSo( DestinationClass &dst );
-	void ifNot( DestinationClass &dst );
+	int location() { return this->the_location; }
+	CodeGenClass * codeGen() { return this->codegen; }
+	bool isSet() { return this->is_set; }
+	bool isReturn() { return this->is_return; }
+	bool isntReturn() { return not this->is_return; }
+	LabelClass * jumpToJump( LabelClass * contn );
 	
 public:
-	VmiRelOpFactory( Plant p ) :
-		plant( p ),
-		flag1( '?' ),
-		op( '?' ),
-		flag2( '?' )
-	{
-	}
+	LabelClass( CodeGenClass * codegen, bool is_return = false ) : 
+		codegen( codegen ), 
+		is_set( false ), 
+		is_return( is_return ), 
+		the_location( -1 ) 
+	{}
+	
+public:
+	void labelSet();
+	void labelInsert();
+		
 };
+
+typedef LabelClass * Label;
+
+#define CONTINUE_LABEL ((LabelClass*)0)
 
 #endif
 

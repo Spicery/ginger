@@ -53,55 +53,9 @@ to it as a stream.
 
 //	These are attributes that are used to annotate the tree. Should
 //	be reserved to SimplifyGNX.
-#define ARITY 			"arity"
-#define TAILCALL		"tailcall"
-#define UID				"uid"
-#define OUTER_LEVEL		"outer.level"
-#define IS_OUTER		"is.outer"
-#define SCOPE			"scope"
-#define PROTECTED		"protected"
-#define IS_ASSIGNED		"is.assigned"
 
-#define CONSTANT		"constant"
-#define CONSTANT_TYPE	"type"
-#define CONSTANT_VALUE	"value"
-
-#define	ID				"id"
-#define ID_NAME			"name"
-#define ID_DEF_PKG		"def.pkg"
-
-#define VAR				"var"
-#define VAR_NAME		"name"
-
-#define MAKEREF			"makeref"
-#define DEREF			"deref"
-#define SETCONT			"setcont"
-
-#define IF				"if"
-#define SET				"set"
-#define FOR				"for"
-#define BIND			"bind"
-#define SEQ				"seq"
-#define	BLOCK			"block"
-
-#define ASSERT			"assert"
-#define ASSERT_N		"n"
-#define ASSERT_TYPE		"type"
-
-#define APP				"app"
-
-#define SYSFN			"sysfn"
-#define SYSFN_VALUE		"value"
-
-#define SYSAPP			"sysapp"
-#define SYSAPP_NAME		"name"
-
-#define	FN				"fn"
-
-#define PROBLEM			"problem"
-#define CULPRIT			"culprit"
-#define CULPRIT_NAME	"name"
-#define CULPRIT_VALUE	"value"
+#define TAIL_CALL_MASK 		0x1
+#define SELF_BIND_MASK		0x2
 
 #include <iostream>
 #include <fstream>
@@ -117,7 +71,7 @@ to it as a stream.
 #include <sstream>
 #include <algorithm>
 
-
+#include "gnxconstants.hpp"
 #include "mishap.hpp"
 #include "sax.hpp"
 #include "mnx.hpp"
@@ -139,9 +93,11 @@ public:
 	bool lifetime_processing;
 	bool lift_processing;
 	bool scope_processing;
+	bool self_processing;
 	bool sysapp_processing;
 	bool tailcall_processing;
 	bool val_processing;
+	bool slot_processing;
 
 public:
 	std::string package;
@@ -167,9 +123,11 @@ public:
 		lifetime_processing( false ),
 		lift_processing( false ),
 		scope_processing( false ),
+		self_processing( false ),
 		sysapp_processing( false ),
 		tailcall_processing( false ),
 		val_processing( false ),
+		slot_processing( false ),
 		undefined_allowed( false ),
 		retain_debug_info( false )
 	{}
@@ -183,6 +141,7 @@ std::string Main::version() {
 extern char * optarg;
 static struct option long_options[] =
     {
+    	{ "self",			no_argument,			0, '0' },
 		{ "absolute",		no_argument,			0, '1' },
 		{ "arity",			no_argument,			0, '2' },
 		{ "flatten",		no_argument,			0, '3' },
@@ -192,6 +151,7 @@ static struct option long_options[] =
         { "sysapp",			no_argument,			0, '7' },
         { "tailcall",		no_argument,			0, '8' },
         { "val",         	no_argument,			0, '9' },
+        { "slotalloc",		no_argument,			0, 'A' },
         { "debug",			no_argument,			0, 'd' },
         { "help",			optional_argument,		0, 'H' },
 		{ "project",		required_argument,		0, 'j' },
@@ -206,9 +166,13 @@ static struct option long_options[] =
 void Main::parseArgs( int argc, char **argv, char **envp ) {
     for(;;) {
         int option_index = 0;
-        int c = getopt_long( argc, argv, "123456789dj:H::L::p:suV", long_options, &option_index );
+        int c = getopt_long( argc, argv, "0123456789Adj:H::L::p:suV", long_options, &option_index );
         if ( c == -1 ) break;
         switch ( c ) {
+        	case '0': {
+        		this->self_processing = true;
+        		break;
+        	}
         	case '1': {
         		this->absolute_processing = true;
         		this->scope_processing = true;		//	requires scope analysis.
@@ -249,15 +213,21 @@ void Main::parseArgs( int argc, char **argv, char **envp ) {
         		this->val_processing = true;
         		break;
         	}
+        	case 'A' : {
+        		this->slot_processing = true;
+        		break;
+        	}
         	case 's' : {
-        		//	A standard choice of options. Everything (unless it is
-        		//	insanely expensive - only we don't have any of those yet)
+        		//	A standard choice of options. Everything, unless it is
+        		//	insanely expensive or of marginal benefit to all back-ends.
+        		//	Only slot_processing excluded at the moment.
         		this->absolute_processing = true;
         		this->arity_processing = true;
         		this->flatten_processing = true;
         		this->lifetime_processing = true;
         		this->lift_processing = true;
         		this->scope_processing = true;
+        		this->self_processing = true;
         		this->sysapp_processing = true;
         		this->tailcall_processing = true;        		
         		this->val_processing = true;        		
@@ -499,23 +469,113 @@ public:
 */
 
 
+/**
+	This is an arity marking pass that follows the main pass, patching
+	up any use of self.app calls. This is a worthwhile optimisation for
+	recursive benchmarks!
+*/
+class SelfAppArityMarker : public Ginger::MnxVisitor {
+public:
+	vector< Ginger::Arity > body_arities;
+	
+private:
+	/**
+		This purpose of this method is to cope with direct calls to
+		self.app, which helps us get much closer to the least fixed
+		point. 
+	*/
+	Ginger::Arity calcArity( shared< Ginger::Mnx > expr ) {
+		if ( expr->hasAttribute( ARITY ) ) {
+			return Ginger::Arity( expr->attribute( ARITY ) );
+		} else if ( expr->name() == IF ) {
+			vector< Ginger::Arity > subexpr_arities;
+			for ( int i = 1; i < expr->size(); i += 2 ) {
+				subexpr_arities.push_back( calcArity( expr->child( i ) ) );
+			}
+			if ( subexpr_arities.size() == 0 ) {
+				return Ginger::Arity( 0, true );
+			} else {
+				Ginger::Arity sofar( subexpr_arities[ 0 ] );
+				for ( size_t i = 1; i < subexpr_arities.size(); i++ ) {
+					sofar = sofar.join( subexpr_arities[ i ] );
+				}
+				return sofar;
+			}
+		} else {
+			return Ginger::Arity( 0, true );
+		}
+	}
+
+public:
+	void startVisit( Ginger::Mnx & element ) {
+		const string & nm = element.name();
+		if ( nm == FN ) {
+			//cerr << "#1" << endl;
+			this->body_arities.push_back( calcArity( element.child( 1 ) ) );
+		} else if ( nm == SELF_APP && this->body_arities.size() > 0 ) {
+			//cerr << "#2" << endl;
+			Ginger::Arity arity( this->body_arities[ this->body_arities.size() - 1 ] );
+			element.putAttribute( ARITY, arity.toString() );
+		}
+	}
+	
+	void endVisit( Ginger::Mnx & element ) {
+		const string & nm = element.name();
+		if ( nm == FN ) {
+			//cerr << "#3" << endl;
+			this->body_arities.pop_back();
+		}
+	}
+
+public:
+	SelfAppArityMarker() {
+		//cerr << "SELF APP MARKING" << endl;
+	}
+	
+	virtual ~SelfAppArityMarker() {}
+};
+
 class ArityMarker : public Ginger::MnxVisitor {
 private:
 	bool changed;
+	bool self_app_pass_needed;
+	bool clear_arities;
 	
 public:
 	bool hasChanged() { return this->changed; }
+	bool hasSelfAppPassNeeded() { return this->self_app_pass_needed; }
+	
+private:
+	Ginger::Arity sumOverChildren( Ginger::Mnx & element ) {
+		bool all_have_arity = true;
+		for ( int i = 0; all_have_arity && i < element.size(); i++ ) {
+			all_have_arity = element.child( i )->hasAttribute( ARITY );
+		}
+		if ( all_have_arity ) {
+			Ginger::Arity sofar( 0 );
+			for ( int i = 0; i < element.size(); i++ ) {
+				Ginger::Arity kid( element.child( i )->attribute( ARITY ) );
+				sofar = sofar.add( kid );
+			}
+			return sofar;
+		} else {
+			return Ginger::Arity( 0, true );
+		}
+	}
+
 	
 public:
 	void startVisit( Ginger::Mnx & element ) {
-		element.clearAttribute( ARITY );	//	Throw away any previous marking.
+		if ( this->clear_arities ) element.clearAttribute( ARITY );	//	Throw away any previous marking.
 	}
 	
 	void endVisit( Ginger::Mnx & element ) {
 		const string & x = element.name();
-		if ( x == CONSTANT ) {
+		if ( x == CONSTANT || x == SELF_CONSTANT ) {
 			element.putAttribute( ARITY, "1" );
 		} else if ( x == ID || x == FN ) {
+			element.putAttribute( ARITY, "1" );
+		} else if ( x == LIST || x == LIST_APPEND || x == VECTOR ) {
 			element.putAttribute( ARITY, "1" );
 		} else if ( x == FOR ) {
 			if ( element.hasAttribute( ARITY ) && element.attribute( ARITY ) == "0" ) {
@@ -524,18 +584,7 @@ public:
 		} else if ( x == SET || x == BIND ) {
 			element.putAttribute( ARITY, "0" );
 		} else if ( x == SEQ ) {
-			bool all_have_arity = true;
-			for ( int i = 0; all_have_arity && i < element.size(); i++ ) {
-				all_have_arity = element.child( i )->hasAttribute( ARITY );
-			}
-			if ( all_have_arity ) {
-				Ginger::Arity sofar( 0 );
-				for ( int i = 0; i < element.size(); i++ ) {
-					Ginger::Arity kid( element.child( i )->attribute( ARITY ) );
-					sofar = sofar.add( kid );
-				}
-				element.putAttribute( ARITY, sofar.toString() );
-			}
+			element.putAttribute( ARITY, this->sumOverChildren( element ).toString() );
 		} else if ( x == IF ) {
 			bool has_odd_kids = ( element.size() % 2 ) == 1;
 			bool all_have_arity = true;
@@ -562,10 +611,10 @@ public:
 					}
 					element.putAttribute( ARITY, sofar.toString() );
 				}
-				
 			}
 		} else if ( x == SYSAPP ) {
 			element.putAttribute( ARITY, Ginger::outArity( element.attribute( SYSAPP_NAME ) ).toString() );
+			element.putAttribute( ARGS_ARITY, this->sumOverChildren( element ).toString() );
 		} else if ( x == ASSERT && element.size() == 1 ) {
 			if ( element.hasAttribute( ASSERT_N, "1" ) ) {
 				if ( element.child( 0 )->hasAttribute( ARITY, "1" ) ) {
@@ -589,17 +638,17 @@ public:
 					element.putAttribute( ARITY, "1" );
 				}
 			}
-		} 
+		} else if ( x == SELF_APP ) {
+			this->self_app_pass_needed = true;
+			element.putAttribute( ARGS_ARITY, this->sumOverChildren( element ).toString() );
+		}
 	}
 	
 public:
-	ArityMarker() : changed( false ) {}
+	ArityMarker( const bool clear ) : changed( false ), self_app_pass_needed( false ), clear_arities( clear ) {}
 	virtual ~ArityMarker() {}
 };
 
-
-
-#define TAIL_CALL_MASK 		0x1
 
 class TailCall : public Ginger::MnxVisitor {
 
@@ -665,7 +714,7 @@ public:
 	void startVisit( Ginger::Mnx & element ) {
 		const string & x = element.name();
 		if ( x == ID ) {
-			const string & name = element.attribute( ID_NAME );
+			const string & name = element.attribute( VID_NAME );
 			if ( element.hasAttribute( SCOPE, "global" ) ) {
 				if ( not element.hasAttribute( "def.pkg" ) ) {
 					const string & enc_pkg = element.hasAttribute( "enc.pkg" ) ? element.attribute( "enc.pkg" ) : this->package;
@@ -706,6 +755,171 @@ public:
 
 	virtual ~Absolute() {}
 };
+
+
+
+/*
+	Self-reference analysis is responsible for simplifying a single feature,
+	"named lambdas". It does this by reducing them to two language elements
+		<self.constant/>
+		<self.app> EXPRS* </self.app>
+		
+	In addition it demotes the name attribute of the fn element into a title
+	attribute. i.e.
+		<fn name=NAME ..> becomes <fn title=NAME>
+	This demotion occurs if there is not already a title in place. If there
+	is a title then the name attribute is simply discarded.
+	
+	Note that although BLOCKs and FORs introduce a new level of scope, they
+	are not recognised in this analysis because they do not introduce a new
+	dynamic scope.
+*/
+
+struct SelfInfo {
+	Ginger::Mnx * 		element;	//	Not allowed to be NULL.
+	const string *		name;		//	Might be NULL.
+
+	SelfInfo( Ginger::Mnx * element, const string * name ) :
+		element( element ),
+		name( name )
+	{}
+	
+	SelfInfo() :
+		element( NULL ),
+		name( NULL )
+	{}
+};
+
+class SelfInfoFinder {
+private:
+	vector< SelfInfo > & self_info;
+	SelfInfo * found;
+	bool nested;
+
+public:
+	//	Returns true if the name is bound to a named-lambda.
+	bool wasFn() {
+		return this->found != NULL && this->found->element->name() == FN;
+	}
+	
+	bool wasNested() {
+		return this->nested;
+	}
+	
+	Ginger::Mnx * element() {
+		return this->found->element;
+	}
+
+	bool find( const std::string & name ) {
+		for ( 
+			vector< SelfInfo >::reverse_iterator it = this->self_info.rbegin();
+			it != this->self_info.rend();
+			++it
+		) {
+			if ( it->name != NULL && name == *it->name ) {
+				this->found = &*it;
+				//cerr << "Found " << name << ": nested = " << this->nested << ", element = " << it->element->name() << endl;
+				return true;
+			} else if ( it->element->name() == FN ) {
+				//cerr << "Chaining out:" << it->element->name() << endl;
+				this->nested = true;
+			} else {
+				//cerr << "Chaining out:" << it->element->name() << endl;
+			}
+		}
+		//cerr << "Did not find " << name << endl;
+		return false;
+	}
+
+public:
+	SelfInfoFinder( vector< SelfInfo > & self_info ) : 
+		self_info( self_info ),
+		found( NULL ),
+		nested( false )
+	{}
+};
+
+class SelfAnalysis : public Ginger::MnxVisitor {
+private:
+	vector< int > scopes;
+	vector< SelfInfo > self_info;
+	
+public:
+	void startVisit( Ginger::Mnx & element ) {
+		element.clearFlags( SELF_BIND_MASK );
+		const string & nm = element.name();
+		if ( nm == ID ) {
+			SelfInfoFinder finder( self_info );
+			if ( finder.find( element.attribute( VID_NAME ) ) && finder.wasFn() ) {
+				if ( finder.wasNested() ) {
+					finder.element()->orFlags( SELF_BIND_MASK );
+				} else {
+					Ginger::MnxBuilder b;
+					b.start( SELF_CONSTANT );
+					b.end();
+					shared< Ginger::Mnx > bgnx( b.build() );
+					element.copyFrom( *bgnx );
+				}
+			}
+		} else if ( nm == VAR ) {
+			//	Efficiency hack - only push the variable if it masks a 
+			//	function name! This keeps the length of the stack low which
+			//	is what pushes this to be an O(N^2) algorithm. 
+			const string & name = element.attribute( VID_NAME );
+			SelfInfoFinder finder( self_info );
+			if ( finder.find( name ) ) {
+				this->self_info.push_back( SelfInfo( &element, &name ) );
+			}
+		} else if ( nm == FN ) {
+			this->scopes.push_back( this->self_info.size() );
+			this->self_info.push_back( 
+				SelfInfo( 
+					&element, 
+					element.hasAttribute( FN_NAME ) ? &element.attribute( FN_NAME ) : NULL
+				)
+			);
+		}
+	}
+	
+	void endVisit( Ginger::Mnx & element ) {
+		const string & nm = element.name();
+		if ( 
+			nm == APP &&
+			element.size() >= 1 &&
+			element.child( 0 )->name() == "self.constant"
+		) {
+			element.name() = "self.app";
+			element.popFrontChild();
+		} else if ( nm == FN ) {
+			int n = this->scopes.back();
+			this->scopes.pop_back();
+			this->self_info.resize( n );
+			if ( element.hasAllFlags( SELF_BIND_MASK ) ) {
+				Ginger::MnxBuilder mnx;
+				mnx.start( SEQ );
+				mnx.start( BIND );
+				mnx.start( VAR );
+				mnx.put( VID_PROTECTED, "true" );
+				mnx.put( VID_NAME, element.attribute( FN_NAME ) );
+				mnx.end();
+				mnx.start( SELF_CONSTANT );
+				mnx.end();
+				mnx.end();
+				mnx.add( element.child( 1 ) );
+				mnx.end();
+				element.child( 1 ) = mnx.build();
+			}
+		}
+	}
+public:
+	SelfAnalysis() {
+		//cerr << "SELF ANALYSIS" << endl;
+	}
+	
+	~SelfAnalysis() {}
+};
+
+
 
 struct VarInfo {
 	Ginger::Mnx *			element;
@@ -752,6 +966,12 @@ struct VarInfo {
 		
 	[3] It propagates the protected="true" maplet into all <id> elements.
 	
+	[4] It marks VARs and IDs as to whether or not they are assigned to.
+	
+	It is very important to note that although BLOCKs and FORs introduces
+	scopes they are NOT recognised in this analysis. This is because
+	the only use of the scopes is to perform outer-analysis.
+	
 */
 class Scope : public Ginger::MnxVisitor {
 private:
@@ -791,8 +1011,8 @@ private:
 	
 	VarInfo * findId( const std::string & name ) {
 		for ( 
-			vector< VarInfo >::iterator it = this->vars.begin();
-			it != this->vars.end();
+			vector< VarInfo >::reverse_iterator it = this->vars.rbegin();
+			it != this->vars.rend();
 			++it
 		) {
 			if ( name == *(it->name) ) {
@@ -812,14 +1032,14 @@ private:
 
 	void markAsAssigned( shared< Ginger::Mnx > id ) {
 		if ( id->hasAttribute( PROTECTED, "true" ) ) {
-			throw Ginger::Mishap( "Assigning to a protected variable" ).culprit( "Variable", id->attribute( ID_NAME, "<unknown>" ) );
-		} else {
+			throw Ginger::Mishap( "Assigning to a protected variable" ).culprit( "Variable", id->attribute( VID_NAME, "<unknown>" ) );
+		} else if ( id->hasAttribute( SCOPE, "local" ) ) {
 			stringstream uidstream( id->attribute( UID, "" ) );
 			int uid;
 			if ( uidstream >> uid ) {
 				this->is_assigned_to.insert( uid );
 			} else {
-				throw Ginger::SystemError( "Missing UID" );
+				throw Ginger::SystemError( "Missing UID" ).culprit( "GNX", id->toString() );
 			}
 		}
 	}
@@ -837,7 +1057,7 @@ public:
 		element.clearAttribute( IS_OUTER );		//	Throw away any previous marking.
 		element.clearAttribute( IS_ASSIGNED );	//	Throw away any previous marking.
 		if ( x == ID ) {
-			const string & name = element.attribute( ID_NAME );
+			const string & name = element.attribute( VID_NAME );
 			VarInfo * v = this->findId( name );
 			if ( v != NULL ) {
 				element.putAttribute( UID, v->uid );
@@ -855,7 +1075,7 @@ public:
 				element.putAttribute( PROTECTED, v->is_protected ? "true" : "false" );
 			}
 		} else if ( x == VAR ) {
-			const string & name = element.attribute( VAR_NAME );
+			const string & name = element.attribute( VID_NAME );
 			const int uid = this->newUid();
 			this->var_of_uid[ uid ] = &element;
 			element.putAttribute( UID, uid );
@@ -868,14 +1088,14 @@ public:
 			//cerr << "Declaring " << name << " at level " << this->vars.size() << endl;
 			//cerr << "  -- but should it be " << this->scopes.size() << endl;
 			this->vars.push_back( VarInfo( &element, &name, uid, this->scopes.size(), is_protected, not is_global ) );
-		} else if ( x == "fn" ) { //|| x == "block" || x == "for" ) {
+		} else if ( x == FN ) {
 			this->scopes.push_back( this->vars.size() );
 		}
 	}
 	
 	void endVisit( Ginger::Mnx & element ) {
 		const string & x = element.name();
-		if ( x == FN ) { //|| x == "block" || x == "for" ) {
+		if ( x == FN ) {
 			int n = this->scopes.back();
 			this->scopes.pop_back();
 			this->vars.resize( n );
@@ -904,7 +1124,7 @@ public:
 			++it
 		) {
 			//cerr << endl;
-			//cerr << "VAR[" << this->var_of_uid[ *it ]->attribute( VAR_NAME ) << "] has " << xrefs.size() << " references" << endl;
+			//cerr << "VAR[" << this->var_of_uid[ *it ]->attribute( VID_NAME ) << "] has " << xrefs.size() << " references" << endl;
 			//	Mark the var declaration as IS_ASSIGNED.
 			this->var_of_uid[ *it ]->putAttribute( IS_ASSIGNED, "true" );
 			//	And now mark all the id cross-refs to that declaration the same.
@@ -952,9 +1172,9 @@ public:
 	void endVisit( Ginger::Mnx & element ) {
 		const string & x = element.name();
 		if ( x == ID ) {
-			if ( element.hasAttribute( ID_DEF_PKG, "ginger.library" ) ) {
+			if ( element.hasAttribute( VID_DEF_PKG, "ginger.library" ) ) {
 				//cout<<"IN 1" << endl;
-				const string name( element.attribute( ID_NAME ) );
+				const string name( element.attribute( VID_NAME ) );
 				element.clearAllAttributes();
 				element.putAttribute( CONSTANT_VALUE, name );
 				element.putAttribute( CONSTANT_TYPE, "sysfn" );
@@ -1035,7 +1255,7 @@ public:
 		) {
 			const string & uid = *it;
 			Ginger::Mnx * v = this->dec_outer[ uid ];
-			if ( v == NULL ) throw;
+			if ( v == NULL ) throw Ginger::SystemError( "Internal error" );
 			//cout << "SO FAR: ";
 			/*v->render();
 			cout << endl;*/
@@ -1153,20 +1373,44 @@ public:
 
 
 class Flatten : public Ginger::MnxVisitor {
-public:
-	void startVisit( Ginger::Mnx & element ) {
-		const string & x = element.name();
-		if ( x == SYSAPP || x == SEQ ) {
-			for ( int i = 0; i < element.size(); i++ ) {
-				if ( element.child( i )->name() == SEQ ) {
-					element.flattenChild( i );
-					i -= 1;
-				}
+private:
+	void flattenSubSeqs( Ginger::Mnx & element ) {
+		for ( int i = 0; i < element.size(); i++ ) {
+			if ( element.child( i )->name() == SEQ ) {
+				element.flattenChild( i );
+				i -= 1;
 			}
 		}
 	}
 
+public:
+
+	void startVisit( Ginger::Mnx & element ) {
+		const string & nm = element.name();
+		if ( nm == SYSAPP || nm == SEQ || nm == LIST || nm == VECTOR ) {
+			this->flattenSubSeqs( element );
+		} 
+	}
+
 	void endVisit( Ginger::Mnx & element ) {
+		const string & nm = element.name();
+		if ( 
+			nm == LIST_APPEND and 
+			element.size() == 2 
+		) {
+			if ( element.child( 0 )->name() == LIST and element.child( 0 )->isEmpty() ) {
+				element.copyFrom( *element.child( 1 ) );
+			} else if ( element.child( 1  )->name() == LIST and element.child( 1 )->isEmpty() ) {
+				element.copyFrom( *element.child( 0 ) );
+			} else if ( element.child( 0 )->name() == LIST and element.child( 1 )->name() == LIST ) {
+				// 	Does LIST/VECTOR introduce a lexical block? In this optimisation
+				//	we assume it does not.
+				element.name() = LIST;
+				element.child(0)->name() = SEQ;
+				element.child(1)->name() = SEQ;
+				this->flattenSubSeqs( element );
+			}
+		}
 	}
 
 public:
@@ -1189,6 +1433,85 @@ public:
 	virtual ~StripOuterAttributes() {}
 };
 
+/**	The responsibility of this class is to determine the layout of
+	the stack frame by
+	(1) determining the number of arguments to take off the stack.
+	(2) the total size of the stack frame, ignoring temporaries.
+	(3) assign indexes into the stack frame (slots) for inner variale
+*/
+class SlotAllocation : public Ginger::MnxWalker {
+private:
+	int count;					//	A count of the local variables allocated so far.
+	int maxcount;				//	High tide marker for count.
+	vector< int > scopes;		//	A stack of count, roughly corresponding to counts.
+	map< int, int > uid_slot;	//	Maps from UID to slots.
+	
+private:
+	static bool isBranchIf( Ginger::MnxWalkPath * path ) {
+		return path != NULL && path->getMnx().name() == IF && ( path->getIndex() & 0x1 ) == 0x1;
+	}
+	
+	static bool isFormalArgs( Ginger::MnxWalkPath * path ) {
+		return path != NULL && path->getMnx().name() == FN && path->getIndex() == 0;
+	}
+	
+	static Ginger::Mnx & getParent( Ginger::MnxWalkPath * path ) {
+		return path->getMnx();
+	}
+	
+	void popCount() {
+		this->count = this->scopes[ this->scopes.size() - 1 ];
+		this->scopes.pop_back();
+	}
+	
+	void pushCount() {
+		this->scopes.push_back( this->count );
+	}
+	
+	int bumpCount() {
+		const int n = this->count++;
+		if ( this->maxcount < this->count ) {
+			this->maxcount = this->count;
+		}
+		return n;
+	}
+	
+public:
+	void startWalk( Ginger::Mnx & element, Ginger::MnxWalkPath * path ) {
+		const string & x = element.name();
+		if ( x == ID && element.hasAttribute( "scope", "local" ) ) {
+			int slot = this->uid_slot[ element.attributeToInt( "uid" ) ];
+			element.putAttribute( "slot", slot );
+		} else if ( x == VAR && element.hasAttribute( "scope", "local" ) ) {
+			int slot = this->bumpCount();
+			this->uid_slot[ element.attributeToInt( "uid" ) ] = slot;
+			element.putAttribute( "slot", slot );
+		} else if ( x == FN ) {
+			this->pushCount();
+			this->count = 0;
+		} else if ( x == BLOCK || x == FOR || isBranchIf( path ) ) {
+			this->pushCount();
+		}
+	}
+	
+	void endWalk( Ginger::Mnx & element, Ginger::MnxWalkPath * path ) {
+		const string & x = element.name();
+		if ( x == FN ) {
+			element.putAttribute( "locals.count", this->maxcount );
+			this->popCount();			
+		} else if ( x == BLOCK || x == FOR || isBranchIf( path ) ) {
+			this->popCount();
+		} else if ( isFormalArgs( path ) ) {
+			//	We are ending an argument list. Stash the count of the formals.
+			getParent( path ).putAttribute( "args.count", this->count );
+		}
+	}	
+
+public:
+	SlotAllocation() : count( 0 ), maxcount( 0 ) {}
+	virtual ~SlotAllocation() {}
+};
+
 bool Main::resimplify( shared< Ginger::Mnx > g ) {
 	bool resimplify = false;
 	
@@ -1205,11 +1528,17 @@ bool Main::resimplify( shared< Ginger::Mnx > g ) {
 	}
 	
 	if ( arity_processing ) {
-		ArityMarker a;
+		ArityMarker a( true );
 		g->visit( a );
 		//	We *do* care about changing here as it breaks the
 		//	otherwise monotonic process.
 		resimplify = resimplify || a.hasChanged();
+		if ( not resimplify && a.hasSelfAppPassNeeded() ) {
+			SelfAppArityMarker m;
+			g->visit( m );
+			ArityMarker b( false );
+			g->visit( b );
+		}
 	}
 	
 	return resimplify;
@@ -1221,6 +1550,11 @@ void Main::simplify( shared< Ginger::Mnx > g ) {
 	//	If we are not doing absolute_processing we should assume we
 	//	will find outers.
 	bool outers_found = not absolute_processing;
+	
+	if ( self_processing ) {
+		SelfAnalysis self;
+		g->visit( self );
+	}
 	
 	if ( scope_processing ) {
 		Scope scope;
@@ -1265,9 +1599,15 @@ void Main::simplify( shared< Ginger::Mnx > g ) {
 	}
 	
 	if ( arity_processing ) {
-		ArityMarker a;
+		ArityMarker a( true );
 		g->visit( a );
 		resimplify = resimplify || a.hasChanged();
+		if ( not resimplify && a.hasSelfAppPassNeeded() ) {
+			SelfAppArityMarker m;
+			g->visit( m );
+			ArityMarker b( false );
+			g->visit( b );
+		}
 	}
 	
 	while ( resimplify ) {
@@ -1278,6 +1618,11 @@ void Main::simplify( shared< Ginger::Mnx > g ) {
 		g->orFlags( TAIL_CALL_MASK );
 		TailCall tc;
 		g->visit( tc );
+	}
+	
+	if ( slot_processing ) {
+		SlotAllocation s;
+		g->walk( s );
 	}
 	
 }

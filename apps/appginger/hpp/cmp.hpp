@@ -16,12 +16,24 @@
     along with AppGinger.  If not, see <http://www.gnu.org/licenses/>.
 \******************************************************************************/
 
-#ifndef READ_XML_HPP
-#define READ_XML_HPP
+#ifndef CMP_HPP
+#define CMP_HPP
 
-#include "term.hpp"
-#include "sax.hpp"
+#include "instruction.hpp"
 
-extern Term mnxToTerm( shared< Ginger::Mnx > mnx );
+
+enum CMP_OP {
+	CMP_GTE,
+	CMP_GT,
+	CMP_EQ,
+	CMP_LT,
+	CMP_LTE,
+	CMP_NEQ
+};
+
+extern CMP_OP revCmpOp( const CMP_OP );
+extern Instruction cmpOpInstruction( const CMP_OP cmp );
+extern Instruction cmpLocalSmallInstruction( const CMP_OP cmp );
+extern Instruction cmpLocalLocalInstruction( const CMP_OP cmp );
 
 #endif

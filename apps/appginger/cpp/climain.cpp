@@ -94,27 +94,6 @@ public:
 	}
 };
 
-/*class Popen {
-private:
-	FILE * gnufp;
-	
-public:
-	FILE * file() { return this->gnufp; }
-	
-public:
-	Popen( string command ) : gnufp( NULL ) {
-		this->gnufp = popen( command.c_str(), "r" );
-		if ( this->gnufp == NULL ) {
-			throw Ginger::SystemError( "Failed to open subprocesses" );	
-		}
-	}
-	~Popen() { 
-		cout << "CLOSING PIPE (1)" << endl;
-		if ( this->gnufp != NULL ) pclose( this->gnufp ); 
-		cout << "CLOSING PIPE (2)" << endl;
-	}
-};*/
-
 class GingerMain : public ToolMain {
 private:
 	void mainLoop() {
@@ -142,7 +121,7 @@ private:
 		//	tail is 1-indexed!
 		
 		
-		commstream << this->context.syntax() << " | " << SIMPLIFYGNX << " -su";
+		commstream << this->context.syntax() << " | " << SIMPLIFYGNX << " -suA";
 		commstream << " -p" << shellSafeName( interactive_pkg->getTitle() );
 		string command( commstream.str() );
 		

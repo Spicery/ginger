@@ -25,7 +25,7 @@ using namespace std;
 #include "common.hpp"
 #include "key.hpp"
 #include "mishap.hpp"
-#include "vmi.hpp"
+//#include "vmi.hpp"
 #include "machine.hpp"
 #include "classlayout.hpp"
 #include "misclayout.hpp"
@@ -214,11 +214,11 @@ Ref * sysClassRecogniser( Ref * pc, MachineClass *vm ) {
 	if ( vm->count != 1 ) throw Ginger::Mishap( "Wrong number of arguments" );
 	Ref kk = vm->fastPeek();
 	if ( !IsObj( kk ) || *RefToPtr4( kk ) != sysKeyKey ) throw Ginger::Mishap( "Key needed" );
-	Plant plant = vm->plant();
-	plant->vmiFUNCTION( 1, 1 );
-	plant->vmiSYS_CALL_ARG( sysargRecognise, kk );
-	plant->vmiSYS_RETURN();
-	vm->fastPeek() = plant->vmiENDFUNCTION();
+	CodeGen codegen = vm->codegen();
+	codegen->vmiFUNCTION( 1, 1 );
+	codegen->vmiSYS_CALL_ARG( sysargRecognise, kk );
+	codegen->vmiSYS_RETURN();
+	vm->fastPeek() = codegen->vmiENDFUNCTION();
 	return pc;
 }
 
@@ -247,12 +247,12 @@ Ref * sysClassConstructor( Ref * pc, MachineClass *vm ) {
 	if ( !IsObj( kk ) || *RefToPtr4( kk ) != sysKeyKey ) throw Ginger::Mishap( "Key needed" );
 	Ref * obj_K = RefToPtr4( kk );
 	long n = SmallToLong( obj_K[ CLASS_OFFSET_NFIELDS ] );
-	Plant plant = vm->plant();
-	plant->vmiFUNCTION( n, 1 );
-	//vmiCHECK_COUNT( plant, n );
-	plant->vmiSYS_CALL_ARGDAT( sysargdatConstruct, kk, n );
-	plant->vmiSYS_RETURN();
-	vm->fastPeek() = plant->vmiENDFUNCTION();
+	CodeGen codegen = vm->codegen();
+	codegen->vmiFUNCTION( n, 1 );
+	//vmiCHECK_COUNT( codegen, n );
+	codegen->vmiSYS_CALL_ARGDAT( sysargdatConstruct, kk, n );
+	codegen->vmiSYS_RETURN();
+	vm->fastPeek() = codegen->vmiENDFUNCTION();
 	return pc;
 }
 
@@ -278,11 +278,11 @@ Ref * sysClassAccessor( Ref * pc, MachineClass *vm ) {
 	long nargs = SmallToLong( RefToPtr4( kk )[ CLASS_OFFSET_NFIELDS ] );
 	long index = SmallToLong( N );
 	if ( 1 <= index && index <= nargs ) {
-		Plant plant = vm->plant();
-		plant->vmiFUNCTION( 1, 1 );
-		plant->vmiSYS_CALL_ARGDAT( sysargdatAccess, kk, index );
-		plant->vmiSYS_RETURN();
-		vm->fastPeek() = plant->vmiENDFUNCTION();
+		CodeGen codegen = vm->codegen();
+		codegen->vmiFUNCTION( 1, 1 );
+		codegen->vmiSYS_CALL_ARGDAT( sysargdatAccess, kk, index );
+		codegen->vmiSYS_RETURN();
+		vm->fastPeek() = codegen->vmiENDFUNCTION();
 	} else {
 		throw Ginger::Mishap( "ToBeDone" );
 	}
@@ -298,11 +298,11 @@ Ref * sysClassUnsafeAccessor( Ref * pc, MachineClass *vm ) {
 	long nargs = SmallToLong( RefToPtr4( kk )[ CLASS_OFFSET_NFIELDS ] );
 	long index = SmallToLong( N );
 	if ( 1 <= index && index <= nargs ) {
-		Plant plant = vm->plant();
-		plant->vmiFUNCTION( 1, 1 );
-		plant->vmiFIELD( index );
-		plant->vmiSYS_RETURN();
-		vm->fastPeek() = plant->vmiENDFUNCTION();
+		CodeGen codegen = vm->codegen();
+		codegen->vmiFUNCTION( 1, 1 );
+		codegen->vmiFIELD( index );
+		codegen->vmiSYS_RETURN();
+		vm->fastPeek() = codegen->vmiENDFUNCTION();
 	} else {
 		throw Ginger::Mishap( "ToBeDone" );
 	}
@@ -331,10 +331,10 @@ Ref * sysClassExploder( Ref * pc, MachineClass * vm ) {
 	if ( *key_K != sysKeyKey ) throw Ginger::Mishap( "Class of object needed" );
 	const long N = SmallToLong( key_K[ CLASS_OFFSET_NFIELDS ] );
 
-	Plant plant = vm->plant();
-	plant->vmiFUNCTION( 1, N );
-	plant->vmiSYS_CALL_ARG( sysargExplode, key );
-	plant->vmiSYS_RETURN();
-	vm->fastPeek() = plant->vmiENDFUNCTION();
+	CodeGen codegen = vm->codegen();
+	codegen->vmiFUNCTION( 1, N );
+	codegen->vmiSYS_CALL_ARG( sysargExplode, key );
+	codegen->vmiSYS_RETURN();
+	vm->fastPeek() = codegen->vmiENDFUNCTION();
 	return pc;
 }

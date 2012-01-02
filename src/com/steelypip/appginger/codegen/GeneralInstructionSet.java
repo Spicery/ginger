@@ -131,6 +131,10 @@ public abstract class GeneralInstructionSet {
 	public Instruction eq_ss_irrr() {
 		return new GenericInstruction();
 	}
+	
+	public Instruction erase_i() {
+		return new GenericInstruction();
+	}
 
 	public Instruction field_ir() {
 		return new GenericInstruction();
@@ -255,6 +259,25 @@ public abstract class GeneralInstructionSet {
 		return new GenericInstruction();
 	}
 
+	public Instruction push_local0_ret_i() {
+		return new GenericInstruction();
+	}
+
+
+	public Instruction push_local1_ret_i() {
+		return new GenericInstruction();
+	}
+
+
+	public Instruction push_local_ret_ir() {
+		return new GenericInstruction();
+	}
+
+
+	public Instruction pushq_ret_ic() {
+		return new GenericInstruction();
+	}
+
 
 	public Instruction reset_i() {
 		return new GenericInstruction();
@@ -263,6 +286,26 @@ public abstract class GeneralInstructionSet {
 
 	public Instruction return_i() {
 		return new GenericInstruction();
+	}
+	
+	public Instruction return_ifso_i() {
+		return new GenericInstruction();
+	}
+	
+	public Instruction return_ifnot_i() {
+		return new GenericInstruction();
+	}
+	
+	public Instruction self_call_i() {
+		return new GenericInstruction();		
+	}
+	
+	public Instruction self_call_n_ir() {
+		return new GenericInstruction();	
+	}
+	
+	public Instruction self_constant_i() {
+		return new GenericInstruction();		
 	}
 
 

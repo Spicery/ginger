@@ -1,4 +1,12 @@
 long s = ToLong( pc[1] );
 long t = ToLong( pc[2] );
+
+Ref a = LOCAL( s );
+Ref b = LOCAL( t );
+
+if ( not IsSmall( a ) or not IsSmall( b ) ) {
+	throw Mishap( "Small integers only" );
+}
+
 long d = ToLong( pc[3] );
-RETURN( ToLong( LOCAL( s ) ) >= ToLong( LOCAL( t ) ) ? pc + d + 3 : pc + 4 );
+RETURN( ToLong( a ) >= ToLong( b ) ? pc + d + 3 : pc + 4 );

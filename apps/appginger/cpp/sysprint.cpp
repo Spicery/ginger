@@ -18,6 +18,7 @@
 
 #include <string>
 #include <sstream>
+#include <iostream>
 
 #include "mnx.hpp"
 
@@ -28,6 +29,10 @@
 #include "sysmap.hpp"
 #include "syssymbol.hpp"
 #include "sysinstance.hpp"
+
+//#define DBG_SYSPRINT 1
+
+using namespace std;
 
 void refPrint( Ref r ) {
 	refPrint( std::cout, r );
@@ -162,7 +167,13 @@ static void refInstancePrint( std::ostream & out, Ref * rec_K ) {
 }
 
 void refPrint( std::ostream & out, const Ref r ) {
+	#ifdef DBG_SYSPRINT
+		cerr << "Printing ref: " << r << endl;
+	#endif
 	if ( IsObj( r ) ) {
+		#ifdef DBG_SYSPRINT
+			cerr << "-- is object" << endl;
+		#endif
 		Ref * obj_K = RefToPtr4( r );
 		const Ref key = * obj_K;
 		if ( IsFunctionKey( key ) ) {
@@ -211,6 +222,9 @@ void refPrint( std::ostream & out, const Ref r ) {
 		}
 	} else {
 		Ref k = refKey( r );
+		#ifdef DBG_SYSPRINT
+			cerr << "--  primitive" << endl;
+		#endif
 		if ( k == sysSmallKey ) {
 			out << SmallToLong( r );
 		} else if ( k == sysBoolKey ) {
@@ -218,6 +232,10 @@ void refPrint( std::ostream & out, const Ref r ) {
 		} else if ( k == sysAbsentKey ) {
 			out << "absent";
 		} else if ( k == sysCharKey ) {
+			#ifdef DBG_SYSPRINT
+				cerr << "--  character: " << (int)(CharacterToChar( r )) << endl;
+			#endif
+		
 			//out << "<char " << r  << ">";
 			out << CharacterToChar( r );
 		} else if ( k == sysSymbolKey ) {

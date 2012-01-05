@@ -98,6 +98,22 @@ private:
 	bool val_processing;
 	bool slot_processing;
 	bool top_level_processing;
+	
+public:
+	static void helpOptions() {
+		printf( "PROCESSING STAGE OPTIONS (n.b. -4 and -9 free for future use)\n" ) ;
+		printf( "-s, --standard        a standard set of transformations, equal to options 0-9\n" );
+		printf( "-0, --self            replace named lambda self-references with special forms\n" );
+		printf( "-1, --absolute        add def.pkg attribute to all globals\n" );
+		printf( "-2, --arity           add arity marking to all subexpressions\n" );
+		printf( "-3, --flatten         eliminate nested sequences\n" );
+		printf( "-5, --lift            transform nested lambdas so that they only reference immediate locals\n" );
+		printf( "-6, --scope           mark all variable definitions and references as local or global\n" );
+		printf( "-7, --sysapp          replace calls to standard variable with sys-calls\n" );
+		printf( "-8, --tailcall        marks function applications as tail-call or not\n" );
+		printf( "-A, --slotalloc       assigns a frame slot to every variable\n" );
+		printf( "-B, --toplevel        moves every lambda to top-level\n" );
+	}	
 		
 public:
 	bool getAbsoluteProcessing() const { return this->absolute_processing; }
@@ -356,13 +372,14 @@ void Main::parseArgs( int argc, char **argv, char **envp ) {
                 //  browser pointed there.
                 if ( optarg == NULL ) {
                     printf( "Usage:  simplifygnx -p PACKAGE OPTIONS < GNX_IN > GNX_OUT\n" );
-                    printf( "OPTIONS\n" );
+                    printf( "GENERAL OPTIONS\n" );
                     printf( "-d, --debug           retain debugging information\n" );
                     printf( "-H, --help[=TOPIC]    help info on optional topic (see --help=help)\n" );
                     printf( "-j, --project=PATH    adds a project folder onto the search path" );
                     printf( "-L, --license[=PART]  print out license information and exit (see --help=license)\n" );
                     printf( "-p, --package=PACKAGE defines the enclosing package\n" );
                     printf( "-V, --version         print out version information and exit\n" );
+                    ProcessingOptions::helpOptions();
                     printf( "\n" );
                 } else if ( std::string( optarg ) == "help" ) {
                     cout << "--help=help           this short help" << endl;

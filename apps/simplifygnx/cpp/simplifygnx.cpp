@@ -71,6 +71,8 @@ to it as a stream.
 #include <sstream>
 #include <algorithm>
 
+#include <uuid/uuid.h>
+
 #include "gnxconstants.hpp"
 #include "mishap.hpp"
 #include "sax.hpp"
@@ -98,6 +100,7 @@ public:
 	bool tailcall_processing;
 	bool val_processing;
 	bool slot_processing;
+	bool top_level_processing;
 
 public:
 	std::string package;
@@ -105,8 +108,8 @@ public:
 	bool retain_debug_info;
 
 private:
-	void simplify( shared< Ginger::Mnx > g );
-	bool resimplify( shared< Ginger::Mnx > g );
+	void simplify( shared< Ginger::Mnx > & g );
+	bool resimplify( shared< Ginger::Mnx > & g );
 
 
 public:
@@ -128,6 +131,7 @@ public:
 		tailcall_processing( false ),
 		val_processing( false ),
 		slot_processing( false ),
+		top_level_processing( false ),
 		undefined_allowed( false ),
 		retain_debug_info( false )
 	{}
@@ -152,6 +156,7 @@ static struct option long_options[] =
         { "tailcall",		no_argument,			0, '8' },
         { "val",         	no_argument,			0, '9' },
         { "slotalloc",		no_argument,			0, 'A' },
+        { "toplevel",		no_argument,			0, 'B' },
         { "debug",			no_argument,			0, 'd' },
         { "help",			optional_argument,		0, 'H' },
 		{ "project",		required_argument,		0, 'j' },
@@ -166,7 +171,7 @@ static struct option long_options[] =
 void Main::parseArgs( int argc, char **argv, char **envp ) {
     for(;;) {
         int option_index = 0;
-        int c = getopt_long( argc, argv, "0123456789Adj:H::L::p:suV", long_options, &option_index );
+        int c = getopt_long( argc, argv, "0123456789ABdj:H::L::p:suV", long_options, &option_index );
         if ( c == -1 ) break;
         switch ( c ) {
         	case '0': {
@@ -215,6 +220,10 @@ void Main::parseArgs( int argc, char **argv, char **envp ) {
         	}
         	case 'A' : {
         		this->slot_processing = true;
+        		break;
+        	}
+        	case 'B' : {
+        		this->top_level_processing = true;
         		break;
         	}
         	case 's' : {
@@ -714,9 +723,9 @@ public:
 	void startVisit( Ginger::Mnx & element ) {
 		const string & x = element.name();
 		if ( x == ID ) {
-			const string & name = element.attribute( VID_NAME );
 			if ( element.hasAttribute( SCOPE, "global" ) ) {
 				if ( not element.hasAttribute( "def.pkg" ) ) {
+					const string & name = element.attribute( VID_NAME );
 					const string & enc_pkg = element.hasAttribute( "enc.pkg" ) ? element.attribute( "enc.pkg" ) : this->package;
 					if ( element.hasAttribute( "alias" ) ) {
 						const string & alias = element.attribute( "alias" );
@@ -1271,15 +1280,7 @@ public:
 	void endVisit( Ginger::Mnx & element ) {
 		const string & x = element.name();
 		if ( x == FN ) {
-			/*cout << "Capture set:" << element.attribute( "name", "[anon]" ) << ":";
-			for ( 
-				set< string >::iterator it = this->capture_sets.back().begin();
-				it != this->capture_sets.back().end();
-				++it
-			) {
-				cout << " " << *it << endl;
-			}
-			cout << endl;*/
+
 			
 			if ( not this->capture_sets.back().empty() ) {
 				
@@ -1305,7 +1306,7 @@ public:
 					fn->copyFrom( element );
 					shared< Ginger::Mnx > partapply( new Ginger::Mnx( SYSAPP ) );
 					partapply->putAttribute( SYSAPP_NAME, "partApply" );
-					partapply->addChild( this->makeLocals( "id" ) );
+					partapply->addChild( this->makeLocals( ID ) );
 					partapply->addChild( fn );
 					element.copyFrom( *partapply );
 				}
@@ -1319,6 +1320,88 @@ public:
 	virtual ~Lift() {}
 };
 
+class TopLevelFunction : public Ginger::MnxVisitor {
+private:
+	vector< string > guids;
+	vector< shared< Ginger::Mnx > > fns;
+	int nesting;
+
+private:
+	static string makeGUID() {	
+		uuid_t x;
+		uuid_generate( x );
+		uuid_string_t s;
+		uuid_unparse( x, s );
+		return string( s );	
+	}
+	
+public:
+	shared< Ginger::Mnx > finishByInsertingBindings( shared< Ginger::Mnx > element ) {
+		Ginger::MnxBuilder b;
+		b.start( SEQ );
+		
+		for ( size_t i = 0; i < this->guids.size(); i++ ) {
+			const string & g = this->guids[ i ];
+			shared< Ginger::Mnx > m( this->fns[ i ] );
+			
+			b.start( BIND );
+			b.start( VAR );
+			b.put( VID_PROTECTED, "true" );
+			b.put( VID_NAME, g );						
+			b.put( VID_DEF_PKG, "ginger.temporaries" );
+			b.put( VID_SCOPE, "global" );			b.end();
+			b.add( m );
+			b.end();
+			
+		}
+		
+		b.add( element );
+		b.end();
+		return b.build();
+	}
+
+	void startVisit( Ginger::Mnx & element ) {
+		if ( element.name() == FN ) {
+			this->nesting += 1;			
+		}
+	}
+
+	void endVisit( Ginger::Mnx & element ) {
+		if ( element.name() == FN ) {
+			this->nesting -= 1;
+			if ( this->nesting > 0 ) {
+				//	We have a nested function definition. Lift it to
+				//	the top level.
+				
+				//	Copy the current element into a temporary.
+				shared< Ginger::Mnx > t( new Ginger::Mnx( "" ) );
+				t->copyFrom( element );
+				
+				//	Create globally unique ID.
+				const string name( makeGUID() );
+				this->guids.push_back( name );
+				this->fns.push_back( t );
+
+				
+				//	Now replace the current element.
+				{
+					Ginger::MnxBuilder b;
+					b.start( ID );
+					b.put( VID_PROTECTED, "true" );
+					b.put( VID_NAME, name );						
+					b.put( VID_DEF_PKG, "ginger.temporaries" );
+					b.put( VID_SCOPE, "global" );
+					b.end();
+					element.copyFrom( *b.build() );					
+				}
+			}
+		}
+	}
+	
+public:
+	TopLevelFunction() : nesting( 0 ) {}
+};
+
 class AddDeref : public Ginger::MnxVisitor {
 public:
 	
@@ -1330,7 +1413,7 @@ public:
 	//
 	void startVisit( Ginger::Mnx & element ) {
 		const string & x = element.name();
-		if ( element.hasAttribute( IS_OUTER, "true" ) && element.hasAttribute( PROTECTED, "false" ) && ( x == "var" || x == "id" ) ) {
+		if ( element.hasAttribute( IS_OUTER, "true" ) && element.hasAttribute( PROTECTED, "false" ) && ( x == VAR || x == ID ) ) {
 			element.putAttribute( IS_OUTER, "deref" );			//	Mark as processed.
 			shared< Ginger::Mnx > t( new Ginger::Mnx( x ) );
 			t->copyFrom( element );
@@ -1512,7 +1595,7 @@ public:
 	virtual ~SlotAllocation() {}
 };
 
-bool Main::resimplify( shared< Ginger::Mnx > g ) {
+bool Main::resimplify( shared< Ginger::Mnx > & g ) {
 	bool resimplify = false;
 	
 	if ( sysapp_processing ) {	
@@ -1544,7 +1627,7 @@ bool Main::resimplify( shared< Ginger::Mnx > g ) {
 	return resimplify;
 }
 
-void Main::simplify( shared< Ginger::Mnx > g ) {
+void Main::simplify( shared< Ginger::Mnx > & g ) {
 	bool resimplify = false;
 
 	//	If we are not doing absolute_processing we should assume we
@@ -1612,6 +1695,12 @@ void Main::simplify( shared< Ginger::Mnx > g ) {
 	
 	while ( resimplify ) {
 		resimplify = this->resimplify( g );
+	}
+	
+	if ( this->top_level_processing ) {
+		TopLevelFunction top;
+		g->visit( top );
+		g = top.finishByInsertingBindings( g );
 	}
 
 	if ( tailcall_processing ) {

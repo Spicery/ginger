@@ -84,11 +84,8 @@ using namespace std;
 
 #define FETCHGNX ( INSTALL_TOOL "/fetchgnx" )
 
-class Main {
+class ProcessingOptions {
 private:
-	vector< string > 	project_folders;
-	
-public:
 	bool absolute_processing;
 	bool arity_processing;
 	bool flatten_processing;
@@ -101,6 +98,115 @@ public:
 	bool val_processing;
 	bool slot_processing;
 	bool top_level_processing;
+		
+public:
+	bool getAbsoluteProcessing() const { return this->absolute_processing; }
+	bool getArityProcessing() const { return this->arity_processing; }
+	bool getFlattenProcessing() const { return this->flatten_processing; }
+	bool getLifetimeProcessing() const { return this->lifetime_processing; }
+	bool getLiftProcessing() const { return this->lift_processing; }
+	bool getScopeProcessing() const { return this->scope_processing; }
+	bool getSelfProcessing() const { return this->self_processing; }
+	bool getSysappProcessing() const { return this->sysapp_processing; }
+	bool getTailcallProcessing() const { return this->tailcall_processing; }
+	bool getValProcessing() const { return this->val_processing; }
+	bool getSlotProcessing() const { return this->slot_processing; }
+	bool getTopLevelProcessing() const { return this->top_level_processing; }
+	
+public:
+	void setAbsoluteProcessing() { 
+		this->absolute_processing = true;         		
+		this->scope_processing = true;		//	requires scope analysis.
+	}
+	void setArityProcessing() { 
+		this->arity_processing = true; 
+	}
+	void setFlattenProcessing() { 
+		this->flatten_processing = true; 
+	}
+	void setLifetimeProcessing() { 
+		this->lifetime_processing = true; 
+	}
+	void setLiftProcessing() { 
+		this->lift_processing = true; 
+		this->scope_processing = true;		//	lift needs scope analysis.
+		this->flatten_processing = true;	//	lift benefits from flattening.
+	}
+	void setScopeProcessing() { 
+		this->scope_processing = true; 
+	}
+	void setSelfProcessing() { 
+		this->self_processing = true; 
+	}
+	void setSysappProcessing() { 
+		this->sysapp_processing = true; 
+		this->flatten_processing = true;	//	introduces new flattening opportunities.
+	}
+	void setTailcallProcessing() { 
+		this->tailcall_processing = true; 
+	}
+	void setValProcessing() { 
+		this->val_processing = true; 
+	}
+	void setSlotProcessing() { 
+		this->slot_processing = true; 
+		this->setLiftProcessing();			//	Won't work unless lifted.
+	}
+	void setTopLevelProcessing() { 
+		this->top_level_processing = true;
+		this->setLiftProcessing();			//	Won't work unless lifted.
+	}
+	
+public:
+	void setStandard() {
+		this->absolute_processing = true;
+		this->arity_processing = true;
+		this->flatten_processing = true;
+		this->lifetime_processing = true;
+		this->lift_processing = true;
+		this->scope_processing = true;
+		this->self_processing = true;
+		this->sysapp_processing = true;
+		this->tailcall_processing = true;        		
+		this->val_processing = true;        		
+	}
+
+public:
+	ProcessingOptions() :
+		absolute_processing( false ),
+		arity_processing( false ),
+		flatten_processing( false ),
+		lifetime_processing( false ),
+		lift_processing( false ),
+		scope_processing( false ),
+		self_processing( false ),
+		sysapp_processing( false ),
+		tailcall_processing( false ),
+		val_processing( false ),
+		slot_processing( false ),
+		top_level_processing( false )
+	{}
+	
+};
+
+class Main : public ProcessingOptions {
+private:
+	vector< string > 	project_folders;
+	
+/*public:
+	bool absolute_processing;
+	bool arity_processing;
+	bool flatten_processing;
+	bool lifetime_processing;
+	bool lift_processing;
+	bool scope_processing;
+	bool self_processing;
+	bool sysapp_processing;
+	bool tailcall_processing;
+	bool val_processing;
+	bool slot_processing;
+	bool top_level_processing;
+*/
 
 public:
 	std::string package;
@@ -116,30 +222,14 @@ public:
 	void parseArgs( int argc, char **argv, char **envp );
 	void run();
 	void printGPL( const char * start, const char * end );
-	std::string version();
+	std::string version() { return "0.1"; }
 	
 public:
 	Main() :
-		absolute_processing( false ),
-		arity_processing( false ),
-		flatten_processing( false ),
-		lifetime_processing( false ),
-		lift_processing( false ),
-		scope_processing( false ),
-		self_processing( false ),
-		sysapp_processing( false ),
-		tailcall_processing( false ),
-		val_processing( false ),
-		slot_processing( false ),
-		top_level_processing( false ),
 		undefined_allowed( false ),
 		retain_debug_info( false )
 	{}
 };
-
-std::string Main::version() {
-	return "0.1";
-}
 
 
 extern char * optarg;
@@ -175,71 +265,81 @@ void Main::parseArgs( int argc, char **argv, char **envp ) {
         if ( c == -1 ) break;
         switch ( c ) {
         	case '0': {
-        		this->self_processing = true;
+        		this->setSelfProcessing();
         		break;
         	}
         	case '1': {
-        		this->absolute_processing = true;
-        		this->scope_processing = true;		//	requires scope analysis.
+        		this->setAbsoluteProcessing();
+        		//this->scope_processing = true;		//	requires scope analysis.
         		break;
         	}
         	case '2': {
-        		this->arity_processing = true;
+        		//this->arity_processing = true;
+        		this->setArityProcessing();
         		break;
         	}
         	case '3': {
-        		this->flatten_processing = true;
+        		//this->flatten_processing = true;
+        		this->setFlattenProcessing();
         		break;
         	}
         	case '4': {
-        		this->lifetime_processing = true;
+        		//this->lifetime_processing = true;
+        		this->setLifetimeProcessing();
         		break;
         	}
         	case '5': {
-        		this->lift_processing = true;
-        		this->scope_processing = true;		//	lift needs scope analysis.
-        		this->flatten_processing = true;	//	lift benefits from flattening.
+        		//this->lift_processing = true;
+        		//this->scope_processing = true;		//	lift needs scope analysis.
+        		//this->flatten_processing = true;	//	lift benefits from flattening.
+        		this->setLiftProcessing();
         		break;
         	}
         	case '6': {
-        		this->sysapp_processing = true;
-        		this->flatten_processing = true;	//	introduces new flattening opportunities.
+        		//this->sysapp_processing = true;
+        		//this->flatten_processing = true;	//	introduces new flattening opportunities.
+        		this->setSysappProcessing();
         		break;
         	}
         	case '7': {
-        		this->scope_processing = true;
+        		//this->scope_processing = true;
+        		this->setScopeProcessing();
         		break;
         	}
         	case '8': {
-        		this->tailcall_processing = true;
+        		this->setTailcallProcessing();
         		break;
         	}
         	case '9': {
-        		this->val_processing = true;
+        		//this->val_processing = true;
+        		this->setValProcessing();
         		break;
         	}
         	case 'A' : {
-        		this->slot_processing = true;
+        		//this->slot_processing = true;
+        		this->setSlotProcessing();
         		break;
         	}
         	case 'B' : {
-        		this->top_level_processing = true;
+        		//this->top_level_processing = true;
+        		this->setTopLevelProcessing();
         		break;
         	}
         	case 's' : {
         		//	A standard choice of options. Everything, unless it is
         		//	insanely expensive or of marginal benefit to all back-ends.
         		//	Only slot_processing excluded at the moment.
-        		this->absolute_processing = true;
-        		this->arity_processing = true;
-        		this->flatten_processing = true;
-        		this->lifetime_processing = true;
-        		this->lift_processing = true;
-        		this->scope_processing = true;
-        		this->self_processing = true;
-        		this->sysapp_processing = true;
-        		this->tailcall_processing = true;        		
-        		this->val_processing = true;        		
+        		//this->absolute_processing = true;
+        		//this->arity_processing = true;
+        		//this->flatten_processing = true;
+        		//this->lifetime_processing = true;
+        		//this->lift_processing = true;
+        		//this->scope_processing = true;
+        		//this->self_processing = true;
+        		//this->sysapp_processing = true;
+        		//this->tailcall_processing = true;        		
+        		//this->val_processing = true;        		
+        		this->setStandard();
         		break;
         	}
         	case 'd' : {
@@ -1598,19 +1698,19 @@ public:
 bool Main::resimplify( shared< Ginger::Mnx > & g ) {
 	bool resimplify = false;
 	
-	if ( sysapp_processing ) {	
+	if ( this->getSysappProcessing() ) {	
 		SysFold s;
 		g->visit( s );
 		//	We are not interested in the changed flag at this point
 		//	because folding is part of the monotonic change.
 	}
 	
-	if ( flatten_processing ) {
+	if ( this->getFlattenProcessing() ) {
 		Flatten flatten;
 		g->visit( flatten );
 	}
 	
-	if ( arity_processing ) {
+	if ( this->getArityProcessing() ) {
 		ArityMarker a( true );
 		g->visit( a );
 		//	We *do* care about changing here as it breaks the
@@ -1632,33 +1732,33 @@ void Main::simplify( shared< Ginger::Mnx > & g ) {
 
 	//	If we are not doing absolute_processing we should assume we
 	//	will find outers.
-	bool outers_found = not absolute_processing;
+	bool outers_found = not this->getAbsoluteProcessing();
 	
-	if ( self_processing ) {
+	if ( this->getSelfProcessing() ) {
 		SelfAnalysis self;
 		g->visit( self );
 	}
 	
-	if ( scope_processing ) {
+	if ( this->getScopeProcessing() ) {
 		Scope scope;
 		g->visit( scope );
 		outers_found = scope.wereOutersFound();
 	}
 	
-	if ( absolute_processing ) {
+	if ( this->getAbsoluteProcessing() ) {
 		Absolute a( this->project_folders, this->package, this->undefined_allowed );
 		g->visit( a );
 		//outers_found = a.wereOutersFound();
 	} 
 
-	if ( sysapp_processing ) {	
+	if ( this->getSysappProcessing() ) {	
 		SysFold s;
 		g->visit( s );
 		//	N.B. We do not care about the changed flag as it cannot
 		//	cause rework at this point.
 	}
 	
-	if ( lift_processing ) {
+	if ( this->getLiftProcessing() ) {
 		//	Only proceed if we have determined that there are indeed
 		//	some variables which are declared as outers. Otherwise
 		//	this is just an expensive no-op!
@@ -1676,12 +1776,12 @@ void Main::simplify( shared< Ginger::Mnx > & g ) {
 		}
 	}
 	
-	if ( flatten_processing ) {
+	if ( this->getFlattenProcessing() ) {
 		Flatten flatten;
 		g->visit( flatten );
 	}
 	
-	if ( arity_processing ) {
+	if ( this->getArityProcessing() ) {
 		ArityMarker a( true );
 		g->visit( a );
 		resimplify = resimplify || a.hasChanged();
@@ -1697,19 +1797,19 @@ void Main::simplify( shared< Ginger::Mnx > & g ) {
 		resimplify = this->resimplify( g );
 	}
 	
-	if ( this->top_level_processing ) {
+	if ( this->getTopLevelProcessing() ) {
 		TopLevelFunction top;
 		g->visit( top );
 		g = top.finishByInsertingBindings( g );
 	}
 
-	if ( tailcall_processing ) {
+	if ( this->getTailcallProcessing() ) {
 		g->orFlags( TAIL_CALL_MASK );
 		TailCall tc;
 		g->visit( tc );
 	}
 	
-	if ( slot_processing ) {
+	if ( this->getSlotProcessing() ) {
 		SlotAllocation s;
 		g->walk( s );
 	}

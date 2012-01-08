@@ -211,8 +211,7 @@ void CodeGenClass::vmiCHAIN_LITE( Ref fn, long N ) {
 
 Valof * CodeGenClass::resolveGlobal( Gnx var_or_id ) {
 	Package * def_pkg = this->vm->getPackage( var_or_id->attribute( VID_DEF_PKG ) );
-	Ident ident = def_pkg->fetchAbsoluteIdent( var_or_id->attribute( VID_NAME ) );
-	return ident->value_of;
+	return def_pkg->fetchAbsoluteValof( var_or_id->attribute( VID_NAME ) );
 }
 
 void CodeGenClass::vmiPOP_INNER_SLOT( int slot ) {
@@ -653,9 +652,6 @@ int CodeGenClass::tmpvar() {
 	return n;
 }
 
-Ident CodeGenClass::newTmpIdent() {
-	return identNewTmp( this->tmpvar() );
-}
 
 static bool isVIdentable( Gnx gnx ) {
 	const string & nm = gnx->name();

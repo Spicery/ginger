@@ -336,7 +336,7 @@ const SysMap::value_type rawData[] = {
 	//SysMap::value_type( "**", SysInfo( VM_OP_FLAVOUR, vmc_pow, fnc_pow, Arity( 2 ), Arity( 1 ), 0, "Exponentiates two numbers, result is float" ) ),
 	SysMap::value_type( "<", SysInfo( CMP_LT, Arity( 2 ), Arity( 1 ), "Less than, compares two real numbers" ) ),
 	SysMap::value_type( "<=", SysInfo( CMP_LTE, Arity( 2 ), Arity( 1 ), "Less than or equal to, compares two real number" ) ),
-	SysMap::value_type( "==", SysInfo( CMP_EQ, Arity( 2 ), Arity( 1 ), "Identity two two values, result is boolean" ) ),
+	SysMap::value_type( "==", SysInfo( CMP_EQ, Arity( 2 ), Arity( 1 ), "Identity of two values, result is boolean" ) ),
 	SysMap::value_type( ">", SysInfo( CMP_GT, Arity( 2 ), Arity( 1 ), "Greater than, compares two real numbers" ) ),
 	SysMap::value_type( ">=", SysInfo( CMP_GTE, Arity( 2 ), Arity( 1 ), "Greater than or equal to, compares two real numbers" ) ),	
 	SysMap::value_type( "instanceClass", SysInfo( Arity( 1 ), Arity( 1 ), sysObjectKey, "Returns the key of any value" ) ),

@@ -20,67 +20,14 @@
 
 #include "ident.hpp"
 #include "key.hpp"
-//#include "term.hpp"
 
 IdentClass::IdentClass( const std::string & nm ) : //, const FacetSet * facets ) :
 	name_data( nm ),
-	is_local( false ),
-	is_outer( false ),
-	is_assigned( false ),
-	is_shared( false ),
-	slot( -1 ),
-	func( NULL ),
-	//facets( facets ),
-	value_of( new Valof() ),
-	level( -1 )
+	value_of( new Valof() )
 {
-}
-
-IdentClass::IdentClass( const std::string & nm, FnTermClass * fn ) :
-	name_data( nm ),
-	is_local( false ),
-	is_outer( false ),
-	is_assigned( false ),
-	is_shared( false ),
-	slot( -1 ),
-	func( fn ),
-	//facets( NULL ),
-	value_of( new Valof() ),
-	level( -1 )
-{
-}
-
-const std::string & IdentClass::getNameString() const {
-	return this->name_data;
-}
-
-bool IdentClass::isSame( IdentClass * other ) {
-	return this->name_data == other->name_data;
-}
-
-/*Ident identNewLocal( const std::string & nm, FnTermClass * fn ) {
-	shared< IdentClass > id( new IdentClass( nm, fn ) );
-	id->setLocal();
-	fn->addInner( id );
-	id->setSlot( fn->nlocals()++ );
-	return shared< IdentClass >( id );
-}
-
-Ident identNewLastArg( const std::string & nm, FnTermClass * fn ) {
-	Ident id = identNewLocal( nm, fn );
-	id->setSlot( fn->nlocals()++ );
-	return id;
-}*/
-
-Ident identNewTmp( const int n ) {
-	IdentClass * id = new IdentClass( std::string( "tmpvar" ), (FnTermClass *)NULL );
-	id->setLocal();
-	id->setSlot( n );
-	return shared< IdentClass >( id );
 }
 
 Ident identNewGlobal( const std::string nm ) { //, const FacetSet * facets ) {
 	IdentClass * id = new IdentClass( nm ); //, facets );
-	id->setGlobal();
 	return shared< IdentClass >( id );
 }

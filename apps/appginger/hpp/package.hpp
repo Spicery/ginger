@@ -25,6 +25,7 @@
 #include <utility>
 #include "dict.hpp"
 #include "ident.hpp"
+#include "valof.hpp"
 
 class Package;
 
@@ -68,15 +69,11 @@ public:
 	
 public:
 	void reset() { this->dict.reset(); }
-	Ident fetchDefinitionIdent( const std::string & c ); //, const FacetSet * facets );
-	Ident fetchUnqualifiedIdent( const std::string & c );
-	Ident fetchQualifiedIdent( const std::string & alias, const std::string & c );
-	Ident fetchAbsoluteIdent( const std::string & c );
+	Valof * fetchDefinitionValof( const std::string & c ); //, const FacetSet * facets );
+	Valof * fetchAbsoluteValof( const std::string & c );
 
 protected:	
 	virtual Ident absoluteAutoload( const std::string & c ) = 0;
-	virtual Ident unqualifiedAutoload( const std::string & c ) = 0;
-	virtual Ident qualifiedAutoload( const std::string & alias, const std::string & c ) = 0;
 
 public:
 	Package( PackageManager * pkgmgr, const std::string title ) :
@@ -97,8 +94,6 @@ public:
 	void loadIfNeeded();
 protected:
 	virtual Ident absoluteAutoload( const std::string & c );
-	virtual Ident unqualifiedAutoload( const std::string & c );
-	virtual Ident qualifiedAutoload( const std::string & alias, const std::string & c );
 	
 public:
 	OrdinaryPackage( PackageManager * pkgmgr, const std::string title );
@@ -110,8 +105,7 @@ public:
 	void loadIfNeeded();
 protected:
 	virtual Ident absoluteAutoload( const std::string & c );
-	virtual Ident unqualifiedAutoload( const std::string & c );
-	virtual Ident qualifiedAutoload( const std::string & alias, const std::string & c );
+
 public:
 	StandardLibraryPackage( PackageManager * pkgmgr, std::string title ) :
 		Package( pkgmgr, title )

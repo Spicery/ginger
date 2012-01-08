@@ -21,8 +21,6 @@
 
 #include "shared.hpp"
 #include "valof.hpp"
-//#include "facet.hpp"
-class FnTermClass;
 
 #include <string>
 #include <memory>
@@ -33,59 +31,19 @@ class FnTermClass;
 class IdentClass {
 private:
 	const std::string	name_data;
-	bool				is_local;
-	bool 				is_outer;
-	bool				is_assigned;
-	bool				is_shared;
-	int					slot;
-	FnTermClass *		func;
 
 public:
-	//const FacetSet * 	facets;
 	Valof * 			value_of;		//	used for global idents
-	int 				level;			//	level of scope
 
 public:
-	bool isSame( IdentClass * other );
-	bool isLocal() { return this->is_local; }
-	void setLocal() { this->is_local = true; }
-	bool isGlobal() { return !this->is_local; }
-	void setGlobal() { this->is_local = false; }
-	
-	void setAssigned() { this->is_assigned = true; }
-	bool isAssigned() { return this->is_assigned; }
-	void setOuter() { this->is_outer = true; }
-	bool isOuter() { return this->is_outer; }
-	bool isInner() { return this->is_local && !this->is_outer; }
-	bool isShared() { return this->is_shared || ( this->is_outer && this->is_assigned ); }
-	void setShared() { this->is_shared = true; }
-	
-public:
-	void setSlot( int n ) { this->slot = n; }
-	int getFinalSlot() const { return this->slot; }
-	void swapSlot( const int a, const int b ) {
-		if ( this->slot == a ) {
-			this->slot = b;
-		} else if ( this->slot == b ) {
-			this->slot = a;
-		}
-	}
-	
-public:
-	FnTermClass * function() { return this->func; }
+	const std::string & getNameString() const { return this->name_data; }
 	
 public:
 	IdentClass( const std::string & nm ); /*, const FacetSet * facets );*/	//	Global
-	IdentClass( const std::string & nm, FnTermClass * fn ); 		//	Local
-	const std::string & getNameString() const;
 };
 
 typedef shared< IdentClass > Ident;
 
-
-//Ident identNewLocal( const std::string & nm, FnTermClass * fn );
-//Ident identNewLastArg( const std::string & nm, FnTermClass * fn );
-Ident identNewTmp( int n );
 Ident identNewGlobal( const std::string nm ); /*, const FacetSet * facets );*/
 
 #endif

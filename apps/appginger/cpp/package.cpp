@@ -27,9 +27,6 @@
 
 #include <syslog.h>
 
-//#include <boost/iostreams/stream_buffer.hpp>
-//#include <boost/iostreams/device/file_descriptor.hpp>
-
 #include "common.hpp"
 #include "package.hpp"
 #include "sys.hpp"
@@ -95,56 +92,29 @@ Ident Package::add( const std::string & c ) { //, const FacetSet * facets ) {
 	return this->dict.add( c ); //, facets );
 }
 
-Ident Package::fetchUnqualifiedIdent( const std::string & c ) {
-	Ident id = this->dict.lookup( c );
-	if ( id ) {
-		return id;
-	} else {
-		Package * p = this->unqualifiedResolutions[ c ];
-		if ( p != NULL ) {
-			Ident id = p->dict.lookup( c );
-			if ( not id ) throw Ginger::SystemError( "Unqualified lookup has been incorrectly recorded" );
-			return id;
-		} else {
-			return this->unqualifiedAutoload( c );
-		}
-	}
-}
 
-Ident Package::fetchQualifiedIdent( const std::string & alias, const std::string & c ) {
-	Ident id = this->dict.lookup( c );
-	if ( id ) {
-		return id;
-	} else {
-		Package * p = this->qualifiedResolutions[ pair< string, string >( alias, c ) ];
-		if ( p != NULL ) {
-			Ident id = p->dict.lookup( c );
-			if ( not id ) throw Ginger::SystemError( "Qualified lookup has been incorrectly recorded" );
-			return id;
-		} else {
-			return this->qualifiedAutoload( alias, c );
-		}
-	}
-}
 
-Ident Package::fetchAbsoluteIdent( const std::string & c ) {
+Valof * Package::fetchAbsoluteValof( const std::string & c ) {
 	//cout << "Absolute fetch" << endl;
 	Ident id = this->dict.lookup( c );
 	if ( id ) {
-		return id;
+		return id->value_of;
 	} else {
-		return this->absoluteAutoload( c );
+		Ident id = this->absoluteAutoload( c );
+		return not( id ) ? NULL : id->value_of;
 	}
 }
 
-Ident Package::fetchDefinitionIdent( const std::string & c ) { //, const FacetSet * facets ) {
+
+Valof * Package::fetchDefinitionValof( const std::string & c ) { //, const FacetSet * facets ) {
 	Ident id = this->dict.lookup( c );
 	if ( not id ) {
-    	return this->add( c ); //, facets );
+    	Ident id = this->add( c ); //, facets );
+    	return not( id ) ? NULL : id->value_of;
     } else {
     	//	What about the consistency of the old and new facets?
     	//	TO BE DONE!
-    	return id;
+    	return id->value_of;
     }
 }
 

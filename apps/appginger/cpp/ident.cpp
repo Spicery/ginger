@@ -27,7 +27,7 @@ IdentClass::IdentClass( const std::string & nm ) : //, const FacetSet * facets )
 {
 }
 
-Ident identNewGlobal( const std::string nm ) { //, const FacetSet * facets ) {
-	IdentClass * id = new IdentClass( nm ); //, facets );
+Ident identNewGlobal( const std::string nm ) {
+	IdentClass * id = new IdentClass( nm );
 	return shared< IdentClass >( id );
 }

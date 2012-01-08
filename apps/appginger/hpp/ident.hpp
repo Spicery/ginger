@@ -39,12 +39,12 @@ public:
 	const std::string & getNameString() const { return this->name_data; }
 	
 public:
-	IdentClass( const std::string & nm ); /*, const FacetSet * facets );*/	//	Global
+	IdentClass( const std::string & nm ); 
 };
 
 typedef shared< IdentClass > Ident;
 
-Ident identNewGlobal( const std::string nm ); /*, const FacetSet * facets );*/
+Ident identNewGlobal( const std::string nm );
 
 #endif
 

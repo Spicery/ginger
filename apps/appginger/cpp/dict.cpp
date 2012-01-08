@@ -40,8 +40,8 @@ Ident DictClass::lookup( const std::string & s ) {
 	return it == this->table.end() ? shared< IdentClass >() : it->second;
 }
 
-Ident DictClass::add( const std::string & s ) { //, const FacetSet * facets ) {
-	Ident id = identNewGlobal( s ); //, facets );
+Ident DictClass::add( const std::string & s ) { 
+	Ident id = identNewGlobal( s ); 
     return this->table[ s ] = id;
 }
 
@@ -49,10 +49,10 @@ void DictClass::remove( const std::string & s ) {
 	this->table.erase( s );
 }
 
-Ident DictClass::lookup_or_add( const std::string & c ) { //, const FacetSet * facets ) {
+Ident DictClass::lookup_or_add( const std::string & c ) {
     Ident id = this->lookup( c );
 	if ( not id ) {
-    	return this->add( c ); //, facets );
+    	return this->add( c ); 
     } else {
     	return id;
     }

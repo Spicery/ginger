@@ -23,7 +23,7 @@
 #include <string>
 #include <vector>
 #include <utility>
-#include "dict.hpp"
+//#include "dict.hpp"
 #include "ident.hpp"
 #include "valof.hpp"
 
@@ -46,10 +46,12 @@ public:
 
 class Package {
 friend class GarbageCollect;	//	I would like to get rid of this soon.
+friend class ScanPkg;
 protected:
 	PackageManager * 					pkgmgr;
 	const std::string					title;
-	DictClass							dict;
+	//DictClass							dict;
+	std::map< std::string, Ident > 		table;
 
 public:	//	Should be private.
 	std::map< std::string, Package * > 	unqualifiedResolutions;
@@ -57,18 +59,26 @@ public:	//	Should be private.
 	
 public:
 	virtual void loadIfNeeded() = 0;
+	
+private:	
+	Ident lookup( const std::string & c );
+	void remove( const std::string & c );
+	Ident lookup_or_add( const std::string & c );
+public:
+	void reset();
+	Ident add( const std::string & c ); 
+
 
 public:
 	MachineClass * getMachine() { return this->pkgmgr->vm; }
 	Package * getPackage( const std::string title );
-	Ident add( const std::string & c ); //, const FacetSet * facets );
 	Valof * valof( const std::string & c );
 	Ident forwardDeclare( const std::string & c );
 	void retractForwardDeclare( const std::string & c );
 	const std::string & getTitle() { return this->title; }
 	
 public:
-	void reset() { this->dict.reset(); }
+	//void reset() { this->dict.reset(); }
 	Valof * fetchDefinitionValof( const std::string & c ); //, const FacetSet * facets );
 	Valof * fetchAbsoluteValof( const std::string & c );
 
@@ -78,8 +88,7 @@ protected:
 public:
 	Package( PackageManager * pkgmgr, const std::string title ) :
 		pkgmgr( pkgmgr ),
-		title( title ),
-		dict()
+		title( title )
 	{
 	}
 	

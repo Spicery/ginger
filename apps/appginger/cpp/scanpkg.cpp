@@ -16,44 +16,19 @@
     along with AppGinger.  If not, see <http://www.gnu.org/licenses/>.
 \******************************************************************************/
 
+#include "scanpkg.hpp"
 
-#include "dict.hpp"
-
-using namespace std;
-
-void DictClass::reset() {
-	for (
-		map< string, Ident >::iterator it = this->table.begin();
-		it != this->table.end();
-	) {
-		Ident id = it->second;
-		if ( id->value_of->valof == SYS_UNDEF ) {
-			this->table.erase( it++ );
-		} else {
-			++it;
-		}
-	}
+Ref * ScanPkg::next() {
+	if ( it == pkg->table.end() ) return static_cast< Ref * >( 0 );
+	this->var = (*it).first;	//	debug
+	Ident id = (*it).second;
+	++it;
+	return &id->value_of->valof;
 }
 
-Ident DictClass::lookup( const std::string & s ) {
-	std::map< std::string, Ident >::iterator it = this->table.find( s );
-	return it == this->table.end() ? shared< IdentClass >() : it->second;
+ScanPkg::ScanPkg( Package * d ) : 
+	pkg( d ),
+	it( d->table.begin() )
+{
 }
 
-Ident DictClass::add( const std::string & s ) { 
-	Ident id = identNewGlobal( s ); 
-    return this->table[ s ] = id;
-}
-
-void DictClass::remove( const std::string & s ) {
-	this->table.erase( s );
-}
-
-Ident DictClass::lookup_or_add( const std::string & c ) {
-    Ident id = this->lookup( c );
-	if ( not id ) {
-    	return this->add( c ); 
-    } else {
-    	return id;
-    }
-}

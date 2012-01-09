@@ -16,14 +16,17 @@
     along with AppGinger.  If not, see <http://www.gnu.org/licenses/>.
 \******************************************************************************/
 
-#include "syssymbol.hpp"
+#include <set>
 #include <map>
 #include <string>
 #include <iostream>
+
 #include "key.hpp"
 #include "mishap.hpp"
 #include "misclayout.hpp"
 #include "stringlayout.hpp"
+#include "syssymbol.hpp"
+
 using namespace std;
 
 /*

@@ -28,7 +28,7 @@
 #include "misclayout.hpp"
 #include "vectorlayout.hpp"
 #include "classlayout.hpp"
-#include "scandict.hpp"
+#include "scanpkg.hpp"
 #include "machine.hpp"
 #include "heapcrawl.hpp"
 #include "cagecrawl.hpp"
@@ -346,8 +346,7 @@ private:
 		PackageManager * pmgr = this->vm->package_mgr_aptr.get();
 		for ( map< string, Package * >::iterator it = pmgr->packages.begin(); it != pmgr->packages.end(); ++it ) {
 			Package * p = it->second;
-			DictClass & d = p->dict;
-			ScanDict scanner( &d );
+			ScanPkg scanner( p );
 			for (;;) {
 				Ref * p = scanner.next();
 				if ( not p ) break;

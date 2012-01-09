@@ -33,7 +33,6 @@
 #include "command.hpp"
 #include "mishap.hpp"
 
-
 #include "common.hpp"
 #include "package.hpp"
 #include "sys.hpp"
@@ -42,6 +41,7 @@
 #include "rcep.hpp"
 
 #define FETCHGNX ( INSTALL_TOOL "/fetchgnx" )
+#define OPTION_X 1
 
 //#define DBG_PACKAGE
 
@@ -79,6 +79,7 @@ Package * PackageManager::getPackage( std::string title ) {
 	}
 }
 
+
 void PackageManager::reset() {
 	for ( 
 		map< string, class Package * >::iterator it = this->packages.begin();
@@ -93,17 +94,15 @@ Package * Package::getPackage( std::string title ) {
 	return this->pkgmgr->getPackage( title );
 }
 
-//	Additions always happen in the dictionary of the package itself.
-//	However it is necessary to check that there are no protected imports.
-Ident Package::add( const std::string & c ) { //, const FacetSet * facets ) {
-	return this->dict.add( c ); //, facets );
+Ident Package::add( const std::string & s ) { 
+	Ident id = identNewGlobal( s ); 
+    return this->table[ s ] = id;
 }
-
 
 
 Valof * Package::fetchAbsoluteValof( const std::string & c ) {
 	//cout << "Absolute fetch" << endl;
-	Ident id = this->dict.lookup( c );
+	Ident id = this->lookup( c );
 	if ( id ) {
 		return id->value_of;
 	} else {
@@ -114,7 +113,7 @@ Valof * Package::fetchAbsoluteValof( const std::string & c ) {
 
 
 Valof * Package::fetchDefinitionValof( const std::string & c ) { //, const FacetSet * facets ) {
-	Ident id = this->dict.lookup( c );
+	Ident id = this->lookup( c );
 	if ( not id ) {
     	Ident id = this->add( c ); //, facets );
     	return not( id ) ? NULL : id->value_of;
@@ -126,17 +125,50 @@ Valof * Package::fetchDefinitionValof( const std::string & c ) { //, const Facet
 }
 
 Ident Package::forwardDeclare( const std::string & c ) {
-	return this->dict.add( c ); //, fetchEmptyFacetSet() );
+	return this->add( c ); //, fetchEmptyFacetSet() );
 }
 
 void Package::retractForwardDeclare( const std::string & c ) {
-	return this->dict.remove( c );
+	return this->remove( c );
 }
 
 Valof * Package::valof( const std::string & c ) {
-	Ident id = this->dict.lookup( c );
+	Ident id = this->lookup( c );
 	if ( not id ) return NULL;
 	return id->value_of;
+}
+
+
+void Package::reset() {
+	for (
+		map< string, Ident >::iterator it = this->table.begin();
+		it != this->table.end();
+	) {
+		Ident id = it->second;
+		if ( id->value_of->valof == SYS_UNDEF ) {
+			this->table.erase( it++ );
+		} else {
+			++it;
+		}
+	}
+}
+
+Ident Package::lookup( const std::string & s ) {
+	std::map< std::string, Ident >::iterator it = this->table.find( s );
+	return it == this->table.end() ? shared< IdentClass >() : it->second;
+}
+
+void Package::remove( const std::string & s ) {
+	this->table.erase( s );
+}
+
+Ident Package::lookup_or_add( const std::string & c ) {
+    Ident id = this->lookup( c );
+	if ( not id ) {
+    	return this->add( c ); 
+    } else {
+    	return id;
+    }
 }
 
 

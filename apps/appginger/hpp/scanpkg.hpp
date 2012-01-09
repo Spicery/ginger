@@ -16,33 +16,28 @@
     along with AppGinger.  If not, see <http://www.gnu.org/licenses/>.
 \******************************************************************************/
 
-#ifndef DICT_HPP
-#define DICT_HPP
+#ifndef SCAN_PKG_HPP
+#define SCAN_PKG_HPP
 
-#include <map>
+#include "package.hpp"
+#include <string>
 
-#include "ident.hpp"
-#include "facet.hpp"
-
-
-class DictClass {
-friend class ScanDict;
+class ScanPkg {
 private:
-	std::map< std::string, Ident > table;
-    
-public:	
-	void reset();
-	Ident lookup( const std::string & c );
-	Ident add( const std::string & c ); 
-	void remove( const std::string & c );
-	Ident lookup_or_add( const std::string & c );
+	std::string var;	//	debug
+public:
+	std::string variable() { return this->var; }	//	debug
+	
+
+private:
+	Package * pkg;
+	std::map< std::string, Ident >::iterator it;
+
+public:
+	Ref * next();
 	
 public:
-	DictClass() : table() {}
+	ScanPkg( Package * d );
 };
 
-typedef DictClass *Dict;
-
-
 #endif
-

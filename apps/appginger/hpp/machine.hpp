@@ -23,7 +23,7 @@
 #include <iostream>
 #include <vector>
 
-#include "dict.hpp"
+//#include "dict.hpp"
 #include "codegen.hpp"
 #include "instruction_set.hpp"
 #include "heap.hpp"

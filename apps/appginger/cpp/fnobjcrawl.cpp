@@ -22,8 +22,6 @@
 
 #include "misclayout.hpp"
 
-
-
 Ref * FnObjCrawl::next() {
 	while ( this->pc < this->obj_Z1 ) {
 		if ( *types == '\0' ) {

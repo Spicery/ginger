@@ -21,13 +21,13 @@
 #include "ident.hpp"
 #include "key.hpp"
 
-IdentClass::IdentClass( const std::string & nm ) : //, const FacetSet * facets ) :
-	name_data( nm ),
-	value_of( new Valof() )
+IdentClass::IdentClass( class Package * parent, const std::string & nm ) : //, const FacetSet * facets ) :
+	parent( parent ),
+	name_data( nm )
 {
 }
 
-Ident identNewGlobal( const std::string nm ) {
-	IdentClass * id = new IdentClass( nm );
+Ident identNewGlobal( class Package * parent, const std::string nm ) {
+	IdentClass * id = new IdentClass( parent, nm );
 	return shared< IdentClass >( id );
 }

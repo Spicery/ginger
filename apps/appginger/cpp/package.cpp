@@ -95,7 +95,7 @@ Package * Package::getPackage( std::string title ) {
 }
 
 Ident Package::add( const std::string & s ) { 
-	Ident id = identNewGlobal( s ); 
+	Ident id = identNewGlobal( this, s ); 
     return this->table[ s ] = id;
 }
 
@@ -104,10 +104,10 @@ Valof * Package::fetchAbsoluteValof( const std::string & c ) {
 	//cout << "Absolute fetch" << endl;
 	Ident id = this->lookup( c );
 	if ( id ) {
-		return id->value_of;
+		return id->valueOf();
 	} else {
 		Ident id = this->absoluteAutoload( c );
-		return not( id ) ? NULL : id->value_of;
+		return not( id ) ? NULL : id->valueOf();
 	}
 }
 
@@ -116,11 +116,11 @@ Valof * Package::fetchDefinitionValof( const std::string & c ) { //, const Facet
 	Ident id = this->lookup( c );
 	if ( not id ) {
     	Ident id = this->add( c ); //, facets );
-    	return not( id ) ? NULL : id->value_of;
+    	return not( id ) ? NULL : id->valueOf();
     } else {
     	//	What about the consistency of the old and new facets?
     	//	TO BE DONE!
-    	return id->value_of;
+    	return id->valueOf();
     }
 }
 
@@ -135,7 +135,7 @@ void Package::retractForwardDeclare( const std::string & c ) {
 Valof * Package::valof( const std::string & c ) {
 	Ident id = this->lookup( c );
 	if ( not id ) return NULL;
-	return id->value_of;
+	return id->valueOf();
 }
 
 
@@ -145,7 +145,7 @@ void Package::reset() {
 		it != this->table.end();
 	) {
 		Ident id = it->second;
-		if ( id->value_of->valof == SYS_UNDEF ) {
+		if ( id->valueOf()->valof == SYS_UNDEF ) {
 			this->table.erase( it++ );
 		} else {
 			++it;
@@ -317,7 +317,7 @@ Ident OrdinaryPackage::absoluteAutoload( const std::string & c ) {
 		return id;		
 	} catch ( Ginger::Problem & e ) {
 		//	Undo the forward declaration.
-		if ( id->value_of->valof == SYS_UNDEF ) {
+		if ( id->valueOf()->valof == SYS_UNDEF ) {
 			//	The autoloading failed. Undo the declaration.
 			this->retractForwardDeclare( c );
 		}
@@ -402,7 +402,7 @@ Ident StandardLibraryPackage::absoluteAutoload( const std::string & c ) {
 		return shared< IdentClass >();
 	} else {
 		Ident id = this->add( c );
-		id->value_of->valof = r;
+		id->valueOf()->valof = r;
 		return id;
 	}
 }

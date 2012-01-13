@@ -23,7 +23,7 @@ Ref * ScanPkg::next() {
 	this->var = (*it).first;	//	debug
 	Ident id = (*it).second;
 	++it;
-	return &id->value_of->valof;
+	return &id->valueOf()->valof;
 }
 
 ScanPkg::ScanPkg( Package * d ) : 

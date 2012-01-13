@@ -50,13 +50,8 @@ friend class ScanPkg;
 protected:
 	PackageManager * 					pkgmgr;
 	const std::string					title;
-	//DictClass							dict;
 	std::map< std::string, Ident > 		table;
 
-public:	//	Should be private.
-	std::map< std::string, Package * > 	unqualifiedResolutions;
-	std::map< std::pair< std::string, std::string >, Package * > 	qualifiedResolutions;
-	
 public:
 	virtual void loadIfNeeded() = 0;
 	
@@ -78,7 +73,6 @@ public:
 	const std::string & getTitle() { return this->title; }
 	
 public:
-	//void reset() { this->dict.reset(); }
 	Valof * fetchDefinitionValof( const std::string & c ); //, const FacetSet * facets );
 	Valof * fetchAbsoluteValof( const std::string & c );
 

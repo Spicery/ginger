@@ -22,15 +22,12 @@
 #include "common.hpp"
 #include "key.hpp"
 
-class IdentClass;
-
 class Valof {
 public:
 	Ref valof;
-	IdentClass * info;	//	Compile time info, may be dumped.
 	
 public:
-	Valof( Ref r = SYS_UNDEF, IdentClass * info = NULL ) {}
+	Valof( Ref r = SYS_UNDEF ) {}
 };
 
 #endif

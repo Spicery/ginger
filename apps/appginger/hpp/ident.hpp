@@ -30,21 +30,25 @@
 
 class IdentClass {
 private:
+	Valof 	 			value_of;		//	used for global idents
+	
+private:
+	class Package * 	parent;
 	const std::string	name_data;
 
 public:
-	Valof * 			value_of;		//	used for global idents
+	Valof *				valueOf() { return &this->value_of; }
 
 public:
 	const std::string & getNameString() const { return this->name_data; }
 	
 public:
-	IdentClass( const std::string & nm ); 
+	IdentClass( class Package * parent, const std::string & nm ); 
 };
 
 typedef shared< IdentClass > Ident;
 
-Ident identNewGlobal( const std::string nm );
+Ident identNewGlobal( class Package * parent, const std::string nm );
 
 #endif
 

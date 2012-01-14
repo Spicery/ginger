@@ -27,7 +27,7 @@
 #include "common.hpp"
 
 
-class ValofClass {
+class Valof {
 public:
 	Ref					valof;
 	
@@ -36,17 +36,14 @@ private:
 	const std::string	name_data;
 
 public:
-	ValofClass *		valueOf() { return this; }
-
-public:
 	const std::string & getNameString() const { return this->name_data; }
 	
 public:
-	ValofClass( class Package * parent, const std::string & nm, Ref r = SYS_UNDEF ); 
+	Valof( class Package * parent, const std::string & nm, Ref r = SYS_UNDEF ) :
+		valof( r ),
+		parent( parent ),
+		name_data( nm )
+	{}
 };
-
-typedef class ValofClass Valof;
-
-typedef ValofClass * Ident;
 
 #endif

@@ -21,7 +21,7 @@
 Ref * ScanPkg::next() {
 	if ( it == pkg->table.end() ) return static_cast< Ref * >( 0 );
 	this->var = (*it).first;	//	debug
-	ValofClass * id = (*it).second;
+	Valof * id = (*it).second;
 	++it;
 	return &id->valof;
 }

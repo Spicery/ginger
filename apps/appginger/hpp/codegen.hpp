@@ -34,7 +34,7 @@
 #include "vident.hpp"
 #include "functor.hpp"
 #include "cmp.hpp"
-//#include "ident.hpp"
+#include "valof.hpp"
 
 class MachineClass;
 typedef MachineClass * Machine;

@@ -95,7 +95,7 @@ Package * Package::getPackage( std::string title ) {
 }
 
 Valof * Package::add( const std::string & s ) { 
-    return this->table[ s ] = new ValofClass( this, s );
+    return this->table[ s ] = new Valof( this, s );
 }
 
 

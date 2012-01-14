@@ -31,7 +31,7 @@ public:
 
 private:
 	Package * pkg;
-	std::map< std::string, Ident >::iterator it;
+	std::map< std::string, Valof * >::iterator it;
 
 public:
 	Ref * next();

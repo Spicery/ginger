@@ -34,7 +34,7 @@
 #include "vident.hpp"
 #include "functor.hpp"
 #include "cmp.hpp"
-#include "ident.hpp"
+//#include "ident.hpp"
 
 class MachineClass;
 typedef MachineClass * Machine;
@@ -193,7 +193,6 @@ private:
 	void compileQueryNext( Gnx query, LabelClass * contn );
 	void compileQueryIfSo( Gnx query, LabelClass * dst, LabelClass * contn );
 	void compileFor( Gnx query, Gnx body, LabelClass * contn );
-	Ident newTmpIdent();
 	void continueFrom( LabelClass * contn );
 	void compileIfTest( bool sense, Gnx mnx, LabelClass * dst, LabelClass * contn );
 	void compileComparison( bool sense, const VIdent & vid0, CMP_OP cmp_op,	const VIdent & vid1, LabelClass * dst, LabelClass * contn );	

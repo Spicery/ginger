@@ -21,9 +21,9 @@
 Ref * ScanPkg::next() {
 	if ( it == pkg->table.end() ) return static_cast< Ref * >( 0 );
 	this->var = (*it).first;	//	debug
-	Ident id = (*it).second;
+	ValofClass * id = (*it).second;
 	++it;
-	return &id->valueOf()->valof;
+	return &id->valof;
 }
 
 ScanPkg::ScanPkg( Package * d ) : 

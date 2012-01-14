@@ -21,13 +21,32 @@
 
 #include "common.hpp"
 #include "key.hpp"
+#include <string>
+#include <memory>
 
-class Valof {
+#include "common.hpp"
+
+
+class ValofClass {
 public:
-	Ref valof;
+	Ref					valof;
+	
+private:
+	class Package * 	parent;
+	const std::string	name_data;
+
+public:
+	ValofClass *		valueOf() { return this; }
+
+public:
+	const std::string & getNameString() const { return this->name_data; }
 	
 public:
-	Valof( Ref r = SYS_UNDEF ) {}
+	ValofClass( class Package * parent, const std::string & nm, Ref r = SYS_UNDEF ); 
 };
+
+typedef class ValofClass Valof;
+
+typedef ValofClass * Ident;
 
 #endif

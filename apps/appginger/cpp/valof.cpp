@@ -16,39 +16,13 @@
     along with AppGinger.  If not, see <http://www.gnu.org/licenses/>.
 \******************************************************************************/
 
-#ifndef IDENT_HPP
-#define IDENT_HPP
+#include <string>
 
-#include "shared.hpp"
 #include "valof.hpp"
 
-#include <string>
-#include <memory>
-
-#include "common.hpp"
-
-
-class IdentClass {
-private:
-	Valof 	 			value_of;		//	used for global idents
-	
-private:
-	class Package * 	parent;
-	const std::string	name_data;
-
-public:
-	Valof *				valueOf() { return &this->value_of; }
-
-public:
-	const std::string & getNameString() const { return this->name_data; }
-	
-public:
-	IdentClass( class Package * parent, const std::string & nm ); 
-};
-
-typedef shared< IdentClass > Ident;
-
-Ident identNewGlobal( class Package * parent, const std::string nm );
-
-#endif
-
+ValofClass::ValofClass( class Package * parent, const std::string & nm, Ref r ) : 
+	valof( r ),
+	parent( parent ),
+	name_data( nm )
+{
+}

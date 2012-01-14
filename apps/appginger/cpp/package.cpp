@@ -94,37 +94,34 @@ Package * Package::getPackage( std::string title ) {
 	return this->pkgmgr->getPackage( title );
 }
 
-Ident Package::add( const std::string & s ) { 
-	Ident id = identNewGlobal( this, s ); 
-    return this->table[ s ] = id;
+Valof * Package::add( const std::string & s ) { 
+    return this->table[ s ] = new ValofClass( this, s );
 }
 
 
 Valof * Package::fetchAbsoluteValof( const std::string & c ) {
 	//cout << "Absolute fetch" << endl;
-	Ident id = this->lookup( c );
+	Valof * id = this->lookup( c );
 	if ( id ) {
-		return id->valueOf();
+		return id;
 	} else {
-		Ident id = this->absoluteAutoload( c );
-		return not( id ) ? NULL : id->valueOf();
+		Valof * id = this->absoluteAutoload( c );
+		return id;
 	}
 }
 
 
-Valof * Package::fetchDefinitionValof( const std::string & c ) { //, const FacetSet * facets ) {
-	Ident id = this->lookup( c );
+Valof * Package::fetchDefinitionValof( const std::string & c ) { 
+	Valof * id = this->lookup( c );
 	if ( not id ) {
-    	Ident id = this->add( c ); //, facets );
-    	return not( id ) ? NULL : id->valueOf();
+    	Valof * id = this->add( c );
+    	return id;
     } else {
-    	//	What about the consistency of the old and new facets?
-    	//	TO BE DONE!
-    	return id->valueOf();
+    	return id;
     }
 }
 
-Ident Package::forwardDeclare( const std::string & c ) {
+Valof * Package::forwardDeclare( const std::string & c ) {
 	return this->add( c ); //, fetchEmptyFacetSet() );
 }
 
@@ -133,19 +130,18 @@ void Package::retractForwardDeclare( const std::string & c ) {
 }
 
 Valof * Package::valof( const std::string & c ) {
-	Ident id = this->lookup( c );
-	if ( not id ) return NULL;
-	return id->valueOf();
+	Valof * id = this->lookup( c );
+	return id;
 }
 
 
 void Package::reset() {
 	for (
-		map< string, Ident >::iterator it = this->table.begin();
+		map< string, Valof * >::iterator it = this->table.begin();
 		it != this->table.end();
 	) {
-		Ident id = it->second;
-		if ( id->valueOf()->valof == SYS_UNDEF ) {
+		Valof * id = it->second;
+		if ( id->valof == SYS_UNDEF ) {
 			this->table.erase( it++ );
 		} else {
 			++it;
@@ -153,17 +149,17 @@ void Package::reset() {
 	}
 }
 
-Ident Package::lookup( const std::string & s ) {
-	std::map< std::string, Ident >::iterator it = this->table.find( s );
-	return it == this->table.end() ? shared< IdentClass >() : it->second;
+Valof * Package::lookup( const std::string & s ) {
+	std::map< std::string, Valof * >::iterator it = this->table.find( s );
+	return it == this->table.end() ? NULL : it->second;
 }
 
 void Package::remove( const std::string & s ) {
 	this->table.erase( s );
 }
 
-Ident Package::lookup_or_add( const std::string & c ) {
-    Ident id = this->lookup( c );
+Valof * Package::lookup_or_add( const std::string & c ) {
+    Valof * id = this->lookup( c );
 	if ( not id ) {
     	return this->add( c ); 
     } else {
@@ -231,7 +227,7 @@ static void fRenderMnx( int fd, shared< Ginger::Mnx > mnx ) {
 	output.flush();
 }
 
-Ident OrdinaryPackage::absoluteAutoload( const std::string & c ) {
+Valof * OrdinaryPackage::absoluteAutoload( const std::string & c ) {
 	syslog( LOG_INFO, "Autoloading is_absolute_ref %s", c.c_str() );
 	
 	Ginger::Command cmd( FETCHGNX );
@@ -307,7 +303,7 @@ Ident OrdinaryPackage::absoluteAutoload( const std::string & c ) {
 	
 		
 	//	Now we establish a forward declaration - to be justified by the success.
-	Ident id = this->forwardDeclare( c );
+	Valof * id = this->forwardDeclare( c );
 
 	try {
 		//	And we load the stream.
@@ -317,7 +313,7 @@ Ident OrdinaryPackage::absoluteAutoload( const std::string & c ) {
 		return id;		
 	} catch ( Ginger::Problem & e ) {
 		//	Undo the forward declaration.
-		if ( id->valueOf()->valof == SYS_UNDEF ) {
+		if ( id->valof == SYS_UNDEF ) {
 			//	The autoloading failed. Undo the declaration.
 			this->retractForwardDeclare( c );
 		}
@@ -325,7 +321,7 @@ Ident OrdinaryPackage::absoluteAutoload( const std::string & c ) {
 	}
 	
 	//	No autoloading implemented yet - just fail.
-	return shared< IdentClass >();	
+	return NULL;
 }
 
 void OrdinaryPackage::loadIfNeeded() {
@@ -395,14 +391,14 @@ void OrdinaryPackage::loadIfNeeded() {
 *******************************************************************************/
 
 
-Ident StandardLibraryPackage::absoluteAutoload( const std::string & c ) {
+Valof * StandardLibraryPackage::absoluteAutoload( const std::string & c ) {
 	Ref r = makeSysFn( this->pkgmgr->vm->codegen(), c, SYS_UNDEF );
 	if ( r == SYS_UNDEF ) {
 		//	Doesn't match a system call. Fail.
-		return shared< IdentClass >();
+		return NULL;
 	} else {
-		Ident id = this->add( c );
-		id->valueOf()->valof = r;
+		Valof * id = this->add( c );
+		id->valof = r;
 		return id;
 	}
 }

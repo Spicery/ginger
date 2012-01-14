@@ -23,8 +23,6 @@
 #include <string>
 #include <vector>
 #include <utility>
-//#include "dict.hpp"
-#include "ident.hpp"
 #include "valof.hpp"
 
 class Package;
@@ -50,25 +48,25 @@ friend class ScanPkg;
 protected:
 	PackageManager * 					pkgmgr;
 	const std::string					title;
-	std::map< std::string, Ident > 		table;
+	std::map< std::string, Valof * > 		table;
 
 public:
 	virtual void loadIfNeeded() = 0;
 	
 private:	
-	Ident lookup( const std::string & c );
+	Valof * lookup( const std::string & c );
 	void remove( const std::string & c );
-	Ident lookup_or_add( const std::string & c );
+	Valof * lookup_or_add( const std::string & c );
 public:
 	void reset();
-	Ident add( const std::string & c ); 
+	Valof * add( const std::string & c ); 
 
 
 public:
 	MachineClass * getMachine() { return this->pkgmgr->vm; }
 	Package * getPackage( const std::string title );
 	Valof * valof( const std::string & c );
-	Ident forwardDeclare( const std::string & c );
+	Valof * forwardDeclare( const std::string & c );
 	void retractForwardDeclare( const std::string & c );
 	const std::string & getTitle() { return this->title; }
 	
@@ -77,7 +75,7 @@ public:
 	Valof * fetchAbsoluteValof( const std::string & c );
 
 protected:	
-	virtual Ident absoluteAutoload( const std::string & c ) = 0;
+	virtual Valof * absoluteAutoload( const std::string & c ) = 0;
 
 public:
 	Package( PackageManager * pkgmgr, const std::string title ) :
@@ -96,7 +94,7 @@ private:
 public:
 	void loadIfNeeded();
 protected:
-	virtual Ident absoluteAutoload( const std::string & c );
+	virtual Valof * absoluteAutoload( const std::string & c );
 	
 public:
 	OrdinaryPackage( PackageManager * pkgmgr, const std::string title );
@@ -107,7 +105,7 @@ class StandardLibraryPackage : public Package {
 public:
 	void loadIfNeeded();
 protected:
-	virtual Ident absoluteAutoload( const std::string & c );
+	virtual Valof * absoluteAutoload( const std::string & c );
 
 public:
 	StandardLibraryPackage( PackageManager * pkgmgr, std::string title ) :

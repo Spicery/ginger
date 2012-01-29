@@ -19,13 +19,14 @@
 #ifndef VALOF_HPP
 #define VALOF_HPP
 
+//	For Ref
 #include "common.hpp"
+
+//	For SYS_UNDEF
 #include "key.hpp"
+
+//	For std::string
 #include <string>
-#include <memory>
-
-#include "common.hpp"
-
 
 class Valof {
 public:

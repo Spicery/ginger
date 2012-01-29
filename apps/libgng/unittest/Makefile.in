@@ -5,7 +5,7 @@ CXXFLAGS=-g -I../hpp -L/opt/local/lib -L../cpp -I/opt/local/include -I/usr/local
 
 CFLAGS=-Wmissing-prototypes 
 
-OBJS=testlibgng.o
+OBJS=testlibgng.o saxtest.o
 
 all: testlibgng
 

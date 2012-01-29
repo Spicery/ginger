@@ -34,9 +34,56 @@ public:
 	virtual ~SaxHandler() {}
 };
 
+class SaxInput {
+public:
+	virtual void mustReadChar( const char ch ) = 0;
+	virtual bool tryReadChar( const char ch ) = 0;
+	virtual char nextChar() = 0;
+	virtual char peekChar() = 0;
+	virtual void pushChar( const char ch ) = 0;
+	virtual bool isEof() = 0;
+public:
+	virtual ~SaxInput() {}
+};
+
+class IStreamSaxInput : public SaxInput {
+private: 
+	std::istream & input;
+	
+public:
+	virtual void mustReadChar( const char ch );
+	virtual bool tryReadChar( const char ch );
+	virtual char nextChar();
+	virtual char peekChar();
+	virtual void pushChar( const char ch );
+	virtual bool isEof();
+	
+public:
+	IStreamSaxInput( std::istream & input );
+	virtual ~IStreamSaxInput() {}
+};
+
+class FileStreamSaxInput : public SaxInput {
+private: 
+	FILE * file;
+	
+public:
+	virtual void mustReadChar( const char ch );
+	virtual bool tryReadChar( const char ch );
+	virtual char nextChar();
+	virtual char peekChar();
+	virtual void pushChar( const char ch );
+	virtual bool isEof();
+	
+public:
+	FileStreamSaxInput( FILE * file );
+	virtual ~FileStreamSaxInput() {}
+};
+
 class SaxParser {
 private:
-	std::istream & input;
+	std::auto_ptr< SaxInput > input;
+	//std::istream & input;
 	SaxHandler & parent;
 	int level;
 	bool finished;
@@ -46,15 +93,24 @@ private:
 	void eatWhiteSpace();
 	void processAttributes( std::map< std::string, std::string > & attrs );
 	void readAttributeValue( std::string & attr );
-	void mustReadChar( const char ch );
-	char nextChar();
-	char peekChar();
+	//void mustReadChar( const char ch );
+	//char nextChar();
+	//char peekChar();
 	
 public:
 	void read();
 	void readElement();
 	SaxParser( std::istream & in, SaxHandler & p ) :
-		input( in ),
+		input( new IStreamSaxInput( in ) ),
+		//input( in ),
+		parent( p ),
+		level( 0 ),
+		finished( false )
+	{
+	}
+	SaxParser( FILE * in, SaxHandler & p ) :
+		input( new FileStreamSaxInput( in ) ),
+		//input( in ),
 		parent( p ),
 		level( 0 ),
 		finished( false )

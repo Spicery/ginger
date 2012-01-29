@@ -21,6 +21,7 @@
 #include <string>
 #include <map>
 #include <sstream>
+#include <cstdio>
 
 #include "sax.hpp"
 #include "mishap.hpp"
@@ -30,37 +31,104 @@
 //#include "facet.hpp"
 
 
-//- SAX Parser -----------------------------------------------------------------
 
 namespace Ginger {
 
 using namespace std;
 
-char SaxParser::nextChar() {
-	char c;
-	if ( not input.get( c ) ) throw Mishap( "Cannot read from file (unexpected end?)" );
-	return c;
+//- IStreamSaxInput ------------------------------------------------------------
+
+
+IStreamSaxInput::IStreamSaxInput( std::istream & input ) : input( input ) { 	
+	this->input >> noskipws; 
 }
 
-char SaxParser::peekChar() {
-	char c = input.peek();
-	if ( not input ) throw Mishap( "Cannot read from file (unexpected end?)" );
-	return c;
-}
 
-void SaxParser::mustReadChar( const char ch_want ) {
+void IStreamSaxInput::mustReadChar( const char ch_want ) {
 	char c_got;
 	if ( not ( input.get( c_got ) ) ) throw Mishap( "Cannot read from file (unexpected end?)" );
 	if ( c_got != ch_want ) throw Mishap( "Unexpected character" ).culprit( "Wanted", ch_want ).culprit( "Received", c_got );
 }
 
-void SaxParser::eatWhiteSpace() {
-	char ch;
-	while ( input.get( ch ) && isspace( ch ) ) {
-		//	Skip.
-	}
-	//cout << "Ungetting '" << ch << "'" << endl;
+bool IStreamSaxInput::tryReadChar( const char ch_want ) {
+	char c_got;
+	if ( not ( input.get( c_got ) ) ) return false;
+	if ( c_got != ch_want ) input.putback( c_got );
+	return c_got == ch_want;
+}
+
+char IStreamSaxInput::nextChar() {
+	char c;
+	if ( not input.get( c ) ) throw Mishap( "Cannot read from file (unexpected end?)" );
+	return c;		
+}
+
+char IStreamSaxInput::peekChar() {
+	char c = input.peek();
+	if ( not input ) throw Mishap( "Cannot read from file (unexpected end?)" );
+	return c;
+}
+
+void IStreamSaxInput::pushChar( const char ch ) {
 	input.putback( ch );
+}
+
+bool IStreamSaxInput::isEof() {
+	return input.eof();
+}
+
+
+//- FileStreamSaxInput ---------------------------------------------------------
+
+FileStreamSaxInput::FileStreamSaxInput( FILE * file ) : file( file ) {
+}
+
+void FileStreamSaxInput::mustReadChar( const char ch_want ) {
+	const int ch = fgetc( this->file );
+	if ( ch == EOF ) throw Mishap( "Cannot read from file (unexpected end?)" );
+	if ( ch != ch_want ) throw Mishap( "Unexpected character" ).culprit( "Wanted", ch_want ).culprit( "Received", (char)ch );
+}
+
+bool FileStreamSaxInput::tryReadChar( const char ch_want ) {
+	const int ch = fgetc( this->file );
+	if ( ch == EOF ) return false;
+	if ( ch != ch_want ) ungetc( ch, this->file );
+	return ch == ch_want;
+}
+
+char FileStreamSaxInput::nextChar() {
+	const int ch = fgetc( this->file );
+	if ( ch == EOF ) throw Mishap( "Cannot read from file (unexpected end?)" );
+	return ch;		
+}
+
+char FileStreamSaxInput::peekChar() {
+	const int ch = fgetc( this->file );
+	if ( ch == EOF ) throw Mishap( "Cannot read from file (unexpected end?)" );
+	ungetc( ch, this->file );
+	return ch;
+}
+
+void FileStreamSaxInput::pushChar( const char ch ) {
+	ungetc( ch, this->file );
+}
+
+bool FileStreamSaxInput::isEof() {
+	return feof( this->file ) != 0;
+}
+
+
+//- SAX Parser -----------------------------------------------------------------
+
+
+void SaxParser::eatWhiteSpace() {
+	for (;;) {
+		char ch = input->nextChar();
+		if ( not isspace( ch ) ) {
+			input->pushChar( ch );
+			break;
+		}
+	}
 }
 
 static bool is_name_char( const char ch ) {
@@ -68,23 +136,27 @@ static bool is_name_char( const char ch ) {
 }
 
 void SaxParser::readName( std::string & name ) {
-	char ch;
-	while ( (ch = nextChar()) && is_name_char( ch ) ) {
-		//std::cout << "pushing '" << ch << "'"<< endl;
+	for (;;) {
+		char ch = input->nextChar();
+		if ( not is_name_char( ch ) ) {
+			input->pushChar( ch );
+			break;
+		}
 		name.push_back( ch );
-		//std::cout << "name so far '" << name << "'" << endl;
 	}
-	input.putback( ch );
 }
 
 void SaxParser::readAttributeValue( std::string & attr ) {
-	this->mustReadChar( '\"' );
+	const char qch = input->nextChar();
+	if ( qch != '\'' && qch != '"' ) {
+		throw Mishap( "Needed quote" ).culprit( "Character received", qch );
+	}
 	for (;;) {
-		char ch = this->nextChar();
-		if ( ch == '\"' ) break;
+		const char ch = input->nextChar();
+		if ( ch == qch ) break;
 		if ( ch == '&' ) {
 			std::string esc;
-			while ( ch = this->nextChar(), ch != ';' ) {
+			while ( ch = input->nextChar(), ch != ';' ) {
 				//std::cout << "char " << ch << endl;
 				esc.push_back( ch );
 				if ( esc.size() > 4 ) {
@@ -117,14 +189,14 @@ void SaxParser::processAttributes(
 	//	Process attributes
 	for (;;) {
 		this->eatWhiteSpace();
-		char c = peekChar();
+		char c = input->peekChar();
 		if ( c == '/' || c == '>' ) {
 			break;
 		}
 		std::string key;
 		this->readName( key );
 		this->eatWhiteSpace();
-		this->mustReadChar( '=' );
+		input->mustReadChar( '=' );
 		this->eatWhiteSpace();
 		std::string value;
 		this->readAttributeValue( value );
@@ -134,49 +206,49 @@ void SaxParser::processAttributes(
 
 
 void SaxParser::read() {
-	this->input >> noskipws;
+	//this->input >> noskipws;
 	
 	this->eatWhiteSpace();
-	if ( this->input.eof() ) {
+	if ( input->isEof() ) {
 		if ( this->finished ) {
 			throw Mishap( "Unexpected end of file" );
 		}
 		this->finished = true;
 		return;
 	}
-	this->mustReadChar( '<' );
+	input->mustReadChar( '<' );
 		
-	char ch = nextChar();
+	char ch = input->nextChar();
 	if ( ch == '/' ) {
 		std::string end_tag;
 		this->readName( end_tag );
 		this->eatWhiteSpace();
-		this->mustReadChar( '>' );
+		input->mustReadChar( '>' );
 		this->parent.endTag( end_tag );
 		this->level -= 1;
 		return;
 	} else if ( ch == '!' ) {
-		if ( '-' != nextChar() || '-' != nextChar() ) throw Mishap( "Invalid XML comment syntax" );
-		char ch = nextChar();
+		if ( '-' != input->nextChar() || '-' != input->nextChar() ) throw Mishap( "Invalid XML comment syntax" );
+		char ch = input->nextChar();
 		for (;;) {
 			char prev_ch = ch;
-			ch = nextChar();
+			ch = input->nextChar();
 			if ( prev_ch == '-' && ch == '-' ) break;
 		}
-		if ( '>' != nextChar() ) throw Mishap( "Invalid XML comment syntax" );
+		if ( '>' != input->nextChar() ) throw Mishap( "Invalid XML comment syntax" );
 		this->read();
 		return;
 	} else if ( ch == '?' ) {
 		for (;;) {
 			char prev = ch;
-			ch = nextChar();
+			ch = input->nextChar();
 			if ( prev == '?' && ch == '>' ) break;
 		}
 		this->read();
 		return;
 	} else {
 		//cout << "Ungetting '" << ch << "'" << endl;
-		input.putback( ch );
+		input->pushChar( ch );
 	}
 	
 	std::string name;
@@ -188,9 +260,9 @@ void SaxParser::read() {
 	this->eatWhiteSpace();
 	
 	
-	ch = nextChar();
+	ch = input->nextChar();
 	if ( ch == '/' ) {
-		this->mustReadChar( '>' );
+		input->mustReadChar( '>' );
 		this->parent.startTag( name, attributes );
 		this->parent.endTag( name );
 		return;

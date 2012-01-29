@@ -36,15 +36,15 @@ int main( int argc, char ** argv ) {
 		out.open( argv[ 1 ] );
 	}
 	
-	runner.setOutputter( 
+	/*runner.setOutputter( 
 		new CppUnit::XmlOutputter( 
 			&runner.result(), 
 			( out.is_open() ? out : std::cerr )
 		) 
-	);
+	);*/
 		
 	// Run the tests.
-  	bool wasSucessful = runner.run();
+  	bool wasSucessful = runner.run("", false, true, false );
 
 	if ( out.is_open() ) {
 		out.close();

@@ -15,19 +15,34 @@ using namespace std;
 #include "role.hpp"
 #include "mishap.hpp"
 
+int Source::peekchar() {
+	const int ch = getc( this->file );
+	ungetc( ch, this->file );
+	return ch;
+}
 
-int ItemFactoryClass::peekchar() {
-	int c = getc( this->file );
-	ungetc( c, this->file );
-	return c;
+int Source::nextchar() {
+	const int ch = getc( this->file );
+	if ( ch == '\n' ) {
+		this->lineno += 1;
+	}
+	return ch;
+}
+
+void Source::pushchar( const int ch ) {
+	if ( ch == '\n' ) {
+		this->lineno -= 1;
+	}
+	ungetc( ch, this->file );
 }
 
 int ItemFactoryClass::trychar( int ch ) {
-    int c = getc( this->file );
+    const int c = this->nextchar();
     if ( c == ch ) {
         return 1;
     } else {
-        ungetc( c, this->file );
+    	this->pushchar( c );
+        //ungetc( c, this->file );
         return 0;
     }
 }
@@ -39,38 +54,6 @@ void ItemFactoryClass::drop() {
 void ItemFactoryClass::unread() {
     this->peeked = true;
 }
-
-/*std::string ItemFactoryClass::readURL() {
-    int ch;
-
-    if ( this->peeked ) {
-        throw Ginger::Mishap( "Trying to read URL after pushback" );
-    }
-    
-    //  Get rid of white space and comments.
-    for(;;) {
-        ch = getc( this->file );
-        if ( isspace( ch ) ) continue;
-        if ( ch == '#' || ( ch == '/' && this->trychar( '/' ) ) ) {
-            do
-                ch = getc( this->file );
-            while ( ch != '\n' && ch != '\r' );
-            continue;
-        }
-        break;
-    }
-	
-    this->text.clear();
-    this->text.push_back( (char)ch );
-
-    for(;;) {
-        ch = getc( this->file );
-        if ( isspace( ch ) ) break;
-        this->text.push_back( (char)ch );
-	}		
-	
-	return text;
-}*/
 
 enum CharType {
 	MiscCharType,
@@ -118,11 +101,11 @@ bool isSignCharType( const char ch ) {
 int ItemFactoryClass::eatsWhiteSpaceAndComments() {
 	int ch;
     for(;;) {
-        ch = getc( this->file );
+        ch = this->nextchar();
         if ( isspace( ch ) ) continue;
         if ( ch == '#' || ( ch == '/' && this->trychar( '/' ) ) ) {
             do
-                ch = getc( this->file );
+                ch = this->nextchar();
             while ( ch != '\n' && ch != '\r' );
         } else {
 	        break;
@@ -144,9 +127,9 @@ void ItemFactoryClass::readAtDigitOrMinus( int ch ) {
 	//
 	do {
 		this->text.push_back( (char)ch );
-		ch = getc( this->file );
+		ch = this->nextchar();
 	} while ( isdigit( ch ) );
-	ungetc( ch, this->file );
+	this->pushchar( ch );
 	if ( this->text.size() == 1 && this->text[ 0 ] == '-' ) {
 		this->item = this->itemMap.lookup( this->text );
 	} else {
@@ -163,9 +146,9 @@ void ItemFactoryClass::readAtAlphaOrUnderbar( int ch ) {
 	//	
 	do {
 		this->text.push_back( ch );
-		ch = getc( this->file );
+		ch = this->nextchar();
 	} while ( isalnum( ch ) || ch == '_' );
-	ungetc( ch, this->file );
+	this->pushchar( ch );
 	this->item = this->itemMap.lookup( this->text );
 	if ( this->item == NULL ) {
 		Item it = this->item = this->spare;
@@ -180,9 +163,9 @@ void ItemFactoryClass::readAtQuoteCharType( int ch ) {
 	//	Strings and Character sequences
 	//
 	int open_quote = ch;
-	while ( ch = getc( this->file ), ch != open_quote && ch != '\n' ) {
+	while ( ch = this->nextchar(), ch != open_quote && ch != '\n' ) {
 		if ( ch == '\\' ) {
-			ch = getc( this->file );
+			ch = this->nextchar();
 			if ( ch == '\\' ) {
 				ch = '\\';
 			} else if ( ch == '"' ) {
@@ -199,7 +182,7 @@ void ItemFactoryClass::readAtQuoteCharType( int ch ) {
 				//	HTML entity.
 				string entity;
 				for (;;) {
-					ch = getc( this->file );
+					ch = this->nextchar();
 					if ( ch == ';' ) break;
 					if ( isalpha( ch ) ) {
 						entity.push_back( (char)ch );
@@ -255,8 +238,8 @@ void ItemFactoryClass::readAtSeparatorCharType( int ch ) {
 void ItemFactoryClass::readAtBracketCharType( int ch ) {
 	do {
 		this->text.push_back( ch );
-	} while ( ( ch = getc( this->file ) ) == '%' );
-	ungetc( ch, this->file );
+	} while ( ( ch = this->nextchar() ) == '%' );
+	this->pushchar( ch );
 	this->item = this->itemMap.lookup( this->text );
 	if ( this->item == NULL ) {
 		throw Ginger::Mishap( "Invalid punctuation token" ); 
@@ -266,11 +249,11 @@ void ItemFactoryClass::readAtBracketCharType( int ch ) {
 void ItemFactoryClass::readAtBracketDecorationCharType( int ch ) {
 	do {
 		this->text.push_back( ch );
-	} while ( ( ch = getc( this->file ) ) == '%' );
+	} while ( ( ch = this->nextchar() ) == '%' );
 	if ( strchr( "()[]{}", ch ) ) {    	
 		this->text.push_back( ch );
 	} else {
-		ungetc( ch, this->file );
+		this->pushchar( ch );
 	}
 	this->item = this->itemMap.lookup( this->text );
 	if ( this->item == NULL ) {
@@ -286,11 +269,11 @@ void ItemFactoryClass::readAtSelfGlueCharType( int ch ) {
 	//
 	this->text.push_back( ch );
 	for (;;) {
-		char nextch = getc( this->file );
+		const char nextch = this->nextchar();
 		if ( nextch == ch ) {
 			this->text.push_back( ch );
 		} else {
-			ungetc( nextch, this->file );
+			this->pushchar( nextch );
 			break;
 		}
 	}
@@ -315,9 +298,9 @@ void ItemFactoryClass::readAtSignCharType( int ch ) {
 	do {
 		prev_ch = ch;
 		this->text.push_back( ch );
-		ch = getc( this->file );
+		ch = this->nextchar();
 	} while ( isSignCharType( ch ) && not( prev_ch == '>' && ch == '<') );
-	ungetc( ch, this->file );
+	this->pushchar( ch );
 	it = this->item = this->itemMap.lookup( this->text );
 	if ( it == NULL ) {
 		throw Ginger::Mishap( "Invalid sign (combination of special characters)" ).culprit( "Sign", this->text );
@@ -373,18 +356,16 @@ Item ItemFactoryClass::peek() {
     return it;
 }
 
+void Source::resetSource() {
+	FILE *f = this->file;
+	int fd = fileno( f );
+	int fd1 = dup( fd );
+	fclose( f );
+	this->file = fdopen( fd1, "r" );
+}
+
 void ItemFactoryClass::reset() {
-
-	{
-	    //	Need to zap the input buffer.  This is a bit laborious
-	    //	but the best I could find in 10 minutes ...
-	    FILE *f = this->file;
-	    int fd = fileno( f );
-	    int fd1 = dup( fd );
-	    fclose( f );
-	    this->file = fdopen( fd1, "r" );
-	}
-
+	this->resetSource();
 	this->peeked = false;
 	this->text.clear();
 }

@@ -21,6 +21,7 @@ private:
 
 private:
 	Node prefixProcessing();
+	Node prefixProcessingCore();
 	Node postfixProcessing( Node lhs, Item item, int prec );
 	Node readStmntsCheck( TokType fnc );
 	Node readStmnts();

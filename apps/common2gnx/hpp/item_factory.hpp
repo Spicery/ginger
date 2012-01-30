@@ -8,12 +8,27 @@
 #include "item.hpp"
 #include "item_map.hpp"
 
+class Source {
+private:
+	FILE *				file;
+	int					lineno;
+	
+public:
+	int peekchar();
+	int nextchar();
+	void pushchar( const int ch );
+	void resetSource();
+	int lineNumber() { return this->lineno; }
+	
+public:
+	Source( FILE * file ) : file( file ), lineno( 1 ) {}
+};
 
-class ItemFactoryClass {
+class ItemFactoryClass : public Source {
 
 public:
 	ItemMap				itemMap;
-	FILE				*file;
+	//FILE				*file;
     bool            	peeked;
     std::string			text;
 	Item				item;
@@ -39,14 +54,14 @@ public:
 	void unread();
 	void drop();
 	Item peek();
-	int peekchar();
+	//int peekchar();
 	void reset();
 	
 public:
 
 	ItemFactoryClass( FILE * f, const bool cstyle ) :
+		Source( f ),
 		itemMap( cstyle ),
-		file( f ),
 		peeked( false ),
 		item( NULL ),
 		spare( new ItemClass() )

@@ -49,18 +49,6 @@ static Node makeIndex( Node lhs, Node rhs ) {
 	return index.build();
 }
 
-/*static void pushAbsent( NodeFactory & f ) {
-	f.start( "constant" );
-	f.put( "type", "absent" );
-	f.put( "value", "absent" );
-	f.end();
-}
-
-static void pushEmpty( NodeFactory & f ) {
-	f.start( "seq" );
-	f.end();
-}*/
-
 static void pushStringConstant( NodeFactory & f, const string & s ) {
 	f.start( "constant" );
 	f.put( "type", "string" );
@@ -714,6 +702,17 @@ Node ReadStateClass::readVarVal( TokType fnc ) {
 }
 
 Node ReadStateClass::prefixProcessing() {
+	ItemFactory ifact = this->item_factory;
+	const int start = ifact->lineNumber();
+	Node node = this->prefixProcessingCore();
+	const int end = ifact->lineNumber();
+	stringstream span;
+	span << start << ";" << end;
+	node->putAttribute( "span", span.str() );
+	return node;
+}
+
+Node ReadStateClass::prefixProcessingCore() {
 	ItemFactory ifact = this->item_factory;
 	Item item = ifact->read();
 	

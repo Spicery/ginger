@@ -152,7 +152,7 @@ void SaxParser::readAttributeValue( std::string & attr ) {
 		throw Mishap( "Needed quote" ).culprit( "Character received", qch );
 	}
 	for (;;) {
-		const char ch = input->nextChar();
+		char ch = input->nextChar();
 		if ( ch == qch ) break;
 		if ( ch == '&' ) {
 			std::string esc;

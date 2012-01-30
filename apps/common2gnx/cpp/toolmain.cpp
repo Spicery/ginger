@@ -213,6 +213,11 @@ void ToolMain::parse( FILE * in ) {
 		//cerr << "read expr" << endl;
 		if ( not n ) return;
 		//cerr << "about to render" << endl;
+		
+		if ( not this->use_stdin ) {
+			n->putAttribute( "source.file", this->input_file_name );
+		}
+		
 		n->render( cout );
 		//cerr << "rendered" << endl;
 		cout << endl;

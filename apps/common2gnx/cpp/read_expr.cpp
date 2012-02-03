@@ -707,7 +707,10 @@ Node ReadStateClass::prefixProcessing() {
 	Node node = this->prefixProcessingCore();
 	const int end = ifact->lineNumber();
 	stringstream span;
-	span << start << ";" << end;
+	span << start;
+	if ( start != end ) {
+		span << ";" << end;
+	}
 	node->putAttribute( "span", span.str() );
 	return node;
 }

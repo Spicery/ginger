@@ -18,6 +18,7 @@
 
 #include <iostream>
 #include <sstream>
+#include <stdio.h>
 
 #include "mnx.hpp"
 #include "mnxsax.hpp"

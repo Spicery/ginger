@@ -22,6 +22,7 @@
 #include <istream>
 #include <vector>
 #include <map>
+#include <memory>
 
 namespace Ginger {
 

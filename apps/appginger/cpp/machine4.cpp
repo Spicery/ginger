@@ -1,5 +1,6 @@
 #include "machine4.hpp"
 #include "instructions_context.hpp"
+#include <stdio.h>
 
 using namespace Ginger;
 

@@ -47,9 +47,32 @@ void mnxRenderText( std::ostream & out, const std::string & str ) {
 	}
 }
 
+void mnxFRenderText( FILE * f, const std::string & str ) {
+	for ( std::string::const_iterator it = str.begin(); it != str.end(); ++it ) {
+		const unsigned char ch = *it;
+		if ( ch == '<' ) {
+			fprintf( f, "&lt;" );
+		} else if ( ch == '>' ) {
+			fprintf( f, "&gt;" );
+		} else if ( ch == '&' ) {
+			fprintf( f,  "&amp;" );
+		} else if ( ch == '"' ) {
+			fprintf( f, "&quot;" );
+		} else if ( ch == '\'' ) {
+			fprintf( f, "&apos;" );
+		} else if ( 32 <= ch && ch < 127 ) {
+			fprintf( f, "%c", ch );
+		} else {
+			fprintf( f, "&#%d;", (int)ch );
+		}
+	}
+}
+
 void mnxRenderText( const std::string & str ) {
 	mnxRenderText( cout, str );
 }
+
+
 
 void Mnx::putAttribute( const std::string & key, const std::string & value ) {
 	this->attributes[ key ] = value;
@@ -129,6 +152,32 @@ bool Mnx::hasAttribute( const std::string & key ) const {
 bool Mnx::hasAttribute( const std::string & key, const std::string & eqval ) const {
 	std::map< std::string, std::string >::const_iterator it = this->attributes.find( key );
 	return it != this->attributes.end() && eqval == it->second;
+}
+
+void Mnx::frender( FILE * f ) {
+	fprintf( f, "<%s", this->element_name.c_str() );
+	for ( 
+		std::map< std::string, std::string >::iterator it = this->attributes.begin();
+		it != this->attributes.end();
+		++it
+	) {
+		fprintf( f, "%s=\"", it->first.c_str() );
+		mnxFRenderText( f, it->second.c_str() );
+		fprintf( f, "\"" );
+	}
+	if ( this->children.empty() ) {
+		fprintf( f, "/>" );
+	} else {
+		fprintf( f, ">" );
+		for ( 
+			std::vector< shared< Mnx > >::iterator it = this->children.begin();
+			it != this->children.end();
+			++it
+		) {
+			(*it)->frender( f );
+		}
+		fprintf( f, "</%s>", this->element_name.c_str() );
+	}
 }
 
 void Mnx::render( std::ostream & out ) {

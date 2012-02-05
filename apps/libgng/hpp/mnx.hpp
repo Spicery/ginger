@@ -30,6 +30,7 @@
 
 namespace Ginger {
 
+extern void mnxFRenderText( FILE * f, const std::string & string );
 extern void mnxRenderText( std::ostream & out, const std::string & string );
 extern void mnxRenderText( const std::string & string );
 
@@ -155,6 +156,7 @@ public:
 	
 public:
 	std::string toString();
+	void frender( FILE * f );
 	void render( std::ostream & out );
 	void render();
 	void prettyPrint( std::ostream & out );

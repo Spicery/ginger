@@ -16,8 +16,8 @@
     along with AppGinger.  If not, see <http://www.gnu.org/licenses/>.
 \******************************************************************************/
 
-#include <boost/iostreams/stream.hpp>
-#include <boost/iostreams/device/file_descriptor.hpp>
+//#include <boost/iostreams/stream.hpp>
+//#include <boost/iostreams/device/file_descriptor.hpp>
 
 #include <vector>
 #include <iostream>
@@ -41,11 +41,9 @@
 #include "rcep.hpp"
 
 #define FETCHGNX ( INSTALL_TOOL "/fetchgnx" )
-#define OPTION_X 1
 
 //#define DBG_PACKAGE
 
-//using namespace boost; 
 using namespace std;
 
 Package::~Package() {
@@ -217,25 +215,26 @@ public:
 	ResolveHandler() : mishap( "" ), qualified( false ) {}
 };
 
-static void fRenderMnx( int fd, shared< Ginger::Mnx > mnx ) {
-	namespace io = boost::iostreams;
-	//cerr << "fd = " << fd << endl;
-	io::file_descriptor_sink fdsink( fd, io::never_close_handle );
-	io::stream_buffer< io::file_descriptor_sink > output_stream_buffer( fdsink );
-	std::ostream output( &output_stream_buffer );
-	mnx->render( output );
-	output.flush();
+static void fRenderMnx( FILE * foutd, shared< Ginger::Mnx > mnx ) {
+	#if 0
+		namespace io = boost::iostreams;
+		//cerr << "fd = " << fd << endl;
+		io::file_descriptor_sink fdsink( fd, io::never_close_handle );
+		io::stream_buffer< io::file_descriptor_sink > output_stream_buffer( fdsink );
+		std::ostream output( &output_stream_buffer );
+		mnx->render( output );
+		output.flush();
+	#else
+		mnx->frender( foutd );
+		fflush( foutd );
+	#endif
 }
 
 Valof * OrdinaryPackage::absoluteAutoload( const std::string & c ) {
 	syslog( LOG_INFO, "Autoloading is_absolute_ref %s", c.c_str() );
 	
 	Ginger::Command cmd( FETCHGNX );
-	#if OPTION_X
-		cmd.addArg( "-X" );
-	#else
-		cmd.addArg( "-D" );
-	#endif
+	cmd.addArg( "-X" );
 	{
 		list< string > & folders = this->getMachine()->getAppContext().getProjectFolderList();
 		for ( 
@@ -248,31 +247,20 @@ Valof * OrdinaryPackage::absoluteAutoload( const std::string & c ) {
 		}
 	}
 	
-	#if OPTION_X
-		Ginger::MnxBuilder qb;
-		qb.start( "fetch.definition" );
-		qb.put( "pkg.name", this->title );
-		qb.put( "var.name", c );
-		qb.end();
-		shared< Ginger::Mnx > query( qb.build() );
-	#else
-		cmd.addArg( "-p" );
-		cmd.addArg( this->title );
-		cmd.addArg( "-v" );
-		cmd.addArg( c );
-	#endif
-
+	Ginger::MnxBuilder qb;
+	qb.start( "fetch.definition" );
+	qb.put( "pkg.name", this->title );
+	qb.put( "var.name", c );
+	qb.end();
+	shared< Ginger::Mnx > query( qb.build() );
 	
 
-	#if OPTION_X
-		cmd.runWithInputAndOutput();
-		int fd = cmd.getInputFD();   
-		fRenderMnx( cmd.getOutputFD(), query );
-		//write( cmd.getOutputFD(), "<resolve.unqualified pkg.name=\"ginger.interactive\" var.name=\"tail\"/>\n", sizeof( "<resolve.unqualified pkg.name=\"ginger.interactive\" var.name=\"tail\"/>\n" ) );
-		//close( cmd.getOutputFD() );
-	#else
-		int fd = cmd.runWithOutput();		
-	#endif
+	cmd.runWithInputAndOutput();
+	int fd = cmd.getInputFD();   
+	FILE * foutd = fdopen( cmd.getOutputFD(), "w" );
+	fRenderMnx( foutd, query );
+	//write( cmd.getOutputFD(), "<resolve.unqualified pkg.name=\"ginger.interactive\" var.name=\"tail\"/>\n", sizeof( "<resolve.unqualified pkg.name=\"ginger.interactive\" var.name=\"tail\"/>\n" ) );
+	//close( cmd.getOutputFD() );
 	
 	//cerr << "Command run " << endl;
 	stringstream prog;
@@ -293,9 +281,7 @@ Valof * OrdinaryPackage::absoluteAutoload( const std::string & c ) {
 		}
 	}
 		
-	#if OPTION_X
-		close( cmd.getOutputFD() );
-	#endif
+	fclose( foutd );
 	
 	#ifdef DBG_PACKAGE_AUTOLOAD
 		cout << "[[" << prog.str() << "]]" << endl;

@@ -82,6 +82,8 @@
 #define THROW			"throw"
 
 #define PROBLEM			"problem"
+#define PROBLEM_SEVERITY		"severity"
+#define PROBLEM_MESSAGE	"message"
 #define CULPRIT			"culprit"
 #define CULPRIT_NAME	"name"
 #define CULPRIT_VALUE	"value"

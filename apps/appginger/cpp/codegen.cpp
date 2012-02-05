@@ -1021,6 +1021,32 @@ void CodeGenClass::compileGnxConstant( Gnx mnx, LabelClass * contn ) {
 	this->vmiPUSHQ( this->calcConstant( mnx ), contn );
 }
 
+static void throwProblem( Gnx mnx ) {
+	const string & sev = mnx->attribute( PROBLEM_SEVERITY );
+	if ( sev == "rollback" ) {
+		Ginger::Mishap mishap( mnx->attribute( PROBLEM_MESSAGE ) );
+		MnxChildIterator mnxit( mnx );
+		while ( mnxit.hasNext() ) {
+			Gnx & culprit = mnxit.next();
+			if ( culprit->hasName( CULPRIT ) && culprit->hasAttribute( CULPRIT_NAME ) && culprit->hasAttribute( CULPRIT_VALUE ) ) {
+				mishap.culprit( culprit->attribute( CULPRIT_NAME ), culprit->attribute( CULPRIT_VALUE ) );
+			}
+		}
+		throw mishap;
+	} else {
+		Ginger::SystemError mishap( mnx->attribute( PROBLEM_MESSAGE ) );
+		MnxChildIterator mnxit ( mnx );
+		while ( mnxit.hasNext() ) {
+			Gnx & culprit = mnxit.next();
+			if ( culprit->hasName( CULPRIT ) && culprit->hasAttribute( CULPRIT_NAME ) && culprit->hasAttribute( CULPRIT_VALUE ) ) {
+				mishap.culprit( culprit->attribute( CULPRIT_NAME ), culprit->attribute( CULPRIT_VALUE ) );
+			}
+		}
+		throw mishap;
+	}
+}
+
+
 void CodeGenClass::compileGnx( Gnx mnx, LabelClass * contn ) {
 	const string & nm = mnx->name();
 	if ( nm == CONSTANT ) {
@@ -1112,8 +1138,10 @@ void CodeGenClass::compileGnx( Gnx mnx, LabelClass * contn ) {
 		this->compileGnxSelfCall( mnx, contn );
 	} else if ( nm == SELF_CONSTANT ) {
 		this->vmiSELF_CONSTANT();
+	} else if ( nm == PROBLEM ) {
+		throwProblem( mnx );
 	} else {
-		throw Ginger::SystemError( "Expression not recognised" ).culprit( "Expression", mnx->toString() );
+		throw Ginger::SystemError( "GNX not recognised" ).culprit( "Expression", mnx->toString() );
 	}
 }
 

@@ -111,10 +111,12 @@ public class SimpleKeyGenerator {
 		
 		//	More arbitrary keys.
 		add( "HashMapData", 	24, 0,	Kind.VECTOR_KIND	);
-		add( "Undef", 			25, 0,	Kind.KEYLESS_KIND	);
-		add( "Element",      	26, 1, 	Kind.MIXED_KIND	);
-		add( "AttrMap",			27,	1,	Kind.ATTR_KIND		);
-		add( "Exception",       28, 3,  Kind.RECORD_KIND	);	//	TAG : Symbol, VALUES : List< Any >, DETAILS : List< Maplet > 
+		add( "Unassigned", 		25, 0,	Kind.KEYLESS_KIND	);
+		add( "Undefined", 		26, 0,  Kind.KEYLESS_KIND	);
+		add( "Indeterminate",   27, 0,  Kind.KEYLESS_KIND	);
+		add( "Element",      	28, 1, 	Kind.MIXED_KIND	);
+		add( "AttrMap",			29,	1,	Kind.ATTR_KIND		);
+		add( "Exception",       30, 3,  Kind.RECORD_KIND	);	//	TAG : Symbol, VALUES : List< Any >, DETAILS : List< Maplet > 
 	}
 	
 	public void generate( final File outputFolder ) throws IOException {

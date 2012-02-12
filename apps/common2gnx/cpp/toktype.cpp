@@ -60,6 +60,8 @@ const char *tok_type_as_type( TokType fnc ) {
 	case tokty_int : return "int";
 	case tokty_char : return "char";
 	case tokty_string : return "string";
+	case tokty_indeterminate : return "indeterminate";
+	case tokty_undefined : return "undefined";
 	default: throw Ginger::Mishap( "Unreachable" );
 	}
 }

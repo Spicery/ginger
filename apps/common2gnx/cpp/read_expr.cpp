@@ -711,7 +711,9 @@ Node ReadStateClass::prefixProcessing() {
 	if ( start != end ) {
 		span << ";" << end;
 	}
-	node->putAttribute( "span", span.str() );
+	string spanstr( span.str() );
+	string spanspan( "span" );
+	node->putAttribute( spanspan, spanstr );
 	return node;
 }
 

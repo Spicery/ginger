@@ -52,7 +52,7 @@ class CommonLexer(RegexLexer):
 			
 			# There are three special constants. Arguably "present" should be added
 			# but I am not keen on that name. Even "absent" bothers me to be honest.
-			(r'absent|true|false', Keyword.Constant),				# Reserved Word.
+			(r'absent|true|false|undefined|indeterminate', Keyword.Constant),				# Reserved Word.
 			
 			# The boolean operators are special - and this is because they are 
 			# likely to become incorporated into the sophisticated Prolog-like

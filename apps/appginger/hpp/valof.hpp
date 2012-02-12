@@ -40,7 +40,7 @@ public:
 	const std::string & getNameString() const { return this->name_data; }
 	
 public:
-	Valof( class Package * parent, const std::string & nm, Ref r = SYS_UNDEF ) :
+	Valof( class Package * parent, const std::string & nm, Ref r = SYS_UNASSIGNED ) :
 		valof( r ),
 		parent( parent ),
 		name_data( nm )

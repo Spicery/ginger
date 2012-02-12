@@ -202,14 +202,17 @@ KEYLESS_KIND
 //	nnnnnnnn.000.101.11 tags
 ////////////////////////////////////////////////////////////////////////
 
-#define SYS_NIL					ToRef( 0 << TAGGG | MISC_TAGGG )
-#define SYS_TERMIN				ToRef( 1 << TAGGG | MISC_TAGGG )
+//  sys_system_only is a system version of sys_absent. User 
+//  programmers never see this. 
+#define SYS_SYSTEM_ONLY         ToRef( 0 << TAGGG | MISC_TAGGG )
+//  value used for forward declarations.
+#define SYS_UNASSIGNED          ToRef( 1 << TAGGG | MISC_TAGGG )
 
-//	sys_system_only is a system version of sys_absent. User 
-//	programmers never see this.
-#define SYS_SYSTEM_ONLY			ToRef( 2 << TAGGG | MISC_TAGGG )
-
-#define SYS_UNDEF				ToRef( 3 << TAGGG | MISC_TAGGG )
+//  User constants.
+#define SYS_NIL					ToRef( 2 << TAGGG | MISC_TAGGG )
+#define SYS_TERMIN				ToRef( 3 << TAGGG | MISC_TAGGG )
+#define SYS_UNDEFINED           ToRef( 4 << TAGGG | MISC_TAGGG )
+#define SYS_INDETERMINATE       ToRef( 5 << TAGGG | MISC_TAGGG )
 
 //	Nil
 #define IsNil( x )				( x == SYS_NIL )

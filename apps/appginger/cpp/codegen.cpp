@@ -990,6 +990,10 @@ Ref CodeGenClass::calcConstant( Gnx mnx ) {
 		return mnx->hasAttribute( CONSTANT_VALUE, "false" ) ? SYS_FALSE : SYS_TRUE;
 	} else if ( type == "absent" ) {
 		return SYS_ABSENT;
+	} else if ( type == "undefined" ) {
+		return SYS_UNDEFINED;
+	} else if ( type == "indeterminate" ) {
+		return SYS_INDETERMINATE;
 	} else if ( type == "char" ) {
 		const string & s = mnx->attribute( CONSTANT_VALUE );
 		if ( not s.empty() ) {
@@ -1005,8 +1009,8 @@ Ref CodeGenClass::calcConstant( Gnx mnx ) {
 	} else if ( type == "symbol" ) {
 		return refMakeSymbol( mnx->attribute( CONSTANT_VALUE ) );
 	} else if ( type == SYSFN and mnx->hasAttribute( SYSFN_VALUE ) ) {
-		Ref r = makeSysFn( this, mnx->attribute( SYSFN_VALUE ), SYS_UNDEF );
-		if ( r == SYS_UNDEF ) {
+		Ref r = makeSysFn( this, mnx->attribute( SYSFN_VALUE ), SYS_UNDEFINED );
+		if ( r == SYS_UNDEFINED ) {
 			throw Ginger::Mishap( "No such system function" ).culprit( "Function", mnx->attribute( SYSFN_VALUE ) );
 		}
 		return r;

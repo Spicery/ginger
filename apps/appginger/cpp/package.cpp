@@ -120,7 +120,7 @@ Valof * Package::fetchDefinitionValof( const std::string & c ) {
 }
 
 Valof * Package::forwardDeclare( const std::string & c ) {
-	return this->add( c ); //, fetchEmptyFacetSet() );
+	return this->add( c );
 }
 
 void Package::retractForwardDeclare( const std::string & c ) {
@@ -139,7 +139,7 @@ void Package::reset() {
 		it != this->table.end();
 	) {
 		Valof * id = it->second;
-		if ( id->valof == SYS_UNDEF ) {
+		if ( id->valof == SYS_UNASSIGNED ) {
 			this->table.erase( it++ );
 		} else {
 			++it;
@@ -299,7 +299,7 @@ Valof * OrdinaryPackage::absoluteAutoload( const std::string & c ) {
 		return id;		
 	} catch ( Ginger::Problem & e ) {
 		//	Undo the forward declaration.
-		if ( id->valof == SYS_UNDEF ) {
+		if ( id->valof == SYS_UNASSIGNED ) {
 			//	The autoloading failed. Undo the declaration.
 			this->retractForwardDeclare( c );
 		}
@@ -378,8 +378,8 @@ void OrdinaryPackage::loadIfNeeded() {
 
 
 Valof * StandardLibraryPackage::absoluteAutoload( const std::string & c ) {
-	Ref r = makeSysFn( this->pkgmgr->vm->codegen(), c, SYS_UNDEF );
-	if ( r == SYS_UNDEF ) {
+	Ref r = makeSysFn( this->pkgmgr->vm->codegen(), c, SYS_UNDEFINED );
+	if ( r == SYS_UNDEFINED ) {
 		//	Doesn't match a system call. Fail.
 		return NULL;
 	} else {

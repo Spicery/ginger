@@ -145,7 +145,9 @@ static void printHelpHex() {
 	cout << "nil            :\t" << SYS_NIL << endl;
 	cout << "termin         :\t" << SYS_TERMIN << endl;
 	cout << "system_only    :\t" << SYS_SYSTEM_ONLY << endl;
-	cout << "undef          :\t" << SYS_UNDEF << endl;
+	cout << "undef          :\t" << SYS_UNASSIGNED << endl;
+	cout << "undef          :\t" << SYS_UNDEFINED << endl;
+	cout << "undef          :\t" << SYS_INDETERMINATE << endl;
 	cout << "Function       :\t" << sysFunctionKey << endl;
 	cout << "CoreFunction   :\t" << sysCoreFunctionKey << endl;
 	cout << "Method         :\t" << sysMethodKey << endl;

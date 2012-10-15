@@ -106,7 +106,7 @@ public:
 
 public:
 	ScriptMain( const char * name ) : ToolMain( name ) {
-		this->context.printLevel() = 1;
+		this->context.printDetailLevel() = 1;
 	}
 	
 	virtual ~ScriptMain() {}

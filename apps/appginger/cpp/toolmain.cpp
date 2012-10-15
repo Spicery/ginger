@@ -391,7 +391,7 @@ bool ToolMain::parseArgs( int argc, char **argv, char **envp ) {
             }
             case 'r': {
             	int level = atoi( optarg );
-            	this->context.printLevel() = level;
+            	this->context.printDetailLevel() = level;
             	break;
             }
             case 'V': {

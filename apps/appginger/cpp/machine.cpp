@@ -227,8 +227,8 @@ void MachineClass::printResults( float time_taken ) {
 }
 
 void MachineClass::printResults( std::ostream & out, float time_taken ) {
-	if ( this->appg.printLevel() >= 1 ) {
-		const bool chatty = this->appg.printLevel() >= 2;
+	if ( this->appg.printDetailLevel() >= 1 ) {
+		const bool chatty = this->appg.printDetailLevel() >= 2;
 	
 		int n = this->vp - this->vp_base;
 	

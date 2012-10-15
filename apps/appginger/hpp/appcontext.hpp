@@ -68,7 +68,7 @@ public:
 	void addArgument( const char * s ) { this->arg_list.push_back( s ); }
 	std::vector< std::string > & arguments() { return this->arg_list; }
 	bool & useStdin() { return this->use_stdin; }
-	int & printLevel() { return this->print_level; }
+	int & printDetailLevel() { return this->print_level; }
 	const char* cgiValue( const char* fieldname );
 	void initCgi();
 	bool & welcomeBanner() { return this->welcoming; }

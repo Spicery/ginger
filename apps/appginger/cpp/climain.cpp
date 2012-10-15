@@ -168,7 +168,7 @@ public:
 
 public:
 	GingerMain( const char * name ) : ToolMain( name ) {
-		this->context.printLevel() = 2;
+		this->context.printDetailLevel() = 2;
 	}
 	
 	virtual ~GingerMain() {}

@@ -342,11 +342,11 @@ void Mnx::walk( MnxWalker & v, MnxWalkPath * path ) {
 }
 
 bool Mnx::hasAnyFlags( int mask ) {
-	return this->flags && mask != 0;
+	return ( this->flags && mask ) != 0;
 }
 
 bool Mnx::hasAllFlags( int mask ) {
-	return this->flags && mask == mask;
+	return ( this->flags && mask ) == mask;
 }
 
 void Mnx::clearFlags( int mask ) {

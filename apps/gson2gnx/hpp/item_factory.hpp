@@ -1,7 +1,7 @@
 #ifndef ITEM_FACTORY_HPP
 #define ITEM_FACTORY_HPP
 
-#include <iostream>s
+#include <iostream>
 #include <string>
 
 #include <stdio.h>

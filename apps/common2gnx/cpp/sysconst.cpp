@@ -3,8 +3,9 @@
 #include <string>
 #include <map>
 
-#define SYSFN( x )    this->table[ x ] = new SysConst( "sysfn", x )
-#define SYSFN2( x, y )    this->table[ x ] = new SysConst( "sysfn", y )
+#define SYSFN( x )    		this->table[ x ] = new SysConst( "sysfn", x )
+#define SYSFN2( x, y )    	this->table[ x ] = new SysConst( "sysfn", y )
+#define CONST( t, x )		this->table[ x ] = new SysConst( t, x )
 
 class SysConstTable {
 	typedef std::map< std::string, SysConst * > Table;
@@ -22,15 +23,19 @@ public:
 	SysConstTable() {
 	
 		//	Absent & Present
-		this->table[ "absent" ] = new SysConst( "absent", "absent" );
-		this->table[ "present" ] = new SysConst( "present", "present" );
+		CONST( "absent", "absent" );
+		CONST( "present", "present" );
 
 		//	Booleans
-		this->table[ "true" ] = new SysConst( "bool", "true" );
-		this->table[ "false" ] = new SysConst( "bool", "false" );		
+		CONST( "bool", "true" );
+		CONST( "bool", "false" );
+		
+		//	Misc.
+		CONST( "undefined", "undefined" );
+		CONST( "indeterminate", "indeterminate" );
 		
 		//	Functions (I think this is debatable).
-		this->table[ "not" ] = new SysConst( "sysfn", "not" );
+		SYSFN( "not" );
 		
 	}
 } theSysConstTable;

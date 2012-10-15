@@ -64,11 +64,15 @@
 #define sysWeakIdMapKey MAKE_KEY( 23, 3, 3, 1 )
 #define HashMapDataID 24
 #define sysHashMapDataKey MAKE_KEY( 24, 0, 4, 2 )
-#define UndefID 25
-#define sysUndefKey MAKE_KEY( 25, 0, 0, 0 )
-#define ElementID 26
-#define sysElementKey MAKE_KEY( 26, 1, 7, 4 )
-#define AttrMapID 27
-#define sysAttrMapKey MAKE_KEY( 27, 1, 6, 4 )
-#define ExceptionID 28
-#define sysExceptionKey MAKE_KEY( 28, 3, 1, 1 )
+#define UnassignedID 25
+#define sysUnassignedKey MAKE_KEY( 25, 0, 0, 0 )
+#define UndefinedID 26
+#define sysUndefinedKey MAKE_KEY( 26, 0, 0, 0 )
+#define IndeterminateID 27
+#define sysIndeterminateKey MAKE_KEY( 27, 0, 0, 0 )
+#define ElementID 28
+#define sysElementKey MAKE_KEY( 28, 1, 7, 4 )
+#define AttrMapID 29
+#define sysAttrMapKey MAKE_KEY( 29, 1, 6, 4 )
+#define ExceptionID 30
+#define sysExceptionKey MAKE_KEY( 30, 3, 1, 1 )

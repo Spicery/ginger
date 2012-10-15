@@ -231,6 +231,10 @@ void refPrint( std::ostream & out, const Ref r ) {
 			out << ( r == SYS_FALSE ? "false" : "true" );
 		} else if ( k == sysAbsentKey ) {
 			out << "absent";
+		} else if ( k == sysUndefinedKey ) {
+			out << "undefined";
+		} else if ( k == sysIndeterminateKey ) {
+			out << "indeterminate";
 		} else if ( k == sysCharKey ) {
 			#ifdef DBG_SYSPRINT
 				cerr << "--  character: " << (int)(CharacterToChar( r )) << endl;

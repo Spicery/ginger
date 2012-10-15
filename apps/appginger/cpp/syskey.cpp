@@ -16,6 +16,8 @@
     along with AppGinger.  If not, see <http://www.gnu.org/licenses/>.
 \******************************************************************************/
 
+#include <string>
+
 #include "syskey.hpp"
 
 #include "common.hpp"
@@ -42,10 +44,12 @@ Ref refKey( Ref r ) {
 	if ( taggg == MISC_TAGGG ) {
 		if ( r == SYS_NIL ) {
 			return sysNilKey;
-		} else if ( r == SYS_UNDEF ) {
-			return sysUndefKey;
+		} else if ( r == SYS_UNDEFINED ) {
+			return sysUndefinedKey;
+		} else if ( r == SYS_INDETERMINATE ) {
+			return sysIndeterminateKey;
 		} else {
-			throw;
+			throw Ginger::Mishap( "Unimplemented key" ).culprit( "Object", ToLong( r ) );
 		}
 	}
 	throw;

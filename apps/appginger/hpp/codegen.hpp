@@ -52,7 +52,6 @@ struct CodeGenState {
 
 class CodeGenClass {
 private:
-//	boost::shared_ptr< std::vector< Ref > >	code_data;
 	shared< std::vector< Ref > >	code_data;
 	std::stack< CodeGenState > 	dump;
 	

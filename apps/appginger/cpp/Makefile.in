@@ -48,19 +48,19 @@ all: $(USEREXECUTABLES)
 # $@ is make shorthand for the dependencies
 appginger: libappginger.a main.o
 	ranlib libappginger.a ../../libgng/cpp/libgng.a
-	@CXX@ $(CXXFLAGS) $(BOOST_CPPFLAGS) -o $@ main.o libappginger.a ../../libgng/cpp/libgng.a /usr/local/lib/librudecgi.a  -lboost_iostreams
+	@CXX@ $(CXXFLAGS) $(BOOST_CPPFLAGS) -o $@ main.o libappginger.a ../../libgng/cpp/libgng.a /usr/local/lib/librudecgi.a  -lboost_iostreams-mt
 
 ginger-cli: libappginger.a climain.o
 	ranlib libappginger.a ../../libgng/cpp/libgng.a
-	@CXX@ $(CXXFLAGS) $(BOOST_CPPFLAGS) -o $@ climain.o libappginger.a ../../libgng/cpp/libgng.a /usr/local/lib/librudecgi.a  -lboost_iostreams
+	@CXX@ $(CXXFLAGS) $(BOOST_CPPFLAGS) -o $@ climain.o libappginger.a ../../libgng/cpp/libgng.a /usr/local/lib/librudecgi.a  -lboost_iostreams-mt
 
 ginger-cgi: libappginger.a cgimain.o
 	ranlib libappginger.a ../../libgng/cpp/libgng.a
-	@CXX@ $(CXXFLAGS) $(BOOST_CPPFLAGS) -o $@ cgimain.o libappginger.a ../../libgng/cpp/libgng.a /usr/local/lib/librudecgi.a  -lboost_iostreams
+	@CXX@ $(CXXFLAGS) $(BOOST_CPPFLAGS) -o $@ cgimain.o libappginger.a ../../libgng/cpp/libgng.a /usr/local/lib/librudecgi.a  -lboost_iostreams-mt
 
 ginger-script: libappginger.a scriptmain.o
 	ranlib libappginger.a ../../libgng/cpp/libgng.a
-	@CXX@ $(CXXFLAGS) $(BOOST_CPPFLAGS) -o $@ scriptmain.o libappginger.a ../../libgng/cpp/libgng.a /usr/local/lib/librudecgi.a  -lboost_iostreams
+	@CXX@ $(CXXFLAGS) $(BOOST_CPPFLAGS) -o $@ scriptmain.o libappginger.a ../../libgng/cpp/libgng.a /usr/local/lib/librudecgi.a  -lboost_iostreams-mt
 
 ginger:
 	echo "#!/bin/sh" > ginger-tmp

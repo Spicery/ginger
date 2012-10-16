@@ -19,7 +19,13 @@
 #ifndef SHARED_HPP
 #define SHARED_HPP
 
-#define BOOST
+//  The point of this file was to accommodate the fact that shared_ptr
+//  was introduced in TR1 but not widely available. As a consequence we
+//  had to use the Boost library for a while. In Oct 2012 testing showed
+//  that TR1 was available on all our major platforms and so we could
+//  continue exclusively with TR1.
+
+//  #define BOOST
 #ifdef BOOST
 	#include <boost/shared_ptr.hpp>
 	#define shared boost::shared_ptr

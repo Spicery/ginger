@@ -13,7 +13,7 @@ CC=@CXX@
 
 INSTALLDIRS=-DINSTALL_BIN='"$(INSTALL_BIN)"' -DINSTALL_LIB='"$(INSTALL_LIB)"' -DINSTALL_TOOL='"$(INSTALL_TOOL)"'
 
-CXXFLAGS=$(INSTALLDIRS) -DEXEC_DIR='$(EXEC_DIR)' -g -I../hpp -I/opt/local/include -Wall -Wnon-virtual-dtor # -Weffc++
+CXXFLAGS=$(INSTALLDIRS) -DEXEC_DIR='$(EXEC_DIR)' -g -I../hpp -Wall -Wnon-virtual-dtor # -Weffc++
 CFLAGS=-Wmissing-prototypes 
 
 OBJS=sax.o mishap.o facet.o fileutils.o command.o arity.o metainfo.o printgpl.o mnx.o mnxsax.o lnxitem.o lnxreader.o

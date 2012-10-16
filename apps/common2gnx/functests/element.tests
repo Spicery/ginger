@@ -3,23 +3,23 @@ Title: Element, trivial
 --------------------------------------------------------------------------------
 <foo/>;
 --------------------------------------------------------------------------------
-<sysapp name="newElement"><sysapp name="newAttrMap"><constant type="string" value="foo"/></sysapp></sysapp>
+<sysapp name="newElement" span="1"><sysapp name="newAttrMap"><constant type="string" value="foo"/></sysapp></sysapp>
 ================================================================================
 Title: Element, standalone
 --------------------------------------------------------------------------------
 <foo alpha="001"/>;
 --------------------------------------------------------------------------------
-<sysapp name="newElement"><sysapp name="newAttrMap"><constant type="string" value="foo"/><constant type="string" value="alpha"/><assert n="1"><constant type="string" value="001"/></assert></sysapp></sysapp>
+<sysapp name="newElement" span="1"><sysapp name="newAttrMap"><constant type="string" value="foo"/><constant type="string" value="alpha"/><assert n="1"><constant type="string" value="001"/></assert></sysapp></sysapp>
 ================================================================================
 Title: Element, childless, other syntax - also showing >< abutting
 --------------------------------------------------------------------------------
 <foo alpha="001"></foo>;
 --------------------------------------------------------------------------------
-<sysapp name="newElement"><sysapp name="newAttrMap"><constant type="string" value="foo"/><constant type="string" value="alpha"/><assert n="1"><constant type="string" value="001"/></assert></sysapp></sysapp>
+<sysapp name="newElement" span="1"><sysapp name="newAttrMap"><constant type="string" value="foo"/><constant type="string" value="alpha"/><assert n="1"><constant type="string" value="001"/></assert></sysapp></sysapp>
 ================================================================================
 Title: Element, with children - also showing >< abutting in several combos
 --------------------------------------------------------------------------------
 <foo alpha="001"><bar/><gort/></foo>;
 --------------------------------------------------------------------------------
-<sysapp name="newElement"><sysapp name="newAttrMap"><constant type="string" value="foo"/><constant type="string" value="alpha"/><assert n="1"><constant type="string" value="001"/></assert></sysapp><seq><sysapp name="newElement"><sysapp name="newAttrMap"><constant type="string" value="bar"/></sysapp></sysapp><sysapp name="newElement"><sysapp name="newAttrMap"><constant type="string" value="gort"/></sysapp></sysapp></seq></sysapp>
+<sysapp name="newElement" span="1"><sysapp name="newAttrMap"><constant type="string" value="foo"/><constant type="string" value="alpha"/><assert n="1"><constant type="string" value="001"/></assert></sysapp><seq span="1"><sysapp name="newElement"><sysapp name="newAttrMap"><constant type="string" value="bar"/></sysapp></sysapp><sysapp name="newElement"><sysapp name="newAttrMap"><constant type="string" value="gort"/></sysapp></sysapp></seq></sysapp>
 ================================================================================

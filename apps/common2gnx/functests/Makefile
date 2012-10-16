@@ -2,6 +2,7 @@
 
 #	Do nothing
 all:
+	echo "Try 'make check' or 'make ccheck'"
 
 #	This is the top-level make
 check: example.pass envvar.pass element.pass

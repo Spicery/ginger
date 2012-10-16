@@ -3,13 +3,13 @@ Title: Shell variable that we know
 --------------------------------------------------------------------------------
 ${TERM};
 --------------------------------------------------------------------------------
-<sysapp name="sysGetEnv"><constant type="string" value="TERM"/></sysapp>
+<sysapp name="sysGetEnv" span="1"><constant type="string" value="TERM"/></sysapp>
 ================================================================================
 Title: Shell variables in a vector to check it combines with vector syntax.
 --------------------------------------------------------------------------------
 {${TERM},${PATH}};
 --------------------------------------------------------------------------------
-<vector><seq><sysapp name="sysGetEnv"><constant type="string" value="TERM"/></sysapp><sysapp name="sysGetEnv"><constant type="string" value="PATH"/></sysapp></seq></vector>
+<vector span="1"><seq><sysapp name="sysGetEnv" span="1"><constant type="string" value="TERM"/></sysapp><sysapp name="sysGetEnv" span="1"><constant type="string" value="PATH"/></sysapp></seq></vector>
 ================================================================================
 Title: Bad shell syntax
 Exit: 1

@@ -705,15 +705,17 @@ Node ReadStateClass::prefixProcessing() {
 	ItemFactory ifact = this->item_factory;
 	const int start = ifact->lineNumber();
 	Node node = this->prefixProcessingCore();
-	const int end = ifact->lineNumber();
-	stringstream span;
-	span << start;
-	if ( start != end ) {
-		span << ";" << end;
+	if ( node ) {
+		const int end = ifact->lineNumber();
+		stringstream span;
+		span << start;
+		if ( start != end ) {
+			span << ";" << end;
+		}
+		string spanstr( span.str() );
+		string spanspan( "span" );
+		node->putAttribute( spanspan, spanstr );
 	}
-	string spanstr( span.str() );
-	string spanspan( "span" );
-	node->putAttribute( spanspan, spanstr );
 	return node;
 }
 

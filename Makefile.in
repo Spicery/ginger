@@ -93,9 +93,9 @@ LIBEXECUTABLES=\
 install: all plaininstall
 
 plaininstall:
-	echo Installing user binaries into $(INSTALL_BIN)
-	echo Installing toolchain binaries into $(INSTALL_TOOL)
-	echo Installing support files $(INSTALL_LIB)
+	# Installing user binaries into $(INSTALL_BIN)
+	# Installing toolchain binaries into $(INSTALL_TOOL)
+	# Installing support files $(INSTALL_LIB)
 	mkdir -p $(INSTALL_LIB)
 	mkdir -p $(INSTALL_TOOL)
 	cp -r projects/standard_library $(INSTALL_LIB) 
@@ -106,6 +106,21 @@ plaininstall:
 	/usr/bin/install -m a=r apps/lisp2gnx/lsp/lisp2gnx.lsp $(INSTALL_LIB)/lisp2gnx
 	/usr/bin/install $(LIBEXECUTABLES) $(INSTALL_TOOL)
 	/usr/bin/install $(USEREXECUTABLES) $(INSTALL_BIN)
+
+# N.B. The rm -rf commands are guarded by code that checks the
+# paths end '/ginger'
+uninstall:
+	# Removing user binaries from $(INSTALL_BIN)
+	rm -f $(INSTALL_BIN)/ginger
+	rm -f $(INSTALL_BIN)/ginger-*
+ifeq (ginger,$(notdir $(INSTALL_TOOL)))
+	# Removing the toolchain binaries from $(INSTALL_TOOL)
+	rm -rf $(INSTALL_TOOL)
+endif
+ifeq (ginger,$(notdir $(INSTALL_LIB)))
+	# Removing the support files from $(INSTALL_LIB)
+	rm -rf $(INSTALL_LIB)
+endif
 
 # Create a tarball for binary archive.
 TBBASE=ginger_files

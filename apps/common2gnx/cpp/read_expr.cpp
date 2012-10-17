@@ -701,6 +701,67 @@ Node ReadStateClass::readVarVal( TokType fnc ) {
 	return bind.build();
 }
 
+Node ReadStateClass::readElement() {
+	NodeFactory element;
+	element.start( SEQ );
+	for (;;) {
+		element.start( "sysapp" );
+		element.put( "name", "newElement" );
+		element.start( "sysapp" );
+		element.put( "name", "newAttrMap" );
+		
+		Item item = this->readIdItem();
+		string element_name( item->nameString() );
+		element.start( "constant" );
+		element.put( "type", "string" );
+		element.put( "value", element_name );
+		element.end();
+		
+		bool closed = false;
+		for (;;) {
+			if ( this->tryToken( tokty_gt ) ) break;
+			if ( this->tryToken( tokty_slashgt ) ) { closed = true; break; }
+			Item item = this->readIdItem();
+			element.start( "constant" );
+			element.put( "type", "string" );
+			element.put( "value", item->nameString() );
+			element.end();
+			this->checkToken( tokty_equal );
+			element.start( "assert" );
+			element.put( "n", "1" );
+			Node value = this->readAtomicExpr();
+			element.add( value );
+			element.end();
+		}
+		element.end(); 	// newAttrMap.
+		if ( not closed ) {
+			//	Read the children.
+			bool ended = false;
+			for (;;) {
+				if ( this->tryToken( tokty_ltslash ) ) break;
+				if ( this->tryToken( tokty_endelement ) ) { ended = true; break; }
+				Node child = this->readExpr();
+				element.add( child );
+			}
+			if ( not ended ) {
+				Item item = this->readIdItem();
+				if ( item->nameString() != element_name ) {
+					throw Ginger::Mishap( "Element close tag does not match open tag" ).culprit( "Open tag", element_name ).culprit( "Close tag", item->nameString() );
+				}
+				this->checkToken( tokty_gt );
+			}
+		}
+		element.end();	//	newElement.
+
+		//	Uniquely, at this point in the language, no semi-colon is
+		//	needed if the next item is ANOTHER element.
+		if ( not this->tryToken( tokty_lt ) ) break;
+	}			
+	element.end();
+	Node answer = element.build();
+	return answer->size() == 1 ? answer->child( 0 ) : answer;
+}
+
 Node ReadStateClass::prefixProcessing() {
 	ItemFactory ifact = this->item_factory;
 	const int start = ifact->lineNumber();
@@ -919,59 +980,7 @@ Node ReadStateClass::prefixProcessingCore() {
 			return this->readLambda();
 		}
 		case tokty_lt: {
-			NodeFactory element;
-			element.start( SEQ );
-			for (;;) {
-				element.start( "sysapp" );
-				element.put( "name", "newElement" );
-				element.start( "sysapp" );
-				element.put( "name", "newAttrMap" );
-				
-				Item item = this->readIdItem();
-				string element_name( item->nameString() );
-				element.start( "constant" );
-				element.put( "type", "string" );
-				element.put( "value", element_name );
-				element.end();
-				
-				bool closed = false;
-				for (;;) {
-					if ( this->tryToken( tokty_gt ) ) break;
-					if ( this->tryToken( tokty_slashgt ) ) { closed = true; break; }
-					Item item = this->readIdItem();
-					element.start( "constant" );
-					element.put( "type", "string" );
-					element.put( "value", item->nameString() );
-					element.end();
-					this->checkToken( tokty_equal );
-					element.start( "assert" );
-					element.put( "n", "1" );
-					Node value = this->readAtomicExpr();
-					element.add( value );
-					element.end();
-				}
-				element.end(); 	// newAttrMap.
-				if ( not closed ) {
-					//	Read the children.
-					while ( not this->tryToken( tokty_ltslash ) ) {
-						Node child = this->readExpr();
-						element.add( child );
-					}
-					Item item = this->readIdItem();
-					if ( item->nameString() != element_name ) {
-						throw Ginger::Mishap( "Element close tag does not match open tag" ).culprit( "Open tag", element_name ).culprit( "Close tag", item->nameString() );
-					}
-					this->checkToken( tokty_gt );
-				}
-				element.end();	//	newElement.
-
-				//	Uniquely, at this point in the language, no semi-colon is
-				//	needed if the next item is ANOTHER element.
-				if ( not this->tryToken( tokty_lt ) ) break;
-			}			
-			element.end();
-			Node answer = element.build();
-			return answer->size() == 1 ? answer->child( 0 ) : answer;
+			return this->readElement();
 		}
 		case tokty_package: {
 			NodeFactory pkg;

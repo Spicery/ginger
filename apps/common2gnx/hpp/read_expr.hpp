@@ -35,6 +35,7 @@ private:
 	Node readLambda();
 	Node readDefinition();
 	Node readVarVal( TokType fnc );
+	Node readElement();
 	std::string readPkgName();
 	void readTryCatch( NodeFactory & ftry );
 	Node readTry( const bool try_vs_transaction );

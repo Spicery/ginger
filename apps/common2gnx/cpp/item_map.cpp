@@ -60,6 +60,7 @@ ItemMap::ItemMap( const bool cstyle ) {
 	add( true,		"%}", 				tokty_fat_cbrace, 	Clo, 		0		);
 	add( true,		"+", 				tokty_add, 			BSA,		600		);
 	add( true,		"++", 				tokty_append, 		BSA, 		800		);
+	add( true,		"</>",				tokty_endelement,	Clo,		0		);
 	add( true,		"<>", 				tokty_append, 		BSA, 		800		);
 	add( true,		"<", 				tokty_lt, 			BSA, 		1200	);
 	add( true,		"<=", 				tokty_lte, 			BSA, 		1400	);

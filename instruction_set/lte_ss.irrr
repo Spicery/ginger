@@ -1,3 +1,22 @@
+/*****************************************************************************\
+Instruction LTE_SS A, B, L
+
+Summary
+	Compares two local variables for A <= B, where A & B
+	are both Smalls. If true jump to Label L, otherwise
+	fallthru.
+	
+Unchecked Precondition
+	A & B are valid local variable indexes.
+	L is a valid label.
+	
+Checked Preconditions
+	A or B must be Small.
+	
+Result (Postcondition)		
+	
+\*****************************************************************************/
+
 long s = ToLong( pc[1] );
 long t = ToLong( pc[2] );
 Ref a = LOCAL( s );

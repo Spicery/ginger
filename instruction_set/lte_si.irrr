@@ -1,3 +1,24 @@
+/*****************************************************************************\
+Instruction LTE_SI A, K, L
+
+Summary
+	Compares the local variable A against a constant K.
+	If A <= K then control is transferred to L.
+	Otherwise the next instruction is executed.
+	
+Unchecked Precondition
+	A is a valid local register index.
+	L is a valid label.
+	K is a small value.
+	
+Checked Preconditions
+	A is a small.
+	
+Result
+	Control continues at L if A <= K otherwise fallthru.
+
+\*****************************************************************************/
+
 long s = ToLong( pc[1] );
 Ref a = LOCAL( s );
 Ref b = pc[2];

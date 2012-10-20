@@ -97,29 +97,6 @@ public class StdMain {
 		return b.toString();
 	}
 	
-	public static void main( final String[] args ) throws ParserConfigurationException, IOException, SAXException, XPathExpressionException {		
-		 
-		System.out.println( appginger() );
-		Process p = Runtime.getRuntime().exec( new String[] { appginger().toString(), "-M" } );
-		InputStream stdout = p.getInputStream();
-		
-		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-		dbf.setValidating( false );
-		dbf.setFeature( "http://xml.org/sax/features/namespaces", false );
-		dbf.setFeature( "http://xml.org/sax/features/validation", false );
-		dbf.setFeature( "http://apache.org/xml/features/nonvalidating/load-dtd-grammar", false );
-		dbf.setFeature( "http://apache.org/xml/features/nonvalidating/load-external-dtd", false );
-		DocumentBuilder db = dbf.newDocumentBuilder();
-		Document doc = db.parse( stdout );
-
-        //doc.getDocumentElement().normalize();
-        //System.out.println( "Root element " + doc.getDocumentElement().getNodeName() );
-        
-		generateGingerLibrary( doc );
-		generateGingerInteractive();
-        generateMetaInfoTable( doc );
-	}
-	
 	
 	
 	private static void generateGingerInteractive() throws IOException {
@@ -199,5 +176,29 @@ public class StdMain {
             //System.out.println( URLEncoder.encode( "... ", "UTF-8" ) );
         }
 	}
+	
+	public static void main( final String[] args ) throws ParserConfigurationException, IOException, SAXException, XPathExpressionException {		
+		 
+		System.out.println( appginger() );
+		Process p = Runtime.getRuntime().exec( new String[] { appginger().toString(), "-M" } );
+		InputStream stdout = p.getInputStream();
+		
+		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+		dbf.setValidating( false );
+		dbf.setFeature( "http://xml.org/sax/features/namespaces", false );
+		dbf.setFeature( "http://xml.org/sax/features/validation", false );
+		dbf.setFeature( "http://apache.org/xml/features/nonvalidating/load-dtd-grammar", false );
+		dbf.setFeature( "http://apache.org/xml/features/nonvalidating/load-external-dtd", false );
+		DocumentBuilder db = dbf.newDocumentBuilder();
+		Document doc = db.parse( stdout );
+
+        //doc.getDocumentElement().normalize();
+        //System.out.println( "Root element " + doc.getDocumentElement().getNodeName() );
+        
+		generateGingerLibrary( doc );
+		generateGingerInteractive();
+        generateMetaInfoTable( doc );
+	}
+	
 
 }

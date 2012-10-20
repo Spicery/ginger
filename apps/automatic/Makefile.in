@@ -1,0 +1,23 @@
+all: mk-simple mk-sys mk-metainfo mk-machine
+
+mk-simple:
+	mkdir -p simple
+	python simple.py
+
+mk-sys:
+	mkdir -p sys
+	python sys.py
+
+mk-metainfo:
+	mkdir -p metainfo
+	python metainfo.py
+
+mk-machine:
+	mkdir -p machine
+	python machine.py
+	
+clean:
+	rm -f simple/*.auto simple/*.inc
+	rm -f sys/*.auto sys/*.inc
+	rm -f metainfo/*.inc metainfo/*.auto
+	rm -f machine/*.inc machine/*.auto

@@ -77,6 +77,7 @@ USEREXECUTABLES=\
 LIBEXECUTABLES=\
 	apps/appginger/cpp/appginger \
 	apps/appginger/cpp/ginger-cli \
+	apps/appginger/cpp/ginger-info \
 	apps/fetchgnx/cpp/fetchgnx \
 	apps/file2gnx/cpp/file2gnx \
 	apps/common2gnx/cpp/common2gnx \

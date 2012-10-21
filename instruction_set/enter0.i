@@ -1,3 +1,16 @@
+/*****************************************************************************\
+Instruction TBD
+
+Summary
+	
+Unchecked Precondition
+	
+Exceptions (Checked Preconditions)
+	
+Result (Postcondition)		
+
+\*****************************************************************************/
+
 //	ENTER0 only works as the 1st instruction of a function.
 Ref *prev = VMSP;
 VMSP -= SP_OVERHEAD + ToULong( pc[ -3 ] );

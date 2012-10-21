@@ -1,3 +1,16 @@
+/*****************************************************************************\
+Instruction TBD
+
+Summary
+	
+Unchecked Precondition
+	
+Exceptions (Checked Preconditions)
+	
+Result (Postcondition)		
+
+\*****************************************************************************/
+
 Ref r = *( VMVP-- );							//	Reduce stack by 1, safely.
 long var = ToLong( pc[ 1 ] );
 VMCOUNT = ( VMVP - ToRefRef( LOCAL( var ) ) );	//	Stack reduced by 1 already, don't redo.

@@ -1,3 +1,16 @@
+/*****************************************************************************\
+Instruction TBD 
+
+Summary
+	
+Unchecked Precondition
+	
+Exceptions (Checked Preconditions)
+	
+Result (Postcondition)		
+
+\*****************************************************************************/
+
 Ref rx = *VMVP;
 if ( IsSmall( rx ) ) {
 	long x = (long)rx;

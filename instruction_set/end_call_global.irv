@@ -1,3 +1,16 @@
+/*****************************************************************************\
+Instruction TBD
+
+Summary
+	
+Unchecked Precondition
+	
+Exceptions (Checked Preconditions)
+	
+Result (Postcondition)		
+
+\*****************************************************************************/
+
 long var = ToLong( pc[ 1 ] );
 Ref r = ((Valof *)( pc[ 2 ] )) -> valof;
 VMCOUNT = VMVP - ToRefRef( LOCAL( var ) );

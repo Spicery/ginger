@@ -1,3 +1,16 @@
+/*****************************************************************************\
+Instruction TBD
+
+Summary
+	
+Unchecked Precondition
+	
+Exceptions (Checked Preconditions)
+	
+Result (Postcondition)		
+
+\*****************************************************************************/
+
 Ref * fn_K = RefToPtr4( pc[ 1 ] );
 VMCOUNT += ToLong( pc[2] );
 

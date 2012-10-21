@@ -1,3 +1,16 @@
+/*****************************************************************************\
+Instruction TBD
+
+Summary
+	
+Unchecked Precondition
+	
+Exceptions (Checked Preconditions)
+	
+Result (Postcondition)		
+
+\*****************************************************************************/
+
 #ifdef DBG_SPECIAL
 fprintf( stderr, "IFNOT finds %x on the stack (cf. %x & %x)\n", (unt)(*( VMVP )), (unt)(SYS_FALSE), (unt)(SYS_TRUE) );
 #endif

@@ -1,3 +1,16 @@
+/*****************************************************************************\
+Instruction TBD
+
+Summary
+	
+Unchecked Precondition
+	
+Exceptions (Checked Preconditions)
+	
+Result (Postcondition)		
+
+\*****************************************************************************/
+
 Ref ry = ToRef( pc[ 1 ] );
 Ref rx = *( VMVP );
 if ( IsSmall( rx ) && IsSmall( ry ) ) {

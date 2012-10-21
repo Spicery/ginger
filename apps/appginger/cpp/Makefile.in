@@ -40,7 +40,7 @@ OBJS=vident.o codegen.o \
 	makesysfn.o \
 	toolmain.o
 
-USEREXECUTABLES=appginger ginger-cgi ginger-script ginger-cli ginger
+USEREXECUTABLES=appginger ginger-cgi ginger-script ginger-cli ginger ginger-info
 
 all: $(USEREXECUTABLES)
 
@@ -49,6 +49,10 @@ all: $(USEREXECUTABLES)
 appginger: libappginger.a main.o
 	ranlib libappginger.a ../../libgng/cpp/libgng.a
 	@CXX@ $(CXXFLAGS) $(BOOST_CPPFLAGS) -o $@ main.o libappginger.a ../../libgng/cpp/libgng.a /usr/local/lib/librudecgi.a
+
+ginger-info: libappginger.a infomain.o
+	ranlib libappginger.a ../../libgng/cpp/libgng.a
+	@CXX@ $(CXXFLAGS) $(BOOST_CPPFLAGS) -o $@ infomain.o libappginger.a ../../libgng/cpp/libgng.a /usr/local/lib/librudecgi.a
 
 ginger-cli: libappginger.a climain.o
 	ranlib libappginger.a ../../libgng/cpp/libgng.a

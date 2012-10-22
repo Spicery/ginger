@@ -90,11 +90,12 @@ private:
 
 public:
 	void startDocument() {
-		level += 1;
 		cout << "<?xml version=\"1.0\"?>" << endl;
 		cout << "<appginger>" << endl;
+		level += 1;
 	}
 	void endDocument() {
+		level -= 1;
 		cout << "</appginger>" << endl;
 	}
 	void startSection( const string & sectionName ) {
@@ -130,30 +131,84 @@ public:
 };
 
 class JSONFormatter : public Formatter {
+private:
+	int level;
+	int section_count;
+	int value_count;
+
+public:
+	JSONFormatter() : level( 0 ) {
+		cerr << "JSONFormatter Created!" << endl;
+	}
+
+private:
+	void indent() {
+		for ( int i = 0; i < this->level; i++ ) {
+			cout << "  ";
+		}		
+	}
+
+	void renderText( const std::string & str ) {
+		for ( std::string::const_iterator it = str.begin(); it != str.end(); ++it ) {
+			const unsigned char ch = *it;
+			if ( ch == '"' ) {
+				cout << "\"\"";
+			} else {
+				cout << ch;
+			}
+		}
+	}
+
+
 public:
 	void startDocument() {
-
+		cout << "{" << endl;
+		this->level += 1;
+		this->section_count = 0;
 	}
 	void endDocument() {
-
+		if ( this->section_count > 0 ) {
+			this->indent();
+			cout << "}" << endl;
+		}
+		this->level -= 1;
+		cout << "}" << endl;
 	}
 	void startSection( const string & sectionName ) {
-
+		if ( this->section_count > 0 ) {
+			this->indent();
+			cout << "}," << endl;
+		}
+		this->value_count = 0;
+		this->indent();
+		cout << "\"" << sectionName << "\": {" << endl;
+		this->level += 1; 
 	}
 	void endSection() {
-
+		if ( this->value_count > 0 ) {
+			cout << " }" << endl;
+		}
+		this->level -= 1;
+		this->section_count += 1;
 	}
 	void insertComment( const string & comment ) {
-		
+		this->indent();
+		cout << "# " << comment << endl;
 	}
 	void startValue( const string & valueName ) {
-
+		if ( this->value_count > 0 ) {
+			cout << " }," << endl;
+		}
+		this->indent();
+		cout << "{ \"name\": \"" << valueName << "\"";
 	}
 	void addAttribute( const string & key, const string & val ) {
-
+		cout << ", \"" << key << "\": \"";
+		this->renderText( val );
+		cout << "\"";
 	}
 	void endValue() {
-
+		this->value_count += 1;
 	}
 	virtual ~JSONFormatter() {}
 };
@@ -161,30 +216,42 @@ public:
 
 
 class ReStructuredTextFormatter : public Formatter {
+private:
+	int section_count;
+
+public:
+	ReStructuredTextFormatter() : section_count( 0 ) {}
+
 public:
 	void startDocument() {
-
+		cout << "Ginger Virtual Machine Information" << endl;
+		cout << "==================================" << endl << endl;
 	}
 	void endDocument() {
-
 	}
 	void startSection( const string & sectionName ) {
-
+		cout << sectionName << endl;
+		size_t n = sectionName.size();
+		for ( size_t i = 0; i < n; i++ ) {
+			cout << "-";
+		}
+		cout << endl << endl;
 	}
 	void endSection() {
-
+		cout << endl;
 	}
 	void insertComment( const string & comment ) {
-		
+		cout << comment << endl << endl;
 	}
 	void startValue( const string & valueName ) {
-
+		cout << valueName << endl;
 	}
 	void addAttribute( const string & key, const string & val ) {
-
+		cout << "    " << key << endl;
+		cout << "        " << val << endl;
 	}
 	void endValue() {
-
+		cout << endl;
 	}
 	virtual ~ReStructuredTextFormatter() {}
 };
@@ -432,6 +499,7 @@ public:
 	            }
 	            case 'j': {
 	            	oformat = JSON_FORMAT;
+	            	break;
 	            }
 	            case 'r' : {
 	            	oformat = RESTRUCTUREDTEXT_FORMAT;

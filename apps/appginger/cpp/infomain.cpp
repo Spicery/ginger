@@ -132,12 +132,14 @@ public:
 
 class JSONFormatter : public Formatter {
 private:
+	bool with_comments;
 	int level;
 	int section_count;
 	int value_count;
+	bool in_std;			//	True iff we are in the std section.
 
 public:
-	JSONFormatter() : level( 0 ) {
+	JSONFormatter() : with_comments( false ), level( 0 ), in_std( false ) {
 		cerr << "JSONFormatter Created!" << endl;
 	}
 
@@ -152,7 +154,9 @@ private:
 		for ( std::string::const_iterator it = str.begin(); it != str.end(); ++it ) {
 			const unsigned char ch = *it;
 			if ( ch == '"' ) {
-				cout << "\"\"";
+				cout << "\\\"";
+			} else if ( ch == '\\' ) {
+				cout << "\\\\";
 			} else {
 				cout << ch;
 			}
@@ -169,7 +173,11 @@ public:
 	void endDocument() {
 		if ( this->section_count > 0 ) {
 			this->indent();
-			cout << "}" << endl;
+			if ( this->in_std ) {
+				cout << "}" << endl;
+			} else {
+				cout << "]" << endl;
+			}
 		}
 		this->level -= 1;
 		cout << "}" << endl;
@@ -177,11 +185,16 @@ public:
 	void startSection( const string & sectionName ) {
 		if ( this->section_count > 0 ) {
 			this->indent();
-			cout << "}," << endl;
+			cout << "]," << endl;
 		}
 		this->value_count = 0;
 		this->indent();
-		cout << "\"" << sectionName << "\": {" << endl;
+		this->in_std = ( sectionName == "std" );
+		if ( this->in_std ) {
+			cout << "\"" << sectionName << "\": {" << endl;
+		} else {
+			cout << "\"" << sectionName << "\": [" << endl;
+		}
 		this->level += 1; 
 	}
 	void endSection() {
@@ -192,20 +205,38 @@ public:
 		this->section_count += 1;
 	}
 	void insertComment( const string & comment ) {
-		this->indent();
-		cout << "# " << comment << endl;
+		//	JSON does not support comments, strictly speaking.
+		if ( with_comments ) {
+			this->indent();
+			cout << "# " << comment << endl;
+		}
 	}
-	void startValue( const string & valueName ) {
+	void startValue( const string & topic ) {
 		if ( this->value_count > 0 ) {
 			cout << " }," << endl;
 		}
 		this->indent();
-		cout << "{ \"name\": \"" << valueName << "\"";
+		if ( not this->in_std ) {
+			cout << "{ \"topic\": \"" << topic << "\"";
+		}
 	}
 	void addAttribute( const string & key, const string & val ) {
-		cout << ", \"" << key << "\": \"";
-		this->renderText( val );
-		cout << "\"";
+		//	N.B. We rely on the fact that the sysfn attributes are 
+		//	emitted in the order name, docstring, <others> to get
+		//	the formatting correct!
+		if ( this->in_std && ( key == "name" ) ) {
+			cout << "\"";
+			this->renderText( val ); 
+			cout << "\": { ";
+		} else if ( this->in_std && ( key == "docstring" ) ) {
+			cout << "\"" << key << "\": \"";
+			this->renderText( val );
+			cout << "\"";			
+		} else {
+			cout << ", \"" << key << "\": \"";
+			this->renderText( val );
+			cout << "\"";			
+		}
 	}
 	void endValue() {
 		this->value_count += 1;
@@ -265,6 +296,7 @@ static void printUsage() {
 	cout << "-x, --xml             output using XML (MinXML in fact)" << endl;
 	cout << "-H, --help            print out this help info" << endl;
 	cout << "-V, --version         print out version information and exit" << endl;
+	cout << "-K, --hexkeys         print cheat sheet for simple key values" << endl;
 	cout << endl;
 }	
 
@@ -315,6 +347,7 @@ static struct option long_options[] =
     {
         { "help",           no_argument,      		0, 'H' },
         { "json",			no_argument,			0, 'j' },
+        { "hexkeys",		no_argument,			0, 'K' },
         { "rst",            no_argument,      		0, 'r' },
         { "version",        no_argument,            0, 'V' },
         { "xml",          	no_argument,      		0, 'x' },
@@ -505,7 +538,7 @@ public:
 	            	oformat = RESTRUCTUREDTEXT_FORMAT;
 	                break;
 	            }
-	            case 'k': {
+	            case 'K': {
 	            	printHelpHex();
 	            	return false;
 	            }

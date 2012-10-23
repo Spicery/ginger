@@ -140,7 +140,6 @@ private:
 
 public:
 	JSONFormatter() : with_comments( false ), level( 0 ), in_std( false ) {
-		cerr << "JSONFormatter Created!" << endl;
 	}
 
 private:

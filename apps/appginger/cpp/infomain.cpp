@@ -392,10 +392,8 @@ private:
 	}
 
 	void printStdInfo() {
-		//cout << "  <std>" << endl;
 		this->formatter->startSection( "std" );
 
-		//cout << "    <!-- Summary of the built-in functions -->" << endl;
 		this->formatter->insertComment( "Summary of the built-in functions" );
 
 		for (
@@ -403,109 +401,74 @@ private:
 			it != sysMap.end();
 			++it
 		) {
-			
-			//cout << "    <sysfn ";
-			//printAttr( "name", it->first );
-			//printAttr( "docstring", ( it->second.docstring != NULL ? it->second.docstring : "-" ) );
-			//printAttr( "in", it->second.in_arity.toString() );
-			//printAttr( "out", it->second.out_arity.toString() );
-			//cout << "/>" << endl;
-
 			this->formatter->startValue( "sysfn" );
 			this->formatter->addAttribute( "name", it->first );
 			this->formatter->addAttribute( "docstring", ( it->second.docstring != NULL ? it->second.docstring : "-" ) );
 			this->formatter->addAttribute( "in", it->second.in_arity.toString() );
 			this->formatter->addAttribute( "out", it->second.out_arity.toString() );
 			this->formatter->endValue();
-
 		}
 
-		//cout << "  </std>" << endl;
 		this->formatter->endSection();
 	}
 
 	void printBuildInfo() {
-		//cout << "  <release>" << endl;
 		this->formatter->startSection( "release" );
 
-		//cout << "    <version "; printAttr( "number", APPGINGER_VERSION ); cout << "/>" << endl;
 		this->formatter->startValue( "version" );
 		this->formatter->addAttribute( "number", APPGINGER_VERSION );
 		this->formatter->endValue();
 
-
-
-		//cout << "    <build ";
-		//printAttr( "file", __FILE__ );
-		//printAttr( "date", __DATE__ ); 
-		//printAttr( "time", __TIME__ ); 
-		//cout << "/>" << endl;
 		this->formatter->startValue( "build" );
 		this->formatter->addAttribute( "file", __FILE__ );
 		this->formatter->addAttribute( "date", __DATE__ );
 		this->formatter->addAttribute( "time", __TIME__ );
 		this->formatter->endValue();
 
-		//cout << "  </release>" << endl;
 		this->formatter->endSection();
 	}
 
 	void printLicenseInfo() {
-		//cout << "  <ipr>" << endl;
 		this->formatter->startSection( "ipr" );
 		
-		//cout << "    <!-- Intellectual Property Rights -->" << endl;
 		this->formatter->insertComment( "Intellectual Property Rights" );
 
-		//cout << "    <license url=\"http://www.gnu.org/licenses/gpl-3.0.txt\" />" << endl;
 		this->formatter->startValue( "license" );
 		this->formatter->addAttribute( "url", "http://www.gnu.org/licenses/gpl-3.0.txt" );
 		this->formatter->endValue();
 
-		//cout << "    <copyright notice=\"Copyright (c) 2010 Stephen Leach\" email=\"stephen.leach@steelypip.com\"/>" << endl;
 		this->formatter->startValue( "copyright" );
 		this->formatter->addAttribute( "notice", "Copyright (c) 2010 Stephen Leach" );
 		this->formatter->addAttribute( "email", "stephen.leach@steelypip.com" );
 		this->formatter->endValue();
 		
-		//cout << "  </ipr>" << endl;
 		this->formatter->endSection();
 	}
 
 	void printCommunityInfo() {
-		//cout << "  <community>" << endl;
 		this->formatter->startSection( "community" );
 		
-		//cout << "    <!-- URLs for all the services for users & the devteam -->" << endl;
 		this->formatter->insertComment( "URLs for all the services for users & the devteam" );
 		
-		//cout << "    <!-- We are obviously missing a user website, forum and mailing list -->" << endl;
 		this->formatter->insertComment( "We are obviously missing a user website, forum and mailing list" );
 		
-		//cout << "    <repository type=\"subversion\" url=\"http://svn6.assembla.com/svn/ginger/\" />" << endl;
 		this->formatter->startValue( "repository" );
 		this->formatter->addAttribute( "type", "subversion" );
 		this->formatter->addAttribute( "url", "http://svn6.assembla.com/svn/ginger/" );
 		this->formatter->endValue();
 
-		//cout << "    <issue_tracking type=\"trac\" url=\"http://trac6.assembla.com/ginger\" />" << endl;
-		//	TODO! issue_tracking is not a valid element name! No underbars allowed.
 		this->formatter->startValue( "issue_tracking" );
 		this->formatter->addAttribute( "type", "trac" );
 		this->formatter->addAttribute( "url", "http://trac6.assembla.com/ginger" );
 		this->formatter->endValue();
 
-		//cout << "  </community>" << endl;
 		this->formatter->endSection();
 	}
 
 public:
 	void printMetaInfo() {
-		//cout << "<?xml version=\"1.0\"?>" << endl;
-		//cout << "<appginger>" << endl;
 		this->formatter->startDocument();
 
-		//cout << "  <!-- Information about the AppGinger executable, its toolchain or community -->" << endl;
 		this->formatter->insertComment( "Information about the AppGinger executable, its toolchain or community" );
 		
 		this->printBuildInfo();
@@ -513,7 +476,6 @@ public:
 		this->printCommunityInfo();
 		this->printStdInfo();
 		this->formatter->endDocument();
-		//cout << "</appginger>" << endl;
 	}
 
 public:
@@ -522,7 +484,7 @@ public:
 		for(;;) {
 	        int option_index = 0;
 	        int c = getopt_long( argc, argv, "HjkrVx", long_options, &option_index );
-	        //cerr << "Got c = " << c << endl;
+	        
 	        if ( c == -1 ) break;
 	        switch ( c ) {
 	            case 'x': {

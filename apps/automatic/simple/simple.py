@@ -10,7 +10,7 @@
 #
 #	It generates two C++ code snippet files
 #		*	${GINGERDEV}/apps/automatic/simple/simplekey.cpp.auto
-#		•	${GINGERDEV}/apps/automaticsimple/simplekey.hpp.auto
+#		*	${GINGERDEV}/apps/automaticsimple/simplekey.hpp.auto
 #	These snippets are included into 
 #		*	${GINGERDEV}/apps/appginger/cpp/key.cpp and 
 #		*	${GINGERDEV}/apps/automatic/hpp/key.hpp
@@ -184,9 +184,9 @@ keys = [
 #	Generates the code snippet for the key.hpp header file.
 ################################################################################
 
-def generateHPP( outputFolder ):
+def generateHPP():
 	"""Creates the simple.hpp.auto file."""
-	file = open( os.path.join( outputFolder, "simplekey.hpp.auto" ), 'w' )
+	file = open( "simplekey.hpp.auto", 'w' )
 	
 	# Generate the Kinds #define's.
 	for k in Kind.values():
@@ -216,9 +216,9 @@ def generateHPP( outputFolder ):
 #	Generates the code snippet for the key.cpp source file.
 ################################################################################
 
-def generateCPP( outputFolder ):
+def generateCPP():
 	"""Creates the simplekey.cpp.auto file"""
-	file = open( os.path.join( outputFolder, "simplekey.cpp.auto" ), 'w' )
+	file = open( "simplekey.cpp.auto", 'w' )
 	for a in keys:
 		file.write( 'case {}: return "{}";\n'.format( a.ordinal(), a.name() ) )
 	file.close()
@@ -227,11 +227,11 @@ def generateCPP( outputFolder ):
 #	Main
 ################################################################################
 
-def generate( outputFolder ):
-	generateHPP( outputFolder )
-	generateCPP( outputFolder )
+def generate():
+	generateHPP()
+	generateCPP()
 
-generate( "simple" )
+generate()
 
 ################################################################################
 

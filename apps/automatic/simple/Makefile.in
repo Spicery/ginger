@@ -1,0 +1,5 @@
+all:
+	python simple.py
+
+clean:
+	rm -f *.auto

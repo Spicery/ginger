@@ -1,0 +1,5 @@
+all:
+	python metainfo.py
+
+clean:
+	rm -f metainfo.cpp.inc

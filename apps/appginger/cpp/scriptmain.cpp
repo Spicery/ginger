@@ -19,6 +19,7 @@
 #include <fstream>
 #include <string>
 #include <sstream>
+#include <cstdlib>
 
 #include <syslog.h>
 

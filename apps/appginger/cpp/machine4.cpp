@@ -1,8 +1,10 @@
 #include "machine4.hpp"
 #include "instructions_context.hpp"
-#include <stdio.h>
+#include <cstdio>
+#include <cstdlib>
 
 using namespace Ginger;
+using namespace std;
 
 #define FREEZE
 #define MELT

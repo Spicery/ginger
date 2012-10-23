@@ -39,10 +39,10 @@ def counter():
 
 class Layout:
 
-	_count = counter()
-	_values = []
-
+	
 	def __init__( self, name ):
+		self._count = counter()
+		self._values = []
 		self._name = name
 		self._ordinal = Layout._count.next()
 		Layout._values.append( self )

@@ -1,10 +1,12 @@
 all clean:
+	# TODO: $(MAKE) -C automatic $@
 	$(MAKE) -C libgng $@
 	$(MAKE) -C appginger $@
 	$(MAKE) -C common2gnx $@
 	$(MAKE) -C fetchgnx $@
 	$(MAKE) -C file2gnx $@
 	$(MAKE) -C gson2gnx $@
+	# TODO: $(MAKE) -C automatic/metainfo $@
 	$(MAKE) -C libmetainfo $@
 	$(MAKE) -C lisp2gnx $@
 	$(MAKE) -C lnx2csv $@

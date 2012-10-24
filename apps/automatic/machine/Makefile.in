@@ -1,0 +1,5 @@
+all:
+	python make_machine.py
+
+clean:
+	rm -f *.auto

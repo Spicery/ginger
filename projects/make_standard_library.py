@@ -9,8 +9,7 @@ import os
 
 def stdLibProjectDir():
 	"""Returns the standard library public.auto directory"""
-	# For development we use tmp_library rather than standard_library.
-	return "tmp_library/ginger.library/public.auto"
+	return "standard_library/ginger.library/public.auto"
 
 def encodeName( name ):
 	"""
@@ -67,8 +66,7 @@ def generateGingerLibrary( stdinfo ):
 
 def gingerInteractiveDir():
 	"""Returns the directory for the ginger.interactive package"""
-	# For development we use tmp_library rather than standard_library.
-	return "tmp_library/ginger.interactive"
+	return "standard_library/ginger.interactive"
 
 def generateGingerInteractive():
 	dir = gingerInteractiveDir()
@@ -77,23 +75,6 @@ def generateGingerInteractive():
 	f = open( os.path.join( dir, "imports.gnx" ), 'w' )
 	f.write( "<package><import from=\"ginger.library\" match0=\"public\" /></package>\n" )
 	f.close()
-
-################################################################################
-#   generateMetaInfoTable
-################################################################################
-
-# Not sure this is required any more. Am going to see if I can delete.
-	
-def metaInfoDir():
-	"""Returns the directory for the metainfo"""
-	# For development we use tmp_metainfo rather than metainfo.
-	return "../automatic/tmp_metainfo"
-
-def generateMetaInfoTable( stdinfo ):
-	dir = metaInfoDir()
-	if not os.path.exists( dir ):
-		os.makedirs( dir )	
-	return
 
 ################################################################################
 #   Main

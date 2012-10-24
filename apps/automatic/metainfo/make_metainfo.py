@@ -12,7 +12,7 @@ def metaInfoDir():
 	return "../automatic/tmp_metainfo"
 
 def generateMetaInfo( ):
-	metainfo = json.loads( subprocess.check_output( [ "../appginger/cpp/ginger-info", "-j" ] ) )
+	metainfo = json.loads( subprocess.check_output( [ "../../appginger/cpp/ginger-info", "-j" ] ) )
 	stdinfo = metainfo[ "std" ]
 	dir = metaInfoDir()
 	if not os.path.exists( dir ):

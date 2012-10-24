@@ -1,4 +1,0 @@
-extern Ref * sysNewPair( Ref * pc, MachineClass * vm );
-extern Ref * sysIsPair( Ref * pc, MachineClass * vm );
-extern Ref * sysHeadField( Ref * pc, MachineClass * vm );
-extern Ref * sysTailField( Ref * pc, MachineClass * vm );

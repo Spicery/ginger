@@ -1,3 +1,0 @@
-extern Ref * sysNewAttrMap( Ref * pc, MachineClass * vm );
-extern Ref * sysIsAttrMap( Ref * pc, MachineClass * vm );
-extern Ref * sysAttrMapNameField( Ref * pc, MachineClass * vm );

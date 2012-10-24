@@ -1,4 +1,0 @@
-extern Ref * sysNewElement( Ref * pc, MachineClass * vm );
-extern Ref * sysIsElement( Ref * pc, MachineClass * vm );
-extern Ref * sysElementAttrMapField( Ref * pc, MachineClass * vm );
-extern Ref * sysIndexElement( Ref * pc, MachineClass * vm );

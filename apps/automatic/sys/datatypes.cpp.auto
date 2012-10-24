@@ -1,6 +1,0 @@
-#include "ref.cpp.auto"
-#include "pair.cpp.auto"
-#include "maplet.cpp.auto"
-#include "vector.cpp.auto"
-#include "attrmap.cpp.auto"
-#include "element.cpp.auto"

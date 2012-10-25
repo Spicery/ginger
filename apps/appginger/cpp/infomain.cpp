@@ -453,11 +453,11 @@ private:
 		this->formatter->insertComment( "We are obviously missing a user website, forum and mailing list" );
 		
 		this->formatter->startValue( "repository" );
-		this->formatter->addAttribute( "type", "subversion" );
-		this->formatter->addAttribute( "url", "http://svn6.assembla.com/svn/ginger/" );
+		this->formatter->addAttribute( "type", "git" );
+		this->formatter->addAttribute( "url", "http://github.com/Spicery/ginger/" );
 		this->formatter->endValue();
 
-		this->formatter->startValue( "issue_tracking" );
+		this->formatter->startValue( "issue.tracking" );
 		this->formatter->addAttribute( "type", "trac" );
 		this->formatter->addAttribute( "url", "http://trac6.assembla.com/ginger" );
 		this->formatter->endValue();

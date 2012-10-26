@@ -539,11 +539,14 @@ void CodeGenClass::vmiIF( bool sense, LabelClass * dst, LabelClass * contn ) {
 }
 
 void CodeGenClass::vmiGOTO( LabelClass * d ) {
-	if ( d == CONTINUE_LABEL || d->isReturn() ) {
+	if ( d->isReturn() ) {
+		this->emitSPC( vmc_return );
+	} else if ( d == CONTINUE_LABEL ) {
 		throw Ginger::SystemError( "Trying to GOTO a fake label" );
+	} else {
+		this->emitSPC( vmc_goto );
+		d->labelInsert();
 	}
-	this->emitSPC( vmc_goto );
-	d->labelInsert();
 }
 
 void CodeGenClass::vmiDECR( const int d ) {
@@ -661,6 +664,9 @@ static bool isConstantIntGnx( Gnx gnx ) {
 }
 
 void CodeGenClass::compileIfTest( bool sense, Gnx mnx, LabelClass * dst, LabelClass * contn ) {
+	bool done = false;
+
+	//	This next section should be refactored.
 	if ( mnx->name() == SYSAPP ) {
 		SysMap::iterator it = sysMap.find( mnx->attribute( SYSAPP_NAME ) );
 		if ( it != sysMap.end() ) {
@@ -673,12 +679,27 @@ void CodeGenClass::compileIfTest( bool sense, Gnx mnx, LabelClass * dst, LabelCl
 				VIdent vid0( this, mnx->child( 0 ) );
 				VIdent vid1( this, mnx->child( 1 ) );
 				this->compileComparison( sense, vid0, info.cmp_op, vid1, dst, contn );
-				return; 	//	*** Processed the special case ***
+				done = true; 	//	*** Processed the special case ***
 			}
 		}
 	}
-	this->compile1( mnx, CONTINUE_LABEL );
-	this->vmiIF( sense, dst, contn );
+
+	if ( not done ) {
+		if ( mnx->name() == OR && mnx->size() == 2 ) {
+			LabelClass e( this );
+			this->compileIfTest( sense, mnx->child( 0 ), e.jumpToJump( dst ), CONTINUE_LABEL );
+			this->compileIfTest( sense, mnx->child( 1 ), e.jumpToJump( dst ), e.jumpToJump( contn ) );
+			e.labelSet();
+		} else if ( mnx->name() == AND && mnx->size() == 2 ) {
+			LabelClass e( this );
+			this->compileIfTest( sense, mnx->child( 0 ), CONTINUE_LABEL, e.jumpToJump( contn ) );
+			this->compileIfTest( sense, mnx->child( 1 ), e.jumpToJump( dst ), e.jumpToJump( contn ) );
+			e.labelSet();
+		} else {
+			this->compile1( mnx, CONTINUE_LABEL );
+			this->vmiIF( sense, dst, contn );
+		}
+	}
 }
 
 void CodeGenClass::compileIfNot( Gnx mnx, LabelClass * dst, LabelClass * contn ) {
@@ -1048,6 +1069,17 @@ static void throwProblem( Gnx mnx ) {
 	}
 }
 
+void CodeGenClass::compileAndOr( bool sense, Gnx mnx, LabelClass * contn ) {
+	LabelClass d( this );
+	LabelClass e( this );
+	this->compile1( mnx->child( 0 ), CONTINUE_LABEL );
+	this->vmiIF( sense, &d, CONTINUE_LABEL );
+	this->vmiPUSHQ( sense ? SYS_FALSE : SYS_TRUE );
+	this->vmiGOTO( e.jumpToJump( contn ) );
+	d.labelSet();
+	this->compile1( mnx->child( 1 ), e.jumpToJump( contn ) );
+	e.labelSet();
+}
 
 void CodeGenClass::compileGnx( Gnx mnx, LabelClass * contn ) {
 	const string & nm = mnx->name();
@@ -1058,6 +1090,10 @@ void CodeGenClass::compileGnx( Gnx mnx, LabelClass * contn ) {
 		this->vmiPUSH( vid, contn );
 	} else if ( nm == IF ) {
 		this->compileGnxIf( mnx, contn );
+	} else if ( nm == OR && mnx->size() == 2 ) {
+		this->compileAndOr( false, mnx, contn );
+	} else if ( nm == AND && mnx->size() == 2 ) {
+		this->compileAndOr( true, mnx, contn );
 	} else if ( nm == SYSAPP ) {
 		this->compileGnxSysApp( mnx, contn );
 	} else if ( nm == APP ) {

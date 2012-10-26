@@ -206,6 +206,7 @@ private:
 	void compileGnxMakeRef( Gnx mnx, LabelClass * contn );
 	void compileGnxSetCont( Gnx mnx, LabelClass * contn );
 	void compileGnxSelfCall( Gnx mnx, LabelClass * contn );
+	void compileAndOr( bool sense, Gnx mnx, LabelClass * contn );
 
 
 public:

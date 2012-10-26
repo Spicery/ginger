@@ -47,6 +47,8 @@
 #define SETCONT			"setcont"
 
 #define IF				"if"
+#define OR              "or"
+#define AND             "and"
 #define SET				"set"
 #define FOR				"for"
 #define FROM			"from"

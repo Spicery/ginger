@@ -69,7 +69,7 @@ Layout.UNUSED7_LAYOUT	= Layout( "UNUSED7_LAYOUT" )
 
 
 ################################################################################
-#	The Kind class denotes a 3-bit refinement of a layout that provides
+#	The Kind class denotes a 4-bit refinement of a layout that provides
 #	enough type information for general low-level operators, such as 
 #	explode ('...'). [Kinds represent built-in essential classes.]
 ################################################################################

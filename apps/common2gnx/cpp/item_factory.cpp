@@ -125,16 +125,29 @@ void ItemFactoryClass::readAtDigitOrMinus( int ch ) {
 	//
 	//	Number
 	//
+	bool digit_seen = false;
+	bool decimal_point_seen = false;
+
 	do {
 		this->text.push_back( (char)ch );
+		if ( isdigit( ch ) ) digit_seen = true;
 		ch = this->nextchar();
 	} while ( isdigit( ch ) );
+	if ( ch == '.' ) {
+		decimal_point_seen = true;
+		do {
+			this->text.push_back( (char)ch );
+			if ( isdigit( ch ) ) digit_seen = true;
+			ch = this->nextchar();
+		} while ( isdigit( ch ) );
+	}
 	this->pushchar( ch );
-	if ( this->text.size() == 1 && this->text[ 0 ] == '-' ) {
+
+	if ( not digit_seen ) {
 		this->item = this->itemMap.lookup( this->text );
 	} else {
 		Item it = this->item = this->spare;
-		it->tok_type = tokty_int;
+		it->tok_type = decimal_point_seen ? tokty_double : tokty_int;
 		it->role = LiteralRole;
 		it->nameString() = this->text;
 	}

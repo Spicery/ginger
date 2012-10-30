@@ -297,7 +297,8 @@ Ref * sysExplode( Ref *pc, class MachineClass * vm ) {
 }
 
 /**
- * 	sysLength is defined for list-like objects.
+ * 	sysLength is definitely defined for list-like objects. The question is
+ *	whether or not it is usefully defined for maps. I think it is.
  */
 Ref * sysLength( Ref *pc, class MachineClass * vm ) {
 	if ( vm->count == 1 ) {
@@ -316,6 +317,7 @@ Ref * sysLength( Ref *pc, class MachineClass * vm ) {
 							vm->fastPeek() = obj_K[ VECTOR_LAYOUT_OFFSET_LENGTH ];
 							break;
 						}
+						case ATTR_KIND:
 						case MIXED_KIND: {
 							vm->fastPeek() = obj_K[ MIXED_LAYOUT_OFFSET_LENGTH ];
 							break;
@@ -328,19 +330,14 @@ Ref * sysLength( Ref *pc, class MachineClass * vm ) {
 							vm->fastPeek() = LongToSmall( sizeAfterKeyOfVectorLayout( obj_K ) );	// Same as pc = sysStringLength( pc, vm );
 							break;
 						}
-						case WRECORD_KIND: {
-							//vm->fastPeek() = LongToSmall( sizeAfterKeyOfWRecordLayout( obj_K ) );
-							throw Mishap( "Trying to take the length of a word record" ).culprit( "Object", refToString( obj_K ) );
+						case MAP_KIND: {
+							vm->fastPeek() = fastMapCount( r );
 							break;
 						}
+						case WRECORD_KIND:
 						case RECORD_KIND: {
 							//vm->fastPeek() = LongToSmall( sizeAfterKeyOfRecordLayout( obj_K ) );
 							throw Mishap( "Trying to take the length of a record" ).culprit( "Object", refToString( obj_K ) );
-							break;
-						}
-						case ATTR_KIND:
-						case MAP_KIND: {
-							throw Mishap( "Length not defined for this object" ).culprit( "Object", refToString( obj_K ) );
 							break;
 						}
 						default: {

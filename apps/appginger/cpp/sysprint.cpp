@@ -29,6 +29,8 @@
 #include "sysmap.hpp"
 #include "syssymbol.hpp"
 #include "sysinstance.hpp"
+#include "wrecordlayout.hpp"
+#include "sysdouble.hpp"
 
 //#define DBG_SYSPRINT 1
 
@@ -153,19 +155,16 @@ static void refRecordPrint( std::ostream & out, Ref * rec_K ) {
 	out << "}";
 }
 
+//	TODO: This looks very wrong!!!!
 static void refWRecordPrint( std::ostream & out, Ref * rec_K ) {
-	if ( *rec_K == sysDoubleKey ) {
-		out << "<double>"; 		//	TODO: printing of doubles.
-	} else {
-		unsigned long len = lengthOfRecordLayout( rec_K );
-		bool sep = false;
-		out << "wrecord{";
-		for ( unsigned long i = 1; i <= len; i++ ) {
-			if ( sep ) { out << ","; } else { sep = true; }
-			refPrint( rec_K[ i ] ); 
-		}
-		out << "}";
+	unsigned long len = lengthOfWRecordLayout( rec_K );
+	bool sep = false;
+	out << "wrecord{";
+	for ( unsigned long i = 1; i <= len; i++ ) {
+		if ( sep ) { out << ","; } else { sep = true; }
+		refPrint( rec_K[ i ] ); 	//	TODO: NO!!!
 	}
+	out << "}";
 }
 
 static void refInstancePrint( std::ostream & out, Ref * rec_K ) {
@@ -179,6 +178,11 @@ static void refInstancePrint( std::ostream & out, Ref * rec_K ) {
 		refPrint( rec_K[ i ] ); 
 	}
 	out << "}";
+}
+
+void refDoublePrint( std::ostream & out, const Ref r ) {
+	double d = gngFastDoubleValue( r );
+	out << d;
 }
 
 void refPrint( std::ostream & out, const Ref r ) {
@@ -225,7 +229,13 @@ void refPrint( std::ostream & out, const Ref r ) {
 					break;
 				}
 				case WRECORD_KIND: {
-					refWRecordPrint( out, obj_K );
+					//cout << "sysDoubleKey = " << hex << sysDoubleKey << endl;
+					//cout << "*obj_K = " << hex << *obj_K << endl;
+					if ( *obj_K == sysDoubleKey ) {
+						refDoublePrint( out, r );
+					} else {
+						refWRecordPrint( out, obj_K );
+					}
 					break;
 				}
 				case STRING_KIND: {

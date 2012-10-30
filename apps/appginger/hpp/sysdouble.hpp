@@ -16,35 +16,12 @@
     along with AppGinger.  If not, see <http://www.gnu.org/licenses/>.
 \******************************************************************************/
 
-#ifndef HEAP_HPP
-#define HEAP_HPP
+#ifndef GNG_SYS_DOUBLE_HPP
+#define GNG_SYS_DOUBLE_HPP
 
-#include "cage.hpp"
+#include "common.hpp"
 
-class HeapClass {
-friend class HeapCrawl;
-private:
-	CageClass *						current;
-	std::vector< CageClass * >		zoo;
-	MachineClass *					machine_ptr;
-	
-public:
-	bool wouldGC( int size );
-	CageClass * preflight( Ref * & pc, int size );
-	CageClass * preflight( int size );
-	Ref copyString( const char *s );				//	Copy string, possibly causing GC
-	Ref copyString( Ref * & pc, const char *s );	//	Copy string, possibly causing GC
-	Ref copyDouble( double d );						//	Copy double, possibly causing GC
-	Ref copyDouble( Ref * & pc, double d );			//	Copy double, possibly causing GC
-
-public:
-	void selectCurrent();
-	CageClass * newCageClass();
-
-public:
-	HeapClass( MachineClass * machine );
-	~HeapClass();
-
-};
+//extern Ref * sysNewDouble( Ref *pc, MachineClass * vm );
+extern double gngFastDoubleValue( Ref r );
 
 #endif

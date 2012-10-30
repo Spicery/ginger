@@ -329,6 +329,19 @@ Node ReadStateClass::postfixProcessing( Node lhs, Item item, int prec ) {
 				seq.end();
 				return makeApp( func, seq.build() );
 			}
+			case tokty_double: {
+				NodeFactory add;
+				add.start( "add" );
+				add.add( lhs );
+				add.start( "constant" );
+				add.put( "type", "double" );
+				add.put( "value", item->nameString() );
+				add.end();
+				add.end();
+				Node t = add.build();
+				//fprintf( stderr, "DEBUG arity %d\n", term_arity( t ) );
+				return t;
+			}
 			case tokty_int: {
 				NodeFactory add;
 				add.start( "add" );

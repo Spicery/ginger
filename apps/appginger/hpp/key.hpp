@@ -116,12 +116,19 @@ KEYLESS_KIND
 #define LAYOUT_OFFSET			TAGG
 #define LAYOUT_MASK				( 0x7 << LAYOUT_OFFSET )
 
-#define KIND_WIDTH				4
-#define KIND_OFFSET				( LAYOUT_OFFSET + LAYOUT_WIDTH )
-#define KIND_MASK				( 0xF << ( TAGG + LAYOUT_WIDTH ) )
+//  We only use 2 bits of the sublayout atm, although it is given a width of 4.
+#define SUBLAYOUT_WIDTH         4
+#define SUBLAYOUT_OFFSET        ( LAYOUT_OFFSET + LAYOUT_WIDTH )
+#define SUBLAYOUT_MASK          ( 0xF << SUBLAYOUT_OFFSET )
+#define ATOMIC_SUBLAYOUT        0x3
+
+#define KIND_WIDTH				( LAYOUT_WIDTH + SUBLAYOUT_WIDTH )
+#define KIND_OFFSET				( LAYOUT_OFFSET )
+#define KIND_MASK				( 0x1F << KIND_OFFSET )
 #define IsSimpleKey( r )		( ( ToULong( r ) & TAGG_MASK ) == KEY_TAGG )
 #define KindOfSimpleKey( k )	( ( ToULong( k ) & KIND_MASK ) >> KIND_OFFSET )
-#define LayoutOfSimpleKey( k )	( ( ToULong( k ) & LAYOUT_MASK ) >> LAYOUT_OFFSET )
+#define LayoutOfSimpleKey( k )  ( ( ToULong( k ) & LAYOUT_MASK ) >> LAYOUT_OFFSET )
+#define SublayoutOfSimpleKey( k )  ( ( ToULong( k ) & SUBLAYOUT_MASK ) >> SUBLAYOUT_OFFSET )
 	
 #define LEN_WIDTH				8
 #define LENGTH_OFFSET 			( KIND_WIDTH + KIND_OFFSET )
@@ -131,8 +138,8 @@ KEYLESS_KIND
 #define SIM_KEY_ID_OFFSET		( LENGTH_OFFSET + LEN_WIDTH )
 #define SimpleKeyID( k ) 		( ToULong(k) >> SIM_KEY_ID_OFFSET )
 
-#define MAKE_KEY( ID, N, K, L ) \
-	ToRef( ( ( ( (ID) << LEN_WIDTH | (N) ) << KIND_WIDTH | (K) ) << LAYOUT_WIDTH | (L) ) << TAGG | KEY_TAGG )
+#define MAKE_KEY( ID, N, S, L ) \
+	ToRef( ( ( ( (ID) << LEN_WIDTH | (N) ) << SUBLAYOUT_WIDTH | (S) ) << LAYOUT_WIDTH | (L) ) << TAGG | KEY_TAGG )
 
 //	Include the definitions for the Kinds, the ${SimpleKey}ID and sys${SimpleKey}Key's
 #include "simplekey.hpp.auto"

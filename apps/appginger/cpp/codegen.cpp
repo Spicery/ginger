@@ -21,6 +21,7 @@
 #include "codegen.hpp"
 
 #include <iostream>
+#include <sstream>
 
 #include "gnxconstants.hpp"
 #include "mnx.hpp"
@@ -1027,6 +1028,15 @@ Ref CodeGenClass::calcConstant( Gnx mnx ) {
 		throw Ginger::SystemError( "To be implemented" ).culprit( "Expression", mnx->toString() );
 	} else if ( type == "string" ) {
 		return this->vm->heap().copyString( mnx->attribute( CONSTANT_VALUE ).c_str() );
+	} else if ( type == "double" ) {
+		double d;
+		const std::string& numtext( mnx->attribute( CONSTANT_VALUE ) );
+		std::istringstream i( numtext );
+		if ( not ( i >> d ) ) {
+			throw Ginger::Mishap( "Format of double precision number incorrect" ).culprit( "Number", numtext );
+		} else {
+			return this->vm->heap().copyDouble( d );
+		}
 	} else if ( type == "symbol" ) {
 		return refMakeSymbol( mnx->attribute( CONSTANT_VALUE ) );
 	} else if ( type == SYSFN and mnx->hasAttribute( SYSFN_VALUE ) ) {

@@ -29,6 +29,8 @@
 #include "sysmap.hpp"
 #include "syssymbol.hpp"
 #include "sysinstance.hpp"
+#include "wrecordlayout.hpp"
+#include "sysdouble.hpp"
 
 //#define DBG_SYSPRINT 1
 
@@ -153,6 +155,18 @@ static void refRecordPrint( std::ostream & out, Ref * rec_K ) {
 	out << "}";
 }
 
+//	TODO: This looks very wrong!!!!
+static void refWRecordPrint( std::ostream & out, Ref * rec_K ) {
+	unsigned long len = lengthOfWRecordLayout( rec_K );
+	bool sep = false;
+	out << "wrecord{";
+	for ( unsigned long i = 1; i <= len; i++ ) {
+		if ( sep ) { out << ","; } else { sep = true; }
+		refPrint( rec_K[ i ] ); 	//	TODO: NO!!!
+	}
+	out << "}";
+}
+
 static void refInstancePrint( std::ostream & out, Ref * rec_K ) {
 	unsigned long len = lengthOfInstance( rec_K );
 	//std::cout << "Length of object " << len << std::endl;
@@ -164,6 +178,11 @@ static void refInstancePrint( std::ostream & out, Ref * rec_K ) {
 		refPrint( rec_K[ i ] ); 
 	}
 	out << "}";
+}
+
+void refDoublePrint( std::ostream & out, const Ref r ) {
+	double d = gngFastDoubleValue( r );
+	out << d;
 }
 
 void refPrint( std::ostream & out, const Ref r ) {
@@ -179,6 +198,10 @@ void refPrint( std::ostream & out, const Ref r ) {
 		if ( IsFunctionKey( key ) ) {
 			out << "<function>";
 		} else if ( IsSimpleKey( key ) ) {
+			#ifdef DBG_SYSPRINT
+				cerr << "-- printing simple key = " << hex << ToULong( key ) << endl;
+				cerr << "-- Kind of simple key = " << hex << KindOfSimpleKey( key ) << endl;
+			#endif
 			switch ( KindOfSimpleKey( key ) ) {
 				case VECTOR_KIND: {
 					refVectorPrint( out, obj_K );
@@ -203,6 +226,16 @@ void refPrint( std::ostream & out, const Ref r ) {
 				}
 				case RECORD_KIND: {
 					refRecordPrint( out, obj_K );
+					break;
+				}
+				case WRECORD_KIND: {
+					//cout << "sysDoubleKey = " << hex << sysDoubleKey << endl;
+					//cout << "*obj_K = " << hex << *obj_K << endl;
+					if ( *obj_K == sysDoubleKey ) {
+						refDoublePrint( out, r );
+					} else {
+						refWRecordPrint( out, obj_K );
+					}
 					break;
 				}
 				case STRING_KIND: {

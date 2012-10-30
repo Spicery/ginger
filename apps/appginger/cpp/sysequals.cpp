@@ -108,6 +108,14 @@ static bool refStringEquals( Ref * rx, Ref * ry ) {
 	}
 }
 
+static bool refWRecordEquals( Ref * rx, Ref * ry ) {
+	unsigned long n = sizeAfterKeyOfRecordLayout( rx );
+	for ( unsigned long i = 1; i <= n; i++ ) {
+		if ( rx[ i ] == ry[ i ] ) return false;
+	}
+	return true;
+}
+
 static bool refMapEquals( Ref * rx, Ref * ry ) {
 	throw Ginger::Mishap( "ToBeDone" );
 }
@@ -135,6 +143,7 @@ bool refEquals( Ref x, Ref y ) {
 						case PAIR_KIND: 	return refPairEquals( x, y );
 						case MAP_KIND:		return refMapEquals( x_K, y_K );
 						case RECORD_KIND: 	return refRecordEquals( x_K, y_K );
+						case WRECORD_KIND: 	return refWRecordEquals( x_K, y_K );
 						case STRING_KIND: 	return refStringEquals( x_K, y_K );
 						default: {
 							throw Ginger::Mishap( "ToBeDone" );

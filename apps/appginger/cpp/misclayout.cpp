@@ -22,6 +22,7 @@
 #include "vectorlayout.hpp"
 #include "stringlayout.hpp"
 #include "classlayout.hpp"
+#include "wrecordlayout.hpp"
 
 #include "common.hpp"
 #include "key.hpp"
@@ -143,6 +144,12 @@ void findObjectLimits( Ref * obj_K, Ref * & obj_A, Ref * & obj_Z1 ) {
 				obj_Z1 = obj_K1 + d;
 				return;
 			}
+			case WRECORD_LAYOUT: {
+				assert( LayoutOfSimpleKey( key ) == WRECORD_LAYOUT );
+				assert( KindOfSimpleKey( key ) == WRECORD_KIND );
+				obj_A = obj_K;
+				obj_Z1 = obj_K1 + sizeAfterKeyOfWRecordLayout( obj_K );
+			}
 			default: throw "Unreachable";
 		}
 	} else if ( IsFunctionKey( key ) ) {		
@@ -242,6 +249,12 @@ unsigned long lengthAfterObjectKey( Ref * obj_K ) {
 				assert( LayoutOfSimpleKey( key ) == STRING_LAYOUT );
 				assert( KindOfSimpleKey( key ) == STRING_KIND );
 				return sizeAfterKeyOfStringLayout( obj_K );
+				break;
+			}
+			case WRECORD_LAYOUT: {
+				assert( LayoutOfSimpleKey( key ) == WRECORD_LAYOUT );
+				assert( KindOfSimpleKey( key ) == WRECORD_KIND );
+				return sizeAfterKeyOfWRecordLayout( obj_K );
 				break;
 			}
 			default: 

@@ -324,10 +324,7 @@ Ref * sysNewCacheEqMap( Ref *pc, MachineClass * vm ) {
 	return newMap( pc, vm, sysCacheEqMapKey );
 }
 
-
-
-
-Ref * sysMapExplode( Ref *pc, class MachineClass * vm ) {
+Ref * sysMapValues( Ref *pc, class MachineClass * vm ) {
 	if ( vm->count != 1 ) throw Ginger::Mishap( "ArgsMismatch" );
 	Ref r = vm->fastPop();
 	if ( !IsMap( r ) ) throw Ginger::Mishap( "Map needed" ).culprit( "Object", refToString( r ) );
@@ -345,6 +342,40 @@ Ref * sysMapExplode( Ref *pc, class MachineClass * vm ) {
 	
 	return pc;
 }
+
+Ref * sysMapExplode( Ref *pc, class MachineClass * vm ) {
+	if ( vm->count != 1 ) throw Ginger::Mishap( "ArgsMismatch" );
+	Ref r = vm->fastPeek();		// Don't remove from stack yet, may need to GC.
+	if ( !IsMap( r ) ) throw Ginger::Mishap( "Map needed" ).culprit( "Object", refToString( r ) );
+
+	//	See if we need a garbage collection.
+	long count = SmallToLong( fastMapCount( r ) );
+	XfrClass xfr( vm->heap().preflight( pc, count * MAPLET_SIZE ) );
+
+	//	Now we can remove the map from the stack.
+	vm->fastPop();
+	
+	//	And make sure we have enough room on the stack for the maplets.
+	vm->checkStackRoom( count );
+	
+	Ref * map_K = RefToPtr4( r );
+	MapCrawl map_crawl( map_K );
+	for (;;) {
+		Ref * bucket_K = map_crawl.nextBucket();
+		if ( bucket_K == NULL ) break;
+
+		xfr.setOrigin();
+        xfr.xfrRef( sysMapletKey );
+        Ref k = bucket_K[ ASSOC_OFFSET_KEY ];
+        Ref v = bucket_K[ ASSOC_OFFSET_VALUE ];
+        xfr.xfrRef( k );
+        xfr.xfrRef( v );
+        vm->fastPush( xfr.makeRef() );
+	}
+	
+	return pc;
+}
+
 
 Ref * sysMapIndex( Ref * pc, class MachineClass * vm ) {
 	if ( vm->count != 2 ) throw Ginger::Mishap( "ArgsMismatch" );
@@ -391,7 +422,7 @@ void gngPrintMapPtr( std::ostream & out, Ref * map_K ) {
 		Ref k = bucket_K[ ASSOC_OFFSET_KEY ];
 		Ref v = bucket_K[ ASSOC_OFFSET_VALUE ];
 		refPrint( out, k );
-		out << ":-";
+		out << "=>";
 		refPrint( out, v );
 	}
 	out << "%}";

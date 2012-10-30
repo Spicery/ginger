@@ -19,6 +19,7 @@
 ################################################################################
 
 import os
+import struct 	# For calculating the size of doubles.
 
 ################################################################################
 #	Utility functions
@@ -30,6 +31,15 @@ def counter():
 	while True:
 		yield n
 		n += 1
+
+def counterTo( mx ):
+	"""A simple helper routine for allocating serial numbers upto a max."""
+	n = 0
+	while n < mx:
+		yield n
+		n += 1
+	raise CountLimitExceeded
+
 
 ################################################################################
 #	The Layout class specifies a 3-bit field that describes the store
@@ -63,7 +73,7 @@ Layout.RECORD_LAYOUT	= Layout( "RECORD_LAYOUT" )
 Layout.VECTOR_LAYOUT	= Layout( "VECTOR_LAYOUT" )
 Layout.STRING_LAYOUT	= Layout( "STRING_LAYOUT" )
 Layout.MIXED_LAYOUT		= Layout( "MIXED_LAYOUT" )
-Layout.UNUSED5_LAYOUT	= Layout( "UNUSED5_LAYOUT" )
+Layout.WRECORD_LAYOUT	= Layout( "WRECORD_LAYOUT" )
 Layout.UNUSED6_LAYOUT	= Layout( "UNUSED6_LAYOUT" )
 Layout.UNUSED7_LAYOUT	= Layout( "UNUSED7_LAYOUT" )
 
@@ -75,18 +85,23 @@ Layout.UNUSED7_LAYOUT	= Layout( "UNUSED7_LAYOUT" )
 ################################################################################
 
 class Kind:
-	
+	LAYOUT_WIDTH = 3
 	_values = []
-	_next = counter()
+	#_next = counter()
 
-	def __init__( self, name, layout ):
+	def __init__( self, name, layout, sublayout ):
+		#print "Kind( ", name, layout.ordinal(), sublayout, ")"
 		self._name = name
-		self._ordinal = Kind._next.next()
+		#self._ordinal = Kind._next.next()
 		self._layout = layout
+		self._sublayout = sublayout
 		Kind._values.append( self )
 
-	def ordinal( self ):
-		return self._ordinal
+	#def ordinal( self ):
+	#	return self._ordinal
+
+	def kind( self ):
+		return ( self._sublayout << Kind.LAYOUT_WIDTH ) | self._layout.ordinal() 
 
 	def layout( self ):
 		return self._layout
@@ -94,20 +109,36 @@ class Kind:
 	def name( self ):
 		return self._name
 
+	def sublayout( self ):
+		return self._sublayout
+
 	@staticmethod
 	def values():
 		for i in Kind._values:
 			yield i	
 
-Kind.KEYLESS_KIND 	= Kind( "KEYLESS", Layout.KEYLESS_LAYOUT )
-Kind.RECORD_KIND	= Kind( "RECORD", Layout.RECORD_LAYOUT )
-Kind.PAIR_KIND 		= Kind( "PAIR", Layout.RECORD_LAYOUT )
-Kind.MAP_KIND 		= Kind( "MAP", Layout.RECORD_LAYOUT )
-Kind.VECTOR_KIND 	= Kind( "VECTOR", Layout.VECTOR_LAYOUT )
-Kind.STRING_KIND 	= Kind( "STRING", Layout.STRING_LAYOUT )
-Kind.ATTR_KIND 		= Kind( "ATTR", Layout.MIXED_LAYOUT )
-Kind.MIXED_KIND 	= Kind( "MIXED", Layout.MIXED_LAYOUT )	
+Kind.SUBLAYOUT_WIDTH 		= 2
+Kind.ATOMIC_SUBLAYOUT       = ( 1 << Kind.SUBLAYOUT_WIDTH ) - 1
 
+Kind.KEYLESS_SUBLAYOUT 		= counterTo( Kind.ATOMIC_SUBLAYOUT )
+Kind.RECORD_SUBLAYOUT 		= counterTo( Kind.ATOMIC_SUBLAYOUT )
+Kind.VECTOR_SUBLAYOUT 		= counterTo( Kind.ATOMIC_SUBLAYOUT )
+Kind.STRING_SUBLAYOUT 		= counterTo( Kind.ATOMIC_SUBLAYOUT )
+Kind.MIXED_SUBLAYOUT 		= counterTo( Kind.ATOMIC_SUBLAYOUT )
+Kind.WRECORD_SUBLAYOUT 		= counterTo( Kind.ATOMIC_SUBLAYOUT )
+
+Kind.KEYLESS_KIND 	= Kind( "KEYLESS", Layout.KEYLESS_LAYOUT, Kind.KEYLESS_SUBLAYOUT.next() )
+Kind.RECORD_KIND	= Kind( "RECORD", Layout.RECORD_LAYOUT, Kind.RECORD_SUBLAYOUT.next() )
+Kind.PAIR_KIND 		= Kind( "PAIR", Layout.RECORD_LAYOUT, Kind.RECORD_SUBLAYOUT.next() )
+Kind.MAP_KIND 		= Kind( "MAP", Layout.RECORD_LAYOUT, Kind.RECORD_SUBLAYOUT.next() )
+Kind.VECTOR_KIND 	= Kind( "VECTOR", Layout.VECTOR_LAYOUT, Kind.VECTOR_SUBLAYOUT.next() )
+Kind.STRING_KIND 	= Kind( "STRING", Layout.STRING_LAYOUT, Kind.STRING_SUBLAYOUT.next() )
+Kind.ATTR_KIND 		= Kind( "ATTR", Layout.MIXED_LAYOUT, Kind.MIXED_SUBLAYOUT.next() )
+#print "ATTR KIND", Kind.ATTR_KIND.kind()
+Kind.MIXED_KIND 	= Kind( "MIXED", Layout.MIXED_LAYOUT, Kind.MIXED_SUBLAYOUT.next() )	
+#print "MIXED KIND", Kind.MIXED_KIND.kind()
+Kind.WRECORD_KIND 	= Kind( "WRECORD", Layout.WRECORD_LAYOUT, Kind.WRECORD_SUBLAYOUT.next() )	
+Kind.ATOMIC_WRECORD_KIND = Kind( "ATOMIC_WRECORD", Layout.WRECORD_LAYOUT, Kind.ATOMIC_SUBLAYOUT )
 
 ################################################################################
 #	The KeyData class is used to represent all the information of a simple
@@ -136,6 +167,15 @@ class KeyData:
 
 	def kind( self ):
 		return self._kind
+
+# 	ATTENTION!
+#	Calculating how large a Double object needs to be is a non-trivial
+#	exercise. In particular it depends on whether or not the -m32 or
+#	-m64 flags are supplied to the g++ compiler. The following is a good
+#	first draft. (However it does mean that we should really amend the
+#	build script so that there's an initial 32/64 bit selection
+#	phase i.e. make all32 and make all64.
+wordsPerDouble = ( struct.calcsize( "d" ) + struct.calcsize( "P" ) - 1 ) / struct.calcsize( "P" )
 
 keys = [
 	KeyData( "Absent", 			0, 	0, 	Kind.KEYLESS_KIND 	),
@@ -176,7 +216,8 @@ keys = [
 	KeyData( "Indeterminate",  	27, 0,  Kind.KEYLESS_KIND	),
 	KeyData( "Element",      	28, 1, 	Kind.MIXED_KIND		),
 	KeyData( "AttrMap",			29,	1,	Kind.ATTR_KIND		),
-	KeyData( "Exception",      	30, 3,  Kind.RECORD_KIND	)
+	KeyData( "Exception",      	30, 3,  Kind.RECORD_KIND	),
+	KeyData( "Double",          31, wordsPerDouble,  Kind.WRECORD_KIND   )
 ]
 
 
@@ -190,7 +231,7 @@ def generateHPP():
 	
 	# Generate the Kinds #define's.
 	for k in Kind.values():
-		file.write( "#define {}_KIND {}\n".format( k.name(), k.ordinal() ) )
+		file.write( "#define {}_KIND {}\n".format( k.name(), k.kind() ) )
 
 	# Generate the Layout #define's.
 	for x in Layout.values():
@@ -204,7 +245,7 @@ def generateHPP():
 				skey.name(), 
 				skey.ordinal(), 
 				skey.nfields(), 
-				skey.kind().ordinal(), 
+				skey.kind().sublayout(), 
 				skey.kind().layout().ordinal() 
 			) 
 		)

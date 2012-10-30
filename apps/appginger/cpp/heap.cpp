@@ -73,8 +73,13 @@ Ref HeapClass::copyString( Ref * & pc, const char * s ) {
 	//	Strings have a two Ref overhead & must be ref aligned and have
 	//	an additional 1-byte overhead for null-byte.
 	size_t n = strlen( s );
-	Ref * fake_pc = static_cast< Ref * >( 0 );
-	XfrClass xfr( fake_pc, *this, 2 + ( n + 1 + sizeof( Ref ) - 1 ) / sizeof( Ref ) );
+
+	//	TODO: This looks like a defect to me! Check all uses!!
+	//	Surely we should not be using fake_pc but real pc. 
+	//	OK - I have commented out the offending line - leaving this 
+	//	message as a reminder to review all uses in more detail later.
+	//	Ref * fake_pc = static_cast< Ref * >( 0 );
+	XfrClass xfr( pc, *this, 2 + ( n + 1 + sizeof( Ref ) - 1 ) / sizeof( Ref ) );
 	
 	//	We will actually copy n+1 bytes to include the null-termination.
 	//	So the calculation of the size is a little bit trickier.
@@ -96,7 +101,19 @@ Ref HeapClass::copyString( const char *s ) {
 	return this->copyString( fake_pc, s );
 }
 
+Ref HeapClass::copyDouble( Ref * & pc, double d ) {
+	int n = ( sizeof( double ) + sizeof( Ref ) - 1 ) / sizeof( Ref );
+	XfrClass xfr( pc, *this, 1 + sizeof( double ) / sizeof( Ref ) );
+	xfr.setOrigin();
+	xfr.xfrRef( sysDoubleKey );
+	xfr.xfrCopy( reinterpret_cast< Ref * >( &d ), n );
+	return xfr.makeRef();
+}
 
+Ref HeapClass::copyDouble( double d ) {
+	Ref * fake_pc = static_cast< Ref * >( 0 );
+	return this->copyDouble( fake_pc, d );
+}
 
 
 HeapClass::HeapClass( MachineClass * machine ) :

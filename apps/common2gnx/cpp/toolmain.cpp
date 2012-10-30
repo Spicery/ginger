@@ -187,6 +187,8 @@ void ToolMain::tokenise( FILE *in ) {
 			cout << " R=\"literal\"";
 			if ( item->tok_type == tokty_int ) {
 				cout << " T=\"int\"";
+			} else if ( item->tok_type == tokty_double ) {
+				cout << " T=\"double\"";
 			} else if ( item->tok_type == tokty_string ) {
 				cout << " T=\"string\"";
 			}

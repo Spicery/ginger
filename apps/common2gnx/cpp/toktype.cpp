@@ -58,6 +58,7 @@ const char *tok_type_as_type( TokType fnc ) {
 	case tokty_present : return "present";
 	case tokty_bool : return "bool";
 	case tokty_int : return "int";
+	case tokty_double : return "double";
 	case tokty_char : return "char";
 	case tokty_string : return "string";
 	case tokty_indeterminate : return "indeterminate";

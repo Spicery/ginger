@@ -28,7 +28,7 @@ OBJS=vident.o codegen.o \
 	destination.o heap.o key.o \
 	misclayout.o listlayout.o \
 	maplayout.o functionlayout.o \
-	vectorlayout.o stringlayout.o \
+	vectorlayout.o stringlayout.o wrecordlayout.o \
 	heapcrawl.o cagecrawl.o callstackcrawl.o fnobjcrawl.o \
 	garbagecollect.o scanfunc.o scanpkg.o \
 	machine.o instruction_set.o \

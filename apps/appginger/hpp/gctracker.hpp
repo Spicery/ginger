@@ -61,6 +61,7 @@ public:
 	virtual void startInstance( Ref * obj_K ) {}
 	virtual void endInstance( Ref * obj_K ) {}
 	virtual void atString( Ref * obj_K ) {}
+	virtual void atWRecord( Ref * obj_K ) {}
 	
 public:
 	virtual ~GCTracker() {};

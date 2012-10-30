@@ -153,6 +153,21 @@ static void refRecordPrint( std::ostream & out, Ref * rec_K ) {
 	out << "}";
 }
 
+static void refWRecordPrint( std::ostream & out, Ref * rec_K ) {
+	if ( *rec_K == sysDoubleKey ) {
+		out << "<double>"; 		//	TODO: printing of doubles.
+	} else {
+		unsigned long len = lengthOfRecordLayout( rec_K );
+		bool sep = false;
+		out << "wrecord{";
+		for ( unsigned long i = 1; i <= len; i++ ) {
+			if ( sep ) { out << ","; } else { sep = true; }
+			refPrint( rec_K[ i ] ); 
+		}
+		out << "}";
+	}
+}
+
 static void refInstancePrint( std::ostream & out, Ref * rec_K ) {
 	unsigned long len = lengthOfInstance( rec_K );
 	//std::cout << "Length of object " << len << std::endl;
@@ -179,6 +194,10 @@ void refPrint( std::ostream & out, const Ref r ) {
 		if ( IsFunctionKey( key ) ) {
 			out << "<function>";
 		} else if ( IsSimpleKey( key ) ) {
+			#ifdef DBG_SYSPRINT
+				cerr << "-- printing simple key = " << hex << ToULong( key ) << endl;
+				cerr << "-- Kind of simple key = " << hex << KindOfSimpleKey( key ) << endl;
+			#endif
 			switch ( KindOfSimpleKey( key ) ) {
 				case VECTOR_KIND: {
 					refVectorPrint( out, obj_K );
@@ -203,6 +222,10 @@ void refPrint( std::ostream & out, const Ref r ) {
 				}
 				case RECORD_KIND: {
 					refRecordPrint( out, obj_K );
+					break;
+				}
+				case WRECORD_KIND: {
+					refWRecordPrint( out, obj_K );
 					break;
 				}
 				case STRING_KIND: {

@@ -55,9 +55,11 @@ using namespace Ginger;
 
 //#define DBG_SYS
 
-/*
- * Does not check vmcount. Which is good because we do not guarantee
- * set the vmcount when it is called. This is purely about performance.
+/**
+ * 	Does not check vmcount. Which is good because we do not guarantee to
+ * 	set the vmcount when it is called. This is purely about performance.
+ *	
+ *	"on-style" iteration should also be defined separately. 
  */
 Ref * sysFastGetFastIterator( Ref * pc, class MachineClass * vm ) {
 	Ref r = vm->fastPop();
@@ -66,59 +68,64 @@ Ref * sysFastGetFastIterator( Ref * pc, class MachineClass * vm ) {
 		Ref * obj_K = RefToPtr4( r );
 		Ref key = *obj_K;
 		if ( IsSimpleKey( key ) ) {
-			switch ( KindOfSimpleKey( key ) ) {
-				case PAIR_KIND: {
-					vm->fastPush( r );			//	Iteration state.
-					vm->fastPush( SYS_ABSENT );	//	Iteration context, a dummy.
-					vm->fastPush( vm->sysFastListIterator() );
-					break;
-				}
-				case RECORD_KIND: {
-					throw Mishap( "ToBeDone" );
-					break;
-				}
-				case STRING_KIND: {
-					vm->fastPush( LongToRef(0) );	//	Iteration state.
-					vm->fastPush( r );				//	Iteration context, a dummy.
-					vm->fastPush( vm->sysFastStringIterator() );
-					break;
-				}
-				case ATTR_KIND:
-				case MAP_KIND: {
-				
-					//	Explode the map.
-					Ref * mark = vm->vp;
-					vm->fastPush( r );
-					vm->count = 1;
-					pc = sysExplode( pc, vm );
-					ptrdiff_t n = vm->vp - mark;
-
-					//	Gather the map as a vector.
-					vm->count = n;
-					pc = sysNewVector( pc, vm );
-					Ref x = vm->fastPop();
+			if ( SublayoutOfSimpleKey( key ) == ATOMIC_SUBLAYOUT ) {
+				throw Mishap( "Trying to iterate over atomic value" ).culprit( "Value", refToString( obj_K ) );
+			} else {
+				switch ( KindOfSimpleKey( key ) ) {
+					case PAIR_KIND: {
+						vm->fastPush( r );			//	Iteration state.
+						vm->fastPush( SYS_ABSENT );	//	Iteration context, a dummy.
+						vm->fastPush( vm->sysFastListIterator() );
+						break;
+					}
+					case WRECORD_KIND:
+					case RECORD_KIND: {
+						throw Mishap( "Trying to iterate over record value" ).culprit( "Value", refToString( obj_K ) );
+						break;
+					}
+					case STRING_KIND: {
+						vm->fastPush( LongToRef(0) );	//	Iteration state.
+						vm->fastPush( r );				//	Iteration context, a dummy.
+						vm->fastPush( vm->sysFastStringIterator() );
+						break;
+					}
+					case ATTR_KIND:
+					case MAP_KIND: {
 					
-					//	Now treat it as a vector iteration.
+						//	Explode the map.
+						Ref * mark = vm->vp;
+						vm->fastPush( r );
+						vm->count = 1;
+						pc = sysExplode( pc, vm );
+						ptrdiff_t n = vm->vp - mark;
 
-					vm->fastPush( LongToRef(1) );	//	Iteration state.
-					vm->fastPush( x );				//	Iteration context, a dummy.
-					vm->fastPush( vm->sysFastVectorIterator() );
-					break;
-				}
-				case VECTOR_KIND: {
-					vm->fastPush( LongToRef(1) );	//	Iteration state.
-					vm->fastPush( r );				//	Iteration context, a dummy.
-					vm->fastPush( vm->sysFastVectorIterator() );
-					break;
-				}
-				case MIXED_KIND: {
-					vm->fastPush( LongToRef(1) );	//	Iteration state.
-					vm->fastPush( r );				//	Iteration context, a dummy.
-					vm->fastPush( vm->sysFastMixedIterator() );
-					break;
-				}
-				default: {
-					throw Ginger::Mishap( "ToBeDone" );
+						//	Gather the map as a vector.
+						vm->count = n;
+						pc = sysNewVector( pc, vm );
+						Ref x = vm->fastPop();
+						
+						//	Now treat it as a vector iteration.
+
+						vm->fastPush( LongToRef(1) );	//	Iteration state.
+						vm->fastPush( x );				//	Iteration context, a dummy.
+						vm->fastPush( vm->sysFastVectorIterator() );
+						break;
+					}
+					case VECTOR_KIND: {
+						vm->fastPush( LongToRef(1) );	//	Iteration state.
+						vm->fastPush( r );				//	Iteration context, a dummy.
+						vm->fastPush( vm->sysFastVectorIterator() );
+						break;
+					}
+					case MIXED_KIND: {
+						vm->fastPush( LongToRef(1) );	//	Iteration state.
+						vm->fastPush( r );				//	Iteration context, a dummy.
+						vm->fastPush( vm->sysFastMixedIterator() );
+						break;
+					}
+					default: {
+						throw Ginger::Mishap( "ToBeDone" );
+					}
 				}
 			}
 		} else if ( IsObj( key ) ) {
@@ -137,8 +144,11 @@ Ref * sysFastGetFastIterator( Ref * pc, class MachineClass * vm ) {
 	return pc;
 }
 
-//	This should be decomposed by implemented vectorAppend, listAppend
-//	and stringAppend
+/**
+ * 	Append is defined for list-like objects.
+ *	This should be decomposed by implemented vectorAppend, listAppend
+ *	and stringAppend.
+ */
 Ref * sysAppend( Ref * pc, class MachineClass * vm ) {
 	if ( vm->count == 2 ) {
 		Ref rhs = vm->fastPeek();
@@ -171,8 +181,9 @@ Ref * sysAppend( Ref * pc, class MachineClass * vm ) {
 	throw Mishap( "Invalid arguments for append (++)" );
 }
 
-/*
-	index( map_like, idx )
+/**
+ *	Index is only defined for list-like objects
+ *		index( map_like, idx )
 */
 Ref * sysIndex( Ref *pc, class MachineClass * vm ) {
 	if ( vm->count != 2 ) throw Ginger::Mishap( "ArgsMismatch" );
@@ -203,6 +214,10 @@ Ref * sysIndex( Ref *pc, class MachineClass * vm ) {
 	return pc;
 }
 
+/**
+ * 	Explode is the inverse of construction. It is therefore defined for a
+ * 	wide variety of objects, not just list-like objects. 
+ */
 Ref * sysExplode( Ref *pc, class MachineClass * vm ) {
 	if ( vm->count == 1 ) {
 		Ref r = vm->fastPeek();
@@ -212,42 +227,56 @@ Ref * sysExplode( Ref *pc, class MachineClass * vm ) {
 			if ( IsFunctionKey( key ) ) {
 				throw Mishap( "Trying to explode (...) a function object" );
 			} else if ( IsSimpleKey( key ) ) {
-				switch ( KindOfSimpleKey( key ) ) {
-					case VECTOR_KIND: {
-						pc = sysVectorExplode( pc, vm );
-						break;
-					}
-					case MIXED_KIND: {
-						pc = sysMixedKindExplode( pc, vm, key );
-						break;
-					}
-					case PAIR_KIND: {
-						pc = sysListExplode( pc, vm );
-						break;
-					}
-					case RECORD_KIND: {
-						//	ARGUABLY THIS IS INCORRECT.
-						vm->fastDrop( 1 );
-						unsigned long n = sizeAfterKeyOfRecordLayout( obj_K );
-						vm->checkStackRoom( n );
-						memcpy( vm->vp + 1, obj_K + 1, n * sizeof( Ref ) );
-						vm->vp += n;
-						break;
-					}
-					case STRING_KIND: {
-						pc = sysStringExplode( pc, vm );
-						break;
-					}
-					case MAP_KIND: {
-						pc = sysMapExplode( pc, vm );
-						break;
-					}
-					case ATTR_KIND: {
-						pc = sysAttrMapExplode( pc, vm );
-						break;
-					}
-					default: {
-						throw Ginger::Mishap( "ToBeDone" );
+				if ( SublayoutOfSimpleKey( key ) == ATOMIC_SUBLAYOUT ) {
+					throw Mishap( "Trying to explode an atomic value" ).culprit( "Value", refToString( obj_K ) );
+				} else {
+					switch ( KindOfSimpleKey( key ) ) {
+						case VECTOR_KIND: {
+							pc = sysVectorExplode( pc, vm );
+							break;
+						}
+						case MIXED_KIND: {
+							pc = sysMixedKindExplode( pc, vm, key );
+							break;
+						}
+						case PAIR_KIND: {
+							pc = sysListExplode( pc, vm );
+							break;
+						}
+						case WRECORD_KIND: {
+							//	The problem here is that we need to box the words
+							//	before pushing them onto the stack. But what do the
+							//	words represent? The obvious view is that they represent
+							//	unsigned/signed longs. 
+							throw Mishap( "To be done" );
+						}
+						case RECORD_KIND: {
+							//	ARGUABLY THIS IS INCORRECT. 
+							//	What does it mean to explode a record? It means that
+							//	it has a default map-like behaviour. If so, what are
+							//	the keys? The access procedures??
+							vm->fastDrop( 1 );
+							unsigned long n = sizeAfterKeyOfRecordLayout( obj_K );
+							vm->checkStackRoom( n );
+							memcpy( vm->vp + 1, obj_K + 1, n * sizeof( Ref ) );
+							vm->vp += n;
+							break;
+						}
+						case STRING_KIND: {
+							pc = sysStringExplode( pc, vm );
+							break;
+						}
+						case MAP_KIND: {
+							pc = sysMapExplode( pc, vm );
+							break;
+						}
+						case ATTR_KIND: {
+							pc = sysAttrMapExplode( pc, vm );
+							break;
+						}
+						default: {
+							throw Ginger::Mishap( "ToBeDone" );
+						}
 					}
 				}
 			} else if ( IsObj( key ) ) {
@@ -267,6 +296,9 @@ Ref * sysExplode( Ref *pc, class MachineClass * vm ) {
 	}
 }
 
+/**
+ * 	sysLength is defined for list-like objects.
+ */
 Ref * sysLength( Ref *pc, class MachineClass * vm ) {
 	if ( vm->count == 1 ) {
 		Ref r = vm->fastPeek();
@@ -274,36 +306,46 @@ Ref * sysLength( Ref *pc, class MachineClass * vm ) {
 			Ref * obj_K = RefToPtr4( r );
 			Ref key = *obj_K;
 			if ( IsFunctionKey( key ) ) {
-				throw Mishap( "Trying to explode (...) a function object" );
+				throw Mishap( "Trying to take the length of a function object" );
 			} else if ( IsSimpleKey( key ) ) {
-				switch ( KindOfSimpleKey( key ) ) {
-					case VECTOR_KIND: {
-						vm->fastPeek() = obj_K[ VECTOR_LAYOUT_OFFSET_LENGTH ];
-						break;
-					}
-					case MIXED_KIND: {
-						vm->fastPeek() = obj_K[ MIXED_LAYOUT_OFFSET_LENGTH ];
-						break;
-					}
-					case PAIR_KIND: {
-						pc = sysListLength( pc, vm );
-						break;
-					}
-					case RECORD_KIND: {
-						vm->fastPeek() = LongToSmall( sizeAfterKeyOfRecordLayout( obj_K ) );
-						break;
-					}
-					case STRING_KIND: {
-						vm->fastPeek() = LongToSmall( sizeAfterKeyOfVectorLayout( obj_K ) );	// Same as pc = sysStringLength( pc, vm );
-						break;
-					}
-					case ATTR_KIND:
-					case MAP_KIND: {
-						throw Mishap( "Trying to take length of a map" );
-						break;
-					}
-					default: {
-						throw "unimplemented (other)";
+				if ( SublayoutOfSimpleKey( key ) == ATOMIC_SUBLAYOUT ) {
+					throw Mishap( "Trying to take the length of an atomic object" ).culprit( "Object", refToString( obj_K ) );
+				} else {
+					switch ( KindOfSimpleKey( key ) ) {
+						case VECTOR_KIND: {
+							vm->fastPeek() = obj_K[ VECTOR_LAYOUT_OFFSET_LENGTH ];
+							break;
+						}
+						case MIXED_KIND: {
+							vm->fastPeek() = obj_K[ MIXED_LAYOUT_OFFSET_LENGTH ];
+							break;
+						}
+						case PAIR_KIND: {
+							pc = sysListLength( pc, vm );
+							break;
+						}
+						case STRING_KIND: {
+							vm->fastPeek() = LongToSmall( sizeAfterKeyOfVectorLayout( obj_K ) );	// Same as pc = sysStringLength( pc, vm );
+							break;
+						}
+						case WRECORD_KIND: {
+							//vm->fastPeek() = LongToSmall( sizeAfterKeyOfWRecordLayout( obj_K ) );
+							throw Mishap( "Trying to take the length of a word record" ).culprit( "Object", refToString( obj_K ) );
+							break;
+						}
+						case RECORD_KIND: {
+							//vm->fastPeek() = LongToSmall( sizeAfterKeyOfRecordLayout( obj_K ) );
+							throw Mishap( "Trying to take the length of a record" ).culprit( "Object", refToString( obj_K ) );
+							break;
+						}
+						case ATTR_KIND:
+						case MAP_KIND: {
+							throw Mishap( "Length not defined for this object" ).culprit( "Object", refToString( obj_K ) );
+							break;
+						}
+						default: {
+							throw "unimplemented (other)";
+						}
 					}
 				}
 			} else if ( IsObj( key ) ) {

@@ -443,9 +443,6 @@ private:
 			switch ( LayoutOfSimpleKey( key ) ) {
 			//switch ( KindOfSimpleKey( key ) ) {
 				case RECORD_LAYOUT: {
-				//case PAIR_KIND:
-				//case MAP_KIND:
-				//case RECORD_KIND: {
 					assert( LayoutOfSimpleKey( key ) == RECORD_LAYOUT );
 					assert( KindOfSimpleKey( key ) == PAIR_KIND || KindOfSimpleKey( key ) == MAP_KIND || KindOfSimpleKey( key ) == RECORD_KIND );
 					if ( this->tracker ) this->tracker->startRecord( obj_K );
@@ -525,13 +522,17 @@ private:
 				}
 				//	This should be STRING_LAYOUT
 				case STRING_LAYOUT: {
-				//case STRING_KIND: {
 					assert( LayoutOfSimpleKey( key ) == STRING_LAYOUT );
 					assert( KindOfSimpleKey( key ) == STRING_KIND );
 
 					if ( this->tracker ) this->tracker->atString( obj_K );
 					//	Non-full. Can stop.
 					break;
+				}
+				case WRECORD_LAYOUT: {
+					assert( LayoutOfSimpleKey( key ) == WRECORD_LAYOUT );
+					assert( KindOfSimpleKey( key ) == WRECORD_KIND );
+					if ( this->tracker ) this->tracker->atWRecord( obj_K );
 				}
 				default: {
 					throw "unimplemented (other)";

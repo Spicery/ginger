@@ -16,19 +16,13 @@
     along with AppGinger.  If not, see <http://www.gnu.org/licenses/>.
 \******************************************************************************/
 
-#ifndef INSTRUCTIONS_CONTEXT_HPP
-#define INSTRUCTIONS_CONTEXT_HPP
+#ifndef GNG_DOUBLE_LAYOUT_HPP
+#define GNG_DOUBLE_LAYOUT_HPP
 
-#include "machine.hpp"
-#include "callstacklayout.hpp"
-#include "mishap.hpp"
 #include "common.hpp"
-#include "key.hpp"
-#include "sys.hpp"
-#include "misclayout.hpp"
-#include "vectorlayout.hpp"
-#include "stringlayout.hpp"
-#include "sysdouble.hpp"
-#include "doublelayout.hpp"
+
+#define DOUBLE_VALUE_SIZE           ( ( sizeof( gngdouble ) + sizeof( Ref ) - 1 ) / sizeof( Ref ) )
+#define DOUBLE_SIZE                 ( 1 + DOUBLE_VALUE_SIZE )
+#define DOUBLE_OFFSET_VALUE         1
 
 #endif

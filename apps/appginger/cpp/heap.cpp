@@ -23,6 +23,7 @@ using namespace std;
 #include "key.hpp"
 #include "heap.hpp"
 #include "garbagecollect.hpp"
+#include "doublelayout.hpp"
 
 #include <cstring>
 
@@ -101,16 +102,15 @@ Ref HeapClass::copyString( const char *s ) {
 	return this->copyString( fake_pc, s );
 }
 
-Ref HeapClass::copyDouble( Ref * & pc, double d ) {
-	int n = ( sizeof( double ) + sizeof( Ref ) - 1 ) / sizeof( Ref );
-	XfrClass xfr( pc, *this, 1 + sizeof( double ) / sizeof( Ref ) );
+Ref HeapClass::copyDouble( Ref * & pc, gngdouble d ) {
+	XfrClass xfr( pc, *this, DOUBLE_SIZE );
 	xfr.setOrigin();
 	xfr.xfrRef( sysDoubleKey );
-	xfr.xfrCopy( reinterpret_cast< Ref * >( &d ), n );
+	xfr.xfrCopy( reinterpret_cast< Ref * >( &d ), DOUBLE_VALUE_SIZE );
 	return xfr.makeRef();
 }
 
-Ref HeapClass::copyDouble( double d ) {
+Ref HeapClass::copyDouble( gngdouble d ) {
 	Ref * fake_pc = static_cast< Ref * >( 0 );
 	return this->copyDouble( fake_pc, d );
 }

@@ -20,8 +20,10 @@
 #define GNG_SYS_DOUBLE_HPP
 
 #include "common.hpp"
+#include "doublelayout.hpp"
+
 
 //extern Ref * sysNewDouble( Ref *pc, MachineClass * vm );
-extern double gngFastDoubleValue( Ref r );
+extern gngdouble gngFastDoubleValue( Ref r );
 
 #endif

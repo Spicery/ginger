@@ -20,16 +20,6 @@ Postcondition
 \*****************************************************************************/
 
 
-//	Instruction ADDI 
-//	Summary
-//		Takes two smalls off the value stack and replaces them
-//		with their sum, which should be a small.
-//	Preconditions
-//		There must be at least two values on the stack.
-//	Exceptions
-//		1.	One or more of the values on the stack is not small.
-//		2.	The total is too large to fit in a small.
-//
 Ref ry = *( VMVP-- );
 Ref rx = *( VMVP );
 if ( IsSmall( rx ) && IsSmall( ry ) ) {
@@ -40,8 +30,22 @@ if ( IsSmall( rx ) && IsSmall( ry ) ) {
 		*VMVP = ToRef( sum );
 		RETURN( pc + 1 );
 	} else {
+		//	TODO: convert to Double.
     	throw Mishap( "Overflow detected in +" );
 	}
+} else if ( IsDouble( rx ) ) {
+	gngdouble x, y;
+	x = gngFastDoubleValue( rx );
+	if ( IsSmall( ry ) ) {
+		y = static_cast< gngdouble >( SmallToLong( ry ) );
+	} else if ( IsDouble( ry ) ) {
+		y = gngFastDoubleValue( ry );
+	} else {
+		throw Mishap( "Invalid arguments for +" );
+	}
+	*( VMVP ) = vm->heap().copyDouble( x + y );
+	RETURN( pc + 1 );
 } else {
-	throw Mishap( "Small integers only" );
+	//	TODO: update message with arguments.
+	throw Mishap( "Numbers only" );
 } 

@@ -56,6 +56,7 @@ const char * keyName( Ref key );
 #define IsFwdObj( r ) 		( IsObj( r ) && IsFwd( *RefToPtr4( r ) ) )
 #define IsSimple( r )		( ( TAG_MASK & ToULong( r ) ) == SIM_TAG )
 #define IsPrimitive( r )	( IsSimple( r ) || IsSmall( r ) )
+#define IsDouble( r )       ( IsObj( r ) && *RefToPtr4( r ) == sysDoubleKey )
 
 #define IntToChar( i )		( (Ref)( ( i ) << TAGGG | CHAR_TAGGG ) )
 

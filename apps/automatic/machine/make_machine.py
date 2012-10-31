@@ -96,6 +96,7 @@ instructionSet = [
 	Instruction( "push_local0_ret", "i" ),
 	Instruction( "push_local1_ret", "i" ),
 	Instruction( "pushq_ret", "ic" ),
+	Instruction( "quo", "i" ),
 	Instruction( "reset", "i" ),
 	Instruction( "return", "i" ),
 	Instruction( "return_ifso", "i" ),

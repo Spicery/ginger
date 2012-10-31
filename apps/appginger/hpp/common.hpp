@@ -37,6 +37,7 @@ class MachineClass;
 
 typedef void * Ref;
 typedef void ** RefRef;
+typedef double gngdouble;   //  So that we can easily swap to long double.
 
 typedef Ref * SysCall( Ref * pc, MachineClass * );
 

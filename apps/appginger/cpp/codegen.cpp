@@ -1029,7 +1029,7 @@ Ref CodeGenClass::calcConstant( Gnx mnx ) {
 	} else if ( type == "string" ) {
 		return this->vm->heap().copyString( mnx->attribute( CONSTANT_VALUE ).c_str() );
 	} else if ( type == "double" ) {
-		double d;
+		gngdouble d;
 		const std::string& numtext( mnx->attribute( CONSTANT_VALUE ) );
 		std::istringstream i( numtext );
 		if ( not ( i >> d ) ) {

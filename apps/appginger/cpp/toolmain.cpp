@@ -37,13 +37,12 @@
 
 #include "appcontext.hpp"
 #include "rcep.hpp"
-//#include "term.hpp"
 #include "mishap.hpp"
 #include "sys.hpp"
 #include "machine1.hpp"
 #include "machine2.hpp"
 #include "machine3.hpp"
-//#include "database.hpp"
+
 
 #include "toolmain.hpp"
 
@@ -74,7 +73,6 @@ static struct option long_options[] =
     {
         { "engine",         required_argument,      0, 'E' },
         { "help",           optional_argument,      0, 'H' },
-        { "metainfo",		no_argument,			0, 'M' },
         { "machine",        required_argument,      0, 'm' },
         { "version",        no_argument,            0, 'V' },
         { "debug",          required_argument,      0, 'd' },
@@ -113,7 +111,7 @@ static void printUsage() {
 	cout << "-i, --stdin           compile from stdin" << endl;
 	cout << "-j, --project=PATH    add a project folder to the search path" << endl;
 	cout << "-L, --license         print out license information and exit" << endl;
-	cout << "-M, --metainfo        dump meta-info XML file to stdout" << endl;
+	//cout << "-M, --metainfo        dump meta-info XML file to stdout" << endl;
 	cout << "-q, --quiet           no welcome banner" << endl;
 	cout << "-r, --results=LEVEL   set results level to 1 or 2" << endl;
 	cout << "-V, --version         print out version information and exit" << endl;
@@ -137,44 +135,6 @@ static void printHelpLicense() {
 	cout << "--license=conditions  Shows terms and conditions." << endl;
 }
 
-static void printHelpHex() {
-	cout << hex;
-	cout << "absent         :\t" << SYS_ABSENT << endl;
-	cout << "true           :\t" << SYS_TRUE << endl;
-	cout << "false          :\t" << SYS_FALSE << endl;
-	cout << "nil            :\t" << SYS_NIL << endl;
-	cout << "termin         :\t" << SYS_TERMIN << endl;
-	cout << "system_only    :\t" << SYS_SYSTEM_ONLY << endl;
-	cout << "undef          :\t" << SYS_UNASSIGNED << endl;
-	cout << "undef          :\t" << SYS_UNDEFINED << endl;
-	cout << "undef          :\t" << SYS_INDETERMINATE << endl;
-	cout << "Function       :\t" << sysFunctionKey << endl;
-	cout << "CoreFunction   :\t" << sysCoreFunctionKey << endl;
-	cout << "Method         :\t" << sysMethodKey << endl;
-	cout << "AbsentKey      :\t" << sysAbsentKey << endl;
-	cout << "BoolKey        :\t" << sysBoolKey << endl;
-	cout << "KeyKey         :\t" << sysKeyKey << endl;
-	cout << "TerminKey      :\t" << sysTerminKey << endl;
-	cout << "NilKey         :\t" << sysNilKey << endl;
-	cout << "PairKey        :\t" << sysPairKey << endl;
-	cout << "VectorKey      :\t" << sysVectorKey << endl;
-	cout << "StringKey      :\t" << sysStringKey << endl;
-	cout << "SymbolKey      :\t" << sysSymbolKey << endl;
-	cout << "SmallKey       :\t" << sysSmallKey << endl;
-	cout << "FloatKey       :\t" << sysFloatKey << endl;
-	cout << "UnicodeKey     :\t" << sysUnicodeKey << endl;
-	cout << "CharKey        :\t" << sysCharKey << endl;
-	cout << "MapletKey      :\t" << sysMapletKey << endl;
-	cout << "HardEqMapKey   :\t" << sysHardEqMapKey << endl;
-	cout << "HardIdMapKey   :\t" << sysHardIdMapKey << endl;
-	cout << "WeakIdMapKey   :\t" << sysWeakIdMapKey << endl;
-	cout << "CacheEqMapKey  :\t" << sysCacheEqMapKey << endl;
-	cout << "AssocKey       :\t" << sysAssocKey << endl;
-	cout << "IndirectionKey :\t" << sysIndirectionKey << endl;
-	cout << "HardRefKey     :\t" << sysHardRefKey << endl;
-	cout << "WeakRefKey     :\t" << sysWeakRefKey << endl;
-	cout << "SoftRefKey     :\t" << sysSoftRefKey << endl;
-}
 
 int ToolMain::printLicense( const char * arg ) const {
 	if ( arg == NULL || std::string( arg ) == std::string( "all" ) ) {
@@ -188,87 +148,6 @@ int ToolMain::printLicense( const char * arg ) const {
 		return EXIT_FAILURE;
 	}
 	return EXIT_SUCCESS;
-}
-
-static void renderText( std::ostream & out, const std::string & str ) {
-	for ( std::string::const_iterator it = str.begin(); it != str.end(); ++it ) {
-		const unsigned char ch = *it;
-		if ( ch == '<' ) {
-			out << "&lt;";
-		} else if ( ch == '>' ) {
-			out << "&gt;";
-		} else if ( ch == '&' ) {
-			out << "&amp;";
-		} else if ( 32 <= ch && ch < 127 ) {
-			out << ch;
-		} else {
-			out << "&#" << (int)ch << ";";
-		}
-	}
-}
-
-static void printAttr( const char * name, const std::string & val ) {
-	cout << name << "=\"";
-	renderText( cout, val );
-	cout << "\" ";
-}
-
-static void printStdInfo() {
-	cout << "  <std>" << endl;
-	cout << "    <!-- Summary of the built-in functions -->" << endl;
-	for (
-		SysMap::iterator it = sysMap.begin();
-		it != sysMap.end();
-		++it
-	) {
-		cout << "    <sysfn ";
-		printAttr( "name", it->first );
-		printAttr( "docstring", ( it->second.docstring != NULL ? it->second.docstring : "-" ) );
-		printAttr( "in", it->second.in_arity.toString() );
-		printAttr( "out", it->second.out_arity.toString() );
-		cout << "/>" << endl;
-	}
-	cout << "  </std>" << endl;
-}
-
-static void printBuildInfo() {
-	cout << "  <release>" << endl;
-	cout << "    <version "; printAttr( "number", APPGINGER_VERSION ); cout << "/>" << endl;
-	cout << "    <build ";
-	printAttr( "file", __FILE__ );
-	printAttr( "date", __DATE__ ); 
-	printAttr( "time", __TIME__ ); 
-	cout << "/>" << endl;
-	cout << "  </release>" << endl;
-}
-
-static void printLicenseInfo() {
-	cout << "  <ipr>" << endl;
-	cout << "    <!-- Intellectual Property Rights -->" << endl;
-	cout << "    <license url=\"http://www.gnu.org/licenses/gpl-3.0.txt\" />" << endl;
-	cout << "    <copyright notice=\"Copyright (c) 2010 Stephen Leach\" email=\"stephen.leach@steelypip.com\"/>" << endl;
-	cout << "  </ipr>" << endl;
-}
-
-static void printCommunityInfo() {
-	cout << "  <community>" << endl;
-	cout << "    <!-- URLs for all the services for users & the devteam -->" << endl;
-	cout << "    <!-- We are obviously missing a user website, forum and mailing list -->" << endl;
-	cout << "    <repository type=\"subversion\" url=\"http://svn6.assembla.com/svn/ginger/\" />" << endl;
-	cout << "    <issue_tracking type=\"trac\" url=\"http://trac6.assembla.com/ginger\" />" << endl;
-	cout << "  </community>" << endl;
-	
-}
-
-static void printMetaInfo() {
-	cout << "<?xml version=\"1.0\"?>" << endl;
-	cout << "<appginger>" << endl;
-	cout << "  <!-- Information about the AppGinger executable, its toolchain or community -->" << endl;
-	printBuildInfo();
-	printLicenseInfo();
-	printCommunityInfo();
-	printStdInfo();
-	cout << "</appginger>" << endl;
 }
 
 
@@ -325,10 +204,11 @@ void tokenize(
 // Return true for an early exit, false to continue processing.
 bool ToolMain::parseArgs( int argc, char **argv, char **envp ) {
 	if ( envp != NULL ) this->context.setEnvironmentVariables( envp );
-	bool meta_info_needed = false;
+	//bool meta_info_needed = false;
     for(;;) {
         int option_index = 0;
-        int c = getopt_long( argc, argv, "d:e:g:H::ij:L::Mm:qr:V", long_options, &option_index );
+        //int c = getopt_long( argc, argv, "d:e:g:H::ij:L::Mm:qr:V", long_options, &option_index );
+        int c = getopt_long( argc, argv, "d:e:g:H::ij:L::m:qr:V", long_options, &option_index );
         //cerr << "Got c = " << c << endl;
         if ( c == -1 ) break;
         switch ( c ) {
@@ -365,8 +245,6 @@ bool ToolMain::parseArgs( int argc, char **argv, char **envp ) {
                 	printHelpDebug();
                 } else if ( std::string( optarg ) == "license" ) {
                 	printHelpLicense();
-                } else if ( std::string( optarg ) == std::string( "hex" ) ) {
-                	printHelpHex();
                 } else {
                     printf( "Unknown help topic %s\n", optarg );
                 }
@@ -382,10 +260,6 @@ bool ToolMain::parseArgs( int argc, char **argv, char **envp ) {
             }
             case 'L': {
             	return printLicense( optarg );
-            }
-            case 'M' : {
-            	meta_info_needed = true;
-            	break;
             }
             case 'q': {
             	this->context.welcomeBanner() = false;
@@ -417,11 +291,6 @@ bool ToolMain::parseArgs( int argc, char **argv, char **envp ) {
 		 while ( optind < argc ) {
 		   	this->context.addArgument( argv[ optind++ ] );
 		 }
-	}
-	
-	if ( meta_info_needed ) {
-		printMetaInfo();
-		return false;
 	}
 	
 	return true;

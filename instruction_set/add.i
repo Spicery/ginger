@@ -26,13 +26,21 @@ if ( IsSmall( rx ) && IsSmall( ry ) ) {
 	long y = (long)ry;
 	long x = (long)rx;
 	long sum = x + y;
-	if ( x < 0 ? sum <= y : sum >= y ) {
+	std::cout << "two smalls: " << x << ", " << y << std::endl;
+	if ( x < 0L ? sum <= y : sum >= y ) {
+		std::cout << "x, y, sum, sum >= y, ( x < 0L ? sum <= y : sum >= y ), sum < 0" << std::endl;
+		std::cout << x << ", " << y << ", " << sum << ", " << ( sum >= y ) << ", " << ( x < 0L ? sum <= y : sum >= y ) << ", " << ( sum < 0L ) << std::endl;
+		//std::cout << "result was small: " << sum << " n.b. " << ( x < 0L ) << ", " << ( sum >= y ) << std::endl;
 		*VMVP = ToRef( sum );
-		RETURN( pc + 1 );
 	} else {
-		//	TODO: convert to Double.
-    	throw Mishap( "Overflow detected in +" );
+		*( VMVP ) = (
+			vm->heap().copyDouble( 
+				static_cast< gngdouble >( x ) + 
+				static_cast< gngdouble >( y )
+			)
+		);
 	}
+	RETURN( pc + 1 );
 } else if ( IsDouble( rx ) ) {
 	gngdouble x, y;
 	x = gngFastDoubleValue( rx );
@@ -43,6 +51,7 @@ if ( IsSmall( rx ) && IsSmall( ry ) ) {
 	} else {
 		throw Mishap( "Invalid arguments for +" );
 	}
+	std::cout << "two doubles: " << x << ", " << y << std::endl;
 	*( VMVP ) = vm->heap().copyDouble( x + y );
 	RETURN( pc + 1 );
 } else {

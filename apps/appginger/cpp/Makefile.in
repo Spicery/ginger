@@ -44,6 +44,23 @@ USEREXECUTABLES=appginger ginger-cgi ginger-script ginger-cli ginger ginger-info
 
 all: $(USEREXECUTABLES)
 
+################################################################################
+# We need to disable optimisations based on non-overflow of integer 
+# arithmetic when compiling the machine implementations. That entails
+# adding the -fwrapv flag.
+################################################################################
+
+machine%.o: machine%.cpp
+	g++ $(CXXFLAGS) -fwrapv -c $<
+
+instruction_set%.o: instruction_set%.cpp
+	g++ $(CXXFLAGS) -fwrapv -c $<
+
+
+################################################################################
+# 	Main executables
+################################################################################
+
 # $@ is make shorthand for the target.
 # $@ is make shorthand for the dependencies
 appginger: libappginger.a main.o

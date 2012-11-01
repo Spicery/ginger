@@ -30,5 +30,6 @@
 #include "stringlayout.hpp"
 #include "sysdouble.hpp"
 #include "doublelayout.hpp"
+#include "sysprint.hpp"
 
 #endif

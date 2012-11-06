@@ -34,7 +34,10 @@ VIdent::VIdent( CodeGen codegen, shared< Ginger::Mnx > vid ) {
 		} else {	
 			this->flavour = GLOBAL_FLAVOUR;
 			Package * def_pkg = codegen->vm->getPackage( vid->attribute( VID_DEF_PKG ) );
+
+			//	TODO: This is interfering with correct autoloading.
 			this->valof = def_pkg->fetchDefinitionValof( vid->attribute( VID_NAME ) );
+			
 			this->slot = 0;
 		}
 	} else if ( nm == CONSTANT ) {

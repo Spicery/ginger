@@ -24,6 +24,6 @@
 
 
 //extern Ref * sysNewDouble( Ref *pc, MachineClass * vm );
-extern gngdouble gngFastDoubleValue( Ref r );
+extern gngdouble_t gngFastDoubleValue( Ref r );
 
 #endif

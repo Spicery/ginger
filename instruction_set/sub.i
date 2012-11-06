@@ -29,10 +29,10 @@ if ( IsSmall( rx ) && IsSmall( ry ) ) {
 	*VMVP = ToRef( diff );
 	RETURN( pc + 1 );
 } else if ( IsDouble( rx ) ) {
-	gngdouble x, y;
+	gngdouble_t x, y;
 	x = gngFastDoubleValue( rx );
 	if ( IsSmall( ry ) ) {
-		y = static_cast< gngdouble >( SmallToLong( ry ) );
+		y = static_cast< gngdouble_t >( SmallToLong( ry ) );
 	} else if ( IsDouble( ry ) ) {
 		y = gngFastDoubleValue( ry );
 	} else {

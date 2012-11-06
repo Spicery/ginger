@@ -21,6 +21,7 @@ if ( IsSmall( rx ) && IsSmall( ry ) ) {
 		*VMVP = ToRef( sum );
 		RETURN( pc + 2 );
 	} else {
+		//	TODO!!!!!
     	throw Mishap( "Overflow detected in +" );
 	}
 } else {

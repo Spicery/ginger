@@ -48,7 +48,7 @@ public:
 
 void ImportHandler::startTag( string & name, Dict & attrs ) {
 	#ifdef DBG_IMPORT_SET_INFO
-		cout << "START " << name << endl;
+		cerr << "START " << name << endl;
 	#endif
 	if ( name != "import" ) return;
 	this->imports.push_back( ImportInfo( attrs ) );
@@ -57,14 +57,14 @@ void ImportHandler::startTag( string & name, Dict & attrs ) {
 
 void ImportHandler::endTag( std::string & name ) {
 	#ifdef DBG_IMPORT_SET_INFO
-		cout << "END " << name << endl;
+		cerr << "END " << name << endl;
 	#endif
 }
 
 
 void ImportSetInfo::readFile( string filename ) {
 	#ifdef DBG_IMPORT_SET_INFO
-		cout << "READING " << filename << endl;
+		cerr << "READING " << filename << endl;
 	#endif
 	ImportHandler handler( this->imports );
 	ifstream stream( filename.c_str() );

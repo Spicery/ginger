@@ -19,6 +19,7 @@ if ( IsSmall( rx ) ) {
 		*( VMVP ) = ToRef( sum );
 		RETURN( pc + 1 );
 	} else {
+		//	TODO: Overflows.
 		throw Mishap( "integer overflow detected in x + 1" );
 	}
 } else {

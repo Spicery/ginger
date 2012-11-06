@@ -16,6 +16,7 @@ if ( IsSmall( rx ) ) {
 	long x = (long)rx;
 	long sum = x - (long)LongToSmall( 1 );
 	if ( sum > x ) {
+		//	TODO: Overflows.
 		throw Mishap( "integer overflow detected in x - 1" ).culprit( "x", "" + x );
 	}
 	*( VMVP ) = ToRef( sum );

@@ -21,9 +21,9 @@
 #include "sysdouble.hpp"
 #include "key.hpp"
 
-gngdouble gngFastDoubleValue( Ref r ) {
-    gngdouble d;
+gngdouble_t gngFastDoubleValue( Ref r ) {
+    gngdouble_t d;
     char * double_bytes = reinterpret_cast< char * >( RefToPtr4( r ) + 1 );
-    memcpy( reinterpret_cast< char * >( &d ), double_bytes, sizeof( gngdouble ) );
+    memcpy( reinterpret_cast< char * >( &d ), double_bytes, sizeof( gngdouble_t ) );
     return d;
 }

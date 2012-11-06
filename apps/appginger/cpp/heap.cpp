@@ -102,7 +102,7 @@ Ref HeapClass::copyString( const char *s ) {
 	return this->copyString( fake_pc, s );
 }
 
-Ref HeapClass::copyDouble( Ref * & pc, gngdouble d ) {
+Ref HeapClass::copyDouble( Ref * & pc, gngdouble_t d ) {
 	XfrClass xfr( pc, *this, DOUBLE_SIZE );
 	xfr.setOrigin();
 	xfr.xfrRef( sysDoubleKey );
@@ -110,7 +110,7 @@ Ref HeapClass::copyDouble( Ref * & pc, gngdouble d ) {
 	return xfr.makeRef();
 }
 
-Ref HeapClass::copyDouble( gngdouble d ) {
+Ref HeapClass::copyDouble( gngdouble_t d ) {
 	Ref * fake_pc = static_cast< Ref * >( 0 );
 	return this->copyDouble( fake_pc, d );
 }

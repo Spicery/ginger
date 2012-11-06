@@ -114,7 +114,7 @@ const std::string & Mnx::attribute( const std::string & key ) const {
 	}
 }
 
-int Mnx::attributeToInt( const std::string & key ) const {
+int Mnx::attributeToIntHelper( const std::string & key, const int def, const bool use_def ) const {
 	std::map< std::string, std::string >::const_iterator it = this->attributes.find( key );
 	if ( it != this->attributes.end() ) {
 		stringstream s( it->second );
@@ -124,26 +124,49 @@ int Mnx::attributeToInt( const std::string & key ) const {
 		} else {
 			throw Mishap( "Integer attribute value needed" ).culprit( "Attribute", key ).culprit( "Value", it->second );
 		}
+	} else if ( use_def ) {
+		return def;
 	} else {
 		throw Mishap( "No such key" ).culprit( "Key", key );
 	}
 }
 
+int Mnx::attributeToInt( const std::string & key ) const {
+	return this->attributeToIntHelper( key, 0, false );
+}
+
+int Mnx::attributeToInt( const std::string & key, const int def ) const {
+	return this->attributeToIntHelper( key, def, true );
+}
+
+long Mnx::attributeToLongHelper( const std::string & key, const long def, const bool use_def ) const {
+	std::map< std::string, std::string >::const_iterator it = this->attributes.find( key );
+	if ( it != this->attributes.end() ) {
+		stringstream s( it->second );
+		long n;
+		if ( s >> n ) {
+			return n;
+		} else {
+			throw Mishap( "Integer attribute value needed" ).culprit( "Attribute", key ).culprit( "Value", it->second );
+		}
+	} else if ( use_def ) {
+		return def;
+	} else {
+		throw Mishap( "No such key" ).culprit( "Key", key );
+	}
+}
+
+long Mnx::attributeToLong( const std::string & key ) const {
+	return this->attributeToLongHelper( key, 0, false );
+}
+
+long Mnx::attributeToLong( const std::string & key, const long def  ) const {
+	return this->attributeToLongHelper( key, def, true );
+}
+
 const std::string & Mnx::attribute( const std::string & key, const std::string & def  ) const {
 	std::map< std::string, std::string >::const_iterator it = this->attributes.find( key );
 	return it != this->attributes.end() ? it->second : def;
-}
-
-int Mnx::attributeToInt( const std::string & key, const int def  ) const {
-	std::map< std::string, std::string >::const_iterator it = this->attributes.find( key );
-	if ( it == this->attributes.end() ) return def;
-	stringstream s( it->second );
-	int n;
-	if ( s >> n ) {
-		return n;
-	} else {
-		throw Mishap( "Integer attribute value needed" ).culprit( "Attribute", key ).culprit( "Value", it->second );
-	}
 }
 
 bool Mnx::hasAttribute( const std::string & key ) const {

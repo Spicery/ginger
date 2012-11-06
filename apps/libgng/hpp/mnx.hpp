@@ -121,12 +121,18 @@ private:
 	std::vector< shared< Mnx > > children;
 	std::map< std::string, std::string > attributes;
 	int flags;
-	
+
+private:
+	long attributeToLongHelper( const std::string & key, const long def, const bool use_def ) const;
+	int attributeToIntHelper( const std::string & key, const int def, const bool use_def ) const;
+
 public:
 	const std::string & attribute( const std::string & key ) const;
 	const std::string & attribute( const std::string & key, const std::string & def ) const;
 	int attributeToInt( const std::string & key ) const;
 	int attributeToInt( const std::string & key, const int def ) const;
+	long attributeToLong( const std::string & key ) const;
+	long attributeToLong( const std::string & key, const long def ) const;
 	bool hasAttribute( const std::string & key ) const;
 	bool hasAttribute( const std::string & key, const std::string & eqval ) const;
 	shared< Mnx > & child( int n );

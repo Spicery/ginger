@@ -16,9 +16,11 @@
     along with AppGinger.  If not, see <http://www.gnu.org/licenses/>.
 \******************************************************************************/
 
-#ifndef DEBUG_HPP
+#ifndef GNG_DEBUG_HPP
+#define GNG_DEBUG_HPP
 
 //#define DBG_LIFTING
 //#define DBG_CRAWL
+//#define DBG_CODEGEN
 
 #endif

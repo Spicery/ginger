@@ -134,7 +134,7 @@ public:
 	void vmiCHECK_COUNT( int N );
 	void vmiCHECK_MARK0( int N );
 	void vmiCHECK_MARK1( int N );
-	void vmiDECR( const int d );
+	void vmiDECR( const long d );
 	void vmiDEREF();
 	void vmiEND_CALL_ID( int var, const VIdent & ident );
 	void vmiEND_MARK( int N );
@@ -150,7 +150,7 @@ public:
 	void vmiIFSO( LabelClass * d, LabelClass * contn );
 	void vmiIFSO( LabelClass * dst );
 	void vmiIFTEST( const bool sense, LabelClass * dst );
-	void vmiINCR( const int d );
+	void vmiINCR( const long d );
 	void vmiINSTRUCTION( Instruction instr );
 	void vmiINVOKE();
 	void vmiMAKEREF();

@@ -181,7 +181,7 @@ static void refInstancePrint( std::ostream & out, Ref * rec_K ) {
 }
 
 void refDoublePrint( std::ostream & out, const Ref r ) {
-	gngdouble d = gngFastDoubleValue( r );
+	gngdouble_t d = gngFastDoubleValue( r );
 	out << d;
 }
 

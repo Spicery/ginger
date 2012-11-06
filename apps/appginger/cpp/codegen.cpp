@@ -18,6 +18,7 @@
 
 #include "debug.hpp"
 
+#include "numbers.hpp"
 #include "codegen.hpp"
 
 #include <iostream>
@@ -181,7 +182,7 @@ void CodeGenClass::vmiFIELD( long index ) {
 }
 
 
-void CodeGenClass::vmiINCR( int n ) {
+void CodeGenClass::vmiINCR( long n ) {
 	switch ( n ) {
 		case 0: {
 			return;
@@ -195,8 +196,14 @@ void CodeGenClass::vmiINCR( int n ) {
 			return;
 		}
 		default: {
+			//	We have to be a little careful here because we only support
+			//	Smalls and not the entire range of Long.
 			this->emitSPC( vmc_incr_by );
-			this->emitRef( LongToSmall( n ) );
+			if ( Numbers::MIN_SMALL <= n && n <= Numbers::MAX_SMALL ) {
+				this->emitRef( LongToSmall( n ) );
+			} else {
+				throw Mishap( "Increment is out of range" ).culprit( "Increment", n );
+			}
 		}
 	}
 }
@@ -550,7 +557,7 @@ void CodeGenClass::vmiGOTO( LabelClass * d ) {
 	}
 }
 
-void CodeGenClass::vmiDECR( const int d ) {
+void CodeGenClass::vmiDECR( const long d ) {
 	this->vmiINCR( -d );
 }
 
@@ -915,13 +922,13 @@ void CodeGenClass::compileGnxSysApp( Gnx mnx, LabelClass * contn ) {
 				//	TODO: We should shift the operator into being an incr/decr.
 				//	Check which one gets optimised.
 				this->compile1( mnx->child( c0 ? 1 : 0 ), CONTINUE_LABEL );
-				this->vmiINCR( mnx->child( c0 ? 0 : 1 )->attributeToInt( CONSTANT_VALUE ) );
+				this->vmiINCR( mnx->child( c0 ? 0 : 1 )->attributeToLong( CONSTANT_VALUE ) );
 			} else if ( 
 				nm == "-" and mnx->size() == 2 and isConstantIntGnx( mnx->child( 1 ) )
 			) {				
 				//	TODO: We should shift the operator into being an incr/decr.
 				this->compile1( mnx->child( 0 ), CONTINUE_LABEL );
-				this->vmiDECR( mnx->child( 1 )->attributeToInt( CONSTANT_VALUE ) );
+				this->vmiDECR( mnx->child( 1 )->attributeToLong( CONSTANT_VALUE ) );
 			} else {
 				this->compileChildrenChecked( mnx, info.in_arity );
 				this->vmiINSTRUCTION( info.instruction );
@@ -1005,9 +1012,12 @@ void CodeGenClass::compileGnxSelfCall( Gnx mnx, LabelClass * contn ) {
 
 
 Ref CodeGenClass::calcConstant( Gnx mnx ) {
+	#ifdef DBG_CODEGEN
+		std::cout << "calcConstant: " << mnx->toString() << std::endl;
+	#endif
 	const string & type = mnx->attribute( CONSTANT_TYPE );
 	if ( type == "int" ) {
-		return LongToRef( mnx->attributeToInt( CONSTANT_VALUE ) );
+		return LongToRef( mnx->attributeToLong( CONSTANT_VALUE ) );
 	} else if ( type == "bool" ) {
 		return mnx->hasAttribute( CONSTANT_VALUE, "false" ) ? SYS_FALSE : SYS_TRUE;
 	} else if ( type == "absent" ) {
@@ -1029,7 +1039,7 @@ Ref CodeGenClass::calcConstant( Gnx mnx ) {
 	} else if ( type == "string" ) {
 		return this->vm->heap().copyString( mnx->attribute( CONSTANT_VALUE ).c_str() );
 	} else if ( type == "double" ) {
-		gngdouble d;
+		gngdouble_t d;
 		const std::string& numtext( mnx->attribute( CONSTANT_VALUE ) );
 		std::istringstream i( numtext );
 		if ( not ( i >> d ) ) {

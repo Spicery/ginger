@@ -23,16 +23,22 @@ Ref ry = *( VMVP-- );
 Ref rx = *( VMVP );
 if ( IsSmall( rx ) && IsSmall( ry ) ) {
 	//  TODO: This needs to be given overflow detection!
-	long y = (long)ry;
-	long x = (long)rx;
-	long product = x * ( y >> TAG );
-	*VMVP = ToRef( product );
+	gnglong_t y = (gnglong_t)ry >> 1;	//	Scale down by factor of 2 & strip off low bit.
+	gnglong_t x = (gnglong_t)rx >> 1; 	//  As above.
+	if ( SignedOverflow::mulOverflowCheck( x, y ) ) {
+		x = static_cast< gngdouble_t >( SmallToLong( rx ) );
+		y = static_cast< gngdouble_t >( SmallToLong( ry ) );
+		*( VMVP ) = vm->heap().copyDouble( x * y );
+	} else {
+		//	Note that the multiply will effectively restore the 00-tag.
+		*VMVP = ToRef( x * y );
+	}
 	RETURN( pc + 1 );
 } else if ( IsDouble( rx ) ) {
-	gngdouble x, y;
+	gngdouble_t x, y;
 	x = gngFastDoubleValue( rx );
 	if ( IsSmall( ry ) ) {
-		y = static_cast< gngdouble >( SmallToLong( ry ) );
+		y = static_cast< gngdouble_t >( SmallToLong( ry ) );
 	} else if ( IsDouble( ry ) ) {
 		y = gngFastDoubleValue( ry );
 	} else {

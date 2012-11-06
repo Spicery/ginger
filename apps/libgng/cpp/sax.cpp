@@ -26,9 +26,7 @@
 #include "sax.hpp"
 #include "mishap.hpp"
 
-//#include "sys.hpp"
 #include "mishap.hpp"
-//#include "facet.hpp"
 
 
 
@@ -146,6 +144,7 @@ void SaxParser::readName( std::string & name ) {
 	}
 }
 
+
 void SaxParser::readAttributeValue( std::string & attr ) {
 	const char qch = input->nextChar();
 	if ( qch != '\'' && qch != '"' ) {
@@ -160,7 +159,7 @@ void SaxParser::readAttributeValue( std::string & attr ) {
 				//std::cout << "char " << ch << endl;
 				esc.push_back( ch );
 				if ( esc.size() > 4 ) {
-					throw Mishap( "Malformed escape" );
+					throw Mishap( "Malformed escape sequence" ).culprit( "Sequence so far", esc );
 				}
 			}
 			if ( esc == "lt" ) {
@@ -173,8 +172,26 @@ void SaxParser::readAttributeValue( std::string & attr ) {
 				attr.push_back( '"' );
 			} else if ( esc == "apos" ) {
 				attr.push_back( '\'' );
+			} else if ( esc.size() >= 2 && esc[ 0 ] == '#' ) {
+				if ( esc[1] == 'x' ) {
+					stringstream s( &esc[2] );
+					unsigned int n;
+					if ( s >> std::hex >> n && n == static_cast< char >( n ) ) {
+						attr.push_back( static_cast< char >( n ) );
+					} else {
+						throw Mishap( "Unexpected numeric sequence after &#" ).culprit( "Sequence", esc );
+					}					
+				} else {
+					stringstream s( &esc[1] );
+					unsigned int n;
+					if ( s >> n && n == static_cast< char >( n ) ) {
+						attr.push_back( static_cast< char >( n ) );
+					} else {
+						throw Mishap( "Unexpected numeric sequence after &#" ).culprit( "Sequence", esc );
+					}
+				}
 			} else {
-				throw;
+				throw Mishap( "Unrecognised escape sequence" ).culprit( "Escape sequence", esc );
 			}
 		} else {
 			attr.push_back( ch );

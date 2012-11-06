@@ -1,15 +1,31 @@
 import subprocess
 import json
 import os
+import math
+import struct
+
+################################################################################
+#	Libraries
+################################################################################
+
+def stdLibProjectDir():
+	"""Returns the standard library public.auto directory"""
+	return "standard_library/ginger.library/public.auto"
+
+def stdLibConstantsDir():
+	"""Returns the standard library definitions for constants"""
+	return "standard_library/ginger.constants/public.auto"
+
+def gingerInteractiveDir():
+	"""Returns the directory for the ginger.interactive package"""
+	return "standard_library/ginger.interactive"
+
+
 
 ################################################################################
 #   generateGingerLibrary
 ################################################################################
 
-
-def stdLibProjectDir():
-	"""Returns the standard library public.auto directory"""
-	return "standard_library/ginger.library/public.auto"
 
 def encodeName( name ):
 	"""
@@ -61,19 +77,48 @@ def generateGingerLibrary( stdinfo ):
 		createDefinitionFile( ename, k )
 
 ################################################################################
-#   generateGingerInteractive
+#   generateGingerLibraryExtras
 ################################################################################
 
-def gingerInteractiveDir():
-	"""Returns the directory for the ginger.interactive package"""
-	return "standard_library/ginger.interactive"
+class ConstantPackage:
+
+	def __init__( self ):
+		self.dir = stdLibConstantsDir()
+		if not os.path.exists( self.dir ):
+			os.makedirs( self.dir )	
+
+	def createConstantFile( self, nam, typ, val ):
+		encname = encodeName( nam )
+		ename = os.path.join( self.dir, encname + ".gnx" )
+		escnam = escapeName( nam )
+		esctyp = escapeName( typ )
+		escval = escapeName( str( val ) )
+		df = open( ename, 'w' )
+		df.write( '<bind><var name="{0}"/><constant type="{1}" value="{2}"/></bind>\n'.format( escnam, esctyp, escval ) )
+		df.close()	
+
+def generateGingerLibraryExtras( stdinfo ):
+	pkg = ConstantPackage()
+	pkg.createConstantFile( "pi", "double", math.pi )
+	pkg.createConstantFile( "e", "double", math.e )
+	# TODO: Really we should move the calcsize( "P" ) out into a shared script.
+	pkg.createConstantFile( "mostNegativeSmall", "int", -( 1 << struct.calcsize( "P" ) * 8 - 2 ) )
+	pkg.createConstantFile( "dir, ""mostPositiveSmall", "int",  ( 1 << struct.calcsize( "P" ) * 8 - 2 ) - 1 )
+
+
+################################################################################
+#   generateGingerInteractive
+################################################################################
 
 def generateGingerInteractive():
 	dir = gingerInteractiveDir()
 	if not os.path.exists( dir ):
 		os.makedirs( dir )
 	f = open( os.path.join( dir, "imports.gnx" ), 'w' )
-	f.write( "<package><import from=\"ginger.library\" match0=\"public\" /></package>\n" )
+	f.write( "<package>" );
+	f.write( "<import from=\"ginger.library\" match0=\"public\" />" )
+	f.write( "<import from=\"ginger.constants\" match0=\"public\" />" )
+	f.write( "</package>\n" )
 	f.close()
 
 ################################################################################
@@ -85,6 +130,7 @@ def standardLibraryFiles():
 	metainfo = json.loads( subprocess.check_output( [ "../apps/appginger/cpp/ginger-info", "-j" ] ) )
 	stdinfo = metainfo[ "std" ]
 	generateGingerLibrary( stdinfo )
+	generateGingerLibraryExtras( stdinfo )
 	generateGingerInteractive()
 
 standardLibraryFiles()

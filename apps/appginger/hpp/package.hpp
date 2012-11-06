@@ -73,7 +73,8 @@ public:
 public:
 	Valof * fetchDefinitionValof( const std::string & c ); //, const FacetSet * facets );
 	Valof * fetchAbsoluteValof( const std::string & c );
-
+	Valof * fetchValof( const std::string & c, const bool absolute );
+	
 protected:	
 	virtual Valof * absoluteAutoload( const std::string & c ) = 0;
 

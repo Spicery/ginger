@@ -97,6 +97,21 @@ Valof * Package::add( const std::string & s ) {
 }
 
 
+Valof * Package::fetchValof( const std::string & c, const bool absolute ) {
+	//cout << "Absolute fetch" << endl;
+	Valof * id = this->lookup( c );
+	if ( id ) {
+		return id;
+	} else if ( absolute ) {
+		Valof * id = this->absoluteAutoload( c );
+		return id;
+	} else {
+    	Valof * id = this->add( c );
+    	return id;
+	}
+}
+
+
 Valof * Package::fetchAbsoluteValof( const std::string & c ) {
 	//cout << "Absolute fetch" << endl;
 	Valof * id = this->lookup( c );

@@ -31,22 +31,25 @@
 #define SAFE_MODE 0
 #endif
 
-typedef unsigned long ulong;
+typedef long gnglong_t;             //  Should be compatible with (void *).
+typedef unsigned long gngulong_t;   //  As above.
+typedef unsigned long ulong;        //  Retire this typedef.
+typedef double gngdouble_t;         //  So that we can easily swap to long double.
+
 typedef const char *charseq;
 class MachineClass;
 
 typedef void * Ref;
 typedef void ** RefRef;
-typedef double gngdouble;   //  So that we can easily swap to long double.
 
 typedef Ref * SysCall( Ref * pc, MachineClass * );
 
 #define ToRef( x )  	( ( Ref )( x ) )
 #define ToRefRef( x )	( ( RefRef )( x ) )
-#define ToULong( x ) 	( ( unsigned long )( x ) )
-#define ToLong( x )		( ( long )( x ) )
+#define ToULong( x ) 	( ( gngulong_t )( x ) )
+#define ToLong( x )		( ( gnglong_t )( x ) )
 #define	ToChars( x ) 	( ( char * )( x ) )
-#define ToSysCall( x ) 	( (SysCall *)( x ) )
+#define ToSysCall( x ) 	( ( SysCall * )( x ) )
 
 #define STANDARD_LIBRARY_PACKAGE	"ginger.library"
 #define INTERACTIVE_PACKAGE			"ginger.interactive"

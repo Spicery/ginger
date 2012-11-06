@@ -41,6 +41,7 @@
 #include <getopt.h>
 #include <syslog.h>
 
+
 #include "mnx.hpp"
 #include "mishap.hpp"
 #include "defn.hpp"
@@ -240,12 +241,43 @@ void Main::printGPL( const char * start, const char * end ) {
 #ifdef DBG_FETCHGNX
 void Main::summary() {
 	cerr << FETCHGNX << " Summary" << endl;
+	cerr << "  Mode: ";
+	switch ( this->task ) {
+		case RESOLVE_QUALIFIED: {
+			cerr << "RESOLVE_QUALIFIED" << endl;
+			cerr << "  Package name  : " << this->package_name;
+			cerr << "  Alias name    : " << this->alias_name;
+			cerr << "  Variable name : " << this->variable_name;
+			break;
+		}
+		case RESOLVE_UNQUALIFIED: {
+			cerr << "RESOLVE_UNQUALIFIED" << endl;
+			cerr << "  Package name  : " << this->package_name << endl; 
+			cerr << "  Variable name : " << this->variable_name << endl;
+			break;
+		}
+		case FETCH_DEFINITION : {
+			cerr << "FETCH_DEFINITION" << endl;
+			break;
+		}
+		case LOAD_PACKAGE: {
+			cerr << "LOAD_PACKAGE" << endl;
+			cerr << "  Package name  : " << this->package_name << endl; 
+			break;
+		}
+		case EXECUTE_COMMAND: {
+			cerr << "EXECUTE_PACKAGE" << endl;
+		}
+		default:
+			throw Mishap( "Invalid mode" );
+	}
+	cerr << "  Project folders (" << this->project_folders.size() << ")" << endl;
 	for (
 		vector< string >::iterator it = this->project_folders.begin();
 		it != this->project_folders.end();
 		++it
 	) {
-		cerr << "  Project " << *it << endl;
+		cerr << "    Project " << *it << endl;
 	}
 	cerr << "  Packages to load (" << this->packages_to_load.size() << ")" << endl;
 	for ( 
@@ -344,10 +376,10 @@ int main( int argc, char ** argv, char **envp ) {
 	try {
 		Main main;
 		main.parseArgs( argc, argv, envp );
+		main.init();
 		#ifdef DBG_FETCHGNX
 			main.summary();
 		#endif
-		main.init();
 		main.run();
 	    return EXIT_SUCCESS;
 	} catch ( Ginger::SystemError & p ) {

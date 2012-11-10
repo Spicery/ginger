@@ -185,7 +185,7 @@ void Mnx::frender( FILE * f ) {
 		it != this->attributes.end();
 		++it
 	) {
-		fprintf( f, "%s=\"", it->first.c_str() );
+		fprintf( f, " %s=\"", it->first.c_str() );
 		mnxFRenderText( f, it->second.c_str() );
 		fprintf( f, "\"" );
 	}

@@ -2,10 +2,13 @@
 cd standard_library
 for package in ginger.*
 do
-	for file in $package/public.auto/*.gnx
-	do
-		echo package = $package, file = $file
-		../../apps/simplifygnx/cpp/simplifygnx -p $package -suA < ${file} > "${file}.tmp"
-		mv "${file}.tmp" ${file}
-	done
+	if [ -d "${package}/public.auto" ]
+	then
+		for file in "${package}"/public.auto/*.gnx
+		do
+			# Run the simplifier on the files in public.auto for the package.
+			../../apps/simplifygnx/cpp/simplifygnx -p $package -suA < "${file}" > "${file}.tmp"
+			mv "${file}.tmp" ${file}
+		done
+	fi
 done

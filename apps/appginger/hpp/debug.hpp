@@ -23,4 +23,9 @@
 //#define DBG_CRAWL
 //#define DBG_CODEGEN
 
+//#define DBG_PACKAGE_AUTOLOAD
+//#define DBG_RCEP
+//#define DBG_CODEGEN
+//#define DBG_VIDENT
+
 #endif

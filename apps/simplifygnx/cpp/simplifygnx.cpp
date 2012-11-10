@@ -17,7 +17,8 @@
 \******************************************************************************/
 
 //	Local debugging switch for conditional code compilation.
-//#define DBG_SIMPLIFYGNX 1
+#define DBG_SIMPLIFYGNX 1
+#define DBG_PACKAGE_AUTOLOAD 1
 
 /**
 The simplifygnx command is used to simplify the Ginger XML (GNX) fed
@@ -102,7 +103,8 @@ private:
 public:
 	static void helpOptions() {
 		printf( "PROCESSING STAGE OPTIONS (n.b. -4 and -9 free for future use)\n" ) ;
-		printf( "-s, --standard        a standard set of transformations, equal to options 0-9\n" );
+        printf( "-s, --standard        a standard set of transformations, equal to options 0-9\n" );
+        printf( "-u, --undefined       undefined allowed\n" );
 		printf( "-0, --self            replace named lambda self-references with special forms\n" );
 		printf( "-1, --absolute        add def.pkg attribute to all globals\n" );
 		printf( "-2, --arity           add arity marking to all subexpressions\n" );
@@ -513,7 +515,8 @@ std::string resolveUnqualified( vector< string > & project_folders, const std::s
 	}
 		
 	#ifdef DBG_PACKAGE_AUTOLOAD
-		cout << "[[" << prog.str() << "]]" << endl;
+        cerr << "simplifygnx resolving unqualified, reply from fetchgnx -R" << endl;
+		cerr << "  [[" << prog.str() << "]]" << endl;
 	#endif
 
 	ResolveHandler resolve;
@@ -566,7 +569,8 @@ std::string resolveQualified(
 	}
 		
 	#ifdef DBG_PACKAGE_AUTOLOAD
-		cout << "[[" << prog.str() << "]]" << endl;
+        cerr << "simplifygnx resolving qualified, reply from fetchgnx -R" << endl;
+		cerr << "  [[" << prog.str() << "]]" << endl;
 	#endif
 
 	ResolveHandler resolve;
@@ -1354,14 +1358,15 @@ public:
 						//cout << "  #capture set[" << ( n - i ) << "] = " << this->capture_sets[ n - 1 ].size() << endl;
 					}
 					
-					#ifdef DBG_SIMPLYGNX
+					#ifdef DBG_SIMPLIFYGNX
+                        cerr << "simplifygnx capture sets" << endl;
 						int k = 0;
 						for (
 							vector< set< string > >::iterator jt = this->capture_sets.begin();
 							jt != this->capture_sets.end();
 							++jt, k++
 						) {
-							cout << "  Capture set [" << k << "] size = " << jt->size() << endl; 
+							cerr << "  Capture set [" << k << "] size = " << jt->size() << endl; 
 						}
 					#endif
 				}
@@ -1840,7 +1845,13 @@ void Main::run() {
 		if ( not g ) break;	
 		this->simplify( g );		
 		g->render();
-		cout << endl;		
+		cout << endl;
+        #ifdef DBG_SIMPLIFYGNX
+            cerr << "simplifygnx replying" << endl;
+            cerr << "  [[" ;
+            g->render( cerr );
+            cerr << "]]" << endl;
+        #endif		
 	}
 }
 

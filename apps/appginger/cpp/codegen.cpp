@@ -1102,6 +1102,12 @@ void CodeGenClass::compileAndOr( bool sense, Gnx mnx, LabelClass * contn ) {
 }
 
 void CodeGenClass::compileGnx( Gnx mnx, LabelClass * contn ) {
+	#ifdef DBG_CODEGEN
+		cerr << "appginger/compileGnx" << endl;
+		cerr << "  [[";
+		mnx->render( cerr );
+		cerr << "]]" << endl;
+	#endif
 	const string & nm = mnx->name();
 	if ( nm == CONSTANT ) {
 		this->compileGnxConstant( mnx, contn );
@@ -1121,10 +1127,23 @@ void CodeGenClass::compileGnx( Gnx mnx, LabelClass * contn ) {
 	} else if ( nm == SEQ ) {
 		this->compileChildren( mnx, contn );
 	} else if ( nm == BIND and mnx->size() == 2 ) {
+		#ifdef DBG_CODEGEN
+			cerr << "appginger/compileGnx/BIND" << endl;
+			cerr << "  [[";
+			mnx->child( 0 )->render( cerr );
+			cerr << "]]" << endl;
+			cerr << "  [[";
+			mnx->child( 1 )->render( cerr );	
+			cerr << "]]" << endl;
+		#endif
 		VIdent vid( this, mnx->child( 0 ) );
+		#ifdef DBG_CODEGEN
+			cerr << "  (VIdent::VIdent done)" << endl;
+		#endif
 		this->compile1( mnx->child( 1 ), CONTINUE_LABEL );
 		this->vmiPOP( vid );
 		this->continueFrom( contn );
+
 	} else if ( nm == FOR and mnx->size() == 2 ) {
 		this->compileGnxFor( mnx, contn );
 	} else if ( nm == LIST ) {

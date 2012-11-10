@@ -17,7 +17,7 @@
 \******************************************************************************/
 
 //	Local debugging switch for conditional code compilation.
-//#define DBG_FETCHGNX 1
+#define DBG_FETCHGNX 1
 
 /**
 	The fetchgnx command is used to fetch the Ginger XML (GNX) contents of a 
@@ -266,7 +266,8 @@ void Main::summary() {
 			break;
 		}
 		case EXECUTE_COMMAND: {
-			cerr << "EXECUTE_PACKAGE" << endl;
+			cerr << "EXECUTE_COMMAND" << endl;
+			break;
 		}
 		default:
 			throw Mishap( "Invalid mode" );

@@ -16,27 +16,45 @@
     along with AppGinger.  If not, see <http://www.gnu.org/licenses/>.
 \******************************************************************************/
 
+#include <iostream>
+#include "debug.hpp"
+
 #include "gnxconstants.hpp"
 #include "mishap.hpp"
-
 #include "vident.hpp"
-
 #include "package.cpp"
 
+using namespace std;
 
 VIdent::VIdent( CodeGen codegen, shared< Ginger::Mnx > vid ) {
 	const string & nm = vid->name();
-	if ( nm == ID || nm == VAR ) {
+	#ifdef DBG_VIDENT
+		cerr << "VIdent::VIdent" << endl;
+		cerr << "  " << nm << endl;
+		cerr << "  [[";
+		vid->render( cerr );
+		cerr << "]]" << endl;
+	#endif
+	const bool nmIsID = nm == ID;
+	if ( nmIsID || nm == VAR ) {
 		if ( vid->hasAttribute( VID_SCOPE, "local" ) ) {
 			this->flavour = LOCAL_FLAVOUR;
 			this->slot = vid->attributeToInt( VID_SLOT );
 			this->valof = NULL;
 		} else {	
 			this->flavour = GLOBAL_FLAVOUR;
+			#ifdef DBG_VIDENT
+				cerr << "VIdent::VIdent > getPackage" << endl;
+				cerr << "  " << vid->attribute( VID_DEF_PKG ) << endl;
+				cerr << "  ok" << endl;
+				cerr << flush;
+			#endif
 			Package * def_pkg = codegen->vm->getPackage( vid->attribute( VID_DEF_PKG ) );
-
+			#ifdef DBG_VIDENT
+				cerr << "VIdent::VIdent < getPackage" << endl;
+			#endif
 			//	TODO: This is interfering with correct autoloading.
-			this->valof = def_pkg->fetchDefinitionValof( vid->attribute( VID_NAME ) );
+			this->valof = def_pkg->fetchValof( vid->attribute( VID_NAME ), nmIsID );
 			
 			this->slot = 0;
 		}
@@ -45,5 +63,7 @@ VIdent::VIdent( CodeGen codegen, shared< Ginger::Mnx > vid ) {
 		this->valof = NULL;
 		this->slot = NULL;
 		this->ref = codegen->calcConstant( vid );
+	} else {
+		throw "TODO";
 	}
 }

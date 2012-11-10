@@ -24,24 +24,18 @@
 #include <setjmp.h>
 #include <time.h>
 
+#include "debug.hpp"
+
 #include <cstdio>
 
 #include "mnx.hpp"
 
 #include "common.hpp"
-//#include "read_xml.hpp"
-//#include "codegen.hpp"
 #include "machine.hpp"
 #include "rcep.hpp"
-//#include "vmi.hpp"
 #include "mishap.hpp"
-//#include "lift.hpp"
-//#include "resolve.hpp"
 
 using namespace std;
-
-
-//#define DBG_RCEP
 
 
 #ifdef DBG_CRAWL
@@ -121,20 +115,16 @@ bool RCEP::unsafe_read_comp_exec_print( istream & input, std::ostream & output )
 	//ReadXmlClass read_xml( input );
 	Ginger::MnxReader read_xml( input );
 
-#ifdef DBG_RCEP
-	printf( "Entering Read-Compile-Eval-Print loop\n" );
-	fflush( stdout );
-#endif
-
 	try {
 		shared< Ginger::Mnx > mnx( read_xml.readMnx() );
 		if ( not mnx ) return false;
 		
 		//	DEBUG.
 		#ifdef DBG_RCEP
-			cerr << "RCEP EXPRESSION: ";
-			mnx->render();
-			cout << endl;
+			cerr << "RCEP expression to compile" << endl;
+			cerr << "  [[";
+			mnx->render( cerr );
+			cerr << "]]" << endl;
 		#endif
 		
 		#ifdef DBG_RCEP
@@ -152,7 +142,7 @@ bool RCEP::unsafe_read_comp_exec_print( istream & input, std::ostream & output )
 	    start = clock();
 	    
 		#ifdef DBG_RCEP
-			cerr << "Queuing up" << endl;
+			cerr << "Planting done - Queuing up" << endl;
 		#endif
 	    
 	    vm->addToQueue( r );

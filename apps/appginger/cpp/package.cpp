@@ -29,6 +29,8 @@
 #include <sys/errno.h>
 #include <syslog.h>
 
+#include "debug.hpp"
+
 #include "sax.hpp"
 #include "command.hpp"
 #include "mishap.hpp"
@@ -248,6 +250,12 @@ static void fRenderMnx( FILE * foutd, shared< Ginger::Mnx > mnx ) {
 Valof * OrdinaryPackage::absoluteAutoload( const std::string & c ) {
 	syslog( LOG_INFO, "Autoloading is_absolute_ref %s", c.c_str() );
 	
+	#ifdef DBG_PACKAGE_AUTOLOAD
+		cerr << "Autoloading" << endl;
+		cerr << "  Package 	: " << this->title << endl;
+		cerr << "  Variable : " << c << endl;
+	#endif
+
 	Ginger::Command cmd( FETCHGNX );
 	cmd.addArg( "-X" );
 	{
@@ -268,7 +276,13 @@ Valof * OrdinaryPackage::absoluteAutoload( const std::string & c ) {
 	qb.put( "var.name", c );
 	qb.end();
 	shared< Ginger::Mnx > query( qb.build() );
-	
+
+	#ifdef DBG_PACKAGE_AUTOLOAD
+		cerr << "appginger asking for definition, using fetchgnx -X" << endl;
+		cerr << "  [[";
+		query->render( cerr );
+		cerr << "]]" << endl;
+	#endif	
 
 	cmd.runWithInputAndOutput();
 	int fd = cmd.getInputFD();   
@@ -299,17 +313,26 @@ Valof * OrdinaryPackage::absoluteAutoload( const std::string & c ) {
 	fclose( foutd );
 	
 	#ifdef DBG_PACKAGE_AUTOLOAD
-		cout << "[[" << prog.str() << "]]" << endl;
+		cerr << "appginger/package autoloading, reply from fetchgnx -X" << endl;
+		cerr << "  [[" << prog.str() << "]]" << endl;
+		cerr << "ok" << endl;
 	#endif
 	
 		
 	//	Now we establish a forward declaration - to be justified by the success.
+	#ifdef DBG_PACKAGE_AUTOLOAD
+		cerr << "appginger/package doing a forward declaration" << endl;
+	#endif
 	Valof * id = this->forwardDeclare( c );
 
 	try {
 		//	And we load the stream.
 		RCEP rcep( this );
 		rcep.setPrinting( false );	//	Turn off result printing.
+		#ifdef DBG_PACKAGE_AUTOLOAD
+			cerr << "appginger/package loading into RCEP" << endl;
+			cerr << "  [[" << prog.str() << "]]" << endl;
+		#endif	
 		rcep.unsafe_read_comp_exec_print( prog, cout );		
 		return id;		
 	} catch ( Ginger::Problem & e ) {
@@ -368,7 +391,8 @@ void OrdinaryPackage::loadIfNeeded() {
 	}
 		
 	#ifdef DBG_PACKAGE_AUTOLOAD
-		cout << "[[" << prog.str() << "]]" << endl;
+		cerr << "appginger/package loading via loadIfNeeded" << endl;
+		cerr << "  [[" << prog.str() << "]]" << endl;
 	#endif	
 
 	if ( prog.str().length() > 0 ) {

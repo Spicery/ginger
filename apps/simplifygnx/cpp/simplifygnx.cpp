@@ -17,8 +17,8 @@
 \******************************************************************************/
 
 //	Local debugging switch for conditional code compilation.
-#define DBG_SIMPLIFYGNX 1
-#define DBG_PACKAGE_AUTOLOAD 1
+//#define DBG_SIMPLIFYGNX 1
+//#define DBG_PACKAGE_AUTOLOAD 1
 
 /**
 The simplifygnx command is used to simplify the Ginger XML (GNX) fed

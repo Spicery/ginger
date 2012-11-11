@@ -31,6 +31,23 @@
 namespace Ginger {
 using namespace std;
 
+#define PREFIX "    "
+#define ORIGIN ( PREFIX "Cause" )
+
+Problem & Problem::cause( Problem & problem ) {
+	this->culprit( ORIGIN, problem.getMessage() );
+	for ( 	
+		vector< pair< string, string > >::iterator it = problem.culprits.begin();
+		it != problem.culprits.end();
+		++it
+	) {
+		std::string key( PREFIX );
+		key.append( it->first );
+		this->culprit( key, it->second );
+	}
+	return *this;
+}
+
 Problem & Problem::culprit( const std::string reason, const std::string arg ) {
 	this->culprits.push_back( pair< const string, const string >( reason, arg ) );
 	return *this;

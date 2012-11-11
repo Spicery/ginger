@@ -46,6 +46,8 @@ public:
 	Problem & culprit( const std::string arg );
 	Problem & culprit( const std::string reason, const long N );
 	Problem & culprit( const std::string reason, const char N );
+
+	Problem & cause( Problem & problem );
 	
 public:
 	virtual const char * severity() = 0;
@@ -70,6 +72,9 @@ public:
 	Mishap & culprit( const std::string arg, const long N ) { this->Problem::culprit( arg, N ); return *this; }
 	Mishap & culprit( const std::string arg, const char N ) { this->Problem::culprit( arg, N ); return *this; }
 
+	Mishap & cause( Problem & problem ) { this->Problem::cause( problem ); return *this; }
+
+
 public:
 	virtual const char * severity() { return "rollback"; }
 
@@ -84,6 +89,9 @@ public:
 	SystemError & culprit( const std::string arg ) { this->Problem::culprit( arg ); return *this; }
 	SystemError & culprit( const std::string arg, const long N ) { this->Problem::culprit( arg, N ); return *this; }
 	SystemError & culprit( const std::string arg, const char N ) { this->Problem::culprit( arg, N ); return *this; }
+
+	SystemError & cause( Problem & problem ) { this->Problem::cause( problem ); return *this; }
+
 
 public:	
 	virtual const char * severity() { return "failover"; }
@@ -100,6 +108,8 @@ public:
 	CompileTimeError & culprit( const std::string arg ) { this->Problem::culprit( arg ); return *this; }
 	CompileTimeError & culprit( const std::string arg, const long N ) { this->Problem::culprit( arg, N ); return *this; }
 	CompileTimeError & culprit( const std::string arg, const char N ) { this->Problem::culprit( arg, N ); return *this; }
+
+	CompileTimeError & cause( Problem & problem ) { this->Problem::cause( problem ); return *this; }
 
 public:	
 	virtual const char * severity() { return "failover"; }

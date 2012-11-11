@@ -342,6 +342,7 @@ Valof * OrdinaryPackage::absoluteAutoload( const std::string & c ) {
 			this->retractForwardDeclare( c );
 		}
 		syslog( LOG_ERR, "Autoloading %s failed due to an exception", c.c_str() );
+		throw Ginger::Mishap( "Autoloading failed (rethrowing)" ).culprit( "Name", c ).cause( e );
 	}
 	
 	//	No autoloading implemented yet - just fail.

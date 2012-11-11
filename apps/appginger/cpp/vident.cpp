@@ -45,11 +45,12 @@ VIdent::VIdent( CodeGen codegen, shared< Ginger::Mnx > vid ) {
 			this->flavour = GLOBAL_FLAVOUR;
 			#ifdef DBG_VIDENT
 				cerr << "VIdent::VIdent > getPackage" << endl;
-				cerr << "  " << vid->attribute( VID_DEF_PKG ) << endl;
+				cerr << "  " << vid->attribute( VID_DEF_PKG, "<def.pkg undefined>" ) << endl;
 				cerr << "  ok" << endl;
 				cerr << flush;
 			#endif
-			Package * def_pkg = codegen->vm->getPackage( vid->attribute( VID_DEF_PKG ) );
+			const string dpnm = vid->attribute( VID_DEF_PKG );
+			Package * def_pkg = codegen->vm->getPackage( dpnm );
 			#ifdef DBG_VIDENT
 				cerr << "VIdent::VIdent < getPackage" << endl;
 			#endif

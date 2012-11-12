@@ -18,6 +18,7 @@
 
 #include <string>
 #include <iostream>
+#include <sstream>
 
 #include <unistd.h>
 #include <sys/types.h>
@@ -47,19 +48,27 @@ Command::Command( const std::string command ) :
 }
 
 Command::~Command() {
-	//cerr << "~Command" << endl;
-	//cerr << "this->should_wait_on_close = " << this->should_wait_on_close << endl;
-	//cerr << "this->child_pid = " << this->child_pid << endl;
+	#ifdef DBG_COMMAND
+		cerr << "~Command" << endl;
+		cerr << "this->should_wait_on_close = " << this->should_wait_on_close << endl;
+		cerr << "this->child_pid = " << this->child_pid << endl;
+	#endif
 	if ( this->should_wait_on_close && this->child_pid != 0 ) {
 		int return_value_of_child;
-		//cerr << "Waiting ... " << this->child_pid << endl;
+		#ifdef DBG_COMMAND
+			cerr << "Waiting ... " << this->child_pid << endl;
+		#endif
 		wait( &return_value_of_child );
-		//cerr << "OK!" << endl;
+		#ifdef DBG_COMMAND
+			cerr << "OK!" << endl;
+		#endif
 	}
 }
 
 void Command::interrupt() {
-	//cerr << "Killing " << this->child_pid << endl;
+	#ifdef DBG_COMMAND
+		cerr << "Killing " << this->child_pid << endl;
+	#endif
 	kill( this->child_pid, SIGKILL );
 }
 
@@ -79,6 +88,18 @@ void Command::fill( vector< char * > & argv ) {
 	argv.push_back( NULL );
 }
 
+const std::string Command::asPrintString() {
+	std::stringstream str;
+	str << this->command.c_str();
+	for ( 
+		vector< string >::iterator it = this->args.begin();
+		it != this->args.end();
+		++it
+	) {
+		str << " " << it->c_str();
+	}
+	return str.str();
+}
 
 void Command::runSilent() {
 	vector< char * > arg_vector;

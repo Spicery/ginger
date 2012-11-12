@@ -16,17 +16,6 @@
     along with AppGinger.  If not, see <http://www.gnu.org/licenses/>.
 \******************************************************************************/
 
-/** \mainpage AppContext Internal Documentation
-*//*
- *
- * \section intro_sec Introduction
- *
- * This is the introduction.
- *
- * \section install_sec Installation
- *
- * \subsection step1 Step 1: Opening the box
-*/
 
 #define SIMPLIFYGNX		( INSTALL_TOOL "/simplifygnx" )
 #define COMMON2GNX		( INSTALL_TOOL "/common2gnx" )
@@ -49,29 +38,17 @@
 #include "common.hpp"
 #include "rcep.hpp"
 #include "appcontext.hpp"
-//#include "term.hpp"
 #include "mishap.hpp"
 #include "sys.hpp"
 #include "machine1.hpp"
 #include "machine2.hpp"
 #include "machine3.hpp"
 #include "machine4.hpp"
-//#include "database.hpp"
 
 using namespace std;
 
 Package * AppContext::initInteractivePackage( MachineClass * vm ) {
-    Package * interactive_pkg = vm->getPackage( INTERACTIVE_PACKAGE );
-    //Package * std_pkg = vm->getPackage( STANDARD_LIBRARY_PACKAGE );
-    /*interactive_pkg->import( 
-        Import(
-            fetchFacetSet( "public" ),  		//  Import the public facet from ...
-            std_pkg,                    		//  ... the standard library.
-            std::string( STANDARD_LIBRARY_PACKAGE ),    //  Alias
-            true,                       		//  Protected = nonmaskable.
-            NULL                        		//  Not into - or should it be the empty FacetSet???
-        )
-    );*/
+    Package * interactive_pkg = vm->getPackage( this->getInteractivePackage() );
     return interactive_pkg;
 }
 
@@ -105,13 +82,12 @@ void AppContext::initCgi() {
 }
 
 const char* AppContext::cgiValue( const char * fieldname ) {
-#ifdef RUDECGI
-	const char * answer = this->cgi == NULL ? "" : this->cgi->value( fieldname );
-	//cout << "CGI " << fieldname << " = " << answer << endl;
-	return answer;
-#else
-	return "";
-#endif
+    #ifdef RUDECGI
+    	const char * answer = this->cgi == NULL ? "" : this->cgi->value( fieldname );
+    	return answer;
+    #else
+    	return "";
+    #endif
 }
 
 const char * AppContext::syntax() { 

@@ -29,6 +29,7 @@
 
 
 #include "gngversion.hpp"
+#include "common.hpp"
 
 #define APPGINGER_NAME		"appginger"
 #define APPGINGER_VERSION	PACKAGE_VERSION
@@ -51,6 +52,7 @@ private:
 	int							print_level;
 	bool						welcoming;
 	std::string         		initial_syntax;
+	std::string					interactive_package;
 
 public:
 	void setGCTrace( bool t ) { this->is_gctrace = t; }
@@ -75,6 +77,8 @@ public:
 	const char * syntax(); 
 	const char * syntax( const std::string & filename ); 
 	void setSyntax( const std::string s ) { this->initial_syntax = s; }
+	const std::string getInteractivePackage() { return this->interactive_package; }
+	void setInteractivePackage( const std::string & ip ) { this->interactive_package = ip; }
 
 public:
 	MachineClass * newMachine();
@@ -89,7 +93,8 @@ public:
 		is_gctrace( false ),
 		use_stdin( false ),
 		print_level( 0 ),
-		welcoming( true )
+		welcoming( true ),
+		interactive_package( INTERACTIVE_PACKAGE )
 	{
 		#ifdef RUDECGI	
 			this->cgi = NULL;

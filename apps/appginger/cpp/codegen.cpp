@@ -237,11 +237,21 @@ void CodeGenClass::vmiPOP( const VIdent & id ) {
 }
 
 void CodeGenClass::vmiPOP( Gnx var_or_id ) {
+	#ifdef DBG_CODEGEN
+		cerr << "POP ";
+		var_or_id->render( cerr );
+		cerr << endl;
+	#endif
 	VIdent vid( this, var_or_id );
 	this->vmiPOP( vid );
 }
 
 void CodeGenClass::vmiPUSH( Gnx var_or_id ) {
+	#ifdef DBG_CODEGEN
+		cerr << "PUSH ";
+		var_or_id->render( cerr );
+		cerr << endl;		
+	#endif
 	VIdent vid( this, var_or_id );
 	this->vmiPUSH( vid );
 }

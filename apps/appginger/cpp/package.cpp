@@ -44,7 +44,7 @@
 
 #define FETCHGNX ( INSTALL_TOOL "/fetchgnx" )
 
-//#define DBG_PACKAGE
+
 
 using namespace std;
 
@@ -100,7 +100,6 @@ Valof * Package::add( const std::string & s ) {
 
 
 Valof * Package::fetchValof( const std::string & c, const bool absolute ) {
-	//cout << "Absolute fetch" << endl;
 	Valof * id = this->lookup( c );
 	if ( id ) {
 		return id;
@@ -115,7 +114,6 @@ Valof * Package::fetchValof( const std::string & c, const bool absolute ) {
 
 
 Valof * Package::fetchAbsoluteValof( const std::string & c ) {
-	//cout << "Absolute fetch" << endl;
 	Valof * id = this->lookup( c );
 	if ( id ) {
 		return id;
@@ -250,12 +248,6 @@ static void fRenderMnx( FILE * foutd, shared< Ginger::Mnx > mnx ) {
 Valof * OrdinaryPackage::absoluteAutoload( const std::string & c ) {
 	syslog( LOG_INFO, "Autoloading is_absolute_ref %s", c.c_str() );
 	
-	#ifdef DBG_PACKAGE_AUTOLOAD
-		cerr << "Autoloading" << endl;
-		cerr << "  Package 	: " << this->title << endl;
-		cerr << "  Variable : " << c << endl;
-	#endif
-
 	Ginger::Command cmd( FETCHGNX );
 	cmd.addArg( "-X" );
 	{
@@ -265,11 +257,26 @@ Valof * OrdinaryPackage::absoluteAutoload( const std::string & c ) {
 			it != folders.end();
 			++it
 		) {
-			cmd.addArg( "-f" );
+			cmd.addArg( "-j" );
 			cmd.addArg( *it );
 		}
 	}
 	
+	#ifdef DBG_PACKAGE_AUTOLOAD
+		cerr << "Autoloading" << endl;
+		cerr << "  Package 	: " << this->title << endl;
+		cerr << "  Variable : " << c << endl;
+		list< string > & folders = this->getMachine()->getAppContext().getProjectFolderList();
+		for ( 
+			list< string >::iterator it = folders.begin();
+			it != folders.end();
+			++it
+		) {
+			cerr << "  Folder  : " << *it << endl;
+		}
+		cerr << "  Command  : " << cmd.asPrintString() << endl;
+	#endif
+
 	Ginger::MnxBuilder qb;
 	qb.start( "fetch.definition" );
 	qb.put( "pkg.name", this->title );
@@ -288,10 +295,7 @@ Valof * OrdinaryPackage::absoluteAutoload( const std::string & c ) {
 	int fd = cmd.getInputFD();   
 	FILE * foutd = fdopen( cmd.getOutputFD(), "w" );
 	fRenderMnx( foutd, query );
-	//write( cmd.getOutputFD(), "<resolve.unqualified pkg.name=\"ginger.interactive\" var.name=\"tail\"/>\n", sizeof( "<resolve.unqualified pkg.name=\"ginger.interactive\" var.name=\"tail\"/>\n" ) );
-	//close( cmd.getOutputFD() );
 	
-	//cerr << "Command run " << endl;
 	stringstream prog;
 	for (;;) {
 		static char buffer[ 1024 ];
@@ -303,9 +307,6 @@ Valof * OrdinaryPackage::absoluteAutoload( const std::string & c ) {
 				throw Ginger::Mishap( "Failed to read" );
 			}
 		} else if ( n > 0 ) {
-			//cerr << "|";
-			//write( 2, buffer, n );
-			//cerr << "|" << endl;
 			prog.write( buffer, n );
 		}
 	}
@@ -353,7 +354,7 @@ void OrdinaryPackage::loadIfNeeded() {
 	if ( this->loaded ) return;
 	
 	syslog( LOG_INFO, "Loading package %s", this->title.c_str() );
-	
+
 	Ginger::Command cmd( FETCHGNX );
 	cmd.addArg( "-I" );
 	{
@@ -363,16 +364,30 @@ void OrdinaryPackage::loadIfNeeded() {
 			it != folders.end();
 			++it
 		) {
-			cmd.addArg( "-f" );
+			cmd.addArg( "-j" );
 			cmd.addArg( *it );
 		}
 	}
 	cmd.addArg( "-p" );
 	cmd.addArg( this->title );
 
-	//cerr << "About to run the command" << endl;
+	#ifdef DBG_PACKAGE_AUTOLOAD
+		cerr << "loadIfNeeded" << endl;
+		cerr << "  Package  : " << this->title << endl;
+		list< string > & folders = this->getMachine()->getAppContext().getProjectFolderList();
+		for ( 
+			list< string >::iterator it = folders.begin();
+			it != folders.end();
+			++it
+		) {
+			cerr << "  Folder  : " << *it << endl;
+		}
+		cerr << "  Command  : " << cmd.asPrintString() << endl;
+	#endif
+
+
+
 	int fd = cmd.runWithOutput();		
-	//cerr << "Command run " << endl;
 	stringstream prog;
 	for (;;) {
 		static char buffer[ 1024 ];
@@ -384,9 +399,6 @@ void OrdinaryPackage::loadIfNeeded() {
 				throw Ginger::Mishap( "Failed to read" );
 			}
 		} else if ( n > 0 ) {
-			//cerr << "|";
-			//write( 2, buffer, n );
-			//cerr << "|" << endl;
 			prog.write( buffer, n );
 		}
 	}

@@ -17,8 +17,9 @@
 \******************************************************************************/
 
 //	Local debugging switch for conditional code compilation.
-//#define DBG_SIMPLIFYGNX 1
-//#define DBG_PACKAGE_AUTOLOAD 1
+
+//#define DBG_SIMPLIFYGNX
+//#define DBG_PACKAGE_AUTOLOAD
 
 /**
 The simplifygnx command is used to simplify the Ginger XML (GNX) fed
@@ -43,7 +44,7 @@ to it as a stream.
 	replace closures, invent extra local variables, passing in explicitly
 	created reference objects.
 
---sysapp: Replace references to system calls with <sysfn>
+--sysapp: Replace references to system calls with <constant type="sysfn">
 	and <sysapp>. It relies on absolute references and will typically
 	be combined with --absolute.
 	
@@ -494,7 +495,7 @@ std::string resolveUnqualified( vector< string > & project_folders, const std::s
 			it != project_folders.end();
 			++it
 		) {
-			cmd.addArg( "-f" );
+			cmd.addArg( "-j" );
 			cmd.addArg( *it );
 		}
 	}
@@ -503,7 +504,12 @@ std::string resolveUnqualified( vector< string > & project_folders, const std::s
 	cmd.addArg( "-v" );
 	cmd.addArg( name );
 
-	//cerr << "About to run the command. Package: " << enc_pkg << endl;
+    #ifdef DBG_SIMPLIFYGNX
+	   cerr << "simplifygnx - About to run the command." << endl;
+       cerr << "  Package   : " << enc_pkg << endl;
+       cerr << "  Command   : " << cmd.asPrintString() << endl;
+    #endif
+
 	int fd = cmd.runWithOutput();		
 	//cerr << "Command run " << endl;
 	stringstream prog;
@@ -1275,13 +1281,13 @@ public:
 	
 	[1] It finds all references to the ginger.library, which are guaranteed
 		to be built-in functions. It replaces these references with 
-		<sysfn> constants.
+		<constant type="sysfn"> constants.
 		
 		If this transformation is successful, it does not need to force a
 		further pass. The action (#2) it needs to combine with happens on the
 		way up.
 		
-	[2] It replaces all <app><sysfn .../>...</app> forms with the especially
+	[2] It replaces all <app><constant type="sysfn" .../>...</app> forms with the especially
 		efficient <sysapp>...</sysapp> form. 
 		
 		If this transformation is successful it triggers a further pass 

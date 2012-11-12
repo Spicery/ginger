@@ -79,17 +79,27 @@ public:
 		this->addArg( command );
 		this->runWithOutput();
 		fp = fdopen( this->getInputFD(), "r" );
-		//cerr << "Opening popen " << this->child_pid << endl;
+		#ifdef DBG_POPEN
+			cerr << "Opening popen " << this->child_pid << endl;
+		#endif
 	}
 	
 	~Popen() {
-		//cerr << "Closing popen" << endl;
+		#ifdef DBG_POPEN
+			cerr << "Closing popen" << endl;
+		#endif
 		if ( fp != NULL ) {
-			//cerr << "Interrupting" << endl;
+			#ifdef DBG_POPEN
+				cerr << "Interrupting" << endl;
+			#endif
 			this->interrupt();
-			//cerr << "Closing (1)" << endl;
+			#ifdef DBG_POPEN
+				cerr << "Closing (1)" << endl;
+			#endif
 			fclose( fp );
-			//cerr << "Closing (2)" << endl;
+			#ifdef DBG_POPEN
+				cerr << "Closing (2)" << endl;
+			#endif
 		}
 	}
 };
@@ -115,13 +125,21 @@ private:
 	
 		RCEP rcep( interactive_pkg );
 		
-		//cout << "Using syntax: " << this->context.syntax() << endl;
-		
 		stringstream commstream;
-		//	tail is 1-indexed!
-		
 		
 		commstream << this->context.syntax() << " | " << SIMPLIFYGNX << " -suA";
+
+		{
+			list< string > & folders = vm->getAppContext().getProjectFolderList();
+			for ( 
+				list< string >::iterator it = folders.begin();
+				it != folders.end();
+				++it
+			) {
+				commstream << " -j" << *it;
+			}
+		}
+
 		commstream << " -p" << shellSafeName( interactive_pkg->getTitle() );
 		string command( commstream.str() );
 		
@@ -142,15 +160,12 @@ private:
 						while ( rcep.unsafe_read_comp_exec_print( stream_pipe_in, std::cout ) ) {}
 						cont = false;
 					} catch ( Ginger::Mishap & e ) {
-						//cerr << "CAUGHT #2" << endl;
 						e.report();
 						cerr << endl << SYS_MSG_PREFIX << "Reset after runtime error ..." << endl;
 						vm->resetMachine();
-						//cout << "Continuing" << endl;
 					} 			
 				}
 			} catch ( Ginger::CompileTimeError & e ) {
-				//cerr << "CAUGHT #1" << endl;
 				e.report();
 				cerr << endl << SYS_MSG_PREFIX << "Reset after compilation error ..." << endl;
 				vm->resetMachine();

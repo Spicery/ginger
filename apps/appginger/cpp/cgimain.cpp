@@ -72,6 +72,18 @@ public:
 			commstream << this->context.syntax( filename ) << " < " ;
 			commstream << shellSafeName( filename ) << " | ";
 			commstream << SIMPLIFYGNX << " -suA";
+
+			{
+				list< string > & folders = vm->getAppContext().getProjectFolderList();
+				for ( 
+					list< string >::iterator it = folders.begin();
+					it != folders.end();
+					++it
+				) {
+					commstream << " -j" << *it;
+				}
+			}
+			
 			commstream << " -p " << shellSafeName( interactive_pkg->getTitle() );
 			string command( commstream.str() );
 			//cerr << "Command so far: " << command << endl;

@@ -66,6 +66,18 @@ public:
 			commstream << this->context.syntax( *it ) << " < " << shellSafeName( *it ) << " | ";
 			commstream << SIMPLIFYGNX << " -suA";
 			commstream << " -p " << shellSafeName( interactive_pkg->getTitle() );
+
+			{
+				list< string > & folders = vm->getAppContext().getProjectFolderList();
+				for ( 
+					list< string >::iterator it = folders.begin();
+					it != folders.end();
+					++it
+				) {
+					commstream << " -j" << *it;
+				}
+			}
+			
 			string command( commstream.str() );
 			//	cerr << "Command so far: " << command << endl;
 			FILE * gnxfp = popen( command.c_str(), "r" );

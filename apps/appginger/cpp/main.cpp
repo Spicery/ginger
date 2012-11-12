@@ -64,7 +64,20 @@ private:
 		stringstream commstream;
 		//	tail is 1-indexed!
 		commstream << SIMPLIFYGNX << " -suA";
+
+		{
+			list< string > & folders = vm->getAppContext().getProjectFolderList();
+			for ( 
+				list< string >::iterator it = folders.begin();
+				it != folders.end();
+				++it
+			) {
+				commstream << " -j" << *it;
+			}
+		}
+
 		commstream << " -p " << shellSafeName( interactive_pkg->getTitle() );
+
 		string command( commstream.str() );
 
 		FILE * gnxfp = popen( command.c_str(), "r" );

@@ -63,7 +63,7 @@ def escapeName( name ):
 def createDefinitionFile( ename, name ):
 	escname = escapeName( name )
 	df = open( ename, 'w' )
-	df.write( '<bind><var name="{0}"/><sysfn value="{0}"/></bind>\n'.format( escname ) )
+	df.write( '<bind><var name="{0}"/><constant type="sysfn" value="{0}"/></bind>\n'.format( escname ) )
 	df.close()
 
 

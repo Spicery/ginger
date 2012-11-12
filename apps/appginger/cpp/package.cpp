@@ -185,51 +185,6 @@ Valof * Package::lookup_or_add( const std::string & c ) {
 *	Autoloading in Ordinary Packages
 *******************************************************************************/
 
-
-
-class ResolveHandler : public Ginger::SaxHandler {
-public:
-	Ginger::Mishap mishap;
-	string enc_pkg_name;
-	string alias_name;
-	string def_pkg_name;
-	bool qualified;	
-        
-public:
-	void startTag( std::string & name, std::map< std::string, std::string > & attrs ) {
-		if ( name == "resolve" ) {
-			qualified = attrs.find( "alias" ) != attrs.end();
-			this->enc_pkg_name = attrs[ "enc.pkg" ];
-			this->alias_name = attrs[ "alias" ];
-			this->def_pkg_name = attrs[ "def.pkg" ];
-		} else if ( name == "mishap" ) {
-			this->mishap.setMessage( attrs[ "message" ] );
-		} else if ( name == "culprit" ) {
-			mishap.culprit( attrs[ "name" ], attrs[ "value" ] );
-		} else {
-			throw Ginger::Mishap( "Unexpected element in response" ).culprit( "Element name", name );
-		}
-	}
-	
-	void endTag( std::string & name ) {
-		if ( name == "mishap" ) {
-			throw mishap;
-		}
-	}
-
-public:
-	void report() {
-		cout <<
-		( qualified ? "QUALIFIED" : "UNQUALIFIED" ) << "( " <<
-		this->enc_pkg_name << ", " << 
-		this->alias_name << ", " <<
-		this->def_pkg_name << " )" << endl;
-	}
-        
-public:
-	ResolveHandler() : mishap( "" ), qualified( false ) {}
-};
-
 static void fRenderMnx( FILE * foutd, shared< Ginger::Mnx > mnx ) {
 	#if 0
 		namespace io = boost::iostreams;

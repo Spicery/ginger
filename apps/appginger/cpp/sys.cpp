@@ -372,6 +372,8 @@ const SysMap::value_type rawData[] = {
 	SysMap::value_type( "-", SysInfo( vmc_sub, Arity( 2 ), Arity( 1 ), "Substracts two numbers" ) ),
 	SysMap::value_type( "*", SysInfo( vmc_mul, Arity( 2 ), Arity( 1 ), "Multiplies two numbers" ) ),
 	SysMap::value_type( "/", SysInfo( vmc_div, Arity( 2 ), Arity( 1 ), "Divides two numbers, result is a float" ) ),
+	SysMap::value_type( "quo", SysInfo( vmc_quo, Arity( 2 ), Arity( 1 ), "Integer quotient" ) ),
+	SysMap::value_type( "mod", SysInfo( vmc_mod, Arity( 2 ), Arity( 1 ), "Integer modulus" ) ),
 	//SysMap::value_type( "**", SysInfo( VM_OP_FLAVOUR, vmc_pow, fnc_pow, Arity( 2 ), Arity( 1 ), 0, "Exponentiates two numbers, result is float" ) ),
 	SysMap::value_type( "<", SysInfo( CMP_LT, Arity( 2 ), Arity( 1 ), "Less than, compares two real numbers" ) ),
 	SysMap::value_type( "<=", SysInfo( CMP_LTE, Arity( 2 ), Arity( 1 ), "Less than or equal to, compares two real number" ) ),

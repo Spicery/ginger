@@ -4,6 +4,10 @@ Instruction DIV_I A, B -> A / B
 Summary
 	Computes A divided by B in floating point arithmetic.
 	TODO: If the result is an exact integer, should it convert it back down?
+
+Comment
+	This is NOT the same as the high level function "div" but it is 
+	the same as "/". For integer division see the QUO instruction.
 	
 Unchecked Precondition
 	

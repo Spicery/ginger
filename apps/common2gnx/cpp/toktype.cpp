@@ -40,6 +40,8 @@ const char * tok_type_as_sysapp( TokType fnc ) {
 	case tokty_add : return "+";
 	case tokty_append: return "append";
 	case tokty_div : return "/";
+	case tokty_quo : return "quo";
+	case tokty_mod : return "mod";
 	case tokty_equal : return "=";
 	case tokty_identical: return "==";
 	case tokty_gt : return ">";

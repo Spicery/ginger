@@ -82,6 +82,7 @@ instructionSet = [
 	Instruction( "lt_ss", "irrr" ),
 	Instruction( "lte_si", "irrr" ),
 	Instruction( "lte_ss", "irrr" ),
+	Instruction( "mod", "i" ),
 	Instruction( "neq_si", "irrr" ),
 	Instruction( "neq_ss", "irrr" ),
 	Instruction( "not", "i" ),

@@ -83,6 +83,7 @@ ItemMap::ItemMap( const bool cstyle ) {
 	add( true,		"catch",			tokty_catch, 		Clo, 		0		);
 	add( !cstyle,	"define",			tokty_define, 		PrF, 		0		);
 	add( !cstyle,	"do",				tokty_do, 			Clo, 		0		);
+	add( true,      "div",              tokty_quo,          BSA, 		500		);
 	add( true,	 	"else",				tokty_else, 		Clo, 		0		);
 	add( !cstyle,	"elseif",			tokty_elseif, 		Clo, 		0		);
 	add( !cstyle,	"elseunless",		tokty_elseunless, 	Clo, 		0		);
@@ -103,6 +104,7 @@ ItemMap::ItemMap( const bool cstyle ) {
 	add( true,	 	"if",				tokty_if,			PrF, 		0		);
 	add( true,	 	"import",			tokty_import,		PrF,		0		);
 	add( true,	 	"in",				tokty_in,			PoF,		2000	);
+	add( true,		"mod",				tokty_mod,			BSA, 		500		);
 	//	add( true,		"indeterminate",	tokty_indeterminate,PrF,		0		);	//	NO!
 	add( true,	 	"or",				tokty_or,			BFo, 		1800	);
 	add( true,	 	"package",			tokty_package,		PrF, 		0		);

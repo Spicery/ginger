@@ -1,9 +1,11 @@
 /*****************************************************************************\
 Instruction TBD
+	//	TODO:
 
 Summary
 	
 Unchecked Precondition
+	* N is a Small (enforced by vmiINCR(long))
 	
 Exceptions (Checked Preconditions)
 	
@@ -13,17 +15,21 @@ Result (Postcondition)
 
 Ref ry = ToRef( pc[ 1 ] );
 Ref rx = *( VMVP );
-if ( IsSmall( rx ) && IsSmall( ry ) ) {
+if ( IsSmall( rx ) ) {
 	long y = (long)ry;
 	long x = (long)rx;
 	long sum = x + y;
-	if ( x < 0 ? sum <= y : sum >= y ) {
+	if ( x < 0 ? sum < y : sum >= y ) {
 		*VMVP = ToRef( sum );
-		RETURN( pc + 2 );
 	} else {
-		//	TODO!!!!!
-    	throw Mishap( "Overflow detected in +" );
+		*VMVP = (
+			vm->heap().copyDouble( 
+				static_cast< gngdouble_t >( x >> TAG ) + 
+				static_cast< gngdouble_t >( y >> TAG )
+			)
+		);
 	}
+	RETURN( pc + 2 );
 } else {
-	throw Mishap( "Small integers only" );
+	throw Mishap( "INCR_BY instruction: Number needed" ).culprit( "Value", refToString( rx ) );
 } 

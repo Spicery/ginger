@@ -26,7 +26,16 @@ if ( IsSmall( rx ) && IsSmall( ry ) ) {
 	long y = (long)ry;
 	long x = (long)rx;
 	long diff = x - y;
-	*VMVP = ToRef( diff );
+	if ( y < 0L ? diff > x : diff <= x ) {
+		*VMVP = ToRef( diff );
+	} else {
+		*( VMVP ) = (
+			vm->heap().copyDouble( 
+				static_cast< gngdouble_t >( x >> TAG ) - 
+				static_cast< gngdouble_t >( y >> TAG )
+			)
+		);
+	}
 	RETURN( pc + 1 );
 } else if ( IsDouble( rx ) ) {
 	gngdouble_t x, y;
@@ -42,5 +51,5 @@ if ( IsSmall( rx ) && IsSmall( ry ) ) {
 	RETURN( pc + 1 );
 } else {
 	//	TODO: update message with arguments.
-	throw Mishap( "Numbers only" );
+	throw Mishap( "Numbers only" ).culprit( "First", refToString( rx ) ).culprit( "Second", refToString( ry ) );
 } 

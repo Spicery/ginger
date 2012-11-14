@@ -17,12 +17,18 @@ if ( IsSmall( rx ) ) {
 	long sum = x + (long)LongToSmall( 1 );
 	if ( sum > x ) {
 		*( VMVP ) = ToRef( sum );
-		RETURN( pc + 1 );
 	} else {
-		//	TODO: Overflows.
-		throw Mishap( "integer overflow detected in x + 1" );
+		*( VMVP ) = (
+			vm->heap().copyDouble( 
+				static_cast< gngdouble_t >( x >> TAG ) + 1.0
+			)
+		);
 	}
+	RETURN( pc + 1 );
+} else if ( IsDouble( rx ) ) {
+	*( VMVP ) = vm->heap().copyDouble( gngFastDoubleValue( rx ) + 1.0 );
+	RETURN( pc + 1 );
 } else {
-	throw Mishap( "Small integer needed" );
+	throw Mishap( "INCR instruction: Number needed" ).culprit( "Value", refToString( rx ) );
 }
 

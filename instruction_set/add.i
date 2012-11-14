@@ -27,7 +27,7 @@ if ( IsSmall( rx ) && IsSmall( ry ) ) {
 	long x = (long)rx;
 	long sum = x + y;
 	//std::cout << "two smalls: " << x << ", " << y << std::endl;
-	if ( x < 0L ? sum <= y : sum >= y ) {
+	if ( x < 0L ? sum < y : sum >= y ) {
 		//std::cout << "x, y, sum, sum >= y, ( x < 0L ? sum <= y : sum >= y ), sum < 0" << std::endl;
 		//std::cout << x << ", " << y << ", " << sum << ", " << ( sum >= y ) << ", " << ( x < 0L ? sum <= y : sum >= y ) << ", " << ( sum < 0L ) << std::endl;
 		//std::cout << "result was small: " << sum << " n.b. " << ( x < 0L ) << ", " << ( sum >= y ) << std::endl;
@@ -35,8 +35,8 @@ if ( IsSmall( rx ) && IsSmall( ry ) ) {
 	} else {
 		*( VMVP ) = (
 			vm->heap().copyDouble( 
-				static_cast< gngdouble_t >( x ) + 
-				static_cast< gngdouble_t >( y )
+				static_cast< gngdouble_t >( x >> TAG ) + 
+				static_cast< gngdouble_t >( y >> TAG )
 			)
 		);
 	}

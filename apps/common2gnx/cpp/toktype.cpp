@@ -26,6 +26,7 @@ const char * tok_type_as_tag( TokType fnc ) {
 		case tokty_and : return "and";
 		case tokty_assign : 
 		case tokty_assignrev : 
+			//	The swapping of arguments us handled by tok_type_as_direction.
 			return "set";
 		case tokty_comma : return "seq";
 		case tokty_or : return "or";

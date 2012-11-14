@@ -24,7 +24,9 @@ const char * tok_type_as_tag( TokType fnc ) {
     switch ( fnc ) {
     	case tokty_also: return "also";
 		case tokty_and : return "and";
-		case tokty_assign : return "set";
+		case tokty_assign : 
+		case tokty_assignrev : 
+			return "set";
 		case tokty_comma : return "seq";
 		case tokty_or : return "or";
 		case tokty_semi : return "seq";

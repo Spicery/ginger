@@ -29,6 +29,8 @@ ItemMap::ItemMap( const bool cstyle ) {
 	add( true,	 	"-",				tokty_sub, 			BSA, 		700		);
 	add( true,	 	"->",				tokty_assign,		BFo,		2000	);
 	add( true,	 	"<-",				tokty_assignrev,	BFo,		2000	);
+	add( true,	 	"=::",				tokty_assign,		BFo,		2000	);
+	add( true,	 	"::=",				tokty_assignrev,	BFo,		2000	);
 	add( true,	 	",", 				tokty_comma, 		BFo, 		prec_comma	);
 	add( !cstyle, 	";", 				tokty_semi, 		PoF, 		prec_semi	);
 	add( cstyle, 	";", 				tokty_semi, 		Clo, 		0		);

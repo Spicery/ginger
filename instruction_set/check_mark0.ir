@@ -1,13 +1,19 @@
 /*****************************************************************************\
-Instruction TBD
+Instruction CHECK_MARK0 LOCAL_N 
 
 Summary
+	Checks that the value of the local variable LOCAL_N is the same
+	as the top of the stack. 
 	
 Unchecked Precondition
+	Pointer values are long-aligned and hence masquerade as Smalls
+	as far as the garbage collector is concerned.
 	
 Exceptions (Checked Preconditions)
+	The difference between the two pointers LOCAL[n] & VMVP isn't zero.
 	
 Result (Postcondition)		
+	It is confirmed that no values were pushed on the stack.
 
 \*****************************************************************************/
 

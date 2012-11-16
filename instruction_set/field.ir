@@ -1,13 +1,17 @@
 /*****************************************************************************\
-Instruction TBD
+Instruction FIELD N ( RECORD ) -> ( RECORD_FIELDn )
 
 Summary
+	Given a record on the top of the stack, it extracts the Nth field
+	and replaces the record with this.
 	
 Unchecked Precondition
+	The top of the stack is a record
+	N is in range
 	
 Exceptions (Checked Preconditions)
 	
-Result (Postcondition)		
+Result (Postcondition)
 
 \*****************************************************************************/
 

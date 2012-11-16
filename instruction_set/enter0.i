@@ -1,13 +1,17 @@
 /*****************************************************************************\
-Instruction TBD
+Instruction ENTER0
 
 Summary
+	A simplified version of ENTER for nullary function objects.
 	
 Unchecked Precondition
+	Must be the first instruction of a function object.
 	
 Exceptions (Checked Preconditions)
+	Non-zero number of arguments were passed.
 	
-Result (Postcondition)		
+Result (Postcondition)	
+	As for ENTER	
 
 \*****************************************************************************/
 

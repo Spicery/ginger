@@ -1,9 +1,11 @@
 /*****************************************************************************\
-Instruction TBD
+Instruction GOTO JUMP_D
 
 Summary
+	Unconditional transfer of control by JUMP_D words.
 	
 Unchecked Precondition
+	JUMP_D is in range of the enclosing function object.
 	
 Exceptions (Checked Preconditions)
 	

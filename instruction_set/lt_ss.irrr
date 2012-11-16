@@ -1,5 +1,5 @@
 /*****************************************************************************\
-Instruction TBD
+Instruction LT_SS
 
 Summary
 	
@@ -17,9 +17,16 @@ long t = ToLong( pc[2] );
 Ref a = LOCAL( s );
 Ref b = LOCAL( t );
 
-if ( not( IsSmall( a ) ) or not( IsSmall( b ) ) ) {
-	throw Mishap( "Small integers needed" );
-}
-
-long d = ToLong( pc[3] );
-RETURN( ToLong( a ) < ToLong( b ) ? pc + d + 3 : pc + 4 );
+if ( IsSmall( a ) ) {
+	if ( IsSmall( b ) ) {
+		RETURN( ToLong( a ) < ToLong( b ) ? pc + ToLong( pc[3] ) + 3 : pc + 4 );
+	} else if ( IsDouble( b ) ) {
+		RETURN( static_cast< gngdouble_t >( SmallToLong( a ) ) < gngFastDoubleValue( b ) ? pc + ToLong( pc[3] ) + 3 : pc + 4 );
+	}
+} else if ( IsDouble( a ) ) {
+	if ( IsSmall( b ) ) {
+		RETURN( gngFastDoubleValue( a ) < static_cast< gngdouble_t >( SmallToLong( b ) ) ? pc + ToLong( pc[3] ) + 3 : pc + 4 );
+	} else if ( IsDouble( b ) ) {
+		RETURN( gngFastDoubleValue( a ) < gngFastDoubleValue( b ) ? pc + ToLong( pc[3] ) + 3 : pc + 4 );
+	} 
+} 

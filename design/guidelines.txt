@@ -1,0 +1,17 @@
+Guidelines for Ginger VM Development
+====================================
+
+Version numbering: 
+	We'll follow the concepts semantic versioning as outlined 
+	at http://semver.org/
+
+Development Programming Languages
+	We strive to keep this reasonably contained so that programmers aren't
+	being asked for too many skills.
+	GNU C++ for the virtual machine
+	Python for scripting
+
+Runtime Dependencies
+	Strive to keep to a minimum.
+	Bash /bin/bash
+	rlwrap (I would prefer to eliminate this)

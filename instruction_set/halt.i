@@ -1,13 +1,17 @@
 /*****************************************************************************\
-Instruction TBD
+Instruction HALT
 
 Summary
+	Forces the virtual machine to exit with a failure.
 	
 Unchecked Precondition
+	None
 	
 Exceptions (Checked Preconditions)
+	None
 	
 Result (Postcondition)		
+	End of the VM session.
 
 \*****************************************************************************/
 

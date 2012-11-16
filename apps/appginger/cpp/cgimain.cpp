@@ -44,12 +44,7 @@
 #include "toolmain.hpp"
 
 #define APP_TITLE "ginger-cgi"
-
-#define SIMPLIFYGNX		( INSTALL_TOOL "/simplifygnx" )
-#define COMMON2GNX		( INSTALL_TOOL "/common2gnx" )
-#define LISP2GNX		( INSTALL_TOOL "/lisp2gnx" )
-#define GSON2GNX		( INSTALL_TOOL "/gson2gnx" )
-#define TAIL			"/usr/bin/tail"
+#include "wellknownpaths.hpp"
 
 using namespace std;
 
@@ -70,8 +65,11 @@ public:
 			stringstream commstream;
 			//	tail is 1-indexed!
 			commstream << this->context.syntax( filename ) << " < " ;
-			commstream << shellSafeName( filename ) << " | ";
-			commstream << SIMPLIFYGNX << " -suA";
+			commstream << shellSafeName( filename );
+
+			#ifdef SIMPLIFY_NOT_IMPLEMENTED
+				commstream << " | " << SIMPLIFYGNX << " -suA";
+			#endif
 
 			{
 				list< string > & folders = vm->getAppContext().getProjectFolderList();

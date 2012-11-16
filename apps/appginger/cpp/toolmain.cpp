@@ -45,16 +45,10 @@
 
 
 #include "toolmain.hpp"
+#include "wellknownpaths.hpp"
 
 using namespace std;
 
-#define LICENSE_FILE	( INSTALL_LIB "/COPYING" )
-
-#define SIMPLIFYGNX		( INSTALL_TOOL "/simplifygnx" )
-#define COMMON2GNX		( INSTALL_TOOL "/common2gnx" )
-#define LISP2GNX		( INSTALL_TOOL "/lisp2gnx" )
-#define GSON2GNX		( INSTALL_TOOL "/gson2gnx" )
-#define TAIL			"/usr/bin/tail"
 
 
 /*

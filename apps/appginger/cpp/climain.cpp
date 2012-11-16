@@ -35,10 +35,7 @@
 
 #define APP_TITLE "ginger"
 
-#define SIMPLIFYGNX		( INSTALL_TOOL "/simplifygnx" )
-#define COMMON2GNX		( INSTALL_TOOL "/common2gnx" )
-#define LISP2GNX		( INSTALL_TOOL "/lisp2gnx" )
-#define GSON2GNX		( INSTALL_TOOL "/gson2gnx" )
+#include "wellknownpaths.hpp"
 
 
 using namespace std;
@@ -127,20 +124,23 @@ private:
 		
 		stringstream commstream;
 		
-		commstream << this->context.syntax() << " | " << SIMPLIFYGNX << " -suA";
+		commstream << this->context.syntax();
 
-		{
-			list< string > & folders = vm->getAppContext().getProjectFolderList();
-			for ( 
-				list< string >::iterator it = folders.begin();
-				it != folders.end();
-				++it
-			) {
-				commstream << " -j" << *it;
+		#ifdef SIMPLIFY_NOT_IMPLEMENTED
+			commstream << " | " << SIMPLIFYGNX << " -suA";
+			{
+				list< string > & folders = vm->getAppContext().getProjectFolderList();
+				for ( 
+					list< string >::iterator it = folders.begin();
+					it != folders.end();
+					++it
+				) {
+					commstream << " -j" << *it;
+				}
 			}
-		}
+			commstream << " -p" << shellSafeName( interactive_pkg->getTitle() );
+		#endif
 
-		commstream << " -p" << shellSafeName( interactive_pkg->getTitle() );
 		string command( commstream.str() );
 		
 		bool cont = true;

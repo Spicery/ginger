@@ -29,4 +29,7 @@
 //#define DBG_CODEGEN
 //#define DBG_VIDENT
 
+//#define DBG_SIMPLIFY
+
+
 #endif

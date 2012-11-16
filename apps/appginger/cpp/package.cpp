@@ -42,7 +42,7 @@
 #include "makesysfn.hpp"
 #include "rcep.hpp"
 
-#define FETCHGNX ( INSTALL_TOOL "/fetchgnx" )
+#include "wellknownpaths.hpp"
 
 
 

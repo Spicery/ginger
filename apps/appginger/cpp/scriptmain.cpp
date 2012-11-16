@@ -34,11 +34,7 @@
 
 #define APP_TITLE "ginger-script"
 
-#define SIMPLIFYGNX		( INSTALL_TOOL "/simplifygnx" )
-#define COMMON2GNX		( INSTALL_TOOL "/common2gnx" )
-#define LISP2GNX		( INSTALL_TOOL "/lisp2gnx" )
-#define GSON2GNX		( INSTALL_TOOL "/gson2gnx" )
-#define TAIL			"/usr/bin/tail"
+#include "wellknownpaths.hpp"
 
 using namespace std;
 
@@ -61,22 +57,27 @@ public:
 	
 		vector< string > & args = this->context.arguments();
 		for ( vector< string >::iterator it = args.begin(); it != args.end(); ++it ) {
+
 			stringstream commstream;
 			//	tail is 1-indexed!
-			commstream << this->context.syntax( *it ) << " < " << shellSafeName( *it ) << " | ";
-			commstream << SIMPLIFYGNX << " -suA";
-			commstream << " -p " << shellSafeName( interactive_pkg->getTitle() );
+			commstream << this->context.syntax( *it ) << " < " << shellSafeName( *it );
 
-			{
-				list< string > & folders = vm->getAppContext().getProjectFolderList();
-				for ( 
-					list< string >::iterator it = folders.begin();
-					it != folders.end();
-					++it
-				) {
-					commstream << " -j" << *it;
+			#ifdef SIMPLIFY_NOT_IMPLEMENTED
+				commstream << " | ";
+				commstream << SIMPLIFYGNX << " -suA";
+				commstream << " -p " << shellSafeName( interactive_pkg->getTitle() );
+
+				{
+					list< string > & folders = vm->getAppContext().getProjectFolderList();
+					for ( 
+						list< string >::iterator it = folders.begin();
+						it != folders.end();
+						++it
+					) {
+						commstream << " -j" << *it;
+					}
 				}
-			}
+			#endif
 			
 			string command( commstream.str() );
 			//	cerr << "Command so far: " << command << endl;
@@ -98,9 +99,24 @@ public:
 		if ( this->context.useStdin() ) {
 			stringstream commstream;
 			//	tail is 1-indexed!
-			commstream << this->context.syntax() << " | ";
-			commstream << SIMPLIFYGNX << " -suA";
-			commstream << " -p " << shellSafeName( interactive_pkg->getTitle() );
+			commstream << this->context.syntax();
+
+			#ifdef SIMPLIFY_NOT_IMPLEMENTED
+				commstream << " | ";
+				commstream << SIMPLIFYGNX << " -suA";
+				commstream << " -p " << shellSafeName( interactive_pkg->getTitle() );
+				{
+					list< string > & folders = vm->getAppContext().getProjectFolderList();
+					for ( 
+						list< string >::iterator it = folders.begin();
+						it != folders.end();
+						++it
+					) {
+						commstream << " -j" << *it;
+					}
+				}
+			#endif
+			
 			string command( commstream.str() );
 
 			FILE * gnxfp = popen( command.c_str(), "r" );

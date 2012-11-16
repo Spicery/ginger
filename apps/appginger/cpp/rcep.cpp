@@ -34,6 +34,7 @@
 #include "machine.hpp"
 #include "rcep.hpp"
 #include "mishap.hpp"
+#include "simplify.hpp"
 
 using namespace std;
 
@@ -116,9 +117,14 @@ bool RCEP::unsafe_read_comp_exec_print( istream & input, std::ostream & output )
 	Ginger::MnxReader read_xml( input );
 
 	try {
+		//	TODO: Fix the freezing in of the package!
+		//	NOTE: If the current package changes then it is vital to
+		//	replace the simplifier. Really this is frozen into the wrong place!!
+		Simplify simplifier( vm->getAppContext(), this->currentPackage() );
 		shared< Ginger::Mnx > mnx( read_xml.readMnx() );
 		if ( not mnx ) return false;
-		
+		mnx = simplifier.simplify( mnx );
+
 		//	DEBUG.
 		#ifdef DBG_RCEP
 			cerr << "RCEP expression to compile" << endl;

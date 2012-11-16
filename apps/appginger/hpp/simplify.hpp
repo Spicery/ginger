@@ -16,64 +16,35 @@
     along with AppGinger.  If not, see <http://www.gnu.org/licenses/>.
 \******************************************************************************/
 
-#ifndef RCEP_HPP
-#define RCEP_HPP
+#ifndef GNG_SIMPLIFY_HPP
+#define GNG_SIMPLIFY_HPP
 
-#include <istream>
-
+#include "shared.hpp"
 #include "mnx.hpp"
+#include "command.hpp"
 
-#include "machine.hpp"
+#include "appcontext.hpp"
 #include "package.hpp"
 
+typedef shared< Ginger::Mnx > Gnx;
 
-class RCEP {
+class Simplify {
 private:
-	Package * current_package;
-	bool printing;
+    bool started;
+    AppContext & context;
+    Ginger::Command command;
+    FILE * fout;
+    Package * package;
 
 private:
-	static int level;
+    void initIfNeeded();
 
 public:
-	void setPrinting( bool p ) {
-		this->printing = p;
-	}
-	
-	bool & isPrinting() {
-		return this->printing;
-	}
-	
-	bool isTopLevel() {
-		return level == 1;
-	}
-
-	Package * currentPackage() { return this->current_package; }
+    Gnx simplify( Gnx x );
 
 public:
-	MachineClass * getMachine() { return this->current_package->getMachine(); } 
-	void printResults( std::ostream & output, float time_taken );
-	
-	//	Does not trap mishap.
-	bool unsafe_read_comp_exec_print( std::istream & input, std::ostream & output );
-	
-	//	Traps mishap.
-	bool read_comp_exec_print( std::istream & input, std::ostream & output );
-	
-	void execGnx( shared< Ginger::Mnx > gnx, std::ostream & output );
-
-public:
-	RCEP( Package * current_package ) :
-		current_package( current_package ),
-		printing( true )
-	{
-		level += 1;
-	}
-	
-	~RCEP() {
-		level -= 1;
-	}
+    Simplify( AppContext & cxt, Package * package );
+    ~Simplify();
 };
 
 #endif
-

@@ -17,13 +17,7 @@
 \******************************************************************************/
 
 
-#define SIMPLIFYGNX		( INSTALL_TOOL "/simplifygnx" )
-#define COMMON2GNX		( INSTALL_TOOL "/common2gnx" )
-#define CSTYLE2GNX		( INSTALL_TOOL "/cstyle2gnx" )
-#define LISP2GNX		( INSTALL_TOOL "/lisp2gnx" )
-#define GSON2GNX		( INSTALL_TOOL "/gson2gnx" )
-#define GNX2GNX			"/bin/cat" 
-
+#include "wellknownpaths.hpp"
 
 #include <iostream>
 #include <fstream>

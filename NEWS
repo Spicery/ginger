@@ -1,0 +1,34 @@
+Ginger Development News
+=======================
+
+Version 0.8
+-----------
+
+Arithmetic
+~~~~~~~~~~
+	* 	Adds new datatype Float (double precision) and support
+		for floating point arithmetic.
+	* 	Integer arithmetic now includes div, rem operators.
+	*	Integer arithmetic smoothly overflows into floating point.
+
+Common Syntax
+~~~~~~~~~~~~~
+	*	New reversible syntax for assignment ::= and =::
+	*	Elements can now be closed using the universal closing tag </>.
+
+Short-circuit Conditionals
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+	*	<and> and <or> short-circuit operators added to the runtime.
+
+Build Process
+~~~~~~~~~~~~~
+	*	Replaced the old Java code with new compact Python scripts,
+		greatly simplifying the build process.
+	*	New executable ginger-info replaces the --meta-info flag (now 
+		removed) and makes the build process more straightforward. Easy way
+		to dump the meta-info about Ginger.
+	*	Dependency on Boost eliminated.
+
+Other
+~~~~~
+	*	Many minor defect fixes.

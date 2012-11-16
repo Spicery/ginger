@@ -1,7 +1,9 @@
 /*****************************************************************************\
-Instruction TBD
+Instruction GT ( A, B ) -> ( A > B )
 
 Summary
+	Removes the top two items from the value stack, which must be
+	numbers, and compares them using the greater than operator.
 	
 Unchecked Precondition
 	
@@ -14,9 +16,22 @@ Result (Postcondition)
 Ref b = *( VMVP-- );
 Ref a = *( VMVP );
 
-if ( not( IsSmall( a ) ) or not( IsSmall( b ) ) ) {
-	throw Mishap( "Small integers needed" );
-}
-
-*( VMVP ) = ToLong( a ) > ToLong( b ) ? SYS_TRUE : SYS_FALSE;
-RETURN( pc + 1 );
+if ( IsSmall( a ) ) {
+	if ( IsSmall( b ) ) {
+		*( VMVP ) = ToLong( a ) > ToLong( b ) ? SYS_TRUE : SYS_FALSE;
+		RETURN( pc + 1 );
+	} else if ( IsDouble( b ) ) {
+		*( VMVP ) = static_cast< gngdouble_t >( SmallToLong( a ) ) > gngFastDoubleValue( b ) ? SYS_TRUE : SYS_FALSE;
+		RETURN( pc + 1 );
+	}
+} else if ( IsDouble( a ) ) {
+	if ( IsSmall( b ) ) {
+		*( VMVP ) = gngFastDoubleValue( a ) > static_cast< gngdouble_t >( SmallToLong( b ) ) ? SYS_TRUE : SYS_FALSE;
+		RETURN( pc + 1 );
+	} else if ( IsDouble( b ) ) {
+		*( VMVP ) = gngFastDoubleValue( a ) > gngFastDoubleValue( b ) ? SYS_TRUE : SYS_FALSE;
+		RETURN( pc + 1 );
+	} 
+} 
+throw Mishap( "Small integers needed" ).culprit( "First", refToString( a ) ).culprit( "Second", refToString( b ) );
+RETURN( NULL ); // sop for compiler.

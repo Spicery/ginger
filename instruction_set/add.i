@@ -1,18 +1,18 @@
 /*****************************************************************************\
-Instruction ADDI
+Instruction ADD ( X:Num, Y:Num ) -> ( X+Y )
 
 Summary
-	Takes two smalls X & Y off the value stack and replaces them
-	with their sum, which should be a small.
+	Takes two numbers X & Y off the value stack and replaces them
+	with their sum, which should be a number.
 	
 Unchecked Precondition
 	There must be at least two values on the stack.
 	
 Checked Preconditions
-	Both X & Y are small.
+	Both X & Y are numbers.
 
 Exceptions
-	The sum of X + Y is too large to fit in a small.
+	None
 	
 Postcondition
 	X & Y are replaced by X+Y

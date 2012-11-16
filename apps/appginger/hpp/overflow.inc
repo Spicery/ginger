@@ -1,4 +1,7 @@
 namespace SignedOverflow {
+#define DBG_SIGNED_OVERFLOW
+
+
 
     typedef unsigned long gngulong_t;
     typedef long gnglong_t;
@@ -13,35 +16,37 @@ namespace SignedOverflow {
         #ifdef DBG_SIGNED_OVERFLOW
             std::cout << "moCheckLoHiUInt64: ";
             std::cout << a << ", " << b;
-            std::cout << hex << "(" << a << ", " << b << ")" << dec;
+            std::cout << std::hex << "(" << a << ", " << b << ")" << std::dec;
             std::cout << std::endl;
         #endif
         if ( not( b >> SHIFT ) ) {
             return false;   //  Performance optimisation for small numbers.
         } else if ( a > MASK ) { 
             #ifdef DBG_SIGNED_OVERFLOW
-                cout << "overflowed! " << a << ">" << MASK << endl;
+                std::cout << "overflowed! " << a << ">" << MASK << std::endl;
             #endif
             return true;
         } else {
             gngulong_t bl = (b & MASK) * a;
             gngulong_t bh = (b >> SHIFT) * a + (bl >> SHIFT);
+            const bool overflow = ( ( bh >> SHIFT1 ) != 0 ) && not( neg_result && ( bl == 0 ) && ( bh == ABS_MIN_NEG_INT ) );
             #ifdef DBG_SIGNED_OVERFLOW
-                cout << "bl = " << bl << endl;
-                cout << "bh = " << bh << endl;
+                std::cout << "bl = " << bl << std::endl;
+                std::cout << "bh = " << bh << std::endl;
+                std::cout << "overflow = " << overflow << std::endl;
                 if ( ( bh >> SHIFT1 ) != 0 ) {
                     if ( bl != 0 ) {
-                        cout << "SIGNED WILL OVERFLOW" << endl;
+                        std::cout << "SIGNED WILL OVERFLOW" << std::endl;
                     } else {
                         if ( bh != ABS_MIN_NEG_INT ) {
-                            cout << "SIGNED WILL OVERFLOW (bh = " << bh << "," << ABS_MIN_NEG_INT << ")" << endl;
+                            std::cout << "SIGNED WILL OVERFLOW (bh = " << bh << "," << ABS_MIN_NEG_INT << ")" << std::endl;
                         } else {
-                            cout << "Max negative" << endl;
+                            std::cout << "Max negative" << std::endl;
                         }               
                     }
                 }
             #endif
-            return ( ( bh >> SHIFT1 ) != 0 ) && not( neg_result && ( bl == 0 ) && ( bh == ABS_MIN_NEG_INT ) );
+            return overflow;
         }
     }
 

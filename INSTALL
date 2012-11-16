@@ -1,9 +1,38 @@
-How to Install AppGinger
-========================
+Installing the Ginger Virtual Machine
+=====================================
 
-* Unpack the appginger tarball into a local folder $APPGINGER.
+Introduction
+------------
+This note describes how to install the Ginger Virtual Machine from source
+onto a bare machine.
 
-	$ APPGINGER=~/appginger
+Installing on Ubuntu (from the command-line)
+--------------------------------------------
+
+*	Pre-requisites: you'll need 
+		git, python, g++, autoconf
+	You can ensure you have these in one step with
+		% sudo apt-get git python g++ autoconf
+
+*	Create a Spicery folder for ginger and any sister projects. e.g.
+		% GINGER_HOME=~/Spicery
+		% mkdir $GINGER_HOME
+		% cd $GINGER_HOME
+
+*	Clone from the GitHub repository into a folder.
+		% git clone https://github.com/Spicery/ginger.git
+
+TODO: To be continued
+
+
+Installing onto Mac OS X
+------------------------
+
+
+
+* Unpack the Ginger tarball into a local folder $APPGINGER.
+
+	$ GINGER_HOME=~/ginger
 	$ mkdir $APPGINGER
 	$ tar zxf appginger.tgz
 
@@ -20,3 +49,9 @@ If all goes well you will find the $APPGINGER/bin folder has two executables
 
 	* appginger
 	* common2gnx
+
+
+Installing from Source (GitHub)
+-------------------------------
+
+* Clone the Ginger repository into a local folder.

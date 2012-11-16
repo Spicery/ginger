@@ -1,13 +1,14 @@
-AUTHORS.txt for AppGinger
+AUTHORS.txt for Ginger
 
-AppGinger - a fast interpreter for Ginger
+Ginger - the ginger virtual machine project
 
-Copyright (c) 2010 Stephen Leach. AppGinger is distributed under the terms 
-of the GNU General Public License. This file is part of AppGinger.
+Copyright (c) 2010 Stephen Leach. Ginger is distributed under the terms 
+of the GNU General Public License. This file is part of Ginger.
 
 Development:
   Stephen Leach <steve@steelypip.com>   
-    appginger, fetchgnx, file2gnx, lisp2gnx and common2gnx development
+    appginger, ginger-cli, ginger-script, ginger-info, ginger-cgi, 
+    fetchgnx, file2gnx, lisp2gnx and common2gnx development
   Graham Higgins <gjh@bel-epa.com>      
     Continuous integration, autoconf & RPM packaging
   

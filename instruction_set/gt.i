@@ -33,5 +33,6 @@ if ( IsSmall( a ) ) {
 		RETURN( pc + 1 );
 	} 
 } 
+
 throw Mishap( "Small integers needed" ).culprit( "First", refToString( a ) ).culprit( "Second", refToString( b ) );
 RETURN( NULL ); // sop for compiler.

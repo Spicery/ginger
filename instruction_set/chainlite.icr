@@ -1,7 +1,8 @@
 /*****************************************************************************\
-Instruction TBD
+Instruction CHAINLITE
 
 Summary
+	Used to implement chaining in partial evaluation.
 	
 Unchecked Precondition
 	

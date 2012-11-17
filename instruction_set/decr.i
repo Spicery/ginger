@@ -11,7 +11,7 @@ Exceptions (Checked Preconditions)
 	The value on top of the stack is a number.
 	
 Result (Postcondition)
-	The top of the stack is one greater than before.
+	The top of the stack is one less than before.
 
 \*****************************************************************************/
 

@@ -1,11 +1,16 @@
 /*****************************************************************************\
-Instruction TBD
+Instruction IFSO JUMP_TO ( X ) -> ()
 
 Summary
-	
+	Compare the top of the stack against false. If it is different then
+	jump to JUMP_TO, otherwise fall through. Remove the top of the stack
+	in either case.
+
 Unchecked Precondition
+	There is at least one item on the stack.
 	
 Exceptions (Checked Preconditions)
+	JUMP_TO is in range of the current enclosing function object.
 	
 Result (Postcondition)		
 

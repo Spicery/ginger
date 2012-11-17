@@ -1,20 +1,24 @@
 /*****************************************************************************\
-Instruction TBD
-	//	TODO:
+Instruction INCR_BY N
 
 Summary
+	Increments the value on top of the stack by N.
 	
 Unchecked Precondition
+	* There is at least one value on the stack
 	* N is a Small (enforced by vmiINCR(long))
-	
+
 Exceptions (Checked Preconditions)
+	* The value on the top of the stack is a Num.
 	
-Result (Postcondition)		
+Result (Postcondition)
+	The top of the stack has been incremented by N.
 
 \*****************************************************************************/
 
 Ref ry = ToRef( pc[ 1 ] );
 Ref rx = *( VMVP );
+
 if ( IsSmall( rx ) ) {
 	long y = (long)ry;
 	long x = (long)rx;
@@ -24,12 +28,20 @@ if ( IsSmall( rx ) ) {
 	} else {
 		*VMVP = (
 			vm->heap().copyDouble( 
-				static_cast< gngdouble_t >( x >> TAG ) + 
-				static_cast< gngdouble_t >( y >> TAG )
+				static_cast< gngdouble_t >( SmallToLong( x ) ) + 
+				static_cast< gngdouble_t >( SmallToLong( y ) )
 			)
 		);
 	}
-	RETURN( pc + 2 );
+} else if ( IsDouble( rx ) ) {
+	*VMVP = (
+		vm->heap().copyDouble( 
+			gngFastDoubleValue( x ) +
+			static_cast< gngdouble_t >( SmallToLong( y ) )
+		)
+	);	
 } else {
 	throw Mishap( "INCR_BY instruction: Number needed" ).culprit( "Value", refToString( rx ) );
 } 
+
+RETURN( pc + 2 );

@@ -1,23 +1,23 @@
 /*****************************************************************************\
-Instruction TBD
+Instruction INVOKE METHOD_TABLE DISPATCH_TABLE
 
 Summary
+	The purpose of INVOKE is to dispatch a core method on an
+	object and its arguments. The argument count is held in VMCOUNT.
+
 	
 Unchecked Precondition
+	* 	INVOKE only works as the 1st instruction of a function.
+		It uses -ve offsets to access the fields before the key.
+	*	There are VMCOUNT + 1 values on the stack.
+
 	
 Exceptions (Checked Preconditions)
+	Arity mismatch.
 	
 Result (Postcondition)		
 
 \*****************************************************************************/
-
-//
-//	INVOKE only works as the 1st instruction of a function.
-//	It uses -ve offsets to access the fields before the key.
-//
-//	The purpose of INVOKE is to dispatch a core method on an
-//	object and its arguments.
-//
 
 //	Get the arity from the field before the function key.
 long A = ToLong( pc[ -2 ] );

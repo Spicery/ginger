@@ -1,9 +1,13 @@
 /*****************************************************************************\
-Instruction TBD
+Instruction IFNOT JUMP_TO
 
 Summary
+	If the top of the stack is false then jump to JUMP_TO,
+	otherwise fall through. Remove the item from the stack in
+	either case.
 	
 Unchecked Precondition
+	There is at least one value on top of the stack.
 	
 Exceptions (Checked Preconditions)
 	
@@ -12,8 +16,9 @@ Result (Postcondition)
 \*****************************************************************************/
 
 #ifdef DBG_SPECIAL
-fprintf( stderr, "IFNOT finds %x on the stack (cf. %x & %x)\n", (unt)(*( VMVP )), (unt)(SYS_FALSE), (unt)(SYS_TRUE) );
+	fprintf( stderr, "IFNOT finds %x on the stack (cf. %x & %x)\n", (unt)(*( VMVP )), (unt)(SYS_FALSE), (unt)(SYS_TRUE) );
 #endif
+
 RETURN(
 	*( VMVP-- ) == SYS_FALSE ?
 	pc + ToLong( pc[ 1 ] ) + 1:

@@ -1,3 +1,16 @@
+/*****************************************************************************\
+Instruction TBD
+
+Summary
+	
+Unchecked Precondition
+	
+Exceptions (Checked Preconditions)
+	
+Result (Postcondition)		
+
+\*****************************************************************************/
+
 //	This instruction implements the fast iterator for mixed record/vectors.
 //	It may assume that there 2 items on the stack (i:Small, v:Mixed) on input.
 //	Since there were 2 inputs, it may therefore safely return 2 items

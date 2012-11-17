@@ -1,3 +1,16 @@
+/*****************************************************************************\
+Instruction TBD
+
+Summary
+	
+Unchecked Precondition
+	
+Exceptions (Checked Preconditions)
+	
+Result (Postcondition)		
+
+\*****************************************************************************/
+
 if ( IsDefer( *vm->vp ) ) {
 	//	Is it already evaluated.  If so return the answer.
 	Ref *x = ToRef( *vm->vp );

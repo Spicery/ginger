@@ -1,3 +1,16 @@
+/*****************************************************************************\
+Instruction TBD
+
+Summary
+	
+Unchecked Precondition
+	
+Exceptions (Checked Preconditions)
+	
+Result (Postcondition)		
+
+\*****************************************************************************/
+
 if( *( VMVP-- ) == SYS_FALSE ) {
 	RETURN( pc + 1 );									//	Go onto the next instruction.
 } else {

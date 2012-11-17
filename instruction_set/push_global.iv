@@ -1,3 +1,16 @@
+/*****************************************************************************\
+Instruction TBD
+
+Summary
+	
+Unchecked Precondition
+	
+Exceptions (Checked Preconditions)
+	
+Result (Postcondition)		
+
+\*****************************************************************************/
+
 Valof * id = (Valof *)( *( ++pc ) );
 if ( SYS_UNASSIGNED == ( *( ++VMVP ) = id->valof ) ) {
 	//	TO DO: Two problems here. Firstly it is not efficient to

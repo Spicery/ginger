@@ -1,3 +1,16 @@
+/*****************************************************************************\
+Instruction TBD
+
+Summary
+	
+Unchecked Precondition
+	
+Exceptions (Checked Preconditions)
+	
+Result (Postcondition)		
+
+\*****************************************************************************/
+
 long s = ToLong( pc[1] );
 long i = ToLong( pc[2] );
 RETURN( ToLong( LOCAL( s ) ) == i ? pc + 4 : pc + ToLong( pc[3] ) + 3 );

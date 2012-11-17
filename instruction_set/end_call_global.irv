@@ -1,9 +1,14 @@
 /*****************************************************************************\
-Instruction TBD
+Instruction END_CALL_GLOBAL LOCAL_VAR VALOF
 
 Summary
+    Updates VMCOUNT with a value-count using LOCAL_VAR as the mark.
+    Calls the function pointed to by the valof VALOF.
+
+    TODO: Does this have the correct extension?
 	
 Unchecked Precondition
+
 	
 Exceptions (Checked Preconditions)
 	

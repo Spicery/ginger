@@ -1,3 +1,16 @@
+/*****************************************************************************\
+Instruction TBD
+
+Summary
+	
+Unchecked Precondition
+	
+Exceptions (Checked Preconditions)
+	
+Result (Postcondition)		
+
+\*****************************************************************************/
+
 Ref *linkptr;
 VMPCFUNC = ToRefRef( VMSP[ SP_FUNC ] );
 linkptr = ToRefRef( VMSP[ SP_LINK ] );				//	recover return address

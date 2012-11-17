@@ -1,3 +1,16 @@
+/*****************************************************************************\
+Instruction TBD
+
+Summary
+	
+Unchecked Precondition
+	
+Exceptions (Checked Preconditions)
+	
+Result (Postcondition)		
+
+\*****************************************************************************/
+
 SysCall * sys = ToSysCall( *++pc );
 FREEZE;
 pc = (*sys)( ++pc, vm );

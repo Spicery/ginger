@@ -1,3 +1,16 @@
+/*****************************************************************************\
+Instruction TBD
+
+Summary
+	
+Unchecked Precondition
+	
+Exceptions (Checked Preconditions)
+	
+Result (Postcondition)		
+
+\*****************************************************************************/
+
 Valof * id = (Valof *)( *( ++pc ) );
 id->valof = *( VMVP-- );
 RETURN( pc + 1 );

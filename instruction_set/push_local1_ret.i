@@ -1,3 +1,16 @@
+/*****************************************************************************\
+Instruction TBD
+
+Summary
+	
+Unchecked Precondition
+	
+Exceptions (Checked Preconditions)
+	
+Result (Postcondition)		
+
+\*****************************************************************************/
+
 *( ++VMVP ) = LOCAL(1);
 Ref *linkptr;
 VMPCFUNC = ToRefRef( VMSP[ SP_FUNC ] );

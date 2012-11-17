@@ -1,23 +1,32 @@
 /*****************************************************************************\
-Instruction TBD
+Instruction END_MARK LOCAL_N
 
 Summary
+	Push a count of the number of items on the stack since the
+	mark, recorded in the variable LOCAL_N.
 	
 Unchecked Precondition
+	There is room on the value-stack for the pushed value.
+	N is a valid index into the call frame.
+	Difference in pointer values have the bottom 2 bits clear.
 	
 Exceptions (Checked Preconditions)
+	None
 	
 Result (Postcondition)		
+	The stack has a value-count pushed on it.
 
 \*****************************************************************************/
 
 Ref r;
 long n = ToLong( *( ++pc ) );
+
 #ifdef DBG_SPECIAL
 	fprintf( stderr, "Recovering %u from %d\n", ToULong( LOCAL(n) ), n );
 	fprintf( stderr, "Comparing with %u\n",  ToULong( VMVP ) );
 	fprintf( stderr, "Length of value stack = %d\n", ( VMVP - VMVP_base ) );
 #endif
-r = ToRef( ToULong( VMVP ) - ToULong( LOCAL(n) ) );
+
+r = ToRef( ToULong( VMVP ) - ToULong( LOCAL( n ) ) );
 *( ++VMVP ) = r;
 RETURN( pc + 1 );

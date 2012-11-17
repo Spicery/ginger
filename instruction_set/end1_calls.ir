@@ -2,12 +2,15 @@
 Instruction END1_CALLS LOCAL_VAR ( FUNCTION ) -> ()
 
 Summary
-    TBD:
-    TODO:
+    Pop and save FUNCTION which is the top of the stack & perform a 
+    value count using LOCAL_VAR as the mark. Then call FUNCTION.
 	
 Unchecked Precondition
+    LOCAL_VAR is a valid local variable & holds a mark.
+    There is at least one value on the value-stack.
 	
 Exceptions (Checked Preconditions)
+    * The top of the stack is not a function object.
 	
 Result (Postcondition)		
 

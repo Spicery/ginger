@@ -36,8 +36,8 @@ if ( IsSmall( rx ) ) {
 } else if ( IsDouble( rx ) ) {
 	*VMVP = (
 		vm->heap().copyDouble( 
-			gngFastDoubleValue( x ) +
-			static_cast< gngdouble_t >( SmallToLong( y ) )
+			gngFastDoubleValue( rx ) +
+			static_cast< gngdouble_t >( SmallToLong( ry ) )
 		)
 	);	
 } else {

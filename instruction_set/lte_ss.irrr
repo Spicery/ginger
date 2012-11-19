@@ -36,3 +36,7 @@ if ( IsSmall( a ) ) {
 		RETURN( gngFastDoubleValue( a ) <= gngFastDoubleValue( b ) ? pc + ToLong( pc[3] ) + 3 : pc + 4 );
 	} 
 } 
+
+throw Mishap( "Numbers needed" ).culprit( "First", refToString( a ) ).culprit( "Second", refToString( b ) );
+RETURN( NULL ); // sop for compiler.
+

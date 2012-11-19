@@ -671,6 +671,12 @@ public:
 	virtual ~SelfAppArityMarker() {}
 };
 
+/**
+    This is the main arity marking pass. It may incidentally replace
+    erases with seqs if it can prove the enclosed expressions have 0
+    arity. In that case it becomes advantageous to perform a round of
+    flattening.
+ */
 class ArityMarker : public Ginger::MnxVisitor {
 private:
 	bool changed;
@@ -751,6 +757,13 @@ public:
 		} else if ( x == SYSAPP ) {
 			element.putAttribute( ARITY, Ginger::outArity( element.attribute( SYSAPP_NAME ) ).toString() );
 			element.putAttribute( ARGS_ARITY, this->sumOverChildren( element ).toString() );
+        } else if ( x == ERASE ) {
+            if ( this->sumOverChildren( element ) == 0 ) {
+                //  Replace in favour of sequence and allow subsequent stages to remove that.
+                element.name() = SEQ;
+                this->changed = true;
+            }
+            element.putAttribute( ARITY, "0" );
 		} else if ( x == ASSERT && element.size() == 1 ) {
 			if ( element.hasAttribute( ASSERT_N, "1" ) ) {
 				if ( element.child( 0 )->hasAttribute( ARITY, "1" ) ) {
@@ -1598,7 +1611,7 @@ public:
 
 	void startVisit( Ginger::Mnx & element ) {
 		const string & nm = element.name();
-		if ( nm == SYSAPP || nm == SEQ || nm == LIST || nm == VECTOR ) {
+		if ( nm == SYSAPP || nm == SEQ || nm == LIST || nm == VECTOR || nm == ERASE ) {
 			this->flattenSubSeqs( element );
 		} 
 	}

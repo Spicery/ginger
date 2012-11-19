@@ -19,20 +19,44 @@
 
 using namespace std;
 
+#define SEQ "seq"
+#define ERASE "erase"
+#define SYSFN "sysfn"
+#define SYSAPP "sysapp"
+#define SYSFN_VALUE "value"
+#define SYSAPP_NAME "name"
+#define APP "app"
+#define CONSTANT "constant"
+#define CONSTANT_TYPE "type"
+#define CONSTANT_VALUE "value"
+#define VAR "var"
+#define VAR_NAME "name"
+#define VAR_PROTECTED "protected"
+#define BIND "bind"
+#define FROM "from"
+#define IN "in"
+#define FN "fn"
+#define FN_NAME "name"
+#define ID "id"
+#define ID_NAME "name"
+#define IF "if"
+#define FOR "for"
+#define SPAN "span"
+
 typedef Ginger::MnxBuilder NodeFactory;
 
 static Node makeApp( Node lhs, Node rhs ) {
-	if ( lhs->name() == "sysfn" ) {
+	if ( lhs->name() == SYSFN ) {
 		NodeFactory sysapp;
-		sysapp.start( "sysapp" );
-		std::string name = lhs->attribute( "value" );
-		sysapp.put( "name", name );
+		sysapp.start( SYSAPP );
+		std::string name = lhs->attribute( SYSFN_VALUE );
+		sysapp.put( SYSAPP_NAME, name );
 		sysapp.add( rhs );
 		sysapp.end();
 		return sysapp.build();
 	} else {
 		NodeFactory app;
-		app.start( "app" );
+		app.start( APP );
 		app.add( lhs );
 		app.add( rhs );
 		app.end();
@@ -42,8 +66,8 @@ static Node makeApp( Node lhs, Node rhs ) {
 
 static Node makeIndex( Node lhs, Node rhs ) {
 	NodeFactory index;
-	index.start( "sysapp" );
-	index.put( "name", "index" );
+	index.start( SYSAPP );
+	index.put( SYSAPP_NAME, "index" );
 	index.add( lhs );
 	index.add( rhs );
 	index.end();
@@ -51,25 +75,26 @@ static Node makeIndex( Node lhs, Node rhs ) {
 }
 
 static void pushStringConstant( NodeFactory & f, const string & s ) {
-	f.start( "constant" );
-	f.put( "type", "string" );
-	f.put( "value", s );
+	f.start( CONSTANT );
+	f.put( CONSTANT_TYPE, "string" );
+	f.put( CONSTANT_VALUE, s );
 	f.end();
 }
 
 static Node makeEmpty() {
-	return shared< Ginger::Mnx >( new Ginger::Mnx( "seq" ) );
+	return shared< Ginger::Mnx >( new Ginger::Mnx( SEQ ) );
 }
 
 static void pushAnyPattern( NodeFactory & f ) {
-	f.start( "val" );
+	f.start( VAR );
+	f.put( VAR_PROTECTED, "true" );
 	f.end();
 }
 
 static void updateAsPattern( Node node ) {
-	if ( node->hasName( "id" ) ) {
-		node->name() = "var";
-		node->putAttribute( "protected", "true" );
+	if ( node->hasName( ID ) ) {
+		node->name() = VAR;
+		node->putAttribute( VAR_PROTECTED, "true" );
 	}
 }
 
@@ -119,10 +144,6 @@ void ReadStateClass::checkPeekToken( TokType fnc ) {
 	}
 }
 
-void ReadStateClass::checkSemi() {
-	this->checkToken( tokty_semi );
-}
-
 bool ReadStateClass::tryName( const char * name ) {
 	ItemFactory ifact = this->item_factory;
 	Item it = ifact->peek();
@@ -147,7 +168,7 @@ bool ReadStateClass::tryToken( TokType fnc ) {
 Node ReadStateClass::readCompoundStmnts( bool obrace_read ) {
 	if ( this->cstyle_mode ) {
 		NodeFactory stmnts;
-		stmnts.start( "seq" );
+		stmnts.start( SEQ );
 		if ( not obrace_read ) this->checkToken( tokty_obrace );
 		while ( not this->tryToken( tokty_cbrace ) ) {
 			Node n = this->readSingleStmnt();
@@ -169,7 +190,9 @@ Node ReadStateClass::readSingleStmnt() {
 			case tokty_function: return this->readDefinition();
 			case tokty_if: return this->readIf( tokty_if, tokty_endif );
 			case tokty_for: return this->readFor();
-			case tokty_semi: return makeEmpty();
+			case tokty_dsemi:
+			case tokty_semi: 
+				return makeEmpty();
 			default: 
 				this->item_factory->unread();
 				// --- Fall-through --- //
@@ -178,8 +201,16 @@ Node ReadStateClass::readSingleStmnt() {
 	
 	//	Fall thru!
 	Node n = this->readOptEmptyExpr();
-	this->checkToken( tokty_semi );
-	return n;
+	if ( this-> tryToken( tokty_dsemi ) ) {
+		NodeFactory f;
+		f.start( ERASE );
+		f.add( n );
+		f.end();
+		return f.build();
+	} else {
+		this->checkToken( tokty_semi );
+		return n;
+	}
 }
 
 Node ReadStateClass::readStmnts() {
@@ -242,8 +273,8 @@ Node ReadStateClass::postfixProcessing( Node lhs, Item item, int prec ) {
 		const bool direction = tok_type_as_direction( fnc );
 		if ( role.IsSys() ) {
 			NodeFactory a;
-			a.start( "sysapp" );
-			a.put( "name", tok_type_as_sysapp( fnc ) );
+			a.start( SYSAPP );
+			a.put( SYSAPP_NAME, tok_type_as_sysapp( fnc ) );
 			Node rhs = this->readExprPrec( prec );
 			a.add( direction ? lhs : rhs );
 			a.add( !direction ? lhs : rhs );
@@ -267,7 +298,7 @@ Node ReadStateClass::postfixProcessing( Node lhs, Item item, int prec ) {
 				Node rhs = this->readExprPrec( prec );
 				updateAsPattern( fnc == tokty_bind ? lhs : rhs );
 				NodeFactory bind;
-				bind.start( "bind" );
+				bind.start( BIND );
 				bind.add( fnc == tokty_bind ? lhs : rhs );
 				bind.add( fnc != tokty_bind ? lhs : rhs );
 				bind.end();
@@ -276,7 +307,7 @@ Node ReadStateClass::postfixProcessing( Node lhs, Item item, int prec ) {
 			case tokty_from: {				
 				updateAsPattern( lhs );
 				NodeFactory node;
-				node.start( "from" );
+				node.start( FROM );
 				Node from_expr = this->readExpr();
 				node.add( lhs );
 				node.add( from_expr );
@@ -291,21 +322,23 @@ Node ReadStateClass::postfixProcessing( Node lhs, Item item, int prec ) {
 				updateAsPattern( lhs );
 				Node in_expr = this->readExpr();
 				NodeFactory node;
-				node.start( "in" );
+				node.start( IN );
 				node.add( lhs );
 				node.add( in_expr );
 				node.end();
 				return node.build();
 			}
+			case tokty_dsemi:
 			case tokty_semi: {
 				Node rhs = this->readOptExprPrec( prec );
-				if ( not( rhs ) ) {
+				bool hasnt_rhs = not( rhs );
+				if ( fnc == tokty_semi && hasnt_rhs ) {
 					return lhs;
 				} else {
 					NodeFactory s;
-					s.start( "seq" );
+					s.start( fnc == tokty_semi ? SEQ : ERASE );
 					s.add( lhs );
-					s.add( rhs );
+					if ( not hasnt_rhs ) s.add( rhs );
 					s.end();
 					return s.build();
 				}
@@ -324,7 +357,7 @@ Node ReadStateClass::postfixProcessing( Node lhs, Item item, int prec ) {
 				Node func = this->readExprPrec( prec_tight );
 				Node rhs = this->readOptExprPrec( prec );			
 				NodeFactory seq;
-				seq.start( "seq" );
+				seq.start( SEQ );
 				seq.add( lhs );
 				if ( not not rhs ) { seq.add( rhs ); }
 				seq.end();
@@ -332,11 +365,12 @@ Node ReadStateClass::postfixProcessing( Node lhs, Item item, int prec ) {
 			}
 			case tokty_double: {
 				NodeFactory add;
+				//	TODO: Bug??
 				add.start( "add" );
 				add.add( lhs );
-				add.start( "constant" );
-				add.put( "type", "double" );
-				add.put( "value", item->nameString() );
+				add.start( CONSTANT );
+				add.put( CONSTANT_TYPE, "double" );
+				add.put( CONSTANT_VALUE, item->nameString() );
 				add.end();
 				add.end();
 				Node t = add.build();
@@ -345,11 +379,12 @@ Node ReadStateClass::postfixProcessing( Node lhs, Item item, int prec ) {
 			}
 			case tokty_int: {
 				NodeFactory add;
+				//	TODO: Bug??
 				add.start( "add" );
 				add.add( lhs );
-				add.start( "constant" );
-				add.put( "type", "int" );
-				add.put( "value", item->nameString() );
+				add.start( CONSTANT );
+				add.put( CONSTANT_TYPE, "int" );
+				add.put( CONSTANT_VALUE, item->nameString() );
 				add.end();
 				add.end();
 				Node t = add.build();
@@ -358,8 +393,8 @@ Node ReadStateClass::postfixProcessing( Node lhs, Item item, int prec ) {
 			}
 			case tokty_explode: {
 				NodeFactory expl;
-				expl.start( "sysapp" );
-				expl.put( "name", "explode" );
+				expl.start( SYSAPP );
+				expl.put( SYSAPP_NAME, "explode" );
 				expl.add( lhs );
 				expl.end();
 				Node t = expl.build();
@@ -377,6 +412,7 @@ static void predicate( TokType sense, NodeFactory & ifunless, Node pred ) {
 	if ( sense == tokty_if ) {
 		ifunless.add( pred );
 	} else {
+		//	TODO: This is a bug?
 		ifunless.start( "sysval" );
 		ifunless.put( "name", "not" );
 		ifunless.add( pred );
@@ -391,7 +427,7 @@ Node ReadStateClass::readIf( TokType sense, TokType closer ) {
 	Node then_part = this->readStmnts();
 	if ( this->tryToken( tokty_else ) ) {	
 		NodeFactory ifunless;
-		ifunless.start( "if" );
+		ifunless.start( IF );
 		predicate( sense, ifunless, pred );
 		ifunless.add( then_part );
 		Node x = this->readStmnts();
@@ -401,7 +437,7 @@ Node ReadStateClass::readIf( TokType sense, TokType closer ) {
 		return ifunless.build();
 	} else if ( this->cstyle_mode || this->tryToken( closer ) ) {
 		NodeFactory ifunless;
-		ifunless.start( "if" );
+		ifunless.start( IF );
 		predicate( sense, ifunless, pred );
 		ifunless.add( then_part );
 		ifunless.end();
@@ -415,7 +451,7 @@ Node ReadStateClass::readIf( TokType sense, TokType closer ) {
 			new_sense = tokty_unless;
 		}
 		NodeFactory ifunless;
-		ifunless.start( "if" );
+		ifunless.start( IF );
 		predicate( sense, ifunless, pred );
 		ifunless.add( then_part );
 		Node x = this->readIf( new_sense, closer );
@@ -430,9 +466,9 @@ Node ReadStateClass::readSyscall() {
 	Item it = ifact->read();
 	if ( it->tok_type == tokty_id ) {
 		NodeFactory sc;
-		sc.start( "constant" );
-		sc.put( "type", "sysfn" );
-		sc.put( "value", it->nameString() );
+		sc.start( CONSTANT );
+		sc.put( CONSTANT_TYPE, SYSFN );
+		sc.put( CONSTANT_VALUE, it->nameString() );
 		sc.end();
 		return sc.build();
 	} else {
@@ -447,7 +483,7 @@ Node ReadStateClass::readFor() {
 	Node body = this->readStmnts();
 	if ( not this->cstyle_mode ) this->checkToken( tokty_endfor );
 	NodeFactory for_node;
-	for_node.start( "for" );
+	for_node.start( FOR );
 	for_node.add( query );
 	for_node.add( body );
 	for_node.end();
@@ -457,12 +493,12 @@ Node ReadStateClass::readFor() {
 static void squash( NodeFactory acc, Node rhs ) {
 	const std::string 
 	name = rhs->name();
-	if ( name == "seq" ) {
+	if ( name == SEQ ) {
 		int n = rhs->size();
 		for ( int i = 0; i < n; i++ ) {
 			squash( acc, rhs->child( i ) );
 		}
-	} else if ( name == "var" ) {
+	} else if ( name == VAR ) {
 		acc.add( rhs );
 	} else {
 		throw Ginger::Mishap( "Invalid form for definition" );
@@ -470,18 +506,18 @@ static void squash( NodeFactory acc, Node rhs ) {
 }
 
 static void flatten( Node & ap, Node & fn, Node & args ) {
-	if ( ap->name() == "app" ) {
+	if ( ap->name() == APP ) {
 		fn = ap->child( 0 );
 		Node rhs = ap->child( 1 );
 		NodeFactory acc;
-		acc.start( "seq" );
+		acc.start( SEQ );
 		squash( acc, ap->child( 1 ) ); 
 		acc.end();
 		args = acc.build();
 	} else {
 		Ginger::Mishap mishap( "Invalid use of 'define'" );
 		mishap.culprit( "Name", ap->name() );
-		if ( ap->name() == "sysapp" ) {
+		if ( ap->name() == SYSAPP ) {
 			mishap.culprit( "Reason", "Trying to redefine a system function" );
 		}
 		throw mishap;
@@ -544,13 +580,13 @@ static Node makeCharSequence( Item item ) {
 		return makeEmpty();
 	} else {
 		NodeFactory charseq;
-		charseq.start( "seq" );
+		charseq.start( SEQ );
 		const std::string & s = item->nameString();
 		std::string::const_iterator iter = s.begin();
 		for ( iter = s.begin(); iter != s.end(); ++iter ) {
-			charseq.start( "constant" );
-			charseq.put( "type", "char" );
-			charseq.put( "value", std::string() + *iter );	//	 WRONG
+			charseq.start( CONSTANT );
+			charseq.put( CONSTANT_TYPE, "char" );
+			charseq.put( CONSTANT_VALUE, std::string() + *iter );	//	 WRONG
 			charseq.end();
 		}
 		charseq.end();
@@ -565,9 +601,9 @@ Node ReadStateClass::readAtomicExpr() {
 	Role role = item->role;
 	if ( role.IsLiteral() ) {
 		NodeFactory simple;
-		simple.start( "constant" );
-		simple.put( "type", tok_type_as_type( fnc ) );
-		simple.put( "value", item->nameString() );
+		simple.start( CONSTANT );
+		simple.put( CONSTANT_TYPE, tok_type_as_type( fnc ) );
+		simple.put( CONSTANT_VALUE, item->nameString() );
 		simple.end();
 	 	return simple.build();
 	} else if ( fnc == tokty_charseq ) {
@@ -606,8 +642,8 @@ Node ReadStateClass::readLambda() {
 		cerr << "About to check stuff????? <-----<" << endl;
 	#endif
 	NodeFactory fn;
-	fn.start( "fn" );
-	fn.put( "name", name );
+	fn.start( FN );
+	fn.put( FN_NAME, name );
 	fn.add( args );
 	fn.add( body );
 	fn.end();
@@ -622,7 +658,7 @@ Node ReadStateClass::readDefinition() {
 	Node fn;
 	Node args;
 	flatten( ap, fn, args );
-	const std::string name = fn->attribute( "name" );
+	const std::string name = fn->attribute( ID_NAME );
 	if ( not this->cstyle_mode ) this->checkToken( tokty_fnarrow );
 	Node body = this->readCompoundStmnts( false );
 	if ( not this->cstyle_mode ) this->checkToken( tokty_enddefine );
@@ -633,13 +669,13 @@ Node ReadStateClass::readDefinition() {
 		//cerr << "Huh?" << endl;
 	}
 	NodeFactory def;
-	def.start( "bind" );
-	def.start( "var" );
-	def.put( "name", name );
-	def.put( "protected", "true" );
+	def.start( BIND );
+	def.start( VAR );
+	def.put( VAR_NAME, name );
+	def.put( VAR_PROTECTED, "true" );
 	def.end();
-	def.start( "fn" );
-	def.put( "name", name );
+	def.start( FN );
+	def.put( FN_NAME, name );
 	def.add( args );
 	def.add( body );
 	def.end();
@@ -673,7 +709,7 @@ Node ReadStateClass::readTry( const bool try_vs_transaction ) {
 	//	<try> APP ( <catch> ... </catch> )* </try>
 	//	<catch> PATTERN ( <case> PATTERN STMNTS </case> )* </catch>
 	NodeFactory ftry;
-	ftry.start( try_vs_transaction ?"try" : "transaction" );
+	ftry.start( try_vs_transaction ? "try" : "transaction" );
 	Node app = this->readExpr();
 	ftry.add( app );
 	if ( try_vs_transaction && this->tryPeekToken( tokty_case ) ) {
@@ -714,13 +750,13 @@ Node ReadStateClass::readTry( const bool try_vs_transaction ) {
 
 Node ReadStateClass::readVarVal( TokType fnc ) {
 	NodeFactory bind;
-	bind.start( "bind" );
+	bind.start( BIND );
 	NodeFactory var;
-	var.start( "var" );
+	var.start( VAR );
 	readTags( *this, var, "tag", true );
 	Item item = this->readIdItem();
-	var.put( "name", item->nameString() );
-	var.put( "protected", fnc == tokty_val ? "true" : "false" );
+	var.put( VAR_NAME, item->nameString() );
+	var.put( VAR_PROTECTED, fnc == tokty_val ? "true" : "false" );
 	var.end();
 	Node v = var.build();
 	bind.add( v );
@@ -735,16 +771,16 @@ Node ReadStateClass::readElement() {
 	NodeFactory element;
 	element.start( SEQ );
 	for (;;) {
-		element.start( "sysapp" );
-		element.put( "name", "newElement" );
-		element.start( "sysapp" );
-		element.put( "name", "newAttrMap" );
+		element.start( SYSAPP );
+		element.put( SYSAPP_NAME, "newElement" );
+		element.start( SYSAPP );
+		element.put( SYSAPP_NAME, "newAttrMap" );
 		
 		Item item = this->readIdItem();
 		string element_name( item->nameString() );
-		element.start( "constant" );
-		element.put( "type", "string" );
-		element.put( "value", element_name );
+		element.start( CONSTANT );
+		element.put( CONSTANT_TYPE, "string" );
+		element.put( CONSTANT_VALUE, element_name );
 		element.end();
 		
 		bool closed = false;
@@ -752,9 +788,9 @@ Node ReadStateClass::readElement() {
 			if ( this->tryToken( tokty_gt ) ) break;
 			if ( this->tryToken( tokty_slashgt ) ) { closed = true; break; }
 			Item item = this->readIdItem();
-			element.start( "constant" );
-			element.put( "type", "string" );
-			element.put( "value", item->nameString() );
+			element.start( CONSTANT );
+			element.put( CONSTANT_TYPE, "string" );
+			element.put( CONSTANT_VALUE, item->nameString() );
 			element.end();
 			this->checkToken( tokty_equal );
 			element.start( "assert" );
@@ -804,7 +840,7 @@ Node ReadStateClass::prefixProcessing() {
 			span << ";" << end;
 		}
 		string spanstr( span.str() );
-		string spanspan( "span" );
+		string spanspan( SPAN );
 		node->putAttribute( spanspan, spanstr );
 	}
 	return node;
@@ -842,7 +878,7 @@ Node ReadStateClass::prefixProcessingCore() {
 		} else if ( role.IsSys() ) {
 			NodeFactory sf;
 			sf.start( "constant" );
-			sf.put( "type", "sysfn" );
+			sf.put( "type", SYSFN );
 			sf.put( "value", tok_type_as_sysapp( fnc ) );
 			sf.end();
 			return sf.build();
@@ -874,7 +910,7 @@ Node ReadStateClass::prefixProcessingCore() {
 		case tokty_envvar: {
 			this->checkToken( tokty_obrace );
 			NodeFactory envvar;
-			envvar.start( "sysapp" );
+			envvar.start( SYSAPP );
 			envvar.put( "name", "sysGetEnv" );
 			envvar.start( "constant" );
 			envvar.put( "type", "string" );
@@ -902,10 +938,10 @@ Node ReadStateClass::prefixProcessingCore() {
 			panic.start( "throw" );
 			Item item = readIdItem();
 			if ( this->tryToken( tokty_oparen ) ) {
-				panic.start( "sysapp" );
+				panic.start( SYSAPP );
 				panic.put( "name", "withExceptionDetails" );
 				
-				panic.start( "sysapp" );
+				panic.start( SYSAPP );
 				panic.put( "name", "newException" );
 				pushStringConstant( panic, item->nameString() );
 				panic.end();
@@ -915,7 +951,7 @@ Node ReadStateClass::prefixProcessingCore() {
 				
 				panic.end();
 			} else {
-				panic.start( "sysapp" );
+				panic.start( SYSAPP );
 				panic.put( "name", "newException" );
 				pushStringConstant( panic, item->nameString() );
 				panic.end();
@@ -1054,6 +1090,22 @@ Node ReadStateClass::prefixProcessingCore() {
 			imp.end();
 			return imp.build();
 		}
+		case tokty_dhat: {
+			NodeFactory maplet;
+			maplet.start( SYSAPP );
+			maplet.put( "name", "newMaplet" );
+			Item it = this->readIdItem();
+			const std::string name( it->nameString() );
+			maplet.start( "constant" );
+			maplet.put( "type", "symbol" );
+			maplet.put( "value", name );
+			maplet.end();
+			maplet.start( "id" );
+			maplet.put( "name", name );
+			maplet.end(); 
+			maplet.end();
+			return maplet.build();
+		}
 		default: {
 		}
 	}
@@ -1078,7 +1130,7 @@ Node ReadStateClass::readOptExprPrec( int prec ) {
 		Item it = ifact->peek();
 		if ( it->item_is_neg_num() ) {
 			NodeFactory t;
-			t.start( "sysapp" );
+			t.start( SYSAPP );
 			t.put( "name", "+" );
 			t.add( e );			
 			if ( it->tok_type == tokty_int ) {

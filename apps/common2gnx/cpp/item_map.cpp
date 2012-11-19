@@ -34,6 +34,7 @@ ItemMap::ItemMap( const bool cstyle ) {
 	add( true,	 	",", 				tokty_comma, 		BFo, 		prec_comma	);
 	add( !cstyle, 	";", 				tokty_semi, 		PoF, 		prec_semi	);
 	add( cstyle, 	";", 				tokty_semi, 		Clo, 		0		);
+	add( !cstyle, 	";;",				tokty_dsemi,		PoF,		prec_semi	);
 	add( true,	 	":-", 				tokty_maplet, 		BSA, 		2000	);
 	add( true,	 	":=", 				tokty_bind, 		PoF, 		2000	);
 	add( true,	 	"=:", 				tokty_bindrev, 		PoF, 		2000	);
@@ -41,6 +42,7 @@ ItemMap::ItemMap( const bool cstyle ) {
 	add( true,		"?!",				tokty_trap,			PoF,		250		);
 	add( true,	 	"??", 				tokty_present, 		PoF, 		1900	);
 	add( true,	 	"...",				tokty_explode,  	SOp,        250		);
+	add( true,      "^^",               tokty_dhat,         PrF,        150     );
 	add( true,	 	".", 				tokty_dot, 			PoF, 		200		);
 	add( true,	 	"(", 				tokty_oparen, 		BoF, 		100		);
 	add( true,	 	"(%", 				tokty_fat_oparen, 	BoF, 		100		);

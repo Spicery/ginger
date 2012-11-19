@@ -60,7 +60,7 @@ enum CharType {
 	LineBreakCharType,
 	QuoteCharType,
 	UnderbarCharType,
-	SeparatorCharType,
+	//SeparatorCharType,
 	BracketCharType,
 	BracketDecorationCharType,
 	SelfGlueCharType,
@@ -77,15 +77,17 @@ CharType char_type( const char ch ) {
 			return QuoteCharType;
 		case '_': 
 			return UnderbarCharType;
-		case ',':
-		case ';': 
-			return SeparatorCharType;
+		//case ',':
+		//case ';': 
+		//	return SeparatorCharType;
 		case '(': case ')':
 		case '[': case ']':
 		case '{': case '}':
 			return BracketCharType;
 		case '%':
 			return BracketDecorationCharType;
+		case ',':
+		case ';':
 		case '.':
 		case '@':
 			return SelfGlueCharType;
@@ -236,17 +238,17 @@ void ItemFactoryClass::readAtQuoteCharType( int ch ) {
 	it->nameString() = this->text;
 }
 
-void ItemFactoryClass::readAtSeparatorCharType( int ch ) {
-	//
-	//	Single character keywords
-	//
-	this->text.push_back( ch );
-	this->item = this->itemMap.lookup( this->text );
-	if ( this->item == NULL ) {
-		//	Never happens.
-		throw Ginger::Mishap( "Invalid punctuation token" ); 
-	}
-}
+//  void ItemFactoryClass::readAtSeparatorCharType( int ch ) {
+//  	//
+//  	//	Self-glue character keywords.
+//  	//
+//  	this->text.push_back( ch );
+//  	this->item = this->itemMap.lookup( this->text );
+//  	if ( this->item == NULL ) {
+//  		//	Never happens.
+//  		throw Ginger::Mishap( "Invalid punctuation token" ); 
+//  	}
+//  }
 
 void ItemFactoryClass::readAtBracketCharType( int ch ) {
 	do {
@@ -340,9 +342,9 @@ Item ItemFactoryClass::read() {
     		case QuoteCharType:
 				this->readAtQuoteCharType( ch );
 				break;
-    		case SeparatorCharType:
-    			this->readAtSeparatorCharType( ch );
-				break;
+    		//case SeparatorCharType:
+    		//	this->readAtSeparatorCharType( ch );
+			//	break;
 			case BracketCharType:
     			this->readAtBracketCharType( ch );
 				break;

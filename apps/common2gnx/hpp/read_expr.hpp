@@ -57,7 +57,6 @@ public:
 	Node readOptEmptyExprCheck( TokType fnc );
 	Node readOptExprPrec( int prec );
 	Node readSingleStmnt();
-	void checkSemi();
 	void checkToken( TokType fnc );
 	void checkPeekToken( TokType fnc );
 	bool tryToken( TokType fnc );

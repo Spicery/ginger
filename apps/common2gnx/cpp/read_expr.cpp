@@ -15,6 +15,7 @@
 #include "role.hpp"
 #include "sysconst.hpp"
 
+//#define DBG_COMMON2GNX
 
 using namespace std;
 
@@ -579,18 +580,34 @@ Node ReadStateClass::readAtomicExpr() {
 }
 
 Node ReadStateClass::readLambda() {
-	//cerr << "LAMBDA" << endl;
+	#ifdef DBG_COMMON2GNX
+		cerr << "LAMBDA" << endl;
+	#endif
+		
 	ReadStateClass pattern( *this );
 	pattern.setPatternMode();
-	//cerr << "About to read pattern" << endl;
-	Node args = pattern.readExprPrec( prec_arrow );
-	//cerr << "Pattern read" << endl;
+	#ifdef DBG_COMMON2GNX
+		cerr << "About to read pattern" << endl;
+	#endif
+	Node ap = pattern.readExprPrec( prec_arrow );
+	Node fun;
+	Node args;
+	flatten( ap, fun, args );
+	const std::string name = fun->attribute( "name" );
+
+	#ifdef DBG_COMMON2GNX
+		cerr << "Pattern read" << endl;
+	#endif
+
 	if ( not this->cstyle_mode ) this->checkToken( tokty_fnarrow );
 	Node body = this->readCompoundStmnts( false );
-	if ( not this->cstyle_mode ) this->checkToken( tokty_endfn );
-	//cerr << "About to check stuff????? <-----<" << endl;
+	if ( not this->cstyle_mode ) this->checkToken( tokty_endfn );	
+	#ifdef DBG_COMMON2GNX
+		cerr << "About to check stuff????? <-----<" << endl;
+	#endif
 	NodeFactory fn;
 	fn.start( "fn" );
+	fn.put( "name", name );
 	fn.add( args );
 	fn.add( body );
 	fn.end();
@@ -797,7 +814,9 @@ Node ReadStateClass::prefixProcessingCore() {
 	ItemFactory ifact = this->item_factory;
 	Item item = ifact->read();
 	
-	//cerr << "First item was " << tok_type_name( item->tok_type ) << endl;
+	#ifdef DBG_COMMON2GNX
+		cerr << "First item was " << tok_type_name( item->tok_type ) << endl;
+	#endif
 	
 	TokType fnc = item->tok_type;
 	Role role = item->role;
@@ -978,7 +997,9 @@ Node ReadStateClass::prefixProcessingCore() {
 		  	return this->readFor();
 		}
 		case tokty_function: {
-			//cerr << "FUNCTION" << endl;
+			#ifdef DBG_COMMON2GNX
+				cerr << "FUNCTION" << endl;
+			#endif
 			if ( this->item_factory->peek()->tok_type == tokty_oparen ) {
 				return this->readLambda();
 			} else {

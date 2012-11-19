@@ -1,0 +1,22 @@
+/*****************************************************************************\
+Instruction ERASE_MARK LOCAL_N
+
+Summary
+	Reset the value stack length to that recorded 
+	in the variable LOCAL_N.
+	
+Unchecked Precondition
+	N is a valid index into the call frame.
+	
+Exceptions (Checked Preconditions)
+	None
+	
+Result (Postcondition)		
+	The value stack is reset and the intermediate values from the mark 
+	are lost.
+
+\*****************************************************************************/
+
+long n = ToLong( *( ++pc ) );
+VMVP = ToRefRef( LOCAL( n ) );
+RETURN( pc + 1 );

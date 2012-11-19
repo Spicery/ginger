@@ -1,0 +1,99 @@
+Notes on the CodeBuilder API
+============================
+
+Excerpts from a letter to Philip Allen
+--------------------------------------
+
+As an example, let's represent the expression 'if f( x ) then p else 0 endif'. In Lisp this would be '(cond ((f x) p) 0) but in Ginger we would have 
+
+<if>
+  <app>
+    <id name="f"/>
+    <id name="x"/>
+  </app>
+  <id name="p"/>
+  <constant type="int" value="0"/>
+<if>
+
+Now that's pure - but a little bit intimidating. So there's a Builder style interface too. It looks like this:
+
+CodeBuilder()
+.IF()
+.APPLY()          # the code builder is returned by each call to allow chaining.
+.variable( `f` )  # If a parameter is provided it acts as a start and end.
+.TO()
+.variable( `x` )  # Similarly, a parameter means you don't need an ENDARG call.
+.ENDAPPLY();
+.THEN()
+.variable( `p` )
+.ELSE();
+.constant( 0 )
+.ENDIF()
+.build()
+
+Of course, in this specific case it would be just as easy to write ... !
+
+CodeBuilder().parseCommon( "if f( x ) then p else 0 endif" ).build()
+
+Constructing Function Applications
+----------------------------------
+
+Style 1
+~~~~~~~
+
+builder.APPLY();;
+<code for function expression>
+builder.TO();;
+<code for arguments>
+builder.ENDAPPLY();;
+
+Example:
+	f( x, 0 )
+
+builder.APPLY();;
+builder.variable( `f` );;
+builder.TO();;
+builder.variable( `x` );;
+builder.constant( 0 );;
+builder.ENDAPPLY();;
+
+
+Style 2
+~~~~~~~
+
+builder.APPLY_END( function_code, arg1_code, arg2_code, .... );;
+
+Example:
+	f( x, 0 )
+
+builder.APPLY_END( `f`, `x`, 0 );
+
+Constructing Lists
+------------------
+
+Style 1
+~~~~~~~
+
+builder.LIST();;
+<< code for the contents >>
+builder.ENDLIST();;
+
+Example:
+	[ "left", 7, f( x ) ]
+
+builder.LIST();;
+builder.constant( "left" );;
+builder.constant( 7 );;
+builder.APPLY_END( `f`, `x` );;
+builder.ENDLIST();;
+
+Style 2
+~~~~~~~
+
+builder.LIST_END( value1_code, value2_code, ... );;
+
+Example:
+	[ "left", 7, f( x ) ]
+
+builder.LIST_END( "left", 7, CodeBuilder().APPLY_END( `f`, `x` ).build() );;
+

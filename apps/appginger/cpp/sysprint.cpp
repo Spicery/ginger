@@ -197,6 +197,10 @@ void refPrint( std::ostream & out, const Ref r ) {
 		const Ref key = * obj_K;
 		if ( IsFunctionKey( key ) ) {
 			out << "<function>";
+		} else if ( key == sysMapletKey ) {
+			refPrint( fastMapletKey( r ) );
+			out << " => ";
+			refPrint( fastMapletValue( r ) );
 		} else if ( IsSimpleKey( key ) ) {
 			#ifdef DBG_SYSPRINT
 				cerr << "-- printing simple key = " << hex << ToULong( key ) << endl;

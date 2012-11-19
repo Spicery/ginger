@@ -55,6 +55,7 @@
 #define IN				"in"
 #define BIND			"bind"
 #define SEQ				"seq"
+#define ERASE           "erase"
 #define	BLOCK			"block"
 
 #define LIST			"list"

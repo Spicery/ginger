@@ -132,7 +132,6 @@ void CodeGenClass::vmiSELF_CALL_N( const int n ) {
 	this->emitRef( ToRef( n ) );
 }
 
-
 void CodeGenClass::vmiSYS_CALL( SysCall * r ) {
 	this->emitSPC( vmc_syscall );
 	this->emitRef( ToRef( r ) );
@@ -393,6 +392,11 @@ void CodeGenClass::vmiSTART_MARK( int v ) {
 void CodeGenClass::vmiEND_MARK( int v ) {
 	this->emitSPC( vmc_end_mark );
 	this->emitRef( ToRef( v ) );
+}
+
+void CodeGenClass::vmiERASE_MARK( int var ) {
+	this->emitSPC( vmc_erase_mark );
+	this->emitRef( ToRef( var ) );
 }
 
 void CodeGenClass::vmiCHECK_COUNT( int v ) {
@@ -1111,6 +1115,14 @@ void CodeGenClass::compileAndOr( bool sense, Gnx mnx, LabelClass * contn ) {
 	e.labelSet();
 }
 
+void CodeGenClass::compileErase( Gnx mnx, LabelClass * contn ) {
+	int v = this->tmpvar();
+	this->vmiSTART_MARK( v );
+	this->compileChildren( mnx, CONTINUE_LABEL );
+	this->vmiERASE_MARK( v );
+	this->continueFrom( contn );
+}
+
 void CodeGenClass::compileGnx( Gnx mnx, LabelClass * contn ) {
 	#ifdef DBG_CODEGEN
 		cerr << "appginger/compileGnx" << endl;
@@ -1136,6 +1148,8 @@ void CodeGenClass::compileGnx( Gnx mnx, LabelClass * contn ) {
 		this->compileGnxApp( mnx, contn );
 	} else if ( nm == SEQ ) {
 		this->compileChildren( mnx, contn );
+	} else if ( nm == ERASE ) {
+		this->compileErase( mnx, contn );
 	} else if ( nm == BIND and mnx->size() == 2 ) {
 		#ifdef DBG_CODEGEN
 			cerr << "appginger/compileGnx/BIND" << endl;

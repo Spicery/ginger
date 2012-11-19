@@ -140,6 +140,7 @@ public:
 	void vmiEND_MARK( int N );
 	void vmiEND1_CALLS( int var );
 	void vmiENTER();
+	void vmiERASE_MARK( int var );
 	void vmiFIELD( long index );
 	void vmiFUNCTION( int N, int A );
 	void vmiGOTO( LabelClass * d );
@@ -207,6 +208,7 @@ private:
 	void compileGnxSetCont( Gnx mnx, LabelClass * contn );
 	void compileGnxSelfCall( Gnx mnx, LabelClass * contn );
 	void compileAndOr( bool sense, Gnx mnx, LabelClass * contn );
+	void compileErase( Gnx mnx, LabelClass * contn );
 
 
 public:

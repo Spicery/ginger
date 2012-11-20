@@ -19,6 +19,8 @@
 #ifndef GNX_CONSTANTS_HPP
 #define GNX_CONSTANTS_HPP
 
+#define SPAN            "span"
+
 #define ARITY 			"arity"
 #define ARGS_ARITY		"args.arity"
 #define TAILCALL		"tailcall"

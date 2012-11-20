@@ -1,0 +1,66 @@
+Special Values
+==============
+
+Ginger has several values which represent "no-result". 
+
+The most useful one is -absent- which represents that there's no value that 
+satisfies all the constraints.
+
+The next most useful is -undefined- that represents an unconstrained value 
+i.e. one that has not participated meaningfully in the constraint solving. 
+Synonyms might be 'unknown' or 'unconstrained'. N.B. Alternative returns
+are often a better way to manage pre-condition failure.
+
+Less commonly useful is -indeterminate- that represents an under-constrained
+solution, typically where a unique solution is required but many exist. N.B.
+It might be a good idea to use alternative-returns to manage this.
+
+The Values
+----------
+
+absent
+~~~~~~
+This value says that the code can find no more solutions. It is used to 
+express the end of a sequence of values.
+
+For example, one might write code to solve where a curve cuts the x-axis.
+If the curve doesn't cut the x-axis it would be appropriate to return 
+absent.
+
+One might use absent to signal that an optional welcome message was missing.
+This would be different from using the empty string - which would imply
+a blank welcome message.
+
+undefined
+~~~~~~~~~
+This value says that the code was supplied inputs for which there is no 
+meaning (yet).
+
+For example, one might write code to convert date-strings into Date objects.
+If the date-string was not a recognised format then one could return 
+undefined to represent an explicit failure value. [Actually we would prefer
+to make an alternative return - but I haven't implemented that yet.]
+
+One also might use undefined as an initial value for variables in a sequence
+of code that incrementally constrains their values.
+
+indeterminate
+~~~~~~~~~~~~~
+This value says that there are many solutions, all in some sense unsatisfactory.
+
+
+
+The Differences
+---------------
+What is the difference between undefined and absent? Undefined represents
+the lack of constraints whereas absent represents an excess of constraints.
+
+Undefined and interdeterminate are similar. But undefined says that some
+pre-condition on the inputs has not been met. Indeterminate says that there
+are solutions-of-a-kind but they lack a required quality (normally uniqueness).
+
+* Undefined:: constraints not applied.
+* Indeterminate:: under constrained, many/inadequate solutions.
+* Absent:: over constrained, no solution.
+
+

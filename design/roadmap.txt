@@ -1,85 +1,192 @@
-  * A toolchain that consists of 
-      - common2gnx:     a front-end for Common, converts to GingerXML. [docs]
-      - cstyle2gnx:     a front-end for a C-family syntax, converts to GingerXML. [docs+rename]
-      - simplifygnx:    a GingerXML simplifier and annotation tool. [docs]
-      - tidymnx:        a tool for pretty-printing MinXML (superset of GingerXML). [docs]
-      - fetchgnx:       a tool for accessing Project contents [docs+revise]
-      - executegnx:     a GingerXML interpreter (renaming of appginger). [docs+rename??]
-    These tools are not supposed to be on the $PATH of a typical user and will 
-    probably be installed somewhere like /usr/local/ginger/bin
+Ginger Release Roadmap
+======================
 
-   * A command-line interpreter, ginger, that coordinates the toolchain components to
-    provide an interactive shell for exploratory programming in a terminal. [design+docs+implement]
-      - Traps keyboard-interrupts
-      - Long term development would be to become a terminal-based Project IDE suitable 
-        for use over SSH.
-      - Uses a user/team/department/.../world preferences hierarchy 
-      - Simple, single-line, terminal based interpreter.
-      	  - Uses readline by default to provide command line editing.
-      	  - Consumes stdin.
-      	  - Interactive.
-          - Might want to turn this off for use with emacs. Figure out later.
-      - Traps panics, reports them, resets, continues.
-      - Prints welcome banner.
-      - Provides the context of the current project and package
-      - Selectable syntax via --syntax option and ~/.ginger preferences
-      - Autolocates the current project 
-          - current directory
-          - --project option
-          - ~/.ginger preferences
-      - Sets up automatic imports for interaction
-      - Special command ‘macros’
-          - help - integrated help
-          - project - create/edit/delete/query project
-          - imports - edits interactive imports
-          - package - create/edit/delete/query package in current project
-          - inspect - inspects variables (or the results of the last computation)
+Release 0.8
+-----------
 
- * A CGI script runner, ginger-cgi (o.n.o.), that can be used to write CGI scripts [docs+spawn]
-     - includes scripts invoked through Apache Action/AddHandler, CGIMapExtensions.
-     - includes #!/usr/local/bin/ginger-cgi (hash-bang) scripts.
-     - can be used interactively for testing.
+Basic Language Features
+~~~~~~~~~~~~~~~~~~~~~~~
 
- * A scripting tool, ginger-script (o.n.o.), that can be used to write UNIX scripts [design+docs+spawn]
-     - includes hash-bang scripting.
-     - includes executing from the standard input.
+*  binding to single variables
+*  assignment to single variables
+*  if/unless N-way conditionals and switch expressions
+*  short circuit conditionals (boolean & absent-oriented)
+*  function applications and partial applications
+*  higher-order functions with full lexical scoping
+*  panics (uncatchable exceptions)
+*  garbage collection
+*  autoloading and autoconversion
 
- * A basic set of Ginger language features including [done]
-     - binding to single variables
-     - assignment to single variables
-     - if/unless N-way conditionals and switch expressions
-     - short circuit conditionals (boolean & absent-oriented)
-     - function applications and partial applications
-     - higher-order functions with full lexical scoping
-     - panics (uncatchable exceptions)
-     - garbage collection
-     - autoloading and autoconversion
+Basic Datatypes
+~~~~~~~~~~~~~~~
 
- * A basic set of built-in datatypes including [done]
-     -simple primitives: absent, booleans, undefined
-     - small integers and small integer arithmetic
-     - ASCII strings, symbols and characters
-     - singly linked lists (Lisp-style)
-     - 1D arrays (vectors)
-     - maps and maplets, including weak hash tables
-     - class objects, for structured reflection
+*  simple primitives: absent, booleans, undefined, indeterminate.
+*  small integers and small integer arithmetic, overflowing to floating point.
+*  floating point arithmatic.
+*  ASCII strings, symbols and characters
+*  singly linked lists (Lisp-style)
+*  1D arrays (vectors)
+*  maps and maplets, including weak hash tables
+*  class objects
 
- * A basic standard library including [docs]
-     - equality
-     - simple I/O
-     - access to environment variables
+Toolchain
+~~~~~~~~~
 
- * Documentation for
-     - a overview of the Ginger project, the manifesto, the motivation, the roadmap. [todo]
-     - all the tools in the toolchain (common2gnx, cstyle2gnx, simplifygnx, 
-       tidymnx, fetchgnx, resolvegnx, appginger) [todo]
-     - all the source formats (Common syntax, C-style syntax, GingerXML, MinimalMnx) 
+These tools are not supposed to be on the $PATH of a typical user and will 
+be installed somewhere like /usr/local/libexec/ginger
+
+* common2gnx:     a front-end for Common, converts to GingerXML. [docs]
+* cstyle2gnx:     a front-end for a C-family syntax, converts to GingerXML. [docs+rename]
+* simplifygnx:    a GingerXML simplifier and annotation tool. [docs]
+* tidymnx:        a tool for pretty-printing MinXML (superset of GingerXML). [docs]
+* fetchgnx:       a tool for accessing Project contents [docs+revise]
+* ginger-cli:     a basic Ginger command-line interpreter (renaming of appginger). [docs+rename??]
+
+Ginger
+~~~~~~
+
+A command-line interpreter, ginger, that coordinates the toolchain components to
+provide an interactive shell for exploratory programming in a terminal. [design+docs+implement]
+
+* Simple, single-line, terminal based interpreter.
+  - Uses readline by default to provide command line editing.
+  - Consumes stdin.
+  - Interactive.
+* Traps panics, reports them, resets, continues.
+* Prints welcome banner.
+* Selectable syntax via --grammar option.
+* Starts up in ginger.interactive package.
+
+
+Ginger CGI
+~~~~~~~~~~
+ 
+A CGI script runner, ginger-cgi (o.n.o.), that can be used to write CGI scripts [docs+spawn]
+
+* supports #!/usr/local/bin/ginger-cgi (hash-bang) scripts.
+* can be used interactively for testing.
+
+
+Ginger #! Script Tool
+~~~~~~~~~~~~~~~~~~~~~
+A scripting tool, ginger-script (o.n.o.), that can be used to write UNIX scripts [design+docs+spawn]
+
+* Immediately exits on error.
+* Supports hash-bang scripting #!/usr/local/bin/ginger-script
+
+
+
+Release 0.9
+-----------
+
+Runtime Features
+~~~~~~~~~~~~~~~~
+* Explicit delay, implicit forcing.
+
+Basic Library
+~~~~~~~~~~~~~
+* equality
+* simple I/O
+* access to environment variables
+
+
+Toolchain
+~~~~~~~~~
+New option for common2gnx
+* --pythonic: supports the python-style indentation that Graham and I discussed.
+
+Ginger
+~~~~~~
+
+* Traps keyboard-interrupts
+* Uses a user/team/department/.../world preferences hierarchy 
+* Provides the context of the current project and package
+* Selectable syntax via ~/.config/ginger preferences
+
+* Autolocates the current project 
+  - current directory
+  - --project option
+  - ~/.config/ginger preferences
+
+* Auto-imports the packages of the current project into the interactive
+  package.
+
+* Special command ‘macros’
+  - !<unix command> - run a unix command in a subshell
+  - help - integrated help
+  - imports - edits interactive imports
+  - inspect - inspects variables (or the results of the last computation)
+
+
+
+Ginger #! Script Tool
+~~~~~~~~~~~~~~~~~~~~~
+
+* Additionally supports being passed multiple scripts in Common syntax.
+    % ginger-script script1.cmn script2.cmn script3.cmn
+* Additionally supports executing from the standard input in any 
+  supported syntax.
+    % echo 'println( "hello world" );' | ginger-script -i -g common
+
+
+Release 1.0
+-----------
+
+Documentation 
+~~~~~~~~~~~~~
+
+*  a overview of the Ginger project, the manifesto, the motivation, the roadmap. [todo]
+*  all the tools in the toolchain [todo]
+*  all the source formats (Common syntax, C-style syntax, GingerXML, MinimalMnx) 
        used in the toolchain. [todo]
-     - the programs (ginger, ginger-cgi, ginger-script) [todo]
-     - the Ginger language features [todo]
-     - the Ginger classes and standard library [todo]
+*  the programs (ginger, ginger-cgi, ginger-script) [todo]
+*  the Ginger language features [todo]
+*  the Ginger classes and standard library [todo]
 
  * Integration with the Sublime 2 text editor [todo]
      - includes syntax colouring for the supported syntaxes (Common [done], C-Style [to be done]).
      - evaluation of supported syntaxes using ginger-script.
 
+
+Ginger CGI
+~~~~~~~~~~
+ 
+* Additionally supports scripts invoked through Apache Action/AddHandler.
+* Additionally supports apache CGIMapExtensions.
+* Supports file upload.
+
+Release 2.0
+-----------
+
+Runtime Features
+~~~~~~~~~~~~~~~~
+
+* Alternative-returns (via the return keyword) escalating to panics.
+* Keyword arguments with default values (via the -with- keyword)
+
+Ginger
+~~~~~~
+
+* admin macro (or command?)
+  - create new project folder (optionally make current)
+  - unset/set/change current project (by folder)
+  - remove current project
+  - delete current project folder
+  - query current project
+  - create/edit/delete/query package in current project
+
+
+Future Releases
+---------------
+
+Runtime Features
+~~~~~~~~~~~~~~~~
+
+* Rollbacks.
+
+Ginger
+~~~~~~
+
+* Long term development would be to become a terminal-based Project IDE suitable 
+  for use over SSH.
+* Emacs support.

@@ -16,6 +16,8 @@ Basic Language Features
 *  panics (uncatchable exceptions)
 *  garbage collection
 *  autoloading and autoconversion
+*  Environment variables via ${NAME} syntax.
+
 
 Basic Datatypes
 ~~~~~~~~~~~~~~~
@@ -61,7 +63,8 @@ provide an interactive shell for exploratory programming in a terminal. [design+
 Ginger CGI
 ~~~~~~~~~~
  
-A CGI script runner, ginger-cgi (o.n.o.), that can be used to write CGI scripts [docs+spawn]
+A CGI script runner, ginger-cgi (o.n.o.), that can be used to write CGI scripts 
+[docs+spawn]
 
 * supports #!/usr/local/bin/ginger-cgi (hash-bang) scripts.
 * can be used interactively for testing.
@@ -69,31 +72,39 @@ A CGI script runner, ginger-cgi (o.n.o.), that can be used to write CGI scripts 
 
 Ginger #! Script Tool
 ~~~~~~~~~~~~~~~~~~~~~
-A scripting tool, ginger-script (o.n.o.), that can be used to write UNIX scripts [design+docs+spawn]
+A scripting tool, ginger-script (o.n.o.), that can be used to write UNIX scripts 
+[design+docs+spawn]
 
 * Immediately exits on error.
 * Supports hash-bang scripting #!/usr/local/bin/ginger-script
 
 
-
 Release 0.9
 -----------
 
-Runtime Features
-~~~~~~~~~~~~~~~~
+Basic Language Features
+~~~~~~~~~~~~~~~~~~~~~~~
+* Binding to multiple variables.
+* Assignment to single variables.
+* Anonymous variables.
+
+
+Advanced Language Features
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 * Explicit delay, implicit forcing.
+* Partial application with ? syntax.
+
+Common Syntax
+~~~~~~~~~~~~~
+* Curried definitions and lambdas.
+* --pythonic: supports the python-style indentation that Graham and I discussed.
+
 
 Basic Library
 ~~~~~~~~~~~~~
-* equality
-* simple I/O
-* access to environment variables
+* Equality
+* Simple file based I/O
 
-
-Toolchain
-~~~~~~~~~
-New option for common2gnx
-* --pythonic: supports the python-style indentation that Graham and I discussed.
 
 Ginger
 ~~~~~~
@@ -113,7 +124,8 @@ Ginger
 
 * Special command ‘macros’
   - !<unix command> - run a unix command in a subshell
-  - help - integrated help
+  - help - integrated help - launches a web-browser? - using javascript for
+    dynamic search?
   - imports - edits interactive imports
   - inspect - inspects variables (or the results of the last computation)
 
@@ -131,6 +143,11 @@ Ginger #! Script Tool
 
 Release 1.0
 -----------
+
+Novel Features
+~~~~~~~~~~~~~~
+* First class virtual machines.
+
 
 Documentation 
 ~~~~~~~~~~~~~
@@ -158,11 +175,18 @@ Ginger CGI
 Release 2.0
 -----------
 
-Runtime Features
-~~~~~~~~~~~~~~~~
-
-* Alternative-returns (via the return keyword) escalating to panics.
+Basic Language Features
+~~~~~~~~~~~~~~~~~~~~~~~
 * Keyword arguments with default values (via the -with- keyword)
+
+Novel Features
+~~~~~~~~~~~~~~
+* Alternative-returns (via the return keyword) escalating to panics.
+
+Standard Library
+~~~~~~~~~~~~~~~~
+* File i/o.
+
 
 Ginger
 ~~~~~~
@@ -179,9 +203,8 @@ Ginger
 Future Releases
 ---------------
 
-Runtime Features
-~~~~~~~~~~~~~~~~
-
+Novel Features
+~~~~~~~~~~~~~~
 * Rollbacks.
 
 Ginger

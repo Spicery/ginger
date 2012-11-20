@@ -4,6 +4,12 @@ Ginger Release Roadmap
 Release 0.8
 -----------
 
+Platforms
+~~~~~~~~~
+Version 0.8 will bebuild, install and tests run on the following:
+* Linux (Ubuntu)
+* Mac OS X
+
 Basic Language Features
 ~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -87,10 +93,13 @@ Basic Language Features
 * Binding to multiple variables.
 * Assignment to single variables.
 * Anonymous variables.
+* Final classes (without inheritance).
+  - Slots
+  - Constructors
+  - Recognisers
 
-
-Advanced Language Features
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+Novel Language Features
+~~~~~~~~~~~~~~~~~~~~~~~
 * Explicit delay, implicit forcing.
 * Partial application with ? syntax.
 
@@ -144,10 +153,20 @@ Ginger #! Script Tool
 Release 1.0
 -----------
 
+Platforms
+~~~~~~~~~
+* Linux: Debian (Ubuntu), Redhat (Fedora), OpenSUSE.
+* Mac OS X
+* Free BSD
+
+Basic Language Features
+~~~~~~~~~~~~~~~~~~~~~~~
+* Single inheritance classes.
+* Single dispatch methods.
+  
 Novel Features
 ~~~~~~~~~~~~~~
 * First class virtual machines.
-
 
 Documentation 
 ~~~~~~~~~~~~~
@@ -178,6 +197,10 @@ Release 2.0
 Basic Language Features
 ~~~~~~~~~~~~~~~~~~~~~~~
 * Keyword arguments with default values (via the -with- keyword)
+* Vectorclasses.
+* Multiple inheritance.
+* Essences.
+* Multiple dispatch.
 
 Novel Features
 ~~~~~~~~~~~~~~

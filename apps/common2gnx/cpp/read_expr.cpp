@@ -14,34 +14,12 @@
 #include "item.hpp"
 #include "role.hpp"
 #include "sysconst.hpp"
+#include "gnxconstants.hpp"
 
 //#define DBG_COMMON2GNX
 
 using namespace std;
 
-#define SEQ "seq"
-#define ERASE "erase"
-#define SYSFN "sysfn"
-#define SYSAPP "sysapp"
-#define SYSFN_VALUE "value"
-#define SYSAPP_NAME "name"
-#define APP "app"
-#define CONSTANT "constant"
-#define CONSTANT_TYPE "type"
-#define CONSTANT_VALUE "value"
-#define VAR "var"
-#define VAR_NAME "name"
-#define VAR_PROTECTED "protected"
-#define BIND "bind"
-#define FROM "from"
-#define IN "in"
-#define FN "fn"
-#define FN_NAME "name"
-#define ID "id"
-#define ID_NAME "name"
-#define IF "if"
-#define FOR "for"
-#define SPAN "span"
 
 typedef Ginger::MnxBuilder NodeFactory;
 
@@ -87,14 +65,14 @@ static Node makeEmpty() {
 
 static void pushAnyPattern( NodeFactory & f ) {
 	f.start( VAR );
-	f.put( VAR_PROTECTED, "true" );
+	f.put( VID_PROTECTED, "true" );
 	f.end();
 }
 
 static void updateAsPattern( Node node ) {
 	if ( node->hasName( ID ) ) {
 		node->name() = VAR;
-		node->putAttribute( VAR_PROTECTED, "true" );
+		node->putAttribute( VID_PROTECTED, "true" );
 	}
 }
 
@@ -658,7 +636,7 @@ Node ReadStateClass::readDefinition() {
 	Node fn;
 	Node args;
 	flatten( ap, fn, args );
-	const std::string name = fn->attribute( ID_NAME );
+	const std::string name = fn->attribute( VID_NAME );
 	if ( not this->cstyle_mode ) this->checkToken( tokty_fnarrow );
 	Node body = this->readCompoundStmnts( false );
 	if ( not this->cstyle_mode ) this->checkToken( tokty_enddefine );
@@ -671,8 +649,8 @@ Node ReadStateClass::readDefinition() {
 	NodeFactory def;
 	def.start( BIND );
 	def.start( VAR );
-	def.put( VAR_NAME, name );
-	def.put( VAR_PROTECTED, "true" );
+	def.put( VID_NAME, name );
+	def.put( VID_PROTECTED, "true" );
 	def.end();
 	def.start( FN );
 	def.put( FN_NAME, name );
@@ -755,8 +733,8 @@ Node ReadStateClass::readVarVal( TokType fnc ) {
 	var.start( VAR );
 	readTags( *this, var, "tag", true );
 	Item item = this->readIdItem();
-	var.put( VAR_NAME, item->nameString() );
-	var.put( VAR_PROTECTED, fnc == tokty_val ? "true" : "false" );
+	var.put( VID_NAME, item->nameString() );
+	var.put( VID_PROTECTED, fnc == tokty_val ? "true" : "false" );
 	var.end();
 	Node v = var.build();
 	bind.add( v );

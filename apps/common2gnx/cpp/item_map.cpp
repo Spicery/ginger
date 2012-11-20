@@ -26,7 +26,7 @@ void ItemMap::add( const bool mode_check, const char *n, TokType f, Role r, int 
 //	Declare syntactic properties.
 ItemMap::ItemMap( const bool cstyle ) {
 	add( true,	 	"$",				tokty_envvar,       PrF,        0       );	// changed for ${VAR} case study. 
-	add( true,	 	"-",				tokty_sub, 			BSA, 		700		);
+	add( true,	 	"-",				tokty_sub, 			BSA, 		600		);
 	add( true,	 	"->",				tokty_assign,		BFo,		2000	);
 	add( true,	 	"<-",				tokty_assignrev,	BFo,		2000	);
 	add( true,	 	"=::",				tokty_assign,		BFo,		2000	);
@@ -55,14 +55,14 @@ ItemMap::ItemMap( const bool cstyle ) {
 	add( true,	 	"{%", 				tokty_fat_obrace, 	PrF, 		100		);
 	add( true,	 	"}", 				tokty_cbrace, 		Clo, 		0		);
 	add( true,		"@", 				tokty_at, 			PoF, 		900		);
-	add( true,		"*", 				tokty_mul, 			BSA, 		400		);
+	add( true,		"*", 				tokty_mul, 			BSA, 		500		);
 	add( true,		"**", 				tokty_pow, 			BSA, 		300		);
-	add( true,		"/", 				tokty_div, 			BSA, 		500		);
+	add( true,		"/", 				tokty_div, 			BSA, 		400		);
 	add( true,		"&&", 				tokty_absand, 		BSA, 		1700	);
 	add( true,		"%)", 				tokty_fat_cparen, 	Clo, 		0		);
 	add( true,		"%]", 				tokty_fat_cbracket, Clo, 		0		);
 	add( true,		"%}", 				tokty_fat_cbrace, 	Clo, 		0		);
-	add( true,		"+", 				tokty_add, 			BSA,		600		);
+	add( true,		"+", 				tokty_add, 			BSA,		700		);
 	add( true,		"++", 				tokty_append, 		BSA, 		800		);
 	add( true,		"</>",				tokty_endelement,	Clo,		0		);
 	add( true,		"<>", 				tokty_append, 		BSA, 		800		);

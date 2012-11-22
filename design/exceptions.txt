@@ -9,7 +9,26 @@ capture the stack trace.
     representing the alternative exit scenario.
     
     Failing to handle an escape escalates to a rollback.
+
+    Suggested syntax
+        
+        throw EVENT( EXPR, ... ) [ rethrow EVENT ![![!]] ] [ with BINDINGS ]
+        
+        try APPLY_EXPR
+        catch ( PATTERN, ... ) then STMNTS
+        catch EVENT( PATTERN, ... ) then STMNTS 
+        ...
+        [ else STMNTS ]
+        endtry
+
+    Notes
+        If the normal return handler is not present then a default
+        handler is provided
+
+            catch ( args... ) then args...
     
+
+
   * Rollback - these are matched with transaction-catch blocks,
     which are like try-catch with a super-power. When a transaction
     is rolled back the state of the virtual machine is completely 
@@ -23,6 +42,17 @@ capture the stack trace.
     If a rollback is not caught by a transaction block, it is promptly
     escalated as a failover.
 
+    Suggested syntax:
+
+        throw EVENT ! [ rethrow EVENT !![!] ] [ with BINDINGS ]
+        
+        transaction STMNTS
+        catch EVENT then STMNTS
+        ...
+        [ else STMNTS ]
+        endtransaction
+
+
   * Failover - I have not completely decided on the terminology here.
     The basic idea is that this is an emergency shutdown of the current
     virtual machine. The long term plan is that a Ginger application is
@@ -31,9 +61,66 @@ capture the stack trace.
     
     If a failover is not actually picked up by the Ginger Runtime, then
     it escalates to a panic. (Maybe a better word is "emergency"?)
-    
+
+    Note that a virtual machine failing-over is regarded as a relatively
+    normal situation. As a consequence perhaps a try/catch block in supervisor 
+    is the right solution? This doesn't strike me as quite right as we
+    need concurrent processing. Perhaps it makes more sense to have some
+    kind of event-handling construct.
+
+    Suggested syntax:
+
+        throw EVENT !! [ rethrow EVENT !!! ] [ with BINDINGS ]
+        
+        try vm.run() catch EVENT then ... else ... endtry
+
+
   * A panic is an invocation of the host operating systems' process exit.
-    Execution is brought to a swift halt.
+    Execution is brought to a swift halt. This is not-trappable in any
+    useful sense.
+
+    Suggested syntax:
+
+        throw TAG !!! [ with BINDINGS ]
+        
+
+Ginger XML
+
+    EVENT_TYPE 
+        ::= "escape" | "rollback" | "failover" | "panic"
+        ::= "" | "!" | "!!" | "!!!"
+        ::= 0 | 1 | 2 | 3
+
+    EVENT ::=
+        <constant type="event" value="EVENT_NAME"/>
+
+    THROW ::=
+        <throw level=EVENT_TYPE>
+            EVENT
+            EXPR
+            OPTIONAL_ARGS
+        </escape>
+
+    <rethrow>
+        THROW
+        EVENT <- must be higher level than the 
+        EXPR
+        OPTIONAL_ARGS
+    </rethrow>
+
+    <try event=EVENT_NAME>
+        EXPR
+        <catch.then event=EVENT_NAME>
+            PATTERN
+            EXPR
+        </catch.then>
+        ...
+        <catch.else>
+            ...
+        </catch.else>
+    </try>
+
 
 
 Stephen Leach, 9th Dec 2011
+Revised 22nd Nov 2012

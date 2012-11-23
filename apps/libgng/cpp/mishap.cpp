@@ -109,6 +109,7 @@ void Problem::report() {
 	) {
 		cerr << SYS_MSG_PREFIX << left << setw( width ) << it->first << " : " << it->second << endl;
 	}
+	cerr << endl;
 }
 
 void Problem::gnxReport() {

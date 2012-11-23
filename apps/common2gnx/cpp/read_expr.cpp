@@ -52,6 +52,7 @@ static Node makeIndex( Node lhs, Node rhs ) {
 	return index.build();
 }
 
+#ifdef NOT_CURRENTLY_USED_BUT_KEEP
 static void pushStringConstant( NodeFactory & f, const string & s ) {
 	f.start( CONSTANT );
 	f.put( CONSTANT_TYPE, "string" );
@@ -59,14 +60,16 @@ static void pushStringConstant( NodeFactory & f, const string & s ) {
 	f.end();
 }
 
-static Node makeEmpty() {
-	return shared< Ginger::Mnx >( new Ginger::Mnx( SEQ ) );
-}
-
 static void pushAnyPattern( NodeFactory & f ) {
 	f.start( VAR );
 	f.put( VID_PROTECTED, "true" );
 	f.end();
+}
+#endif
+
+
+static Node makeEmpty() {
+	return shared< Ginger::Mnx >( new Ginger::Mnx( SEQ ) );
 }
 
 static void updateAsPattern( Node node ) {
@@ -661,66 +664,43 @@ Node ReadStateClass::readDefinition() {
 	return def.build();
 }
 
-void ReadStateClass::readTryCatch( NodeFactory & ftry ) {
-	while( this->tryToken( tokty_case ) ) {
-		ftry.start( "case" );
-		ReadStateClass pattern( *this );
-		pattern.setPatternMode();
-		Node case_patt = pattern.readExpr();
-		ftry.add( case_patt );
-		this->checkToken( tokty_then );
-		Node then_stnmnts = this->readStmnts();
-		ftry.add( then_stnmnts );
-		ftry.end();
-	}
-	if ( this->tryToken( tokty_else ) ) {
-		ftry.start( "case" );
-		pushAnyPattern( ftry );
-		Node else_stmnts = this->readStmnts();
-		ftry.add( else_stmnts );
-		ftry.end();
-	}
-}
-
 Node ReadStateClass::readTry( const bool try_vs_transaction ) {
-	// 	try APP ( catch ( case PATTERN then STMNTS )* [ else STMNTS ] )* endtry
-	//	<try> APP ( <catch> ... </catch> )* </try>
-	//	<catch> PATTERN ( <case> PATTERN STMNTS </case> )* </catch>
 	NodeFactory ftry;
 	ftry.start( try_vs_transaction ? "try" : "transaction" );
 	Node app = this->readExpr();
 	ftry.add( app );
-	if ( try_vs_transaction && this->tryPeekToken( tokty_case ) ) {
-		ftry.start( "catch" );
-		pushAnyPattern( ftry ); 
-		this->readTryCatch( ftry );
+
+	while ( this->tryToken( tokty_catch ) ) {
+
+		if ( this->tryPeekToken( tokty_oparen ) ) {
+			ftry.start( "catch.return" );
+		} else {
+			ftry.start( "catch.then" );
+
+			Item item = this->readIdItem();
+			const std::string name = item->nameString();
+			ftry.put( "event", name );			
+		}		
+		
+		ReadStateClass pattern( *this );
+		pattern.setPatternMode();
+		Node catch_patt = pattern.readExpr();
+		ftry.add( catch_patt );
+		
+		this->checkToken( tokty_then );
+		Node e = this->readExpr();
+		ftry.add( e );
+
 		ftry.end();
-	} else if ( try_vs_transaction && this->tryToken( tokty_else ) ) {
-		ftry.start( "catch" );
-		pushAnyPattern( ftry );
-		ftry.start( "case" );
-		pushAnyPattern( ftry );
-		Node stmnts = this->readStmnts();
-		ftry.add( stmnts );
+	}
+
+	if ( this->tryToken( tokty_else ) ) {
+		ftry.start( "catch.else" );
+		Node else_stmnts = this->readStmnts();
+		ftry.add( else_stmnts );
 		ftry.end();
-		ftry.end();
-	} else if ( this->tryPeekToken( tokty_catch ) ) {
-		while ( this->tryToken( tokty_catch ) ) {
-			ftry.start( "catch" );
-			ReadStateClass pattern( *this );
-			pattern.setPatternMode();
-			Node catch_patt = pattern.readExpr();
-			ftry.add( catch_patt );
-			if ( try_vs_transaction ) {
-				this->readTryCatch( ftry );
-			} else {
-				this->checkToken( tokty_then );
-				Node stmnts = this->readStmnts();
-				ftry.add( stmnts );
-			}
-			ftry.end();
-		}
-	} 
+	}
+
 	this->checkToken( try_vs_transaction? tokty_endtry : tokty_endtransaction );
 	ftry.end();
 	return ftry.build();
@@ -907,42 +887,33 @@ Node ReadStateClass::prefixProcessingCore() {
 			ret.end();
 			return ret.build();
 		}
-		case tokty_throw:
-		case tokty_escape:
-		case tokty_rollback:
-		case tokty_failover:
-		case tokty_panic: {
+		case tokty_throw: {
 			NodeFactory panic;
 			panic.start( "throw" );
-			Item item = readIdItem();
-			if ( this->tryToken( tokty_oparen ) ) {
-				panic.start( SYSAPP );
-				panic.put( "name", "withExceptionDetails" );
-				
-				panic.start( SYSAPP );
-				panic.put( "name", "newException" );
-				pushStringConstant( panic, item->nameString() );
-				panic.end();
-				
-				Node d = this->readExprCheck( tokty_cparen );
-				panic.add( d );
-				
-				panic.end();
+
+			panic.put( "event", this->readIdItem()->nameString() );
+			panic.put(
+				"level",
+				this->tryToken( tokty_rollback ) ? "rollback" :
+				this->tryToken( tokty_failover ) ? "failover" :
+				this->tryToken( tokty_panic ) ? "panic" :
+				"escape"
+			);
+			if ( this->tryPeekToken( tokty_oparen ) ) {
+				Node e = this->readExpr();
+				panic.add( e );
 			} else {
-				panic.start( SYSAPP );
-				panic.put( "name", "newException" );
-				pushStringConstant( panic, item->nameString() );
+				panic.start( SEQ );
 				panic.end();
 			}
+
 			panic.end();
 			return panic.build();
 		}
-		/*case tokty_transaction: {
-			return this->readTry( false );
+		case tokty_try: 
+		case tokty_transaction: {
+			return this->readTry( fnc == tokty_try );
 		}
-		case tokty_try: {
-			return this->readTry( true );
-		}*/
 		case tokty_charseq: {
 			return makeCharSequence( item );
 		}

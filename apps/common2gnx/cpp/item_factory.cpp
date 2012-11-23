@@ -90,6 +90,7 @@ CharType char_type( const char ch ) {
 		case ';':
 		case '.':
 		case '@':
+			//	TODO: Should '.' and '@' be self-glue or sign?
 			return SelfGlueCharType;
 		default:
 			return ispunct( ch ) ? SignCharType : MiscCharType;	

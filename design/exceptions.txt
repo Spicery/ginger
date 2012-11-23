@@ -86,30 +86,27 @@ capture the stack trace.
 
 Ginger XML
 
-    EVENT_TYPE 
-        ::= "escape" | "rollback" | "failover" | "panic"
-        ::= "" | "!" | "!!" | "!!!"
-        ::= 0 | 1 | 2 | 3
-
-    EVENT ::=
-        <constant type="event" value="EVENT_NAME"/>
-
+    EVENT_LEVEL ::= "escape" | "rollback" | "failover" | "panic"
+    
     THROW ::=
-        <throw level=EVENT_TYPE>
+        <throw level=EVENT_LEVEL event=EVENT_NAME>
             EVENT
             EXPR
-            OPTIONAL_ARGS
+            [ OPTIONAL_ARGS ]
         </escape>
 
-    <rethrow>
+    <rethrow event=EVENT_NAME level=EVENT_LEVEL>
         THROW
-        EVENT <- must be higher level than the 
         EXPR
-        OPTIONAL_ARGS
+        [ OPTIONAL_ARGS ]
     </rethrow>
 
-    <try event=EVENT_NAME>
+    <try level=EVENT_LEVEL>
         EXPR
+        <catch.return>
+            PATTERN
+            EXPR
+        </catch.return>
         <catch.then event=EVENT_NAME>
             PATTERN
             EXPR

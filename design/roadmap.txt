@@ -19,7 +19,7 @@ Basic Language Features
 *  short circuit conditionals (boolean & absent-oriented)
 *  function applications and partial applications
 *  higher-order functions with full lexical scoping
-*  panics (uncatchable exceptions)
+*  undecorated throws which are not catchable (escalated to failover)
 *  garbage collection
 *  autoloading and autoconversion
 *  Environment variables via ${NAME} syntax.
@@ -60,7 +60,9 @@ provide an interactive shell for exploratory programming in a terminal. [design+
   - Uses readline by default to provide command line editing.
   - Consumes stdin.
   - Interactive.
-* Traps panics, reports them, resets, continues.
+* Exceptions always escalate to failover.
+* Traps failovers, reports them, resets, continues.
+* Panics abort the system (not sure this is correct).
 * Prints welcome banner.
 * Selectable syntax via --grammar option.
 * Starts up in ginger.interactive package.

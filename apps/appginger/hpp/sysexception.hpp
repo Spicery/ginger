@@ -22,7 +22,11 @@
 #include "common.hpp"
 #include "machine.hpp"
 
-Ref * sysNewException( Ref * pc, class MachineClass * vm );
+#ifdef EXCEPTIONS_IMPLEMENTED
+    Ref * sysNewException( Ref * pc, class MachineClass * vm );
+#endif
+    
+extern Ref * sysFailover( Ref * pc, class MachineClass * vm );
 extern Ref * sysPanic( Ref * pc, class MachineClass * vm );
 
 

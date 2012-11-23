@@ -85,6 +85,9 @@
 #define SELF_CONSTANT	"self.constant"
 
 #define THROW			"throw"
+#define THROW_EVENT     "event"
+#define THROW_LEVEL     "level"
+#define TRY             "try"
 
 #define PROBLEM			"problem"
 #define PROBLEM_SEVERITY		"severity"

@@ -434,6 +434,10 @@ void CodeGenClass::vmiPUSHQ( Ref obj, LabelClass * contn ) {
 	}
 }
 
+void CodeGenClass::vmiPUSHQ_STRING( const std::string & s, LabelClass * contn ) {
+	this->vmiPUSHQ( this->vm->heap().copyString( s.c_str() ) );
+}
+
 void CodeGenClass::vmiRETURN() {
 	this->emitSPC( vmc_return );
 }
@@ -441,8 +445,6 @@ void CodeGenClass::vmiRETURN() {
 void CodeGenClass::vmiHALT() {
 	this->emitSPC( vmc_halt );
 }
-
-
 
 void CodeGenClass::vmiENTER() {
 	this->emitSPC(
@@ -1217,12 +1219,13 @@ void CodeGenClass::compileGnx( Gnx mnx, LabelClass * contn ) {
 		this->compileGnxMakeRef( mnx, contn );
 	} else if ( nm == SETCONT and mnx->size() == 2 ) {
 		this->compileGnxSetCont( mnx, contn );
-	} else if ( nm == THROW and mnx->size() == 1 ) {
-		this->compile1( mnx->child( 0 ), CONTINUE_LABEL );
-		this->vmiSET_SYS_CALL( sysPanic, 1 );
-		//	Don't bother with the 		
-		//		this->continueFrom( contn );
-		//	as we panic!!
+	} else if ( 
+		nm == THROW and 
+		mnx->size() == 1 and 
+		mnx->hasAttribute( THROW_EVENT ) and 
+		mnx->hasAttribute( THROW_LEVEL )
+	) {
+		this->compileThrow( mnx, contn );
 	} else if ( nm == ASSERT and mnx->size() == 1 ) {
 		if ( mnx->hasAttribute( ASSERT_N, "1" ) ) {
 			//	case-study: Adding New Element Type.
@@ -1239,11 +1242,39 @@ void CodeGenClass::compileGnx( Gnx mnx, LabelClass * contn ) {
 		this->compileGnxSelfCall( mnx, contn );
 	} else if ( nm == SELF_CONSTANT ) {
 		this->vmiSELF_CONSTANT();
+	} else if ( nm == TRY && mnx->size() >= 1 ) {
+		this->compileTry( mnx, contn );
 	} else if ( nm == PROBLEM ) {
 		throwProblem( mnx );
 	} else {
 		throw Ginger::SystemError( "GNX not recognised" ).culprit( "Expression", mnx->toString() );
 	}
+}
+
+void CodeGenClass::compileThrow( Gnx mnx, LabelClass * contn ) {
+	//	Push the event name.
+	this->vmiPUSHQ_STRING( mnx->attribute( THROW_EVENT ), CONTINUE_LABEL );
+	//	TODO: Push the supplied list of arguments as a list.
+	#if 1	
+		int v = this->tmpvar();
+		this->vmiSTART_MARK( v );
+		this->compileGnx( mnx->child( 0 ), CONTINUE_LABEL );
+		this->vmiSET( v );
+		this->vmiSYS_CALL( sysNewList );			
+	#else
+		this->vmiPUSHQ( SYS_NIL );
+	#endif
+	const std::string level( mnx->attribute( THROW_LEVEL ) );
+	this->vmiSET_SYS_CALL( level == "panic" ? sysPanic : sysFailover, 2 );
+	//	Don't bother with the 		
+	//		this->continueFrom( contn );
+	//	as we panic!!
+}
+
+
+void CodeGenClass::compileTry( Gnx mnx, LabelClass * contn ) {
+	cerr << SYS_MSG_PREFIX << "Warning: exception catching not implemented" << endl;
+	this->compileGnx( mnx->child( 0 ), contn );
 }
 
 void CodeGenClass::compileChildren( Gnx mnx, LabelClass * contn ) {

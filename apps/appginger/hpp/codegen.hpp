@@ -167,6 +167,7 @@ public:
 	void vmiPUSHQ_RETURN( Ref obj );
 	void vmiPUSHQ( Ref obj );
 	void vmiPUSHQ( Ref obj, LabelClass * contn );
+	void vmiPUSHQ_STRING( const std::string & s, LabelClass * contn );
 	void vmiRETURN();
 	void vmiSELF_CALL();
 	void vmiSELF_CALL_N( const int n );
@@ -209,6 +210,8 @@ private:
 	void compileGnxSelfCall( Gnx mnx, LabelClass * contn );
 	void compileAndOr( bool sense, Gnx mnx, LabelClass * contn );
 	void compileErase( Gnx mnx, LabelClass * contn );
+	void compileTry( Gnx mnx, LabelClass * contn );
+	void compileThrow( Gnx mnx, LabelClass * contn );
 
 
 public:

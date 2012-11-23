@@ -25,19 +25,56 @@
 
 using namespace std;
 
-Ref * sysNewException( Ref * pc, class MachineClass * vm ) {
-	if ( vm->count == 1 ) {
-		XfrClass xfr( vm->heap().preflight( pc, EXCEPTION_SIZE ) );
-		xfr.setOrigin();
-		xfr.xfrRef( sysExceptionKey );
-		xfr.xfrRef( vm->fastPeek() );
-		xfr.xfrRef( SYS_NIL );
-		xfr.xfrRef( SYS_NIL );
-		vm->fastPeek() = xfr.makeRef();
-	} else {
-		throw Ginger::Mishap( "Wrong number of arguments to construct an Exception" );
+#ifdef EXCEPTIONS_IMPLEMENTED
+	/*
+		Constructs an exception object from a name, with no positional
+		or keyword arguments.
+
+		TODO: For version 0.8 at least I don't intend to bother with
+		constructing exceptions.
+	*/
+	Ref * sysNewException( Ref * pc, class MachineClass * vm ) {
+		if ( vm->count == 1 ) {
+			XfrClass xfr( vm->heap().preflight( pc, EXCEPTION_SIZE ) );
+			xfr.setOrigin();
+			xfr.xfrRef( sysExceptionKey );
+			xfr.xfrRef( vm->fastPeek() );
+			xfr.xfrRef( SYS_NIL );
+			xfr.xfrRef( SYS_NIL );
+			vm->fastPeek() = xfr.makeRef();
+		} else {
+			throw Ginger::Mishap( "Wrong number of arguments to construct an Exception" );
+		}
+		return pc;
 	}
-	return pc;
+#endif
+
+static void decorateProblem( class MachineClass * vm, Ginger::Problem & problem ) {
+	if ( vm->count == 2 ) {
+		Ref args = vm->fastPop();
+		Ref event_name = vm->fastPeek();
+		stringstream out;
+		refPrint( out, event_name );
+		problem.setMessage( out.str() );
+		while ( IsPair( args ) ) {
+			stringstream a;
+			refPrint( a, fastPairHead( args ) );
+			problem.culprit( "Argument", a.str() );
+			args = fastPairTail( args );
+		}
+	}
+}
+
+/*
+	A failover is raised at a point when the machine state
+	still has integrity. We can therefore perform quite a few
+	operations safely on the state, such as sys-printing.
+*/
+Ref * sysFailover( Ref * pc, class MachineClass * vm ) {
+	//	Initialise message with default.
+	Ginger::Mishap mishap( "Internal error: throw called with invalid arguments" ); 
+	decorateProblem( vm, mishap );
+	throw mishap;
 }
 
 /*
@@ -46,16 +83,8 @@ Ref * sysNewException( Ref * pc, class MachineClass * vm ) {
 	operations safely on the state, such as sys-printing.
 */
 Ref * sysPanic( Ref * pc, class MachineClass * vm ) {
-	if ( vm->count != 1 ) {
-		throw Ginger::SystemError();
-	} else {
-		Ref exn = vm->fastPeek();
-		if ( IsException( exn ) ) {
-			stringstream out;
-			refPrint( out, RefToPtr4( exn )[ EXCEPTION_OFFSET_TAG ] );
-			throw Ginger::SystemError( out.str() );
-		} else {
-			throw Ginger::SystemError();
-		}
-	}
+	//	Initialise message with default.
+	Ginger::SystemError syserror( "Internal error: throw called with invalid arguments" ); 
+	decorateProblem( vm, syserror );
+	throw syserror;
 }

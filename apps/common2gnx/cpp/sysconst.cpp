@@ -24,8 +24,9 @@ public:
 	
 		//	Absent & Present
 		CONST( "absent", "absent" );
-		CONST( "present", "present" );
-
+		#ifdef PRESENT_CONSTANT_REQUIRED
+			CONST( "present", "present" );
+		#endif
 		//	Booleans
 		CONST( "bool", "true" );
 		CONST( "bool", "false" );

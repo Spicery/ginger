@@ -861,7 +861,7 @@ void CodeGenClass::compileFor( Gnx query, Gnx body, LabelClass * contn ) {
 }
 
 void CodeGenClass::compileGnxIf( Gnx mnx, LabelClass * contn ) {
-	int a = mnx->size();
+	const int a = mnx->size();
 	if ( a == 2 ) {
 		//	codegen1( codegen, term_index( mnx, 0 ) );
 		//	vmiIFNOT( codegen, d );

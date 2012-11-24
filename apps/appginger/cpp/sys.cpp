@@ -362,6 +362,10 @@ Ref * sysLength( Ref *pc, class MachineClass * vm ) {
 	}
 }
 
+Ref * sysIsntAbsent( Ref *pc, class MachineClass * vm ) {
+	vm->fastPeek() = vm->fastPeek() == SYS_ABSENT ? SYS_FALSE : SYS_TRUE;
+	return pc;
+}
 
 #include "datatypes.cpp.auto"
 
@@ -403,7 +407,8 @@ const SysMap::value_type rawData[] = {
 	SysMap::value_type( "append", SysInfo( Arity( 2 ), Arity( 1 ), sysAppend, "Appends two sequences of the same type, result is a sequence of the same type" ) ),	
 	SysMap::value_type( "listAppend", SysInfo( Arity( 2 ), Arity( 1 ), sysListAppend, "Appends two lists" ) ),	
 	SysMap::value_type( "isNil", SysInfo( Arity( 1 ), Arity( 1 ), sysIsNil, "Tests whether a list is empty or not" ) ),
-	SysMap::value_type( "isList", SysInfo( Arity( 1 ), Arity( 1 ), sysIsList, "Tests whether an object is a list or not" ) ),
+	SysMap::value_type( "isList", SysInfo( Arity( 1 ), Arity( 1 ), sysIsList, "Tests whether an object is a list or not" ) ),	
+	SysMap::value_type( "isntAbsent", SysInfo( Arity( 1 ), Arity( 1 ), sysIsntAbsent, "Tests whether an object is non-absent" ) ),
 	SysMap::value_type( "newList", SysInfo( Arity( 0, true ), Arity( 1 ), sysNewList, "Builds a list from the arguments" ) ),
 	SysMap::value_type( "newListOnto", SysInfo( Arity( 1, true ), Arity( 1 ), sysNewListOnto, "Builds a list from the first N-1 args and appends that to the last argument" ) ),
 	SysMap::value_type( "newMap", SysInfo( Arity( 0, true ), Arity( 1 ), sysNewHardEqMap, "Builds a new map from maps and maplets" ) ),

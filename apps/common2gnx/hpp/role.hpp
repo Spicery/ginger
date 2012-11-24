@@ -39,7 +39,6 @@ enum CompileCode {
 class Role {
 public:
 	int 				in_arity 		: 4;
-	int 				out_arity  		: 4;
 	enum FixityCode 	fixity_code		: 4;
 	enum CompileCode	compile_code   	: 4;
 	
@@ -48,13 +47,13 @@ public:
 	bool IsPostfix() 	{ return ( this->fixity_code & PostfixCode ) != 0; }
 	bool IsBothfix()	{ return this->fixity_code == ( PrefixCode | PostfixCode ); }
 	bool IsAnyfix()		{ return this->fixity_code != NofixCode; }
-	bool IsUnary() 		{ return this->in_arity == 1 && this->IsPrefix(); }
-	bool IsBinary()		{ return this->in_arity == 2 && this->IsPostfix(); }
 
+	bool IsUnary() 		{ return this->in_arity == 1; }
+	bool IsBinary()		{ return this->in_arity == 2; }
+	
 	bool IsLiteral() 	{ return this->compile_code == LiteralCode; }
 	bool IsForm() 		{ return this->compile_code == FormCode; }
 	bool IsSys() 		{ return this->compile_code == SysCode; }
-
 };
 
 
@@ -76,9 +75,9 @@ extern Role PrefixOpRole;
 extern Role PrefixRole;
 extern Role SkipRole;
 extern Role StringRole;
-extern Role SuffixOpRole;
+extern Role SuffixSysRole;
 extern Role UnarySysRole;
-
+extern Role UnaryFormRole;
 
 #endif
 

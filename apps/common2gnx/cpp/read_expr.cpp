@@ -270,7 +270,25 @@ Node ReadStateClass::postfixProcessing( Node lhs, Item item, int prec ) {
 			a.end();
 			return a.build();			
 		} else {
-			throw;
+			throw Ginger::Mishap( "Internal error - postfixProcessing" );
+		}
+	} else if ( role.IsUnary() ) {
+		if ( role.IsSys() ) {
+			NodeFactory a;
+			a.start( SYSAPP );
+			a.put( SYSAPP_NAME, tok_type_as_sysapp( fnc ) );
+			a.add( lhs );
+			a.end();
+			return a.build();
+		} else if ( role.IsForm() ) {
+			NodeFactory a;
+			a.start( tok_type_as_tag( fnc ) );
+			Node rhs = this->readExprPrec( prec );
+			a.add( lhs );
+			a.end();
+			return a.build();			
+		} else {
+			throw Ginger::Mishap( "Internal error (postfixProcessing): None of these cases defined yet" );			
 		}
 	} else {
 		switch ( fnc ) {
@@ -372,7 +390,8 @@ Node ReadStateClass::postfixProcessing( Node lhs, Item item, int prec ) {
 				//fprintf( stderr, "DEBUG arity %d\n", term_arity( t ) );
 				return t;
 			}
-			case tokty_explode: {
+			/*
+				case tokty_explode: {
 				NodeFactory expl;
 				expl.start( SYSAPP );
 				expl.put( SYSAPP_NAME, "explode" );
@@ -381,6 +400,7 @@ Node ReadStateClass::postfixProcessing( Node lhs, Item item, int prec ) {
 				Node t = expl.build();
 				return t;
 			}
+			*/
 			default: {
 				throw Ginger::Mishap( "This keyword not handled" ).culprit( "Keyword", item->nameString() );
 			}
@@ -835,13 +855,14 @@ Node ReadStateClass::prefixProcessingCore() {
 			return unary.build();
 		} else if ( role.IsSys() ) {
 			NodeFactory sf;
-			sf.start( "constant" );
-			sf.put( "type", SYSFN );
-			sf.put( "value", tok_type_as_sysapp( fnc ) );
+			sf.start( SYSAPP );
+			sf.put( SYSAPP_NAME, tok_type_as_sysapp( fnc ) );
+			Node x = this->readExprPrec( item->precedence );
+			sf.add( x );
 			sf.end();
 			return sf.build();
 		} else {
-			throw;	// 	Unreachable.
+			throw Ginger::Mishap( "Internal error - unreachable code reached" );
 		}
 	}
 
@@ -894,8 +915,8 @@ Node ReadStateClass::prefixProcessingCore() {
 			panic.put( "event", this->readIdItem()->nameString() );
 			panic.put(
 				"level",
-				this->tryToken( tokty_rollback ) ? "rollback" :
-				this->tryToken( tokty_failover ) ? "failover" :
+				this->tryToken( tokty_bang ) ? "rollback" :
+				this->tryToken( tokty_dbang ) ? "failover" :
 				this->tryToken( tokty_panic ) ? "panic" :
 				"escape"
 			);

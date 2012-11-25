@@ -1,0 +1,24 @@
+/*****************************************************************************\
+Instruction ANDABS JUMP_TO ( X ) -> ( absent | () )
+
+Summary
+	Compare the top of the stack against absent. If it is the same then
+	jump to JUMP_TO. Otherwise fall through, removing the top of the stack
+	in either case.
+
+Unchecked Precondition
+	There is at least one item on the stack.
+	
+Exceptions (Checked Preconditions)
+	JUMP_TO is in range of the current enclosing function object.
+	
+Result (Postcondition)		
+
+\*****************************************************************************/
+
+if ( *VMVP == SYS_ABSENT ) {
+	RETURN( pc + ToLong( pc[ 1 ] ) + 1 );
+} else {
+	VMVP--;
+	RETURN( pc + 2 );
+}

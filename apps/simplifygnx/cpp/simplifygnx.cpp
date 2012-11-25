@@ -717,6 +717,8 @@ public:
 			element.putAttribute( ARITY, "1" );
 		} else if ( x == ID || x == FN ) {
 			element.putAttribute( ARITY, "1" );
+        } else if ( x == AND || x == OR || x == ABSAND || x == ABSOR ) {
+            element.putAttribute( ARITY, "1" );
 		} else if ( x == LIST || x == LIST_APPEND || x == VECTOR ) {
 			element.putAttribute( ARITY, "1" );
 		} else if ( x == FOR ) {

@@ -29,7 +29,7 @@ all: simplifygnx
 # $@ is make shorthand for the target.
 # $@ is make shorthand for the dependencies
 simplifygnx: $(OBJS)
-	@CXX@ $(CXXFLAGS) $(BOOST_CPPFLAGS) -o $@ $^ ../../libgng/cpp/libgng.a ../../libmetainfo/cpp/libmetainfo.a
+	@CXX@ $(CXXFLAGS) $(BOOST_CPPFLAGS) -o $@ $^ ../../libgng/cpp/libgng.a ../../libmetainfo/cpp/libmetainfo.a $(wildcard /usr/lib/i386-linux-gnu/libuuid.so)
 	
 clean:
 	rm -f *.o

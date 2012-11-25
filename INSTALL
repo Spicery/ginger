@@ -14,6 +14,11 @@ Installing on Ubuntu (from the command-line)
 	You can ensure you have these in one step with
 		% sudo apt-get git python g++ autoconf
 
+*	TODO: rudecgi
+		% mkdir /tmp/rudecgi
+		% cd /tmp/rudecgi
+		% wget http://www.rudeserver.com/cgiparser/download/rudecgi-5.0.0.tar.gz
+
 *	Create a Spicery folder for ginger and any sister projects. e.g.
 		% GINGER_HOME=~/Spicery
 		% mkdir $GINGER_HOME

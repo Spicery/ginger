@@ -42,15 +42,15 @@ const char * tok_type_as_sysapp( TokType fnc ) {
     switch ( fnc ) {
 	case tokty_add : return "+";
 	case tokty_append: return "append";
-	case tokty_bang: return "absnot";
-	case tokty_dbang: return "absbool";
+	case tokty_bang: return "absNot";
+	case tokty_dbang: return "boolAbs";
 	case tokty_div : return "/";
 	case tokty_quo : return "quo";
 	case tokty_mod : return "mod";
 	case tokty_equal : return "=";
 	case tokty_explode: return "explode";
 	case tokty_identical: return "==";
-	case tokty_isntabsent: return "isntabsent";
+	case tokty_isntabsent: return "isntAbsent";
 	case tokty_gt : return ">";
 	case tokty_gte : return ">=";
 	case tokty_lt : return "<";

@@ -48,8 +48,10 @@ Ref refKey( Ref r ) {
 			return sysUndefinedKey;
 		} else if ( r == SYS_INDETERMINATE ) {
 			return sysIndeterminateKey;
+		} else if ( r == SYS_PRESENT ) {
+			return sysPresentKey;
 		} else {
-			throw Ginger::Mishap( "Unimplemented key" ).culprit( "Object", ToLong( r ) );
+			throw Ginger::Mishap( "Internal error (refKey): Unimplemented key" ).culprit( "Object", ToLong( r ) );
 		}
 	}
 	throw;

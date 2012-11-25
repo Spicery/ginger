@@ -115,7 +115,8 @@ Basic Library
 ~~~~~~~~~~~~~
 * Equality
 * Simple file based I/O
-
+* valueClass works for all basic values
+* print and show works for all baic values
 
 Ginger
 ~~~~~~

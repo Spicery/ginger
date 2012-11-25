@@ -7,6 +7,8 @@
 #define SYSFN2( x, y )    	this->table[ x ] = new SysConst( "sysfn", y )
 #define CONST( t, x )		this->table[ x ] = new SysConst( t, x )
 
+#define PRESENT_CONSTANT_REQUIRED
+
 class SysConstTable {
 	typedef std::map< std::string, SysConst * > Table;
 

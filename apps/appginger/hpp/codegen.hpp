@@ -185,6 +185,10 @@ public:
 	void vmiSYS_CALL( SysCall * r );
 	void vmiSYS_RETURN();
 	void vmiTEST( const VIdent & vid0, CMP_OP cmp_op, const VIdent & vid1, LabelClass * dst );
+	void vmiAND( LabelClass * dst );
+	void vmiOR( LabelClass * dst );
+	void vmiABS_AND( LabelClass * dst );
+	void vmiABS_OR( LabelClass * dst );
 
 public:
 	Ref calcConstant( Gnx mnx );
@@ -208,7 +212,8 @@ private:
 	void compileGnxMakeRef( Gnx mnx, LabelClass * contn );
 	void compileGnxSetCont( Gnx mnx, LabelClass * contn );
 	void compileGnxSelfCall( Gnx mnx, LabelClass * contn );
-	void compileAndOr( bool sense, Gnx mnx, LabelClass * contn );
+	void compileBoolAbsAndOr( bool bool_vs_abs, bool and_vs_or, Gnx mnx, LabelClass * contn );
+
 	void compileErase( Gnx mnx, LabelClass * contn );
 	void compileTry( Gnx mnx, LabelClass * contn );
 	void compileThrow( Gnx mnx, LabelClass * contn );

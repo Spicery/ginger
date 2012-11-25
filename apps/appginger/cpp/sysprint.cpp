@@ -268,6 +268,8 @@ void refPrint( std::ostream & out, const Ref r ) {
 			out << ( r == SYS_FALSE ? "false" : "true" );
 		} else if ( k == sysAbsentKey ) {
 			out << "absent";
+		} else if ( k == sysPresentKey ) {
+			out << "present";
 		} else if ( k == sysUndefinedKey ) {
 			out << "undefined";
 		} else if ( k == sysIndeterminateKey ) {

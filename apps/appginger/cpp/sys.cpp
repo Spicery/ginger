@@ -367,11 +367,25 @@ Ref * sysIsntAbsent( Ref *pc, class MachineClass * vm ) {
 	return pc;
 }
 
+Ref * sysAbsNot( Ref *pc, class MachineClass * vm ) {
+	vm->fastPeek() = vm->fastPeek() == SYS_ABSENT ? SYS_PRESENT : SYS_ABSENT;
+	return pc;
+}
+
+Ref * sysBoolAbs( Ref *pc, class MachineClass * vm ) {
+	if ( vm->fastPeek() == SYS_FALSE ) {
+		vm->fastPeek() = SYS_ABSENT;
+	}
+	return pc;
+}
+
 #include "datatypes.cpp.auto"
 
 typedef std::map< std::string, SysInfo > SysMap;
 const SysMap::value_type rawData[] = {
 	SysMap::value_type( "not", SysInfo( vmc_not, Arity( 1 ), Arity( 1 ), "Negates a boolean value" ) ),
+	SysMap::value_type( "boolAbs", SysInfo( Arity( 1 ), Arity( 1 ), sysBoolAbs, "Maps boolean into absence: false -> absent, true -> true" ) ),
+	SysMap::value_type( "absNot", SysInfo( Arity( 1 ), Arity( 1 ), sysAbsNot, "Negation of presence: absent->present; non-absent->absent" ) ),
 	SysMap::value_type( "+", SysInfo( vmc_add, Arity( 2 ), Arity( 1 ), "Adds two numbers" ) ),
 	SysMap::value_type( "-", SysInfo( vmc_sub, Arity( 2 ), Arity( 1 ), "Substracts two numbers" ) ),
 	SysMap::value_type( "*", SysInfo( vmc_mul, Arity( 2 ), Arity( 1 ), "Multiplies two numbers" ) ),

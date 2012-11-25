@@ -500,6 +500,26 @@ void CodeGenClass::vmiNOT() {
 	this->emitSPC( vmc_not );
 }
 
+void CodeGenClass::vmiAND( LabelClass * dst ) {
+	this->emitSPC( vmc_and );
+	dst->labelInsert();
+}
+
+void CodeGenClass::vmiOR( LabelClass * dst ) {
+	this->emitSPC( vmc_or );
+	dst->labelInsert();
+}
+
+void CodeGenClass::vmiABS_AND( LabelClass * dst ) {
+	this->emitSPC( vmc_absand );
+	dst->labelInsert();
+}
+
+void CodeGenClass::vmiABS_OR( LabelClass * dst ) {
+	this->emitSPC( vmc_absor );
+	dst->labelInsert();
+}
+
 void CodeGenClass::vmiIFNOT( LabelClass * d, LabelClass * contn ) {
 	this->vmiIFSO( contn, d );
 }
@@ -1105,16 +1125,32 @@ static void throwProblem( Gnx mnx ) {
 	}
 }
 
-void CodeGenClass::compileAndOr( bool sense, Gnx mnx, LabelClass * contn ) {
-	LabelClass d( this );
+/**
+	Boolean test, bool_vs_abs == true
+	Absent test,  bool_vs_abs == false
+	AND and_vs_or == true
+	OR  and_vs_or == false
+ */
+
+void CodeGenClass::compileBoolAbsAndOr( bool bool_vs_abs, bool and_vs_or, Gnx mnx, LabelClass * contn ) {
 	LabelClass e( this );
+	LabelClass *end = e.jumpToJump( contn );
 	this->compile1( mnx->child( 0 ), CONTINUE_LABEL );
-	this->vmiIF( sense, &d, CONTINUE_LABEL );
-	this->vmiPUSHQ( sense ? SYS_FALSE : SYS_TRUE );
-	this->vmiGOTO( e.jumpToJump( contn ) );
-	d.labelSet();
-	this->compile1( mnx->child( 1 ), e.jumpToJump( contn ) );
-	e.labelSet();
+	if ( bool_vs_abs ) {
+		if ( and_vs_or ) {
+			this->vmiAND( end );
+		} else {
+			this->vmiOR( end );
+		}	
+	} else {
+		if ( and_vs_or ) {
+			this->vmiABS_AND( end );
+		} else {
+			this->vmiABS_OR( end );
+		}
+	}
+	this->compile1( mnx->child( 1 ), end );
+	e.labelSet();	
 }
 
 void CodeGenClass::compileErase( Gnx mnx, LabelClass * contn ) {
@@ -1141,9 +1177,13 @@ void CodeGenClass::compileGnx( Gnx mnx, LabelClass * contn ) {
 	} else if ( nm == IF ) {
 		this->compileGnxIf( mnx, contn );
 	} else if ( nm == OR && mnx->size() == 2 ) {
-		this->compileAndOr( false, mnx, contn );
+		this->compileBoolAbsAndOr( true, false, mnx, contn );
 	} else if ( nm == AND && mnx->size() == 2 ) {
-		this->compileAndOr( true, mnx, contn );
+		this->compileBoolAbsAndOr( true, true, mnx, contn );
+	} else if ( nm == ABSOR && mnx->size() == 2 ) {
+		this->compileBoolAbsAndOr( false, false, mnx, contn );
+	} else if ( nm == ABSAND && mnx->size() == 2 ) {
+		this->compileBoolAbsAndOr( false, true, mnx, contn );
 	} else if ( nm == SYSAPP ) {
 		this->compileGnxSysApp( mnx, contn );
 	} else if ( nm == APP ) {

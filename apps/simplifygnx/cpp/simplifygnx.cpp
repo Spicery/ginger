@@ -1473,7 +1473,7 @@ private:
 	static string makeGUID() {	
 		uuid_t x;
 		uuid_generate( x );
-		uuid_string_t s;
+		char s[ 37 ];               //  Because Linux does not define uuid_string_t ... argh!
 		uuid_unparse( x, s );
 		return string( s );	
 	}

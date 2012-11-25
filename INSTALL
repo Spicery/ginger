@@ -10,9 +10,9 @@ Installing on Ubuntu (from the command-line)
 --------------------------------------------
 
 *	Pre-requisites: you'll need some basic developer tools 
-		git, python, g++, autoconf
+		git, python, g++, autoconf, uuid
 	You can ensure you have these in one step with
-		% sudo apt-get git python g++ autoconf
+		% sudo apt-get git python g++ autoconf uuid-dev
 
 *	We also need the RudeCGI library
 		% mkdir /tmp/rudecgi
@@ -29,9 +29,9 @@ Installing on Ubuntu (from the command-line)
 		% sudo apt-get install rlwrap
 
 *	Create a Spicery folder for ginger and any sister projects. e.g.
-		% GINGER_HOME=~/Spicery
-		% mkdir $GINGER_HOME
-		% cd $GINGER_HOME
+		% SPICERY_HOME=~/Spicery
+		% mkdir $SPICERY_HOME
+		% cd $SPICERY_HOME
 
 *	Clone from the GitHub repository into a folder.
 		% git clone https://github.com/Spicery/ginger.git

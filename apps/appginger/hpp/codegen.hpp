@@ -50,7 +50,40 @@ struct CodeGenState {
 	shared< std::vector< Ref > >	code_data;
 };
 
+class CompileQuery {
+private:
+	CodeGenClass * codegen;
+	VIdent * loop_var;
+
+private:
+	void setLoopVar( VIdent * v ) {
+		this->loop_var = v;
+	}
+
+	VIdent & getLoopVar();
+
+private:
+	void compileQueryInit( Gnx query, LabelClass * contn );
+	void compileQueryNext( Gnx query, LabelClass * contn );
+	void compileQueryIfSo( Gnx query, LabelClass * dst, LabelClass * contn );
+
+public:
+	void compileFor( Gnx query, Gnx body, LabelClass * contn );
+
+public:
+	CompileQuery( CodeGenClass * cg ) : codegen( cg ), loop_var( NULL ) {}
+
+	~CompileQuery() {
+		if ( this->loop_var ) {
+			delete this->loop_var;
+		}
+	}
+};
+
+
 class CodeGenClass {
+friend class CompileQuery;
+
 private:
 	shared< std::vector< Ref > >	code_data;
 	std::stack< CodeGenState > 	dump;
@@ -110,6 +143,7 @@ public:
 	int 		ninputs;
 private:
 	int 		current_slot;
+public:
 	int			tmpvar();				//	Change this name later.
 public:
 	MachineClass 	*vm;
@@ -193,15 +227,18 @@ public:
 public:
 	Ref calcConstant( Gnx mnx );
 
+public:
+	void continueFrom( LabelClass * contn );
+	void compileComparison( bool sense, const VIdent & vid0, CMP_OP cmp_op,	const VIdent & vid1, LabelClass * dst, LabelClass * contn );	
+	void compileComparison( const VIdent & vid0, CMP_OP cmp_op,	const VIdent & vid1, LabelClass * dst, LabelClass * contn );
+
+
 private:
 	void compileQueryInit( Gnx query, LabelClass * contn );
 	void compileQueryNext( Gnx query, LabelClass * contn );
 	void compileQueryIfSo( Gnx query, LabelClass * dst, LabelClass * contn );
 	void compileFor( Gnx query, Gnx body, LabelClass * contn );
-	void continueFrom( LabelClass * contn );
 	void compileIfTest( bool sense, Gnx mnx, LabelClass * dst, LabelClass * contn );
-	void compileComparison( bool sense, const VIdent & vid0, CMP_OP cmp_op,	const VIdent & vid1, LabelClass * dst, LabelClass * contn );	
-	void compileComparison( const VIdent & vid0, CMP_OP cmp_op,	const VIdent & vid1, LabelClass * dst, LabelClass * contn );
 	void compileGnxConstant( Gnx mnx, LabelClass * contn );
 	void compileGnxIf( Gnx mnx, LabelClass * contn );
 	void compileGnxFn( Gnx mnx, LabelClass * contn );

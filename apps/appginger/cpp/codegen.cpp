@@ -781,103 +781,116 @@ void CodeGenClass::compileComparison(
 	this->continueFrom( contn );
 }
 
+VIdent & CompileQuery::getLoopVar() {
+	if ( this->loop_var == NULL ) {
+		throw Ginger::Mishap( "Internal error (getLoopVar): loop_var not set" );
+	}
+	return *this->loop_var;
+}
 
-
-void CodeGenClass::compileQueryInit( Gnx query, LabelClass * contn ) {
+void CompileQuery::compileQueryInit( Gnx query, LabelClass * contn ) {
 	const string & nm = query->name();
 	if ( nm == FROM ) {
 		
 		Gnx var( query->child( 0 ) );
+		this->setLoopVar( new VIdent( this->codegen, var ) );
 		
 		Gnx start_expr( query->child( 1 ) );
-		this->compile1( start_expr, CONTINUE_LABEL );
-		this->vmiPOP( var );
+		this->codegen->compile1( start_expr, CONTINUE_LABEL );
+		this->codegen->vmiPOP( var );
 		
-		Gnx end_expr( query->child( 2 ) );
-		int tmp_end_expr = this->tmpvar();
-		query->putAttribute( "tmp.end.expr", tmp_end_expr );
-		this->compile1( end_expr, CONTINUE_LABEL );
-		this->vmiPOP_INNER_SLOT( tmp_end_expr );
+		if ( query->size() >= 3 ) {
+			Gnx end_expr( query->child( 2 ) );
+			int tmp_end_expr = this->codegen->tmpvar();
+			query->putAttribute( "tmp.end.expr", tmp_end_expr );
+			this->codegen->compile1( end_expr, CONTINUE_LABEL );
+			this->codegen->vmiPOP_INNER_SLOT( tmp_end_expr );
+		}
 		
 	} else if ( nm == IN ) {
+
+		this->setLoopVar( new VIdent( this->codegen, query->child( 0 ) ) );
 	
-		this->compile1( query->child( 1 ), CONTINUE_LABEL );
-		this->vmiINSTRUCTION( vmc_getiterator );
-		int tmp_next_fn = tmpvar();
-		int tmp_context = tmpvar();
-		int tmp_state = tmpvar();
+		this->codegen->compile1( query->child( 1 ), CONTINUE_LABEL );
+		this->codegen->vmiINSTRUCTION( vmc_getiterator );
+		int tmp_next_fn = this->codegen->tmpvar();
+		int tmp_context = this->codegen->tmpvar();
+		int tmp_state = this->codegen->tmpvar();
 		query->putAttribute( "tmp.next.fn", tmp_next_fn );
 		query->putAttribute( "tmp.context", tmp_context );
 		query->putAttribute( "tmp.state", tmp_state );
-		this->vmiPOP_INNER_SLOT( tmp_next_fn );
-		this->vmiPOP_INNER_SLOT( tmp_context );
-		this->vmiPOP_INNER_SLOT( tmp_state );
+		this->codegen->vmiPOP_INNER_SLOT( tmp_next_fn );
+		this->codegen->vmiPOP_INNER_SLOT( tmp_context );
+		this->codegen->vmiPOP_INNER_SLOT( tmp_state );
 	
 	} else {
 		throw Ginger::SystemError( "Not implemented general queries" );
 	}
-	this->continueFrom( contn );
+	this->codegen->continueFrom( contn );
 }
 
-void CodeGenClass::compileQueryNext( Gnx query, LabelClass * contn ) {
+void CompileQuery::compileQueryNext( Gnx query, LabelClass * contn ) {
 	const string & nm = query->name();
 	if ( nm == FROM ) {
 
-		Gnx var( query->child( 0 ) );
-		
 		//	Obvious candidate for a merged instruction.
-		this->vmiPUSH( var );
-		this->vmiINSTRUCTION( vmc_incr );
-		this->vmiPOP( var );
+		this->codegen->vmiPUSH( this->getLoopVar() );
+		this->codegen->vmiINSTRUCTION( vmc_incr );
+		this->codegen->vmiPOP( this->getLoopVar() );
 
 	} else if ( nm == IN ) {
 		//	Nothing.
 	} else {
 		throw Ginger::SystemError( "Not implemented general queries" );
 	}
-	this->continueFrom( contn );
+	this->codegen->continueFrom( contn );
 }
 
 /**	Compiles a query so that if the query evaluates to true we jump to label 
 	'dst' otherwise we continue at label 'contn'.
 */
-void CodeGenClass::compileQueryIfSo( Gnx query, LabelClass * dst, LabelClass * contn ) {
+void CompileQuery::compileQueryIfSo( Gnx query, LabelClass * dst, LabelClass * contn ) {
 	const string & nm = query->name();
 	if ( nm == FROM ) {
-		VIdent var( this, query->child( 0 ) );
-		VIdent end_expr( query->attributeToInt( "tmp.end.expr" ) );
-		this->compileComparison( true, var, CMP_LTE, end_expr, dst, contn );		
+		if ( query->size() >= 3 ) {
+			VIdent end_expr( query->attributeToInt( "tmp.end.expr" ) );
+			this->codegen->compileComparison( true, this->getLoopVar(), CMP_LTE, end_expr, dst, contn );		
+		} else {
+			this->codegen->vmiGOTO( dst );
+		}
 	} else if ( nm == IN ) {
-		Gnx loopvar( query->child( 0 ) );
-
 		int tmp_state = query->attributeToInt( "tmp.state" );
 		int tmp_context = query->attributeToInt( "tmp.context" );
 		int tmp_next_fn = query->attributeToInt( "tmp.next.fn" );
 
-		this->vmiPUSH_INNER_SLOT( tmp_state );	
-		this->vmiPUSH_INNER_SLOT( tmp_context );	
-		this->vmiSET_CALL_INNER_SLOT( 2, tmp_next_fn );		
-		this->vmiPOP_INNER_SLOT( tmp_state );
-		this->vmiPOP( loopvar );
+		this->codegen->vmiPUSH_INNER_SLOT( tmp_state );	
+		this->codegen->vmiPUSH_INNER_SLOT( tmp_context );	
+		this->codegen->vmiSET_CALL_INNER_SLOT( 2, tmp_next_fn );		
+		this->codegen->vmiPOP_INNER_SLOT( tmp_state );
+		this->codegen->vmiPOP( this->getLoopVar() );
 		
 		VIdent id_tmp_state( tmp_state );
 		VIdent termin( SYS_TERMIN );
-		//this->vmiIF_NEQ_ID_CONSTANT( id_tmp_state, SYS_TERMIN, dst, contn );
-		this->compileComparison( id_tmp_state, CMP_NEQ, termin, dst, contn );
+		this->codegen->compileComparison( id_tmp_state, CMP_NEQ, termin, dst, contn );
 	} else {
 		throw Ginger::SystemError( "Not implemented general queries" );
 	}
 }
 
-void CodeGenClass::compileFor( Gnx query, Gnx body, LabelClass * contn ) {
-	LabelClass body_label( this );
-	LabelClass test_label( this );
+void CompileQuery::compileFor( Gnx query, Gnx body, LabelClass * contn ) {
+	LabelClass body_label( this->codegen );
+	LabelClass test_label( this->codegen );
 	this->compileQueryInit( query, &test_label );
 	body_label.labelSet();
-	this->compileGnx( body, CONTINUE_LABEL );
+	this->codegen->compileGnx( body, CONTINUE_LABEL );
 	this->compileQueryNext( query, CONTINUE_LABEL );
 	test_label.labelSet();
 	this->compileQueryIfSo( query, &body_label, contn );
+}
+
+void CodeGenClass::compileFor( Gnx query, Gnx body, LabelClass * contn ) {
+	CompileQuery cq( this );
+	cq.compileFor( query, body, contn );
 }
 
 void CodeGenClass::compileGnxIf( Gnx mnx, LabelClass * contn ) {
@@ -1286,6 +1299,8 @@ void CodeGenClass::compileGnx( Gnx mnx, LabelClass * contn ) {
 		this->compileTry( mnx, contn );
 	} else if ( nm == PROBLEM ) {
 		throwProblem( mnx );
+	} else if ( nm == FROM or nm == IN ) {
+		throw Ginger::Mishap( "Naked queries not yet supported" ).culprit( "Expression", mnx->toString() );
 	} else {
 		throw Ginger::SystemError( "GNX not recognised" ).culprit( "Expression", mnx->toString() );
 	}

@@ -20,6 +20,7 @@
 #include <cstdlib>
 
 #include <syslog.h>
+#include <unistd.h>
 
 #include "mishap.hpp"
 

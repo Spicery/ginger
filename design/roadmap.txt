@@ -153,12 +153,17 @@ Ginger #! Script Tool
     % echo 'println( "hello world" );' | ginger-script -i -g common
 
 
-Release 0.10
+Version 0.10
 ------------
 
-* Adding support for lisp-like front-end syntax (lispstyle2gnx)
-* Adding support for indentation-controlled syntax (pycommon2gnx)
+* Adding support for lisp-like front-end syntax (lisp2gnx)
+* Adding idiomatic names for the different language front-ends.
+* Adding support for indentation-controlled syntax (common2gnx)
 
+Unicode Sprint / Version 0.11
+-----------------------------
+
+* A possible pre-1.0 version that will support Unicode BMLP.
 
 Release 1.0
 -----------

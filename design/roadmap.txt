@@ -153,6 +153,13 @@ Ginger #! Script Tool
     % echo 'println( "hello world" );' | ginger-script -i -g common
 
 
+Release 0.10
+------------
+
+* Adding support for lisp-like front-end syntax (lispstyle2gnx)
+* Adding support for indentation-controlled syntax (pycommon2gnx)
+
+
 Release 1.0
 -----------
 

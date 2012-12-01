@@ -23,7 +23,7 @@
 #include <cstdlib>
 
 #include <syslog.h>
-
+#include <stddef.h>
 #include <getopt.h>
 
 #include "gngversion.hpp"

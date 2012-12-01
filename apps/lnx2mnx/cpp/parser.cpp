@@ -23,6 +23,9 @@
 #include <vector>
 #include <sstream>
 
+#include <stddef.h>
+
+
 //	AppGinger Libraries
 #include "mishap.hpp"
 #include "mnx.hpp"

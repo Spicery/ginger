@@ -2,6 +2,7 @@
 #include <string>
 #include <sstream>
 
+#include <stddef.h>
 #include <stdio.h>
 #include <assert.h>
 

@@ -19,6 +19,7 @@
 #include <string>
 #include <fstream>
 
+#include <stddef.h>
 #include <stdlib.h>
 #include <getopt.h>
 

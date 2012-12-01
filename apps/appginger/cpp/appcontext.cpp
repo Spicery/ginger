@@ -25,6 +25,7 @@
 #include <cstdio>
 #include <cstdlib>
 
+#include <stddef.h>
 #include <unistd.h>
 #include <getopt.h>
 #include <syslog.h>

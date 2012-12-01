@@ -1,6 +1,8 @@
 #include <map>
 #include <string>
 
+#include <stddef.h>
+
 #include "item_map.hpp"
 
 #include "toktype.hpp"

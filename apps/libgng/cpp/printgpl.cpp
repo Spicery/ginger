@@ -23,6 +23,8 @@
 //	STL-ised Old Headers
 #include <cstdlib>
 
+#include <stddef.h>
+
 //	Headers specific to the libgng.
 #include "printgpl.hpp"
 

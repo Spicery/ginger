@@ -20,6 +20,7 @@
 #include <iostream>
 #include <sstream>
 
+#include <stddef.h>
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/wait.h>

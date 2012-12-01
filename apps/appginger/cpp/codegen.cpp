@@ -24,6 +24,9 @@
 #include <iostream>
 #include <sstream>
 
+#include <stddef.h>
+
+
 #include "gnxconstants.hpp"
 #include "mnx.hpp"
 #include "mishap.hpp"

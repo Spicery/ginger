@@ -1,7 +1,9 @@
-#include "sysconst.hpp"
-
 #include <string>
 #include <map>
+
+#include <stddef.h>
+
+#include "sysconst.hpp"
 
 #define SYSFN( x )    		this->table[ x ] = new SysConst( "sysfn", x )
 #define SYSFN2( x, y )    	this->table[ x ] = new SysConst( "sysfn", y )

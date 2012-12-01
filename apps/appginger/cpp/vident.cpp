@@ -17,6 +17,9 @@
 \******************************************************************************/
 
 #include <iostream>
+
+#include <stddef.h>
+
 #include "debug.hpp"
 
 #include "gnxconstants.hpp"

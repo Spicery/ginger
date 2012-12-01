@@ -18,6 +18,8 @@
 #include <iostream>
 #include <sstream>
 
+#include <stddef.h>
+
 #include "projectcache.hpp"
 #include "folderscan.hpp"
 

@@ -27,6 +27,7 @@
 #include <cstdlib>
 
 #include <ext/stdio_filebuf.h> // __gnu_cxx::stdio_filebuf
+#include <stddef.h>
 
 #include <rude/cgi.h>
 

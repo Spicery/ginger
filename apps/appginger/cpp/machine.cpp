@@ -19,6 +19,8 @@
 #include <cstdlib>
 #include <iostream>
 
+#include <stddef.h>
+
 #include "machine1.hpp"
 #include "machine2.hpp"
 #include "common.hpp"

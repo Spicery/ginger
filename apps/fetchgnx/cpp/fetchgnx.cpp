@@ -38,6 +38,7 @@
 #include <vector>
 #include <cstdlib>
 
+#include <stddef.h>
 #include <getopt.h>
 #include <syslog.h>
 

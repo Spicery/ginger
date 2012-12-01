@@ -22,6 +22,7 @@
 #include <sstream>
 #include <string>
 
+#include <stddef.h>
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/wait.h>

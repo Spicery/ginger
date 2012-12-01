@@ -22,6 +22,7 @@ using namespace std;
 
 //	For memcpy.
 #include <string.h>	
+#include <stddef.h>
 
 #include "sysmap.hpp"
 

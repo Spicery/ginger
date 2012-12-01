@@ -16,6 +16,8 @@
     along with AppGinger.  If not, see <http://www.gnu.org/licenses/>.
 \******************************************************************************/
 
+#include <stddef.h>
+
 #include "folderscan.hpp"
 #include "mishap.hpp"
 

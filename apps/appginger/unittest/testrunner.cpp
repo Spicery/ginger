@@ -20,6 +20,9 @@
 #include <fstream>
 #include <string>
 
+#include <stddef.h>
+
+
 #include <cppunit/CompilerOutputter.h>
 #include <cppunit/XmlOutputter.h>
 #include <cppunit/ui/text/TestRunner.h>

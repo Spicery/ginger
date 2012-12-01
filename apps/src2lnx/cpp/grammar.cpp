@@ -19,6 +19,9 @@
 //	STL
 #include <iostream>
 
+#include <stddef.h>
+
+
 //	Ginger libs
 #include "mishap.hpp"
 

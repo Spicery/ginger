@@ -18,6 +18,8 @@
 
 #include <iostream>
 
+#include <stddef.h>
+
 #include "varinfo.hpp"
 #include "facet.hpp"
 

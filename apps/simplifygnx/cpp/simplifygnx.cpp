@@ -63,15 +63,18 @@ to it as a stream.
 #include <fstream>
 #include <sstream>
 
-#include <getopt.h>
-#include <syslog.h>
-#include <stdlib.h>
 #include <list>
 #include <vector>
 #include <map>
 #include <set>
 #include <sstream>
 #include <algorithm>
+
+#include <stddef.h>
+#include <stdio.h>
+#include <getopt.h>
+#include <syslog.h>
+#include <stdlib.h>
 
 #include <uuid/uuid.h>
 

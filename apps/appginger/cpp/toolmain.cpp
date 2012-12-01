@@ -28,6 +28,7 @@
 
 #include <ext/stdio_filebuf.h> // __gnu_cxx::stdio_filebuf
 
+#include <stddef.h>
 #include <unistd.h>
 #include <getopt.h>
 #include <syslog.h>

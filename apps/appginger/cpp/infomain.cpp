@@ -22,6 +22,7 @@
 #include <string>
 #include <vector>
 
+#include <stddef.h>
 #include <getopt.h>
 
 

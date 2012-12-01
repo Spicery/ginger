@@ -24,6 +24,8 @@
 #include <cstdio>
 #include <cstdlib>
 
+#include <stddef.h>
+
 #include "heap.hpp"
 #include "key.hpp"
 #include "mishap.hpp"

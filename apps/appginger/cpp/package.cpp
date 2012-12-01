@@ -25,6 +25,7 @@
 #include <sstream>
 #include <exception>
 
+#include <stddef.h>
 #include <unistd.h>
 #include <sys/errno.h>
 #include <syslog.h>

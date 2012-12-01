@@ -19,6 +19,7 @@
 #include <sstream>
 using namespace std;
 
+#include <stddef.h>
 #include <cppunit/TestAssert.h>
 
 #include "gctest.hpp"

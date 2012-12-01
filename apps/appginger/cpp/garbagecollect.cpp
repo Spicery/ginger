@@ -22,6 +22,9 @@
 #include <set>
 #include <cassert>
 
+#include <stddef.h>
+
+
 #include "garbagecollect.hpp"
 #include "gctracker.hpp"
 #include "key.hpp"

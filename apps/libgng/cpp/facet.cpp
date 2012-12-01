@@ -21,6 +21,9 @@
 #include <string>
 #include <map>
 
+#include <stddef.h>
+
+
 namespace Ginger {
 using namespace std;
 

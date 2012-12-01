@@ -16,6 +16,9 @@
     along with AppGinger.  If not, see <http://www.gnu.org/licenses/>.
 \******************************************************************************/
 
+#include <stddef.h>
+
+
 //	Ginger libs
 #include "mishap.hpp"
 #include "mnxsax.hpp"

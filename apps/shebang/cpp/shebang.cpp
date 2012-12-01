@@ -21,6 +21,7 @@
 #include <vector>
 #include <iostream>
 
+#include <stddef.h>
 #include <syslog.h>
 #include <stdlib.h>
 

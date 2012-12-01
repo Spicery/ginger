@@ -21,7 +21,10 @@
 #include <cstdlib>
 
 #include <fstream>
+
 #include <getopt.h>
+#include <stddef.h>
+
 
 #include "mishap.hpp"
 #include "gngversion.hpp"

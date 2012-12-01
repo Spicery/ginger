@@ -22,6 +22,7 @@
 #include <string>
 
 
+#include <stddef.h>
 #include <syslog.h>
 
 #include <ext/stdio_filebuf.h> // __gnu_cxx::stdio_filebuf

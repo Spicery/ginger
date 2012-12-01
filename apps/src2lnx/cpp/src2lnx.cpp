@@ -22,6 +22,7 @@
 #include <cstdlib>
 
 //	C libraries
+#include <stddef.h>
 #include <getopt.h>
 
 //	Part of libgng

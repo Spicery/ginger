@@ -1085,9 +1085,6 @@ Ref CodeGenClass::calcConstant( Gnx mnx ) {
 		} else {
 			throw Ginger::SystemError( "Invalid character string" );
 		}
-	} else if ( type == "list" ) {
-		//	This is deprecated.
-		throw Ginger::SystemError( "To be implemented" ).culprit( "Expression", mnx->toString() );
 	} else if ( type == "string" ) {
 		return this->vm->heap().copyString( mnx->attribute( CONSTANT_VALUE ).c_str() );
 	} else if ( type == "double" ) {

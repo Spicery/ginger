@@ -69,13 +69,14 @@ enum CharType {
 	SignCharType
 };
 
-CharType char_type( const char ch ) {
+CharType charType( const char ch ) {
 	switch ( ch ) {
 		case '\n':
 		case '\r': 
 			return LineBreakCharType;
 		case '"':
-		case '\'': 
+		case '\'':
+		case '`':
 			return QuoteCharType;
 		case '_': 
 			return UnderbarCharType;
@@ -100,7 +101,7 @@ CharType char_type( const char ch ) {
 }
 
 bool isSignCharType( const char ch ) {
-	return char_type( ch ) == SignCharType;
+	return charType( ch ) == SignCharType;
 }
 
 int ItemFactoryClass::eatsWhiteSpaceAndComments() {
@@ -236,8 +237,8 @@ void ItemFactoryClass::readAtQuoteCharType( int ch ) {
 		throw "unterminated string (%s)";
 	}
 	Item it = this->item = this->spare;
-	it->tok_type = open_quote == '"' ? tokty_string : tokty_charseq;
-	it->role = it->tok_type == tokty_string ? StringRole : CharSeqRole;
+	it->tok_type = ( open_quote == '"' ) ? tokty_string : ( open_quote == '\'' ) ? tokty_charseq : tokty_symbol;
+	it->role = it->tok_type == tokty_string ? StringRole : it->tok_type == tokty_symbol ? SymbolRole : CharSeqRole;
 	it->nameString() = this->text;
 }
 
@@ -254,10 +255,12 @@ void ItemFactoryClass::readAtQuoteCharType( int ch ) {
 //  }
 
 void ItemFactoryClass::readAtBracketCharType( int ch ) {
-	do {
+	this->text.push_back( ch );
+	if ( ( ch = this->nextchar() ) == '%' ) {
 		this->text.push_back( ch );
-	} while ( ( ch = this->nextchar() ) == '%' );
-	this->pushchar( ch );
+	} else {
+		this->pushchar( ch );
+	}
 	this->item = this->itemMap.lookup( this->text );
 	if ( this->item == NULL ) {
 		throw Ginger::Mishap( "Invalid punctuation token" ); 
@@ -265,10 +268,8 @@ void ItemFactoryClass::readAtBracketCharType( int ch ) {
 }
 
 void ItemFactoryClass::readAtBracketDecorationCharType( int ch ) {
-	do {
-		this->text.push_back( ch );
-	} while ( ( ch = this->nextchar() ) == '%' );
-	if ( strchr( "()[]{}", ch ) ) {    	
+	this->text.push_back( ch );
+	if ( strchr( "()[]{}", ( ch = this->nextchar() ) ) ) {    	
 		this->text.push_back( ch );
 	} else {
 		this->pushchar( ch );
@@ -341,7 +342,7 @@ Item ItemFactoryClass::read() {
 	} else if ( isalpha( ch ) || ch == '_' ) {
 		this->readAtAlphaOrUnderbar( ch );
     } else {
-    	switch ( char_type( ch ) ) {
+    	switch ( charType( ch ) ) {
     		case QuoteCharType:
 				this->readAtQuoteCharType( ch );
 				break;

@@ -825,6 +825,39 @@ Node ReadStateClass::prefixProcessing() {
 	return node;
 }
 
+Node ReadStateClass::readListOrVector( bool vector_vs_list, TokType closer ) {
+	NodeFactory list;
+	list.start( vector_vs_list ? VECTOR : LIST );
+	Node stmnts = this->readStmnts();
+	if ( not vector_vs_list && this->tryToken( tokty_bar ) ) {
+		list.add( stmnts );
+		list.end();
+		Node L = list.build();
+		NodeFactory append;
+		append.start( LIST_APPEND );
+		append.add( L );
+		Node x = this->readStmntsCheck( closer );
+		append.add( x );
+		append.end();
+		return append.build();
+	} else {
+		this->checkToken( closer );
+		list.add( stmnts );
+		list.end();
+		return list.build();
+	}
+}
+
+Node ReadStateClass::readMap( TokType closer ) {
+	NodeFactory list;
+	list.start( SYSAPP );
+	list.put( SYSAPP_NAME, "newMap" );
+	Node x = this->readStmntsCheck( closer );
+	list.add( x );
+	list.end();
+	return list.build();
+}
+
 Node ReadStateClass::prefixProcessingCore() {
 	ItemFactory ifact = this->item_factory;
 	Item item = ifact->read();
@@ -951,43 +984,20 @@ Node ReadStateClass::prefixProcessingCore() {
 			}
 		}
 		case tokty_obracket: {
-			NodeFactory list;
-			list.start( this->cstyle_mode ? VECTOR : LIST );
-			Node stmnts = this->readStmnts();
-			if ( not this->cstyle_mode && this->tryToken( tokty_bar ) ) {
-				list.add( stmnts );
-				list.end();
-				Node L = list.build();
-				NodeFactory append;
-				append.start( LIST_APPEND );
-				append.add( L );
-				Node x = this->readStmntsCheck( tokty_cbracket );
-				append.add( x );
-				append.end();
-				return append.build();
-			} else {
-				this->checkToken( tokty_cbracket );
-				list.add( stmnts );
-				list.end();
-				return list.build();
-			}
+			//	In version 0.7: return this->readListOrVector( this->cstyle_mode, tokty_cbracket );
+			return this->readListOrVector( true, tokty_cbracket );
 		}
 		case tokty_obrace: {
-			NodeFactory list;
-			list.start( VECTOR );
-			Node x = this->readStmntsCheck( tokty_cbrace );
-			list.add( x );
-			list.end();
-			return list.build();
+			//	In version 0.7: return this->readListOrVector( true, tokty_cbrace );
+			return this->readMap( tokty_cbrace );
 		}
-		case tokty_fat_obrace: {
-			NodeFactory list;
-			list.start( SYSAPP );
-			list.put( SYSAPP_NAME, "newMap" );
-			Node x = this->readStmntsCheck( tokty_fat_cbrace );
-			list.add( x );
-			list.end();
-			return list.build();
+		case tokty_fat_obracket: {
+			//	In version 0.7: return this->readMap( tokty_fat_cbrace );
+			return this->readListOrVector( false, tokty_fat_cbracket );
+		}
+		case tokty_fat_ocbracket: {
+			Node list( new Ginger::Mnx( LIST ) );
+			return list;
 		}
 		case tokty_unless: {
 			return this->readIf( tokty_unless, tokty_endunless );

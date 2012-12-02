@@ -75,6 +75,7 @@ extern Role PrefixOpRole;
 extern Role PrefixRole;
 extern Role SkipRole;
 extern Role StringRole;
+extern Role SymbolRole;
 extern Role SuffixSysRole;
 extern Role UnarySysRole;
 extern Role UnaryFormRole;

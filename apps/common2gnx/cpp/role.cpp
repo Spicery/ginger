@@ -15,5 +15,6 @@ Role PrefixRole 		= { DONTKNOW, PrefixCode, NoSpecialCode };
 Role SkipRole			= { 0, PrefixCode, NoSpecialCode };
 Role StringRole			= { 0, PrefixCode, LiteralCode };
 Role SuffixSysRole		= { 1, PostfixCode, SysCode };
+Role SymbolRole			= { 0, PrefixCode, LiteralCode };
 Role UnarySysRole		= { 1, PrefixCode, SysCode };
 Role UnaryFormRole		= { 1, PrefixCode, FormCode };

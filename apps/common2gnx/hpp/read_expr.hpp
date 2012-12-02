@@ -39,7 +39,9 @@ private:
 	std::string readPkgName();
 	void readTryCatch( NodeFactory & ftry );
 	Node readTry( const bool try_vs_transaction );
-	
+	Node readListOrVector( const bool vector_vs_list, TokType closer );
+	Node readMap( TokType closer );
+
 public:
 	void setPatternMode() { this->pattern_mode = true; }
 	void clearPatternMode() { this->pattern_mode = false; }

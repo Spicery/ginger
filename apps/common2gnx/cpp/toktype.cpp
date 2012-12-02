@@ -72,6 +72,7 @@ const char *tok_type_as_type( TokType fnc ) {
 	case tokty_double : return "double";
 	case tokty_char : return "char";
 	case tokty_string : return "string";
+	case tokty_symbol: return "symbol";
 	case tokty_indeterminate : return "indeterminate";
 	case tokty_undefined : return "undefined";
 	default: throw Ginger::Mishap( "Internal error (tok_type_as_type): Unreachable" );

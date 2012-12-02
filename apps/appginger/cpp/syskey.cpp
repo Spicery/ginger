@@ -27,7 +27,19 @@
 #include "machine.hpp"
 #include "classlayout.hpp"
 
-Ref refKey( Ref r ) {
+//#define DBG_DATA_KEY
+
+#ifdef DBG_DATA_KEY
+	#include <iostream>
+#endif
+
+using namespace std;
+
+
+Ref refDataKey( Ref r ) {
+	#ifdef DBG_DATA_KEY
+		cerr << "Finding data key of: " << ToULong( r ) << endl;
+	#endif
 	unsigned long u = ( unsigned long )r;
 	unsigned long tag, tagg, taggg;
 	tag = u & TAG_MASK;
@@ -36,8 +48,8 @@ Ref refKey( Ref r ) {
 	tagg = u & TAGG_MASK;
 	if ( tagg == ( 0 | SIM_TAG ) ) return sysAbsentKey;
 	if ( tagg == ToULong( SYS_FALSE ) || tagg == ToULong( SYS_TRUE ) ) return sysBoolKey;
-	if ( tagg == FN_TAGG ) return sysFunctionKey;
-	if ( tagg == KEY_TAGG ) return sysKeyKey;
+	if ( tagg == FN_TAGG ) return sysClassKey;
+	if ( tagg == KEY_TAGG ) return sysClassKey;
 	taggg = u & TAGGG_MASK;
 	if ( taggg == CHAR_TAGGG ) return sysCharKey;
 	if ( taggg == SYMBOL_TAGGG ) return sysSymbolKey;
@@ -51,17 +63,28 @@ Ref refKey( Ref r ) {
 		} else if ( r == SYS_PRESENT ) {
 			return sysPresentKey;
 		} else {
-			throw Ginger::Mishap( "Internal error (refKey): Unimplemented key" ).culprit( "Object", ToLong( r ) );
+			//	TODO: Improve error message.
+			throw Ginger::Mishap( "Internal error (refDataKey): Unimplemented misc key" ).culprit( "Object", ToLong( r ) );
 		}
 	}
-	throw;
+	//	TODO: Improve error message.
+	throw Ginger::Mishap( "Internal error (refDataKey): Unimplemented key" ).culprit( "Object", ToLong( r ) );
 }
 
 Ref * sysObjectKey( Ref * pc, MachineClass * vm ) {
 	if ( vm->count == 1 ) {
-		vm->fastPeek() = refKey( vm->fastPeek() );
+		vm->fastPeek() = refDataKey( vm->fastPeek() );
 		return pc;
 	} else {
-		throw Ginger::Mishap( "Wrong number of arguments for objectKey" );
+		throw Ginger::Mishap( "Wrong number of arguments for dataClass" );
 	}
+}
+
+Ref * sysKeyName( Ref * pc, MachineClass * vm ) {
+	if ( vm->count == 1 ) {
+		vm->fastPeek() = vm->heap().copyString( keyName( vm->fastPeek() ) );
+		return pc;
+	} else {
+		throw Ginger::Mishap( "Wrong number of arguments for className" );
+	}	
 }

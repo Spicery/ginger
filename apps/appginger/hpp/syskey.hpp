@@ -23,7 +23,8 @@
 #include "machine.hpp"
 
 extern Ref * sysObjectKey( Ref * pc, MachineClass * vm );
-extern Ref refKey( Ref r );
+extern Ref * sysKeyName( Ref * pc, MachineClass * vm );
+extern Ref refDataKey( Ref r );
 
 #endif
 

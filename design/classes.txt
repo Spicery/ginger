@@ -1,0 +1,26 @@
+The Built-In Ginger Classes
+===========================
+
+Absent
+Present
+Undefined
+Indeterminate
+
+
+Boolean
+Integer
+Float
+
+Character
+String
+Symbol
+
+Linked List
+	Pair
+	Nil
+Vector
+
+Function
+
+Class
+

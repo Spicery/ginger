@@ -25,7 +25,7 @@
 
 unsigned long lengthOfInstance( Ref * obj_K ) {
 	Ref key = *obj_K;
-	if ( IsObj( key ) && *RefToPtr4( key ) == sysKeyKey ) {
+	if ( IsObj( key ) && *RefToPtr4( key ) == sysClassKey ) {
 		Ref * key_K = RefToPtr4( key );
 		int N = SmallToLong( key_K[ CLASS_OFFSET_NFIELDS ] );
 		return N;
@@ -36,7 +36,7 @@ unsigned long lengthOfInstance( Ref * obj_K ) {
 
 Ref titleOfInstance( Ref * obj_K ) {
 	Ref key = *obj_K;
-	if ( IsObj( key ) && *RefToPtr4( key ) == sysKeyKey ) {
+	if ( IsObj( key ) && *RefToPtr4( key ) == sysClassKey ) {
 		Ref * key_K = RefToPtr4( key );
 		return key_K[ CLASS_OFFSET_TITLE ];
 	} else {	

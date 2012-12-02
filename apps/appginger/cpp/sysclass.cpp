@@ -188,7 +188,7 @@ Ref * sysNewRecordClass( Ref * pc, MachineClass * vm ) {
 			Ref title = vm->fastPeek();
 	
 			xfr.setOrigin();
-			xfr.xfrRef( sysKeyKey );
+			xfr.xfrRef( sysClassKey );
 			xfr.xfrRef( title );
 			xfr.xfrRef( nfields );
 			xfr.xfrRef( SYS_ABSENT );
@@ -206,14 +206,14 @@ static Ref * sysargRecognise( Ref * pc, MachineClass * vm ) {
 	if ( vm->count != 1 ) throw Ginger::Mishap( "Wrong number of arguments" );
 	Ref this_item = vm->fastPeek();
 	Ref that_key = pc[ -1 ];
-	vm->fastPeek() = refKey( this_item ) == that_key ? SYS_TRUE : SYS_FALSE;
+	vm->fastPeek() = refDataKey( this_item ) == that_key ? SYS_TRUE : SYS_FALSE;
 	return pc;
 }
 
 Ref * sysClassRecogniser( Ref * pc, MachineClass *vm ) {
 	if ( vm->count != 1 ) throw Ginger::Mishap( "Wrong number of arguments" );
 	Ref kk = vm->fastPeek();
-	if ( !IsObj( kk ) || *RefToPtr4( kk ) != sysKeyKey ) throw Ginger::Mishap( "Key needed" );
+	if ( !IsObj( kk ) || *RefToPtr4( kk ) != sysClassKey ) throw Ginger::Mishap( "Key needed" );
 	CodeGen codegen = vm->codegen();
 	codegen->vmiFUNCTION( 1, 1 );
 	codegen->vmiSYS_CALL_ARG( sysargRecognise, kk );
@@ -244,7 +244,7 @@ static Ref * sysargdatConstruct( Ref * pc, MachineClass *vm ) {
 Ref * sysClassConstructor( Ref * pc, MachineClass *vm ) {
 	if ( vm->count != 1 ) throw Ginger::Mishap( "Wrong number of arguments" );
 	Ref kk = vm->fastPeek();
-	if ( !IsObj( kk ) || *RefToPtr4( kk ) != sysKeyKey ) throw Ginger::Mishap( "Key needed" );
+	if ( !IsObj( kk ) || *RefToPtr4( kk ) != sysClassKey ) throw Ginger::Mishap( "Key needed" );
 	Ref * obj_K = RefToPtr4( kk );
 	long n = SmallToLong( obj_K[ CLASS_OFFSET_NFIELDS ] );
 	CodeGen codegen = vm->codegen();
@@ -261,7 +261,7 @@ static Ref * sysargdatAccess( Ref * pc, MachineClass *vm ) {
 	Ref that_key = pc[-2];
 	if ( vm->count != 1 ) throw Ginger::Mishap( "Wrong number of arguments" );
 	Ref this_item  = vm->fastPeek();
-	if ( refKey( this_item ) == that_key ) {
+	if ( refDataKey( this_item ) == that_key ) {
 		vm->fastPeek() = RefToPtr4( this_item )[ N ];
 	} else {
 		throw Ginger::Mishap( "ToBeDone" );
@@ -328,7 +328,7 @@ Ref * sysClassExploder( Ref * pc, MachineClass * vm ) {
 	Ref key = vm->fastPeek();
 	if ( !IsObj( key ) ) throw Ginger::Mishap( "Class of object needed" );
 	Ref * key_K = RefToPtr4( key );
-	if ( *key_K != sysKeyKey ) throw Ginger::Mishap( "Class of object needed" );
+	if ( *key_K != sysClassKey ) throw Ginger::Mishap( "Class of object needed" );
 	const long N = SmallToLong( key_K[ CLASS_OFFSET_NFIELDS ] );
 
 	CodeGen codegen = vm->codegen();

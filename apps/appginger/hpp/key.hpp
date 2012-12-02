@@ -174,7 +174,7 @@ KEYLESS_KIND
 
 #define IsClassKind( ref )		IsInstance( ref )
 #define IsInstance( ref )		( IsObj( ref ) && IsObj( *RefToPtr4( ref ) ) )
-#define IsClass( ref )			( IsObj( ref ) && ( *RefToPtr4( ref ) == sysKeyKey ) )
+#define IsClass( ref )			( IsObj( ref ) && ( *RefToPtr4( ref ) == sysClassKey ) )
 
 #define INDEX( rv, offset )		( RefToPtr4( rv )[ offset ] )
 

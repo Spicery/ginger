@@ -195,12 +195,12 @@ Ref * findObjectKey( Ref * obj_A ) {
 			/*	I think the code would look like this.
 			if ( IsSimpleKey( *obj_A ) ) return obj_A;
 			if ( IsObj( *obj_A ) ) {
-				if ( *RefToPtr4( *obj_A ) == sysKeyKey ) return obj_A;
+				if ( *RefToPtr4( *obj_A ) == sysClassKey ) return obj_A;
 			}
 			if ( IsFwd( *obj_A ) ) {
 				Ref K = *FwdToPtr4( *obj_A );
 				if ( IsObj( K ) ) {
-					if ( *RefToPtr4( K ) == sysKeyKey ) return obj_A;
+					if ( *RefToPtr4( K ) == sysClassKey ) return obj_A;
 				}
 			} 
 			*/

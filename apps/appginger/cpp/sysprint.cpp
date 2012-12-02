@@ -32,7 +32,7 @@
 #include "wrecordlayout.hpp"
 #include "sysdouble.hpp"
 
-//#define DBG_SYSPRINT 1
+//#define DBG_SYSPRINT
 
 using namespace std;
 
@@ -55,26 +55,32 @@ static void refStringPrint( std::ostream & out, Ref * str_K ) {
 	out << s;	
 }
 
+static const char * open_list = "[%";
+static const char * close_list = "%]";
+
 static void refListPrint( std::ostream & out, Ref sofar ) {
 	bool sep = false;
-	out << "[";
+	out << open_list;
 	while ( IsPair( sofar ) ) {
 		if ( sep ) { out << ","; } else { sep = true; }
 		refPrint( out, *( RefToPtr4( sofar ) + 1 ) );
 		sofar = *( RefToPtr4( sofar ) + 2 );
 	}
-	out << "]";
+	out << close_list;
 }
+
+static const char * open_vector = "[";
+static const char * close_vector = "]";
 
 static void refVectorPrint( std::ostream & out, Ref * vec_K ) {
 	bool sep = false;
-	out << "{";
+	out << open_vector;
 	long len = RefToLong( vec_K[ -1 ] );
 	for ( long i = 1; i <= len; i++ ) {
 		if ( sep ) { out << ","; } else { sep = true; }
 		refPrint( vec_K[ i ] ); 
 	}
-	out << "}";
+	out << close_vector;
 }
 
 static void refMixedPrint( std::ostream & out, Ref * mix_K ) {
@@ -185,6 +191,13 @@ void refDoublePrint( std::ostream & out, const Ref r ) {
 	out << d;
 }
 
+void refKeyPrint( std::ostream & out, const Ref r ) {
+	const char * name = keyName( r );
+	out << "<class " << name << ">";
+}
+
+
+
 void refPrint( std::ostream & out, const Ref r ) {
 	#ifdef DBG_SYSPRINT
 		cerr << "Printing ref: " << r << endl;
@@ -258,7 +271,7 @@ void refPrint( std::ostream & out, const Ref r ) {
 			out << "<printing undefined>";
 		}
 	} else {
-		Ref k = refKey( r );
+		Ref k = refDataKey( r );
 		#ifdef DBG_SYSPRINT
 			cerr << "--  primitive" << endl;
 		#endif
@@ -278,23 +291,14 @@ void refPrint( std::ostream & out, const Ref r ) {
 			#ifdef DBG_SYSPRINT
 				cerr << "--  character: " << (int)(CharacterToChar( r )) << endl;
 			#endif
-		
 			//out << "<char " << r  << ">";
 			out << CharacterToChar( r );
 		} else if ( k == sysSymbolKey ) {
 			out << symbolToStdString( r );
 		} else if ( k == sysNilKey ) {
 			refListPrint( out, r );
-		} else if ( k == sysVectorKey ) {
-			bool sep = false;
-			out << "{";
-			Ref * p = RefToPtr4( r );
-			long len = RefToLong( p[ -1 ] );
-			for ( int i = 1; i <= len; i++ ) {
-				if ( sep ) { out << ","; } else { sep = true; }
-				refPrint( p[ i ] ); 
-			}
-			out << "}";
+		} else if ( k == sysClassKey ) {
+			refKeyPrint( out, r );
 		} else {
 			out << "?(" << std::hex << ToULong( r ) << std::dec << ")";
 		}

@@ -412,10 +412,14 @@ Ref * sysMapIndex( Ref * pc, class MachineClass * vm ) {
 	return pc;
 }
 
+static const char * MAP_OPEN = "{";
+static const char * MAP_CLOSE = "}";
+static const char * MAP_ARROW = "=>";
+
 void gngPrintMapPtr( std::ostream & out, Ref * map_K ) {
 	MapCrawl map_crawl( map_K );
 	bool sep = false;
-	out << "{%";
+	out << MAP_OPEN;
 	for (;;) {
 		Ref * bucket_K = map_crawl.nextBucket();
 		if ( bucket_K == NULL ) break;
@@ -423,10 +427,10 @@ void gngPrintMapPtr( std::ostream & out, Ref * map_K ) {
 		Ref k = bucket_K[ ASSOC_OFFSET_KEY ];
 		Ref v = bucket_K[ ASSOC_OFFSET_VALUE ];
 		refPrint( out, k );
-		out << "=>";
+		out << MAP_ARROW;
 		refPrint( out, v );
 	}
-	out << "%}";
+	out << MAP_CLOSE;
 }
 
 

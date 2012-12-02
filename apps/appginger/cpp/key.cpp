@@ -22,7 +22,7 @@
 bool isKey( Ref x ) {
 	unsigned long u = ToULong( x );
 	if ( ( u & TAG_MASK ) == OBJ_TAG ) {
-		return *RefToPtr4( x ) == sysKeyKey;
+		return *RefToPtr4( x ) == sysClassKey;
 	} else if ( ( u & TAGG_MASK ) == KEY_TAGG ) {
 		return true;
 	} else {
@@ -42,8 +42,8 @@ const char * keyName( Ref key ) {
 	} else if ( IsFunctionKey( key ) ) {
 		return "Function";
 	} else if ( IsObj( key ) ) {
-		//	Compound keys not implemented yet.
-		return "Instance";
+		//	TODO: Compound keys not implemented yet.
+		return "Object";
 	} else if ( IsFwd( key ) ) {
 		//	In fact can be reached if any 
 		return "<Forwarded!>";

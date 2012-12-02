@@ -317,7 +317,7 @@ static void printHelpHex() {
 	cout << "Method         :\t" << sysMethodKey << endl;
 	cout << "AbsentKey      :\t" << sysAbsentKey << endl;
 	cout << "BoolKey        :\t" << sysBoolKey << endl;
-	cout << "KeyKey         :\t" << sysKeyKey << endl;
+	cout << "KeyKey         :\t" << sysClassKey << endl;
 	cout << "TerminKey      :\t" << sysTerminKey << endl;
 	cout << "NilKey         :\t" << sysNilKey << endl;
 	cout << "PairKey        :\t" << sysPairKey << endl;

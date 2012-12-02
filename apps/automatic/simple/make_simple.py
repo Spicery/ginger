@@ -180,7 +180,7 @@ wordsPerDouble = ( struct.calcsize( "d" ) + struct.calcsize( "P" ) - 1 ) / struc
 keys = [
 	KeyData( "Absent", 			0, 	0, 	Kind.KEYLESS_KIND 	),
 	KeyData( "Bool", 			1, 	0, 	Kind.KEYLESS_KIND	),
-	KeyData( "Key",				2, 	4, 	Kind.RECORD_KIND	),
+	KeyData( "Class",			2, 	4, 	Kind.RECORD_KIND	),
 	KeyData( "Termin",			3, 	0, 	Kind.KEYLESS_KIND	),
 	KeyData( "Nil", 			4, 	0, 	Kind.KEYLESS_KIND	),
 	KeyData( "Pair", 			5, 	2, 	Kind.PAIR_KIND		),

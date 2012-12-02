@@ -38,6 +38,7 @@
 #include "sysvector.hpp"
 #include "sysmixed.hpp"
 #include "sysstring.hpp"
+#include "syssymbol.hpp"
 #include "sysmap.hpp"
 #include "syskey.hpp"
 #include "sysclass.hpp"
@@ -398,7 +399,9 @@ const SysMap::value_type rawData[] = {
 	SysMap::value_type( "==", SysInfo( CMP_EQ, Arity( 2 ), Arity( 1 ), "Identity of two values, result is boolean" ) ),
 	SysMap::value_type( ">", SysInfo( CMP_GT, Arity( 2 ), Arity( 1 ), "Greater than, compares two real numbers" ) ),
 	SysMap::value_type( ">=", SysInfo( CMP_GTE, Arity( 2 ), Arity( 1 ), "Greater than or equal to, compares two real numbers" ) ),	
-	SysMap::value_type( "instanceClass", SysInfo( Arity( 1 ), Arity( 1 ), sysObjectKey, "Returns the key of any value" ) ),
+	SysMap::value_type( "className", SysInfo( Arity( 1 ), Arity( 1 ), sysKeyName, "Returns the name of a key" ) ),
+	SysMap::value_type( "dataClass", SysInfo( Arity( 1 ), Arity( 1 ), sysObjectKey, "Returns the key of any value" ) ),
+	SysMap::value_type( "makeSymbol", SysInfo( Arity( 1 ), Arity( 1 ), sysMakeSymbol, "Returns a symbol with the same spelling as the string" ) ),
 	SysMap::value_type( "newRecordClass", SysInfo( Arity( 2 ), Arity( 1 ), sysNewRecordClass, "Returns a new class object for records" ) ),
 	SysMap::value_type( "newClass", SysInfo( Arity( 4 ), Arity( 1 ), sysNewClass, "Returns a new class object for instances" ) ),
 	SysMap::value_type( "newClassRecogniser", SysInfo( Arity( 1 ), Arity( 1 ), sysClassRecogniser, "Returns a function that recognises a given class" ) ),

@@ -93,7 +93,7 @@ Release 0.9
 Basic Language Features
 ~~~~~~~~~~~~~~~~~~~~~~~
 * Binding to multiple variables.
-* Assignment to single variables.
+* Assignment to multiple variables.
 * Anonymous variables.
 * Final classes (without inheritance).
   - Slots
@@ -124,7 +124,6 @@ Ginger
 * Traps keyboard-interrupts
 * Uses a user/team/department/.../world preferences hierarchy 
 * Provides the context of the current project and package
-* Selectable syntax via ~/.config/ginger preferences
 
 * Autolocates the current project 
   - current directory
@@ -195,9 +194,7 @@ Documentation
 *  the Ginger classes and standard library [todo]
 
  * Integration with the Sublime 2 text editor [todo]
-     - includes syntax colouring for the supported syntaxes (Common [done], C-Style [to be done]).
-     - evaluation of supported syntaxes using ginger-script.
-
+  
 
 Ginger CGI
 ~~~~~~~~~~

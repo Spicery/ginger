@@ -18,7 +18,12 @@ Symbol
 Linked List
 	Pair
 	Nil
+
 Vector
+
+Element
+
+Map
 
 Function
 

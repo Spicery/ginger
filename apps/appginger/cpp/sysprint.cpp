@@ -36,274 +36,286 @@
 
 using namespace std;
 
-void refPrint( Ref r ) {
-	refPrint( std::cout, r );
-}
+static const char * OPEN_LIST = "[%";
+static const char * CLOSE_LIST = "%]";
 
-void refPtrPrint( Ref * r ) {
-	refPrint( Ptr4ToRef( r ) );
-}
+static const char * OPEN_VECTOR = "[";
+static const char * CLOSE_VECTOR = "]";
 
-void refPtrPrint( std::ostream & out, Ref * r ) {
-	refPrint( out, Ptr4ToRef( r ) );
-}
+static const char * STRING_QUOTE = "\"";
+static const char * CHAR_QUOTE = "'";
+static const char * SYMBOL_QUOTE = "`";
 
-//	Relies on null termination, which is potentially dodgy - except this
-//	is only for formatting printable characters.
-static void refStringPrint( std::ostream & out, Ref * str_K ) {
-	char *s = ToChars( str_K + 1 );
-	out << s;	
-}
+class RefPrint {
+private:
+	std::ostream & out;
+	bool showing;
 
-static const char * open_list = "[%";
-static const char * close_list = "%]";
+public:
+	RefPrint( std::ostream & out ) : out( out ), showing( false ) {}
 
-static void refListPrint( std::ostream & out, Ref sofar ) {
-	bool sep = false;
-	out << open_list;
-	while ( IsPair( sofar ) ) {
-		if ( sep ) { out << ","; } else { sep = true; }
-		refPrint( out, *( RefToPtr4( sofar ) + 1 ) );
-		sofar = *( RefToPtr4( sofar ) + 2 );
+	void setShowing( const bool showing ) {
+		this->showing = showing;
 	}
-	out << close_list;
-}
 
-static const char * open_vector = "[";
-static const char * close_vector = "]";
-
-static void refVectorPrint( std::ostream & out, Ref * vec_K ) {
-	bool sep = false;
-	out << open_vector;
-	long len = RefToLong( vec_K[ -1 ] );
-	for ( long i = 1; i <= len; i++ ) {
-		if ( sep ) { out << ","; } else { sep = true; }
-		refPrint( vec_K[ i ] ); 
+private:
+	//	Relies on null termination, which is potentially dodgy - except this
+	//	is only for formatting printable characters.
+	void refStringPrint( Ref * str_K ) {
+		char *s = ToChars( str_K + 1 );
+		if ( this->showing ) this->out << STRING_QUOTE;
+		this->out << s;	
+		if ( this->showing ) this->out << STRING_QUOTE;
 	}
-	out << close_vector;
-}
 
-static void refMixedPrint( std::ostream & out, Ref * mix_K ) {
-	bool sep = false;
-	out << "mixed[";
-	long len = numFieldsOfMixedLayout( mix_K );
-	for ( long i = 1; i <= len; i++ ) {
-		if ( sep ) { out << ","; } else { sep = true; }
-		refPrint( mix_K[ i ] ); 
-	}	
-	out <<"]{";
-	sep = false;
-	len = RefToLong( mix_K[ MIXED_LAYOUT_OFFSET_LENGTH ] );
-	for ( long i = 1; i <= len; i++ ) {
-		if ( sep ) { out << ","; } else { sep = true; }
-		refPrint( mix_K[ i ] ); 
-	}
-	out << "}";
-}
-
-enum Tag {
-	TAG_OPEN,
-	TAG_CLOSE,
-	TAG_EMPTY
-};
-
-//	WARNING: KNOWN ERRORS. There is not the proper quoting of characters 
-//	in the name, key or value.
-static void refAttrMapPrint( std::ostream & out, Ref * attrmap_K, enum Tag flag ) {
-	std::string name( refToString( attrmap_K[ 1 ] ) );
-	if ( flag == TAG_CLOSE ) {
-		out << "</";
-		Ginger::mnxRenderText( out, name );
-		out << ">";
-	} else {
-		out << "<";
-		Ginger::mnxRenderText( out, name );
-		long length = SmallToULong( attrmap_K[ MIXED_LAYOUT_OFFSET_LENGTH ] );
-		for ( long i = 0; i < length; i += 2 ) {
-			out << " ";
-			std::string key( refToString( attrmap_K[ 2 + i ] ) );
-			Ginger::mnxRenderText( out, key );
-			out << "=\"";
-			std::string value( refToString( attrmap_K[ 3 + i ] ) );
-			Ginger::mnxRenderText( out, value );
-			out << "\"";
+	void refListPrint( Ref sofar ) {
+		bool sep = false;
+		this->out << OPEN_LIST;
+		while ( IsPair( sofar ) ) {
+			if ( sep ) { this->out << ","; } else { sep = true; }
+			this->refPrint( *( RefToPtr4( sofar ) + 1 ) );
+			sofar = *( RefToPtr4( sofar ) + 2 );
 		}
-		out << ( flag == TAG_OPEN ? ">" : "/>" );
+		this->out << CLOSE_LIST;
 	}
-}
 
-static void refElementPrint( std::ostream & out, Ref * mix_K ) {
-	Ref attrmap = mix_K[ 1 ];
-	if ( ! IsAttrMap( attrmap ) ) {
-		throw Ginger::Mishap( "Attribute map needed" ).culprit( "Item", refToString( attrmap ) );
-	}
-	Ref * attrmap_K = RefToPtr4( attrmap );
-	long length = SmallToULong( mix_K[ MIXED_LAYOUT_OFFSET_LENGTH ] );
-	if ( length > 0 ) {
-		refAttrMapPrint( out, attrmap_K, TAG_OPEN );
-		for ( long i = 0; i < length; i++ ) {
-			refPrint( out, mix_K[ 2 + i ] );
+	void refVectorPrint( Ref * vec_K ) {
+		bool sep = false;
+		this->out << OPEN_VECTOR;
+		long len = RefToLong( vec_K[ -1 ] );
+		for ( long i = 1; i <= len; i++ ) {
+			if ( sep ) { this->out << ","; } else { sep = true; }
+			this->refPrint( vec_K[ i ] ); 
 		}
-		refAttrMapPrint( out, attrmap_K, TAG_CLOSE );
-	} else {
-		refAttrMapPrint( out, attrmap_K, TAG_EMPTY );
+		this->out << CLOSE_VECTOR;
 	}
-}
 
-static void refRecordPrint( std::ostream & out, Ref * rec_K ) {
-	unsigned long len = lengthOfRecordLayout( rec_K );
-	bool sep = false;
-	out << "record{";
-	for ( unsigned long i = 1; i <= len; i++ ) {
-		if ( sep ) { out << ","; } else { sep = true; }
-		refPrint( rec_K[ i ] ); 
+	void refMixedPrint( Ref * mix_K ) {
+		bool sep = false;
+		this->out << "mixed[";
+		long len = numFieldsOfMixedLayout( mix_K );
+		for ( long i = 1; i <= len; i++ ) {
+			if ( sep ) { this->out << ","; } else { sep = true; }
+			this->refPrint( mix_K[ i ] ); 
+		}	
+		this->out <<"]{";
+		sep = false;
+		len = RefToLong( mix_K[ MIXED_LAYOUT_OFFSET_LENGTH ] );
+		for ( long i = 1; i <= len; i++ ) {
+			if ( sep ) { this->out << ","; } else { sep = true; }
+			this->refPrint( mix_K[ i ] ); 
+		}
+		this->out << "}";
 	}
-	out << "}";
-}
 
-//	TODO: This looks very wrong!!!!
-static void refWRecordPrint( std::ostream & out, Ref * rec_K ) {
-	unsigned long len = lengthOfWRecordLayout( rec_K );
-	bool sep = false;
-	out << "wrecord{";
-	for ( unsigned long i = 1; i <= len; i++ ) {
-		if ( sep ) { out << ","; } else { sep = true; }
-		refPrint( rec_K[ i ] ); 	//	TODO: NO!!!
-	}
-	out << "}";
-}
+	enum Tag {
+		TAG_OPEN,
+		TAG_CLOSE,
+		TAG_EMPTY
+	};
 
-static void refInstancePrint( std::ostream & out, Ref * rec_K ) {
-	unsigned long len = lengthOfInstance( rec_K );
-	//std::cout << "Length of object " << len << std::endl;
-	bool sep = false;
-	refPrint( out, titleOfInstance( rec_K ) );
-	out << "[" << len << "]{";
-	for ( unsigned long i = 1; i <= len; i++ ) {
-		if ( sep ) { out << ","; } else { sep = true; }
-		refPrint( rec_K[ i ] ); 
-	}
-	out << "}";
-}
-
-void refDoublePrint( std::ostream & out, const Ref r ) {
-	gngdouble_t d = gngFastDoubleValue( r );
-	out << d;
-}
-
-void refKeyPrint( std::ostream & out, const Ref r ) {
-	const char * name = keyName( r );
-	out << "<class " << name << ">";
-}
-
-
-
-void refPrint( std::ostream & out, const Ref r ) {
-	#ifdef DBG_SYSPRINT
-		cerr << "Printing ref: " << r << endl;
-	#endif
-	if ( IsObj( r ) ) {
-		#ifdef DBG_SYSPRINT
-			cerr << "-- is object" << endl;
-		#endif
-		Ref * obj_K = RefToPtr4( r );
-		const Ref key = * obj_K;
-		if ( IsFunctionKey( key ) ) {
-			out << "<function>";
-		} else if ( key == sysMapletKey ) {
-			refPrint( fastMapletKey( r ) );
-			out << " => ";
-			refPrint( fastMapletValue( r ) );
-		} else if ( IsSimpleKey( key ) ) {
-			#ifdef DBG_SYSPRINT
-				cerr << "-- printing simple key = " << hex << ToULong( key ) << endl;
-				cerr << "-- Kind of simple key = " << hex << KindOfSimpleKey( key ) << endl;
-			#endif
-			switch ( KindOfSimpleKey( key ) ) {
-				case VECTOR_KIND: {
-					refVectorPrint( out, obj_K );
-					break;
-				}
-				case ATTR_KIND:
-				case MIXED_KIND: {
-					if ( sysElementKey == key ) {
-						refElementPrint( out, obj_K );
-					} else {
-						refMixedPrint( out, obj_K );
-					}
-					break;
-				}
-				case PAIR_KIND: {
-					refListPrint( out, r );
-					break;
-				}
-				case MAP_KIND: {
-					gngPrintMapPtr( out, obj_K );
-					break;
-				}
-				case RECORD_KIND: {
-					refRecordPrint( out, obj_K );
-					break;
-				}
-				case WRECORD_KIND: {
-					//cout << "sysDoubleKey = " << hex << sysDoubleKey << endl;
-					//cout << "*obj_K = " << hex << *obj_K << endl;
-					if ( *obj_K == sysDoubleKey ) {
-						refDoublePrint( out, r );
-					} else {
-						refWRecordPrint( out, obj_K );
-					}
-					break;
-				}
-				case STRING_KIND: {
-					refStringPrint( out, obj_K );
-					break;
-				}
-				default: {
-					out << "<printing undefined>";
-					break;
-				}
+	//	WARNING: KNOWN ERRORS. There is not the proper quoting of characters 
+	//	in the name, key or value.
+	void refAttrMapPrint( Ref * attrmap_K, enum Tag flag ) {
+		std::string name( refToString( attrmap_K[ 1 ] ) );
+		if ( flag == TAG_CLOSE ) {
+			this->out << "</";
+			Ginger::mnxRenderText( this->out, name );
+			this->out << ">";
+		} else {
+			this->out << "<";
+			Ginger::mnxRenderText( this->out, name );
+			long length = SmallToULong( attrmap_K[ MIXED_LAYOUT_OFFSET_LENGTH ] );
+			for ( long i = 0; i < length; i += 2 ) {
+				this->out << " ";
+				std::string key( refToString( attrmap_K[ 2 + i ] ) );
+				Ginger::mnxRenderText( this->out, key );
+				this->out << "=\"";
+				std::string value( refToString( attrmap_K[ 3 + i ] ) );
+				Ginger::mnxRenderText( this->out, value );
+				this->out << "\"";
 			}
-		} else if ( IsObj( key ) ) {
-			//	Compound keys not implemented yet.
-			refInstancePrint( out, obj_K );
-		} else {
-			out << "<printing undefined>";
-		}
-	} else {
-		Ref k = refDataKey( r );
-		#ifdef DBG_SYSPRINT
-			cerr << "--  primitive" << endl;
-		#endif
-		if ( k == sysSmallKey ) {
-			out << SmallToLong( r );
-		} else if ( k == sysBoolKey ) {
-			out << ( r == SYS_FALSE ? "false" : "true" );
-		} else if ( k == sysAbsentKey ) {
-			out << "absent";
-		} else if ( k == sysPresentKey ) {
-			out << "present";
-		} else if ( k == sysUndefinedKey ) {
-			out << "undefined";
-		} else if ( k == sysIndeterminateKey ) {
-			out << "indeterminate";
-		} else if ( k == sysCharKey ) {
-			#ifdef DBG_SYSPRINT
-				cerr << "--  character: " << (int)(CharacterToChar( r )) << endl;
-			#endif
-			//out << "<char " << r  << ">";
-			out << CharacterToChar( r );
-		} else if ( k == sysSymbolKey ) {
-			out << symbolToStdString( r );
-		} else if ( k == sysNilKey ) {
-			refListPrint( out, r );
-		} else if ( k == sysClassKey ) {
-			refKeyPrint( out, r );
-		} else {
-			out << "?(" << std::hex << ToULong( r ) << std::dec << ")";
+			this->out << ( flag == TAG_OPEN ? ">" : "/>" );
 		}
 	}
-}
+
+	void refElementPrint( Ref * mix_K ) {
+		Ref attrmap = mix_K[ 1 ];
+		if ( ! IsAttrMap( attrmap ) ) {
+			throw Ginger::Mishap( "Attribute map needed" ).culprit( "Item", refToString( attrmap ) );
+		}
+		Ref * attrmap_K = RefToPtr4( attrmap );
+		long length = SmallToULong( mix_K[ MIXED_LAYOUT_OFFSET_LENGTH ] );
+		if ( length > 0 ) {
+			this->refAttrMapPrint( attrmap_K, TAG_OPEN );
+			for ( long i = 0; i < length; i++ ) {
+				this->refPrint( mix_K[ 2 + i ] );
+			}
+			this->refAttrMapPrint( attrmap_K, TAG_CLOSE );
+		} else {
+			this->refAttrMapPrint( attrmap_K, TAG_EMPTY );
+		}
+	}
+
+	void refRecordPrint( Ref * rec_K ) {
+		unsigned long len = lengthOfRecordLayout( rec_K );
+		bool sep = false;
+		this->out << "record{";
+		for ( unsigned long i = 1; i <= len; i++ ) {
+			if ( sep ) { this->out << ","; } else { sep = true; }
+			this->refPrint( rec_K[ i ] ); 
+		}
+		this->out << "}";
+	}
+
+	//	TODO: This looks very wrong!!!!
+	void refWRecordPrint( Ref * rec_K ) {
+		unsigned long len = lengthOfWRecordLayout( rec_K );
+		bool sep = false;
+		this->out << "wrecord{";
+		for ( unsigned long i = 1; i <= len; i++ ) {
+			if ( sep ) { this->out << ","; } else { sep = true; }
+			this->refPrint( rec_K[ i ] ); 	//	TODO: NO!!!
+		}
+		this->out << "}";
+	}
+
+	void refInstancePrint( Ref * rec_K ) {
+		unsigned long len = lengthOfInstance( rec_K );
+		//std::cout << "Length of object " << len << std::endl;
+		bool sep = false;
+		this->refPrint( titleOfInstance( rec_K ) );
+		this->out << "[" << len << "]{";
+		for ( unsigned long i = 1; i <= len; i++ ) {
+			if ( sep ) { this->out << ","; } else { sep = true; }
+			this->refPrint( rec_K[ i ] ); 
+		}
+		this->out << "}";
+	}
+
+	void refDoublePrint( const Ref r ) {
+		gngdouble_t d = gngFastDoubleValue( r );
+		this->out << d;
+	}
+
+	void refKeyPrint( const Ref r ) {
+		const char * name = keyName( r );
+		this->out << "<class " << name << ">";
+	}
+
+public:
+	void refPrint( const Ref r ) {
+		#ifdef DBG_SYSPRINT
+			cerr << "Printing ref: " << r << endl;
+		#endif
+		if ( IsObj( r ) ) {
+			#ifdef DBG_SYSPRINT
+				cerr << "-- is object" << endl;
+			#endif
+			Ref * obj_K = RefToPtr4( r );
+			const Ref key = * obj_K;
+			if ( IsFunctionKey( key ) ) {
+				this->out << "<function>";
+			} else if ( key == sysMapletKey ) {
+				refPrint( fastMapletKey( r ) );
+				this->out << " => ";
+				refPrint( fastMapletValue( r ) );
+			} else if ( IsSimpleKey( key ) ) {
+				#ifdef DBG_SYSPRINT
+					cerr << "-- printing simple key = " << hex << ToULong( key ) << dec << endl;
+					cerr << "-- Kind of simple key = " << hex << KindOfSimpleKey( key ) << dec << endl;
+				#endif
+				switch ( KindOfSimpleKey( key ) ) {
+					case VECTOR_KIND: {
+						this->refVectorPrint( obj_K );
+						break;
+					}
+					case ATTR_KIND:
+					case MIXED_KIND: {
+						if ( sysElementKey == key ) {
+							this->refElementPrint( obj_K );
+						} else {
+							this->refMixedPrint( obj_K );
+						}
+						break;
+					}
+					case PAIR_KIND: {
+						this->refListPrint( r );
+						break;
+					}
+					case MAP_KIND: {
+						gngPrintMapPtr( this->out, obj_K );
+						break;
+					}
+					case RECORD_KIND: {
+						this->refRecordPrint( obj_K );
+						break;
+					}
+					case WRECORD_KIND: {
+						//cout << "sysDoubleKey = " << hex << sysDoubleKey << endl;
+						//cout << "*obj_K = " << hex << *obj_K << endl;
+						if ( *obj_K == sysDoubleKey ) {
+							this->refDoublePrint( r );
+						} else {
+							this->refWRecordPrint( obj_K );
+						}
+						break;
+					}
+					case STRING_KIND: {
+						this->refStringPrint( obj_K );
+						break;
+					}
+					default: {
+						this->out << "<printing undefined>";
+						break;
+					}
+				}
+			} else if ( IsObj( key ) ) {
+				//	Compound keys not implemented yet.
+				this->refInstancePrint( obj_K );
+			} else {
+				this->out << "<printing undefined>";
+			}
+		} else {
+			Ref k = refDataKey( r );
+			#ifdef DBG_SYSPRINT
+				cerr << "--  primitive" << endl;
+			#endif
+			if ( k == sysSmallKey ) {
+				this->out << SmallToLong( r );
+			} else if ( k == sysBoolKey ) {
+				this->out << ( r == SYS_FALSE ? "false" : "true" );
+			} else if ( k == sysAbsentKey ) {
+				this->out << "absent";
+			} else if ( k == sysPresentKey ) {
+				this->out << "present";
+			} else if ( k == sysUndefinedKey ) {
+				this->out << "undefined";
+			} else if ( k == sysIndeterminateKey ) {
+				this->out << "indeterminate";
+			} else if ( k == sysCharKey ) {
+				#ifdef DBG_SYSPRINT
+					cerr << "--  character: " << (int)(CharacterToChar( r )) << endl;
+				#endif
+				//this->out << "<char " << r  << ">";
+				if ( this->showing ) this->out << CHAR_QUOTE;
+				this->out << CharacterToChar( r );
+				if ( this->showing ) this->out << CHAR_QUOTE;
+			} else if ( k == sysSymbolKey ) {
+				if ( this->showing ) this->out << SYMBOL_QUOTE;
+				this->out << symbolToStdString( r );
+				if ( this->showing ) this->out << SYMBOL_QUOTE;
+			} else if ( k == sysNilKey ) {
+				this->refListPrint( r );
+			} else if ( k == sysClassKey ) {
+				this->refKeyPrint( r );
+			} else {
+				this->out << "?(" << std::hex << ToULong( r ) << std::dec << ")";
+			}
+		}
+	}
+
+};	//	end class.
 
 Ref * sysRefPrint( Ref * pc, class MachineClass * vm ) {
 	for ( int i = vm->count - 1; i >= 0; i-- ) {
@@ -318,6 +330,42 @@ Ref * sysRefPrintln( Ref * pc, class MachineClass * vm ) {
 	pc = sysRefPrint( pc, vm );
 	std::cout << std::endl;
 	return pc;
+}
+
+Ref * sysRefShow( Ref * pc, class MachineClass * vm ) {
+	RefPrint printer( std::cout );
+	printer.setShowing( true );
+	for ( int i = vm->count - 1; i >= 0; i-- ) {
+		Ref r = vm->fastSubscr( i );
+		printer.refPrint( r );		
+		if ( i != 0 ) std::cout << ",";
+	}
+	vm->fastDrop( vm->count );
+	return pc;
+}
+
+Ref * sysRefShowln( Ref * pc, class MachineClass * vm ) {
+	pc = sysRefShow( pc, vm );
+	std::cout << std::endl;
+	return pc;
+}
+
+void refPrint( Ref r ) {
+	RefPrint printer( std::cout );
+	printer.refPrint( r );
+}
+
+void refPrint( std::ostream & out, const Ref r ) {
+	RefPrint printer( out );
+	printer.refPrint( r );
+}
+
+void refPtrPrint( Ref * r ) {
+	refPrint( Ptr4ToRef( r ) );
+}
+
+void refPtrPrint( std::ostream & out, Ref * r ) {
+	refPrint( out, Ptr4ToRef( r ) );
 }
 
 std::string refToString( Ref ref ) {

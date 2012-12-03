@@ -27,9 +27,11 @@ extern void refPrint( Ref r );
 extern void refPtrPrint( Ref * r );
 extern void refPrint( std::ostream & out, Ref r );
 extern void refPtrPrint( std::ostream & out, Ref * r );
+extern std::string refToString( Ref ref );
 extern Ref * sysRefPrint( Ref * pc, MachineClass * );
 extern Ref * sysRefPrintln( Ref * pc, MachineClass * );
-extern std::string refToString( Ref ref );
+extern Ref * sysRefShow( Ref * pc, MachineClass * );
+extern Ref * sysRefShowln( Ref * pc, MachineClass * );
 
 #endif
 

@@ -18,13 +18,23 @@ using namespace std;
 #include "mishap.hpp"
 
 int Source::peekchar() {
-	const int ch = getc( this->file );
-	ungetc( ch, this->file );
-	return ch;
+	if ( this->buffer.empty() ) {
+		const int ch = getc( this->file );
+		this->buffer.push_front( ch );
+		return ch;
+	} else {
+		return this->buffer.front();
+	}
 }
 
 int Source::nextchar() {
-	const int ch = getc( this->file );
+	int ch;
+	if ( this->buffer.empty() ) {
+		ch = getc( this->file );
+	} else {
+		ch = this->buffer.front();
+		this->buffer.pop_front();		
+	}
 	if ( ch == '\n' ) {
 		this->lineno += 1;
 	}
@@ -35,7 +45,7 @@ void Source::pushchar( const int ch ) {
 	if ( ch == '\n' ) {
 		this->lineno -= 1;
 	}
-	ungetc( ch, this->file );
+	this->buffer.push_front( ch );
 }
 
 int ItemFactoryClass::trychar( int ch ) {
@@ -44,7 +54,6 @@ int ItemFactoryClass::trychar( int ch ) {
         return 1;
     } else {
     	this->pushchar( c );
-        //ungetc( c, this->file );
         return 0;
     }
 }
@@ -139,13 +148,18 @@ void ItemFactoryClass::readAtDigitOrMinus( int ch ) {
 		if ( isdigit( ch ) ) digit_seen = true;
 		ch = this->nextchar();
 	} while ( isdigit( ch ) );
+
 	if ( ch == '.' ) {
-		decimal_point_seen = true;
-		do {
-			this->text.push_back( (char)ch );
-			if ( isdigit( ch ) ) digit_seen = true;
-			ch = this->nextchar();
-		} while ( isdigit( ch ) );
+		//	IF the next character is a digit then we can proceed safely.
+		//	Otherwise we treat the '.' as postfix function application.
+		if ( isdigit( this->peekchar() ) ) {
+			decimal_point_seen = true;
+			do {
+				this->text.push_back( (char)ch );
+				if ( isdigit( ch ) ) digit_seen = true;
+				ch = this->nextchar();
+			} while ( isdigit( ch ) );
+		}
 	}
 	this->pushchar( ch );
 

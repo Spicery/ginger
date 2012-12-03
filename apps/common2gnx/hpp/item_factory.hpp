@@ -2,6 +2,7 @@
 #define ITEM_FACTORY_HPP
 
 #include <string>
+#include <list>
 
 #include <stdio.h>
 
@@ -10,6 +11,7 @@
 
 class Source {
 private:
+	std::list< int >	buffer;
 	FILE *				file;
 	int					lineno;
 	
@@ -23,6 +25,8 @@ public:
 public:
 	Source( FILE * file ) : file( file ), lineno( 1 ) {}
 };
+
+
 
 class ItemFactoryClass : public Source {
 

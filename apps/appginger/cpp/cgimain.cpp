@@ -47,6 +47,8 @@
 #define APP_TITLE "ginger-cgi"
 #include "wellknownpaths.hpp"
 
+//#define DBG_CGI_MAIN
+
 using namespace std;
 
 class CgiMain : public ToolMain {
@@ -70,22 +72,24 @@ public:
 
 			#ifdef SIMPLIFY_NOT_IMPLEMENTED
 				commstream << " | " << SIMPLIFYGNX << " -suA";
-			#endif
-
-			{
-				list< string > & folders = vm->getAppContext().getProjectFolderList();
-				for ( 
-					list< string >::iterator it = folders.begin();
-					it != folders.end();
-					++it
-				) {
-					commstream << " -j" << *it;
-				}
-			}
 			
-			commstream << " -p " << shellSafeName( interactive_pkg->getTitle() );
+				{
+					list< string > & folders = vm->getAppContext().getProjectFolderList();
+					for ( 
+						list< string >::iterator it = folders.begin();
+						it != folders.end();
+						++it
+					) {
+						commstream << " -j" << *it;
+					}
+				}
+				
+				commstream << " -p " << shellSafeName( interactive_pkg->getTitle() );
+			#endif
 			string command( commstream.str() );
-			//cerr << "Command so far: " << command << endl;
+			#ifdef DBG_CGI_MAIN
+				std::cerr << "Command so far: " << command << std::endl;
+			#endif
 			FILE * gnxfp = popen( command.c_str(), "r" );
 			if ( gnxfp == NULL ) {
 				throw Ginger::Mishap( "Failed to translate input" );

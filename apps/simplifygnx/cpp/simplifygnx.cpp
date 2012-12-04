@@ -618,34 +618,11 @@ public:
 	vector< Ginger::Arity > body_arities;
 	
 private:
-	/**
-		This purpose of this method is to cope with direct calls to
-		self.app, which helps us get much closer to the least fixed
-		point. 
-	*/
-	Ginger::Arity calcArity( shared< Ginger::Mnx > expr ) {
-		if ( expr->hasAttribute( ARITY ) ) {
-			return Ginger::Arity( expr->attribute( ARITY ) );
-		} else if ( expr->name() == IF ) {
-			vector< Ginger::Arity > subexpr_arities;
-			for ( int i = 1; i < expr->size(); i += 2 ) {
-				subexpr_arities.push_back( calcArity( expr->child( i ) ) );
-			}
-			if ( subexpr_arities.size() == 0 ) {
-				return Ginger::Arity( 0, true );
-			} else {
-				Ginger::Arity sofar( subexpr_arities[ 0 ] );
-				for ( size_t i = 1; i < subexpr_arities.size(); i++ ) {
-					sofar = sofar.join( subexpr_arities[ i ] );
-				}
-				return sofar;
-			}
-		} else {
-			return Ginger::Arity( 0, true );
-		}
-	}
+    // Forward declaration.
+    Ginger::Arity calcArity( shared< Ginger::Mnx > expr );
+    Ginger::Arity calcArityIfThenOptElse( shared< Ginger::Mnx > expr, int offset );
 
-public:
+ public:
 	void startVisit( Ginger::Mnx & element ) {
 		const string & nm = element.name();
 		if ( nm == FN ) {
@@ -673,6 +650,45 @@ public:
 	
 	virtual ~SelfAppArityMarker() {}
 };
+
+Ginger::Arity SelfAppArityMarker::calcArityIfThenOptElse( shared< Ginger::Mnx > expr, int offset ) {
+    vector< Ginger::Arity > subexpr_arities;
+    for ( int i = 1 + offset; i < expr->size(); i += 2 ) {
+        subexpr_arities.push_back( calcArity( expr->child( i ) ) );
+    }
+    const bool has_else = ( ( expr->size() - offset ) & 0x1 ) == 1;
+    if ( has_else ) {
+        subexpr_arities.push_back( calcArity( expr->lastChild() ) );
+    }
+    if ( subexpr_arities.size() == 0 ) {
+        return Ginger::Arity( 0, true );
+    } else {
+        Ginger::Arity sofar( subexpr_arities[ 0 ] );
+        for ( size_t i = 1; i < subexpr_arities.size(); i++ ) {
+            sofar = sofar.join( subexpr_arities[ i ] );
+        }
+        return sofar;
+    }       
+}
+
+/**
+    This purpose of this method is to cope with direct calls to
+    self.app, which helps us get much closer to the least fixed
+    point. 
+*/
+Ginger::Arity SelfAppArityMarker::calcArity( shared< Ginger::Mnx > expr ) {
+    if ( expr->hasAttribute( ARITY ) ) {
+        return Ginger::Arity( expr->attribute( ARITY ) );
+    } else if ( expr->name() == IF ) {
+        return calcArityIfThenOptElse( expr, 0 );
+    } else if ( expr->name() == SWITCH ) {
+        return calcArityIfThenOptElse( expr, 1 );
+    } else {
+        return Ginger::Arity( 0, true );
+    }
+}
+
+
 
 /**
     This is the main arity marking pass. It may incidentally replace
@@ -733,32 +749,68 @@ public:
 		} else if ( x == SEQ ) {
 			element.putAttribute( ARITY, this->sumOverChildren( element ).toString() );
 		} else if ( x == IF ) {
-			bool has_odd_kids = ( element.size() % 2 ) == 1;
+			bool has_else = ( element.size() % 2 ) == 1;
 			bool all_have_arity = true;
 			for ( int i = 1; all_have_arity && i < element.size(); i += 2 ) {
 				all_have_arity = element.child( i )->hasAttribute( ARITY );
 			}
-			if ( all_have_arity && has_odd_kids ) {
+			if ( all_have_arity && has_else ) {
 				all_have_arity = element.lastChild()->hasAttribute( ARITY );
 			}
 			if ( all_have_arity ) {
 				const int N = element.size();
 				if ( N == 0 ) {
+                    //  Not even an else clause, equal to a <seq/>.
 					element.putAttribute( ARITY, "0" );
 				} else if ( N == 1 ) {
-					element.putAttribute( ARITY, element.child( 0 )->attribute( ARITY ) );
+                    //  Consists only of an else clause.
+					element.putAttribute( ARITY, element.child( 1 )->attribute( ARITY ) );
 				} else {
+                    //  Has at least one if-then pair.
 					Ginger::Arity sofar( element.child( 1 )->attribute( ARITY ) );
 					for ( int i = 3; i < element.size(); i += 2 ) {
 						Ginger::Arity kid( element.child( i )->attribute( ARITY ) );
 						sofar = sofar.unify( kid );
 					}
-					if ( has_odd_kids ) {
+					if ( has_else ) {
 						sofar = sofar.unify( Ginger::Arity( element.lastChild()->attribute( ARITY ) ) );
-					}
+					} else {
+                        //  Otherwise the else clause is implicitly an <seq/>.
+                        sofar = sofar.unify( Ginger::Arity( 0 ) );
+                    }
 					element.putAttribute( ARITY, sofar.toString() );
 				}
 			}
+        } else if ( x == SWITCH && element.size() >= 1 ) {
+            bool has_else = ( element.size() % 2 ) == 0;
+            bool all_have_arity = true;
+            for ( int i = 2; all_have_arity && i < element.size(); i += 2 ) {
+                all_have_arity = element.child( i )->hasAttribute( ARITY );
+            }
+            if ( all_have_arity && has_else ) {
+                all_have_arity = element.lastChild()->hasAttribute( ARITY );
+            }
+            if ( all_have_arity ) {
+                const int N = element.size();
+                if ( N == 1 ) {
+                    element.putAttribute( ARITY, "0" );
+                } else if ( N == 2 ) {
+                    element.putAttribute( ARITY, element.child( 1 )->attribute( ARITY ) );
+                } else {
+                    Ginger::Arity sofar( element.child( 2 )->attribute( ARITY ) );
+                    for ( int i = 4; i < element.size(); i += 2 ) {
+                        Ginger::Arity kid( element.child( i )->attribute( ARITY ) );
+                        sofar = sofar.unify( kid );
+                    }
+                    if ( has_else ) {
+                        sofar = sofar.unify( Ginger::Arity( element.lastChild()->attribute( ARITY ) ) );
+                    } else {
+                        //  Otherwise the else clause is implicitly an <seq/>.
+                        sofar = sofar.unify( Ginger::Arity( 0 ) );                        
+                    }
+                    element.putAttribute( ARITY, sofar.toString() );
+                }
+            }
 		} else if ( x == SYSAPP ) {
 			element.putAttribute( ARITY, Ginger::outArity( element.attribute( SYSAPP_NAME ) ).toString() );
 			element.putAttribute( ARGS_ARITY, this->sumOverChildren( element ).toString() );
@@ -824,6 +876,14 @@ public:
 				if ( has_odd_kids ) {
 					element.lastChild()->orFlags( TAIL_CALL_MASK );
 				}
+            } else if ( x == SWITCH && element.size() >= 1 ) {
+                bool has_else = ( x.size() % 2 ) == 0;
+                for ( int i = 2; i < element.size(); i += 2 ) {
+                    element.child( i )->orFlags( TAIL_CALL_MASK );
+                }
+                if ( has_else ) {
+                    element.lastChild()->orFlags( TAIL_CALL_MASK );
+                }
 			} else if ( x == SEQ || x == BLOCK ) {
 				if ( element.size() >= 1 ) {
 					shared< Ginger::Mnx > ch = element.lastChild();
@@ -1677,10 +1737,28 @@ private:
 	map< int, int > uid_slot;	//	Maps from UID to slots.
 	
 private:
-	static bool isBranchIf( Ginger::MnxWalkPath * path ) {
-		return path != NULL && path->getMnx().name() == IF && ( path->getIndex() & 0x1 ) == 0x1;
-	}
-	
+    static bool isBranchIf( Ginger::MnxWalkPath * path ) {
+        return (
+            path != NULL && 
+            path->getMnx().name() == IF && 
+            (
+                ( ( path->getIndex() & 0x1 ) == 0x1 ) ||
+                path->isLastIndex()
+            )
+        );
+    }
+    
+    static bool isBranchSwitch( Ginger::MnxWalkPath * path ) {
+        return (
+            path != NULL && 
+            path->getMnx().name() == SWITCH && 
+            (
+                ( ( path->getIndex() & 0x1 ) == 0x0 ) ||
+                path->isLastIndex()
+            )
+        );
+    }
+    
 	static bool isFormalArgs( Ginger::MnxWalkPath * path ) {
 		return path != NULL && path->getMnx().name() == FN && path->getIndex() == 0;
 	}
@@ -1719,7 +1797,7 @@ public:
 		} else if ( x == FN ) {
 			this->pushCount();
 			this->count = 0;
-		} else if ( x == BLOCK || x == FOR || isBranchIf( path ) ) {
+		} else if ( x == BLOCK || x == FOR || isBranchIf( path ) || isBranchSwitch( path ) ) {
 			this->pushCount();
 		}
 	}
@@ -1729,7 +1807,7 @@ public:
 		if ( x == FN ) {
 			element.putAttribute( "locals.count", this->maxcount );
 			this->popCount();			
-		} else if ( x == BLOCK || x == FOR || isBranchIf( path ) ) {
+		} else if ( x == BLOCK || x == FOR || isBranchIf( path ) || isBranchSwitch( path ) ) {
 			this->popCount();
 		} else if ( isFormalArgs( path ) ) {
 			//	We are ending an argument list. Stash the count of the formals.

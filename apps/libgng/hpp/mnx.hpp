@@ -52,9 +52,10 @@ private:
 	MnxWalkPath *	prev;
 
 public:
-	Mnx & 			getMnx() { return this->mnx; }
-	int				getIndex() { return this->index; }
-	MnxWalkPath *	getPrevious() { return this->prev; }
+	Mnx & 			getMnx() const { return this->mnx; }
+	int				getIndex() const { return this->index; }
+	MnxWalkPath *	getPrevious() const { return this->prev; }
+	bool			isLastIndex() const;
 
 public:
 	MnxWalkPath( 

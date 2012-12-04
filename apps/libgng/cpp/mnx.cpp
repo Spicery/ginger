@@ -27,6 +27,8 @@
 namespace Ginger {
 using namespace std;
 
+bool MnxWalkPath::isLastIndex() const { return this->mnx.size() == this->index + 1; }
+
 void mnxRenderText( std::ostream & out, const std::string & str ) {
 	for ( std::string::const_iterator it = str.begin(); it != str.end(); ++it ) {
 		const unsigned char ch = *it;

@@ -61,6 +61,7 @@
 #define SEQ				"seq"
 #define ERASE           "erase"
 #define	BLOCK			"block"
+#define SWITCH          "switch"
 
 #define LIST			"list"
 #define LIST_APPEND		"list.append"

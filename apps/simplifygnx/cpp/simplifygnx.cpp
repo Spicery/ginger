@@ -1495,7 +1495,8 @@ public:
 			b.put( VID_PROTECTED, "true" );
 			b.put( VID_NAME, g );						
 			b.put( VID_DEF_PKG, "ginger.temporaries" );
-			b.put( VID_SCOPE, "global" );			b.end();
+			b.put( VID_SCOPE, "global" );			
+            b.end();
 			b.add( m );
 			b.end();
 			
@@ -1794,7 +1795,6 @@ void Main::simplify( shared< Ginger::Mnx > & g ) {
 	if ( this->getAbsoluteProcessing() ) {
 		Absolute a( this->project_folders, this->package, this->undefined_allowed );
 		g->visit( a );
-		//outers_found = a.wereOutersFound();
 	} 
 
 	if ( this->getSysappProcessing() ) {	

@@ -41,6 +41,15 @@ private:
 	Node readTry( const bool try_vs_transaction );
 	Node readListOrVector( const bool vector_vs_list, TokType closer );
 	Node readMap( TokType closer );
+	Node readSwitch();
+	Node readSwitchStmnts();
+	Node readThrow();
+	Node readId( const std::string item );
+	Node readEnvVar();
+	Node readDHat();
+	Node readPackage();
+	Node readImport();
+	Node readReturn();
 
 public:
 	void setPatternMode() { this->pattern_mode = true; }

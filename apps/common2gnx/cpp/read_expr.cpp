@@ -168,10 +168,16 @@ Node ReadStateClass::readSingleStmnt() {
 		Item it = this->item_factory->read();
 		//cerr << "SINGLE " << tok_type_name( it->tok_type ) << endl;
 		switch ( it->tok_type ) {
-			case tokty_obrace: return this->readCompoundStmnts( true );
-			case tokty_function: return this->readDefinition();
-			case tokty_if: return this->readIf( tokty_if, tokty_endif );
-			case tokty_for: return this->readFor();
+			case tokty_obrace: 
+				return this->readCompoundStmnts( true );
+			case tokty_function: 
+				return this->readDefinition();
+			case tokty_if: 
+				return this->readIf( tokty_if, tokty_endif );
+			case tokty_for: 
+				return this->readFor();
+			case tokty_switch: 
+				return this->readSwitch();
 			case tokty_dsemi:
 			case tokty_semi: 
 				return makeEmpty();
@@ -858,6 +864,212 @@ Node ReadStateClass::readMap( TokType closer ) {
 	return list.build();
 }
 
+Node ReadStateClass::readSwitchStmnts() {
+	NodeFactory st;
+	st.start( SEQ );
+	while (
+		not ( 
+			this->tryPeekToken( tokty_cbrace ) ||
+			this->tryPeekToken( tokty_case ) ||
+			this->tryPeekToken( tokty_default )
+		) 
+	) {
+		Node x = this->readSingleStmnt();
+		st.add( x );
+	}
+	st.end();
+	return st.build();
+}
+
+Node ReadStateClass::readSwitch() {
+	NodeFactory sw;
+	sw.start( SWITCH );
+
+	bool else_seen = false;
+	Node swelse;
+
+	if ( this->cstyle_mode ) {
+		
+		this->checkToken( tokty_oparen );
+		Node swvalue = this->readExprCheck( tokty_cparen );
+		sw.add( swvalue );
+	
+		this->checkToken( tokty_obrace );
+	
+		for (;;) {
+			if ( this->tryToken( tokty_case ) ) {
+				Node e = this->readExpr();
+				sw.add( e );
+				this->checkToken( tokty_colon );
+				Node b = this->readSwitchStmnts();
+				sw.add( b );
+			} else if ( this->tryToken( tokty_default ) ) {
+				if ( else_seen ) {
+					throw Ginger::Mishap( "Switch with two default parts" );
+				}
+				else_seen = true;
+				this->checkToken( tokty_colon );
+				swelse = this->readSwitchStmnts();
+			} else {
+				break;
+			}
+		}
+		this->checkToken( tokty_cbrace );
+
+	} else {
+		Node swvalue = this->readExpr();
+		sw.add( swvalue );
+
+		for (;;) {
+			if ( this->tryToken( tokty_case ) ) {
+				Node e = this->readExprCheck( tokty_then );
+				sw.add( e );
+				Node b = this->readStmnts();
+				sw.add( b );
+			} else if ( this->tryToken( tokty_else ) ) {
+				if ( else_seen ) {
+					throw Ginger::Mishap( "Switch with two else parts" );
+				}
+				else_seen = true;
+				swelse = this->readOptExpr();
+			} else {
+				break;
+			}
+		}
+		this->checkToken( tokty_endswitch );
+	}
+
+	if ( else_seen ) {
+		sw.add( swelse );
+	}
+
+	sw.end();
+	return sw.build();
+}
+
+Node ReadStateClass::readThrow() {
+	NodeFactory panic;
+	panic.start( "throw" );
+
+	panic.put( "event", this->readIdItem()->nameString() );
+	panic.put(
+		"level",
+		this->tryToken( tokty_bang ) ? "rollback" :
+		this->tryToken( tokty_dbang ) ? "failover" :
+		this->tryToken( tokty_panic ) ? "panic" :
+		"escape"
+	);
+	if ( this->tryPeekToken( tokty_oparen ) ) {
+		Node e = this->readExpr();
+		panic.add( e );
+	} else {
+		panic.start( SEQ );
+		panic.end();
+	}
+
+	panic.end();
+	return panic.build();
+}
+
+Node ReadStateClass::readId( const std::string name ) {
+	SysConst * sysc = lookupSysConst( name );
+	if ( sysc != NULL ) {
+		NodeFactory constant;
+		constant.start( "constant" );
+		constant.put( "type", sysc->tag );
+		constant.put( "value", sysc->value );
+		constant.end();
+		return constant.build();
+	} else {
+		NodeFactory id;
+		id.start( this->pattern_mode ? "var" : "id" );
+		id.put( "name", name );
+		id.end();
+		return id.build();
+	}
+}
+
+Node ReadStateClass::readEnvVar() {
+	this->checkToken( tokty_obrace );
+	NodeFactory envvar;
+	envvar.start( SYSAPP );
+	envvar.put( "name", "sysGetEnv" );
+	envvar.start( "constant" );
+	envvar.put( "type", "string" );
+	envvar.put( "value", this->item_factory->read()->nameString() );
+	envvar.end();		
+	this->checkToken( tokty_cbrace );
+	envvar.end();
+	return envvar.build();
+}
+
+Node ReadStateClass::readDHat() {
+	NodeFactory maplet;
+	maplet.start( SYSAPP );
+	maplet.put( "name", "newMaplet" );
+	Item it = this->readIdItem();
+	const std::string name( it->nameString() );
+	maplet.start( "constant" );
+	maplet.put( "type", "symbol" );
+	maplet.put( "value", name );
+	maplet.end();
+	maplet.start( "id" );
+	maplet.put( "name", name );
+	maplet.end(); 
+	maplet.end();
+	return maplet.build();
+}
+
+Node ReadStateClass::readPackage() {
+	NodeFactory pkg;
+	pkg.start( "package" );
+	string url = this->readPkgName();
+	pkg.put( "url", url );
+	this->checkToken( tokty_semi );
+	Node body = this->readStmntsCheck( tokty_endpackage );
+	pkg.add( body );
+	pkg.end();
+	return pkg.build();
+}
+
+Node ReadStateClass::readImport() {
+	NodeFactory imp;
+	imp.start( "import" );
+	bool pervasive, qualified;
+	
+	readImportQualifiers( *this, pervasive, qualified );
+	imp.put( "pervasive", pervasive ? "true" : "false" );
+	imp.put( "qualified", qualified ? "true" : "false" );
+	
+	readImportMatch( *this, imp );
+	
+	this->checkToken( tokty_from );
+	string url = this->readPkgName();
+	imp.put( "from", url );
+
+	if ( this->tryName( "alias" ) ) {
+    	Item item = this->readIdItem();
+		imp.put( "alias", item->nameString() );
+	}
+	
+	if ( this->tryName( "into" ) ) {
+		readImportInto( *this, imp );
+	}
+	
+	imp.end();
+	return imp.build();
+}
+
+Node ReadStateClass::readReturn() {
+	NodeFactory ret;
+	ret.start( "assert" );
+	ret.put( "tailcall", "true" );
+	Node n = this->readExpr();
+	ret.add( n );
+	ret.end();
+	return ret.build();
+}
+
 Node ReadStateClass::prefixProcessingCore() {
 	ItemFactory ifact = this->item_factory;
 	Item item = ifact->read();
@@ -901,81 +1113,23 @@ Node ReadStateClass::prefixProcessingCore() {
 	}
 
 	switch ( fnc ) {
-		case tokty_id: {
-			std::string & name = item->nameString();
-			SysConst * sysc = lookupSysConst( name );
-			if ( sysc != NULL ) {
-				NodeFactory constant;
-				constant.start( "constant" );
-				constant.put( "type", sysc->tag );
-				constant.put( "value", sysc->value );
-				constant.end();
-				return constant.build();
-			} else {
-				NodeFactory id;
-				id.start( this->pattern_mode ? "var" : "id" );
-				id.put( "name", name );
-				id.end();
-				return id.build();
-			}
-		}
+		case tokty_id: 
+			return this->readId( item->nameString() );
 		// changed for ${VAR} case study
-		case tokty_envvar: {
-			this->checkToken( tokty_obrace );
-			NodeFactory envvar;
-			envvar.start( SYSAPP );
-			envvar.put( "name", "sysGetEnv" );
-			envvar.start( "constant" );
-			envvar.put( "type", "string" );
-			envvar.put( "value", ifact->read()->nameString() );
-			envvar.end();		
-			this->checkToken( tokty_cbrace );
-			envvar.end();
-			return envvar.build();
-		}
-		case tokty_return: {
-			NodeFactory ret;
-			ret.start( "assert" );
-			ret.put( "tailcall", "true" );
-			Node n = this->readExpr();
-			ret.add( n );
-			ret.end();
-			return ret.build();
-		}
-		case tokty_throw: {
-			NodeFactory panic;
-			panic.start( "throw" );
-
-			panic.put( "event", this->readIdItem()->nameString() );
-			panic.put(
-				"level",
-				this->tryToken( tokty_bang ) ? "rollback" :
-				this->tryToken( tokty_dbang ) ? "failover" :
-				this->tryToken( tokty_panic ) ? "panic" :
-				"escape"
-			);
-			if ( this->tryPeekToken( tokty_oparen ) ) {
-				Node e = this->readExpr();
-				panic.add( e );
-			} else {
-				panic.start( SEQ );
-				panic.end();
-			}
-
-			panic.end();
-			return panic.build();
-		}
+		case tokty_envvar: 
+			return this->readEnvVar();
+		case tokty_return: 
+			return this->readReturn();
+		case tokty_throw: 
+			return this->readThrow();
 		case tokty_try: 
-		case tokty_transaction: {
+		case tokty_transaction: 
 			return this->readTry( fnc == tokty_try );
-		}
-		case tokty_charseq: {
+		case tokty_charseq: 
 			return makeCharSequence( item );
-		}
 		case tokty_val:
-        case tokty_var : {
+        case tokty_var : 
 	        return this->readVarVal( fnc );
-        }
 		case tokty_oparen: {
 			if ( this->cstyle_mode ) {
 				return this->readOptEmptyExprCheck( tokty_cparen );
@@ -983,32 +1137,27 @@ Node ReadStateClass::prefixProcessingCore() {
 				return this->readStmntsCheck( tokty_cparen );
 			}
 		}
-		case tokty_obracket: {
+		case tokty_obracket:
 			//	In version 0.7: return this->readListOrVector( this->cstyle_mode, tokty_cbracket );
 			return this->readListOrVector( true, tokty_cbracket );
-		}
-		case tokty_obrace: {
+		case tokty_obrace: 
 			//	In version 0.7: return this->readListOrVector( true, tokty_cbrace );
 			return this->readMap( tokty_cbrace );
-		}
-		case tokty_fat_obracket: {
+		case tokty_fat_obracket:
 			//	In version 0.7: return this->readMap( tokty_fat_cbrace );
 			return this->readListOrVector( false, tokty_fat_cbracket );
-		}
 		case tokty_fat_ocbracket: {
 			Node list( new Ginger::Mnx( LIST ) );
 			return list;
 		}
-		case tokty_unless: {
+		case tokty_unless:
 			return this->readIf( tokty_unless, tokty_endunless );
-		}
 		case tokty_if: {
 			if ( this->cstyle_mode ) break;
 			return this->readIf( tokty_if, tokty_endif );
 		}
-		case tokty_syscall: {
+		case tokty_syscall:
 			return this->readSyscall();
-		}
 		case tokty_for: {
 			if ( this->cstyle_mode ) break;
 		  	return this->readFor();
@@ -1023,72 +1172,26 @@ Node ReadStateClass::prefixProcessingCore() {
 				break;
 			}
 		}
-		case tokty_define: {
+		case tokty_define:
 			//cerr << "DEFINE" << endl;
 			return this->readDefinition();
-		}
-		case tokty_fn: {
+		case tokty_fn: 
 			return this->readLambda();
-		}
-		case tokty_lt: {
+		case tokty_lt:
 			return this->readElement();
+		case tokty_package: 
+			return this->readPackage();
+		case tokty_import: 
+			return this->readImport();
+		case tokty_dhat:
+			return this->readDHat();
+		case tokty_switch: {
+			if ( this->cstyle_mode ) break;
+			return this->readSwitch();
 		}
-		case tokty_package: {
-			NodeFactory pkg;
-			pkg.start( "package" );
-			string url = this->readPkgName();
-			pkg.put( "url", url );
-			this->checkToken( tokty_semi );
-			Node body = this->readStmntsCheck( tokty_endpackage );
-			pkg.add( body );
-			pkg.end();
-			return pkg.build();
-		}
-		case tokty_import: {
-			NodeFactory imp;
-			imp.start( "import" );
-			bool pervasive, qualified;
-			
-			readImportQualifiers( *this, pervasive, qualified );
-			imp.put( "pervasive", pervasive ? "true" : "false" );
-			imp.put( "qualified", qualified ? "true" : "false" );
-			
-			readImportMatch( *this, imp );
-			
-			this->checkToken( tokty_from );
-			string url = this->readPkgName();
-			imp.put( "from", url );
+		default: 
+			{}
 
-			if ( this->tryName( "alias" ) ) {
-	        	Item item = this->readIdItem();
-				imp.put( "alias", item->nameString() );
-			}
-			
-			if ( this->tryName( "into" ) ) {
-				readImportInto( *this, imp );
-			}
-			
-			imp.end();
-			return imp.build();
-		}
-		case tokty_dhat: {
-			NodeFactory maplet;
-			maplet.start( SYSAPP );
-			maplet.put( "name", "newMaplet" );
-			Item it = this->readIdItem();
-			const std::string name( it->nameString() );
-			maplet.start( "constant" );
-			maplet.put( "type", "symbol" );
-			maplet.put( "value", name );
-			maplet.end();
-			maplet.start( "id" );
-			maplet.put( "name", name );
-			maplet.end(); 
-			maplet.end();
-			return maplet.build();
-		}
-		default: {
-		}
 	}
 	ifact->unread();
     return Node();

@@ -896,28 +896,81 @@ void CodeGenClass::compileFor( Gnx query, Gnx body, LabelClass * contn ) {
 	cq.compileFor( query, body, contn );
 }
 
-void CodeGenClass::compileGnxIf( Gnx mnx, LabelClass * contn ) {
-	const int a = mnx->size();
-	if ( a == 2 ) {
+void CodeGenClass::compileGnxSwitch( const int offset, const int switch_slot, int tmp_slot, Gnx mnx, LabelClass * contn ) {
+	const int a = mnx->size() - offset;
+	if ( a == 0 ) {
+		this->continueFrom( contn );
+	} else if ( a == 1 ) {
+		this->compileGnx( mnx->child( offset ), contn );
+	} else if ( a == 2 ) {
+		LabelClass doneLab( this );
+		if ( tmp_slot == -1 ) {
+			//	Allocate tmp_slot on first use.
+			tmp_slot = this->tmpvar();
+		}
+		this->compile1( mnx->child( offset ), CONTINUE_LABEL );
+		this->vmiPOP_INNER_SLOT( tmp_slot );
+		this->vmiTEST( switch_slot, CMP_NEQ, tmp_slot, doneLab.jumpToJump( contn ) );
+		this->compileGnx( mnx->child( offset + 1 ), contn );
+		doneLab.labelSet();		
+	} else {
+		LabelClass elseLab( this );
+		LabelClass doneLab( this );
+
+		if ( tmp_slot == -1 ) {
+			//	Allocate tmp_slot on first use.
+			tmp_slot = this->tmpvar();
+		}
+		this->compile1( mnx->child( offset ), CONTINUE_LABEL );
+		this->vmiPOP_INNER_SLOT( tmp_slot );
+		this->vmiTEST( switch_slot, CMP_NEQ, tmp_slot, &elseLab );
+
+		this->compileGnx( mnx->child( offset + 1 ), doneLab.jumpToJump( contn ) );
+
+		elseLab.labelSet();
+		this->compileGnxSwitch( offset + 2, switch_slot, tmp_slot, mnx, contn );
+
+		doneLab.labelSet();
+
+	}
+}
+
+void CodeGenClass::compileGnxSwitch( Gnx mnx, LabelClass * contn ) {
+	int switch_slot = this->tmpvar();
+	this->compile1( mnx->child( 0 ), CONTINUE_LABEL );
+	this->vmiPOP_INNER_SLOT( switch_slot );
+	//	N.B. -1 is an invalid tmpvar.
+	this->compileGnxSwitch( 1, switch_slot, -1, mnx, contn );
+}
+
+void CodeGenClass::compileGnxIf( int offset, Gnx mnx, LabelClass * contn ) {
+	const int a = mnx->size() - offset;
+	if ( a == 0 ) {
+		this->continueFrom( contn );
+	} else if ( a == 1 ) {
+		this->compileGnx( mnx->child( offset ), contn );
+	} else if ( a == 2 ) {
 		//	codegen1( codegen, term_index( mnx, 0 ) );
 		//	vmiIFNOT( codegen, d );
-		LabelClass d( this );
-		this->compileIfNot( mnx->child( 0 ), d.jumpToJump( contn ), CONTINUE_LABEL );
-		this->compileGnx( mnx->child( 1 ), contn );
-		d.labelSet();
-	} else if ( a == 3 ) {
-		LabelClass e( this );
+		LabelClass doneLab( this );
+		this->compileIfNot( mnx->child( offset ), doneLab.jumpToJump( contn ), CONTINUE_LABEL );
+		this->compileGnx( mnx->child( offset + 1 ), contn );
+		doneLab.labelSet();
+	} else {
+		LabelClass elseLab( this );
 		//	codegen1( codegen, term_index( mnx, 0 ) );
 		//	vmiIFNOT( codegen, e );
-		LabelClass d( this );
-		this->compileIfNot( mnx->child( 0 ), &e, CONTINUE_LABEL );
-		this->compileGnx( mnx->child( 1 ), d.jumpToJump( contn ) );
-		e.labelSet();
-		this->compileGnx( mnx->child( 2 ), d.jumpToJump( contn ) );
-		d.labelSet();
-	} else {
-		throw Ginger::Unreachable( __FILE__, __LINE__ );
+		LabelClass doneLab( this );
+		this->compileIfNot( mnx->child( offset ), &elseLab, CONTINUE_LABEL );
+		this->compileGnx( mnx->child( offset + 1 ), doneLab.jumpToJump( contn ) );
+		elseLab.labelSet();
+		this->compileGnxIf( offset + 2, mnx, contn );
+		doneLab.labelSet();
 	}
+}
+
+void CodeGenClass::compileGnxIf( Gnx mnx, LabelClass * contn ) {
+	this->compileGnxIf( 0, mnx, contn );
 }
 
 void CodeGenClass::compileGnxFn( Gnx mnx, LabelClass * contn ) {
@@ -1189,6 +1242,8 @@ void CodeGenClass::compileGnx( Gnx mnx, LabelClass * contn ) {
 		this->vmiPUSH( vid, contn );
 	} else if ( nm == IF ) {
 		this->compileGnxIf( mnx, contn );
+	} else if ( nm == SWITCH && mnx->size() >= 1 ) {
+		this->compileGnxSwitch( mnx, contn );
 	} else if ( nm == OR && mnx->size() == 2 ) {
 		this->compileBoolAbsAndOr( true, false, mnx, contn );
 	} else if ( nm == AND && mnx->size() == 2 ) {

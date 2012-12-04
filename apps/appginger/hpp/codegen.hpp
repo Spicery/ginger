@@ -241,6 +241,9 @@ private:
 	void compileIfTest( bool sense, Gnx mnx, LabelClass * dst, LabelClass * contn );
 	void compileGnxConstant( Gnx mnx, LabelClass * contn );
 	void compileGnxIf( Gnx mnx, LabelClass * contn );
+	void compileGnxIf( int offset, Gnx mnx, LabelClass * contn );
+	void compileGnxSwitch( Gnx mnx, LabelClass * contn );
+	void compileGnxSwitch( const int offset, const int switch_slot, int tmp_slot, Gnx mnx, LabelClass * contn );
 	void compileGnxFn( Gnx mnx, LabelClass * contn );
 	void compileGnxApp( Gnx mnx, LabelClass * contn );
 	void compileGnxSysApp( Gnx mnx, LabelClass * contn );

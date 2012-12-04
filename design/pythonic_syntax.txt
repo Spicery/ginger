@@ -1,0 +1,25 @@
+01:19:10 Stephen Leach: Evening. Sort of *cough*
+01:19:33 Graham Higgins : quite
+01:22:24 Graham Higgins : very neat trick inverting the Python whitespace
+01:23:01 Stephen Leach: Aye, it wasn't obvious
+01:23:59 Stephen Leach: But as far as I can tell it gives you the key benefits of Python and (importantly) creates only a very small weakness for errors
+
+
+01:39:45 Stephen Leach: So where in Python you might write this ...
+01:40:38 Stephen Leach: def myMethod( self, a, b ): if self.test( a ) and self.test( b ): return self.compute( a, b ) else: return self.compute( b,a )
+01:40:47 Stephen Leach: In Ginger you would write
+01:41:42 Stephen Leach: def ^myMethod( a, b ) =>> compute( if ^test( a ) and ^test( b ) then a, b else b,a  endif ) enddefine
+01:41:51 Stephen Leach: oops
+01:41:59 Stephen Leach: def ^myMethod( a, b ) =>> ^compute( if ^test( a ) and ^test( b ) then a, b else b,a  endif ) enddefine
+01:42:11 Stephen Leach: And with the cute syntax ...
+01:43:13 Graham Higgins : how universal is the ^ token, can it be used to reference attributes? ^foo, e.g.
+01:43:33 Stephen Leach: 
+
+def ^myMethod( a, b ):
+    ^compute( 
+        if ^test( a ) and ^test( b ):
+            a, b 
+        else: 
+            b,a
+    )
+

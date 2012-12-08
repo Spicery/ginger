@@ -178,6 +178,8 @@ Node ReadStateClass::readSingleStmnt() {
 				return this->readFor();
 			case tokty_switch: 
 				return this->readSwitch();
+			case tokty_recordclass:
+				return this->readRecordClass();
 			case tokty_dsemi:
 			case tokty_semi: 
 				return makeEmpty();
@@ -1107,11 +1109,12 @@ Node ReadStateClass::readRecordClass() {
 	
 	vector< string > slot_names;
 	const string class_name( this->readIdName() );
+	if ( this->cstyle_mode ) this->checkToken( tokty_obrace );
 	while ( this->tryToken( tokty_slot ) ) {
 		slot_names.push_back( this->readIdName() );
 		this->checkToken( tokty_semi );
 	}
-	this->checkToken( tokty_endrecordclass );
+	this->checkToken( this->cstyle_mode ? tokty_cbrace : tokty_endrecordclass );
 
 	NodeFactory f;
 	f.start( SEQ );

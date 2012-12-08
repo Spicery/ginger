@@ -99,6 +99,7 @@ ItemMap::ItemMap( const bool cstyle ) {
 	add( !cstyle,	"endfor",			tokty_endfor, 		Clo, 		0		);
 	add( !cstyle,	"endif",			tokty_endif, 		Clo, 		0		);
 	add( !cstyle,	"endpackage",		tokty_endpackage, 	Clo, 		0		);
+	add( !cstyle,	"endrecordclass",	tokty_endrecordclass, 	Clo, 		0		);
 	add( !cstyle,	"endswitch",		tokty_endswitch, 	Clo, 		0		);
 	add( !cstyle,	"endtransaction", 	tokty_endtransaction, Clo,		0		);
 	add( !cstyle,	"endtry",			tokty_endtry,		Clo,		0		);
@@ -117,7 +118,9 @@ ItemMap::ItemMap( const bool cstyle ) {
 	add( true,	 	"or",				tokty_or,			BFo, 		1800	);
 	add( true,	 	"package",			tokty_package,		PrF, 		0		);
 	add( true,		"!!!",				tokty_panic, 		PrF, 		0		);
+	add( !cstyle, 	"recordclass",		tokty_recordclass,	PrF,		0		);
 	add( true,	 	"return",			tokty_return,		PrF, 		0		);
+	add( !cstyle,	"slot",				tokty_slot,			Clo,		0		);
 	add( true,      "switch",			tokty_switch,       PrF,        0       );
 	add( !cstyle,	"then",				tokty_then,			Clo, 		0		);
 	add( true,		"throw",			tokty_throw,		PrF,		0		);

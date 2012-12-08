@@ -86,12 +86,12 @@ string ReadStateClass::readPkgName() {
 	return it->nameString();
 }
 
-Item ReadStateClass::readIdItem() {
+const string ReadStateClass::readIdName() {
 	Item it = this->item_factory->read();
 	if ( it->tok_type != tokty_id ) {
 		throw Ginger::Mishap( "Identifier expected" ).culprit( "Found", it->nameString() );
 	}
-	return it;
+	return it->nameString();
 }
 
 Node ReadStateClass::readExprPrec( int prec ) {
@@ -703,10 +703,7 @@ Node ReadStateClass::readTry( const bool try_vs_transaction ) {
 			ftry.start( "catch.return" );
 		} else {
 			ftry.start( "catch.then" );
-
-			Item item = this->readIdItem();
-			const std::string name = item->nameString();
-			ftry.put( "event", name );			
+			ftry.put( "event", this->readIdName() );			
 		}		
 		
 		ReadStateClass pattern( *this );
@@ -739,8 +736,7 @@ Node ReadStateClass::readVarVal( TokType fnc ) {
 	NodeFactory var;
 	var.start( VAR );
 	readTags( *this, var, "tag", true );
-	Item item = this->readIdItem();
-	var.put( VID_NAME, item->nameString() );
+	var.put( VID_NAME, this->readIdName() );
 	var.put( VID_PROTECTED, fnc == tokty_val ? "true" : "false" );
 	var.end();
 	Node v = var.build();
@@ -760,9 +756,8 @@ Node ReadStateClass::readElement() {
 		element.put( SYSAPP_NAME, "newElement" );
 		element.start( SYSAPP );
 		element.put( SYSAPP_NAME, "newAttrMap" );
-		
-		Item item = this->readIdItem();
-		string element_name( item->nameString() );
+
+		const string element_name( this->readIdName() );
 		element.start( CONSTANT );
 		element.put( CONSTANT_TYPE, "string" );
 		element.put( CONSTANT_VALUE, element_name );
@@ -772,10 +767,9 @@ Node ReadStateClass::readElement() {
 		for (;;) {
 			if ( this->tryToken( tokty_gt ) ) break;
 			if ( this->tryToken( tokty_slashgt ) ) { closed = true; break; }
-			Item item = this->readIdItem();
 			element.start( CONSTANT );
 			element.put( CONSTANT_TYPE, "string" );
-			element.put( CONSTANT_VALUE, item->nameString() );
+			element.put( CONSTANT_VALUE, this->readIdName() );
 			element.end();
 			this->checkToken( tokty_equal );
 			element.start( "assert" );
@@ -795,9 +789,9 @@ Node ReadStateClass::readElement() {
 				element.add( child );
 			}
 			if ( not ended ) {
-				Item item = this->readIdItem();
-				if ( item->nameString() != element_name ) {
-					throw Ginger::Mishap( "Element close tag does not match open tag" ).culprit( "Open tag", element_name ).culprit( "Close tag", item->nameString() );
+				const string ename( this->readIdName() );
+				if ( ename != element_name ) {
+					throw Ginger::Mishap( "Element close tag does not match open tag" ).culprit( "Open tag", element_name ).culprit( "Close tag", ename );
 				}
 				this->checkToken( tokty_gt );
 			}
@@ -951,7 +945,7 @@ Node ReadStateClass::readThrow() {
 	NodeFactory panic;
 	panic.start( "throw" );
 
-	panic.put( "event", this->readIdItem()->nameString() );
+	panic.put( "event", this->readIdName() );
 	panic.put(
 		"level",
 		this->tryToken( tokty_bang ) ? "rollback" :
@@ -1007,8 +1001,7 @@ Node ReadStateClass::readDHat() {
 	NodeFactory maplet;
 	maplet.start( SYSAPP );
 	maplet.put( "name", "newMaplet" );
-	Item it = this->readIdItem();
-	const std::string name( it->nameString() );
+	const string name( this->readIdName() );
 	maplet.start( "constant" );
 	maplet.put( "type", "symbol" );
 	maplet.put( "value", name );
@@ -1048,8 +1041,7 @@ Node ReadStateClass::readImport() {
 	imp.put( "from", url );
 
 	if ( this->tryName( "alias" ) ) {
-    	Item item = this->readIdItem();
-		imp.put( "alias", item->nameString() );
+		imp.put( "alias", this->readIdName() );
 	}
 	
 	if ( this->tryName( "into" ) ) {
@@ -1068,6 +1060,139 @@ Node ReadStateClass::readReturn() {
 	ret.add( n );
 	ret.end();
 	return ret.build();
+}
+
+/*
+Transforms 
+	recordclass <RNAME>
+		slot <NAME1>;
+		slot <NAME2>;
+		...
+		slot <NAME_N>;
+	endrecordclass;
+into
+	<seq>
+		<bind>
+			<var name="${RNAME}"/>
+			<sysapp value="newRecordClass">
+				<constant type="string" value="${RNAME}"/>
+				<constant type="int" value="${N}"/>
+			</sysapp>
+		</bind>
+		<bind>
+			<var name="new${RNAME}"/>
+			<sysapp value="classConstructor"/>
+				<id name="${RNAME}"/>
+			</sysapp>
+		</bind>
+		<!-- one for each slot -->
+		<bind>
+			<var name="${NAME_1}"/>
+			<sysapp value="classAccessor"/>
+				<id name="${RNAME}"/>
+				<constant type="int" value="1"/>
+			</sysapp>
+		</bind>
+		....
+		<bind>
+			<var name="${NAME_N}"/>
+			<sysapp value="classAccessor"/>
+				<id name="${RNAME}"/>
+				<constant type="int" value="${N}"/>
+			</sysapp>
+		</bind>
+	</seq>
+*/
+Node ReadStateClass::readRecordClass() {
+	
+	vector< string > slot_names;
+	const string class_name( this->readIdName() );
+	while ( this->tryToken( tokty_slot ) ) {
+		slot_names.push_back( this->readIdName() );
+		this->checkToken( tokty_semi );
+	}
+	this->checkToken( tokty_endrecordclass );
+
+	NodeFactory f;
+	f.start( SEQ );
+
+	//	Datakey.
+	f.start( BIND );
+	f.start( VAR ); 
+	f.put( VID_NAME, class_name );
+	f.end(); // VAR
+	f.start( SYSAPP );
+	f.put( SYSAPP_NAME, "newRecordClass" );
+	f.start( CONSTANT );
+	f.put( CONSTANT_TYPE, "string" );
+	f.put( CONSTANT_VALUE, class_name );
+	f.end();	//	CONSTANT
+	f.start( CONSTANT );
+	f.put( CONSTANT_TYPE, "int" );
+	f.put( CONSTANT_VALUE, slot_names.size() );	
+	f.end(); 	// CONSTANT
+	f.end();	//	SYSAPP
+	f.end(); // BIND
+
+	//	Constructor
+	f.start( BIND );
+	f.start( VAR ); 
+	{
+		stringstream s;
+		s << "new";
+		s << class_name;
+		f.put( VID_NAME, s.str() );
+	}
+	f.end(); // VAR
+	f.start( SYSAPP );
+	f.put( SYSAPP_NAME, "newClassConstructor" );
+	f.start( ID );
+	f.put( VID_NAME, class_name );
+	f.end();	//	ID
+	f.end();	//	SYSAPP
+	f.end(); //	BIND
+
+	//	Recogniser
+	f.start( BIND );
+	f.start( VAR ); 
+	{
+		stringstream s;
+		s << "is";
+		s << class_name;
+		f.put( VID_NAME, s.str() );
+	}
+	f.end(); // VAR
+	f.start( SYSAPP );
+	f.put( SYSAPP_NAME, "newClassRecogniser" );
+	f.start( ID );
+	f.put( VID_NAME, class_name );
+	f.end();	//	ID
+	f.end();	//	SYSAPP
+	f.end(); //	BIND
+
+	for ( int i = 0; i < slot_names.size(); i++ ) {
+		const string & ith_name( slot_names[ i ] );
+
+		f.start( BIND );
+		f.start( VAR ); 
+		f.put( VID_NAME, ith_name );
+		f.end(); // VAR
+		f.start( SYSAPP );
+		f.put( SYSAPP_NAME, "newClassAccessor" );
+		f.start( ID );
+		f.put( VID_NAME, class_name );
+		f.end();	//	ID
+		f.start( CONSTANT );
+		f.put( CONSTANT_TYPE, "int" );
+		f.put( CONSTANT_VALUE, i + 1 );	
+		f.end(); //	CONSTANT
+		f.end();	//	SYSAPP
+		f.end(); //	BIND
+
+	}
+
+	f.end(); // SEQ
+	return f.build();
 }
 
 Node ReadStateClass::prefixProcessingCore() {
@@ -1189,6 +1314,8 @@ Node ReadStateClass::prefixProcessingCore() {
 			if ( this->cstyle_mode ) break;
 			return this->readSwitch();
 		}
+		case tokty_recordclass:
+			return this->readRecordClass();
 		default: 
 			{}
 

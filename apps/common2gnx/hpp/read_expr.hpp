@@ -26,7 +26,7 @@ private:
 	Node readStmntsCheck( TokType fnc );
 	Node readStmnts();
 	Node readCompoundStmnts( bool obrace_read );
-	Item readIdItem();
+	const std::string readIdName();
 	Node readExprCheck( TokType fnc );
 	Node readIf( TokType sense, TokType closer );
 	Node readSyscall();
@@ -50,6 +50,7 @@ private:
 	Node readPackage();
 	Node readImport();
 	Node readReturn();
+	Node readRecordClass();
 
 public:
 	void setPatternMode() { this->pattern_mode = true; }

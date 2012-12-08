@@ -162,6 +162,9 @@ Ref * sysNewClass( Ref * pc, MachineClass * vm ) {
 	return pc;
 }
 
+/*
+	newRecordClass( title:String, nslots:Small ) -> ( new_record_key )
+*/
 Ref * sysNewRecordClass( Ref * pc, MachineClass * vm ) {
 	if ( vm->count == 2 ) {
 
@@ -202,14 +205,23 @@ Ref * sysNewRecordClass( Ref * pc, MachineClass * vm ) {
 	}
 }
 
-static Ref * sysargRecognise( Ref * pc, MachineClass * vm ) {
-	if ( vm->count != 1 ) throw Ginger::Mishap( "Wrong number of arguments" );
+Ref * sysargRecognise( Ref * pc, MachineClass * vm ) {
+	if ( vm->count != 1 ) throw Ginger::Mishap( "Wrong number of arguments for recogniser" );
 	Ref this_item = vm->fastPeek();
 	Ref that_key = pc[ -1 ];
+	#ifdef DBG_RECOGNISER
+		cerr << "Recogniser: that_key = " << that_key;
+		cerr << " this_item = " << this_item;
+		cerr << " key = " << refDataKey( this_item );
+		cerr << endl;
+	#endif
 	vm->fastPeek() = refDataKey( this_item ) == that_key ? SYS_TRUE : SYS_FALSE;
 	return pc;
 }
 
+/*
+	classRecogniser( key )( object ) -> Bool
+*/
 Ref * sysClassRecogniser( Ref * pc, MachineClass *vm ) {
 	if ( vm->count != 1 ) throw Ginger::Mishap( "Wrong number of arguments" );
 	Ref kk = vm->fastPeek();
@@ -222,13 +234,11 @@ Ref * sysClassRecogniser( Ref * pc, MachineClass *vm ) {
 	return pc;
 }
 
-//#include <iostream>
-//#include "sysprint.hpp"
 
 static Ref * sysargdatConstruct( Ref * pc, MachineClass *vm ) {
 	long N = ToULong( pc[-1] );
 	Ref kk = pc[-2];
-	if ( vm->count != N ) throw Ginger::Mishap( "Wrong number of arguments" );
+	if ( vm->count != N ) throw Ginger::Mishap( "Wrong number of arguments for constructor" );
 	//std::cout << "NFIELDS = " << N << std::endl;
 	//refPrint( std::cout, kk );
 	//std::cout << std::endl;
@@ -241,6 +251,9 @@ static Ref * sysargdatConstruct( Ref * pc, MachineClass *vm ) {
 	return pc;
 }
 
+/*
+	classConstructor( key )( arg1, ..., argN ) -> instance
+*/
 Ref * sysClassConstructor( Ref * pc, MachineClass *vm ) {
 	if ( vm->count != 1 ) throw Ginger::Mishap( "Wrong number of arguments" );
 	Ref kk = vm->fastPeek();
@@ -264,11 +277,14 @@ static Ref * sysargdatAccess( Ref * pc, MachineClass *vm ) {
 	if ( refDataKey( this_item ) == that_key ) {
 		vm->fastPeek() = RefToPtr4( this_item )[ N ];
 	} else {
-		throw Ginger::Mishap( "ToBeDone" );
+		throw Ginger::Mishap( "Invalid type for field access" ).culprit( "Expected", refToString( that_key ) ).culprit( "Actual", refToString( this_item ) );
 	}
 	return pc;
 }
 
+/*
+	classAccessor( key, N:Small )( instance ) -> nth_field_of_instance
+*/
 Ref * sysClassAccessor( Ref * pc, MachineClass *vm ) {
 	if ( vm->count != 2 ) throw Ginger::Mishap( "Wrong number of arguments" );
 	Ref N = vm->fastPop();
@@ -288,6 +304,10 @@ Ref * sysClassAccessor( Ref * pc, MachineClass *vm ) {
 	}
 	return pc;
 }
+
+/*
+	classUnsafeAccessor( key, N:Small )( instance ) -> nth_field_of_instance
+*/
 
 Ref * sysClassUnsafeAccessor( Ref * pc, MachineClass *vm ) {
 	if ( vm->count != 2 ) throw Ginger::Mishap( "Wrong number of arguments" );
@@ -323,6 +343,9 @@ static Ref * sysargExplode( Ref * pc, MachineClass * vm ) {
 	return pc;
 }
 
+/*
+	classExploder( key )( instance ) -> ( arg1, ..., argN )
+*/
 Ref * sysClassExploder( Ref * pc, MachineClass * vm ) {
 	if ( vm->count != 1 ) throw Ginger::Mishap( "Wrong number of arguments" );
 	Ref key = vm->fastPeek();

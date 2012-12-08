@@ -180,17 +180,21 @@ private:
 		this->out << "}";
 	}
 
+	//	<TYPE FIELD ...>
+	//	
 	void refInstancePrint( Ref * rec_K ) {
 		unsigned long len = lengthOfInstance( rec_K );
 		//std::cout << "Length of object " << len << std::endl;
-		bool sep = false;
+		//bool sep = false;
+		this->out << "<";
 		this->refPrint( titleOfInstance( rec_K ) );
-		this->out << "[" << len << "]{";
+		//this->out << "[" << len << "]{";
 		for ( unsigned long i = 1; i <= len; i++ ) {
-			if ( sep ) { this->out << ","; } else { sep = true; }
+			//if ( sep ) { this->out << ","; } else { sep = true; }
+			this->out << " ";
 			this->refPrint( rec_K[ i ] ); 
 		}
-		this->out << "}";
+		this->out << ">";
 	}
 
 	void refDoublePrint( const Ref r ) {
@@ -215,7 +219,13 @@ public:
 			Ref * obj_K = RefToPtr4( r );
 			const Ref key = * obj_K;
 			if ( IsFunctionKey( key ) ) {
-				this->out << "<function>";
+				if ( IsCoreFunctionKey( key ) ) {
+					this->out << "<sysfn>";					
+				} else if ( IsMethodKey( key ) ) {
+					this->out << "<method>";					
+				} else {
+					this->out << "<function>";					
+				}
 			} else if ( key == sysMapletKey ) {
 				refPrint( fastMapletKey( r ) );
 				this->out << " => ";

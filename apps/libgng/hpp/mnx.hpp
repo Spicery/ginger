@@ -153,7 +153,7 @@ public:
 	void clearAttribute( const std::string & key );
 	void clearAllAttributes();
 	void putAttribute( const std::string & key, const std::string & value );
-	void putAttribute( const std::string & key, const int & value );
+	void putAttribute( const std::string & key, const long & value );
 	void putAttributeMap( std::map< std::string, std::string > & attrs );
 	void addChild( shared< Mnx > child );
 	void popFrontChild();
@@ -185,6 +185,7 @@ public:
 	MnxBuilder();
 	void start( const std::string & name );
 	void put( const std::string & key, const std::string & value );
+	void put( const std::string & key, const long & value );
 	void add( shared< Mnx > & child );
 	void end();
 	void save();

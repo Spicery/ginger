@@ -81,7 +81,7 @@ void Mnx::putAttribute( const std::string & key, const std::string & value ) {
 	this->attributes[ key ] = value;
 }
 
-void Mnx::putAttribute( const std::string & key, const int & value ) {
+void Mnx::putAttribute( const std::string & key, const long & value ) {
 	stringstream s;
 	s << value;
 	this->attributes[ key ] = s.str();
@@ -417,6 +417,12 @@ void MnxBuilder::put( const std::string & key, const std::string & value ) {
 	#endif
 	this->stack.back()->putAttribute( key, value );
 }
+
+void MnxBuilder::put( const std::string & key, const long & value ) {
+	this->stack.back()->putAttribute( key, value );
+}
+
+
 
 void MnxBuilder::end() {
 	#ifdef DEBUG

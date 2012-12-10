@@ -75,6 +75,7 @@ to it as a stream.
 #include <getopt.h>
 #include <syslog.h>
 #include <stdlib.h>
+#include <unistd.h>
 
 #include <uuid/uuid.h>
 

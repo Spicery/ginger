@@ -18,9 +18,13 @@ CC=@CXX@
 
 INSTALLDIRS=-DINSTALL_BIN='"$(INSTALL_BIN)"' -DINSTALL_LIB='"$(INSTALL_LIB)"' -DINSTALL_TOOL='"$(INSTALL_TOOL)"'
 
+NONDARWINCXXFLAGS:=
+ifneq ($(shell uname),Darwin)
+	NONDARWINCXXFLAGS=-luuid
+endif
 
 CXXFLAGS=$(INSTALLDIRS) -g -I../hpp -I../../libgng/hpp -I../../libmetainfo/hpp -Wall -Wnon-virtual-dtor
-CFLAGS=-Wmissing-prototypes 
+CFLAGS=-Wmissing-prototypes
 
 OBJS= simplifygnx.o
 
@@ -29,7 +33,7 @@ all: simplifygnx
 # $@ is make shorthand for the target.
 # $@ is make shorthand for the dependencies
 simplifygnx: $(OBJS)
-	@CXX@ $(CXXFLAGS) $(BOOST_CPPFLAGS) -o $@ $^ ../../libgng/cpp/libgng.a ../../libmetainfo/cpp/libmetainfo.a $(wildcard /usr/lib/i386-linux-gnu/libuuid.so)
+	@CXX@ $(CXXFLAGS) $(BOOST_CPPFLAGS) -o $@ $^ ../../libgng/cpp/libgng.a ../../libmetainfo/cpp/libmetainfo.a $(NONDARWINCXXFLAGS)
 	
 clean:
 	rm -f *.o

@@ -24,6 +24,7 @@
 #include <stddef.h>
 #include <syslog.h>
 #include <stdlib.h>
+#include <unistd.h>
 
 #define SHEBANG "shebang"
 

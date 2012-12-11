@@ -4,6 +4,6 @@
 #	packed files archive is in the current directory. 
 #	N.B. You will probably need to run this script with root privileges.
 #
-PACKED_FILES=appginger-packed-files.tgz
+PACKED_FILES=ginger-files.tgz
 INSTALL_DIR=/usr/local
 gzip -d $PACKED_FILES | ( cd $INSTALL_DIR; tar zxf -)

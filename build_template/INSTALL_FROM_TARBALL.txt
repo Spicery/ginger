@@ -4,29 +4,25 @@ How to Install AppGinger from a Binary Tarball
 The following instructions are a summary of the very simple 'install.sh'
 script. All we do is unpack an archive in a suitable place.
 
-1.  Download the binary-tarball AppGinger.tgz. Unpack it to
+1.  Download the binary-tarball ginger.tgz. Unpack it to
     extract these instructions, the license and the packed files
-    'appginger-packed-files.tgz'. 
+    'ginger-files.tgz'. 
+        % cd /tmp
+        % wget <GINGER_TARBALL_URL>/ginger.tgz
+        % tar zxf ginger.tgz
 
-2.  Move the packed files to a temporary location e.g. /tmp. This
-    is only done to keep the description in step 4 easy to explain.
+2.  By default, Ginger will be installed in /usr/local. If you want to
+    change this location edit install.sh and modify the INSTALL_DIR. 
+        % cd ginger
+        % vi install.sh
 
-3.  Change directory to where you want to install AppGinger. We
-    suggest /usr/local. It will install the executables into the 
-    'bin' directory and the support files into 'share/appginger'.
-    The 'bin' directory should be on your $PATH.
-        % cd /usr/local
+3.  Run the install.sh command as root
+        % sudo sh install.sh
 
-4.  Unpack the appginger-files.tgz tarball. 
-        % sudo tar zx /tmp/appginger-packed-files.tgz
-
-5.  To check everything has installed as expected, run a check
-    command. 
-        % appginger-admin check-install
-    You should see a confirmation message that everything is OK.
-
-6.  You may delete the packed files archive to save space.
-        % rm /tmp/appginger-packed-files.tgz
+4.  You may delete the downloaded and unpacked files to save space.
+        % rm /tmp/ginger.tgz 
+        % rm -r /tmp/ginger
 
 ---
 Stephen Leach <stephen.leach@steelypip.com>, 30th Oct 2011
+Revised 11th Dec 2012

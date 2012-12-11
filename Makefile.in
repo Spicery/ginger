@@ -134,12 +134,13 @@ TBPREFIX=usr/local
 TBMAIN=${TBBASE}/${TBPREFIX}
 TBTOOL=${TBMAIN}/libexec
 TBBIN=${TBMAIN}/bin
-TBOUTPUT=ginger.tgz
+TBOUTPUT=ginger-files.tgz
 
 tarball-clean:
 	mkdir -p _build
 	rm -f _build/$(TBOUTPUT)
 	rm -rf _build/$(TBBASE)
+	rm -rf _build/$(TBPACKAGE)
 
 tarball: all tarball-as-is
 
@@ -160,7 +161,7 @@ tarball-as-is:
 	find _build -type d -name .svn | xargs /bin/rm -rf
 	find _build -name '.DS_STORE' | xargs rm -f
 	find _build -name '._*'
-	( cd _build/$(TBBASE); tar cf - . ) | gzip > _build/$(TBPACKAGE)/$(TBOUTPUT)
+	( cd _build/$(TBMAIN); tar cf - . ) | gzip > _build/$(TBPACKAGE)/$(TBOUTPUT)
 	( cd _build; tar cf - $(TBPACKAGE) ) | gzip > _build/$(TBPACKAGE).tgz
 
 test:

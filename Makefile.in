@@ -95,9 +95,9 @@ LIBEXECUTABLES=\
 	apps/lnx2csv/cpp/lnx2csv \
 	apps/lnx2mnx/cpp/lnx2mnx
 
-install: all plaininstall
+install: all install-as-is
 
-plaininstall:
+install-as-is:
 	# Installing user binaries into $(INSTALL_BIN)
 	# Installing toolchain binaries into $(INSTALL_TOOL)
 	# Installing support files $(INSTALL_LIB)
@@ -141,9 +141,10 @@ tarball-clean:
 	rm -f _build/$(TBOUTPUT)
 	rm -rf _build/$(TBBASE)
 
+tarball: all tarball-as-is
 
-tarball: all
-	make clean-tarball
+tarball-as-is:
+	make tarball-clean
 	mkdir -p _build/$(TBPACKAGE)
 	mkdir -p _build/$(TBTOOL)
 	mkdir -p _build/$(TBBIN)

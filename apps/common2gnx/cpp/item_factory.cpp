@@ -248,7 +248,7 @@ void ItemFactoryClass::readAtQuoteCharType( int ch ) {
 		this->text.push_back( ch );
 	}
 	if ( ch == '\n' ) {
-		throw "unterminated string (%s)";
+		throw Ginger::Mishap( "Unterminated string" ).culprit( "String so far", this->text );
 	}
 	Item it = this->item = this->spare;
 	it->tok_type = ( open_quote == '"' ) ? tokty_string : ( open_quote == '\'' ) ? tokty_charseq : tokty_symbol;

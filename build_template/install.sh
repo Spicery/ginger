@@ -11,7 +11,7 @@ INSTALL_DIR=/usr/local
 #	N.B. You will probably need to run this script with root privileges.
 #
 PACKED_FILES=ginger-files.tgz
-gzip -d ${PACKED_FILES} | ( cd ${INSTALL_DIR}; tar zxf -)
+gzip -d < ${PACKED_FILES} | ( cd ${INSTALL_DIR}; tar xf -)
 
 #
 # Now create the uninstaller (uninstall.sh) in the share directory.
@@ -20,10 +20,10 @@ gzip -d ${PACKED_FILES} | ( cd ${INSTALL_DIR}; tar zxf -)
 UNINSTALL_FILE=${INSTALL_DIR}/share/ginger/uninstall.sh
 touch ${UNINSTALL_FILE}
 echo '#!/bin/sh' > ${UNINSTALL_FILE}
-echo "/bin/rm $(INSTALL_DIR}/bin/ginger" >> ${UNINSTALL_FILE}
-echo "/bin/rm $(INSTALL_DIR}/bin/ginger-*" >> ${UNINSTALL_FILE}
-echo "/bin/rm -rf $(INSTALL_DIR}/libexec/ginger" >> ${UNINSTALL_FILE}
-echo "/bin/rm -rf $(INSTALL_DIR}/share/ginger" >> ${UNINSTALL_FILE}
+echo "/bin/rm ${INSTALL_DIR}/bin/ginger" >> ${UNINSTALL_FILE}
+echo "/bin/rm ${INSTALL_DIR}/bin/ginger-*" >> ${UNINSTALL_FILE}
+echo "/bin/rm -rf ${INSTALL_DIR}/libexec/ginger" >> ${UNINSTALL_FILE}
+echo "/bin/rm -rf ${INSTALL_DIR}/share/ginger" >> ${UNINSTALL_FILE}
 chmod a+x ${UNINSTALL_FILE}
 
 INSTALL_INFO_FILE=${INSTALL_DIR}/share/ginger/INSTALL_INFO.txt

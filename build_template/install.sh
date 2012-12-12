@@ -34,3 +34,7 @@ echo "date         : " `date` >> ${INSTALL_INFO_FILE}
 echo "uname -mn    : " `uname -mn` >> ${INSTALL_INFO_FILE}
 echo "uname -rsv   : " `uname -rsv` >> ${INSTALL_INFO_FILE}
 chmod a+r ${INSTALL_INFO_FILE}
+
+# Then install rlwrap
+apt-get install rlwrap
+

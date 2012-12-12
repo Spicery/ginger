@@ -163,6 +163,7 @@ private:
 						e.report();
 						cerr << endl << SYS_MSG_PREFIX << "Reset after runtime error ..." << endl;
 						vm->resetMachine();
+						break;
 					} 			
 				}
 			} catch ( Ginger::CompileTimeError & e ) {

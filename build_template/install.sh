@@ -32,5 +32,5 @@ echo "Ginger Installation from Tarball Information" >> ${INSTALL_INFO_FILE}
 echo "--------------------------------------------" >> ${INSTALL_INFO_FILE}
 echo "date         : " `date` >> ${INSTALL_INFO_FILE}
 echo "uname -mn    : " `uname -mn` >> ${INSTALL_INFO_FILE}
-echo "uname -v     : " `uname -v` >> ${INSTALL_INFO_FILE}
+echo "uname -rsv   : " `uname -rsv` >> ${INSTALL_INFO_FILE}
 chmod a+r ${INSTALL_INFO_FILE}

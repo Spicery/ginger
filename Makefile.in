@@ -172,7 +172,7 @@ tarball-as-is-build-info:
 	echo "-------------------------------------" >> _build/$(TBBUILDINFO)
 	echo "date         : " `date` >> _build/$(TBBUILDINFO)
 	echo "uname -mn    : " `uname -mn` >> _build/$(TBBUILDINFO)
-	echo "uname -v     : " `uname -v` >> _build/$(TBBUILDINFO)
+	echo "uname -rsv   : " `uname -rsv` >> _build/$(TBBUILDINFO)
 	( cd _build/$(TBBASE); echo "space needed : " `du -shc | grep total` ) >> _build/$(TBBUILDINFO)
 
 test:

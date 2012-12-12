@@ -135,6 +135,7 @@ TBMAIN=${TBBASE}/${TBPREFIX}
 TBTOOL=${TBMAIN}/libexec
 TBBIN=${TBMAIN}/bin
 TBOUTPUT=ginger-files.tgz
+TBBUILDINFO=$(TBPACKAGE)/BUILD_INFO.txt
 
 tarball-clean:
 	mkdir -p _build
@@ -161,8 +162,18 @@ tarball-as-is:
 	find _build -type d -name .svn | xargs /bin/rm -rf
 	find _build -name '.DS_STORE' | xargs rm -f
 	find _build -name '._*'
+	make tarball-as-is-build-info
 	( cd _build/$(TBMAIN); tar cf - . ) | gzip > _build/$(TBPACKAGE)/$(TBOUTPUT)
 	( cd _build; tar cf - $(TBPACKAGE) ) | gzip > _build/$(TBPACKAGE).tgz
+
+tarball-as-is-build-info:
+	touch _build/$(TBBUILDINFO)
+	echo "Ginger Tarball Build-time Information" >> _build/$(TBBUILDINFO)
+	echo "-------------------------------------" >> _build/$(TBBUILDINFO)
+	echo "date         : " `date` >> _build/$(TBBUILDINFO)
+	echo "uname -mn    : " `uname -mn` >> _build/$(TBBUILDINFO)
+	echo "uname -v     : " `uname -v` >> _build/$(TBBUILDINFO)
+	( cd _build/$(TBBASE); echo "space needed : " `du -shc | grep total` ) >> _build/$(TBBUILDINFO)
 
 test:
 	nosetests -v

@@ -23,6 +23,17 @@
 #include "mishap.hpp"
 //#include "vmi.hpp"
 
+Ref * sysApplyFunction( Ref * pc, class MachineClass * vm ) {
+	Ref r = vm->fastPop();
+	Ref * fptr = RefToPtr4( r );
+
+    vm->count -= 1;
+    vm->link = pc + 1;
+    vm->func_of_link = vm->func_of_program_counter;
+    vm->func_of_program_counter = fptr;
+
+    return fptr + 1;
+}
 
 /*
 	This function is called with the stack looking like

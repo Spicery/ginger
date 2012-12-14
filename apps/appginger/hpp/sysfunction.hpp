@@ -24,6 +24,6 @@
 extern Ref * sysPartApply( Ref *pc, class MachineClass * vm );
 extern Ref * sysFunctionInArity( Ref *pc, class MachineClass * vm );
 extern Ref * sysFunctionOutArity( Ref *pc, class MachineClass * vm );
-
+extern Ref * sysApplyFunction( Ref * pc, class MachineClass * vm );
 
 #endif

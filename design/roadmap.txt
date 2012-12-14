@@ -1,7 +1,7 @@
 Ginger Release Roadmap
 ======================
 
-Release 0.8
+Version 0.8
 -----------
 
 Platforms
@@ -87,7 +87,7 @@ A scripting tool, ginger-script (o.n.o.), that can be used to write UNIX scripts
 * Supports hash-bang scripting #!/usr/local/bin/ginger-script
 
 
-Release 0.9
+Version 0.9
 -----------
 
 Basic Language Features
@@ -102,7 +102,6 @@ Basic Language Features
 
 Novel Language Features
 ~~~~~~~~~~~~~~~~~~~~~~~
-* Explicit delay, implicit forcing.
 * Partial application with ? syntax.
 
 Common Syntax
@@ -152,15 +151,27 @@ Ginger #! Script Tool
     % echo 'println( "hello world" );' | ginger-script -i -g common
 
 
-Version 0.10
+Version 0.10: Delay-Force Sprint
+--------------------------------
+
+This version is dedicated to the introduction of explicit delay + implicit 
+forcing. After some thought I realised this will be a significant challenge 
+and hence it deserves its own version.
+
+Novel Language Features
+~~~~~~~~~~~~~~~~~~~~~~~
+* Explicit delay, implicit forcing.
+
+
+Version 0.11
 ------------
 
 * Adding support for lisp-like front-end syntax (lisp2gnx)
 * Adding idiomatic names for the different language front-ends.
 * Adding support for indentation-controlled syntax (common2gnx)
 
-Unicode Sprint / Version 0.11
------------------------------
+Version 0.12: Unicode Sprint
+----------------------------
 
 * A possible pre-1.0 version that will support Unicode BMLP.
 

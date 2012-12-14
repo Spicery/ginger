@@ -51,6 +51,7 @@
 #include "sysattrmap.hpp"
 #include "syselement.hpp"
 #include "sysexception.hpp"
+#include "sysapply.hpp"
 
 using namespace Ginger;
 
@@ -436,6 +437,7 @@ const SysMap::value_type rawData[] = {
 	SysMap::value_type( "partApply", SysInfo( Arity( 1, true ), Arity( 1 ), sysPartApply, "Freezes arguments and a function together to make a new function" ) ),
 	SysMap::value_type( "functionInArity", SysInfo( Arity( 1  ), Arity( 1 ), sysFunctionInArity, "Input arity of a function" ) ),
 	SysMap::value_type( "functionOutArity", SysInfo( Arity( 1 ), Arity( 1 ), sysFunctionOutArity, "Output arity of a function" ) ),
+#include "sysapply.inc"
 #include "sysattrmap.inc"
 #include "syscgi.inc"
 #include "syselement.inc"

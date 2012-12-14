@@ -195,6 +195,7 @@ Ref * sysNewRecordClass( Ref * pc, MachineClass * vm ) {
 			xfr.xfrRef( title );
 			xfr.xfrRef( nfields );
 			xfr.xfrRef( SYS_ABSENT );
+			xfr.xfrRef( SYS_ABSENT );
 			xfr.xfrRef( slots );
 			
 			vm->fastPeek() = xfr.makeRef();
@@ -361,3 +362,5 @@ Ref * sysClassExploder( Ref * pc, MachineClass * vm ) {
 	vm->fastPeek() = codegen->vmiENDFUNCTION();
 	return pc;
 }
+
+

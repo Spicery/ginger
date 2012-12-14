@@ -16,17 +16,21 @@
     along with AppGinger.  If not, see <http://www.gnu.org/licenses/>.
 \******************************************************************************/
 
-#ifndef CLASS_LAYOUT_HPP
-#define CLASS_LAYOUT_HPP
-
-#define CLASS_OFFSET_TITLE 				1
-#define CLASS_OFFSET_NFIELDS 			2
-#define CLASS_OFFSET_INSTANCE_APPLY     3
-#define CLASS_OFFSET_SELF_APPLY         4
-#define CLASS_OFFSET_SLOTS				5
-#define CLASS_SIZE						6
+#include "common.hpp"
+#include "key.hpp"
 
 
-#define sizeAfterKeyOfInstance( obj_K ) SmallToLong(RefToPtr4((obj_K)[0])[CLASS_OFFSET_NFIELDS])
+#include "sysapply.hpp"
 
-#endif
+
+
+Ref * sysApply( Ref * pc, MachineClass *vm ) {
+    /*
+    if ( vm->count != 1 ) throw Ginger::Mishap( "Wrong number of arguments" );
+    Ref key = vm->fastPeek();
+    if ( not IsKey( key ) ) throw Ginger::Mishap( "Class of object needed" );
+    Ref * key_K = RefToPtr4( key );
+    */
+    return pc;
+}
+

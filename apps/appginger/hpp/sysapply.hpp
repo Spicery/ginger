@@ -16,17 +16,13 @@
     along with AppGinger.  If not, see <http://www.gnu.org/licenses/>.
 \******************************************************************************/
 
-#ifndef CLASS_LAYOUT_HPP
-#define CLASS_LAYOUT_HPP
+#ifndef GNG_SYS_APPLY_HPP
+#define GNG_SYS_APPLY_HPP
 
-#define CLASS_OFFSET_TITLE 				1
-#define CLASS_OFFSET_NFIELDS 			2
-#define CLASS_OFFSET_INSTANCE_APPLY     3
-#define CLASS_OFFSET_SELF_APPLY         4
-#define CLASS_OFFSET_SLOTS				5
-#define CLASS_SIZE						6
+#include "machine.hpp"
+#include "common.hpp"
 
 
-#define sizeAfterKeyOfInstance( obj_K ) SmallToLong(RefToPtr4((obj_K)[0])[CLASS_OFFSET_NFIELDS])
+extern Ref * sysApply( Ref * pc, MachineClass *vm );
 
 #endif

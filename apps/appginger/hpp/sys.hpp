@@ -16,8 +16,8 @@
     along with AppGinger.  If not, see <http://www.gnu.org/licenses/>.
 \******************************************************************************/
 
-#ifndef SYS_HPP
-#define SYS_HPP
+#ifndef GNG_SYS_HPP
+#define GNG_SYS_HPP
 
 #include <map>
 #include <iostream>

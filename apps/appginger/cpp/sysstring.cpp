@@ -21,6 +21,7 @@
 #include "key.hpp"
 #include "misclayout.hpp"
 #include "stringlayout.hpp"
+#include "heap.hpp"
 
 Ref * sysStringAppend( Ref * pc, class MachineClass * vm ) {
 
@@ -114,5 +115,14 @@ Ref * sysStringLength( Ref *pc, class MachineClass * vm ) {
 	return pc;
 }
 
-
+Ref * sysNewString( Ref *pc, class MachineClass * vm ) {
+	std::string sofar;
+	vm->vp -= vm->count;
+	for ( int i = 1; i <= vm->count; i++ ) {
+		sofar.push_back( CharacterToChar( vm->vp[ i ] ) );
+	}
+	vm->checkStackRoom( 1 );
+	vm->fastPush( vm->heap().copyString( pc, sofar.c_str() ) );
+	return pc;
+}
 

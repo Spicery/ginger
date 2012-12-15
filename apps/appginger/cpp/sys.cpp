@@ -52,6 +52,7 @@
 #include "syselement.hpp"
 #include "sysexception.hpp"
 #include "sysapply.hpp"
+#include "sysstack.hpp"
 
 using namespace Ginger;
 
@@ -443,6 +444,7 @@ const SysMap::value_type rawData[] = {
 #include "syselement.inc"
 #include "sysexception.inc"
 #include "sysprint.inc"
+#include "sysstack.inc"
 #include "sysstring.inc"
 #include "sysunix.inc"
 #include "sysvector.inc"

@@ -1,0 +1,1 @@
+SysMap::value_type( "swap", SysInfo( Arity( 2 ), Arity( 2 ), sysSwap, "Swaps two values around" ) ),

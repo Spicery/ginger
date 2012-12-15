@@ -16,10 +16,20 @@
     along with AppGinger.  If not, see <http://www.gnu.org/licenses/>.
 \******************************************************************************/
 
+#include "mishap.hpp"
+
+#include "machine.hpp"
+
+#include "sysstack.hpp"
 
 Ref * sysFastSwap( Ref *pc, class MachineClass * vm ) {
     Ref r = vm->fastPeek();
     vm->fastPeek() = vm->fastPeek( 1 );
     vm->fastPeek( 1 ) = r;
     return pc;
+}
+
+Ref * sysSwap( Ref *pc, class MachineClass * vm ) {
+    if ( vm->count != 2 ) throw Ginger::Mishap( "Wrong number of arguments" );
+    return sysFastSwap( pc, vm );
 }

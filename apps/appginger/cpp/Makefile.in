@@ -85,7 +85,7 @@ ginger-script: libappginger.a scriptmain.o
 
 ginger:
 	echo "#!/bin/sh" > ginger-tmp
-	echo 'echo "Ginger: @PACKAGE_VERSION@, Copyright (c) 2010  Stephen Leach"' >> ginger-tmp
+	echo 'echo "Ginger: @PACKAGE_VERSION@, "`date +%Y-%m-%d`", Copyright (c) 2010  Stephen Leach"' >> ginger-tmp
 	echo 'echo "+----------------------------------------------------------------------+"'  >> ginger-tmp
 	echo 'echo "| This program comes with ABSOLUTELY NO WARRANTY. It is free software, |"' >> ginger-tmp
 	echo 'echo "| and you are welcome to redistribute it under certain conditions.     |"' >> ginger-tmp

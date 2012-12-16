@@ -26,11 +26,11 @@
 #define OFFSET_TO_NUM_INPUTS				-1
 #define OFFSET_TO_NUM_SLOTS					-2
 #define OFFSET_TO_NUM_OUTPUTS				-3
-#define OFFSET_TO_FUNCTION_LENGTH			-4
+#define FN_OFFSET_TO_PROPS                  -4
+#define OFFSET_TO_FUNCTION_LENGTH			-5
 
 
 // Non-standard offsets (from PC or to-the-key)
-#define OFFSET_TO_NSLOTS_FROM_PC			-2
 #define OFFSET_TO_NSLOTS_TO_KEY				(-OFFSET_TO_NUM_INPUTS)
 #define OFFSET_FROM_FN_LENGTH_TO_KEY		(-OFFSET_TO_FUNCTION_LENGTH)
 

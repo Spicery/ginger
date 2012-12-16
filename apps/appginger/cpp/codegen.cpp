@@ -644,9 +644,6 @@ Ref CodeGenClass::detach( const bool in_heap, Ref fnkey ) {
 	
 	if ( in_heap ) {
 		
-		// Disabled temporarily.
-		//int M = ( L + REFBITS-1 ) % REFBITS;
-	
 		Ref * fake_pc = NULL;
 		XfrClass xfr( fake_pc, *this->vm, preflight_size );
 	
@@ -655,6 +652,7 @@ Ref CodeGenClass::detach( const bool in_heap, Ref fnkey ) {
 		//	reasons.
 		//
 		xfr.xfrRef( ToRef( ( L << TAGGG ) | FUNC_LEN_TAGGG ) );  //	tagged for heap scanning
+		xfr.xfrRef( SYS_ABSENT );					//	props
 		xfr.xfrRef( ToRef( this->nresults ) );		//	raw R
 		xfr.xfrRef( ToRef( this->nlocals ) );		//	raw N
 		xfr.xfrRef( ToRef( this->ninputs ) );		//	raw A
@@ -665,19 +663,12 @@ Ref CodeGenClass::detach( const bool in_heap, Ref fnkey ) {
 	
 		xfr.xfrVector( *this->code_data );	//	alt
 	
-		/* Disabled for a while
-		//	For the moment, fake the mask bits.  Since we have no garbage
-		//	collector this shouldn't be a problem!
-		for ( int i = 0; i < M; i++ ) {
-			xfr.xfrRef( ToRef( 0 ) );
-		}
-		*/
-	
 		return xfr.makeRef();
 	} else {
 		Ref * permanentStore = new Ref[ preflight_size ];		//	This store is never reclaimed.
 		Ref * p = permanentStore;
 		*p++ = ToRef( ( L << TAGGG ) | FUNC_LEN_TAGGG );
+		*p++ = ToRef( SYS_ABSENT );
 		*p++ = ToRef( this->nresults );
 		*p++ = ToRef( this->nlocals );
 		*p++ = ToRef( this->ninputs );

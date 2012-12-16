@@ -43,7 +43,7 @@
 
 //	This is a hard limit on the numbers of fields that may be set to the 
 //	left of the key.
-#define MAX_OFFSET_FROM_START_TO_KEY	4
+#define MAX_OFFSET_FROM_START_TO_KEY	5
 
 
 ////////////////////////////////////////////////////////////////////////////////

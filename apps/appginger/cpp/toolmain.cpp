@@ -43,7 +43,8 @@
 #include "machine1.hpp"
 #include "machine2.hpp"
 #include "machine3.hpp"
-
+#include "misclayout.hpp"
+#include "functionlayout.hpp"
 
 #include "toolmain.hpp"
 #include "wellknownpaths.hpp"
@@ -197,8 +198,21 @@ void tokenize(
     }
 };
 
+
+void ToolMain::integrityChecks() {
+    int integrity_failure = 0;
+    if ( MAX_OFFSET_FROM_START_TO_KEY < OFFSET_FROM_FN_LENGTH_TO_KEY ) {
+        integrity_failure = 1;
+    }
+    if ( integrity_failure ) {
+        cerr << "ERROR: Integrity check failed: code " << integrity_failure << endl;
+        exit( EXIT_FAILURE );
+    }
+}
+
 // Return true for an early exit, false to continue processing.
 bool ToolMain::parseArgs( int argc, char **argv, char **envp ) {
+    this->integrityChecks();
 	if ( envp != NULL ) this->context.setEnvironmentVariables( envp );
 	//bool meta_info_needed = false;
     for(;;) {

@@ -103,7 +103,7 @@ def generateGingerLibraryExtras( stdinfo ):
 	pkg.createConstantFile( "e", "double", math.e )
 	# TODO: Really we should move the calcsize( "P" ) out into a shared script.
 	pkg.createConstantFile( "mostNegativeSmall", "int", -( 1 << struct.calcsize( "P" ) * 8 - 2 ) )
-	pkg.createConstantFile( "dir, ""mostPositiveSmall", "int",  ( 1 << struct.calcsize( "P" ) * 8 - 2 ) - 1 )
+	pkg.createConstantFile( "mostPositiveSmall", "int",  ( 1 << struct.calcsize( "P" ) * 8 - 2 ) - 1 )
 
 
 ################################################################################

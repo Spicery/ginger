@@ -20,7 +20,7 @@ INSTALLDIRS=-DINSTALL_BIN='"$(INSTALL_BIN)"' -DINSTALL_LIB='"$(INSTALL_LIB)"' -D
 
 NONDARWINCXXFLAGS:=
 ifneq ($(shell uname),Darwin)
-	NONDARWINCXXFLAGS=-luuid
+	NONDARWINCXXFLAGS=-Wl,-Bstatic -luuid -Wl,-Bdynamic
 endif
 
 CXXFLAGS=$(INSTALLDIRS) -g -I../hpp -I../../libgng/hpp -I../../libmetainfo/hpp -Wall -Wnon-virtual-dtor

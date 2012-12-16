@@ -414,7 +414,7 @@ const SysMap::value_type rawData[] = {
 	SysMap::value_type( "setMethod", SysInfo( Arity( 3 ), Arity( 0 ), sysSetMethod, "Sets the function for a method on an object" ) ),
 	SysMap::value_type( "setSlot", SysInfo( Arity( 3 ), Arity( 0 ), sysSetSlot, "Sets a method as the Nth slot of a class" ) ),
 	SysMap::value_type( "=", SysInfo( Arity( 2 ), Arity( 1 ), sysEquals, "Compare any two values as equal" ) ),
-	SysMap::value_type( "gc", SysInfo( Arity( 0 ), Arity( 0 ), sysGarbageCollect, "Forces a garbage collection - useful for tests" ) ),
+	SysMap::value_type( "sysgarbage", SysInfo( Arity( 0 ), Arity( 0 ), sysGarbageCollect, "Forces a garbage collection - useful for tests" ) ),
 	SysMap::value_type( "hash", SysInfo( Arity( 1 ), Arity( 1 ), sysHash, "Computes a hash code for any value, returns a positive Small" ) ),
 	SysMap::value_type( "index", SysInfo( Arity( 2 ), Arity( 1 ), sysIndex, "Indexes any sequence" ) ),
 	SysMap::value_type( "mapIndex", SysInfo( Arity( 2 ), Arity( 1 ), sysMapIndex, "Indexes a map" ) ),

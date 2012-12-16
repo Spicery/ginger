@@ -1157,6 +1157,47 @@ Ref CodeGenClass::calcConstant( Gnx mnx ) {
 			throw Ginger::Mishap( "No such system function" ).culprit( "Function", mnx->attribute( SYSFN_VALUE ) );
 		}
 		return r;
+	} else if ( type == "sysclass" ) {
+		/*
+		<sysclass value="Absent"/>          ### class for absent
+		<sysclass value="Bool"/>            ### class for true & false
+		<sysclass value="SmallInt"/>        ### class for 'small' integers
+		<sysclass value="Float"/>           ### class for floats
+		<sysclass value="String"/>          ### class for strings
+		<sysclass value="Char"/>            ### class for characters
+		<sysclass value="Nil"/>             ### class for nil
+		<sysclass value="Pair"/>            ### class for list pairs
+		<sysclass value="Vector"/>          ### class for vectors
+		<sysclass value="Class"/>           ### class for classes
+		*/
+		const std::string& cname( mnx->attribute( CONSTANT_VALUE ) );
+		if ( cname == "Absent" ) {
+			return sysAbsentKey;
+		} else if ( cname == "Bool" ) {
+			return sysBoolKey;
+		} else if ( cname == "Small" ) {
+			return sysSmallKey;
+		} else if ( cname == "Double" ) {
+			//	TODO: Add Float?
+			return sysDoubleKey;
+		} else if ( cname == "String" ) {
+			return sysStringKey;
+		} else if ( cname == "Char" ) {
+			return sysCharKey;
+		} else if ( cname == "Nil" ) {
+			return sysNilKey;
+		} else if ( cname == "Pair" ) {
+			return sysPairKey;
+		} else if ( cname == "Vector" ) {
+			return sysVectorKey;
+		} else if ( cname == "Class" ) {
+			return sysClassKey;
+		} else {
+			//	TODO: Function keys - not as easy as the documentation makes out.
+			//	TODO: Map keys - same deal
+			//			<sysclass value="Fn"/>              ### class for function objects
+			throw Ginger::SystemError( "Constant not recognised" ).culprit( "Expression", mnx->toString() );
+		}
 	} else {
 		throw Ginger::SystemError( "Constant not recognised" ).culprit( "Expression", mnx->toString() );
 	}

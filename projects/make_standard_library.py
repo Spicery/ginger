@@ -97,6 +97,9 @@ class ConstantPackage:
 		df.write( '<bind><var name="{0}"/><constant type="{1}" value="{2}"/></bind>\n'.format( escnam, esctyp, escval ) )
 		df.close()	
 
+	def createConstantClassFile( self, nam ):
+		self.createConstantFile( nam, "sysclass", nam )
+
 def generateGingerLibraryExtras( stdinfo ):
 	pkg = ConstantPackage()
 	pkg.createConstantFile( "pi", "double", math.pi )
@@ -104,6 +107,16 @@ def generateGingerLibraryExtras( stdinfo ):
 	# TODO: Really we should move the calcsize( "P" ) out into a shared script.
 	pkg.createConstantFile( "mostNegativeSmall", "int", -( 1 << struct.calcsize( "P" ) * 8 - 2 ) )
 	pkg.createConstantFile( "mostPositiveSmall", "int",  ( 1 << struct.calcsize( "P" ) * 8 - 2 ) - 1 )
+	pkg.createConstantClassFile( "Absent" )
+	pkg.createConstantClassFile( "Bool" )
+	pkg.createConstantClassFile( "Small" )
+	pkg.createConstantClassFile( "Double" )
+	pkg.createConstantClassFile( "String" )
+	pkg.createConstantClassFile( "Char" )
+	pkg.createConstantClassFile( "Nil" )
+	pkg.createConstantClassFile( "Pair" )
+	pkg.createConstantClassFile( "Vector" )
+	pkg.createConstantClassFile( "Class" )
 
 
 ################################################################################

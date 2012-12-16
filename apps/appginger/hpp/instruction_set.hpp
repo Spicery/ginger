@@ -7,6 +7,7 @@
 #include "classlayout.hpp"
 #include "methodlayout.hpp"
 #include "maplayout.hpp"
+#include "sysapply.hpp"
 
 class InstructionSet {
 public:

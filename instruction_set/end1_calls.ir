@@ -21,11 +21,17 @@ long var = ToLong( pc[ 1 ] );
 VMCOUNT = ( VMVP - ToRefRef( LOCAL( var ) ) );	//	Stack reduced by 1 already, don't redo.
 {    
     Ref *ptr;
-    if ( !IsObj( r ) ) call_error( r );
-    ptr = RefToPtr4( r );
-    if ( !IsFunctionKey( *ptr ) ) call_error( r );
-    VMLINK = pc + 2;
-    VMLINKFUNC = VMPCFUNC;
-    VMPCFUNC = ptr;
-    RETURN( ptr + 1 );
+    if ( IsObj( r ) && IsFunctionKey( *( ptr = RefToPtr4( r ) ) ) ) {
+        VMLINK = pc + 2;
+        VMLINKFUNC = VMPCFUNC;
+        VMPCFUNC = ptr;
+        RETURN( ptr + 1 );
+    } else {
+        VMVP += 1;
+        VMCOUNT += 1;
+        FREEZE;
+        pc = sysApply( pc + 2, vm );
+        MELT;
+        RETURN( pc );    
+    }
 }

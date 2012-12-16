@@ -19,10 +19,8 @@
 #ifndef GNG_SYS_APPLY_HPP
 #define GNG_SYS_APPLY_HPP
 
-#include "machine.hpp"
 #include "common.hpp"
 
-
-extern Ref * sysApply( Ref * pc, MachineClass *vm );
+extern Ref * sysApply( Ref * pc, class MachineClass *vm );
 
 #endif

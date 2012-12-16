@@ -22,11 +22,17 @@ Postcondition
 Ref r = *( VMVP-- );
 {    
     Ref *ptr;
-    if ( !IsObj( r ) ) call_error( r );
-    ptr = RefToPtr4( r );
-    if ( !IsFunctionKey( *ptr ) ) call_error( r );
-    VMLINK = pc + 1;
-    VMLINKFUNC = VMPCFUNC;
-    VMPCFUNC = ptr;
-    RETURN( ptr + 1 );
+    if ( IsObj( r ) && IsFunctionKey( *( ptr = RefToPtr4( r ) ) ) ) {
+        VMLINK = pc + 1;
+        VMLINKFUNC = VMPCFUNC;
+        VMPCFUNC = ptr;
+        RETURN( ptr + 1 );
+    } else {
+        VMVP += 1;
+        VMCOUNT += 1;
+        FREEZE;
+        pc = sysApply( pc + 1, vm );
+        MELT;
+        RETURN( pc );
+    }
 }

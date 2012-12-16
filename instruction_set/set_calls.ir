@@ -15,11 +15,17 @@ Ref r = *( VMVP-- );
 VMCOUNT = ToLong( pc[ 1 ] );
 {    
     Ref *ptr;
-    if ( !IsObj( r ) ) call_error( r );
-    ptr = RefToPtr4( r );
-    if ( !IsFunctionKey( *ptr ) ) call_error( r );
-    VMLINK = pc + 2;
-    VMLINKFUNC = VMPCFUNC;
-    VMPCFUNC = ptr;
-    RETURN( ptr + 1 );
+    if ( IsObj( r ) && IsFunctionKey( *( ptr = RefToPtr4( r ) ) ) ) {
+        VMLINK = pc + 2;
+        VMLINKFUNC = VMPCFUNC;
+        VMPCFUNC = ptr;
+        RETURN( ptr + 1 );
+    } else {
+        *( ++VMVP ) = r;
+        VMCOUNT += 1;
+        FREEZE;
+        pc = sysApply( pc + 2, vm );
+        MELT;
+        RETURN( pc );    
+    }
 }

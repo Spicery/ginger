@@ -92,7 +92,7 @@ void MachineClass::executeQueue() {
 	    this->execute( r );
 	} else {		
 		CodeGen codegen = this->codegen();
-	    codegen->vmiFUNCTION( 0, 0 );
+	    codegen->vmiFUNCTION( "Execute Queue", 0, 0 );
 	    codegen->vmiENTER();
         for ( 
         	vector< Ref >::iterator it = this->queue.begin();

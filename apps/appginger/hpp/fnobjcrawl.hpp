@@ -32,8 +32,12 @@ private:
 	const char * types;
 
 private:
+	Ref * props;
+	
+private:
 	const char * sig;
 	const char * name;
+
 public:
 	const char *getName() { return this->name; }
 	ptrdiff_t getPosn() { return this->types - this->sig; }

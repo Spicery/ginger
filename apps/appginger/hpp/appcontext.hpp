@@ -79,7 +79,7 @@ public:
 	void setSyntax( const std::string s ) { this->initial_syntax = s; }
 	const std::string getInteractivePackage() { return this->interactive_package; }
 	void setInteractivePackage( const std::string & ip ) { this->interactive_package = ip; }
-
+ 
 public:
 	MachineClass * newMachine();
 	Package * initInteractivePackage( MachineClass * vm );

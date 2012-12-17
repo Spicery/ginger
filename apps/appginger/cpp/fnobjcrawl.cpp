@@ -23,23 +23,29 @@
 #include "misclayout.hpp"
 
 Ref * FnObjCrawl::next() {
-	while ( this->pc < this->obj_Z1 ) {
-		if ( *types == '\0' ) {
-			this->types = ins.signature( *pc );
-			this->name = ins.name( *pc );
-			this->sig = this->types;
-		} else {
-			const char ch = *types++;
-			Ref * current = pc++;
-			if ( ch == 'c' ) return current;
-			
-			//	If we want to be able to delete the global dictionary
-			//	then we must add in tracing through Idents too. They
-			//	have the char 'v'.
-			
+	if ( this->props != 0 ) {
+		Ref * ans = this->props;
+		this->props = 0;
+		return ans;
+	} else {
+		while ( this->pc < this->obj_Z1 ) {
+			if ( *types == '\0' ) {
+				this->types = ins.signature( *pc );
+				this->name = ins.name( *pc );
+				this->sig = this->types;
+			} else {
+				const char ch = *types++;
+				Ref * current = pc++;
+				if ( ch == 'c' ) return current;
+				
+				//	If we want to be able to delete the global dictionary
+				//	then we must add in tracing through Idents too. They
+				//	have the char 'v'.
+				
+			}
 		}
+		return static_cast< Ref * >( 0 );
 	}
-	return static_cast< Ref * >( 0 );
 }
 
 FnObjCrawl::FnObjCrawl( MachineClass * vm, Ref * obj_K ) :
@@ -48,6 +54,7 @@ FnObjCrawl::FnObjCrawl( MachineClass * vm, Ref * obj_K ) :
 {
 	this->pc = obj_K + 1;
 	this->obj_Z1 = this->pc + sizeAfterKeyOfFn( obj_K );
+	this->props = &obj_K[ FN_OFFSET_TO_PROPS ];
 }
 
 

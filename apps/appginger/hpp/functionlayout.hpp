@@ -42,4 +42,6 @@ extern long numOutputsOfFn( Ref * key );
 extern long numSlotsOfFn( Ref * key );
 extern long numInputsOfFn( Ref * key );
 
+#define EMPTY_FN_NAME ""
+
 #endif

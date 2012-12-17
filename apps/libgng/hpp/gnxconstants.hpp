@@ -99,4 +99,6 @@
 #define CULPRIT_NAME	"name"
 #define CULPRIT_VALUE	"value"
 
+#define EMPTY_FN_NAME   ""
+
 #endif

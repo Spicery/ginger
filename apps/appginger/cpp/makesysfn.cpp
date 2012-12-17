@@ -35,7 +35,7 @@ Ref makeSysFn( CodeGen codegen, std::string fn_name, Ref default_value ) {
 	Ref x = info.coreFunctionObject;
 	if ( x != NULL ) return x;
 
-	codegen->vmiFUNCTION( info.in_arity.count(), info.out_arity.count() );
+	codegen->vmiFUNCTION( fn_name, info.in_arity.count(), info.out_arity.count() );
 	
 	//	We have two different kinds of system functions. Those that are
 	//	implemented as native instructions and those that are implemented

@@ -33,6 +33,7 @@ using namespace std;
 #include "roots.hpp"
 #include "sysmethod.hpp"
 #include "sysprint.hpp"
+#include "functionlayout.hpp"
 
 static long preflightNewClass( MachineClass * vm ) {
 	Ref overrides = vm->vp[ 0 ];
@@ -220,6 +221,12 @@ Ref * sysargRecognise( Ref * pc, MachineClass * vm ) {
 	return pc;
 }
 
+static const std::string makeName( const char * prefix, Ref title ) {
+	if ( title == SYS_ABSENT ) return EMPTY_FN_NAME;
+	std::string t( prefix == NULL ? "" : prefix );
+	return t + refToString( title );
+}
+
 /*
 	classRecogniser( key )( object ) -> Bool
 */
@@ -227,8 +234,9 @@ Ref * sysClassRecogniser( Ref * pc, MachineClass *vm ) {
 	if ( vm->count != 1 ) throw Ginger::Mishap( "Wrong number of arguments" );
 	Ref kk = vm->fastPeek();
 	if ( !IsObj( kk ) || *RefToPtr4( kk ) != sysClassKey ) throw Ginger::Mishap( "Key needed" );
+
 	CodeGen codegen = vm->codegen();
-	codegen->vmiFUNCTION( 1, 1 );
+	codegen->vmiFUNCTION( makeName( "is", RefToPtr4( kk )[ CLASS_OFFSET_TITLE ] ), 1, 1 );
 	codegen->vmiSYS_CALL_ARG( sysargRecognise, kk );
 	codegen->vmiSYS_RETURN();
 	vm->fastPeek() = codegen->vmiENDFUNCTION();
@@ -262,7 +270,7 @@ Ref * sysClassConstructor( Ref * pc, MachineClass *vm ) {
 	Ref * obj_K = RefToPtr4( kk );
 	long n = SmallToLong( obj_K[ CLASS_OFFSET_NFIELDS ] );
 	CodeGen codegen = vm->codegen();
-	codegen->vmiFUNCTION( n, 1 );
+	codegen->vmiFUNCTION( makeName( "new", obj_K[ CLASS_OFFSET_TITLE ]), n, 1 );
 	//vmiCHECK_COUNT( codegen, n );
 	codegen->vmiSYS_CALL_ARGDAT( sysargdatConstruct, kk, n );
 	codegen->vmiSYS_RETURN();
@@ -296,6 +304,7 @@ Ref * sysClassAccessor( Ref * pc, MachineClass *vm ) {
 	long index = SmallToLong( N );
 	if ( 1 <= index && index <= nargs ) {
 		CodeGen codegen = vm->codegen();
+		//	TODO: Figure out name.
 		codegen->vmiFUNCTION( 1, 1 );
 		codegen->vmiSYS_CALL_ARGDAT( sysargdatAccess, kk, index );
 		codegen->vmiSYS_RETURN();
@@ -320,6 +329,7 @@ Ref * sysClassUnsafeAccessor( Ref * pc, MachineClass *vm ) {
 	long index = SmallToLong( N );
 	if ( 1 <= index && index <= nargs ) {
 		CodeGen codegen = vm->codegen();
+		//	TODO: Figure out name.
 		codegen->vmiFUNCTION( 1, 1 );
 		codegen->vmiFIELD( index );
 		codegen->vmiSYS_RETURN();
@@ -356,7 +366,7 @@ Ref * sysClassExploder( Ref * pc, MachineClass * vm ) {
 	const long N = SmallToLong( key_K[ CLASS_OFFSET_NFIELDS ] );
 
 	CodeGen codegen = vm->codegen();
-	codegen->vmiFUNCTION( 1, N );
+	codegen->vmiFUNCTION( makeName( "dest", key_K[ CLASS_OFFSET_TITLE ] ), 1, N );
 	codegen->vmiSYS_CALL_ARG( sysargExplode, key );
 	codegen->vmiSYS_RETURN();
 	vm->fastPeek() = codegen->vmiENDFUNCTION();

@@ -83,7 +83,7 @@ void RCEP::execGnx( shared< Ginger::Mnx > mnx, std::ostream & output ) {
     
 	try {
 	    codegen = vm->codegen();
-	    codegen->vmiFUNCTION( 0, 0 );
+	    codegen->vmiFUNCTION( "Top Level Loop", 0, 0 );
 	    codegen->vmiENTER();
 	    LabelClass retn( codegen, true );
         codegen->compileGnx( mnx, &retn );
@@ -138,7 +138,7 @@ bool RCEP::unsafe_read_comp_exec_print( istream & input, std::ostream & output )
 	    #endif
 
 	    codegen = vm->codegen();
-	    codegen->vmiFUNCTION( 0, 0 );
+	    codegen->vmiFUNCTION( "Top level loop", 0, 0 );
 	    codegen->vmiENTER();
 	    LabelClass retn( codegen, true );
         codegen->compileGnx( mnx, &retn );

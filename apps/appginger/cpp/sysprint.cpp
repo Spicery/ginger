@@ -21,7 +21,8 @@
 #include <iostream>
 
 #include "mnx.hpp"
-
+    
+#include "stash.hpp"
 #include "sysprint.hpp"
 #include "syskey.hpp"
 #include "misclayout.hpp"
@@ -31,6 +32,7 @@
 #include "sysinstance.hpp"
 #include "wrecordlayout.hpp"
 #include "sysdouble.hpp"
+#include "functionlayout.hpp"
 
 //#define DBG_SYSPRINT
 
@@ -207,6 +209,26 @@ private:
 		this->out << "<class " << name << ">";
 	}
 
+	void refFunctionPrint( const Ref fn ) {
+		Ref * fn_K = RefToPtr4( fn );
+		Ref key = fn_K[ 0 ];
+		Ref props = fn_K[ FN_OFFSET_TO_PROPS ];
+		if ( IsCoreFunctionKey( key ) ) {
+			this->out << "<sysfn " << getStash( SmallToLong( props ) ) << ">";					
+		} else {
+			std::string name;
+			if ( props != SYS_ABSENT ) {
+				name += " ";
+				name += refToString( props );
+			}
+			if ( IsMethodKey( key ) ) {
+				this->out << "<method" << name << ">";					
+			} else {
+				this->out << "<function" << name << ">";					
+			}
+		}
+	}
+
 public:
 	void refPrint( const Ref r ) {
 		#ifdef DBG_SYSPRINT
@@ -219,13 +241,7 @@ public:
 			Ref * obj_K = RefToPtr4( r );
 			const Ref key = * obj_K;
 			if ( IsFunctionKey( key ) ) {
-				if ( IsCoreFunctionKey( key ) ) {
-					this->out << "<sysfn>";					
-				} else if ( IsMethodKey( key ) ) {
-					this->out << "<method>";					
-				} else {
-					this->out << "<function>";					
-				}
+				refFunctionPrint( r );
 			} else if ( key == sysMapletKey ) {
 				refPrint( fastMapletKey( r ) );
 				this->out << " => ";

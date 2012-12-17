@@ -18,6 +18,7 @@
 
 #include "sysmethod.hpp"
 
+#include "functionlayout.hpp"
 #include "common.hpp"
 #include "machine.hpp"
 
@@ -31,12 +32,16 @@ Ref * sysNewMethod( Ref * pc, MachineClass * vm ) {
 	
 	Ref noutputs = vm->fastPop();
 	Ref ninputs = vm->fastPop();
-	/*Ref name =*/ vm->fastPop();	//	Currently discarded.
+	Ref name = vm->fastPop();
 	
 	if ( !IsSmall( noutputs ) || !IsSmall( ninputs ) ) throw Ginger::Mishap( "Invalid arguments" ).culprit( "#Outputs", refToString( noutputs ) ).culprit( "Inputs", refToString( ninputs ) );
 	
 	CodeGen codegen = vm->codegen();
-	codegen->vmiFUNCTION( SmallToLong( ninputs ), SmallToLong( noutputs ) );
+	codegen->vmiFUNCTION( 
+		name == SYS_ABSENT ? std::string( EMPTY_FN_NAME ) : refToString( name ),
+		SmallToLong( ninputs ), 
+		SmallToLong( noutputs ) 
+	);
 	codegen->vmiINVOKE();
 	Ref r = codegen->vmiENDFUNCTION( sysMethodKey );
 	vm->fastPush( r );	//	No check needed, as stack has room for 3.
@@ -91,6 +96,7 @@ Ref * sysSetSlot( Ref * pc, MachineClass * vm ) {
 	//	service function.
 	{
 		CodeGen codegen = vm->codegen();
+		//	TODO: Supply a useful name.
 		codegen->vmiFUNCTION( 1, 1 );
 		codegen->vmiFIELD( pos );
 		codegen->vmiSYS_RETURN();

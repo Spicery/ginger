@@ -32,6 +32,7 @@
 #include "mishap.hpp"
 #include "arity.hpp"
 
+#include "stash.hpp"
 #include "label.hpp"
 #include "instruction.hpp"
 #include "heap.hpp"
@@ -458,9 +459,15 @@ void CodeGenClass::vmiENTER() {
 }
 
 void CodeGenClass::vmiFUNCTION( int N, int A ) {
-	this->vm->gcVeto();
-	this->save( N, A );
+	this->vmiFUNCTION( EMPTY_FN_NAME, N, A );
 }
+
+void CodeGenClass::vmiFUNCTION( const string name, int N, int A ) {
+	this->vm->gcVeto();
+	this->save( name, N, A );
+}
+
+
 
 Ref CodeGenClass::vmiENDFUNCTION( bool in_heap, Ref fnkey ) {
 	Ref r;
@@ -634,6 +641,9 @@ void CodeGenClass::vmiTEST(
 #define REFBITS ( 8 * sizeof( Ref ) )
 
 Ref CodeGenClass::detach( const bool in_heap, Ref fnkey ) {
+
+
+
 	unsigned long L = this->code_data->size();
 	unsigned long preflight_size = OFFSET_FROM_FN_LENGTH_TO_KEY + 1 + L /* + M */;
 	
@@ -643,6 +653,12 @@ Ref CodeGenClass::detach( const bool in_heap, Ref fnkey ) {
 	}
 	
 	if ( in_heap ) {
+
+		Ref fn_props = (
+			this->props == EMPTY_FN_NAME ?
+			SYS_ABSENT :
+			this->vm->heap().copyString( this->props.c_str() )
+		);
 		
 		Ref * fake_pc = NULL;
 		XfrClass xfr( fake_pc, *this->vm, preflight_size );
@@ -652,7 +668,7 @@ Ref CodeGenClass::detach( const bool in_heap, Ref fnkey ) {
 		//	reasons.
 		//
 		xfr.xfrRef( ToRef( ( L << TAGGG ) | FUNC_LEN_TAGGG ) );  //	tagged for heap scanning
-		xfr.xfrRef( SYS_ABSENT );					//	props
+		xfr.xfrRef( fn_props );					//	props
 		xfr.xfrRef( ToRef( this->nresults ) );		//	raw R
 		xfr.xfrRef( ToRef( this->nlocals ) );		//	raw N
 		xfr.xfrRef( ToRef( this->ninputs ) );		//	raw A
@@ -668,7 +684,14 @@ Ref CodeGenClass::detach( const bool in_heap, Ref fnkey ) {
 		Ref * permanentStore = new Ref[ preflight_size ];		//	This store is never reclaimed.
 		Ref * p = permanentStore;
 		*p++ = ToRef( ( L << TAGGG ) | FUNC_LEN_TAGGG );
-		*p++ = ToRef( SYS_ABSENT );
+		
+		//	WARNING: Next field are the props. Very dangerous to allow to escape.
+		*p++ = (
+			this->props == EMPTY_FN_NAME ?
+			SYS_ABSENT :
+			LongToSmall( addStash( this->props ) )
+		);
+		
 		*p++ = ToRef( this->nresults );
 		*p++ = ToRef( this->nlocals );
 		*p++ = ToRef( this->ninputs );
@@ -967,7 +990,7 @@ void CodeGenClass::compileGnxIf( Gnx mnx, LabelClass * contn ) {
 void CodeGenClass::compileGnxFn( Gnx mnx, LabelClass * contn ) {
 	int args_count = mnx->attributeToInt( FN_ARGS_COUNT );
 	int locals_count = mnx->attributeToInt( FN_LOCALS_COUNT );
-	this->vmiFUNCTION( locals_count, args_count );
+	this->vmiFUNCTION( mnx->attribute( FN_NAME, EMPTY_FN_NAME ), locals_count, args_count );
 	this->vmiENTER();
 	LabelClass retn( this, true );
 	this->compileGnx( mnx->child( 1 ), &retn );

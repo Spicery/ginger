@@ -21,6 +21,7 @@
 
 #include <vector>
 #include <stack>
+#include <memory>
 #include "shared.hpp"
 
 #include "arity.hpp"
@@ -43,10 +44,11 @@ typedef class shared< Ginger::Mnx > Gnx;
 
 
 struct CodeGenState {
-	int			nlocals;
-	int 		ninputs;
-	int 		nresults;				//	Unsure about this.
-	int 		current_slot;
+	std::string 	props;
+	int				nlocals;
+	int 			ninputs;
+	int 			nresults;				//	Unsure about this.
+	int 			current_slot;
 	shared< std::vector< Ref > >	code_data;
 };
 
@@ -89,9 +91,10 @@ private:
 	std::stack< CodeGenState > 	dump;
 	
 public:
-	void save( int N, int A ) {
+	void save( const std::string name, int N, int A ) {
 		CodeGenState s;
 		s.current_slot = this->current_slot;
+		s.props = this->props;
 		s.ninputs = this->ninputs;
 		s.nlocals = this->nlocals;
 		s.nresults = this->nresults;		//	 Not too sure about this
@@ -99,15 +102,17 @@ public:
 		this->dump.push( s );
 		
 		this->code_data = shared< std::vector< Ref > >( new std::vector< Ref >() );
+		this->props = name;
 		this->nlocals = N;
 		this->ninputs = A;
 		this->current_slot = N;
 		//	To-do: what about nresults????
 	}
-	
+
 	void restore() {
-		const CodeGenState & s = dump.top();
+		CodeGenState & s = dump.top();
 		this->current_slot = s.current_slot;
+		this->props = s.props;
 		this->ninputs = s.ninputs;
 		this->nlocals = s.nlocals;
 		this->nresults = s.nresults;		//	Unsure about this.
@@ -143,6 +148,7 @@ public:
 	int 		ninputs;
 private:
 	int 		current_slot;
+ 	std::string props;
 public:
 	int			tmpvar();				//	Change this name later.
 public:
@@ -177,6 +183,7 @@ public:
 	void vmiERASE_MARK( int var );
 	void vmiFIELD( long index );
 	void vmiFUNCTION( int N, int A );
+	void vmiFUNCTION( const std::string name, int N, int A );
 	void vmiGOTO( LabelClass * d );
 	void vmiHALT();
 	void vmiIF( bool sense, LabelClass * d, LabelClass * contn );

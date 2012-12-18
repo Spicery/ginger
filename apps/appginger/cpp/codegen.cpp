@@ -25,6 +25,7 @@
 #include <sstream>
 
 #include <stddef.h>
+#include <string.h>
 
 
 #include "gnxconstants.hpp"

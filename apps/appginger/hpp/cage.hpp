@@ -20,7 +20,10 @@
 #define CAGE_HPP
 
 #include <vector>
+#include <string>
+
 #include <cstddef>
+
 #include "common.hpp"
 
 class MachineClass;

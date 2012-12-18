@@ -32,7 +32,6 @@
 #include "mishap.hpp"
 #include "arity.hpp"
 
-#include "stash.hpp"
 #include "label.hpp"
 #include "instruction.hpp"
 #include "heap.hpp"
@@ -642,10 +641,11 @@ void CodeGenClass::vmiTEST(
 
 Ref CodeGenClass::detach( const bool in_heap, Ref fnkey ) {
 
-
-
+	//	Add one for the count and then follow with a succession of bytes.
+	unsigned long N = 1 + ( this->props.size() + sizeof( Ref ) - 1 ) / sizeof( Ref );
+	
 	unsigned long L = this->code_data->size();
-	unsigned long preflight_size = OFFSET_FROM_FN_LENGTH_TO_KEY + 1 + L /* + M */;
+	unsigned long preflight_size = OFFSET_FROM_FN_LENGTH_TO_KEY + 1 + L + N;
 	
 	//	The preflighted size must fit into WORDBITS-8 bits.
 	if ( ( preflight_size & ~TAGGG_MASK ) != 0 ) {
@@ -654,12 +654,6 @@ Ref CodeGenClass::detach( const bool in_heap, Ref fnkey ) {
 	
 	if ( in_heap ) {
 
-		Ref fn_props = (
-			this->props == EMPTY_FN_NAME ?
-			SYS_ABSENT :
-			this->vm->heap().copyString( this->props.c_str() )
-		);
-		
 		Ref * fake_pc = NULL;
 		XfrClass xfr( fake_pc, *this->vm, preflight_size );
 	
@@ -668,7 +662,6 @@ Ref CodeGenClass::detach( const bool in_heap, Ref fnkey ) {
 		//	reasons.
 		//
 		xfr.xfrRef( ToRef( ( L << TAGGG ) | FUNC_LEN_TAGGG ) );  //	tagged for heap scanning
-		xfr.xfrRef( fn_props );					//	props
 		xfr.xfrRef( ToRef( this->nresults ) );		//	raw R
 		xfr.xfrRef( ToRef( this->nlocals ) );		//	raw N
 		xfr.xfrRef( ToRef( this->ninputs ) );		//	raw A
@@ -678,20 +671,15 @@ Ref CodeGenClass::detach( const bool in_heap, Ref fnkey ) {
 		xfr.xfrRef( fnkey );
 	
 		xfr.xfrVector( *this->code_data );	//	alt
+
+		xfr.xfrRef( ToRef( this->props.size() ) );
+		xfr.xfrString( this->props );
 	
 		return xfr.makeRef();
 	} else {
 		Ref * permanentStore = new Ref[ preflight_size ];		//	This store is never reclaimed.
 		Ref * p = permanentStore;
 		*p++ = ToRef( ( L << TAGGG ) | FUNC_LEN_TAGGG );
-		
-		//	WARNING: Next field are the props. Very dangerous to allow to escape.
-		*p++ = (
-			this->props == EMPTY_FN_NAME ?
-			SYS_ABSENT :
-			LongToSmall( addStash( this->props ) )
-		);
-		
 		*p++ = ToRef( this->nresults );
 		*p++ = ToRef( this->nlocals );
 		*p++ = ToRef( this->ninputs );
@@ -701,6 +689,11 @@ Ref CodeGenClass::detach( const bool in_heap, Ref fnkey ) {
 		for ( std::vector< Ref >::iterator it = this->code_data->begin(); it != this->code_data->end(); ++it ) {
 			*p++ = *it;
 		}
+
+		*p = ToRef( this->props.size() );
+		memcpy( p + 1, this->props.c_str(), this->props.size() );
+		p += N;
+		
 		return Ptr4ToRef( func );
 	}
 }

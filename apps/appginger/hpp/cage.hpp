@@ -38,6 +38,7 @@ public:
 	void xfrRef( Ref x );
 	void xfrDup( Ref x, int n );
 	void xfrVector( std::vector< Ref > & chain );
+	void xfrString( const std::string s );
 	void xfrSubstring( const char *s, int a, int b );
 	void xfrSubstringStep( int offset, const char *s, int a, int b );
 	void xfrSubstringFinish( int offset );

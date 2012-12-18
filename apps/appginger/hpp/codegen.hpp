@@ -33,7 +33,6 @@
 #include "mnx.hpp"
 #include "sysfunction.hpp"
 #include "vident.hpp"
-#include "functor.hpp"
 #include "cmp.hpp"
 #include "valof.hpp"
 

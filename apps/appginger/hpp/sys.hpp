@@ -24,8 +24,6 @@
 
 #include "arity.hpp"
 
-
-#include "functor.hpp"
 #include "common.hpp"
 #include "cmp.hpp"
 

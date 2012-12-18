@@ -16,11 +16,21 @@
     along with AppGinger.  If not, see <http://www.gnu.org/licenses/>.
 \******************************************************************************/
 
+#include <iostream>
+
 #include "functionlayout.hpp"
 #include "key.hpp"
 
-unsigned long sizeAfterKeyOfFn( Ref * key ) {
-	return ToULong( *( key - OFFSET_FROM_FN_LENGTH_TO_KEY ) ) >> TAGGG;
+unsigned long sizeInstructionsAfterKeyOfFn( Ref * fn_K ) {
+    return ToULong( fn_K[ OFFSET_TO_FUNCTION_LENGTH ] ) >> TAGGG;
+}
+
+
+unsigned long sizeAfterKeyOfFn( Ref * fn_K ) {
+	unsigned long instr_width = sizeInstructionsAfterKeyOfFn( fn_K );
+    Ref * name_P = fn_K + 1 + instr_width;
+    unsigned long d = ToULong( name_P[ 0 ] );
+    return instr_width + 1 + ( d + sizeof( Ref ) - 1 ) / sizeof( Ref );
 }
 
 long numOutputsOfFn( Ref * key ) {
@@ -35,3 +45,16 @@ long numInputsOfFn( Ref * key ) {
 	return ToLong( key[ OFFSET_TO_NUM_INPUTS ] );
 }
 
+
+
+const std::string nameOfFn( Ref * fn_K ) {
+    Ref * name_P = fn_K + 1 + sizeInstructionsAfterKeyOfFn( fn_K );
+    unsigned long d = ToULong( name_P[ 0 ] );
+
+    char * bytes = reinterpret_cast< char * >( name_P + 1 );
+    std::string sofar;
+    for ( int i = 0; i < d; i++ ) {
+        sofar.push_back( bytes[ i ] );
+    }
+    return sofar;
+}

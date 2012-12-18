@@ -22,7 +22,6 @@
 
 #include "mnx.hpp"
     
-#include "stash.hpp"
 #include "sysprint.hpp"
 #include "syskey.hpp"
 #include "misclayout.hpp"
@@ -212,21 +211,20 @@ private:
 	void refFunctionPrint( const Ref fn ) {
 		Ref * fn_K = RefToPtr4( fn );
 		Ref key = fn_K[ 0 ];
-		Ref props = fn_K[ FN_OFFSET_TO_PROPS ];
+
+		const std::string name( nameOfFn( fn_K ) );
+
 		if ( IsCoreFunctionKey( key ) ) {
-			this->out << "<sysfn " << getStash( SmallToLong( props ) ) << ">";					
+			this->out << "<sysfn";
+		} else if ( IsMethodKey( key ) ) {
+			this->out << "<method";
 		} else {
-			std::string name;
-			if ( props != SYS_ABSENT ) {
-				name += " ";
-				name += refToString( props );
-			}
-			if ( IsMethodKey( key ) ) {
-				this->out << "<method" << name << ">";					
-			} else {
-				this->out << "<function" << name << ">";					
-			}
+			this->out << "<function";
 		}
+		if ( name.size() > 0 ) {
+			this->out << " " << name;
+		}
+		this->out << ">";
 	}
 
 public:

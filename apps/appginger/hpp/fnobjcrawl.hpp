@@ -27,13 +27,10 @@
 class FnObjCrawl {
 private:
 	Ref * pc;
-	Ref * obj_Z1;
+	Ref * obj_N;
 	const InstructionSet & ins;
 	const char * types;
 
-private:
-	Ref * props;
-	
 private:
 	const char * sig;
 	const char * name;

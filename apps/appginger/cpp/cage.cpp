@@ -124,6 +124,12 @@ void XfrClass::xfrVector( std::vector< Ref > & v ) {
 	}
 }
 
+void XfrClass::xfrString( const std::string s ) {
+	const size_t n = s.size();
+	memcpy( (void *)(this->tmptop), s.c_str(), n );
+	this->tmptop += ( sizeof( Ref ) + n - 1 ) / sizeof( Ref );
+}
+
 //  Copy characters from index a to b of s.
 void XfrClass::xfrSubstring( const char *s, int a, int b ) {
 	/*

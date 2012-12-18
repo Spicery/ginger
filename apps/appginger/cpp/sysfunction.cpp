@@ -65,8 +65,6 @@ Ref * sysPartApply( Ref *pc, class MachineClass * vm ) {
 	Ref * F_K = RefToPtr4( F );
 	if ( !IsFunctionKey( *F_K ) ) throw Ginger::Mishap( "Function needed as last arg to partApply" );
 
-	Ref props = F_K[ FN_OFFSET_TO_PROPS ];	
-	
 	long F_in_arity = numInputsOfFn( F_K );
 	long F_out_arity = numOutputsOfFn( F_K );
 	
@@ -77,7 +75,7 @@ Ref * sysPartApply( Ref *pc, class MachineClass * vm ) {
 	//	This seems very unlikely to be correct. We can't just go around
 	//	substracting arities.
 	codegen->vmiFUNCTION( 
-		props == SYS_ABSENT ? std::string( EMPTY_FN_NAME ) : refToString( props ),
+		nameOfFn( F_K ),
 		F_in_arity - N, 
 		F_out_arity 
 	);

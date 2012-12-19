@@ -23,9 +23,10 @@ private:
 	bool gen_lnx;
 	bool cstyle;
 	const char * app_title;
+	bool no_span;
 	
 public:
-	ToolMain( bool cstyle, const char * title ) : cstyle( cstyle ), app_title( title ) {}
+	ToolMain( bool cstyle, const char * title ) : cstyle( cstyle ), app_title( title ), no_span( false ) {}
 
 public:
 	std::string version() { return "0.2"; }

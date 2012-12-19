@@ -45,6 +45,7 @@ static struct option long_options[] =
         { "license",        optional_argument,      0, 'L' },
         { "tokenise",		no_argument,			0, 'T' },
         { "version",        no_argument,            0, 'V' },
+        { "nospan",         no_argument,            0, 's' },
         { 0, 0, 0, 0 }
     };
 
@@ -69,10 +70,10 @@ void ToolMain::printGPL( const char * start, const char * end ) {
 void ToolMain::parseArgs( int argc, char **argv, char **envp ) {
 	this->gen_lnx = false;
 	this->use_stdin = true;
-	
+
 	for(;;) {
 		int option_index = 0;
-		int c = getopt_long( argc, argv, "TH::L::V", long_options, &option_index );
+		int c = getopt_long( argc, argv, "TH::L::Vs", long_options, &option_index );
 		if ( c == -1 ) break;
 		switch ( c ) {
 			case 'T': {
@@ -90,6 +91,7 @@ void ToolMain::parseArgs( int argc, char **argv, char **envp ) {
 					printf( "-H, --help[=TOPIC]    help info on optional topic (see --help=help)\n" );
 					printf( "-V, --version         print out version information and exit\n" );
 					printf( "-L, --license[=PART]  print out license information and exit (see --help=license)\n" );
+					printf( "-s, --nospan          suppress span attribution" );
 					printf( "\n" );
 				} else if ( std::string( optarg ) == "help" ) {
 					cout << "--help=help           this short help" << endl;
@@ -115,6 +117,10 @@ void ToolMain::parseArgs( int argc, char **argv, char **envp ) {
 					exit( EXIT_FAILURE );
 				}
 				exit( EXIT_SUCCESS );   //  Is that right?              
+			}
+			case 's': {
+				this->no_span = true;
+				break;
 			}
 			case 'V': {
 				cout << this->app_title << ": version " << this->version() << " (" << __DATE__ << " " << __TIME__ << ") part of " << PACKAGE_NAME << " version " << PACKAGE_VERSION << endl;
@@ -205,7 +211,7 @@ void ToolMain::tokenise( FILE *in ) {
 
 void ToolMain::parse( FILE * in ) {
 	ItemFactoryClass ifact( in, this->cstyle );
-	ReadStateClass input( &ifact );
+	ReadStateClass input( &ifact, not this->no_span );
 	input.setCStyleMode( this->cstyle );
 	while ( not input.isAtEndOfInput() ) {
 		input.reset();

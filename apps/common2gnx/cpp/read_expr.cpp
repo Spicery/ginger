@@ -813,7 +813,7 @@ Node ReadStateClass::prefixProcessing() {
 	ItemFactory ifact = this->item_factory;
 	const int start = ifact->lineNumber();
 	Node node = this->prefixProcessingCore();
-	if ( node ) {
+	if ( node && this->span_mode ) {
 		const int end = ifact->lineNumber();
 		stringstream span;
 		span << start;

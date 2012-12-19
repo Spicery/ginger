@@ -15,6 +15,7 @@ public:
 	ItemFactory item_factory;
 	bool		pattern_mode;
 	bool		cstyle_mode;
+	bool		span_mode;
 	
 private:
 	bool 		is_postfix_allowed;
@@ -78,10 +79,11 @@ public:
 
 	
 public:
-	ReadStateClass( ItemFactory ifact ) :
+	ReadStateClass( ItemFactory ifact, bool span_mode ) :
 		item_factory( ifact ),
 		pattern_mode( false ),
 		cstyle_mode( false ),
+		span_mode( span_mode ),
 		is_postfix_allowed( true )
 	{
 	}

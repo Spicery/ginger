@@ -1,2 +1,1 @@
-<bind><var name="print" protected="true"/><fn name="print"><seq><var name="x"/></seq><app><id name="_print"/><id name="x"/></app></fn></bind>
 <app><id name="print"/><constant type="string" value="Hello"/></app>

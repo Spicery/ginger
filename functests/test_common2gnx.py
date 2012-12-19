@@ -6,7 +6,7 @@ import commands
 
 here = os.path.dirname( os.path.realpath( __file__ ) )
 home = os.path.join( here, ".." )
-cmn2gnx = os.path.join( here, "cmn2gnx" )
+cmn2gnx = os.path.join( here, "common2gnx" )
 executable = os.path.join( home, "apps/common2gnx/cpp/common2gnx")
 
 class Common2GNXTestCase(unittest.TestCase):

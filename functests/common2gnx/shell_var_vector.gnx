@@ -1,0 +1,1 @@
+<sysapp name="newMap"><sysapp name="newMaplet"><sysapp name="sysGetEnv"><constant type="string" value="TERM"/></sysapp><sysapp name="sysGetEnv"><constant type="string" value="PATH"/></sysapp></sysapp></sysapp>

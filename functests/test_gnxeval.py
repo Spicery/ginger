@@ -15,23 +15,18 @@ class GNX2GingerTestCase(unittest.TestCase):
     def setUp(self):
         self.infn = gnx2ginger  + "/%s.gnx"
 
+    def runtest( self, fn, out ):
+        res = commands.getoutput( """cat {0} | {1} -i --grammar=gnx""".format( self.infn % fn, executable ) )
+        self.assertEqual( res, out )
+
     def test_gnx2ginger_print(self):
         """gnx2ginger - print"""
-        fn = "print"
-        res = commands.getoutput( """cat {0} | {1} -i --grammar=gnx""".format( self.infn % fn, executable ) )
-        # print("Res %s" % res)
-        self.assertEqual( res, "Hello" )
+        self.runtest( "print", "Hello" )
 
     def test_gnx2ginger_nfib(self):
         """gnx2ginger - nfib"""
-        fn = "nfib"
-        res = commands.getoutput( """cat {0} | {1} -m3 -i --grammar=gnx""".format( self.infn % fn, executable ) )
-       # print("Res: %s" % res)
-        self.assertEqual(res, "18454929")
-
+        self.runtest( "nfib", "18454929" )
+ 
     def test_gnx2ginger_factorial(self):
         """gnx2ginger - factorial"""
-        fn = "factorial"
-        res = commands.getoutput( """cat {0} | {1} -i --grammar=gnx""".format( self.infn % fn, executable ) )
-        # print("Res %s" % res)
-        self.assertEqual( res, "6" )
+        self.runtest( "factorial", 6 )

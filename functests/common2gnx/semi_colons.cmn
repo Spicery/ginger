@@ -1,0 +1,2 @@
+
+define f() =>> 0; 1 enddefine;

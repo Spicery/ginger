@@ -1,0 +1,2 @@
+
+<bind><var name="f" protected="true"/><fn name="f"><seq/><seq><constant type="int" value="0"/><constant type="int" value="1"/></seq></fn></bind>

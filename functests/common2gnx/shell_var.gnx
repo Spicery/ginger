@@ -1,0 +1,1 @@
+<sysapp name="sysGetEnv"><constant type="string" value="TERM"/></sysapp>

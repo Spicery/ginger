@@ -1,0 +1,1 @@
+<bind><var name="f" protected="true"/><fn name="f"><seq><var name="x"/></seq><if><sysapp name="&lt;"><id name="x"/><constant type="int" value="0"/></sysapp><constant type="string" value="a"/><constant type="string" value="b"/></if></fn></bind>

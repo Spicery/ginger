@@ -1,0 +1,2 @@
+<!-- Elimination of assert with n = "1" -->
+<assert n="1"><constant type="string" value="false"/></assert>

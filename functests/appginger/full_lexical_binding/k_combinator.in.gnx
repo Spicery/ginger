@@ -1,0 +1,16 @@
+<!-- define K( x ) =>> fn y =>> x endfn enddefine -->
+<bind>
+	<var name="K" protected="true" />
+	<fn name="outer">
+		<seq>
+			<var name="x" />
+		</seq>
+		<fn name="inner">
+			<var name="y" />
+			<id name="x" />
+		</fn>
+	</fn>
+</bind>
+
+<!-- K( true )( false ); -->
+<app><app><id name="K"/><constant type="bool" value="true"/></app><constant type="bool" value="false"/></app>

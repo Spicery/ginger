@@ -1,0 +1,21 @@
+<!-- Method -->
+<!-- val Foo := newRecordClass( "Foo", 1 ); -->
+<bind><var name="Foo" protected="true" tag="public"/><app><id name="newRecordClass"/><seq><constant type="string" value="Foo"/><constant type="int" value="1"/></seq></app></bind>
+
+<!-- val FooCont := newClassAccessor( Foo, 1 ); -->
+<bind><var name="FooCont" protected="true" tag="public"/><app><id name="newClassAccessor"/><seq><id name="Foo"/><constant type="int" value="1"/></seq></app></bind>
+
+<!-- val M := newMethod( "M", 1, 1 ); -->
+<bind><var name="M" protected="true" tag="public"/><app><id name="newMethod"/><seq><seq><constant type="string" value="M"/><constant type="int" value="1"/></seq><constant type="int" value="1"/></seq></app></bind>
+
+<!-- setMethod( Foo, M, FooCont ); -->
+<app><id name="setMethod"/><seq><seq><id name="Foo"/><id name="M"/></seq><id name="FooCont"/></seq></app>
+
+<!-- val newFoo := newClassConstructor( Foo ); -->
+<bind><var name="newFoo" protected="true" tag="public"/><app><id name="newClassConstructor"/><id name="Foo"/></app></bind>
+
+
+<!-- val X := newFoo( "yay" ); -->
+<bind><var name="X" protected="true" tag="public"/><app><id name="newFoo"/><constant type="string" value="yay"/></app></bind>
+<!-- M( X ); -->
+<app><id name="M"/><id name="X"/></app>

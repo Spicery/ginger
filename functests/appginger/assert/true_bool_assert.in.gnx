@@ -1,0 +1,2 @@
+<!-- Verify assert with type="bool" - is the other boolean -->
+<assert type="bool"><seq><constant type="bool" value="true"/></seq></assert>

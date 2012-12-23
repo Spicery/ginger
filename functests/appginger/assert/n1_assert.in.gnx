@@ -1,0 +1,2 @@
+<!-- Verify assert with n="1" - just the right number of values -->
+<assert n="1"><constant type="string" value="OK"/></assert>

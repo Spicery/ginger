@@ -1,0 +1,10 @@
+<!-- 
+	"abc".index(2);
+	["abc".explode].index(3);
+	{"abc".explode}.index(1);
+	{% 'p' :- 'a', 'q' :- 'b', 'r' :- 'c' %}.index( 'q' );
+-->
+<app><id name="index"/><seq><constant type="string" value="abc"/><constant type="int" value="2"/></seq></app>
+<app><id name="index"/><seq><sysapp name="newList"><sysapp name="explode"><seq><constant type="string" value="abc"/></seq></sysapp></sysapp><constant type="int" value="3"/></seq></app>
+<app><id name="index"/><seq><sysapp name="newVector"><sysapp name="explode"><seq><constant type="string" value="abc"/></seq></sysapp></sysapp><constant type="int" value="1"/></seq></app>
+<app><id name="index"/><seq><sysapp name="newMap"><seq><seq><sysapp name="newMaplet"><seq><constant type="char" value="p"/></seq><seq><constant type="char" value="a"/></seq></sysapp><sysapp name="newMaplet"><seq><constant type="char" value="q"/></seq><seq><constant type="char" value="b"/></seq></sysapp></seq><sysapp name="newMaplet"><seq><constant type="char" value="r"/></seq><seq><constant type="char" value="c"/></seq></sysapp></seq></sysapp><seq><constant type="char" value="q"/></seq></seq></app>

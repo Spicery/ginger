@@ -1,0 +1,24 @@
+<!-- KK, checking intermediate functions do capture -->
+<!-- define KK( x ) => fn y => fn z => ( x, z ) endfn endfn enddefine -->
+
+<bind>
+	<var name="KK" protected="true" />
+	<fn name="KKx">
+		<seq>
+			<var name="x" />
+		</seq>
+		<fn name="KKy">
+			<var name="y" />
+			<fn name="KKz">
+				<var name="z" />
+				<seq>
+					<id name="x" />
+					<id name="z" />
+				</seq>
+			</fn>
+		</fn>
+	</fn>
+</bind>
+
+<!-- KK( "foo" )( "bar" )( "gort" ) -->
+<app><app><app><id name="KK"/><constant type="string" value="foo"/></app><constant type="string" value="bar"/></app><constant type="string" value="gort"/></app>

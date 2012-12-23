@@ -1,0 +1,2 @@
+<!-- XML meta-chars in String -->
+<constant type="string" value="&gt;"/>

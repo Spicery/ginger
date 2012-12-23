@@ -1,0 +1,2 @@
+<!-- Failed elimination of assert with non-matching type -->
+<assert type="bool"><constant type="string" value="false"/></assert>

@@ -1,0 +1,2 @@
+<!-- Non-elimination of assert with n = "1" -->
+<assert n="1"><seq/></assert>

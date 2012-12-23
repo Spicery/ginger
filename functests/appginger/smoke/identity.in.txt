@@ -1,0 +1,3 @@
+<!-- Identity -->
+<bind><var name="f" protected="true"/><fn name="f"><seq><var name="x"/></seq><id name="x"/></fn></bind>
+<app><id name="f"/><constant type="int" value="99"/></app>

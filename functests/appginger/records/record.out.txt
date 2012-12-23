@@ -1,0 +1,1 @@
+[true,false,99,foo,[%99,foo%]]

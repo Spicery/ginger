@@ -1,0 +1,5 @@
+<!--
+	Verify assert with type="bool" - not a boolean
+	Must fail
+-->
+<assert type="bool"><seq><constant type="string" value="Ouch!"/></seq></assert>

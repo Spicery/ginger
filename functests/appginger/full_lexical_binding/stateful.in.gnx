@@ -1,0 +1,16 @@
+<!--
+	# Stateful
+	define foo() =>>
+		var x := 0;
+		fn () =>> x + 1 -> x; x endfn
+	enddefine;
+	var f := foo();
+	f();
+	f();
+	f();
+-->
+<bind><var name="foo" protected="true"/><fn name="foo"><seq/><seq><bind><var name="x" protected="false" tag="public"/><constant type="int" value="0"/></bind><fn><seq/><seq><set><sysapp name="+"><id name="x"/><constant type="int" value="1"/></sysapp><id name="x"/></set><id name="x"/></seq></fn></seq></fn></bind>
+<bind><var name="f" tag="public"/><app><id name="foo"/><seq/></app></bind>
+<app><id name="f"/><seq/></app>
+<app><id name="f"/><seq/></app>
+<app><id name="f"/><seq/></app>

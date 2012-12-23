@@ -1,0 +1,5 @@
+<!-- 
+	Verify assert with n="1" - not enough values.
+	Must fail.
+-->
+<assert n="1"><seq/></assert>

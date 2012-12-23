@@ -45,7 +45,7 @@ protected:
 	void testWeakIdRehashing();
 
 protected:	
-	AppContext context;
+	AppContext * context;
 	MachineClass * vm;
 	Package * interactive;
 	RCEP * rcep;
@@ -55,18 +55,11 @@ protected:
 
 
 public:
-	Valof * safeValof(  const char * name );
+	Valof * safeValof( const char * name );
 
-	void setUp() {
-		this->vm = context.newMachine();
-		this->interactive = context.initInteractivePackage( vm );
-		this->rcep = new RCEP( interactive );
-	}
+	void setUp(); 
 	
-	void tearDown() {
-		delete this->rcep;
-		delete this->vm;
-	}
+	void tearDown();
 
 };
 

@@ -30,7 +30,7 @@ static int inferredLayout( Ref simple_key ) {
 void SimpleKeyTest::testOK() {
 	CPPUNIT_ASSERT( inferredLayout( sysAbsentKey ) == LayoutOfSimpleKey( sysAbsentKey ) );
 	CPPUNIT_ASSERT( inferredLayout( sysBoolKey ) == LayoutOfSimpleKey( sysBoolKey ) );
-	CPPUNIT_ASSERT( inferredLayout( sysKeyKey ) == LayoutOfSimpleKey( sysKeyKey ) );
+	CPPUNIT_ASSERT( inferredLayout( sysClassKey ) == LayoutOfSimpleKey( sysClassKey ) );
 	CPPUNIT_ASSERT( inferredLayout( sysTerminKey ) == LayoutOfSimpleKey( sysTerminKey ) );
 	CPPUNIT_ASSERT( inferredLayout( sysNilKey ) == LayoutOfSimpleKey( sysNilKey ) );
 	CPPUNIT_ASSERT( inferredLayout( sysPairKey ) == LayoutOfSimpleKey( sysPairKey ) );
@@ -53,7 +53,7 @@ void SimpleKeyTest::testOK() {
 	CPPUNIT_ASSERT( inferredLayout( sysHardIdMapKey ) == LayoutOfSimpleKey( sysHardIdMapKey ) );
 	CPPUNIT_ASSERT( inferredLayout( sysWeakIdMapKey ) == LayoutOfSimpleKey( sysWeakIdMapKey ) );
 	CPPUNIT_ASSERT( inferredLayout( sysHashMapDataKey ) == LayoutOfSimpleKey( sysHashMapDataKey ) );
-	CPPUNIT_ASSERT( inferredLayout( sysUndefKey ) == LayoutOfSimpleKey( sysUndefKey ) );
+	CPPUNIT_ASSERT( inferredLayout( sysUndefinedKey ) == LayoutOfSimpleKey( sysUndefinedKey ) );
 	CPPUNIT_ASSERT( inferredLayout( sysElementKey ) == LayoutOfSimpleKey( sysElementKey ) );
 	CPPUNIT_ASSERT( inferredLayout( sysAttrMapKey ) == LayoutOfSimpleKey( sysAttrMapKey ) );
 }

@@ -40,7 +40,7 @@ public:
 	}
 
 public:
-	Machine3( AppContext & application );
+	Machine3( AppContext * application );
 	virtual ~Machine3() {}
 };
 

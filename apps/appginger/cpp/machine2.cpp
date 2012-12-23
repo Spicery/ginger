@@ -29,7 +29,7 @@ Machine vm;
 typedef void SpecialFn( void );
 typedef SpecialFn *Special;
 
-Machine2::Machine2( AppContext & g ) :
+Machine2::Machine2( AppContext * g ) :
 	MachineClass( g )
 {
 }

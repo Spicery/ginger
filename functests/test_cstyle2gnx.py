@@ -6,7 +6,7 @@ import nose.tools
 
 here = os.path.dirname( os.path.realpath( __file__ ) )
 home = os.path.join( here, ".." )
-executable = os.path.join( home, "apps/cstyle2gnx/cpp/cstyle2gnx")
+executable = os.path.join( home, "apps/common2gnx/cpp/cstyle2gnx")
 
 def runtest( in_file_name ):
     out_file_name = re.sub( r'\.in.cst$', '.out.gnx', in_file_name )

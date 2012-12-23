@@ -71,7 +71,7 @@ class MachineClass {
 friend class GarbageCollect;
 
 private:
-	AppContext &					appg;
+	AppContext *					appg;
 	std::auto_ptr<CodeGenClass>		codegen_aptr;
 	std::auto_ptr<HeapClass>		heap_aptr;
 	Pressure						pressure;
@@ -85,7 +85,7 @@ private:
 	std::auto_ptr<PackageManager>	package_mgr_aptr;
 	
 public:
-	Package * 		getPackage( std::string );
+	Package * 		getPackage( std::string name );
 	Pressure &		getPressure();
 	
 public:
@@ -168,7 +168,7 @@ public:
 	
 
 public:
-	MachineClass( AppContext & appg );
+	MachineClass( AppContext * appg );
 	virtual ~MachineClass();
 };
 

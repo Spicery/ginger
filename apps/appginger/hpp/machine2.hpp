@@ -37,7 +37,7 @@ public:
 	}
 	
 public:
-	Machine2( AppContext & application );
+	Machine2( AppContext * application );
 	virtual ~Machine2() {}
 
 };

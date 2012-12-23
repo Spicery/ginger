@@ -34,6 +34,20 @@ using namespace std;
 #include "reflayout.hpp"
 #include "sysmap.hpp"
 
+void GCTest::setUp() {
+	this->context = new AppContext();
+	this->vm = context->newMachine();
+	this->interactive = this->context->initInteractivePackage( vm );
+	this->rcep = new RCEP( interactive );
+}
+
+ void GCTest::tearDown() {
+	delete this->rcep;
+	delete this->vm;
+	delete this->context;
+}
+
+
 static int lengthOfAssocChain( Ref achain ) {
 	int count = 0;
 	for ( ; achain != SYS_ABSENT ; count++ ) {

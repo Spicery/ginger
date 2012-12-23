@@ -19,7 +19,7 @@ using namespace std;
 
 typedef Instruction Special;
 
-Machine4::Machine4( AppContext & g ) : MachineClass( g ) {}
+Machine4::Machine4( AppContext * g ) : MachineClass( g ) {}
 
 void Machine4::execute( Ref r ) {
 	Ref * pc = this->setUpPC( r );

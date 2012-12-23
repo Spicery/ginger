@@ -29,7 +29,7 @@ using namespace Ginger;
 
 
 
-Machine3::Machine3( AppContext & g ) :
+Machine3::Machine3( AppContext * g ) :
 	MachineClass( g )
 {
 	this->core( true, 0 );

@@ -23,6 +23,7 @@
 #include <vector>
 #include <list>
 
+
 #ifdef RUDECGI
 	#include <rude/cgi.h>
 #endif
@@ -96,12 +97,15 @@ public:
 		welcoming( true ),
 		interactive_package( INTERACTIVE_PACKAGE )
 	{
+		//std::cout << "AppContext: " << interactive_package << std::endl;
 		#ifdef RUDECGI	
 			this->cgi = NULL;
 		#endif
 	}
 
-	~AppContext() {}
+	~AppContext() {
+		//std::cout << "~Appcontext" << std::endl;
+	}
 };
 
 #endif

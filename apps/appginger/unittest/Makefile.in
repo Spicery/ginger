@@ -1,20 +1,20 @@
 
-CC=g++
+CC=@CXX@
 
-CXXFLAGS=-g -I../hpp -I../../libgng/hpp -L../cpp -I../../automatic/machine -I../../automatic/sys -I../../automatic/simple -Wall -Wnon-virtual-dtor
+CXXFLAGS=-g -I../hpp -I../../libgng/hpp -I../../automatic/machine -I../../automatic/sys -I../../automatic/simple `cppunit-config --cflags` -Wall -Wnon-virtual-dtor
 CFLAGS=-Wmissing-prototypes 
-LDFLAGS=-ldl -lboost_iostreams
+LDFLAGS=`cppunit-config --libs` 
 OBJS=example.o testrunner.o gctest.o gcstats.o archtest.o simplekeytest.o constants.o
 
 all: testrunner
 
-check: testrunner
+unitcheck:
 	./testrunner 2> results.xml 
 
 # $@ is make shorthand for the target.
 # $@ is make shorthand for the dependencies
 testrunner: $(OBJS) ../cpp/libappginger.a
-	g++ $(CXXFLAGS) $(BOOST_CPPFLAGS) -o $@ $^ ../../libgng/cpp/libgng.a  -lcppunit -lappginger $(LDFLAGS) /usr/local/lib/librudecgi.a
+	g++ $(CXXFLAGS) -o $@ $^ ../../libgng/cpp/libgng.a $(LDFLAGS) /usr/local/lib/librudecgi.a -L../cpp -lappginger 
 
 clean:
 	rm -f *.o

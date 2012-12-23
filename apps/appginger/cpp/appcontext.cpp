@@ -43,19 +43,20 @@
 using namespace std;
 
 Package * AppContext::initInteractivePackage( MachineClass * vm ) {
-    Package * interactive_pkg = vm->getPackage( this->getInteractivePackage() );
+    const std::string name( this->getInteractivePackage() );
+    Package * interactive_pkg = vm->getPackage( name );
     return interactive_pkg;
 }
 
 MachineClass * AppContext::newMachine() {
    switch ( this->machine_impl_num ) {
-        case 1: return new Machine1( *this );
-        case 2: return new Machine2( *this );
-        case 3: return new Machine3( *this );
-        case 4: return new Machine4( *this );
+        case 1: return new Machine1( this );
+        case 2: return new Machine2( this );
+        case 3: return new Machine3( this );
+        case 4: return new Machine4( this );
         default: {
             cerr <<  "Invalid implementation (" << this->machine_impl_num << ") using implementation 1" << endl;
-            return new Machine1( *this );
+            return new Machine1( this );
             break;
         }
     }

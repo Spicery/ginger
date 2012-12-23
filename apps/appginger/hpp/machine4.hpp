@@ -35,7 +35,7 @@ public:
 	}
 
 public:
-	Machine4( AppContext & g );
+	Machine4( AppContext * g );
 	virtual ~Machine4() {}
 
 };

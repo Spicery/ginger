@@ -39,7 +39,7 @@ using namespace std;
 
 #define RANDOM_SIZE 100000
 
-MachineClass::MachineClass( AppContext & application ) :
+MachineClass::MachineClass( AppContext * application ) :
 	appg( application ),
 	codegen_aptr( new CodeGenClass( this ) ),
 	heap_aptr( new HeapClass( this ) ),
@@ -111,11 +111,11 @@ void MachineClass::executeQueue() {
 }
 
 bool MachineClass::getShowCode() {
-	return this->appg.getShowCode();
+	return this->appg->getShowCode();
 }
 
 bool MachineClass::isGCTrace() {
-	return this->appg.isGCTrace();
+	return this->appg->isGCTrace();
 }
 
 void MachineClass::resetMachine() {
@@ -229,8 +229,8 @@ void MachineClass::printResults( float time_taken ) {
 }
 
 void MachineClass::printResults( std::ostream & out, float time_taken ) {
-	if ( this->appg.printDetailLevel() >= 1 ) {
-		const bool chatty = this->appg.printDetailLevel() >= 2;
+	if ( this->appg->printDetailLevel() >= 1 ) {
+		const bool chatty = this->appg->printDetailLevel() >= 2;
 	
 		int n = this->vp - this->vp_base;
 	
@@ -321,7 +321,7 @@ Package * MachineClass::getPackage( std::string title ) {
 }
 
 AppContext & MachineClass::getAppContext() {
-	return this->appg;
+	return *this->appg;
 }
 
 // -----------------------------------------------------------------------------

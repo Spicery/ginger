@@ -391,6 +391,7 @@ const SysMap::value_type rawData[] = {
 	SysMap::value_type( "absNot", SysInfo( Arity( 1 ), Arity( 1 ), sysAbsNot, "Negation of presence: absent->present; non-absent->absent" ) ),
 	SysMap::value_type( "+", SysInfo( vmc_add, Arity( 2 ), Arity( 1 ), "Adds two numbers" ) ),
 	SysMap::value_type( "-", SysInfo( vmc_sub, Arity( 2 ), Arity( 1 ), "Substracts two numbers" ) ),
+	SysMap::value_type( "negate", SysInfo( vmc_neg, Arity( 1 ), Arity( 1 ), "Negates a number" ) ),
 	SysMap::value_type( "*", SysInfo( vmc_mul, Arity( 2 ), Arity( 1 ), "Multiplies two numbers" ) ),
 	SysMap::value_type( "/", SysInfo( vmc_div, Arity( 2 ), Arity( 1 ), "Divides two numbers, result is a float" ) ),
 	SysMap::value_type( "quo", SysInfo( vmc_quo, Arity( 2 ), Arity( 1 ), "Integer quotient" ) ),

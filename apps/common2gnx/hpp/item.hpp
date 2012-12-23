@@ -7,8 +7,9 @@
 #include "role.hpp"
 
 enum {
-	prec_tight	= 	100,
-	prec_not	=  1600,
+	prec_tight	= 	 100,
+	prec_negate =    500,
+	prec_not	=   1600,
     prec_arrow  =  10000,
     prec_comma  =  20000,
     prec_semi   =  30000,

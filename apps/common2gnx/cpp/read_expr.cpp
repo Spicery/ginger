@@ -1241,6 +1241,15 @@ Node ReadStateClass::prefixProcessingCore() {
 	}
 
 	switch ( fnc ) {
+		case tokty_sub: {
+			Node e = this->readExprPrec( prec_negate );
+			NodeFactory neg;
+			neg.start( SYSAPP );
+			neg.put( SYSAPP_NAME, "negate" );
+			neg.add( e );
+			neg.end();
+			return neg.build();
+		}
 		case tokty_id: 
 			return this->readId( item->nameString() );
 		// changed for ${VAR} case study

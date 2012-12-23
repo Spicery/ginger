@@ -90,6 +90,7 @@ instructionSet = [
 	Instruction( "mod", "i" ),
 	Instruction( "neq_si", "irrr" ),
 	Instruction( "neq_ss", "irrr" ),
+	Instruction( "neg", "i" ),
 	Instruction( "not", "i" ),
 	Instruction( "pop_global", "iv" ),
 	Instruction( "pop_local", "ir"),

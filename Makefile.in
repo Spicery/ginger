@@ -56,9 +56,6 @@ distclean: clean
 	rmdir -p autom4te.cache
 	rm -f configure
 
-check: all
-	$(MAKE) -C apps $@
-
 # EPREFIX should be bound to PREFIX by default. This appears to be a lie.
 # As a consequence we override EPREFIX entirely. Probably incorrect but not
 # that interesting.
@@ -173,5 +170,5 @@ tarball-as-is-build-info:
 	echo "uname -rsv   : " `uname -rsv` >> _build/$(TBBUILDINFO)
 	( cd _build/$(TBBASE); echo "space needed : " `du -shc | grep total` ) >> _build/$(TBBUILDINFO)
 
-test:
+check:
 	nosetests -v functests

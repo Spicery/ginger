@@ -170,5 +170,16 @@ tarball-as-is-build-info:
 	echo "uname -rsv   : " `uname -rsv` >> _build/$(TBBUILDINFO)
 	( cd _build/$(TBBASE); echo "space needed : " `du -shc | grep total` ) >> _build/$(TBBUILDINFO)
 
-check:
+unitcheck:
+	# To be done
+
+funccheck:
 	nosetests -v functests
+
+syscheck:
+	# To be done
+
+check:
+	make unitcheck
+	make funccheck
+	make syscheck

@@ -12,7 +12,6 @@ distclean: clean
 	rm -f apps/Makefile
 	rm -f apps/appginger/Makefile
 	rm -f apps/appginger/cpp/Makefile
-	rm -f apps/appginger/functest/Makefile
 	rm -f apps/appginger/unittest/Makefile
 	rm -f apps/automatic/machine/Makefile
 	rm -f apps/automatic/metainfo/Makefile
@@ -34,7 +33,6 @@ distclean: clean
 	rm -f apps/libmetainfo/unittest/Makefile
 	rm -f apps/lisp2gnx/Makefile
 	rm -f apps/lisp2gnx/lsp/Makefile
-	rm -f apps/lisp2gnx/functest/Makefile
 	rm -f apps/tidymnx/Makefile
 	rm -f apps/tidymnx/cpp/Makefile
 	rm -f apps/shebang/Makefile

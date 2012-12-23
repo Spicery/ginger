@@ -72,7 +72,6 @@ AC_CONFIG_FILES([Makefile
                  apps/Makefile
                  apps/appginger/Makefile
                  apps/appginger/cpp/Makefile
-                 apps/appginger/functest/Makefile
                  apps/appginger/unittest/Makefile
                  apps/automatic/simple/Makefile
                  apps/automatic/sys/Makefile
@@ -82,7 +81,6 @@ AC_CONFIG_FILES([Makefile
                  apps/common2gnx/cpp/Makefile
                  apps/lisp2gnx/Makefile
                  apps/lisp2gnx/lsp/Makefile
-                 apps/lisp2gnx/functest/Makefile
                  apps/fetchgnx/Makefile
                  apps/fetchgnx/cpp/Makefile
                  apps/fetchgnx/unittest/Makefile

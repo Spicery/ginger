@@ -1,0 +1,4 @@
+<set>
+	<constant type="int" value="123"/>
+	<id name="x"/>
+</set>

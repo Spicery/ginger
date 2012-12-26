@@ -1,0 +1,58 @@
+<bind>
+	<var name="quadratic" protected="true"/>
+	<fn name="quadratic">
+		<seq><var name="flag"/><var name="a"/><var name="b"/><var name="c"/></seq>
+		<seq>
+			<bind>
+				<var name="s" protected="true"/>
+				<app>
+					<id name="sqrt"/>
+					<sysapp name="-">
+						<sysapp name="*">
+							<id name="b"/>
+							<id name="b"/>
+						</sysapp>
+						<sysapp name="*">
+							<sysapp name="*">
+								<constant type="int" value="4"/>
+								<id name="a"/>
+							</sysapp>
+							<id name="c"/>
+						</sysapp>
+					</sysapp>
+				</app>
+			</bind>
+			<if>
+				<id name="flag"/>
+				<seq>
+					<assert tailcall="true">
+						<sysapp name="/">
+							<sysapp name="+">
+								<sysapp name="negate"><id name="b"/></sysapp>
+								<id name="s"/>							
+							</sysapp>
+							<sysapp name="*">
+								<constant type="int" value="2"/>
+								<id name="a"/>
+							</sysapp>
+						</sysapp>
+					</assert>
+				</seq>
+				<seq>
+					<assert tailcall="true">
+						<sysapp name="/">
+							<sysapp name="-">
+								<sysapp name="negate"><id name="b"/></sysapp>
+								<id name="s"/>
+							</sysapp>
+							<sysapp name="*">
+								<constant type="int" value="2"/>
+								<id name="a"/>
+							</sysapp>
+						</sysapp>
+					</assert>
+				</seq>
+			</if>
+		</seq>
+	</fn>
+</bind>

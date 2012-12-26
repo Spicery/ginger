@@ -1,0 +1,8 @@
+function quadratic( flag, a, b, c ) {
+	var s = sqrt( b * b - 4 * a * c );
+	if ( flag ) {
+		return ( -b + s ) / ( 2 * a );
+	} else {
+		return ( -b - s ) / ( 2 * a );
+	}
+}

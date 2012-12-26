@@ -32,7 +32,7 @@ if ( IsSmall( rx ) ) {
 	}
 	RETURN( pc + 1 );
 } else if ( IsDouble( rx ) ) {
-	gngdouble_t x, y;
+	gngdouble_t x;
 	x = gngFastDoubleValue( rx );
 	*( VMVP ) = vm->heap().copyDouble( -x );
 	RETURN( pc + 1 );

@@ -29,18 +29,18 @@ void ItemMap::add( const bool mode_check, const char *n, TokType f, Role r, int 
 ItemMap::ItemMap( const bool cstyle ) {
 	add( true,	 	"$",				tokty_envvar,       PrF,        0       );	// changed for ${VAR} case study. 
 	add( true,	 	"-",				tokty_sub, 			BSy, 		600		);
-	add( true,	 	"->",				tokty_assign,		BFo,		2000	);
-	add( true,	 	"<-",				tokty_assignrev,	BFo,		2000	);
-	add( true,	 	"=::",				tokty_assign,		BFo,		2000	);
-	add( true,	 	"::=",				tokty_assignrev,	BFo,		2000	);
+	add( true,	 	"->",				tokty_assign,		BFo,		prec_assign	);
+	add( true,	 	"<-",				tokty_assignrev,	BFo,		prec_assign	);
+	add( true,	 	"=::",				tokty_assign,		BFo,		prec_assign	);
+	add( true,	 	"::=",				tokty_assignrev,	BFo,		prec_assign	);
 	add( true,	 	",", 				tokty_comma, 		BFo, 		prec_comma	);
 	add( cstyle,	":",				tokty_colon,		Clo,		0 		);
 	add( !cstyle, 	";", 				tokty_semi, 		PoF, 		prec_semi	);
 	add( cstyle, 	";", 				tokty_semi, 		Clo, 		0		);
 	add( !cstyle, 	";;",				tokty_dsemi,		PoF,		prec_semi	);
 	add( true,	 	":-", 				tokty_maplet, 		BSy, 		2000	);
-	add( true,	 	":=", 				tokty_bind, 		PoF, 		2000	);
-	add( true,	 	"=:", 				tokty_bindrev, 		PoF, 		2000	);
+	add( true,	 	":=", 				tokty_bind, 		PoF, 		prec_assign	);
+	add( true,	 	"=:", 				tokty_bindrev, 		PoF, 		prec_assign	);
 	add( true,      "!",                tokty_bang,         USy,        1650    );
 	add( true,	 	"!!", 				tokty_dbang, 		SSA, 		prec_not	);
 	add( true,		"?!",				tokty_trap,			PoF,		250		);
@@ -72,7 +72,8 @@ ItemMap::ItemMap( const bool cstyle ) {
 	add( true,		"<>", 				tokty_append, 		BSy, 		800		);
 	add( true,		"<", 				tokty_lt, 			BSy, 		1200	);
 	add( true,		"<=", 				tokty_lte, 			BSy, 		1400	);
-	add( true,		"=", 				tokty_equal, 		BSy, 		1100	);
+	add( !cstyle,	"=", 				tokty_equal, 		BSy, 		1100	);
+	add( cstyle,	"=", 				tokty_equal, 		BFo, 		2000	);
 	add( true,		"==", 				tokty_identical, 	BSy, 		1000	);
 	add( true,		"=>>", 				tokty_fnarrow, 		BSy, 		prec_arrow	);
 	add( true,		"=>", 				tokty_maplet, 		BSy, 		prec_arrow	);

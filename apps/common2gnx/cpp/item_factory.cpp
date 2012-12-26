@@ -122,6 +122,15 @@ int ItemFactoryClass::eatsWhiteSpaceAndComments() {
             do
                 ch = this->nextchar();
             while ( ch != '\n' && ch != '\r' );
+        } else if ( ch == '/' && this->cstyle_mode && this->trychar( '*' ) ) {
+        	this->nextchar();
+        	for (;;) {
+        		ch = this->nextchar();
+        		if ( ch == '*' && this->trychar( '/' ) ) {
+        			this->nextchar();
+        			break;
+        		}
+        	}
         } else {
 	        break;
 	    }

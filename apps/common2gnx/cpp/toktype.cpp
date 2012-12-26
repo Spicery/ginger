@@ -13,6 +13,7 @@ const char *tok_type_name( TokType fnc ) {
 
 const bool tok_type_as_direction( TokType fnc ) {
 	switch ( fnc ) {
+		case tokty_equal:
 		case tokty_assignrev: 
 			return false;
 		default: 
@@ -27,6 +28,7 @@ const char * tok_type_as_tag( TokType fnc ) {
 		case tokty_dbang : return "absnot";
     	case tokty_also: return "also";
 		case tokty_and : return "and";
+		case tokty_equal:
 		case tokty_assign : 
 		case tokty_assignrev : 
 			//	The swapping of arguments us handled by tok_type_as_direction.

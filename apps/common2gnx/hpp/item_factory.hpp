@@ -31,6 +31,7 @@ public:
 class ItemFactoryClass : public Source {
 
 public:
+	bool				cstyle_mode;
 	ItemMap				itemMap;
 	//FILE				*file;
     bool            	peeked;
@@ -65,6 +66,7 @@ public:
 
 	ItemFactoryClass( FILE * f, const bool cstyle ) :
 		Source( f ),
+		cstyle_mode( cstyle ),
 		itemMap( cstyle ),
 		peeked( false ),
 		item( NULL ),

@@ -735,15 +735,12 @@ Node ReadStateClass::readTry( const bool try_vs_transaction ) {
 Node ReadStateClass::readVarVal( TokType fnc ) {
 	NodeFactory bind;
 	bind.start( BIND );
-	NodeFactory var;
-	var.start( VAR );
-	readTags( *this, var, "tag", true );
-	var.put( VID_NAME, this->readIdName() );
-	var.put( VID_PROTECTED, fnc == tokty_val ? "true" : "false" );
-	var.end();
-	Node v = var.build();
-	bind.add( v );
-	this->checkToken( tokty_bind );
+	
+	Node lhs = this->readExprPrec( prec_assign );
+	updateAsPattern( lhs );
+
+	bind.add( lhs );
+	this->checkToken( this->cstyle_mode ? tokty_equal : tokty_bind );
 	Node x = this->readExpr();
 	bind.add( x );
 	bind.end();

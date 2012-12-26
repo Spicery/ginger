@@ -1,0 +1,18 @@
+<bind>
+	<var name="K" protected="true"/>
+	<fn name="K">
+		<seq><var name="x"/></seq>
+		<seq>
+			<assert tailcall="true">
+				<fn>
+					<seq><var name="y"/></seq>
+					<seq>
+						<assert tailcall="true">
+							<id name="x"/>
+						</assert>
+					</seq>
+				</fn>
+			</assert>
+		</seq>
+	</fn>
+</bind>

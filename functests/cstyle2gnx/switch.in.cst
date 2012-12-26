@@ -1,0 +1,8 @@
+switch ( x ) {
+	case a:
+		call1();
+	case b:
+		call2();
+	default:
+		call3();
+}

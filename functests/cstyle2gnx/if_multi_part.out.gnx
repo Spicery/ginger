@@ -1,0 +1,9 @@
+<if>
+	<id name="x"/>
+	<seq><app><id name="call1"/><seq/></app></seq>
+	<if>
+		<id name="y"/>
+		<seq><app><id name="call2"/><seq/></app></seq>
+		<seq><app><id name="call3"/><seq/></app></seq>
+	</if>
+</if>

@@ -1,0 +1,3 @@
+recordclass Foo { 
+	slot fooBar;
+}

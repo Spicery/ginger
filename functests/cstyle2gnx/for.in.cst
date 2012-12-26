@@ -1,0 +1,4 @@
+{
+	for ( i in L ) {}
+	for ( j from 1 to 10 ) x = j * j;
+}

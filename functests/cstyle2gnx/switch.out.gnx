@@ -1,0 +1,8 @@
+<switch>
+	<id name="x"/>
+	<id name="a"/>
+	<seq><app><id name="call1"/><seq/></app></seq>
+	<id name="b"/>
+	<seq><app><id name="call2"/><seq/></app></seq>
+	<seq><app><id name="call3"/><seq/></app></seq>
+</switch>

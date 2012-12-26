@@ -1,0 +1,23 @@
+<seq>
+	<for>
+		<in>
+		 	<var name="i" protected="true"/>
+		 	<id name="L"/>
+		 </in>
+		 <seq/>
+	</for>
+	<for>
+		<from>
+			<var name="j" protected="true"/>
+			<constant type="int" value="1"/>
+			<constant type="int" value="10"/>
+		</from>
+		<set>
+			<sysapp name="*">
+				<id name="j"/>
+				<id name="j"/>
+			</sysapp>
+			<id name="x"/>
+		</set>
+	</for>
+</seq>

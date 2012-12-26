@@ -1,0 +1,7 @@
+if ( x ) {
+	call1();
+} else if ( y ) {
+	call2();
+} else {
+	call3();
+}

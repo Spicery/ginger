@@ -1,21 +1,19 @@
 #include <string>
-using namespace std;
 
 #include <iostream>
-//#include <stdio.h>
 #include <ctype.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 #include <stddef.h>
 
-
 #include "item_factory.hpp"
-
 #include "item_map.hpp"
 #include "item.hpp"
 #include "role.hpp"
 #include "mishap.hpp"
+
+using namespace std;
 
 int Source::peekchar() {
 	if ( this->buffer.empty() ) {

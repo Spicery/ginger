@@ -171,7 +171,11 @@ Node ReadStateClass::readSingleStmnt() {
 			case tokty_obrace: 
 				return this->readCompoundStmnts( true );
 			case tokty_function: 
-				return this->readDefinition();
+				if ( this->cstyle_mode && this->item_factory->peek()->tok_type == tokty_oparen ) {
+					return this->readLambda();
+				} else {
+					return this->readDefinition();
+				}
 			case tokty_if: 
 				return this->readIf( tokty_if, tokty_endif );
 			case tokty_for: 
@@ -515,7 +519,7 @@ static void squash( NodeFactory acc, Node rhs ) {
 	}
 }
 
-static void flatten( Node & ap, Node & fn, Node & args ) {
+static void flatten( bool name_needed, Node & ap, Node & fn, Node & args ) {
 	if ( ap->name() == APP ) {
 		fn = ap->child( 0 );
 		Node rhs = ap->child( 1 );
@@ -524,8 +528,15 @@ static void flatten( Node & ap, Node & fn, Node & args ) {
 		squash( acc, ap->child( 1 ) ); 
 		acc.end();
 		args = acc.build();
+	} else if ( not name_needed ) {
+		//fn = NULL;
+		NodeFactory acc;
+		acc.start( SEQ );
+		squash( acc, ap );
+		acc.end();
+		args = acc.build();
 	} else {
-		Ginger::Mishap mishap( "Invalid use of 'define'" );
+		Ginger::Mishap mishap( "Invalid function header" );
 		mishap.culprit( "Name", ap->name() );
 		if ( ap->name() == SYSAPP ) {
 			mishap.culprit( "Reason", "Trying to redefine a system function" );
@@ -638,9 +649,8 @@ Node ReadStateClass::readLambda() {
 	Node ap = pattern.readExprPrec( prec_arrow );
 	Node fun;
 	Node args;
-	flatten( ap, fun, args );
-	const std::string name = fun->attribute( "name" );
-
+	flatten( false, ap, fun, args );
+	
 	#ifdef DBG_COMMON2GNX
 		cerr << "Pattern read" << endl;
 	#endif
@@ -653,7 +663,9 @@ Node ReadStateClass::readLambda() {
 	#endif
 	NodeFactory fn;
 	fn.start( FN );
-	fn.put( FN_NAME, name );
+	if ( fun && fun->hasAttribute( "name" ) ) {
+		fn.put( FN_NAME, fun->attribute( "name" ) );
+	}
 	fn.add( args );
 	fn.add( body );
 	fn.end();
@@ -667,8 +679,8 @@ Node ReadStateClass::readDefinition() {
 	Node ap = pattern.readExprPrec( prec_arrow );
 	Node fn;
 	Node args;
-	flatten( ap, fn, args );
-	const std::string name = fn->attribute( VID_NAME );
+	flatten( true, ap, fn, args );
+	const std::string name( fn->attribute( VID_NAME ) );
 	if ( not this->cstyle_mode ) this->checkToken( tokty_fnarrow );
 	Node body = this->readCompoundStmnts( false );
 	if ( not this->cstyle_mode ) this->checkToken( tokty_enddefine );
@@ -1272,13 +1284,10 @@ Node ReadStateClass::prefixProcessingCore() {
 			}
 		}
 		case tokty_obracket:
-			//	In version 0.7: return this->readListOrVector( this->cstyle_mode, tokty_cbracket );
 			return this->readListOrVector( true, tokty_cbracket );
 		case tokty_obrace: 
-			//	In version 0.7: return this->readListOrVector( true, tokty_cbrace );
 			return this->readMap( tokty_cbrace );
 		case tokty_fat_obracket:
-			//	In version 0.7: return this->readMap( tokty_fat_cbrace );
 			return this->readListOrVector( false, tokty_fat_cbracket );
 		case tokty_fat_ocbracket: {
 			Node list( new Ginger::Mnx( LIST ) );

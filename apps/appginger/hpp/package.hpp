@@ -56,10 +56,10 @@ public:
 private:	
 	Valof * lookup( const std::string & c );
 	void remove( const std::string & c );
-	Valof * lookup_or_add( const std::string & c );
+	Valof * lookup_or_add( const std::string & c, bool prot );
 public:
 	void reset();
-	Valof * add( const std::string & c ); 
+	Valof * add( const std::string & c, bool prot ); 
 
 
 public:
@@ -71,9 +71,9 @@ public:
 	const std::string & getTitle() { return this->title; }
 	
 public:
-	Valof * fetchDefinitionValof( const std::string & c ); //, const FacetSet * facets );
+	Valof * fetchDefinitionValof( const std::string & c, bool prot ); //, const FacetSet * facets );
 	Valof * fetchAbsoluteValof( const std::string & c );
-	Valof * fetchValof( const std::string & c, const bool absolute );
+	Valof * fetchValof( const std::string & c, bool prot, bool isID );
 	
 protected:	
 	virtual Valof * absoluteAutoload( const std::string & c ) = 0;

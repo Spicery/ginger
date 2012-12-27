@@ -58,7 +58,8 @@ VIdent::VIdent( CodeGen codegen, shared< Ginger::Mnx > vid ) {
 				cerr << "VIdent::VIdent < getPackage" << endl;
 			#endif
 			//	TODO: This is interfering with correct autoloading.
-			this->valof = def_pkg->fetchValof( vid->attribute( VID_NAME ), nmIsID );
+			const bool prot = vid->attribute( VID_PROTECTED, "true" ) == "true";
+			this->valof = def_pkg->fetchValof( vid->attribute( VID_NAME ), prot, nmIsID );
 			
 			this->slot = 0;
 		}

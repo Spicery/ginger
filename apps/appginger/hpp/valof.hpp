@@ -36,15 +36,29 @@ private:
 	class Package * 	parent;
 	const std::string	name_data;
 
+private:	//	Flags.
+	bool				prot;
+
 public:
 	const std::string & getNameString() const { return this->name_data; }
+	bool isProtected() const { return this->prot; }
 	
 public:
 	Valof( class Package * parent, const std::string & nm, Ref r = SYS_UNASSIGNED ) :
 		valof( r ),
 		parent( parent ),
-		name_data( nm )
+		name_data( nm ),
+		prot( false )
 	{}
+
+	Valof( class Package * parent, const std::string & nm, bool prot, Ref r = SYS_UNASSIGNED ) :
+		valof( r ),
+		parent( parent ),
+		name_data( nm ),
+		prot( prot )
+	{}
+
+
 };
 
 #endif

@@ -73,10 +73,10 @@ static Node makeEmpty() {
 	return shared< Ginger::Mnx >( new Ginger::Mnx( SEQ ) );
 }
 
-static void updateAsPattern( Node node ) {
+static void updateAsPattern( Node node, const bool val_vs_var ) {
 	if ( node->hasName( ID ) ) {
 		node->name() = VAR;
-		node->putAttribute( VID_PROTECTED, "true" );
+		node->putAttribute( VID_PROTECTED, val_vs_var ? "true" : "false" );
 	}
 }
 
@@ -308,7 +308,7 @@ Node ReadStateClass::postfixProcessing( Node lhs, Item item, int prec ) {
 			case tokty_bindrev:
 			case tokty_bind: {
 				Node rhs = this->readExprPrec( prec );
-				updateAsPattern( fnc == tokty_bind ? lhs : rhs );
+				updateAsPattern( fnc == tokty_bind ? lhs : rhs, true );
 				NodeFactory bind;
 				bind.start( BIND );
 				bind.add( fnc == tokty_bind ? lhs : rhs );
@@ -317,7 +317,7 @@ Node ReadStateClass::postfixProcessing( Node lhs, Item item, int prec ) {
 				return bind.build();
 			}
 			case tokty_from: {				
-				updateAsPattern( lhs );
+				updateAsPattern( lhs, true );
 				NodeFactory node;
 				node.start( FROM );
 				Node from_expr = this->readExpr();
@@ -331,7 +331,7 @@ Node ReadStateClass::postfixProcessing( Node lhs, Item item, int prec ) {
 				return node.build();
 			}
 			case tokty_in: {				
-				updateAsPattern( lhs );
+				updateAsPattern( lhs, true );
 				Node in_expr = this->readExpr();
 				NodeFactory node;
 				node.start( IN );
@@ -749,7 +749,7 @@ Node ReadStateClass::readVarVal( TokType fnc ) {
 	bind.start( BIND );
 	
 	Node lhs = this->readExprPrec( prec_assign );
-	updateAsPattern( lhs );
+	updateAsPattern( lhs, fnc == tokty_val );
 
 	bind.add( lhs );
 	this->checkToken( this->cstyle_mode ? tokty_equal : tokty_bind );

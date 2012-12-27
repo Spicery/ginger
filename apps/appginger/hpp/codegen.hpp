@@ -197,8 +197,8 @@ public:
 	void vmiMAKEREF();
 	void vmiNOT();
 	void vmiPOP_INNER_SLOT( int slot );
-	void vmiPOP( Gnx var_or_id );
-	void vmiPOP(const VIdent & vid );
+	void vmiPOP( Gnx var_or_id, const bool assign_vs_bind = true );
+	void vmiPOP(const VIdent & vid, const bool assign_vs_bind = true );
 	void vmiPUSH_INNER_SLOT( int slot );
 	void vmiPUSH_INNER_SLOT( int slot, LabelClass * contn );
 	void vmiPUSH( const VIdent & vid );

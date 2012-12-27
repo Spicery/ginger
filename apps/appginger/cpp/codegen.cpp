@@ -92,7 +92,7 @@ void CodeGenClass::emitRef( Ref ref ) {
 	this->codegenRef( ref );
 }
 
-void CodeGenClass::emitValof( Valof *v ) {
+void CodeGenClass::emitValof( Valof * v ) {
 	this->codegenRef( ToRef( v ) );
 }
 
@@ -218,9 +218,9 @@ void CodeGenClass::vmiCHAIN_LITE( Ref fn, long N ) {
 }
 
 
-Valof * CodeGenClass::resolveGlobal( Gnx var_or_id ) {
-	Package * def_pkg = this->vm->getPackage( var_or_id->attribute( VID_DEF_PKG ) );
-	return def_pkg->fetchAbsoluteValof( var_or_id->attribute( VID_NAME ) );
+Valof * CodeGenClass::resolveGlobal( Gnx id ) {
+	Package * def_pkg = this->vm->getPackage( id->attribute( VID_DEF_PKG ) );
+	return def_pkg->fetchAbsoluteValof( id->attribute( VID_NAME ) );
 }
 
 void CodeGenClass::vmiPOP_INNER_SLOT( int slot ) {
@@ -228,25 +228,29 @@ void CodeGenClass::vmiPOP_INNER_SLOT( int slot ) {
 	this->emitRef( ToRef( slot ) );	
 }
 
-void CodeGenClass::vmiPOP( const VIdent & id ) {
+void CodeGenClass::vmiPOP( const VIdent & id, const bool assign_vs_bind ) {
 	if ( id.isLocal() ) {
 		this->vmiPOP_INNER_SLOT( id.getSlot() );
 	} else if ( id.isGlobal() ) {
+		Valof * v = id.getValof();
+		if ( assign_vs_bind && v->isProtected() ) {
+			throw Ginger::Mishap( "Assigning to a protected variable" ).culprit( "Variable", v->getNameString() );
+		}
 		this->emitSPC( vmc_pop_global );
-		this->emitValof( id.getValof() );
+		this->emitValof( v );
 	} else {
 		throw Ginger::SystemError( "Internal Error" );
 	}
 }
 
-void CodeGenClass::vmiPOP( Gnx var_or_id ) {
+void CodeGenClass::vmiPOP( Gnx var_or_id, const bool assign_vs_bind ) {
 	#ifdef DBG_CODEGEN
 		cerr << "POP ";
 		var_or_id->render( cerr );
 		cerr << endl;
 	#endif
 	VIdent vid( this, var_or_id );
-	this->vmiPOP( vid );
+	this->vmiPOP( vid, assign_vs_bind );
 }
 
 void CodeGenClass::vmiPUSH( Gnx var_or_id ) {
@@ -808,7 +812,7 @@ void CompileQuery::compileQueryInit( Gnx query, LabelClass * contn ) {
 		
 		Gnx start_expr( query->child( 1 ) );
 		this->codegen->compile1( start_expr, CONTINUE_LABEL );
-		this->codegen->vmiPOP( var );
+		this->codegen->vmiPOP( var, false );
 		
 		if ( query->size() >= 3 ) {
 			Gnx end_expr( query->child( 2 ) );
@@ -847,7 +851,7 @@ void CompileQuery::compileQueryNext( Gnx query, LabelClass * contn ) {
 		//	Obvious candidate for a merged instruction.
 		this->codegen->vmiPUSH( this->getLoopVar() );
 		this->codegen->vmiINSTRUCTION( vmc_incr );
-		this->codegen->vmiPOP( this->getLoopVar() );
+		this->codegen->vmiPOP( this->getLoopVar(), false );
 
 	} else if ( nm == IN ) {
 		//	Nothing.
@@ -878,7 +882,7 @@ void CompileQuery::compileQueryIfSo( Gnx query, LabelClass * dst, LabelClass * c
 		this->codegen->vmiPUSH_INNER_SLOT( tmp_context );	
 		this->codegen->vmiSET_CALL_INNER_SLOT( 2, tmp_next_fn );		
 		this->codegen->vmiPOP_INNER_SLOT( tmp_state );
-		this->codegen->vmiPOP( this->getLoopVar() );
+		this->codegen->vmiPOP( this->getLoopVar(), false );
 		
 		VIdent id_tmp_state( tmp_state );
 		VIdent termin( SYS_TERMIN );
@@ -1324,7 +1328,7 @@ void CodeGenClass::compileGnx( Gnx mnx, LabelClass * contn ) {
 			cerr << "  (VIdent::VIdent done)" << endl;
 		#endif
 		this->compile1( mnx->child( 1 ), CONTINUE_LABEL );
-		this->vmiPOP( vid );
+		this->vmiPOP( vid, false );
 		this->continueFrom( contn );
 
 	} else if ( nm == FOR and mnx->size() == 2 ) {
@@ -1366,7 +1370,7 @@ void CodeGenClass::compileGnx( Gnx mnx, LabelClass * contn ) {
 	} else if ( nm == SET and mnx->size() == 2 ) {
 		VIdent vid( this, mnx->child( 1 ) );
 		this->compile1( mnx->child( 0 ), CONTINUE_LABEL );
-		this->vmiPOP( vid );
+		this->vmiPOP( vid, true );
 		this->continueFrom( contn );
 	} else if ( nm == FN ) {
 		this->compileGnxFn( mnx, contn );

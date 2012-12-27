@@ -95,20 +95,20 @@ Package * Package::getPackage( std::string title ) {
 	return this->pkgmgr->getPackage( title );
 }
 
-Valof * Package::add( const std::string & s ) { 
-    return this->table[ s ] = new Valof( this, s );
+Valof * Package::add( const std::string & s, bool prot ) { 
+    return this->table[ s ] = new Valof( this, s, prot );
 }
 
 
-Valof * Package::fetchValof( const std::string & c, const bool absolute ) {
+Valof * Package::fetchValof( const std::string & c, bool prot, bool isID ) {
 	Valof * id = this->lookup( c );
 	if ( id ) {
 		return id;
-	} else if ( absolute ) {
+	} else if ( isID ) {
 		Valof * id = this->absoluteAutoload( c );
 		return id;
 	} else {
-    	Valof * id = this->add( c );
+    	Valof * id = this->add( c, prot );
     	return id;
 	}
 }
@@ -125,10 +125,10 @@ Valof * Package::fetchAbsoluteValof( const std::string & c ) {
 }
 
 
-Valof * Package::fetchDefinitionValof( const std::string & c ) { 
+Valof * Package::fetchDefinitionValof( const std::string & c, bool prot ) { 
 	Valof * id = this->lookup( c );
 	if ( not id ) {
-    	Valof * id = this->add( c );
+    	Valof * id = this->add( c, prot );
     	return id;
     } else {
     	return id;
@@ -136,7 +136,7 @@ Valof * Package::fetchDefinitionValof( const std::string & c ) {
 }
 
 Valof * Package::forwardDeclare( const std::string & c ) {
-	return this->add( c );
+	return this->add( c, false );
 }
 
 void Package::retractForwardDeclare( const std::string & c ) {
@@ -172,10 +172,10 @@ void Package::remove( const std::string & s ) {
 	this->table.erase( s );
 }
 
-Valof * Package::lookup_or_add( const std::string & c ) {
+Valof * Package::lookup_or_add( const std::string & c, bool prot ) {
     Valof * id = this->lookup( c );
 	if ( not id ) {
-    	return this->add( c ); 
+    	return this->add( c, prot ); 
     } else {
     	return id;
     }
@@ -391,7 +391,7 @@ Valof * StandardLibraryPackage::absoluteAutoload( const std::string & c ) {
 		//	Doesn't match a system call. Fail.
 		return NULL;
 	} else {
-		Valof * id = this->add( c );
+		Valof * id = this->add( c, true );
 		id->valof = r;
 		return id;
 	}

@@ -177,7 +177,7 @@ funccheck:
 	nosetests -v functests
 
 syscheck:
-	# To be done
+	nosetests systests
 
 check:
 	make unitcheck

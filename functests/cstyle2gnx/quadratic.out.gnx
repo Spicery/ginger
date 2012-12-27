@@ -4,7 +4,7 @@
 		<seq><var name="flag"/><var name="a"/><var name="b"/><var name="c"/></seq>
 		<seq>
 			<bind>
-				<var name="s" protected="true"/>
+				<var name="s" protected="false"/>
 				<app>
 					<id name="sqrt"/>
 					<sysapp name="-">

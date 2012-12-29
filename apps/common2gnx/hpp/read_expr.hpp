@@ -26,7 +26,9 @@ private:
 	Node postfixProcessing( Node lhs, Item item, int prec );
 	Node readStmntsCheck( TokType fnc );
 	Node readStmnts();
-	Node readCompoundStmnts( bool obrace_read );
+	Node readCompoundStmnts();
+	Node readCompoundCore();
+	Node readCompoundCoreCheck( TokType closer );
 	const std::string readIdName();
 	Node readExprCheck( TokType fnc );
 	Node readIf( TokType sense, TokType closer );
@@ -73,6 +75,7 @@ public:
 	void checkToken( TokType fnc );
 	void checkPeekToken( TokType fnc );
 	bool tryToken( TokType fnc );
+	bool tryPeekCloser();
 	bool tryPeekToken( TokType fnc );
 	bool tryName( const char * name );
 	bool isAtEndOfInput();

@@ -119,6 +119,11 @@ bool ReadStateClass::tryPeekToken( TokType fnc ) {
 	return it->tok_type == fnc;
 }
 
+bool ReadStateClass::tryPeekCloser() {
+	Item it = this->item_factory->peek();
+	return it->role.IsCloser();
+}
+
 void ReadStateClass::checkPeekToken( TokType fnc ) {
 	Item it = this->item_factory->peek();
 	if ( it->tok_type != fnc ) {
@@ -147,17 +152,31 @@ bool ReadStateClass::tryToken( TokType fnc ) {
 	}
 }
 
-Node ReadStateClass::readCompoundStmnts( bool obrace_read ) {
+Node ReadStateClass::readCompoundCore() {
 	if ( this->cstyle_mode ) {
 		NodeFactory stmnts;
 		stmnts.start( SEQ );
-		if ( not obrace_read ) this->checkToken( tokty_obrace );
-		while ( not this->tryToken( tokty_cbrace ) ) {
+		while ( this->tryPeekToken( tokty_semi ) || not this->tryPeekCloser() ) {
 			Node n = this->readSingleStmnt();
 			stmnts.add( n );
 		}
 		stmnts.end();
 		return stmnts.build();
+	} else {
+		return this->readStmnts();
+	}
+}
+
+Node ReadStateClass::readCompoundCoreCheck( TokType closer ) {
+	Node n = this->readCompoundCore();
+	this->checkToken( closer );
+	return n;
+}
+
+Node ReadStateClass::readCompoundStmnts() {
+	if ( this->cstyle_mode ) {
+		this->checkToken( tokty_obrace );
+		return this->readCompoundCoreCheck( tokty_cbrace );
 	} else {
 		return this->readStmnts();
 	}
@@ -169,7 +188,7 @@ Node ReadStateClass::readSingleStmnt() {
 		//cerr << "SINGLE " << tok_type_name( it->tok_type ) << endl;
 		switch ( it->tok_type ) {
 			case tokty_obrace: 
-				return this->readCompoundStmnts( true );
+				return this->readCompoundCoreCheck( tokty_cbrace );
 			case tokty_function: 
 				if ( this->cstyle_mode && this->item_factory->peek()->tok_type == tokty_oparen ) {
 					return this->readLambda();
@@ -195,15 +214,20 @@ Node ReadStateClass::readSingleStmnt() {
 	
 	//	Fall thru!
 	Node n = this->readOptEmptyExpr();
-	if ( this-> tryToken( tokty_dsemi ) ) {
+	if ( this->tryToken( tokty_dsemi ) ) {
 		NodeFactory f;
 		f.start( ERASE );
 		f.add( n );
 		f.end();
 		return f.build();
-	} else {
-		this->checkToken( tokty_semi );
+	} else if ( this->tryToken( tokty_semi ) ) {
 		return n;
+	} else {
+		if ( this->item_factory->peek()->role.IsCloser() ) {
+			return n;	
+		} else {
+			throw Ginger::Mishap( "Missing semi-colon?" ).culprit( "Token", this->item_factory->peek()->nameString() );
+		}
 	}
 }
 
@@ -656,7 +680,7 @@ Node ReadStateClass::readLambda() {
 	#endif
 
 	if ( not this->cstyle_mode ) this->checkToken( tokty_fnarrow );
-	Node body = this->readCompoundStmnts( false );
+	Node body = this->readCompoundStmnts();
 	if ( not this->cstyle_mode ) this->checkToken( tokty_endfn );	
 	#ifdef DBG_COMMON2GNX
 		cerr << "About to check stuff????? <-----<" << endl;
@@ -682,7 +706,7 @@ Node ReadStateClass::readDefinition() {
 	flatten( true, ap, fn, args );
 	const std::string name( fn->attribute( VID_NAME ) );
 	if ( not this->cstyle_mode ) this->checkToken( tokty_fnarrow );
-	Node body = this->readCompoundStmnts( false );
+	Node body = this->readCompoundStmnts();
 	if ( not this->cstyle_mode ) this->checkToken( tokty_enddefine );
 	if ( this->cstyle_mode ) {
 		//cerr << "postfix NOT allowed (2)" << endl;
@@ -839,7 +863,7 @@ Node ReadStateClass::prefixProcessing() {
 Node ReadStateClass::readListOrVector( bool vector_vs_list, TokType closer ) {
 	NodeFactory list;
 	list.start( vector_vs_list ? VECTOR : LIST );
-	Node stmnts = this->readStmnts();
+	Node stmnts = this->readCompoundCore();
 	if ( not vector_vs_list && this->tryToken( tokty_bar ) ) {
 		list.add( stmnts );
 		list.end();
@@ -847,7 +871,7 @@ Node ReadStateClass::readListOrVector( bool vector_vs_list, TokType closer ) {
 		NodeFactory append;
 		append.start( LIST_APPEND );
 		append.add( L );
-		Node x = this->readStmntsCheck( closer );
+		Node x = this->readCompoundCoreCheck( closer );
 		append.add( x );
 		append.end();
 		return append.build();

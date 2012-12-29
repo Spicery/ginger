@@ -43,6 +43,8 @@ public:
 	enum CompileCode	compile_code   	: 4;
 	
 public:
+	bool IsCloser()		{ return this->fixity_code == NofixCode && this->compile_code == NoSpecialCode; }
+
 	bool IsPrefix() 	{ return ( this->fixity_code & PrefixCode ) != 0; }
 	bool IsPostfix() 	{ return ( this->fixity_code & PostfixCode ) != 0; }
 	bool IsBothfix()	{ return this->fixity_code == ( PrefixCode | PostfixCode ); }

@@ -1,0 +1,18 @@
+<bind>
+	<var name="mk" protected="true"/>
+	<fn name="mk">
+		<seq>	
+			<var name="x"/>
+		</seq>
+		<seq>
+			<assert tailcall="true">
+				<vector>
+					<seq>
+						<id name="x"/>
+						<id name="x"/>
+					</seq>
+				</vector>
+			</assert>
+		</seq>
+	</fn>
+</bind>

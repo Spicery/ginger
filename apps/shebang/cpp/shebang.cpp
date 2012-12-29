@@ -26,6 +26,8 @@
 #include <stdlib.h>
 #include <unistd.h>
 
+//#define DBG_SHEBANG
+
 #define SHEBANG "shebang"
 
 using namespace std;
@@ -89,6 +91,11 @@ public:
 
 public:
 	int run() {
+		#ifdef DBG_SHEBANG
+			for ( vector<string>::iterator it = args.begin(); it != args.end(); ++it ) {	
+				cerr << "  argument: " << *it << endl;
+			}
+		#endif
 		execv( argvector[0], &argvector[0] );
 		return EXIT_FAILURE;	//	If we reach here then the exec failed!
 	}

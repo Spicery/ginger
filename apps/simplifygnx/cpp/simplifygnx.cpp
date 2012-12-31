@@ -890,7 +890,11 @@ public:
 					shared< Ginger::Mnx > ch = element.lastChild();
 					ch->orFlags( TAIL_CALL_MASK );
 				}
-			}
+			} else if ( x == ASSERT && element.size() == 1 && element.hasAttribute( ASSERT_TAILCALL, "true" ) ) {
+                shared< Ginger::Mnx > c = element.child( 0 );
+                element.copyFrom( *c );
+                this->startVisit( element );
+            }
 			//	else don't push the marker down. 
 			//	This includes <for>, <sysapp>, any constant,
 			//	<id>, <set>

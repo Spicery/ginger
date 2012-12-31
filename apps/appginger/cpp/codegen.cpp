@@ -1395,7 +1395,9 @@ void CodeGenClass::compileGnx( Gnx mnx, LabelClass * contn ) {
 			//	case-study: Adding New Element Type.
 			this->compile1( mnx->child( 0 ), CONTINUE_LABEL );
 			this->vmiSET_SYS_CALL( sysCheckBool, 1 );
-			this->continueFrom( contn );			
+			this->continueFrom( contn );
+		} else if ( mnx->hasAttribute( ASSERT_TAILCALL, "true" ) ) {			
+			throw Ginger::Mishap( "Return found in non-tailcall position" );
 		} else {
 			throw Ginger::SystemError( "Unimplemented assertion" );
 		}

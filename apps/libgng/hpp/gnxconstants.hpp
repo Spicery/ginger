@@ -23,7 +23,7 @@
 
 #define ARITY 			"arity"
 #define ARGS_ARITY		"args.arity"
-#define TAILCALL		"tailcall"
+#define TAILCALL		"is.tail.call"
 #define UID				"uid"
 #define OUTER_LEVEL		"outer.level"
 #define IS_OUTER		"is.outer"
@@ -70,6 +70,7 @@
 #define ASSERT			"assert"
 #define ASSERT_N		"n"
 #define ASSERT_TYPE		"type"
+#define ASSERT_TAILCALL "tailcall"
 
 #define APP				"app"
 

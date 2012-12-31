@@ -1089,8 +1089,8 @@ Node ReadStateClass::readImport() {
 
 Node ReadStateClass::readReturn() {
 	NodeFactory ret;
-	ret.start( "assert" );
-	ret.put( "tailcall", "true" );
+	ret.start( ASSERT );
+	ret.put( ASSERT_TAILCALL, "true" );
 	Node n = this->readExpr();
 	ret.add( n );
 	ret.end();

@@ -78,7 +78,7 @@ static struct option long_options[] =
         { "project",		required_argument,		0, 'j' },
         { "stdin",			no_argument,			0, 'i' },
         { "quiet",          no_argument,            0, 'q' },
-        { "results",		required_argument,		0, 'r' },
+        { "level",		    required_argument,		0, 'v' },
         { 0, 0, 0, 0 }
     };
 
@@ -110,7 +110,7 @@ static void printUsage() {
 	cout << "-L, --license         print out license information and exit" << endl;
     cout << "-p, --package=PKG     initial interactive package" << endl;
 	cout << "-q, --quiet           no welcome banner" << endl;
-	cout << "-r, --results=LEVEL   set results level to 1 or 2" << endl;
+	cout << "-v, --level=LEVEL     set results level to 1 or 2" << endl;
 	cout << "-V, --version         print out version information and exit" << endl;
 	cout << endl;
 }	
@@ -217,7 +217,7 @@ bool ToolMain::parseArgs( int argc, char **argv, char **envp ) {
 	//bool meta_info_needed = false;
     for(;;) {
         int option_index = 0;
-        int c = getopt_long( argc, argv, "d:e:g:H::ij:L::m:p:qr:V", long_options, &option_index );
+        int c = getopt_long( argc, argv, "d:e:g:H::ij:L::m:p:qv:V", long_options, &option_index );
         //cerr << "Got c = " << c << endl;
         if ( c == -1 ) break;
         switch ( c ) {

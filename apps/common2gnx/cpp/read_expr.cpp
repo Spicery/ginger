@@ -347,10 +347,30 @@ Node ReadStateClass::postfixProcessing( Node lhs, Item item, int prec ) {
 				Node from_expr = this->readExpr();
 				node.add( lhs );
 				node.add( from_expr );
-				if ( this->tryToken( tokty_to ) ) {
+
+				const bool has_by_part = this->tryToken( tokty_by );
+				
+				if ( has_by_part ) {
+					Node by_expr = this->readExprPrec( prec );
+					node.add( by_expr );
+				}
+
+				const bool has_to_part = this->tryToken( tokty_to );
+
+				if ( has_to_part && not has_by_part ) {
+					//	We should insert a default.
+					//	TODO: refactor (extract) adding a constant int.
+					node.start( CONSTANT );
+					node.put( CONSTANT_TYPE, "int" );
+					node.put( CONSTANT_VALUE, "1" );
+					node.end();
+				}
+				
+				if ( has_to_part ) {
 					Node to_expr = this->readExprPrec( prec );
 					node.add( to_expr );
 				}
+				
 				node.end();
 				return node.build();
 			}

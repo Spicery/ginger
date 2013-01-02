@@ -86,6 +86,7 @@ ItemMap::ItemMap( const bool cstyle ) {
 	add( true,		"||",				tokty_absor, 		BFo, 		1800	);
 	add( true,		"also",				tokty_also,			BFo,		1800	);
 	add( true,		"and",				tokty_and, 			BFo, 		1700	);
+	add( !cstyle,	"by",				tokty_by,			Clo, 		0		);
 	add( true,		"case",				tokty_case,			Clo,		0		);
 	add( true,		"catch",			tokty_catch, 		Clo, 		0		);
 	add( cstyle,	"default",			tokty_default, 		Clo, 		0		);

@@ -805,8 +805,9 @@ VIdent & CompileQuery::getLoopVar() {
 
 void CompileQuery::compileQueryInit( Gnx query, LabelClass * contn ) {
 	const string & nm = query->name();
-	if ( nm == FROM ) {
-		
+	const int N = query->size();
+	if ( nm == FROM && N >= 2 ) {
+
 		Gnx var( query->child( 0 ) );
 		this->setLoopVar( new VIdent( this->codegen, var ) );
 		
@@ -814,15 +815,35 @@ void CompileQuery::compileQueryInit( Gnx query, LabelClass * contn ) {
 		this->codegen->compile1( start_expr, CONTINUE_LABEL );
 		this->codegen->vmiPOP( var, false );
 		
-		if ( query->size() >= 3 ) {
-			Gnx end_expr( query->child( 2 ) );
+		if ( N >= 3 ) {
+			//	We have a FROM and BY part at least. If the BY part
+			//	is the constant 1 then we will optimise it away.
+			Gnx by_expr( query->child( 2 ) );
+			if ( 
+				//	TODO: refactor this into a simple call.
+				not( 
+					by_expr->hasName( CONSTANT ) &&
+					by_expr->hasAttribute( CONSTANT_TYPE, "int" ) &&
+					by_expr->hasAttribute( CONSTANT_VALUE, "1" )
+				)
+			) {
+				int tmp_by_expr = this->codegen->tmpvar();
+				query->putAttribute( "tmp.by.expr", tmp_by_expr );
+				this->codegen->compile1( by_expr, CONTINUE_LABEL );
+				this->codegen->vmiPOP_INNER_SLOT( tmp_by_expr );
+			}
+		}
+
+		if ( N >= 4 ) {
+			//	We have FROM, BY and TO parts.
+			Gnx end_expr( query->child( 3 ) );
 			int tmp_end_expr = this->codegen->tmpvar();
 			query->putAttribute( "tmp.end.expr", tmp_end_expr );
 			this->codegen->compile1( end_expr, CONTINUE_LABEL );
 			this->codegen->vmiPOP_INNER_SLOT( tmp_end_expr );
 		}
 		
-	} else if ( nm == IN ) {
+	} else if ( nm == IN && N >= 2 ) {
 
 		this->setLoopVar( new VIdent( this->codegen, query->child( 0 ) ) );
 	
@@ -850,7 +871,13 @@ void CompileQuery::compileQueryNext( Gnx query, LabelClass * contn ) {
 
 		//	Obvious candidate for a merged instruction.
 		this->codegen->vmiPUSH( this->getLoopVar() );
-		this->codegen->vmiINSTRUCTION( vmc_incr );
+		if ( query->hasAttribute( "tmp.by.expr" ) ) {
+			VIdent by( query->attributeToInt( "tmp.by.expr" ) );
+			this->codegen->vmiPUSH( by );
+			this->codegen->vmiINSTRUCTION( vmc_add );
+		} else {
+			this->codegen->vmiINSTRUCTION( vmc_incr );
+		}
 		this->codegen->vmiPOP( this->getLoopVar(), false );
 
 	} else if ( nm == IN ) {
@@ -867,7 +894,8 @@ void CompileQuery::compileQueryNext( Gnx query, LabelClass * contn ) {
 void CompileQuery::compileQueryIfSo( Gnx query, LabelClass * dst, LabelClass * contn ) {
 	const string & nm = query->name();
 	if ( nm == FROM ) {
-		if ( query->size() >= 3 ) {
+		const int N = query->size();
+		if ( N >= 3 ) {
 			VIdent end_expr( query->attributeToInt( "tmp.end.expr" ) );
 			this->codegen->compileComparison( true, this->getLoopVar(), CMP_LTE, end_expr, dst, contn );		
 		} else {

@@ -325,7 +325,6 @@ static void printHelpHex() {
 	cout << "StringKey      :\t" << sysStringKey << endl;
 	cout << "SymbolKey      :\t" << sysSymbolKey << endl;
 	cout << "SmallKey       :\t" << sysSmallKey << endl;
-	cout << "FloatKey       :\t" << sysFloatKey << endl;
 	cout << "UnicodeKey     :\t" << sysUnicodeKey << endl;
 	cout << "CharKey        :\t" << sysCharKey << endl;
 	cout << "MapletKey      :\t" << sysMapletKey << endl;

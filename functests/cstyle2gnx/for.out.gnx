@@ -10,6 +10,7 @@
 		<from>
 			<var name="j" protected="true"/>
 			<constant type="int" value="1"/>
+			<constant type="int" value="1"/>
 			<constant type="int" value="10"/>
 		</from>
 		<set>

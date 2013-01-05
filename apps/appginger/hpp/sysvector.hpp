@@ -28,11 +28,12 @@
 //  Really this should include the auto-generated headers and NOT
 //  datatypes.hpp.auto which is in turn included by sys.hpp.
 //    
-//  #include "vector.hpp.auto"
+
+#include "vector.hpp.auto"
 
 extern Ref * sysVectorAppend( Ref *pc, class MachineClass * vm );
 extern Ref * sysVectorExplode( Ref *pc, class MachineClass * vm );
-extern Ref * sysVectorIndex( Ref *pc, class MachineClass * vm );
+extern Ref * sysIsMutableVector( Ref *pc, class MachineClass * vm );
 extern Ref * sysVectorLength( Ref *pc, class MachineClass * vm );
 extern Ref * sysFastVectorLength( Ref *pc, class MachineClass * vm );
 

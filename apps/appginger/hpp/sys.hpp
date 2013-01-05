@@ -30,7 +30,9 @@
 class MachineClass;
 
 extern Ref * sysExplode( Ref *pc, class MachineClass * vm );
+extern Ref * sysUpdaterOfExplode( Ref *pc, class MachineClass * vm );
 extern Ref * sysIndex( Ref *pc, class MachineClass * vm );
+extern Ref * sysUpdaterOfIndex( Ref *pc, class MachineClass * vm );
 extern Ref * sysLength( Ref *pc, class MachineClass * vm );
 extern Ref * sysHash( Ref *pc, class MachineClass * vm );
 extern Ref * sysAppend( Ref *pc, class MachineClass * vm );

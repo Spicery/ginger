@@ -70,10 +70,10 @@ Ref * sysStringAppend( Ref * pc, class MachineClass * vm ) {
 
 Ref * sysStringIndex( Ref *pc, class MachineClass * vm ) {
 	if ( vm->count != 2 ) throw Ginger::Mishap( "ArgsMismatch" );
-	Ref idx = vm->fastPop();
-	if ( !IsSmall( idx ) ) throw Ginger::Mishap( "TypeError" );
-	Ref str = vm->fastPeek();
+	Ref str = vm->fastPop();
 	if ( !IsString( str ) ) throw Ginger::Mishap( "TypeError" );
+	Ref idx = vm->fastPeek();
+	if ( !IsSmall( idx ) ) throw Ginger::Mishap( "TypeError" );
 	Ref * str_K = RefToPtr4( str );
 	char * data = reinterpret_cast< char * >( str_K + 1 ) - 1;
 	

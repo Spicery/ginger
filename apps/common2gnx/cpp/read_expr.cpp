@@ -47,8 +47,8 @@ static Node makeIndex( Node lhs, Node rhs ) {
 	NodeFactory index;
 	index.start( SYSAPP );
 	index.put( SYSAPP_NAME, "index" );
-	index.add( lhs );
 	index.add( rhs );
+	index.add( lhs );
 	index.end();
 	return index.build();
 }

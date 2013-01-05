@@ -184,37 +184,75 @@ Ref * sysAppend( Ref * pc, class MachineClass * vm ) {
 	throw Mishap( "Invalid arguments for append (++)" );
 }
 
+Ref * sysUpdaterOfIndex( Ref *pc, class MachineClass * vm ) {
+	if ( vm->count != 3 ) throw Ginger::Mishap( "ArgsMismatch: sysUpdaterOfIndex" );
+	
+	//	Quickly copy map value for decoding.
+	//Ref val = vm->fastPop();
+	//Ref idx = vm->fastPop();
+	Ref map = vm->fastPeek();
+	//vm->fastPush( idx );
+	//vm->fastPush( val );
+
+	if ( IsObj( map ) ) {
+		Ref * map_K = RefToPtr4( map );
+		if ( IsSimpleKey( *map_K ) ) {
+			switch ( KindOfSimpleKey( *map_K ) ) {
+				case VECTOR_KIND: return pc = sysSetIndexVector( pc, vm );
+				//case MIXED_KIND: return pc = sysMixedKindIndex( pc, vm, *map_K );
+				//case PAIR_KIND: return pc = sysListIndex( pc, vm );
+				//case STRING_KIND: return pc = sysStringIndex( pc, vm );
+				//case MAP_KIND: return pc = sysMapIndex( pc, vm );
+				//case ATTR_KIND: return pc = sysAttrMapIndex( pc, vm );
+				default: throw Ginger::Mishap( "ToBeDone: sysUpdaterOfIndex" ).culprit( "Item", refToString( map ) );
+			}
+		} else {
+			throw Ginger::Mishap( "ToBeDone: sysUpdaterOfIndex (1)" );
+		}
+	} else if ( IsNil( map ) ) {
+		//return sysListIndex( pc, vm );
+		throw Ginger::Mishap( "ToBeDone: sysUpdaterOfIndex (2)" );
+	} else {
+		throw Ginger::Mishap( "ToBeDone: sysUpdaterOfIndex (3)" ).culprit( "Item", refToString( map ) );
+	}
+
+}
+
+
 /**
  *	Index is only defined for list-like objects
  *		index( map_like, idx )
 */
 Ref * sysIndex( Ref *pc, class MachineClass * vm ) {
-	if ( vm->count != 2 ) throw Ginger::Mishap( "ArgsMismatch" );
-	Ref idx = vm->fastPop();
+	if ( vm->count != 2 ) throw Ginger::Mishap( "ArgsMismatch: sysIndex" );
 	Ref map = vm->fastPeek();
-	vm->fastPush( idx );
 	
 	if ( IsObj( map ) ) {
 		Ref * map_K = RefToPtr4( map );
 		if ( IsSimpleKey( *map_K ) ) {
 			switch ( KindOfSimpleKey( *map_K ) ) {
-				case VECTOR_KIND: return pc = sysVectorIndex( pc, vm );
+				case VECTOR_KIND: return pc = sysGetIndexVector( pc, vm );
 				case MIXED_KIND: return pc = sysMixedKindIndex( pc, vm, *map_K );
 				case PAIR_KIND: return pc = sysListIndex( pc, vm );
 				case STRING_KIND: return pc = sysStringIndex( pc, vm );
 				case MAP_KIND: return pc = sysMapIndex( pc, vm );
 				case ATTR_KIND: return pc = sysAttrMapIndex( pc, vm );
-				default: throw Ginger::Mishap( "ToBeDone" );
+				default: throw Ginger::Mishap( "ToBeDone: sysIndex" );
 			}
 		} else {
-			throw Ginger::Mishap( "ToBeDone" );
+			throw Ginger::Mishap( "ToBeDone: sysIndex" );
 		}
 	} else if ( IsNil( map ) ) {
 		return sysListIndex( pc, vm );
 	} else {
-		throw Ginger::Mishap( "ToBeDone" );
+		throw Ginger::Mishap( "ToBeDone: sysIndex" );
 	}
 	return pc;
+}
+
+Ref * sysUpdaterOfExplode( Ref * pc, MachineClass * vm ) {
+	//	TODO:
+	throw Ginger::Mishap( "ToBeDone: sysUpdaterOfExplode" );
 }
 
 /**
@@ -418,9 +456,11 @@ const SysMap::value_type rawData[] = {
 	SysMap::value_type( "sysgarbage", SysInfo( Arity( 0 ), Arity( 0 ), sysGarbageCollect, "Forces a garbage collection - useful for tests" ) ),
 	SysMap::value_type( "hash", SysInfo( Arity( 1 ), Arity( 1 ), sysHash, "Computes a hash code for any value, returns a positive Small" ) ),
 	SysMap::value_type( "index", SysInfo( Arity( 2 ), Arity( 1 ), sysIndex, "Indexes any sequence" ) ),
+	SysMap::value_type( "updaterOfIndex", SysInfo( Arity( 3 ), Arity( 0 ), sysUpdaterOfIndex, "Updates the index of any sequence" ) ),
 	SysMap::value_type( "mapIndex", SysInfo( Arity( 2 ), Arity( 1 ), sysMapIndex, "Indexes a map" ) ),
 	SysMap::value_type( "listIndex", SysInfo( Arity( 2 ), Arity( 1 ), sysListIndex, "Indexes a list" ) ),
 	SysMap::value_type( "explode", SysInfo( Arity( 1 ), Arity( 0, true ), sysExplode, "Explodes any sequence into its members" ) ),
+	SysMap::value_type( "updaterOfExplode", SysInfo( Arity( 1, true ), Arity( 0 ), sysUpdaterOfExplode, "Updates the explode value of any sequence i.e. fills" ) ),
 	SysMap::value_type( "listExplode", SysInfo( Arity( 1 ), Arity( 0, true ), sysListExplode, "Explodes a list into its members" ) ),
 	SysMap::value_type( "length", SysInfo( Arity( 1 ), Arity( 1 ), sysLength, "Returns the length of any sequence" ) ),	
 	SysMap::value_type( "listLength", SysInfo( Arity( 1 ), Arity( 1 ), sysListLength, "Returns the length of a list" ) ),	

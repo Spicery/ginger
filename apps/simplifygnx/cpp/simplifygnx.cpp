@@ -1414,7 +1414,31 @@ public:
 				//element.render();
 				//cout << endl;
 			}
-		}
+		} else if ( x == SET && element.size() == 2 ) {
+            if ( element.child( 1 )->hasName( SYSAPP ) && element.child( 1 )->hasAttribute( SYSAPP_NAME ) ) {
+                const string & sysfn_name = element.child( 1 )->attribute( SYSAPP_NAME );
+                const char * uname = (
+                    sysfn_name == "index" ? "updaterOfIndex" :
+                    sysfn_name == "explode" ? "updaterOfExplode" :
+                    NULL
+                );
+                if ( uname != NULL ) {
+                    /*
+                        <set> EXPR <sysapp name=A> ARGS* </sysapp> </set>
+                        <sysapp name=U> EXPR ARGS </sysapp>
+                    */
+                    shared< Ginger::Mnx > uform( new Ginger::Mnx( SYSAPP ) );
+                    uform->putAttribute( SYSAPP_NAME, uname );
+                    uform->addChild( element.child( 0 ) );
+                    Ginger::MnxChildIterator kids( element.child(1) );
+                    while ( kids.hasNext() ) {
+                        uform->addChild( kids.next() );
+                    }
+                    element.copyFrom( *uform );
+                    this->changed = true;
+                }
+            }
+        }
 	}
 
 public:

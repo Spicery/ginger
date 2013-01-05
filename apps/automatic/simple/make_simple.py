@@ -181,14 +181,18 @@ keys = [
 	KeyData( "Absent", 			0, 	0, 	Kind.KEYLESS_KIND 	),
 	KeyData( "Bool", 			1, 	0, 	Kind.KEYLESS_KIND	),
 	KeyData( "Class",			2, 	4, 	Kind.RECORD_KIND	),
-	KeyData( "Termin",			3, 	0, 	Kind.KEYLESS_KIND	),
-	KeyData( "Nil", 			4, 	0, 	Kind.KEYLESS_KIND	),
-	KeyData( "Pair", 			5, 	2, 	Kind.PAIR_KIND		),
-	KeyData( "Vector",			6, 	0, 	Kind.VECTOR_KIND	),
-	KeyData( "String", 			7, 	0, 	Kind.STRING_KIND	),
-	KeyData( "Symbol", 			8, 	1, 	Kind.KEYLESS_KIND	),
-	KeyData( "Small", 			9, 	0, 	Kind.KEYLESS_KIND	),
-	KeyData( "Float", 			10, 0, 	Kind.KEYLESS_KIND	),
+	KeyData( "Nil", 			3, 	0, 	Kind.KEYLESS_KIND	),
+	KeyData( "Pair", 			4, 	2, 	Kind.PAIR_KIND		),
+	KeyData( "Small", 			5, 	0, 	Kind.KEYLESS_KIND	),
+	KeyData( "String", 			6, 	0, 	Kind.STRING_KIND	),
+	KeyData( "Symbol", 			7, 	1, 	Kind.KEYLESS_KIND	),
+
+	#	Do NOT move references without changing IsVectorID and
+	#	IsMutableVectorID. Must be on a multiple of 2 boundary.
+	KeyData( "Vector",			8, 	0, 	Kind.VECTOR_KIND	),
+	KeyData( "MutableVector",   9,  0,  Kind.VECTOR_KIND    ),
+
+	KeyData( "Termin",			10, 0, 	Kind.KEYLESS_KIND	),
 	KeyData( "Unicode", 		11, 0, 	Kind.KEYLESS_KIND	),
 	KeyData( "Char", 			12, 0, 	Kind.KEYLESS_KIND	),
 	KeyData( "Maplet",  		13, 2, 	Kind.RECORD_KIND	),

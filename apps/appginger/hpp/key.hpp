@@ -149,6 +149,9 @@ KEYLESS_KIND
 #define IsRefSimpleKey( k )		( ( SimpleKeyID( k ) >> 2 ) == 4 )
 #define IsRefKey( k )			( IsSimpleKey( k ) && IsRefSimpleKey( k ) )
 
+#define IsVectorID( k )         ( IsSimpleKey( k ) && ( ( SimpleKeyID( k ) >> 1 ) == 4 ) )
+#define IsMutableVectorID( k )  ( IsSimpleKey( k ) && ( SimpleKeyID( k ) == 9 ) )
+
 #define IsMapKey( k )			( IsSimpleKey( k ) && IsMapSimpleKey( k ) )
 #define IsMapSimpleKey( k )		( ( SimpleKeyID( k ) >> 2 ) == 5 )
 #define MapKeyEq( k )			( ( SimpleKeyID( k ) & 0x2 ) == 0 )
@@ -157,7 +160,8 @@ KEYLESS_KIND
 
 //	Recognisers
 #define IsPair( x )				( IsObj( x ) && ( *RefToPtr4( x ) == sysPairKey ) )
-#define IsVector( x )			( IsObj( x ) && ( *RefToPtr4( x ) == sysVectorKey ) )
+#define IsVector( x )           ( IsObj( x ) && IsVectorID( *RefToPtr4( x ) ) )
+#define IsMutableVector( x )    ( IsObj( x ) && IsMutableVectorID( *RefToPtr4( x ) ) )
 #define IsMaplet( x ) 			( IsObj( x ) && ( *RefToPtr4( x ) == sysMapletKey ) )
 #define IsAssoc( x ) 			( IsObj( x ) && ( *RefToPtr4( x ) == sysAssocKey ) )
 #define IsString( x )			( IsObj( x ) && ( *RefToPtr4( x ) == sysStringKey ) )

@@ -132,17 +132,21 @@ class MethodOptions:
 
 	"""
 		C = constructor
+		T = initialiser (using T temporarily as a refactoring step to switching to I)
 		D = deconstructor
 		R = recogniser
 		F = record fields
-	 	I = vector indexer
+	 	G = vector get-indexer
+	 	S = vector set-indexer
 	"""
-	def __init__( self, opts = "CDRIF" ):
+	def __init__( self, opts = "CTDRFGS" ):
 		self.gen_constructor = ( opts.find( 'C' ) != -1 )
+		self.gen_initialiser = ( opts.find( 'T' ) != -1 )
 		self.gen_deconstructor = ( opts.find( 'D' ) != -1 )
 		self.gen_recogniser = ( opts.find( 'R' ) != -1 )
 		self.gen_fields = ( opts.find( 'F' ) != -1 )
-		self.gen_indexer = ( opts.find( 'I' ) != -1 )
+		self.gen_get_indexer = ( opts.find( 'G' ) != -1 )
+		self.gen_set_indexer = ( opts.find( 'S' ) != -1 )
 
 	def isGenConstructor( self ):
 		return self.gen_constructor
@@ -156,8 +160,14 @@ class MethodOptions:
 	def isGenFields( self ):
 		return self.gen_fields
 
-	def isGenIndexer( self ):
-		return self.gen_indexer
+	def isGenGetIndexer( self ):
+		return self.gen_get_indexer
+
+	def isGenSetIndexer( self ):
+		return self.gen_set_indexer
+
+	def isGenInitialiser( self ):
+		return self.gen_initialiser
 
 
 ################################################################################
@@ -190,14 +200,23 @@ class DataClassGenerator( object ):
 	def isName( self ):
 		return "Is" + self.data_key_root
 
+	def isMutableName( self ):
+		return "IsMutable" + self.data_key_root
+
 	def consName( self ):
 		return "sysNew" + self.data_key_root
 
 	def altConsName( self, aname ):
 		return "sysNew" + aname + self.data_key_root
 
-	def indexName( self ):
-		return "sysIndex" + self.data_key_root	
+	def getIndexName( self ):
+		return "sysGetIndex" + self.data_key_root	
+
+	def setIndexName( self ):
+		return "sysSetIndex" + self.data_key_root	
+
+	def altInitialiserName( self, aname ):
+		return "sysInit" + aname + self.data_key_root
 
 	# This is an abstract method - not sure how you do this in Python.
 	def generate( self, cpp, hpp ):
@@ -231,7 +250,7 @@ class DataClassGenerator( object ):
 		cpp.write( "    } else {\n" )
 		cpp.write( "        throw Mishap( \"Wrong number of arguments for recogniser\" );\n" )
 		cpp.write( "    }\n" )
-		cpp.write( "}\n" )
+		cpp.write( "}\n\n" )
 
 		hpp.write( "extern Ref * {}( Ref * pc, MachineClass * vm );\n".format( recogniser_name ) )
 		self.addSysConst( "is" + self.data_key_root, 1, 1, recogniser_name );
@@ -315,64 +334,124 @@ class FullRecordClassGenerator( DataClassGenerator ):
 	
 class FullVectorClassGenerator( DataClassGenerator ):
 	
-	def __init__( self, sysconsts, className, options = MethodOptions( "CIR" ) ):
+	def __init__( self, sysconsts, className, options = MethodOptions( "CTGRS" ) ):
 		super( FullVectorClassGenerator, self ).__init__( sysconsts, className )
 		self.options = options
 
-
 	def generate( self, cpp, hpp ):
-		if self.options.isGenConstructor():
-			self.generateConstructor( cpp, hpp )
-		cpp.write( "\n" )
+		for aname in self.allKeyRoots():
+			if self.options.isGenConstructor():
+				self.generateConstructor( aname, cpp, hpp )
+			if self.options.isGenInitialiser():
+				self.generateInitialiser( aname, cpp, hpp )
 		if self.options.isGenRecogniser():
 			self.generateRecogniser( cpp, hpp )
-		cpp.write( "\n" )
-		if self.options.isGenIndexer(): 
-			self.generateAccessor( cpp, hpp )
-		cpp.write( "\n" )
-
-	def generateAccessor( self, cpp, hpp ):
-		cpp.write( "Ref * {}( Ref * pc, MachineClass * vm ) {{\n".format( self.indexName() ) )
+		if self.options.isGenGetIndexer(): 
+			self.generateGetIndex( cpp, hpp )
+		if self.options.isGenSetIndexer():
+			self.generateSetIndex( cpp, hpp )
+		
+	def generateGetIndex( self, cpp, hpp ):
+		cpp.write( "Ref * {}( Ref * pc, MachineClass * vm ) {{\n".format( self.getIndexName() ) )
 		cpp.write( "   if ( vm->count == 2 ) {\n" )
-		cpp.write( "       Ref n = vm->fastPop();\n" )
-		cpp.write( "       Ref v = vm->fastPeek();\n" )
+		cpp.write( "       Ref v = vm->fastPop();\n" )
+		cpp.write( "       Ref n = vm->fastPeek();\n" )
 		cpp.write( "       Ref * p = RefToPtr4( v );\n" )
-		cpp.write( "       if ( IsObj( v ) && *RefToPtr4( v ) == {} ) {{\n".format( self.keyName() ) )
+		cpp.write( "       if ( {}( v ) ) {{\n".format( self.isName() ) )
 		cpp.write( "           if ( IsSmall( n ) && LongToSmall( 1 ) <= n && n <= p[ -1 ] ) {\n" )
 		cpp.write( "               vm->fastPeek() = p[ SmallToLong( n ) ];\n" )
 		cpp.write( "           } else {\n" )
 		cpp.write( "               throw Mishap( \"Small integer index needed\" );\n" )
 		cpp.write( "           }\n" )
-		cpp.write( "           return pc;" )
+		cpp.write( "           return pc;\n" )
 		cpp.write( "       } else {\n" )
 		cpp.write( "           throw Mishap( \"Vector needed\" );\n" )
 		cpp.write( "       }\n" )
 		cpp.write( "   } else {\n" )
 		cpp.write( "       throw Mishap( \"Wrong number of arguments for index\" );\n" )
 		cpp.write( "   }\n" )
-		cpp.write( "}\n" )
+		cpp.write( "}\n\n" )
 		
-		hpp.write( "extern Ref * {}( Ref * pc, MachineClass * vm );\n".format( self.indexName() ) )
-		self.addSysConst( "index" + self.data_key_root, 2, 1, self.indexName() );
+		hpp.write( "extern Ref * {}( Ref * pc, MachineClass * vm );\n".format( self.getIndexName() ) )
+		self.addSysConst( "getIndex" + self.data_key_root, 2, 1, self.getIndexName() );
 
-	def generateConstructor( self, cpp, hpp ):
-		cpp.write( "Ref * {}( Ref * pc, MachineClass * vm ) {{\n".format( self.consName() ) )
+	def generateSetIndex( self, cpp, hpp ):
+		cpp.write( "Ref * {}( Ref * pc, MachineClass * vm ) {{\n".format( self.setIndexName() ) )
+		cpp.write( "   if ( vm->count == 3 ) {\n" )
+		cpp.write( "       Ref v = vm->fastPop();\n" )
+		cpp.write( "       Ref n = vm->fastPop();\n" )
+		cpp.write( "       Ref x = vm->fastPop();\n" )
+		cpp.write( "       Ref * p = RefToPtr4( v );\n" )
+		cpp.write( "       if ( {}( v ) ) {{\n".format( self.isMutableName() ) )
+		cpp.write( "           if ( IsSmall( n ) && LongToSmall( 1 ) <= n && n <= p[ -1 ] ) {\n" )
+		cpp.write( "               p[ SmallToLong( n ) ] = x;\n" )
+		cpp.write( "           } else {\n" )
+		cpp.write( "               throw Mishap( \"Small integer index needed\" );\n" )
+		cpp.write( "           }\n" )
+		cpp.write( "           return pc;\n" )
+		cpp.write( "       } else {\n" )
+		cpp.write( "           throw Mishap( \"Vector needed\" );\n" )
+		cpp.write( "       }\n" )
+		cpp.write( "   } else {\n" )
+		cpp.write( "       throw Mishap( \"Wrong number of arguments for index-based update\" );\n" )
+		cpp.write( "   }\n" )
+		cpp.write( "}\n\n" )
+		
+		hpp.write( "extern Ref * {}( Ref * pc, MachineClass * vm );\n".format( self.setIndexName() ) )
+		self.addSysConst( "setIndex" + self.data_key_root, 2, 1, self.setIndexName() );
+
+	def generateConstructor( self, altName, cpp, hpp ):
+		constructorName = self.altConsName( altName );
+		keyName = self.altKeyName( altName );
+		cpp.write( "Ref * {}( Ref * pc, MachineClass * vm ) {{\n".format( constructorName ) )
 		cpp.write( "    int n = vm->count;\n" )
 		cpp.write( "    XfrClass xfr( vm->heap().preflight( pc, 2 + n ) );\n" )
 		cpp.write( "    xfr.xfrRef( LongToSmall( n ) );\n" )
 		cpp.write( "    xfr.setOrigin();\n" )
-		cpp.write( "    xfr.xfrRef( {} );\n".format( self.keyName() ) )
+		cpp.write( "    xfr.xfrRef( {} );\n".format( keyName ) )
 		cpp.write( "    xfr.xfrCopy( ++vm->vp -= n, n );\n" )
 		cpp.write( "    vm->fastSet( xfr.makeRef() );\n" )
 		cpp.write( "    return pc;\n" )
-		cpp.write( "}\n" )
+		cpp.write( "}\n\n" )
 
-		hpp.write( "extern Ref * {}( Ref * pc, MachineClass * vm );\n".format( self.consName() ) )
+		hpp.write( "extern Ref * {}( Ref * pc, MachineClass * vm );\n".format( constructorName ) )
 		self.addSysConst( 
-			"new" + self.data_key_root, 
+			"new" + altName + self.data_key_root, 
 			Arity.MANY, 
 			Arity( 1 ), 
-			self.consName()
+			constructorName
+		)
+
+	def generateInitialiser( self, altName, cpp, hpp ):
+		initName = self.altInitialiserName( altName );
+		keyName = self.altKeyName( altName );
+		cpp.write( "Ref * {}( Ref * pc, MachineClass * vm ) {{\n".format( initName ) )
+		cpp.write( "    if ( vm->count == 2 ) {\n" );
+		cpp.write( "        Ref def = vm->fastPop();\n" )
+		cpp.write( "        Ref count = vm->fastPeek();\n" )
+		cpp.write( "        if ( IsSmall( count ) ) {\n" )
+		cpp.write( "            long n = SmallToLong( count );\n" )
+		cpp.write( "            XfrClass xfr( vm->heap().preflight( pc, 2 + n ) );\n" )
+		cpp.write( "            xfr.xfrRef( count );\n" )
+		cpp.write( "            xfr.setOrigin();\n" )
+		cpp.write( "            xfr.xfrRef( {} );\n".format( keyName ) )
+		cpp.write( "            xfr.xfrDup( def, n );\n" )
+		cpp.write( "            vm->fastSet( xfr.makeRef() );\n" )
+		cpp.write( "            return pc;\n" )
+		cpp.write( "        } else {\n" )
+		cpp.write( "            throw Mishap( \"Small integer needed as a size for initialiser\" );\n" )
+		cpp.write( "        }\n" )
+		cpp.write( "    } else {\n" )
+		cpp.write( "        throw Mishap( \"Wrong number of arguments for initialiser\" );\n" )
+		cpp.write( "    }\n" )
+		cpp.write( "}\n\n" )
+
+		hpp.write( "extern Ref * {}( Ref * pc, MachineClass * vm );\n".format( initName ) )
+		self.addSysConst( 
+			"init" + altName + self.data_key_root, 
+			Arity( 2 ), 
+			Arity( 1 ), 
+			initName
 		)
 
 
@@ -396,8 +475,10 @@ class FullMixedClassGenerator( DataClassGenerator ):
 		for i in range( len( self.fieldNames ) ):
 			if self.options.isGenFields():
 				self.generateField( i, cpp, hpp );
-		if self.options.isGenIndexer(): 
-			self.generateAccessor( cpp, hpp ); 
+		if self.options.isGenGetIndexer(): 
+			self.generateGetIndexer( cpp, hpp ); 
+		if self.options.isGenSetIndexer(): 
+			self.generateSetIndexer( cpp, hpp ); 
 
 	def generateField( self, n, cpp, hpp ):
 		field = self.fieldNames[ n ];
@@ -421,13 +502,14 @@ class FullMixedClassGenerator( DataClassGenerator ):
 		hpp.write( "extern Ref * {}( Ref * pc, MachineClass * vm );\n".format( accessorName ) )
 		self.addSysConst( field, 1, 1, accessorName );
 
-	def generateAccessor( self, cpp, hpp ):
-		cpp.write( "Ref * {}( Ref * pc, MachineClass * vm ) {{\n".format( self.indexName() ) )
+	def generateGetIndexer( self, cpp, hpp ):
+		cpp.write( "Ref * {}( Ref * pc, MachineClass * vm ) {{\n".format( self.getIndexName() ) )
 		cpp.write( "   if ( vm->count == 2 ) {\n" );
 		cpp.write( "       Ref n = vm->fastPop();\n" );
 		cpp.write( "       Ref v = vm->fastPeek();\n" );
 		cpp.write( "       Ref * p = RefToPtr4( v );\n" );
-		cpp.write( "       if ( IsObj( v ) && *RefToPtr4( v ) == {} ) {{\n".format( self.keyName() ) )
+
+		cpp.write( "       if ( {}( v ) ) {{\n".format( self.isName() ) )
 		cpp.write( "           if ( IsSmall( n ) && LongToSmall( 1 ) <= n && n <= p[ -1 ] ) {\n" );
 		cpp.write( "               vm->fastPeek() = p[ {} + SmallToLong( n ) ];\n".format( len( self.fieldNames ) ) )
 		cpp.write( "           } else {\n" );
@@ -440,10 +522,34 @@ class FullMixedClassGenerator( DataClassGenerator ):
 		cpp.write( "   } else {\n" );
 		cpp.write( "       throw Mishap( \"Wrong number of arguments for index\" );\n" );
 		cpp.write( "   }\n" );
-		cpp.write( "}\n" );
+		cpp.write( "}\n\n" );
 		
-		hpp.write( "extern Ref * {}( Ref * pc, MachineClass * vm );\n".format( self.indexName() ) )
-		self.addSysConst( "index" + self.data_key_root, 2, 1, self.indexName() )
+		hpp.write( "extern Ref * {}( Ref * pc, MachineClass * vm );\n".format( self.getIndexName() ) )
+		self.addSysConst( "getIndex" + self.data_key_root, 2, 1, self.getIndexName() )
+
+	def generateSetIndexer( self, cpp, hpp ):
+		cpp.write( "Ref * {}( Ref * pc, MachineClass * vm ) {{\n".format( self.setIndexName() ) )
+		cpp.write( "   if ( vm->count == 2 ) {\n" );
+		cpp.write( "       Ref n = vm->fastPop();\n" );
+		cpp.write( "       Ref v = vm->fastPeek();\n" );
+		cpp.write( "       Ref * p = RefToPtr4( v );\n" );
+		cpp.write( "       if ( {}( v ) ) {{\n".format( self.isMutableName() ) )
+		cpp.write( "           if ( IsSmall( n ) && LongToSmall( 1 ) <= n && n <= p[ -1 ] ) {\n" );
+		cpp.write( "               vm->fastPeek() = p[ {} + SmallToLong( n ) ];\n".format( len( self.fieldNames ) ) )
+		cpp.write( "           } else {\n" );
+		cpp.write( "               throw Mishap( \"Small integer index needed\" );\n" );
+		cpp.write( "           }\n" );
+		cpp.write( "           return pc;\n" );
+		cpp.write( "       } else {\n" );
+		cpp.write( "           throw Mishap( \"Vector needed\" );\n" );
+		cpp.write( "       }\n" );
+		cpp.write( "   } else {\n" );
+		cpp.write( "       throw Mishap( \"Wrong number of arguments for index\" );\n" );
+		cpp.write( "   }\n" );
+		cpp.write( "}\n\n" );
+		
+		hpp.write( "extern Ref * {}( Ref * pc, MachineClass * vm );\n".format( self.setIndexName() ) )
+		self.addSysConst( "setIndex" + self.data_key_root, 2, 1, self.setIndexName() )
 
 	def generateConstructor( self, altName, cpp, hpp ):
 		constructorName = self.altConsName( altName );
@@ -490,12 +596,13 @@ ref = FullRecordClassGenerator( sysconsts, "Maplet", "mapletKey", "mapletValue" 
 ref.generateFilesWithPrefix( "maplet" )
 
 ref = FullVectorClassGenerator( sysconsts, "Vector" )
+ref.addKeyRoots( "", "Mutable" )
 ref.generateFilesWithPrefix( "vector" )
 
 ref = FullMixedClassGenerator( sysconsts, "AttrMap", MethodOptions( "CRF" ), "attrMapName" )
 ref.generateFilesWithPrefix( "attrmap" )
 
-ref = FullMixedClassGenerator( sysconsts, "Element", MethodOptions( "CRIF" ), "elementAttrMap" )
+ref = FullMixedClassGenerator( sysconsts, "Element", MethodOptions( "CRGF" ), "elementAttrMap" )
 ref.generateFilesWithPrefix( "element" )
 
 #	Create the insert for the sysMap table.

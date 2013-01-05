@@ -43,8 +43,8 @@ Ref * sysAttrMapExplode( Ref *pc, class MachineClass * vm ) {
 
 Ref * sysAttrMapIndex( Ref *pc, class MachineClass * vm ) {
 	if ( vm->count != 2 ) throw Ginger::Mishap( "ArgsMismatch" );
-	const Ref idx = vm->fastPop();
 	const Ref amap = vm->fastPop();
+	const Ref idx = vm->fastPop();
 	
 	if ( !IsAttrMap( amap ) ) throw Ginger::Mishap( "Map needed" ).culprit( "Object", refToString( amap ) );
 	

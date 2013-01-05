@@ -128,9 +128,9 @@ Ref * sysListAppend( Ref * pc, class MachineClass * vm ) {
 
 Ref * sysListIndex( Ref *pc, class MachineClass * vm ) {
 	if ( vm->count != 2 ) throw Ginger::Mishap( "ArgsMismatch" );
-	Ref idx = vm->fastPop();
+	Ref list = vm->fastPop();
+	Ref idx = vm->fastPeek();
 	if ( !IsSmall( idx ) ) throw Ginger::Mishap( "TypeError" );
-	Ref list = vm->fastPeek();
 	
 	long I = SmallToLong( idx );
 	if ( I <= 0 ) throw Ginger::Mishap( "OutOfRange" );

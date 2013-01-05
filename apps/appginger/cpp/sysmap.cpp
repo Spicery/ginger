@@ -380,8 +380,8 @@ Ref * sysMapExplode( Ref *pc, class MachineClass * vm ) {
 
 Ref * sysMapIndex( Ref * pc, class MachineClass * vm ) {
 	if ( vm->count != 2 ) throw Ginger::Mishap( "ArgsMismatch" );
-	const Ref idx = vm->fastPop();
 	const Ref map = vm->fastPop();
+	const Ref idx = vm->fastPop();
 	
 	if ( !IsMap( map ) ) throw Ginger::Mishap( "Map needed" ).culprit( "Object", refToString( map ) );
 	Ref * map_K = RefToPtr4( map );

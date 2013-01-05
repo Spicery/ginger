@@ -27,12 +27,14 @@
 
 Ref * sysMixedKindIndex( Ref *pc, class MachineClass * vm, Ref key ) {
 	if ( vm->count != 2 ) throw Ginger::Mishap( "ArgsMismatch" );
-	Ref idx = vm->fastPop();
-	if ( !IsSmall( idx ) ) throw Ginger::Mishap( "TypeError" );
-	Ref vec = vm->fastPeek();
+	
+	Ref vec = vm->fastPop();
 	if ( !IsMixedKind( vec ) ) throw Ginger::Mishap( "TypeError" );
 	Ref * vec_K = RefToPtr4( vec );
 	if ( *vec_K != key ) throw Ginger::Mishap( "Argument mismatch for mixedExplode" );
+	
+	Ref idx = vm->fastPeek();
+	if ( !IsSmall( idx ) ) throw Ginger::Mishap( "TypeError" );
 	
 	const long I = SmallToLong( idx );
 	const long N = SmallToLong( vec_K[ MIXED_LAYOUT_OFFSET_LENGTH ] );

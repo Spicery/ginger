@@ -140,7 +140,7 @@ Ref * sysApply( Ref * pc, MachineClass *vm ) {
         } else if ( IsSimpleKey( key ) ) {
             switch ( KindOfSimpleKey( key ) ) {
                 case VECTOR_KIND: {
-                    return sysVectorIndex( sysFastSwap( pc, vm ), vm );
+                    return sysGetIndexVector( sysFastSwap( pc, vm ), vm );
                 }
                 case PAIR_KIND: {
                     return sysListIndex( sysFastSwap( pc, vm ), vm );

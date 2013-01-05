@@ -1,10 +1,10 @@
 <!-- 
-	"abc".index(2);
-	["abc".explode].index(3);
-	{"abc".explode}.index(1);
-	{% 'p' :- 'a', 'q' :- 'b', 'r' :- 'c' %}.index( 'q' );
+	index(2, "abc");
+	index( 3, [% "abc".explode %] );
+	index( 1, [ "abc".explode ] );
+	index( 'q', { 'p' => 'a', 'q' => 'b', 'r' => 'c' } );
 -->
-<app><id name="index"/><seq><constant type="string" value="abc"/><constant type="int" value="2"/></seq></app>
-<app><id name="index"/><seq><sysapp name="newList"><sysapp name="explode"><seq><constant type="string" value="abc"/></seq></sysapp></sysapp><constant type="int" value="3"/></seq></app>
-<app><id name="index"/><seq><sysapp name="newVector"><sysapp name="explode"><seq><constant type="string" value="abc"/></seq></sysapp></sysapp><constant type="int" value="1"/></seq></app>
-<app><id name="index"/><seq><sysapp name="newMap"><seq><seq><sysapp name="newMaplet"><seq><constant type="char" value="p"/></seq><seq><constant type="char" value="a"/></seq></sysapp><sysapp name="newMaplet"><seq><constant type="char" value="q"/></seq><seq><constant type="char" value="b"/></seq></sysapp></seq><sysapp name="newMaplet"><seq><constant type="char" value="r"/></seq><seq><constant type="char" value="c"/></seq></sysapp></seq></sysapp><seq><constant type="char" value="q"/></seq></seq></app>
+<app><id name="index" span="1"/><seq><constant span="1" type="int" value="2"/><constant span="1" type="string" value="abc"/></seq></app>
+<app><id name="index" span="2"/><seq><constant span="2" type="int" value="3"/><list span="2"><app><id name="explode" span="2"/><seq><constant span="2" type="string" value="abc"/></seq></app></list></seq></app>
+<app><id name="index" span="3"/><seq><constant span="3" type="int" value="1"/><vector span="3"><app><id name="explode" span="3"/><seq><constant span="3" type="string" value="abc"/></seq></app></vector></seq></app>
+<app><id name="index" span="4"/><seq><seq span="4"><constant type="char" value="q"/></seq><sysapp name="newMap" span="4"><seq><seq><sysapp name="newMaplet"><seq span="4"><constant type="char" value="p"/></seq><seq span="4"><constant type="char" value="a"/></seq></sysapp><sysapp name="newMaplet"><seq span="4"><constant type="char" value="q"/></seq><seq span="4"><constant type="char" value="b"/></seq></sysapp></seq><sysapp name="newMaplet"><seq span="4"><constant type="char" value="r"/></seq><seq span="4"><constant type="char" value="c"/></seq></sysapp></seq></sysapp></seq></app>

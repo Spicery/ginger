@@ -70,12 +70,21 @@ Ref * sysVectorAppend( Ref * pc, class MachineClass * vm ) {
 
 }
 
+Ref * sysIsMutableVector( Ref *pc, class MachineClass * vm ) {
+	Ref vec = vm->fastPeek();
+	vm->fastPeek() = IsMutableVector( vec ) ? SYS_TRUE : SYS_FALSE;
+	return pc;
+}
+
+
+//	TODO: Deprecate in favour of sysVectorGetIndex which is automatically generated
+/*
 Ref * sysVectorIndex( Ref *pc, class MachineClass * vm ) {
 	if ( vm->count != 2 ) throw Ginger::Mishap( "ArgsMismatch" );
 	Ref idx = vm->fastPop();
-	if ( !IsSmall( idx ) ) throw Ginger::Mishap( "TypeError" );
+	if ( not IsSmall( idx ) ) throw Ginger::Mishap( "TypeError (vector needed)" );
 	Ref vec = vm->fastPeek();
-	if ( !IsVector( vec ) ) throw Ginger::Mishap( "TypeError" );
+	if ( not IsVector( vec ) ) throw Ginger::Mishap( "TypeError (vector needed)" );
 	Ref * vec_K = RefToPtr4( vec );
 	
 	const long I = SmallToLong( idx );
@@ -89,6 +98,7 @@ Ref * sysVectorIndex( Ref *pc, class MachineClass * vm ) {
 	
 	return pc;
 }
+*/
 
 Ref * sysVectorExplode( Ref *pc, class MachineClass * vm ) {
 	if ( vm->count != 1 ) throw Ginger::Mishap( "Wrong number of arguments for vectorExplode" );

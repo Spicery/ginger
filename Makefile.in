@@ -174,10 +174,10 @@ unitcheck:
 	# To be done
 
 funccheck:
-	nosetests -v functests
+	(cd functests; nosetests)
 
 syscheck:
-	nosetests systests
+	(cd systests; nosetests)
 
 check:
 	make unitcheck

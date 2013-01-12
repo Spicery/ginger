@@ -32,6 +32,7 @@ using namespace Ginger;
 #define LOG_FACILITY	LOG_LOCAL2
 
 #define COMMON2GNX		( INSTALL_TOOL "/common2gnx" )
+#define CSTYLE2GNX		( INSTALL_TOOL "/cstyle2gnx" )
 #define LISP2GNX 		( INSTALL_TOOL "/lisp2gnx" )
 #define GNX2GNX     	( "/bin/cat" )
 
@@ -70,6 +71,8 @@ int main( int argc, char ** argv ) {
 		const char * cmdpath = NULL;
 		if ( extn == "cmn" ) {
 			cmdpath = COMMON2GNX;
+		} else if ( extn == "cst" ) {
+			cmdpath = CSTYLE2GNX;
 		} else if ( extn == "lsp" ) {
 			cmdpath = LISP2GNX;
 		} else if ( extn == "gnx" ) {

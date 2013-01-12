@@ -1,0 +1,10 @@
+Door 1 open
+Door 4 open
+Door 9 open
+Door 16 open
+Door 25 open
+Door 36 open
+Door 49 open
+Door 64 open
+Door 81 open
+Door 100 open

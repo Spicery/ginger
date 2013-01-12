@@ -1,0 +1,3 @@
+function autocst() {
+	println( "Autocst" );
+}

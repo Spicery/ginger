@@ -30,6 +30,9 @@ class ImportSetInfo {
 private:
 	std::vector< ImportInfo > imports;
 	
+private:
+    void addDefaultImports();
+
 public:
 	void readFile( std::string filename );
 	void printImports();

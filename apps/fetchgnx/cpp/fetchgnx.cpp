@@ -57,6 +57,7 @@ enum Task {
 	RESOLVE_QUALIFIED,
 	RESOLVE_UNQUALIFIED,
 	LOAD_PACKAGE,
+	LOAD_FILE,
 	EXECUTE_COMMAND
 };
 
@@ -64,6 +65,7 @@ class Main {
 private:
 	Task						task;
 	vector< string >			project_folders;
+	string 						load_file;
 	string 						package_name;
 	string						alias_name;
 	string						variable_name;
@@ -84,15 +86,8 @@ public:
 };
 
 std::string Main::version() {
-	return "0.4";
+	return "0.5";
 }
-
-//  struct option {
-//      const char *name;   // option name
-//      int has_arg;        // 0 = no arg, 1 = mandatory arg, 2 = optional arg
-//      int *flag;          // variable to return result or NULL
-//      int val;            // code to return (when flag is null)
-//                          //  typically short option code
 
 extern char * optarg;
 static struct option long_options[] =
@@ -103,6 +98,7 @@ static struct option long_options[] =
         { "help",			optional_argument,		0, 'H' },
         { "initial",        no_argument,            0, 'I' },
         { "license",        optional_argument,      0, 'L' },
+        { "load",			required_argument,      0, 'l' },
         { "folder",         required_argument,  	0, 'f' },
         { "project",        required_argument,      0, 'j' },
         { "package",        required_argument,      0, 'p' },
@@ -113,11 +109,42 @@ static struct option long_options[] =
         { 0, 0, 0, 0 }
     };
 
+static void printUsage() {
+	cout << "Usage:  fetchgnx MODE_OPTION -j PROJECT -p PACKAGE [-a ALIAS] -v VARIABLE\n" << endl;
+	cout << "MODE OPTIONS\n" << endl;
+	cout << "-R, --resolve         find the origin package::variable of a reference\n" << endl;
+	cout << "-D, --definition      find the definition of a package::variable\n" << endl;
+	cout << "-H, --help[=TOPIC]    help info on optional topic (see --help=help)\n" << endl;
+	cout << "-I, --initial         fetch initialisation code for a package\n" << endl;
+	cout << "-V, --version         print out version information and exit\n" << endl;
+	cout << "-L, --license[=PART]  print out license information and exit (see --help=license)\n" << endl;
+	cout << "ARGUMENTS FOR -R AND -D\n" << endl;
+	cout << "-j, --project=PATH    defines project folder, there may be more than one\n" << endl;
+	cout << "-f, --folder=PATH     alternative to --project option\n" << endl;
+	cout << "-p, --package=NAME    sets the package name\n" << endl;
+	cout << "-a, --alias=NAME      sets the alias name, optional\n" << endl;
+	cout << "-v, --variable=NAME   sets the variable name\n" << endl;
+	cout << "-U, --undefined       allow undefined variables\n" << endl;
+	cout << endl;
+}
+
+static void printHelpOptionUsage() {
+    cout << "--help=help           this short help" << endl;
+    cout << "--help=licence        help on displaying license information" << endl;
+    cout << "--help=std            print out variables in std" << endl;
+}
+
+static void printLicenseOptionUsage() {
+	cout << "Displays key sections of the GNU Public License." << endl;
+	cout << "--license=warranty    Shows warranty." << endl;
+	cout << "--license=conditions  Shows terms and conditions." << endl;
+}
+
 void Main::parseArgs( int argc, char **argv, char **envp ) {
 	bool qualified = false;
     for(;;) {
         int option_index = 0;
-        int c = getopt_long( argc, argv, "uXRDH::IVL::j:f:p:a:v:", long_options, &option_index );
+        int c = getopt_long( argc, argv, "uXRDH::IVL::l:j:f:p:a:v:", long_options, &option_index );
         if ( c == -1 ) break;
         switch ( c ) {
             case 'a' : {
@@ -139,32 +166,13 @@ void Main::parseArgs( int argc, char **argv, char **envp ) {
                 //  files and this will simply go there. Or run a web
                 //  browser pointed there.
                 if ( optarg == NULL ) {
-                    printf( "Usage:  fetchgnx MODE_OPTION -j PROJECT -p PACKAGE [-a ALIAS] -v VARIABLE\n" );
-                    printf( "MODE OPTIONS\n" );
-                    printf( "-R, --resolve         find the origin package::variable of a reference\n" );
-                    printf( "-D, --definition      find the definition of a package::variable\n" );
-                    printf( "-H, --help[=TOPIC]    help info on optional topic (see --help=help)\n" );
-                    printf( "-I, --initial         fetch initialisation code for a package\n" );
-                    printf( "-V, --version         print out version information and exit\n" );
-                    printf( "-L, --license[=PART]  print out license information and exit (see --help=license)\n" );
-                    printf( "ARGUMENTS FOR -R AND -D\n" );
-                    printf( "-j, --project=PATH    defines project folder, there may be more than one\n" );
-                    printf( "-f, --folder=PATH     alternative to --project option\n" );
-                    printf( "-p, --package=NAME    sets the package name\n" );
-                    printf( "-a, --alias=NAME      sets the alias name, optional\n" );
-                    printf( "-v, --variable=NAME   sets the variable name\n" );
-                    printf( "-U, --undefined       allow undefined variables\n" );
-                    printf( "\n" );
+                	printUsage();
                 } else if ( std::string( optarg ) == "help" ) {
-                    cout << "--help=help           this short help" << endl;
-                    cout << "--help=licence        help on displaying license information" << endl;
-                    cout << "--help=std            print out variables in std" << endl;
+                	printHelpOptionUsage();
                 } else if ( std::string( optarg ) == "license" ) {
-                    cout << "Displays key sections of the GNU Public License." << endl;
-                    cout << "--license=warranty    Shows warranty." << endl;
-                    cout << "--license=conditions  Shows terms and conditions." << endl;
+                	printLicenseOptionUsage();
                 } else {
-                    printf( "Unknown help topic %s\n", optarg );
+                    cout << "Unknown help topic " << optarg << endl;
                 }
                 exit( EXIT_SUCCESS );   //  Is that right?
             }
@@ -184,6 +192,11 @@ void Main::parseArgs( int argc, char **argv, char **envp ) {
                     exit( EXIT_FAILURE );
                 }
                 exit( EXIT_SUCCESS );   //  Is that right?              
+            }
+            case 'l': {
+            	task = LOAD_FILE;
+            	this->load_file = std::string( optarg );
+            	break;
             }
             case 'p': {
 				package_name = std::string( optarg );
@@ -213,7 +226,7 @@ void Main::parseArgs( int argc, char **argv, char **envp ) {
                 break;
             }
             default: {
-                printf( "?? getopt returned character code 0%x ??\n", static_cast< int >( c ) );
+                cout << "?? getopt returned character code " << hex << static_cast< int >( c ) << dec << endl;
             }
         }
     }
@@ -265,6 +278,11 @@ void Main::summary() {
 			cerr << "LOAD_PACKAGE" << endl;
 			cerr << "  Package name  : " << this->package_name << endl; 
 			break;
+		}
+		case LOAD_FILE: {
+			cerr << "LOAD_FILE" << endl;
+			cerr << "  Package name  : " << this->package_name << endl; 
+			cerr << "  Load file name  : " << this->load_file << endl; 
 		}
 		case EXECUTE_COMMAND: {
 			cerr << "EXECUTE_COMMAND" << endl;
@@ -324,6 +342,10 @@ void Main::run() {
 			search.loadPackage( this->package_name );
 			break;
 		}
+		case LOAD_FILE: {
+			search.loadFileFromPackage( this->package_name, this->load_file );
+			break;
+		}
 		case EXECUTE_COMMAND: {
 			#ifdef DBG_FETCHGNX
 				cerr << "Entering Execute Command mode" << endl;
@@ -364,6 +386,12 @@ void Main::run() {
 				mnx->hasAttribute( "pkg.name" )
 			) {
 				search.loadPackage( mnx->attribute( "pkg.name" ) );
+			} else if (
+				mnx->hasName( "fetch.load.file" ) &&
+				mnx->hasAttribute( "pkg.name" ) &&
+				mnx->hasAttribute( "load.file" )
+			) {
+				search.loadFileFromPackage( mnx->attribute( "pkg.name" ), mnx->attribute( "load.file" ) );
 			} else {
 				throw Ginger::Mishap( "Invalid request" ).culprit( mnx->toString() );
 			}

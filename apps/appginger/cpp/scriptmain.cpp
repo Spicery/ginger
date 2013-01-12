@@ -23,11 +23,14 @@
 
 #include <stddef.h>
 #include <syslog.h>
+#include <sys/errno.h>
+
 
 #include <ext/stdio_filebuf.h> // __gnu_cxx::stdio_filebuf
 
 #include "mnx.hpp"
 #include "mishap.hpp"
+#include "command.hpp"
 
 #include "rcep.hpp"
 #include "appcontext.hpp"
@@ -49,87 +52,113 @@ private:
 			rcep.printResults( cout, 0 );
 		}			
 	}
+
+	void executeCommand( RCEP & rcep, const string command ) {
+		//	cerr << "Command so far: " << command << endl;
+		FILE * gnxfp = popen( command.c_str(), "r" );
+		if ( gnxfp == NULL ) {
+			throw Ginger::Mishap( "Failed to translate input" );
+		}
+		// ... open the file, with whatever, pipes or who-knows ...
+		// let's build a buffer from the FILE* descriptor ...
+		__gnu_cxx::stdio_filebuf<char> pipe_buf( gnxfp, ios_base::in );
+		
+		// there we are, a regular istream is build upon the buffer.
+		istream stream_pipe_in( &pipe_buf );
+		
+		while ( rcep.unsafe_read_comp_exec_print( stream_pipe_in, std::cout ) ) {}
+
+		pclose( gnxfp );	
+	}
+
+	void executeFile( RCEP & rcep, const string filename ) {
+		stringstream commstream;
+		//	tail is 1-indexed!
+		commstream << this->context.syntax( filename ) << " < " << shellSafeName( filename );
+		this->executeCommand( rcep, commstream.str() );
+	}
+
+	void executeStdin( RCEP & rcep ) {
+		this->executeCommand( rcep, this->context.syntax() );
+	}
+
+	void loadFileFromPackage( RCEP & rcep, Package * pkg, const std::string filename ) {
+		Ginger::Command cmd( FETCHGNX );
+		cmd.addArg( "-X" );
+		{
+			list< string > & folders = rcep.getMachine()->getAppContext().getProjectFolderList();
+			for ( 
+				list< string >::iterator it = folders.begin();
+				it != folders.end();
+				++it
+			) {
+				cmd.addArg( "-j" );
+				cmd.addArg( *it );
+			}
+		}
+
+		Ginger::MnxBuilder qb;
+		qb.start( "fetch.load.file" );
+		qb.put( "pkg.name", pkg->getTitle() );
+		qb.put( "load.file", filename );
+		qb.end();
+		shared< Ginger::Mnx > query( qb.build() );
+
+		#ifdef DBG_SCRIPT_MAIN
+			cerr << "scriptmain asking for loadfile, using fetchgnx -X" << endl;
+			cerr << "  [[";
+			query->render( cerr );
+			cerr << "]]" << endl;
+		#endif	
+
+		cmd.runWithInputAndOutput();
+		int fd = cmd.getInputFD();   
+		FILE * foutd = fdopen( cmd.getOutputFD(), "w" );
+		query->frender( foutd );
+		fflush( foutd );
+
+		stringstream prog;
+		for (;;) {
+			static char buffer[ 1024 ];
+			//	TODO: protect close with finally.
+			int n = read( fd, buffer, sizeof( buffer ) );
+			if ( n == 0 ) break;
+			if ( n == -1 ) {
+				if ( errno != EINTR ) {
+					perror( "Script main loading file" );
+					throw Ginger::Mishap( "Failed to read" );
+				}
+			} else if ( n > 0 ) {
+				prog.write( buffer, n );
+			}
+		}
+
+		//	TODO: protect close with finally.
+		fclose( foutd );
+
+		#ifdef DBG_SCRIPT_MAIN
+			cerr << "  [[" << prog.str() << "]]" << endl;
+		#endif
+		while ( rcep.unsafe_read_comp_exec_print( prog, std::cout ) ) {}
+	}
 	
 public:
 	int run() {		
 		MachineClass * vm = this->context.newMachine();
 		Package * interactive_pkg = this->context.initInteractivePackage( vm );
 		RCEP rcep( interactive_pkg );
-	
+
+		list< string > & load_files = this->context.getLoadFileList();
+		for ( list< string >::iterator it = load_files.begin(); it != load_files.end(); ++it ) {
+			this->loadFileFromPackage( rcep, interactive_pkg, *it );
+		}
+			
 		vector< string > & args = this->context.arguments();
 		for ( vector< string >::iterator it = args.begin(); it != args.end(); ++it ) {
-
-			stringstream commstream;
-			//	tail is 1-indexed!
-			commstream << this->context.syntax( *it ) << " < " << shellSafeName( *it );
-
-			#ifdef SIMPLIFY_NOT_IMPLEMENTED
-				commstream << " | ";
-				commstream << SIMPLIFYGNX << " -suA";
-				commstream << " -p " << shellSafeName( interactive_pkg->getTitle() );
-
-				{
-					list< string > & folders = vm->getAppContext().getProjectFolderList();
-					for ( 
-						list< string >::iterator it = folders.begin();
-						it != folders.end();
-						++it
-					) {
-						commstream << " -j" << *it;
-					}
-				}
-			#endif
-			
-			string command( commstream.str() );
-			//	cerr << "Command so far: " << command << endl;
-			FILE * gnxfp = popen( command.c_str(), "r" );
-			if ( gnxfp == NULL ) {
-				throw Ginger::Mishap( "Failed to translate input" );
-			}
-			// ... open the file, with whatever, pipes or who-knows ...
-			// let's build a buffer from the FILE* descriptor ...
-			__gnu_cxx::stdio_filebuf<char> pipe_buf( gnxfp, ios_base::in );
-			
-			// there we are, a regular istream is build upon the buffer.
-			istream stream_pipe_in( &pipe_buf );
-			
-			while ( rcep.unsafe_read_comp_exec_print( stream_pipe_in, std::cout ) ) {}
-
-			pclose( gnxfp );
+			this->executeFile( rcep, *it );
 		}
 		if ( this->context.useStdin() ) {
-			stringstream commstream;
-			//	tail is 1-indexed!
-			commstream << this->context.syntax();
-
-			#ifdef SIMPLIFY_NOT_IMPLEMENTED
-				commstream << " | ";
-				commstream << SIMPLIFYGNX << " -suA";
-				commstream << " -p " << shellSafeName( interactive_pkg->getTitle() );
-				{
-					list< string > & folders = vm->getAppContext().getProjectFolderList();
-					for ( 
-						list< string >::iterator it = folders.begin();
-						it != folders.end();
-						++it
-					) {
-						commstream << " -j" << *it;
-					}
-				}
-			#endif
-			
-			string command( commstream.str() );
-
-			FILE * gnxfp = popen( command.c_str(), "r" );
-			if ( gnxfp == NULL ) {
-				throw Ginger::Mishap( "Failed to translate input" );
-			}
-		
-			__gnu_cxx::stdio_filebuf<char> pipe_buf( gnxfp, ios_base::in );
-			istream stream_pipe_in( &pipe_buf );
-			while ( rcep.unsafe_read_comp_exec_print( stream_pipe_in, std::cout ) ) {}
-			
-			pclose( gnxfp );
+			this->executeStdin( rcep );
 		}
 	    return EXIT_SUCCESS;
 	}

@@ -279,11 +279,24 @@ void Search::fetchDefinition( const string & pkg_name, const string & var_name )
 
 void Search::loadPackage( const string & pkg ) {
 	PackageCache * c = this->project_cache.fetchPackageCache( pkg );
-	string pathname = c->getLoadPath();
+	string pathname = c->getInitLoadPath();
 	if ( pathname.size() > 0 ) {
 		run( INSTALL_TOOL "/" FILE2GNX, pathname, cout );
 	} else {
 		//cout << "<seq><!-- load path was not defined --></seq>" << endl;
 	}
 }
-	
+
+void Search::loadFileFromPackage( const string & pkg, const string & load_file ) {
+	PackageCache * c = this->project_cache.fetchPackageCache( pkg );
+	string pathname = c->getLoadFolder();
+	if ( pathname.size() <= 0 ) {
+		throw Mishap( "No load folder for this package" ).culprit( "Package", pkg );
+	}
+	const string file_name( pathname + "/" + load_file );
+	if ( access( file_name.c_str(), R_OK ) == 0 ) {
+		run( INSTALL_TOOL "/" FILE2GNX, file_name, cout );
+	} else {
+		throw Mishap( "Cannot find load file for this package" ).culprit( "Load file", load_file ).culprit( "Package", pkg );
+	}	
+}

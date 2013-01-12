@@ -42,6 +42,7 @@ public:
 	void resolveUnqualified( const std::string & pkg, const std::string & vname );
 	void fetchDefinition( const std::string & pkg, const std::string & vname );
 	void loadPackage( const std::string & pkg );
+	void loadFileFromPackage( const std::string & pkg, const std::string & load_file );
 	
 public:
 	//Search( std::string & sqlite_db_file, std::vector< std::string > & project_path );

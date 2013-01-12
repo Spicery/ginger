@@ -20,6 +20,8 @@
 #include <iostream>
 #include <utility>
 
+#include "mishap.hpp"
+
 #include "importsetinfo.hpp"
 #include "sax.hpp"
 
@@ -61,16 +63,46 @@ void ImportHandler::endTag( std::string & name ) {
 	#endif
 }
 
+/*
+<package>
+	<import from="ginger.library" match0="public" />
+	<import from="ginger.constants" match0="public" />
+</package>
+*/
+
+typedef std::map< std::string, std::string > Dict;
+
+static Dict defPkg( const char * from ) {
+	Dict dict;
+	dict[ "from" ] = from;
+	dict[ "match0" ] = "public";
+	return dict;
+}
+
+static Dict GINGER_LIBRARY( defPkg( "ginger.library") );
+static Dict GINGER_CONSTANTS( defPkg( "ginger.constants") );
+
+void ImportSetInfo::addDefaultImports() {
+	this->imports.push_back( ImportInfo( GINGER_LIBRARY ) );
+	this->imports.push_back( ImportInfo( GINGER_CONSTANTS ) );
+}
+
 
 void ImportSetInfo::readFile( string filename ) {
 	#ifdef DBG_IMPORT_SET_INFO
 		cerr << "READING " << filename << endl;
 	#endif
-	ImportHandler handler( this->imports );
 	ifstream stream( filename.c_str() );
 	if ( stream.good() ) {
+		ImportHandler handler( this->imports );
 		Ginger::SaxParser saxp( stream, handler );
 		saxp.readElement();
+	} else if ( access( filename.c_str(), F_OK ) != 0 ) {
+		//	File does not exist. Supply default.
+		this->addDefaultImports();
+	} else {
+		//	We have a problem with the file.
+		throw Ginger::Mishap( "Cannot read imports file" ).culprit( "Filename", filename );
 	}
 }
 

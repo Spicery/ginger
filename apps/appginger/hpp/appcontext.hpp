@@ -44,6 +44,7 @@ private:
 	bool 						dbg_show_code;
 	bool 						is_gctrace;
 	std::list< std::string >	project_folder_list;
+	std::list< std::string >    load_file_list;
 	char **						envp;
 	std::vector< std::string > 	arg_list;
 	#ifdef RUDECGI
@@ -66,6 +67,8 @@ public:
 	std::list< std::string > & getProjectFolderList() { return this->project_folder_list; }
 	void addProjectFolder( const std::string & folder );
 	void addProjectFolder( const char * folder );
+	void addLoadFile( const char * filename );
+	std::list< std::string > & getLoadFileList() { return this->load_file_list; }
 	char ** getEnvironmentVariables() { return this->envp; }
 	void setEnvironmentVariables( char ** e ) { this->envp = e; }
 	void addArgument( const char * s ) { this->arg_list.push_back( s ); }

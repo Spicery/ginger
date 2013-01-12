@@ -62,10 +62,13 @@ MachineClass * AppContext::newMachine() {
     }
 }
 
+void AppContext::addLoadFile( const char * load_file_name ) {
+    this->load_file_list.push_back( load_file_name );
+}
+
 void AppContext::addProjectFolder( const std::string & folder ) {
 	this->project_folder_list.push_back( folder );
 }
-
 
 void AppContext::addProjectFolder( const char * folder ) { 
 	this->project_folder_list.push_back( folder );

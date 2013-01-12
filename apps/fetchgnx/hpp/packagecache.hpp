@@ -36,7 +36,8 @@ class PackageCache {
 private:
 	ProjectCache *						project;
 	std::string 						package_name;
-	std::string							load_path;
+	std::string							init_load_file;
+	std::string							load_folder_path;
 	std::map< std::string, VarInfo > 	cache;
 	ImportSetInfo 						imports;
 	
@@ -50,8 +51,10 @@ public:
 	void readImports( std::string import_file );
 	void printImports();
 	//void fillFromList( std::vector< std::string > & from_list );
-	void setLoadPath( const std::string & path );
-	std::string getLoadPath();
+	void setInitLoadPath( const std::string path );
+	std::string getInitLoadPath();
+	std::string getLoadFolder();
+	void setLoadFolder( const std::string path );
 	std::vector< ImportInfo > & importVector();
 
 public:

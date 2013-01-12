@@ -45,9 +45,10 @@
 
 #include "wellknownpaths.hpp"
 
-
-
 using namespace std;
+
+//#define DBG_PACKAGE_AUTOLOAD 1
+
 
 Package::~Package() {
 }

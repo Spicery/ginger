@@ -39,7 +39,7 @@ PackageCache::~PackageCache() {
 }
 
 /*
-	GOT HERE - CONSIDERING HOW TO COPE WITH RELOADING. Repeats could
+	TODO: CONSIDERING HOW TO COPE WITH RELOADING. Repeats could
 	cause the cached imports to grow without limit, unless there is a good
 	composite primary key.
 		from
@@ -166,14 +166,27 @@ void PackageCache::printImports() {
 	this->imports.printImports();
 }
 
-void PackageCache::setLoadPath( const string & path ) {
-	this->load_path = path;
-}
-
-string PackageCache::getLoadPath() {
-	return this->load_path;
-}
-
 vector< ImportInfo > & PackageCache::importVector() {
 	return this->imports.importVector();
 }
+
+string PackageCache::getLoadFolder() {
+	return this->load_folder_path;
+}
+
+void PackageCache::setLoadFolder( const std::string path ) {
+	this->load_folder_path = path;
+}
+
+//	TODO: I am no longer convinced that the initial load file is a good concept.
+//	However, we definitely have a use-case for the load-folder.
+
+string PackageCache::getInitLoadPath() {
+	return this->init_load_file;
+}
+
+void PackageCache::setInitLoadPath( const std::string path ) {
+	this->init_load_file = path;
+}
+
+

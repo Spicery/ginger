@@ -137,7 +137,7 @@ PackageCache * ProjectCache::cachePackage( const string & pkg ) {
 			//newc->printImports();
 			
 			FolderScan fscan( pkg_folder );
-			while ( fscan.nextFolderOrFile() ) {
+			while ( fscan.nextFolder() ) {
 				string entry = fscan.entryName();
 		
 				//	Check that -entry- matches *.auto
@@ -177,10 +177,10 @@ PackageCache * ProjectCache::cachePackage( const string & pkg ) {
 						//cout << "new path name 2 = " << v->getPathName() << endl;
 						//newc->putPathName( root, files.folderName() + "/" + fname );		
 					}	
-				} else if ( entry.compare( 0, LOAD_SIZE - 1, LOAD ) == 0 ) {
-					//	It doesn't match *.auto but it is a load file though.
+				} else if ( entry == "load" ) {
+					//	It doesn't match *.auto but it is a load folder though.
 					const string p( fscan.folderName() + "/" + entry );
-					newc->setLoadPath( p );
+					newc->setLoadFolder( p );
 				}
 			}	
 			

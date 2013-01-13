@@ -103,8 +103,7 @@ public:
 
 class GingerMain : public ToolMain {
 private:
-	void mainLoop() {
-	
+	void mainLoop() {	
 		MachineClass * vm = this->context.newMachine();
 		SIGINT_FLAG = &vm->sigint_flag;
 
@@ -115,38 +114,55 @@ private:
 		sigaction( SIGINT, &sigIntHandler, NULL );
 
 		Package * interactive_pkg = this->context.initInteractivePackage( vm );
-	 
-		#ifdef DBG_APPCONTEXT
-			clog << "RCEP ..." << endl;
-		#endif
+	 	RCEP rcep( interactive_pkg );
+
+	 	try {
+	 		this->executeLoadFileList( rcep );
+	 		this->executeFileArguments( rcep );
+	 	} catch ( Ginger::Mishap & e ) {
+			e.report();
+			cerr << endl << SYS_MSG_PREFIX << "Reset after runtime error ..." << endl;
+			vm->resetMachine();
+	 	} catch ( Ginger::CompileTimeError & e ) {
+			e.report();
+			cerr << endl << SYS_MSG_PREFIX << "Reset after compilation error ..." << endl;
+			vm->resetMachine();
+	 	}
+		
+		/**********************************************************************\
+		*	BLOCK1, replacement for BLOCK2, see comment below. This is the
+		* 	version I want to use.
+		\**********************************************************************/
 	
-		RCEP rcep( interactive_pkg );
-		
-		stringstream commstream;
-		
-		commstream << this->context.syntax();
-
-		#ifdef SIMPLIFY_NOT_IMPLEMENTED
-			commstream << " | " << SIMPLIFYGNX << " -suA";
-			{
-				list< string > & folders = vm->getAppContext().getProjectFolderList();
-				for ( 
-					list< string >::iterator it = folders.begin();
-					it != folders.end();
-					++it
-				) {
-					commstream << " -j" << *it;
-				}
-			}
-			commstream << " -p" << shellSafeName( interactive_pkg->getTitle() );
+		#ifndef BLOCK2
+		for (;;) {
+			try {
+				this->executeStdin( rcep );
+				break;
+			} catch ( Ginger::Mishap & e ) {
+				e.report();
+				cerr << endl << SYS_MSG_PREFIX << "Reset after runtime error ..." << endl;
+				vm->resetMachine();
+		 	} catch ( Ginger::CompileTimeError & e ) {
+				e.report();
+				cerr << endl << SYS_MSG_PREFIX << "Reset after compilation error ..." << endl;
+				vm->resetMachine();
+		 	}
+		}
 		#endif
-
-		string command( commstream.str() );
 		
+		/**********************************************************************\
+		*	The following code BLOCK2 is commented out until testing confirms
+		* 	the BLOCK1 code correctly replaces it. I had some strange 
+		*	compilation & runtime issues that I solved by trial and error
+		* 	Hopefully BLOCK1, which is perfectly elegant, solves this fully.
+		\**********************************************************************/
+
+		#ifdef BLOCK2
 		bool cont = true;
 		while ( cont ) {
 			try {
-				Popen p( commstream.str() );		
+				Popen p( this->context.syntax() );		
 				// ... open the file, with whatever, pipes or who-knows ...
 				// let's build a buffer from the FILE* descriptor ...
 				__gnu_cxx::stdio_filebuf<char> pipe_buf( p.file(), ios_base::in );
@@ -172,6 +188,7 @@ private:
 				vm->resetMachine();
 			}
 		}
+		#endif
 
 	}
 

@@ -57,41 +57,7 @@ private:
 		#endif
 	
 		RCEP rcep( interactive_pkg );
-		//while ( rcep.read_comp_exec_print( std::cin, std::cout ) ) {};
-		
-		#ifdef SIMPLIFY_NOT_IMPLEMENTED
-			stringstream commstream;
-			//	tail is 1-indexed!
-			commstream << SIMPLIFYGNX << " -suA";
-
-			{
-				list< string > & folders = vm->getAppContext().getProjectFolderList();
-				for ( 
-					list< string >::iterator it = folders.begin();
-					it != folders.end();
-					++it
-				) {
-					commstream << " -j" << *it;
-				}
-			}
-
-			commstream << " -p " << shellSafeName( interactive_pkg->getTitle() );
-
-			string command( commstream.str() );
-
-			FILE * gnxfp = popen( command.c_str(), "r" );
-			if ( gnxfp == NULL ) {
-				throw Ginger::Mishap( "Failed to translate input" );
-			}
-		
-			__gnu_cxx::stdio_filebuf<char> pipe_buf( gnxfp, ios_base::in );
-			istream stream_pipe_in( &pipe_buf );
-			while ( rcep.unsafe_read_comp_exec_print( stream_pipe_in, std::cout ) ) {}
-			
-			pclose( gnxfp );		
-		#else 
-			while ( rcep.unsafe_read_comp_exec_print( std::cin, std::cout ) ) {}
-		#endif
+		this->executeStdin( rcep );
 	}
 
 public:

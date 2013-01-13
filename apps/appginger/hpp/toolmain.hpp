@@ -19,6 +19,8 @@
 #ifndef TOOL_MAIN_HPP
 #define TOOL_MAIN_HPP
 
+#include "rcep.hpp"
+
 class ToolMain {
 protected:
 	const char * appname;
@@ -28,6 +30,16 @@ protected:
 	void integrityChecks();
 	std::string shellSafeName( const std::string & filename );
 	int printLicense( const char * arg ) const;
+
+protected:
+	void executeLoadFileList( RCEP & rcep );
+	void loadFileFromPackage( RCEP & rcep, Package * pkg, const std::string filename );
+	void executeFileArguments( RCEP & rcep );
+	void executeStdin( RCEP & rcep );
+	void executeFile( RCEP & rcep, const std::string filename );
+	void executeCommand( RCEP & rcep, const std::string command );
+	void runFrom( RCEP & rcep, Ginger::MnxReader & gnx_read );
+
 
 public:
 	bool parseArgs( int argc, char **argv, char **envp );

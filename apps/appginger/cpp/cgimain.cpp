@@ -55,57 +55,14 @@ class CgiMain : public ToolMain {
 public:
 	int run() {
 		this->context.initCgi();
-		
 		MachineClass * vm = this->context.newMachine();
 		Package * interactive_pkg = this->context.initInteractivePackage( vm );
 		RCEP rcep( interactive_pkg );
+
 		rcep.isPrinting() = false;		//	Turn off printing.
-		
-		vector< string > & args = this->context.arguments();
-		for ( vector< string >::iterator it = args.begin(); it != args.end(); ++it ) {
-			const string filename( *it );
-
-			stringstream commstream;
-			//	tail is 1-indexed!
-			commstream << this->context.syntax( filename ) << " < " ;
-			commstream << shellSafeName( filename );
-
-			#ifdef SIMPLIFY_NOT_IMPLEMENTED
-				commstream << " | " << SIMPLIFYGNX << " -suA";
-			
-				{
-					list< string > & folders = vm->getAppContext().getProjectFolderList();
-					for ( 
-						list< string >::iterator it = folders.begin();
-						it != folders.end();
-						++it
-					) {
-						commstream << " -j" << *it;
-					}
-				}
-				
-				commstream << " -p " << shellSafeName( interactive_pkg->getTitle() );
-			#endif
-			string command( commstream.str() );
-			#ifdef DBG_CGI_MAIN
-				std::cerr << "Command so far: " << command << std::endl;
-			#endif
-			FILE * gnxfp = popen( command.c_str(), "r" );
-			if ( gnxfp == NULL ) {
-				throw Ginger::Mishap( "Failed to translate input" );
-			}
-			// ... open the file, with whatever, pipes or who-knows ...
-			// let's build a buffer from the FILE* descriptor ...
-			__gnu_cxx::stdio_filebuf<char> pipe_buf( gnxfp, ios_base::in );
-			
-			// there we are, a regular istream is build upon the buffer.
-			istream stream_pipe_in( &pipe_buf );
-			
-			while ( rcep.unsafe_read_comp_exec_print( stream_pipe_in, std::cout ) ) {}
-
-			pclose( gnxfp );
-		}
-		
+		this->executeLoadFileList( rcep );
+		this->executeFileArguments( rcep );
+	    
 	    return EXIT_SUCCESS;
 	}
 

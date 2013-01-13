@@ -32,9 +32,11 @@
 #include <unistd.h>
 #include <getopt.h>
 #include <syslog.h>
+#include <sys/errno.h>
 
 #include "gngversion.hpp"
 #include "mnx.hpp"
+#include "command.hpp"
 
 #include "appcontext.hpp"
 #include "rcep.hpp"
@@ -313,4 +315,117 @@ bool ToolMain::parseArgs( int argc, char **argv, char **envp ) {
 	}
 	
 	return true;
+}
+
+void ToolMain::runFrom( RCEP & rcep, Ginger::MnxReader & gnx_read ) {
+    for (;;) {
+        shared< Ginger::Mnx > m = gnx_read.readMnx();
+        if ( not m ) break;
+        rcep.execGnx( m, cout );
+        rcep.printResults( cout, 0 );
+    }           
+}
+
+void ToolMain::executeCommand( RCEP & rcep, const string command ) {
+    //  cerr << "Command so far: " << command << endl;
+    FILE * gnxfp = popen( command.c_str(), "r" );
+    if ( gnxfp == NULL ) {
+        throw Ginger::Mishap( "Failed to translate input" );
+    }
+    // ... open the file, with whatever, pipes or who-knows ...
+    // let's build a buffer from the FILE* descriptor ...
+    __gnu_cxx::stdio_filebuf<char> pipe_buf( gnxfp, ios_base::in );
+    
+    // there we are, a regular istream is build upon the buffer.
+    istream stream_pipe_in( &pipe_buf );
+    
+    while ( rcep.unsafe_read_comp_exec_print( stream_pipe_in, std::cout ) ) {}
+
+    pclose( gnxfp );    
+}
+
+void ToolMain::executeFile( RCEP & rcep, const string filename ) {
+    stringstream commstream;
+    //  tail is 1-indexed!
+    commstream << this->context.syntax( filename ) << " < " << shellSafeName( filename );
+    this->executeCommand( rcep, commstream.str() );
+}
+
+void ToolMain::executeStdin( RCEP & rcep ) {
+    this->executeCommand( rcep, this->context.syntax() );
+}
+
+void ToolMain::executeFileArguments( RCEP & rcep ) {
+    vector< string > & args = this->context.arguments();
+    for ( vector< string >::iterator it = args.begin(); it != args.end(); ++it ) {
+        this->executeFile( rcep, *it );
+    }
+}
+
+void ToolMain::executeLoadFileList( RCEP & rcep ) {
+    list< string > & load_files = this->context.getLoadFileList();
+    for ( list< string >::iterator it = load_files.begin(); it != load_files.end(); ++it ) {
+        this->loadFileFromPackage( rcep, rcep.currentPackage(), *it );
+    }
+}
+
+
+void ToolMain::loadFileFromPackage( RCEP & rcep, Package * pkg, const std::string filename ) {
+    Ginger::Command cmd( FETCHGNX );
+    cmd.addArg( "-X" );
+    {
+        list< string > & folders = rcep.getMachine()->getAppContext().getProjectFolderList();
+        for ( 
+            list< string >::iterator it = folders.begin();
+            it != folders.end();
+            ++it
+        ) {
+            cmd.addArg( "-j" );
+            cmd.addArg( *it );
+        }
+    }
+
+    Ginger::MnxBuilder qb;
+    qb.start( "fetch.load.file" );
+    qb.put( "pkg.name", pkg->getTitle() );
+    qb.put( "load.file", filename );
+    qb.end();
+    shared< Ginger::Mnx > query( qb.build() );
+
+    #ifdef DBG_SCRIPT_MAIN
+        cerr << "scriptmain asking for loadfile, using fetchgnx -X" << endl;
+        cerr << "  [[";
+        query->render( cerr );
+        cerr << "]]" << endl;
+    #endif  
+
+    cmd.runWithInputAndOutput();
+    int fd = cmd.getInputFD();   
+    FILE * foutd = fdopen( cmd.getOutputFD(), "w" );
+    query->frender( foutd );
+    fflush( foutd );
+
+    stringstream prog;
+    for (;;) {
+        static char buffer[ 1024 ];
+        //  TODO: protect close with finally.
+        int n = read( fd, buffer, sizeof( buffer ) );
+        if ( n == 0 ) break;
+        if ( n == -1 ) {
+            if ( errno != EINTR ) {
+                perror( "Script main loading file" );
+                throw Ginger::Mishap( "Failed to read" );
+            }
+        } else if ( n > 0 ) {
+            prog.write( buffer, n );
+        }
+    }
+
+    //  TODO: protect close with finally.
+    fclose( foutd );
+
+    #ifdef DBG_SCRIPT_MAIN
+        cerr << "  [[" << prog.str() << "]]" << endl;
+    #endif
+    while ( rcep.unsafe_read_comp_exec_print( prog, std::cout ) ) {}
 }

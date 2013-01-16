@@ -1,0 +1,20 @@
+Ginger Project Folder
+=====================
+
+This folder is used to store a Ginger 'project'. Projects are collections
+of software that you and other people write. When the Ginger virtual machine
+starts up, it will be given a search-list of project folders in which to
+look for definitions.
+
+If one project depends on another, then you can arrange that the dependencies
+are automatically included on the search-path. This is done by creating a
+file 
+
+	linked_projects.txt
+
+at the top-level of the project directory. The lines are read one by one,
+ignoring any comment-lines starting with '#', and these folders are added
+to the project search-list.
+
+If you create a project using the ginger-admin command, a linked_projects.txt
+file is automatically created for you with some helpful comments inside.

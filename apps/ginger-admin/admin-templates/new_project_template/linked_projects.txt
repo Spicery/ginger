@@ -1,0 +1,33 @@
+################################################################################
+#
+#	(Edit this file as you see fit)
+#
+#	This file lists additional project folders that you want automatically
+#	added to the project search-path. You can use this to make available
+#	any libraries your code depends on - or simply to ensure that your
+#	favourite libraries are to hand.
+#
+#	Blank lines and lines that starts with a '#' symbol are ignored. Otherwise
+#	you should add the pathname of each project folder on its own line. You 
+#	may use environment variables and '~' to define paths.
+#
+#	Note that relative pathnames are treated as relative to the current 
+#	project, i.e. the folder enclosing this file, and not your working 
+#	directory. 
+#
+################################################################################
+
+#	You don't need to add the standard library to the search path. But 
+#	if you did you would add a line like this (but without the leading #).
+#	There's no need to include a trailing slash, although it does no harm.
+#/usr/local/share/ginger/standard_library
+
+#	You can use environment variables. e.g.
+#${GINGERLIBS}/my_useful_project
+
+#	And you can use relative pathnames, relative to this project folder.
+#../my_sister_project
+
+#	Or you can use '~' to refer to your home directory or the home directory
+#	of other users.
+#~/Documents/GingerProjects

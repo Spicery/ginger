@@ -25,6 +25,8 @@ distclean: clean
 	rm -f apps/file2gnx/Makefile
 	rm -f apps/file2gnx/cpp/Makefile
 	rm -f apps/file2gnx/unittest/Makefile
+	rm -f apps/ginger-admin/Makefile
+	rm -f apps/ginger-admin/cpp/Makefile
 	rm -f apps/libgng/Makefile
 	rm -f apps/libgng/cpp/Makefile
 	rm -f apps/libgng/unittest/Makefile
@@ -71,7 +73,8 @@ INSTALL_DOC=@docdir@
 USEREXECUTABLES=\
 	apps/appginger/cpp/ginger-cgi \
 	apps/appginger/cpp/ginger-script \
-	apps/appginger/cpp/ginger
+	apps/appginger/cpp/ginger \
+	apps/ginger-admin/cpp/ginger-admin
 
 LIBEXECUTABLES=\
 	apps/appginger/cpp/appginger \
@@ -98,6 +101,7 @@ install-as-is:
 	# Installing support files $(INSTALL_LIB)
 	mkdir -p $(INSTALL_LIB)
 	mkdir -p $(INSTALL_TOOL)
+	cp -r apps/ginger-admin/admin-templates $(INSTALL_LIB)
 	cp -r projects/standard_library $(INSTALL_LIB) 
 	#echo Installing docs into $(INSTALL_DOC)
 	mkdir -p $(INSTALL_LIB)

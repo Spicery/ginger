@@ -1,0 +1,20 @@
+File2GNX
+========
+
+It should utilise a configurable file mapping. So where should that live? See..
+
+http://standards.freedesktop.org/basedir-spec/basedir-spec-latest.html
+
+Until version 0.8.1, we merely want to be compatible with that spec. This
+implies that we should reference
+
+	/etc/xdg/ginger/parser-mapping.mnx
+
+The contents should be a lookup table with the format.
+
+	<parser.mapping root.dir="/usr/local/bin">
+		<parser ext=".csv" exe="common2gnx"/>
+		<parser ext=".cst" exe="cstyle2gnx"/>
+	</parser.mapping>
+
+Relative path names will be resolved relative to the root.dir attribute.

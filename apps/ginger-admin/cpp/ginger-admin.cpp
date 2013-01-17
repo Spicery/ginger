@@ -33,6 +33,7 @@
 #include <sys/stat.h>
 
 #include <readline/readline.h>
+#include <readline/history.h>
 
 #define PACKAGE_NAME "ginger-admin"
 

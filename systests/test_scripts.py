@@ -4,8 +4,6 @@ import glob
 import commands
 import nose.tools
 
-here = os.path.dirname( os.path.realpath( __file__ ) )
-
 def runtest( in_file_name ):
     out_file_name = re.sub( r'\.in.sh$', '.out.txt', in_file_name )
     res = commands.getoutput( "{0}".format( in_file_name ) )

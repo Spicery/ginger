@@ -7,6 +7,7 @@ all clean:
 	$(MAKE) -C common2gnx $@
 	$(MAKE) -C fetchgnx $@
 	$(MAKE) -C file2gnx $@
+	$(MAKE) -C ginger-admin $@
 	$(MAKE) -C gson2gnx $@
 	$(MAKE) -C automatic/metainfo $@
 	$(MAKE) -C libmetainfo $@

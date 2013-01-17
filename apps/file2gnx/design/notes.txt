@@ -10,11 +10,12 @@ implies that we should reference
 
 	/etc/xdg/ginger/parser-mapping.mnx
 
+(N.B. This means adding another location to the install/uninstall functions.)
+
 The contents should be a lookup table with the format.
 
-	<parser.mapping root.dir="/usr/local/bin">
-		<parser ext=".csv" exe="common2gnx"/>
-		<parser ext=".cst" exe="cstyle2gnx"/>
+	<parser.mapping>
+		<parser ext="cmn" exe="/usr/local/libexec/ginger/common2gnx"/>
+		<parser ext="cst" exe="/usr/local/libexec/ginger/cstyle2gnx"/>
+		<parser ext="lsp" exe="/usr/local/libexec/ginger/lisp2gnx"/>
 	</parser.mapping>
-
-Relative path names will be resolved relative to the root.dir attribute.

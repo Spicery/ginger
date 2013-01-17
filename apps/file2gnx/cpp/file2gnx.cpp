@@ -18,11 +18,14 @@
 
 #include <iostream>
 #include <cstdlib>
+#include <fstream>
 
 #include <syslog.h>
 #include <unistd.h>
 #include <stddef.h>
 
+#include "mnx.hpp"
+#include "sax.hpp"
 #include "mishap.hpp"
 
 using namespace std;
@@ -36,6 +39,10 @@ using namespace Ginger;
 #define LISP2GNX 		( INSTALL_TOOL "/lisp2gnx" )
 #define GNX2GNX     	( "/bin/cat" )
 
+//	This will need to be significantly expanded when we adopt XDG
+//	standards properly.
+#define FILE2GNX_CONFIG 	"/etc/xdg/ginger/parser-mapping.mnx" 
+
 //
 //	Insecure. We need to do this more neatly. It would be best if common2gnx
 //	and lisp2gnx could handle being passed a filename as an argument. This
@@ -45,6 +52,73 @@ void run( string command, string pathname ) {
 	const char * cmd = command.c_str();
 	execl( cmd, cmd, pathname.c_str(), NULL );
 }
+
+#define PARSER "parser"
+#define PARSER_EXT "ext"
+#define PARSER_EXE "exe"
+
+class ExtnLookup : public Ginger::SaxHandler {
+private:
+	string pathname;
+	string extn;
+	bool found;
+	string parser;
+
+public:
+	ExtnLookup( const string & pathname, const string & extn ) :
+		pathname( pathname ),
+		extn( extn ),
+		found( false )
+	{}
+
+public:
+	typedef map< string, string > Dict;
+	
+	void startTag( string & name, Dict & attrs ) {
+		if ( name != PARSER ) return;
+		Dict::iterator it = attrs.find( PARSER_EXT );
+		Dict::iterator jt = attrs.find( PARSER_EXE );
+		if ( it != attrs.end() && extn == it->second && jt != attrs.end() ) {
+			this->found = true;
+			this->parser = jt->second;
+		} 
+	}
+
+	void endTag( std::string & name ) {
+	}
+
+public:
+
+	string getParser() {
+		return this->parser;
+	}
+
+	bool lookup( const char * mnx_file_name ) {
+		ifstream stream( mnx_file_name );
+		if ( stream.good() ) {
+			Ginger::SaxParser saxp( stream, *this );
+			saxp.readElement();
+			return this->found;
+		} else {
+			return false;
+		}
+	}
+
+	const char * defaultCommand() {
+		if ( extn == "cmn" ) {
+			return COMMON2GNX;
+		} else if ( extn == "cst" ) {
+			return CSTYLE2GNX;
+		} else if ( extn == "lsp" ) {
+			return LISP2GNX;
+		} else if ( extn == "gnx" ) {
+			return GNX2GNX;
+		} else {
+			throw Mishap( "Filename has unrecognised extension, giving up" ).culprit( "Filename", pathname ).culprit( "Extension", extn );
+		}	
+	}
+
+};
 
 int main( int argc, char ** argv ) {
 	openlog( APP_TITLE, 0, LOG_FACILITY );
@@ -56,7 +130,6 @@ int main( int argc, char ** argv ) {
 	}
 	
 	try {
-		
 		const string pathname( argv[ 1 ] );
 		
 		const size_t n = pathname.rfind( '.' );
@@ -67,19 +140,14 @@ int main( int argc, char ** argv ) {
 		//cout << "dot yes" << endl;
 		string extn( pathname.substr( n + 1, pathname.size() ) );
 		//cout << "extension is " << extn << endl;
+
+		ExtnLookup elookup( pathname, extn );
+		const char * cmdpath = (
+			elookup.lookup( FILE2GNX_CONFIG ) ?
+			elookup.getParser().c_str() :
+			elookup.defaultCommand()
+		);
 		
-		const char * cmdpath = NULL;
-		if ( extn == "cmn" ) {
-			cmdpath = COMMON2GNX;
-		} else if ( extn == "cst" ) {
-			cmdpath = CSTYLE2GNX;
-		} else if ( extn == "lsp" ) {
-			cmdpath = LISP2GNX;
-		} else if ( extn == "gnx" ) {
-			cmdpath = GNX2GNX;
-		} else {
-			throw Mishap( "Filename has unrecognised extension, giving up" ).culprit( "Filename", pathname ).culprit( "Extension", extn );
-		}
 		syslog( LOG_INFO, "Converting %s with extension %s using %s", pathname.c_str(), extn.c_str(), cmdpath );
 		run( cmdpath, pathname );
 		

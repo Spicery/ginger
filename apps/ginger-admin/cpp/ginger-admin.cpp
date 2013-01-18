@@ -98,6 +98,7 @@ public:
 static void printUsage() {
     cout << "Usage : ginger-admin [options]" << endl;
     cout << "OPTION                SUMMARY" << endl;
+    cout << "--add-import          adds an import declaration to a project" << endl;
     cout << "--add-package         adds a package folder to a project" << endl;
     cout << "--help                print out more detailed help" << endl;
     cout << "--interactive         menu-based interaction for this tool (recommended)" << endl;
@@ -115,8 +116,8 @@ static struct option long_options[] =
         { "help",           optional_argument,      0, 'H' },
         { "interactive",    no_argument,            0, 'I' },
         { "license",        optional_argument,      0, 'L' },
-        { "new-import",     required_argument,      0, 'M' },
-        { "new-package",    required_argument,      0, 'P' },
+        { "add-import",     required_argument,      0, 'M' },
+        { "add-package",    required_argument,      0, 'P' },
         { "new-project",    required_argument,      0, 'N' },
         { "package",        required_argument,      0, 'p' },
         { "version",        no_argument,            0, 'V' },
@@ -322,7 +323,7 @@ public:
         this->pkg_name = optarg;
     }
 
-    const char * option() { return "add-import"; }
+    const char * option() { return "add-package"; }
 
     int run() {
         cerr << "TODO: " << endl; 

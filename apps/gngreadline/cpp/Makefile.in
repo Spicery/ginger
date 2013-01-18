@@ -1,0 +1,33 @@
+prefix=@prefix@
+exec_prefix=@prefix@
+datarootdir=@datarootdir@
+PACKAGE_TARNAME=@PACKAGE_TARNAME@
+INSTALL_BIN=@bindir@
+INSTALL_TOOL=@libexecdir@/@PACKAGE_TARNAME@
+INSTALL_LIB=@datarootdir@/@PACKAGE_TARNAME@
+INSTALL_DOC=@docdir@
+VERSION=@PACKAGE_VERSION@
+
+CC=@CXX@
+
+INSTALLDIRS=-DINSTALL_BIN='"$(INSTALL_BIN)"' -DINSTALL_LIB='"$(INSTALL_LIB)"' -DINSTALL_TOOL='"$(INSTALL_TOOL)"'
+
+# -Weffc++
+CXXFLAGS=-DVERSION='"$(VERSION)"' $(INSTALLDIRS) -g -I../hpp -I../../libgng/hpp -Wall -Wnon-virtual-dtor
+CFLAGS=-Wmissing-prototypes 
+
+OBJS=gngreadline.o
+
+all: gngreadline
+
+# $@ is make shorthand for the target.
+# $@ is make shorthand for the dependencies
+gngreadline: $(OBJS)
+	@CXX@ $(CXXFLAGS) -o $@ $(OBJS) ../../libgng/cpp/libgng.a -lreadline
+
+clean:
+	rm -f *.o
+	rm -f gngreadline
+
+#	Nothing needs doing.
+check:

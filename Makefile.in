@@ -27,6 +27,8 @@ distclean: clean
 	rm -f apps/file2gnx/unittest/Makefile
 	rm -f apps/ginger-admin/Makefile
 	rm -f apps/ginger-admin/cpp/Makefile
+	rm -f apps/gngreadline/Makefile
+	rm -f apps/gngreadline/cpp/Makefile
 	rm -f apps/libgng/Makefile
 	rm -f apps/libgng/cpp/Makefile
 	rm -f apps/libgng/unittest/Makefile
@@ -73,17 +75,17 @@ INSTALL_DOC=@docdir@
 USEREXECUTABLES=\
 	apps/appginger/cpp/ginger-cgi \
 	apps/appginger/cpp/ginger-script \
-	apps/appginger/cpp/ginger \
-	apps/ginger-admin/cpp/ginger-admin
+	apps/appginger/cpp/ginger 
 
 LIBEXECUTABLES=\
 	apps/appginger/cpp/appginger \
-	apps/appginger/cpp/ginger-cli \
-	apps/appginger/cpp/ginger-info \
-	apps/fetchgnx/cpp/fetchgnx \
-	apps/file2gnx/cpp/file2gnx \
 	apps/common2gnx/cpp/common2gnx \
 	apps/common2gnx/cpp/cstyle2gnx \
+	apps/fetchgnx/cpp/fetchgnx \
+	apps/file2gnx/cpp/file2gnx \
+	apps/appginger/cpp/ginger-cli \
+	apps/appginger/cpp/ginger-info \
+	apps/gngreadline/cpp/gngreadline \
 	apps/lisp2gnx/lsp/lisp2gnx \
 	apps/shebang/cpp/shebang \
 	apps/simplifygnx/cpp/simplifygnx \

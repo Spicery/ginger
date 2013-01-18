@@ -1,0 +1,12 @@
+Notes on the gngreadline Tool
+=============================
+
+Rather than try to integrate the GNU readline functionality directly into 
+the Ginger interpreter, it make more sense to provide a separate readline
+tool.
+
+The aim is to provide a configurable tool that provides GNU readline
+functionality and supports Ginger commands such as
+
+	! UNIX_COMMAND
+	help TOPIC_TAG*

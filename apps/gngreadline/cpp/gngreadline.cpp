@@ -18,6 +18,7 @@
 
 #include <iostream>
 #include <string>
+#include <map>
 #include <fstream>
 #include <sstream>
 #include <tr1/memory>
@@ -73,15 +74,21 @@ static char * getline( const char * prompt, bool reask_if_empty = true ) {
 
 
 class Interaction {
+private:
+    string prompt;
+
 public:
     void interact() {
         for (;;) {
-            const char * s = getline( "Question? " );
+            const char * s = getline( prompt.c_str() );
             if ( not s ) break;
             
             cout << s << endl;
         }
     }
+
+public:
+    Interaction( const string prompt ) : prompt( prompt ) {}
 };
 
 static void printUsage() {
@@ -107,13 +114,32 @@ static void printUsage() {
 extern char * optarg;
 static struct option long_options[] =
     {
-        { "help",           optional_argument,      0, 'H' },
-        { "license",        optional_argument,      0, 'L' },
-        { "version",        no_argument,            0, 'V' },
+        { "help",           optional_argument,      0,  'H' },
+        { "license",        optional_argument,      0,  'L' },
+        { "prompt",         required_argument,      0,  'p' },
+        { "version",        no_argument,            0,  'V' },
+        { "xterm-color-index", required_argument,   0,  'x' },
         { 0, 0, 0, 0 }
     };
 
 class Task {
+private:
+    std::map< std::string, std::string > attributes;
+
+public:
+    void put( const string key, const string value ) {
+        this->attributes[ key ] = value;
+    }
+
+    const std::string get( const string key, const string def ) {
+        std::map< std::string, std::string >::iterator it = this->attributes.find( key );
+        if ( it == this->attributes.end() ) {
+            return def;
+        } else {
+            return it->second;
+        }
+    }
+
 public:
     virtual bool acceptsMoreArgs() { return true; }
 
@@ -179,12 +205,38 @@ public:
     virtual ~UsageTask() {}
 };
 
+static const char * PROMPT = "prompt";
+static const char * DEFAULT_PROMPT = ">>> ";
+static const char * COLOR_INDEX = "color.index";
+static const char * DEFAULT_COLOR_INDEX = "202";
+
 class InteractiveTask : public Task {
 public:
     const char * option() { return "interactive"; }
 
+private:
+    string getDefaultPromptString() {
+        return this->get( PROMPT, DEFAULT_PROMPT );
+    }
+
+    string getPromptString() {
+        if ( string( getenv( "TERM" ) ) != "xterm-256color" ) {
+            return this->getDefaultPromptString();
+        } else {
+            //  See http://frexx.de/xterm-256-notes/
+            string color_index( this->get( COLOR_INDEX, DEFAULT_COLOR_INDEX ) );
+            string p( "\033[38;5;" );
+            p += color_index;
+            p += "m";
+            p += this->getDefaultPromptString();
+            p += "\033[0m";
+            return p;
+        }
+    }
+
+public:
     int run() {
-        Interaction interaction;
+        Interaction interaction( this->getPromptString() );
         interaction.interact();
         return EXIT_SUCCESS; 
     }
@@ -268,7 +320,7 @@ public:
         TaskPtr mode( new InteractiveTask() );
         while ( mode->acceptsMoreArgs() ) {
             int option_index = 0;
-            int c = getopt_long( argc, argv, "H::L::V", long_options, &option_index );
+            int c = getopt_long( argc, argv, "H::L::p:Vx:", long_options, &option_index );
             //cerr << "Got c = " << c << endl;
             if ( c == -1 ) break;
             switch ( c ) {
@@ -283,9 +335,19 @@ public:
                     mode->setOptArg( optarg );
                     break;
                 }
+                case 'p': {
+                    //  --prompt PROMPT
+                    mode->put( PROMPT, optarg );
+                    break;
+                }
                 case 'V': {
                     //  --version
                     mode = TaskPtr( new VersionTask() );
+                    break;
+                }
+                case 'x': {
+                    //  --xterm-color
+                    mode->put( COLOR_INDEX, optarg );
                     break;
                 }
                 case '?': {

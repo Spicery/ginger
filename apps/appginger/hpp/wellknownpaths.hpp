@@ -20,15 +20,16 @@
 #define GNG_WELL_KNOWN_PATHS_HPP
 
 
-#define LICENSE_FILE	( INSTALL_LIB "/COPYING" )
+#define LICENSE_FILE	INSTALL_LIB "/COPYING"
 
-#define FETCHGNX        ( INSTALL_TOOL "/fetchgnx" )
-#define SIMPLIFYGNX		( INSTALL_TOOL "/simplifygnx" )
+#define FETCHGNX        INSTALL_TOOL "/fetchgnx"
+#define SIMPLIFYGNX		INSTALL_TOOL "/simplifygnx"
 
-#define COMMON2GNX		( INSTALL_TOOL "/common2gnx" )
-#define LISP2GNX		( INSTALL_TOOL "/lisp2gnx" )
-#define GSON2GNX		( INSTALL_TOOL "/gson2gnx" )
-#define CSTYLE2GNX      ( INSTALL_TOOL "/cstyle2gnx" )
+#define GNGREADLINE     INSTALL_TOOL "/gngreadline"
+#define COMMON2GNX      INSTALL_TOOL "/common2gnx"
+#define LISP2GNX		INSTALL_TOOL "/lisp2gnx"
+#define GSON2GNX		INSTALL_TOOL "/gson2gnx"
+#define CSTYLE2GNX      INSTALL_TOOL "/cstyle2gnx"
 #define GNX2GNX         "/bin/cat" 
 
 #define TAIL			"/usr/bin/tail"

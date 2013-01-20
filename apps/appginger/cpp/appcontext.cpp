@@ -91,13 +91,13 @@ const char* AppContext::cgiValue( const char * fieldname ) {
 
 const char * AppContext::syntax() { 
 	if ( this->initial_syntax == "gnx" ) {
-		return GNX2GNX;
+		return GNGREADLINE " | " GNX2GNX;
 	} else if ( this->initial_syntax == "" || this->initial_syntax == "common" ) {
-		return COMMON2GNX;
+		return GNGREADLINE " | " COMMON2GNX;
 	} else if ( this->initial_syntax == "lisp" ) {
-		return LISP2GNX;
+		return GNGREADLINE " | " LISP2GNX;
 	} else if ( ( this->initial_syntax == "cstyle" ) || ( this->initial_syntax == "javascript" ) ) {
-		return CSTYLE2GNX;
+		return GNGREADLINE " | " CSTYLE2GNX;
 	} else {
 		throw Ginger::Mishap( "Unrecognised language" ).culprit( "Language", this->initial_syntax );
 	}

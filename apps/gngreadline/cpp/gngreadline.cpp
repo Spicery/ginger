@@ -32,6 +32,8 @@
 #include <stddef.h>
 #include <stdlib.h>
 #include <sys/stat.h>
+#include <sys/types.h>
+#include <sys/wait.h>
 
 #include <readline/readline.h>
 #include <readline/history.h>
@@ -40,8 +42,8 @@
 
 using namespace std;
 
-
-/* A static variable for holding the line. */
+/*
+// A static variable for holding the line.
 static char *line_read = (char *)NULL;
 
 //  Read a string, and return a pointer to it. Returns NULL on EOF.
@@ -70,9 +72,6 @@ static char * getline( const char * prompt, bool reask_if_empty = true ) {
     }
 }
 
-
-
-
 class Interaction {
 private:
     string prompt;
@@ -100,6 +99,8 @@ static void printUsage() {
     cout << endl;
 }
 
+*/
+
 /*
     This is the structure of struct option, which does not seem to be
     especially well documented. Included for handy reference.
@@ -111,6 +112,7 @@ static void printUsage() {
                             //  typically short option code
 */
 
+/*
 extern char * optarg;
 static struct option long_options[] =
     {
@@ -366,8 +368,36 @@ public:
     }
 
 };
+*/
 
 int main( int argc, char ** argv ) {
-    GngReadLine gngreadline;
-    return gngreadline.main( argc, argv );
+    //std::cerr<< "GNGREADLINE" << std::endl;
+    std::string line;
+    while ( !getline( std::cin, line ).eof() ) {
+        if ( !line.empty() && line[0] == '!' ) {
+            pid_t pid = fork();
+            if ( pid == 0 ) {
+                //  Ensure that stdout goes to the terminal.
+                if ( dup2( STDERR_FILENO, STDOUT_FILENO ) < 0 ) {
+                    perror( "gngreadline (dup failed)" );
+                    exit( EXIT_FAILURE );
+                }
+                //cerr << "Forking! (child)" << endl;
+                if ( line.size() == 1 ) {
+                    execl( "/bin/bash", "/bin/bash", "-c", "/bin/bash -i", (char *)0 );
+                    perror( "gngreadline (execl failed 1)" );
+                } else {
+                    execl( "/bin/bash", "/bin/bash", "-c", line.c_str() + 1, (char *)0 );
+                    perror( "gngreadline (execl failed 2)" );
+                }
+                exit( EXIT_FAILURE );
+            } else {
+                int status;
+                wait( &status );
+            }
+        } else {
+            std::cout << line << std::endl;
+        }
+    }
+    //std::cerr << "End of file" << endl;
 }

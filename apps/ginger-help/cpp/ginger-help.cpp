@@ -49,12 +49,18 @@ const char * open_exe =
 ;
 
 int main( int argc, char ** argv ) {
-    if ( argc != 2 ) {
+    string topic;
+    if ( argc == 2 ) {
+        topic = argv[ 1 ];
+    } else if ( argc == 1 ) {
+        //  Default is fine.
+        topic = "index";
+    } else {
         cerr << "Usage: ginger-help <topic>" << endl;
         return EXIT_FAILURE;
     }
     string filename( INSTALL_LIB "/html/" );
-    filename += argv[ 1 ];
+    filename += topic;
     filename += ".html";
     if ( fork() == 0 ) {
         execl( open_exe, open_exe, filename.c_str(), (char *)0 );

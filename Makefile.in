@@ -27,6 +27,8 @@ distclean: clean
 	rm -f apps/file2gnx/unittest/Makefile
 	rm -f apps/ginger-admin/Makefile
 	rm -f apps/ginger-admin/cpp/Makefile
+	rm -f apps/ginger-help/Makefile
+	rm -f apps/ginger-help/cpp/Makefile
 	rm -f apps/gngreadline/Makefile
 	rm -f apps/gngreadline/cpp/Makefile
 	rm -f apps/libgng/Makefile
@@ -84,6 +86,8 @@ LIBEXECUTABLES=\
 	apps/fetchgnx/cpp/fetchgnx \
 	apps/file2gnx/cpp/file2gnx \
 	apps/appginger/cpp/ginger-cli \
+	apps/appginger/cpp/ginger-admin \
+	apps/appginger/cpp/ginger-help \
 	apps/appginger/cpp/ginger-info \
 	apps/gngreadline/cpp/gngreadline \
 	apps/lisp2gnx/lsp/lisp2gnx \

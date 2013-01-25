@@ -370,6 +370,14 @@ public:
 };
 */
 
+
+bool startsWith( const string& haystack, const string& needle ) {
+    return (
+        needle.length() <= haystack.length() && 
+        equal( needle.begin(), needle.end(), haystack.begin() )
+    );
+}
+
 int main( int argc, char ** argv ) {
     //std::cerr<< "GNGREADLINE" << std::endl;
     std::string line;
@@ -395,6 +403,16 @@ int main( int argc, char ** argv ) {
                 int status;
                 wait( &status );
             }
+        } else if ( line == "help" ) {
+            //  TODO: OPEN default web browser on the starting page.
+            #ifdef __APPLE__
+                system( "open file:" INSTALL_LIB "/help/help.html" );
+            #else
+                system( "xdg-open file:" INSTALL_LIB "/help/help.html" );
+            #endif
+        } else if ( startsWith( line, "help " ) ) {
+            //  TODO: Open default web browser on the page with best matches to tags.
+            cerr << "To be done ..." << endl;
         } else {
             std::cout << line << std::endl;
         }

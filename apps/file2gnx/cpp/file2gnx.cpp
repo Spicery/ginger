@@ -23,10 +23,15 @@
 #include <syslog.h>
 #include <unistd.h>
 #include <stddef.h>
+#include <getopt.h>
 
+#include "config.h"
 #include "mnx.hpp"
 #include "sax.hpp"
 #include "mishap.hpp"
+
+#define LICENSE_FILE	INSTALL_LIB "/COPYING"
+
 
 using namespace std;
 using namespace Ginger;
@@ -48,11 +53,6 @@ using namespace Ginger;
 //	and lisp2gnx could handle being passed a filename as an argument. This
 //	would be both more secure and efficient.
 //
-void run( string command, string pathname ) {
-	const char * cmd = command.c_str();
-	execl( cmd, cmd, pathname.c_str(), NULL );
-}
-
 #define PARSER "parser"
 #define PARSER_EXT "ext"
 #define PARSER_EXE "exe"
@@ -120,26 +120,209 @@ public:
 
 };
 
-int main( int argc, char ** argv ) {
-	openlog( APP_TITLE, 0, LOG_FACILITY );
-	setlogmask( LOG_UPTO( LOG_INFO ) );
+void printGPL( const char * start, const char * end ) {
+    bool printing = false;
+    ifstream license( LICENSE_FILE );
+    std::string line;
+    while ( getline( license, line ) )  {
+        if ( !printing && ( start == NULL || line.find( start ) != string::npos ) ) {
+            printing = true;
+        } else if ( printing && end != NULL && line.find( end ) != string::npos ) {
+            printing = false;
+        }
+        if ( printing ) {
+            std::cout << line << std::endl;
+        }
+    }
+}
 
-	if ( argc != 2 ) {
-		cerr << "Usage: " << APP_TITLE << " <pathname>" << endl;
+static void printUsage() {
+	cout << "Usage :  " << APP_TITLE << " [OPTIONS] [FILE]" << endl << endl;
+	cout << "OPTION                SUMMARY" << endl;
+	cout << "-g, --grammar=LANG    select front-end syntax" << endl;
+	cout << "-H, --help            print out this help info (see --help=help)" << endl;
+	cout << "-i, --stdin           compile from stdin" << endl;
+	cout << "-L, --license         print out license information and exit" << endl;
+    cout << "-V, --version         print out version information and exit" << endl;
+	cout << endl;
+}	
+
+static void printHelpOptions() {
+	cout << "--help=help           this short help" << endl;
+	cout << "--help=licence        help on displaying license information" << endl;
+}
+
+static void printHelpLicense() {
+	cout << "Displays key sections of the GNU Public License." << endl;
+	cout << "--license=warranty    Shows warranty." << endl;
+	cout << "--license=conditions  Shows terms and conditions." << endl;
+}
+
+int printLicense( const char * arg ) {
+	if ( arg == NULL || std::string( arg ) == std::string( "all" ) ) {
+		printGPL( NULL, NULL );
+	} else if ( std::string( arg ) == std::string( "warranty" ) ) {
+		printGPL( "Disclaimer of Warranty.", "Limitation of Liability." );                 
+	} else if ( std::string( arg ) == std::string( "conditions" ) ) {
+		printGPL( "TERMS AND CONDITIONS", "END OF TERMS AND CONDITIONS" );
+	} else {
+		std::cerr << "Unknown license option: " << arg << std::endl;
 		return EXIT_FAILURE;
 	}
-	
-	try {
-		const string pathname( argv[ 1 ] );
+	return EXIT_SUCCESS;
+}
+
+
+/*	USAGE:
+	file2gnx FILE
+	file2gnx < FILE
+	file2gnx -g grammar < FILE
+	file2gnx -i < FILE 
+	file2gnx -g GRAMMAR FILE
+	file2gnx -i -g GRAMMAR < FILE
+*/
+
+
+/*
+	This is the structure of struct option, which does not seem to be
+	especially well documented. Included for handy reference.
+	struct option {
+		const char *name;   // option name
+		int has_arg;        // 0 = no arg, 1 = mandatory arg, 2 = optional arg
+		int *flag;          // variable to return result or NULL
+		int val;            // code to return (when flag is null)
+							//  typically short option code
+*/
+
+extern char * optarg;
+static struct option long_options[] =
+    {
+        { "help",           optional_argument,      0, 'H' },
+        { "grammar",		required_argument,		0, 'g' },
+        { "license",        optional_argument,      0, 'L' },
+        { "stdin",			no_argument,			0, 'i' },
+        { "version",        no_argument,            0, 'V' },
+        { 0, 0, 0, 0 }
+    };
+
+class Main {
+private:
+	bool use_grammar;
+	bool use_stdin;
+	string grammar;
+   	vector< string > files;
+	    
+public:
+
+	Main() :
+		use_grammar( false ),
+		use_stdin( false )
+	{}
+
+	bool parse( int argc, char ** argv ) {
+		openlog( APP_TITLE, 0, LOG_FACILITY );
+		setlogmask( LOG_UPTO( LOG_INFO ) );
+
+		for(;;) {
+	        int option_index = 0;
+	        int c = getopt_long( argc, argv, "g:H::iL::V", long_options, &option_index );
+	        //cerr << "Got c = " << c << endl;
+	        if ( c == -1 ) break;
+	        switch ( c ) {
+	            case 'g': {
+	            	this->use_grammar = true;
+	            	this->grammar = optarg;
+	            	break;
+	            }
+	        	case 'H': {
+	                if ( optarg == NULL ) {
+	                	printUsage();
+	                } else if ( std::string( optarg ) == "help" ) {
+	                	printHelpOptions();
+	                } else if ( std::string( optarg ) == "license" ) {
+	                	printHelpLicense();
+	                } else {
+	                    printf( "Unknown help topic %s\n", optarg );
+	                }
+	                return false;
+	          	}
+	            case 'i': {
+	            	this->use_stdin = true;
+	            	break;
+	            }
+	            case 'L': {
+	            	printLicense( optarg );
+	            	return false;
+	            }
+				case 'V': {
+	                cout << APP_TITLE << ": version " << PACKAGE_VERSION << " (" << __DATE__ << " " << __TIME__ << ")" << endl;
+	            	return false;
+	            }
+	            default: {
+	            	cerr << "Unrecognised option: " << static_cast< long >( c ) << endl;
+	            	exit( EXIT_FAILURE );
+	            }
+
+	       	}
+	   	}
+
+
+	    //	Aggregate the remaining arguments, which are effectively filenames (paths).
+		if ( optind < argc ) {
+			 while ( optind < argc ) {
+			   	this->files.push_back( argv[ optind++ ] );
+			 }
+		}
+
+		//	Now rationalise the options.
+		{
+			int nfiles = files.size();
+			if ( nfiles == 0 ) {
+				this->use_stdin = true;
+				this->use_grammar = true;
+			} else if ( nfiles > 1 ) {
+				printUsage();
+				exit( EXIT_FAILURE );
+			}
+		}
+
+		return true;
+	}
+
+	void run( string command, string pathname ) {
+		const char * cmd = command.c_str();
+		execl( cmd, cmd, pathname.c_str(), (char)0 );
+	}
+
+	void runStdin( string command ) {
+		const char * cmd = command.c_str();
+		execl( cmd, cmd, (char)0 );	
+	}
+
+	void useStdin() {
+		ExtnLookup elookup( "<standard input>", this->grammar );
+		const char * cmdpath = (
+			elookup.lookup( FILE2GNX_CONFIG ) ?
+			elookup.getParser().c_str() :
+			elookup.defaultCommand()
+		);
+		runStdin( cmdpath );
+	}
+
+	void useFile() {
+		const string & pathname( this->files[ 0 ] );
 		
-		const size_t n = pathname.rfind( '.' );
-		if ( n == string::npos ) {
-			throw Mishap( "Filename lacks extension, giving up" ).culprit( "Filename", pathname );
-		} 
-			
-		//cout << "dot yes" << endl;
-		string extn( pathname.substr( n + 1, pathname.size() ) );
-		//cout << "extension is " << extn << endl;
+		string extn;
+		if ( this->use_grammar ) {
+			extn = this->grammar;
+		} else {
+			//	Use extension.
+			const size_t n = pathname.rfind( '.' );
+			if ( n == string::npos ) {
+				throw Mishap( "Filename lacks extension, giving up" ).culprit( "Filename", pathname );
+			} 
+			extn = pathname.substr( n + 1, pathname.size() );
+		}
 
 		ExtnLookup elookup( pathname, extn );
 		const char * cmdpath = (
@@ -150,7 +333,24 @@ int main( int argc, char ** argv ) {
 		
 		syslog( LOG_INFO, "Converting %s with extension %s using %s", pathname.c_str(), extn.c_str(), cmdpath );
 		run( cmdpath, pathname );
-		
+	}
+
+	void main() {
+		if ( this->use_stdin ) {
+			this->useStdin();
+		} else {
+			this->useFile();
+		}		
+	}
+
+};
+
+int main( int argc, char ** argv ) {
+	try {
+		Main main;
+		if ( main.parse( argc, argv ) ) {
+			main.main();
+		}
 		return EXIT_SUCCESS;
 	} catch ( Ginger::Mishap & m ) {
 		m.culprit( "Detected by", APP_TITLE );

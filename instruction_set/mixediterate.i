@@ -1,13 +1,23 @@
 /*****************************************************************************\
-Instruction TBD
+Definition
+	MIXEDITERATE ( i:Small, m:Mixed ) -> ( x, i' )
 
 Summary
+	The basis for mixed record/vector iteration. It is a portmanteau 
+	iterator instruction that is fused with a return.
 	
 Unchecked Precondition
+	* There are two items on the stack: i & m
+	* i: Small
+	* m: Mixed Record/Vector
 	
 Exceptions (Checked Preconditions)
+	None
 	
 Result (Postcondition)		
+	* Returns the next value in the sequence x
+	* and an updated index i' - except at the end of the sequence when i' is termin
+	* Returns to the calling function
 
 \*****************************************************************************/
 

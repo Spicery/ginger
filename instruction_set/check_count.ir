@@ -1,5 +1,6 @@
 /*****************************************************************************\
-Instruction CHECK_COUNT N
+Definition 
+	CHECK_COUNT N
 
 Summary
 	Checks that the VMCOUNT register equals N, otherwise throw a

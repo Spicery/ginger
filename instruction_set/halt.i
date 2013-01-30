@@ -1,5 +1,6 @@
 /*****************************************************************************\
-Instruction HALT
+Definition
+	HALT
 
 Summary
 	Forces the virtual machine to exit with a failure.

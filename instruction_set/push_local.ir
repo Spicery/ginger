@@ -1,13 +1,21 @@
 /*****************************************************************************\
-Instruction TBD
-
+Definition
+	* PUSH_LOCAL LOCAL_N () -> ( X ), where X = LOCAL[ N ]
+	* VPC += 2
+	
 Summary
+	Pushes the value of the n-th local variable LOCAL[ N ] onto the stack.
 	
 Unchecked Precondition
+	There is room on the stack for one more value.
 	
 Exceptions (Checked Preconditions)
+	None.
 	
-Result (Postcondition)		
+Result (Postcondition)
+	* The top of the stack is LOCAL[ N ]
+	* The stack is one bigger		
+	* Execution continues at the next instruction.
 
 \*****************************************************************************/
 

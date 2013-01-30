@@ -1,13 +1,19 @@
 /*****************************************************************************\
-Instruction TBD
+Definition
+	SYSCALL_ARGDAT RAW_SYSCALL_PTR DATA ARG
 
 Summary
 	
 Unchecked Precondition
+	* RAW_SYSCALL_PTR is a valid pointer to a SysCall structure.
+	* DATA is not a reference (because it is GC cloaked)
 	
 Exceptions (Checked Preconditions)
+	None
 	
-Result (Postcondition)		
+Result (Postcondition)
+	* The native function has been called.
+	* Execution continues where the native function indicates.
 
 \*****************************************************************************/
 

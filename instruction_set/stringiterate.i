@@ -1,13 +1,23 @@
 /*****************************************************************************\
-Instruction TBD
+Definition
+	STRINGITERATE ( i : Small, s : String ) -> ( c, i' )
 
 Summary
+	The basis for string iteration. It is a portmanteau iterator instruction
+	that is fused with a return.
 	
 Unchecked Precondition
+	* There are two items on the stack: i & s
+	* i: Small
+	* s: String
 	
 Exceptions (Checked Preconditions)
+	None
 	
 Result (Postcondition)		
+	* Returns the next character in the string c
+	* and an updated index i' - except at the end of the string when i' is termin
+	* Returns to the calling function
 
 \*****************************************************************************/
 

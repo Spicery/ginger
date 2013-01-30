@@ -1,5 +1,6 @@
 /*****************************************************************************\
-Instruction IFSO JUMP_TO ( X ) -> ()
+Definition
+	* IFSO JUMP_TO ( X ) -> ()
 
 Summary
 	Compare the top of the stack against false. If it is different then
@@ -12,7 +13,12 @@ Unchecked Precondition
 Exceptions (Checked Preconditions)
 	JUMP_TO is in range of the current enclosing function object.
 	
-Result (Postcondition)		
+Result (Postcondition)
+	* The stack is one less.
+	* If X is false
+		* Execution continues at the next instruction.
+	* Otherwise
+		* Execution continues at JUMP_TO + 1.
 
 \*****************************************************************************/
 

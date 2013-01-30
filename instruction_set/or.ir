@@ -1,10 +1,10 @@
 /*****************************************************************************\
-Instruction OR JUMP_TO ( X ) -> ( X ) | ()
+Definition
+	* OR JUMP_TO ( X ) -> ( X ) | ()
 
 Summary
 	Compare the top of the stack against false. If it is the same then
 	remove the top of the stack and fall thru. Otherwise jump to JUMP_TO.
-
 
 Unchecked Precondition
 	There is at least one item on the stack.
@@ -12,7 +12,11 @@ Unchecked Precondition
 Exceptions (Checked Preconditions)
 	JUMP_TO is in range of the current enclosing function object.
 	
-Result (Postcondition)		
+Result (Postcondition)
+	If top of stack is false
+		* Remove the item and continue at next instruction
+	Otherwise
+		* Jump to JUMP_TO
 
 \*****************************************************************************/
 

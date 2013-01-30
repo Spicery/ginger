@@ -1,19 +1,26 @@
 /*****************************************************************************\
-Instruction TBD
+Definition
+	* START_MARK LOCAL_N
+	* LOCAL[ N ] = address of stack top.
 
 Summary
+	The first part of a MARK-SET pair.
 	
 Unchecked Precondition
+	* LOCAL_N is a valid local variable.
 	
 Exceptions (Checked Preconditions)
+	None
 	
-Result (Postcondition)		
+Result (Postcondition)
+	* LOCAL[ N ] contains the current top-of-stack address.
+	* Execution continues at the next instruction.		
 
 \*****************************************************************************/
 
 long n = ToLong( *( ++pc ) );
 #ifdef DBG_SPECIAL
-fprintf( stderr, "Storing %u in %d\n", ToULong( ToRef( VMVP ) ), n );
+	fprintf( stderr, "Storing %u in %d\n", ToULong( ToRef( VMVP ) ), n );
 #endif
 LOCAL(n) = ToRef( VMVP );
 RETURN( pc + 1 );

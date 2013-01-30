@@ -1,5 +1,6 @@
 /*****************************************************************************\
-Instruction INVOKE METHOD_TABLE DISPATCH_TABLE
+Description
+	INVOKE METHOD_TABLE DISPATCH_TABLE
 
 Summary
 	The purpose of INVOKE is to dispatch a core method on an

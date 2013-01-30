@@ -1,5 +1,6 @@
 /*****************************************************************************\
-Instruction GT ( A, B ) -> ( R ), where R = A >= B
+Definition
+	GT ( A, B ) -> ( R ), where R = A >= B
 
 Summary
 	Removes the top two items from the value stack, which must be

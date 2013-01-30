@@ -1,10 +1,17 @@
 /*****************************************************************************\
-Instruction ABS JUMP_TO ( X ) -> ( absent | () )
+Definition 
+	AND JUMP_TO ( X ) -> ( false | () )
 
 Summary
-	Compare the top of the stack against false. If it is the same then
-	jump to JUMP_TO. Otherwise fall through, removing the top of the stack
-	in either case.
+	Pop the top of the stack and compare with false. If it is the same then
+	push false and jump to JUMP_TO. Otherwise fall through.
+
+	The idea is to compile the expression ``( LHS and RHS )`` as
+
+	- compile1( LHS );
+	- AND Ldone
+	- compile1( RHS );
+	- Ldone:
 
 Unchecked Precondition
 	There is at least one item on the stack.
@@ -12,7 +19,15 @@ Unchecked Precondition
 Exceptions (Checked Preconditions)
 	JUMP_TO is in range of the current enclosing function object.
 	
-Result (Postcondition)		
+Result (Postcondition)
+	If X was false then
+		* Value stack = ( false )
+		* VPC = JUMP_TO + 1
+	
+	If X was non-false
+		* Value stack = ()
+		* VPC = next instruction, i.e. VPC + 2.
+
 
 \*****************************************************************************/
 

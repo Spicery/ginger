@@ -1,5 +1,6 @@
 /*****************************************************************************\
-Instruction GT ( A, B ) -> ( A > B )
+Definition
+	GT ( A, B ) -> ( A > B )
 
 Summary
 	Removes the top two items from the value stack, which must be

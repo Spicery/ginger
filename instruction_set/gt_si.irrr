@@ -1,5 +1,6 @@
 /*****************************************************************************\
-Instruction GT_SI LOCAL_S VALUE_B JUMP_D
+Definition
+	GT_SI LOCAL_S VALUE_B JUMP_D
 
 Summary
 	Compares a local variable LOCAL_S using greater than versus a 

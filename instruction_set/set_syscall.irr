@@ -1,13 +1,21 @@
 /*****************************************************************************\
-Instruction TBD
+Definition
+	* SET_SYSCALL RAW_COUNT RAW_SYSCALL_PTR 
 
 Summary
-	
+	Invokes a system-function (sysfn) with a fixed count of arguments
+	in RAW_COUNT. Both arguments are cloaked from the garbage collector.
+
 Unchecked Precondition
+	* COUNT is a positive long.
+	* RAW_SYSCALL_PTR is a pointer to a valid SysCall structure.
 	
 Exceptions (Checked Preconditions)
+	None.
 	
-Result (Postcondition)		
+Result (Postcondition)
+	* The system function has been called and has returned.
+	* Execution continues as determined by the system function.
 
 \*****************************************************************************/
 

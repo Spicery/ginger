@@ -1,13 +1,19 @@
 /*****************************************************************************\
-Instruction TBD
+Definition
+	SYSCALL_DAT RAW_SYSCALL_PTR DATA
 
 Summary
-	
+	Invokes the native function with a data argument frozen in.
+
 Unchecked Precondition
+	RAW_SYSCALL_PTR is a valid pointer to a SysCall object.
 	
 Exceptions (Checked Preconditions)
+	None
 	
 Result (Postcondition)		
+	* The native function has been called and returned.
+	* Execution continues at the instruction indicated by the native function.
 
 \*****************************************************************************/
 

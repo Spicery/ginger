@@ -1,5 +1,6 @@
 /*****************************************************************************\
-Instruction LTE (A, B) -> ( R ), where R = A <= B
+Definition
+	LTE (A, B) -> ( R ), where R = A <= B
 
 Summary
 	Takes two numbers A & B off the stack and pushs a boolean result

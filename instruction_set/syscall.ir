@@ -1,13 +1,18 @@
 /*****************************************************************************\
-Instruction TBD
+Definition
+	SYSCALL RAW_SYS_PTR
 
 Summary
+	Call a native function via the "system" interface.
 	
 Unchecked Precondition
+	The pointer points to a SysCall structure.
 	
 Exceptions (Checked Preconditions)
-	
-Result (Postcondition)		
+	None
+
+Result (Postcondition)
+	The native function call has completed.
 
 \*****************************************************************************/
 

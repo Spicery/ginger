@@ -1,5 +1,6 @@
 /*****************************************************************************\
-Instruction INCR_BY N
+Definition
+	INCR_BY N
 
 Summary
 	Increments the value on top of the stack by N.

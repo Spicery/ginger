@@ -1,5 +1,6 @@
 /*****************************************************************************\
-Instruction ENTER0
+Definition
+	ENTER0
 
 Summary
 	A simplified version of ENTER for nullary function objects.

@@ -1,13 +1,21 @@
 /*****************************************************************************\
-Instruction TBD
+Definition
+	* POP_GLOBAL VALOF_V ( X ) -> ()
+	* V = X
+	* VPC += 2
 
 Summary
+	Pops the top of the stack into the global variable V.
 	
 Unchecked Precondition
-	
+	There is at least one value to pop.
+
 Exceptions (Checked Preconditions)
+	None.
 	
 Result (Postcondition)		
+	* V = X
+	* Execution continues at the next instruction.
 
 \*****************************************************************************/
 

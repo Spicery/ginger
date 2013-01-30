@@ -1,5 +1,6 @@
 /*****************************************************************************\
-Instruction ADD ( X:Num, Y:Num ) -> ( X+Y )
+Definition
+	ADD ( X:Num, Y:Num ) -> ( X+Y )
 
 Summary
 	Takes two numbers X & Y off the value stack and replaces them

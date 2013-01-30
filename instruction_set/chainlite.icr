@@ -1,5 +1,6 @@
 /*****************************************************************************\
-Instruction CHAINLITE
+Definition 
+	CHAINLITE F N
 
 Summary
 	Used to implement chaining in partial evaluation.

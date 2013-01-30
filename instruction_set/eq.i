@@ -1,5 +1,6 @@
 /*****************************************************************************\
-Instruction EQ ( A, B ) -> ( A == B )
+Definition
+	EQ ( A, B ) -> ( A == B )
 
 Summary
 	Removes two items from the top of the stack and compares them for 

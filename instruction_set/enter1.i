@@ -1,5 +1,6 @@
 /*****************************************************************************\
-Instruction ENTER1
+Definition
+	ENTER1
 
 Summary
 	A simplified version of ENTER for unary function objects.

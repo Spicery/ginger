@@ -1,6 +1,7 @@
 /*****************************************************************************\
 
-Instructions CALLS (CALL value on Stack)
+Definition 
+    CALLS ( F ) -> ()
 
 Summary
 	Takes one value F off the stack (unchecked) and calls it.

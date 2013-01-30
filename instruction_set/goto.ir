@@ -1,5 +1,6 @@
 /*****************************************************************************\
-Instruction GOTO JUMP_D
+Definition
+	GOTO JUMP_D
 
 Summary
 	Unconditional transfer of control by JUMP_D words.

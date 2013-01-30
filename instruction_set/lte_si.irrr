@@ -1,15 +1,16 @@
 /*****************************************************************************\
-Instruction LTE_SI A, K, L
+Definition
+	LTE_SI A, K, L
 
 Summary
-	Compares the local variable A against a constant K.
-	If A <= K then control is transferred to L.
-	Otherwise the next instruction is executed.
+	* Compares the local variable A against a constant K.
+	* If A <= K then control is transferred to L.
+	* Otherwise the next instruction is executed.
 	
 Unchecked Precondition
-	A is a valid local register index.
-	L is a valid label.
-	K is a small value.
+	* A is a valid local register index.
+	* L is a valid label.
+	* K is a small value.
 	
 Checked Preconditions
 	A is a small.

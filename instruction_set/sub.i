@@ -1,28 +1,30 @@
 /*****************************************************************************\
-Instruction SUBI
+Definition
+	* SUB ( X : Num, Y : Num ) -> ( R : Num ), where R = X - Y
+	* VPC += 1
 
 Summary
-	Takes two smalls X & Y off the value stack and replaces them
-	with their difference, which should be a small.
+	Takes two Nums X & Y off the value stack and replaces them
+	with their difference, which should be a Num.
 	
 Unchecked Precondition
 	There must be at least two values on the stack.
 	
 Checked Preconditions
-	Both X & Y are small.
+	Both X & Y are Nums.
 
 Exceptions
-	The difference X - Y is too large to fit in a small.
+	None
 	
 Postcondition
-	X & Y are replaced by X - Y
+	* X & Y are replaced by X - Y
+	* Execution continues at the next instruction.
 
 \*****************************************************************************/
 
 Ref ry = *( VMVP-- );
 Ref rx = *( VMVP );
 if ( IsSmall( rx ) && IsSmall( ry ) ) {
-	//  TODO: This needs to be given overflow detection!
 	long y = (long)ry;
 	long x = (long)rx;
 	long diff = x - y;
@@ -50,6 +52,5 @@ if ( IsSmall( rx ) && IsSmall( ry ) ) {
 	*( VMVP ) = vm->heap().copyDouble( x - y );
 	RETURN( pc + 1 );
 } else {
-	//	TODO: update message with arguments.
 	throw Mishap( "Numbers only" ).culprit( "First", refToString( rx ) ).culprit( "Second", refToString( ry ) );
 } 

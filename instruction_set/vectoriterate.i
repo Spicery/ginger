@@ -1,13 +1,23 @@
 /*****************************************************************************\
-Instruction TBD
+Definition
+	VECTORITERATE ( i:Small, v:Vector ) -> ( x, i' )
 
 Summary
+	The basis for vector iteration. It is a portmanteau iterator instruction
+	that is fused with a return.
 	
 Unchecked Precondition
+	* There are two items on the stack: i & v
+	* i: Small
+	* v: Vector
 	
 Exceptions (Checked Preconditions)
+	None
 	
 Result (Postcondition)		
+	* Returns the next value in the sequence x
+	* and an updated index i' - except at the end of the sequence when i' is  termin
+	* Returns to the calling function
 
 \*****************************************************************************/
 

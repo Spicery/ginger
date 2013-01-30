@@ -1,5 +1,6 @@
 /*****************************************************************************\
-Instruction END_MARK LOCAL_N
+Definition
+	END_MARK LOCAL_N
 
 Summary
 	Push a count of the number of items on the stack since the

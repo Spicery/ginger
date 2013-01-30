@@ -1,5 +1,6 @@
 /*****************************************************************************\
-Instruction DECR 
+Definition
+	DECR 
 
 Summary
 	Decrements the value on top of the stack by 1.

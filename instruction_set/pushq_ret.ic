@@ -1,13 +1,22 @@
 /*****************************************************************************\
-Instruction TBD
-
-Summary
+Definition
+	* PUSHQ_RET CONST () -> ( CONST )
+	* VMPCFUNC, VMSP, VPC restored from call-stack.
 	
+Summary
+	Push a constant and return from the calling function.
+
 Unchecked Precondition
+	* There is room on the stack for one more value.
+	* There is a previous function call.
 	
 Exceptions (Checked Preconditions)
+	None.
 	
-Result (Postcondition)		
+Result (Postcondition)
+	* The top of the stack is CONST.
+	* The stack is one bigger.
+	* Execution continues from previous function call.
 
 \*****************************************************************************/
 

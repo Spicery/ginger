@@ -1,18 +1,25 @@
 /*****************************************************************************\
-Instruction ABSOR JUMP_TO ( X ) -> ( X ) | ()
+Definition
+	ABSOR JUMP_TO ( X ) -> ( X ) | ()
 
 Summary
 	Compare the top of the stack against absent. If it is the same then
 	fall through and remove the top of the stack. Otherwise jump to JUMP_TO.
 
-
 Unchecked Precondition
-	There is at least one item on the stack.
+	There is at least one item X on the stack.
 	
 Exceptions (Checked Preconditions)
 	JUMP_TO is in range of the current enclosing function object.
 	
-Result (Postcondition)		
+Result (Postcondition)
+	If X was non-absent then
+		* Value stack = ( X )
+		* VPC = JUMP_TO + 1
+	
+	If X was absent	
+		* Value stack = ()
+		* VPC = next instruction, i.e. VPC + 2.
 
 \*****************************************************************************/
 

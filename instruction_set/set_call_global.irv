@@ -1,13 +1,22 @@
 /*****************************************************************************\
-Instruction TBD
+Define
+    * SET_CALL_GLOBAL RAW_COUNT VALOF_F
+    * VMCOUNT = RAW_COUNT
 
 Summary
-	
+    Calls a variable GLOBAL( F ) with a fixed count of the arguments. Note
+    that GLOBAL( F ) does not have to be a function. If it is not a 
+    function GLOBAL( F ) is pushed and sysApply is invoked.
+
 Unchecked Precondition
+    * There is space on the stack for one more value, if GLOBAL( F ) is not
+      a function object.
 	
 Exceptions (Checked Preconditions)
+    None.
 	
 Result (Postcondition)		
+    * The object F has been entered.
 
 \*****************************************************************************/
 

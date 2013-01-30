@@ -1,7 +1,9 @@
 /*****************************************************************************\
-Instruction TBD
+Definition
+	RETURN
 
 Summary
+	Returns from a function call.
 	
 Unchecked Precondition
 	

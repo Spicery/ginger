@@ -1,5 +1,6 @@
 /*****************************************************************************\
-Instruction MUL ( X:Num, Y:Num ) -> ( R:Num )
+Definition
+	MUL ( X:Num, Y:Num ) -> ( R:Num )
 
 Summary
 	Takes two numbers X & Y off the value stack and replaces them
@@ -51,6 +52,5 @@ if ( IsSmall( rx ) && IsSmall( ry ) ) {
 	*( VMVP ) = vm->heap().copyDouble( x * y );
 	RETURN( pc + 1 );
 } else {
-	//	TODO: update message with arguments.
 	throw Mishap( "Numbers only" ).culprit( "First", refToString( rx ) ).culprit( "Second", refToString( ry ) );
 } 

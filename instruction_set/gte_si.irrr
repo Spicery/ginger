@@ -1,16 +1,26 @@
 /*****************************************************************************\
-Instruction GTE_SI LOCAL_S VALUE_B JUMP_D
+Definition
+	GTE_SI LOCAL_S VALUE_B:Num JUMP_D
 
 Summary
 	Compares a local variable LOCAL_S using greater than or equal to versus a 
 	number VALUE_B and if true jumps to JUMP_D, otherwise falls through.
 
-	
 Unchecked Precondition
+	* JUMP_D is in range of the enclosing function object.
+	* LOCAL_S is a valid index for local variables of the 
+	  enclosing function object.
+	* VALUE_B is a number.
+
+	Q: Should this be marked as rrr?
 	
 Exceptions (Checked Preconditions)
+	* LOCAL[ S ] must be a number.
 	
 Result (Postcondition)		
+	* 	Control is transferred to the target forwards or backwards if
+		a numerical local variables is greater-than-or-equal to a constant.
+
 
 \*****************************************************************************/
 

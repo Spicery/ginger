@@ -1,13 +1,22 @@
 /*****************************************************************************\
-Instruction TBD
+Definition
+	* PUSH_LOCAL_RET LOCAL_N
+	* VMPCFUNC, VMSP, VPC restored from previous call
 
 Summary
-	
+	Pushes the value of a local and returns from the calling function.
+
 Unchecked Precondition
+	* There's room on the stack for one more value.
+	* There's a calling function waiting on the call-stack.
 	
 Exceptions (Checked Preconditions)
+	None.
 	
 Result (Postcondition)		
+	* The top of stack is the value of LOCAL[ N ]
+	* The stack is one bigger.
+	* Execution continues from the calling function.
 
 \*****************************************************************************/
 

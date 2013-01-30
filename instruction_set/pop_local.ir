@@ -1,13 +1,20 @@
 /*****************************************************************************\
-Instruction TBD
+Definition
+	* POP_LOCAL LOCAL_N ( X ) -> ()
+	* LOCAL[ N ] = X
 
 Summary
+	Pops the top of the stack into LOCAL[ N ].
 	
 Unchecked Precondition
-	
+	There is at least one value X on the stack to pop.
+
 Exceptions (Checked Preconditions)
+	None.
 	
 Result (Postcondition)		
+	* LOCAL[ N ] = X
+	* Execution continues at the next instruction.
 
 \*****************************************************************************/
 

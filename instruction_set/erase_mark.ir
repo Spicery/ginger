@@ -1,5 +1,6 @@
 /*****************************************************************************\
-Instruction ERASE_MARK LOCAL_N
+Definition
+	ERASE_MARK LOCAL_N
 
 Summary
 	Reset the value stack length to that recorded 

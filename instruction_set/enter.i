@@ -1,5 +1,6 @@
 /*****************************************************************************\
-Instruction ENTER
+Definition
+	ENTER
 
 Summary
 	This is the most general instruction for setting up a non-leaf
@@ -14,9 +15,9 @@ Exceptions (Checked Preconditions)
 	VMCOUNT is not consistent with the number of required arguments.
 	
 Result (Postcondition)		
-	The callstack pointer, the link pointer and the link-function pointer
-	are pushed onto the callstack.
-	The arguments are pushed in order onto the callstack.
+	* The callstack pointer, the link pointer and the link-function pointer
+	* are pushed onto the callstack.
+	* The arguments are pushed in order onto the callstack.
 
 \*****************************************************************************/
 

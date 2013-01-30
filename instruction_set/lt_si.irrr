@@ -1,15 +1,25 @@
 /*****************************************************************************\
-Instruction LT_SI LOCAL_S VALUE_B JUMP_D
+Definition
+	LT_SI LOCAL_S VALUE_B JUMP_D
 
 Summary
 	Compares a local variable LOCAL_S using less than versus another
 	local variable LOCAL_T and if true jumps to JUMP_D, otherwise falls through.
 	
 Unchecked Precondition
+	* JUMP_D is in range of the enclosing function object.
+	* LOCAL_S is a valid index for local variables of the 
+	  enclosing function object.
+	* VALUE_B is a number.
+
+	Q: Should this be marked as rrr?
 	
 Exceptions (Checked Preconditions)
+	* LOCAL[ S ] must be a number.
 	
 Result (Postcondition)		
+	* 	Control is transferred to the target forwards or backwards if
+		a numerical local variables is less-than a constant.
 
 \*****************************************************************************/
 

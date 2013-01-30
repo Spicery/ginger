@@ -1,5 +1,6 @@
 /*****************************************************************************\
-Instruction NEQ ( A, B ) -> ( R ), where R = A != B
+Definition
+	NEQ ( A, B ) -> ( R ), where R = A != B
 
 Summary
 	Removes two items from the top of the stack and compares them for 

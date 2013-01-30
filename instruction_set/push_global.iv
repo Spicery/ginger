@@ -1,13 +1,22 @@
 /*****************************************************************************\
-Instruction TBD
-
+Definition
+	* POP_GLOBAL VALOF_V () -> ( X ), where X = GLOBAL( V )
+	* VPC += 2
+ 
 Summary
+	Pushes the value of GLOBAL( V ) onto the stack.
 	
 Unchecked Precondition
+	* V is a pointer to a Valof structure.
+	* There is room on the stack for one more value.
 	
 Exceptions (Checked Preconditions)
+	* V is not an uninitialised variable.
 	
 Result (Postcondition)		
+	* The top of stack is X.
+	* The stack is one bigger.
+	* Execution continues at the next instruction.
 
 \*****************************************************************************/
 

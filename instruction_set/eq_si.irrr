@@ -1,5 +1,6 @@
 /*****************************************************************************\
-Instruction EQ_SI LOCAL_S VALUE_I JUMP_D
+Definition
+	* EQ_SI LOCAL_S VALUE_I JUMP_D
 
 Summary
 	Compares the value of local variable LOCAL_S using identity to
@@ -7,17 +8,17 @@ Summary
 	through to the next instruction.
 	
 Unchecked Precondition
-	JUMP_D is in the bounds of the enclosing function object
-	LOCAL_S is a valid index into the callstack.
+	* JUMP_D is in the bounds of the enclosing function object
+	* LOCAL_S is a valid index into the callstack.
 	
-	TODO: should this really be marked as rrr????
+	Q: should this really be marked as rrr????
 	
 Exceptions (Checked Preconditions)
 	None
 	
 Result (Postcondition)		
-	Control is transferred to the target forwards or backwards if
-	the local variable is identical to a constant.
+	* 	Control is transferred to the target forwards or backwards if
+		the local variable is identical to a constant.
 
 \*****************************************************************************/
 

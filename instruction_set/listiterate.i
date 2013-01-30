@@ -1,13 +1,24 @@
 /*****************************************************************************\
-Instruction TBD
+Definition
+	LISTITERATE ( L: List, DUMMY ) -> ( Head, Tail : List )
 
 Summary
+	The basis for list iteration. It is a portmanteau iterator instruction
+	that is fused with a return.
 	
 Unchecked Precondition
+	* There are two items on the stack: L & DUMMY
+	* L is a reference that is marched down the list
+	* DUMMY is ignored
 	
 Exceptions (Checked Preconditions)
+	None
 	
 Result (Postcondition)		
+	* Returns the next value in the sequence Head
+	* and an updated list Tail - except at the end of the sequence when termin
+	  is returned
+	* Returns to the calling function
 
 \*****************************************************************************/
 

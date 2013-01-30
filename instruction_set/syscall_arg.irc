@@ -1,13 +1,20 @@
 /*****************************************************************************\
-Instruction TBD
+Definition
+	SYSCALL_ARG RAW_SYSCALL_PTR DATA_ARG
 
 Summary
+	Calls a native function with in-line data value.
 	
 Unchecked Precondition
+	* RAW_SYSCALL_PTR is a pointer to a valid SysCall structure.
+	* DATA_ARG is not a reference (it is GC cloaked)
 	
 Exceptions (Checked Preconditions)
+	None
 	
-Result (Postcondition)		
+Result (Postcondition)
+	* The native function has been called.
+	* Execution continues where the native function indicates.
 
 \*****************************************************************************/
 

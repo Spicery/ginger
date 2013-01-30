@@ -1,6 +1,9 @@
 /*****************************************************************************\
+Definition
+	INCR ( X ) -> ( X1 )
+
 Summary
-	Increments the value on top of the stack by 1.
+	Increments X, the value on top of the stack, by 1.
 	
 Unchecked Precondition
 	There is at least one value on the value stack.
@@ -9,7 +12,7 @@ Exceptions (Checked Preconditions)
 	The value on top of the stack is a number.
 	
 Result (Postcondition)
-	The top of the stack is one greater than before.	
+	The top of the stack X1 is one greater than before.
 
 \*****************************************************************************/
 

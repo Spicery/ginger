@@ -1,5 +1,6 @@
 /*****************************************************************************\
-Instruction SUBI
+Definition
+	* NEGATE ( X : Num ) -> ( -X )
 
 Summary
 	Takes a number x off the value stack and replaces it
@@ -37,6 +38,5 @@ if ( IsSmall( rx ) ) {
 	*( VMVP ) = vm->heap().copyDouble( -x );
 	RETURN( pc + 1 );
 } else {
-	//	TODO: update message with arguments.
-	throw Mishap( "Numbers only" ).culprit( "First", refToString( rx ) );
+	throw Mishap( "Trying to negate a non-number" ).culprit( "First", refToString( rx ) );
 } 

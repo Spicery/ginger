@@ -1,19 +1,27 @@
 /*****************************************************************************\
-Instruction DIV_I A, B -> A / B
+Definition
+	* DIV ( A, B ) -> ( R ), where R = A / B
+	* VPC += 1
 
 Summary
 	Computes A divided by B in floating point arithmetic.
-	TODO: If the result is an exact integer, should it convert it back down?
+	Q: If the result is an exact integer, should it convert it back down?
 
 Comment
 	This is NOT the same as the high level function "div" but it is 
 	the same as "/". For integer division see the QUO instruction.
 	
 Unchecked Precondition
+	* There are two values on the top of the stack.
 	
 Exceptions (Checked Preconditions)
+	* A & B are not numbers.
 	
 Result (Postcondition)		
+	* The two items A & B are removed from the stack and replaced by R.
+	* R is floating point.
+	* R is equal to A / B with A & B converted to floating point.
+	* Execution continues at the next instruction.
 
 \*****************************************************************************/
 
@@ -37,7 +45,6 @@ if ( IsSmall( rx ) && IsSmall( ry ) ) {
 	*( VMVP ) = vm->heap().copyDouble( x / y );
 	RETURN( pc + 1 );
 } else {
-	//	TODO: update message with arguments.
-	throw Mishap( "Numbers only" );
+	throw Mishap( "Numbers only" ).culprit( "First", refToString( rx ) ).culprit( "Second", refToString( ry ) );
 } 
 

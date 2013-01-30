@@ -1,5 +1,6 @@
 /*****************************************************************************\
-Instruction ERASE
+Definition
+	ERASE
 
 Summary
 	Removes the topmost item from the value stack.

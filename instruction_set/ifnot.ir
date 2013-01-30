@@ -1,5 +1,6 @@
 /*****************************************************************************\
-Instruction IFNOT JUMP_TO
+Definition
+	* IFNOT JUMP_TO ( X ) -> ()
 
 Summary
 	If the top of the stack is false then jump to JUMP_TO,
@@ -10,9 +11,15 @@ Unchecked Precondition
 	There is at least one value on top of the stack.
 	
 Exceptions (Checked Preconditions)
+	None
 	
 Result (Postcondition)		
-
+	* The stack is one less.
+	* If X is false
+		* Execution continues at JUMP_TO + 1.
+	* Otherwise
+		* Execution continues at the next instruction.
+		
 \*****************************************************************************/
 
 #ifdef DBG_SPECIAL

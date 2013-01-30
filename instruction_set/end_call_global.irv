@@ -1,18 +1,30 @@
 /*****************************************************************************\
-Instruction END_CALL_GLOBAL LOCAL_VAR VALOF
+Definition
+    * END_CALL_GLOBAL LOCAL_N VALOF_V
+    * VMLINK, VMPCFUNC, VPC are saved and updated
+    * VMCOUNT has the argument count.
 
 Summary
-    Updates VMCOUNT with a value-count using LOCAL_VAR as the mark.
-    Calls the function pointed to by the valof VALOF.
+    Updates VMCOUNT with a value-count using LOCAL[ N ] as the mark.
+    Calls the object pointed to by the global variable V. If the 
+    object is not a function then sysApply is utilised to call it.
 
-    TODO: Does this have the correct extension?
+    Q: Does this have the correct extension?
 	
 Unchecked Precondition
+    * VMCOUNT has the correct count of arguments to be passed.
+    * LOCAL[ N ] is a valid local variable.
+    * LOCAL[ N ] holds the address of a previous top-of-stack pointer.
+    * VALOF_V is a valid pointer to a Valof structure.
+    * If GLOBAL( V ) is not a function object then there is room for
+      at least one more value on the stack, for sysApply.
 
-	
 Exceptions (Checked Preconditions)
+    * GLOBAL( V ) is a reference to a callable object, checked via sysApply.
 	
-Result (Postcondition)		
+Result (Postcondition)
+    * VMLINK, VMPCFUNC, VPC are saved and updated
+    * Execution continues in GLOBAL( V )
 
 \*****************************************************************************/
 

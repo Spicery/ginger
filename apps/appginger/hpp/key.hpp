@@ -45,6 +45,9 @@ const char * keyName( Ref key );
 #define SmallToLong( r )	( (long)( ToLong( r ) >> TAG ) )
 #define SmallToULong( r )	( (unsigned long)( ToLong( r ) >> TAG ) )
 
+//  Requires INT_TAG == 0
+#define IsZeroSmall( r )    ( ToULong( r ) == 0 )
+
 #define ULongToSmall( x ) 	ToRef( ( x ) << TAG | INT_TAG )
 
 #define FwdToPtr4( r )		( ToULong( r ) & ~0x3 )

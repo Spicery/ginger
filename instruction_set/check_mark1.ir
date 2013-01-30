@@ -1,5 +1,6 @@
 /*****************************************************************************\
-Instruction CHECK_MARK1 LOCAL_N
+Definition
+	CHECK_MARK1 LOCAL_N
 
 Summary
 	Checks that the value of the local variable LOCAL_N one less

@@ -86,8 +86,8 @@ LIBEXECUTABLES=\
 	apps/fetchgnx/cpp/fetchgnx \
 	apps/file2gnx/cpp/file2gnx \
 	apps/appginger/cpp/ginger-cli \
-	apps/appginger/cpp/ginger-admin \
-	apps/appginger/cpp/ginger-help \
+	apps/ginger-admin/cpp/ginger-admin \
+	apps/ginger-help/cpp/ginger-help \
 	apps/appginger/cpp/ginger-info \
 	apps/gngreadline/cpp/gngreadline \
 	apps/lisp2gnx/lsp/lisp2gnx \

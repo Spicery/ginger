@@ -17,6 +17,7 @@
 \******************************************************************************/
 
 #include <iostream>
+#include <algorithm>    // std::find_if
 #include <string>
 #include <map>
 #include <fstream>

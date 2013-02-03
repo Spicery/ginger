@@ -116,6 +116,9 @@ install-as-is:
 	/usr/bin/install -m a=r apps/lisp2gnx/lsp/lisp2gnx.lsp $(INSTALL_LIB)/lisp2gnx
 	/usr/bin/install $(LIBEXECUTABLES) $(INSTALL_TOOL)
 	/usr/bin/install $(USEREXECUTABLES) $(INSTALL_BIN)
+	# Add in the convenience links
+	( cd $(INSTALL_BIN); ln -sf ginger-script ginger-common )
+	( cd $(INSTALL_BIN); ln -sf ginger-script ginger-ctyle )
 
 # N.B. The rm -rf commands are guarded by code that checks the
 # paths end '/ginger'
@@ -159,6 +162,8 @@ tarball-as-is:
 	( cd build_template; tar cf - . ) | ( cd _build/$(TBPACKAGE); tar xf - )
 	cp $(LIBEXECUTABLES) _build/$(TBTOOL)
 	cp $(USEREXECUTABLES) _build/$(TBBIN)
+	( cd _build/$(TBBIN); ln -sf ginger-script ginger-common )
+	( cd _build/$(TBBIN); ln -sf ginger-script ginger-ctyle )
 	cp COPYING _build/$(TBMAIN)/share/ginger
 	cp AUTHORS _build/$(TBMAIN)/share/ginger
 	mkdir -p _build/$(TBMAIN)/share/ginger/lisp2gnx/

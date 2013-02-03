@@ -34,4 +34,18 @@ bool fileExists( const string & pathname ) {
 	return st == 0;
 }
 
+string shellSafeName( const string & filename ) {
+    string safe;
+    for ( string::const_iterator it = filename.begin(); it != filename.end(); ++it ) {
+        const char ch = *it;
+        if ( not isalnum( ch ) ) {
+            safe.push_back( '\\' );
+        }
+        safe.push_back( ch );
+    }
+    return safe;
 }
+
+
+
+} // end namespace

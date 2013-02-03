@@ -1,4 +1,4 @@
-#!/usr/local/bin/ginger-script -m1
+#!/usr/local/bin/ginger-common -m1
 
 val numdoors := 100;
 

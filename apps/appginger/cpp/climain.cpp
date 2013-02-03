@@ -57,6 +57,7 @@ void sigint_handler( int s ){
 	*SIGINT_FLAG = true;
 }
 
+#ifdef BLOCK2
 class Popen : public Ginger::Command {
 private:
 	FILE * fp;
@@ -100,6 +101,7 @@ public:
 		}
 	}
 };
+#endif
 
 class GingerMain : public ToolMain {
 private:
@@ -137,7 +139,7 @@ private:
 		#ifndef BLOCK2
 		for (;;) {
 			try {
-				this->executeStdin( rcep );
+				this->executeStdin( true, rcep );
 				break;
 			} catch ( Ginger::Mishap & e ) {
 				e.report();

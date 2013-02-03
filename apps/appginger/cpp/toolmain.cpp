@@ -34,6 +34,7 @@
 #include <syslog.h>
 #include <sys/errno.h>
 
+#include "fileutils.hpp"
 #include "gngversion.hpp"
 #include "mnx.hpp"
 #include "command.hpp"
@@ -151,19 +152,6 @@ int ToolMain::printLicense( const char * arg ) const {
 	return EXIT_SUCCESS;
 }
 
-
-string ToolMain::shellSafeName( const string & filename ) {
-	string safe;
-	for ( string::const_iterator it = filename.begin(); it != filename.end(); ++it ) {
-		const char ch = *it;
-		if ( not isalnum( ch ) ) {
-			safe.push_back( '\\' );
-		}
-		safe.push_back( ch );
-	}
-	return safe;
-}
-
 //	We will get to use this later, when we add the -x,--xargs option.
 template < class ContainerT >
 void tokenize(
@@ -218,7 +206,22 @@ void ToolMain::integrityChecks() {
 bool ToolMain::parseArgs( int argc, char **argv, char **envp ) {
     this->integrityChecks();
 	if ( envp != NULL ) this->context.setEnvironmentVariables( envp );
-	//bool meta_info_needed = false;
+
+    //  If the name of the binary has a '-' sign in it, it is used as
+    //  as the default grammar.
+    {
+        //cerr << "Infer grammar ..." << endl;
+        const string appname( argc >= 1 ? argv[ 0 ] : "" );
+        const size_t n = appname.rfind( '-' );
+        if ( n != string::npos ) {
+            this->context.setSyntax( appname.substr( n + 1, appname.size() ) );
+            //cerr << "Extn = " << appname.substr( n + 1, appname.size() ) << endl;
+        //} else {
+            //cerr << "None set" << endl;
+        }
+	}
+
+    //bool meta_info_needed = false;
     for(;;) {
         int option_index = 0;
         int c = getopt_long( argc, argv, "d:e:g:H::ij:L::l:m:p:qv:V", long_options, &option_index );
@@ -327,7 +330,7 @@ void ToolMain::runFrom( RCEP & rcep, Ginger::MnxReader & gnx_read ) {
 }
 
 void ToolMain::executeCommand( RCEP & rcep, const string command ) {
-    //  cerr << "Command so far: " << command << endl;
+    //cerr << "Command so far: " << command << endl;
     FILE * gnxfp = popen( command.c_str(), "r" );
     if ( gnxfp == NULL ) {
         throw Ginger::Mishap( "Failed to translate input" );
@@ -347,12 +350,12 @@ void ToolMain::executeCommand( RCEP & rcep, const string command ) {
 void ToolMain::executeFile( RCEP & rcep, const string filename ) {
     stringstream commstream;
     //  tail is 1-indexed!
-    commstream << this->context.syntax( filename ) << " < " << shellSafeName( filename );
+    commstream << this->context.syntax( filename );
     this->executeCommand( rcep, commstream.str() );
 }
 
-void ToolMain::executeStdin( RCEP & rcep ) {
-    this->executeCommand( rcep, this->context.syntax() );
+void ToolMain::executeStdin( const bool interactively, RCEP & rcep ) {
+    this->executeCommand( rcep, this->context.syntax( interactively ) );
 }
 
 void ToolMain::executeFileArguments( RCEP & rcep ) {

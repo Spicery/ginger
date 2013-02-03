@@ -28,14 +28,14 @@ protected:
 
 protected:
 	void integrityChecks();
-	std::string shellSafeName( const std::string & filename );
+	//std::string shellSafeName( const std::string & filename );
 	int printLicense( const char * arg ) const;
 
 protected:
 	void executeLoadFileList( RCEP & rcep );
 	void loadFileFromPackage( RCEP & rcep, Package * pkg, const std::string filename );
 	void executeFileArguments( RCEP & rcep );
-	void executeStdin( RCEP & rcep );
+	void executeStdin( const bool interactively, RCEP & rcep );
 	void executeFile( RCEP & rcep, const std::string filename );
 	void executeCommand( RCEP & rcep, const std::string command );
 	void runFrom( RCEP & rcep, Ginger::MnxReader & gnx_read );

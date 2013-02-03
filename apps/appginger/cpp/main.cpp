@@ -57,7 +57,7 @@ private:
 		#endif
 	
 		RCEP rcep( interactive_pkg );
-		this->executeStdin( rcep );
+		this->executeStdin( false, rcep );
 	}
 
 public:

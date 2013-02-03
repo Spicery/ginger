@@ -30,6 +30,7 @@
 #include <getopt.h>
 #include <syslog.h>
 
+#include "fileutils.hpp"
 #include "common.hpp"
 #include "rcep.hpp"
 #include "appcontext.hpp"
@@ -89,9 +90,19 @@ const char* AppContext::cgiValue( const char * fieldname ) {
     #endif
 }
 
-const char * AppContext::syntax() { 
-	if ( this->initial_syntax == "gnx" ) {
-		return GNGREADLINE " | " GNX2GNX;
+const string AppContext::syntax( const bool interactively ) { 
+    string cmd;
+    if ( interactively ) {
+        cmd += GNGREADLINE " | ";
+    }
+    cmd += FILE2GNX " ";
+    if ( not this->initial_syntax.empty() ) {
+        cmd += "-g ";
+        cmd += Ginger::shellSafeName( this->initial_syntax );
+    }
+    return cmd;
+	/*if ( this->initial_syntax == "gnx" ) {
+		return GNGREADLINE " | " FILE2GNX ;
 	} else if ( this->initial_syntax == "" || this->initial_syntax == "common" ) {
 		return GNGREADLINE " | " COMMON2GNX;
 	} else if ( this->initial_syntax == "lisp" ) {
@@ -100,10 +111,19 @@ const char * AppContext::syntax() {
 		return GNGREADLINE " | " CSTYLE2GNX;
 	} else {
 		throw Ginger::Mishap( "Unrecognised language" ).culprit( "Language", this->initial_syntax );
-	}
+	}*/
 }
 
-const char * AppContext::syntax( const std::string & filename ) { 
+const string AppContext::syntax( const std::string & filename ) { 
+    string cmd( FILE2GNX " " );
+    if ( not this->initial_syntax.empty() ) {
+        cmd += "-g ";
+        cmd += Ginger::shellSafeName( this->initial_syntax );
+        cmd += " ";
+    }
+    cmd += Ginger::shellSafeName( filename );
+    return cmd;
+    /*
 	std::string::size_type idx = filename.rfind( '.' );
 	if ( idx != std::string::npos ) {
 		std::string extension = filename.substr( idx );
@@ -118,4 +138,5 @@ const char * AppContext::syntax( const std::string & filename ) {
 		}
 	}
 	return this->syntax();
+    */
 }

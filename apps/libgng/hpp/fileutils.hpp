@@ -24,7 +24,7 @@
 namespace Ginger {
 
 extern bool fileExists( const std::string & pathname );
-
+extern std::string shellSafeName( const std::string & name );
 
 } // namespace
 

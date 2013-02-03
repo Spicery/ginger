@@ -60,16 +60,34 @@ using namespace Ginger;
 class ExtnLookup : public Ginger::SaxHandler {
 private:
 	string pathname;
+	string grammar;
 	string extn;
 	bool found;
 	string parser;
 
 public:
-	ExtnLookup( const string & pathname, const string & extn ) :
-		pathname( pathname ),
-		extn( extn ),
+	ExtnLookup( const string & grammar ) :
+		pathname( "<standard input>" ),
+		grammar( grammar ),
+		extn( grammar ),
 		found( false )
-	{}
+	{
+	}
+	
+
+	ExtnLookup( const string & pathname, const string & grammar ) :
+		pathname( pathname ),
+		grammar( grammar ),
+		found( false )
+	{
+		//	Calculate the extension, using the grammar as a default.
+		const size_t n = pathname.rfind( '.' );
+		if ( n == string::npos ) {
+			this->extn = grammar;
+		} else {
+			this->extn = pathname.substr( n + 1, pathname.size() );
+		}
+	}
 
 public:
 	typedef map< string, string > Dict;
@@ -87,11 +105,7 @@ public:
 	void endTag( std::string & name ) {
 	}
 
-public:
-
-	string getParser() {
-		return this->parser;
-	}
+private:
 
 	bool lookup( const char * mnx_file_name ) {
 		ifstream stream( mnx_file_name );
@@ -104,18 +118,33 @@ public:
 		}
 	}
 
-	const char * defaultCommand() {
-		if ( extn == "cmn" ) {
+	const char * defaultCommand( const string & ex ) {
+		if ( ex == "cmn" || ex == "common" ) {
 			return COMMON2GNX;
-		} else if ( extn == "cst" ) {
+		} else if ( ex == "cst" || ex == "cstyle" ) {
 			return CSTYLE2GNX;
-		} else if ( extn == "lsp" ) {
+		} else if ( ex == "lsp" || ex == "lisp" ) {
 			return LISP2GNX;
-		} else if ( extn == "gnx" ) {
+		} else if ( ex == "gnx" ) {
 			return GNX2GNX;
 		} else {
-			throw Mishap( "Filename has unrecognised extension, giving up" ).culprit( "Filename", pathname ).culprit( "Extension", extn );
+			return NULL;
 		}	
+	}
+
+public:
+	string lookupParserUsingConfig( const char * mnx_file_name ) {
+		//	cerr << "Looking up: " << this->extn << " in " << mnx_file_name << endl;
+		this->lookup( mnx_file_name );
+		if ( this->found ) {
+			return this->parser;
+		} else {
+			const char * e = this->defaultCommand( this->extn );
+			if ( e != NULL ) return e;
+			e = this->defaultCommand( this->grammar );
+			if ( e != NULL ) return e;
+			throw Mishap( "Cannot detect syntax, giving up" ).culprit( "Source", pathname ).culprit( "Extension", extn );
+		}
 	}
 
 };
@@ -139,7 +168,7 @@ void printGPL( const char * start, const char * end ) {
 static void printUsage() {
 	cout << "Usage :  " << APP_TITLE << " [OPTIONS] [FILE]" << endl << endl;
 	cout << "OPTION                SUMMARY" << endl;
-	cout << "-g, --grammar=LANG    select front-end syntax" << endl;
+	cout << "-g, --grammar=LANG    default front-end syntax" << endl;
 	cout << "-H, --help            print out this help info (see --help=help)" << endl;
 	cout << "-i, --stdin           compile from stdin" << endl;
 	cout << "-L, --license         print out license information and exit" << endl;
@@ -289,52 +318,34 @@ public:
 		return true;
 	}
 
-	void run( string command, string pathname ) {
+private:
+
+	void run( const string & command, const string & pathname ) {
 		const char * cmd = command.c_str();
 		execl( cmd, cmd, pathname.c_str(), (char)0 );
 	}
 
-	void runStdin( string command ) {
+	void runStdin( const string & command ) {
 		const char * cmd = command.c_str();
 		execl( cmd, cmd, (char)0 );	
 	}
 
 	void useStdin() {
-		ExtnLookup elookup( "<standard input>", this->grammar );
-		const char * cmdpath = (
-			elookup.lookup( FILE2GNX_CONFIG ) ?
-			elookup.getParser().c_str() :
-			elookup.defaultCommand()
-		);
+		ExtnLookup elookup( this->grammar );
+		string cmdpath( elookup.lookupParserUsingConfig( FILE2GNX_CONFIG ) );
 		runStdin( cmdpath );
 	}
 
 	void useFile() {
 		const string & pathname( this->files[ 0 ] );
-		
-		string extn;
-		if ( this->use_grammar ) {
-			extn = this->grammar;
-		} else {
-			//	Use extension.
-			const size_t n = pathname.rfind( '.' );
-			if ( n == string::npos ) {
-				throw Mishap( "Filename lacks extension, giving up" ).culprit( "Filename", pathname );
-			} 
-			extn = pathname.substr( n + 1, pathname.size() );
-		}
-
-		ExtnLookup elookup( pathname, extn );
-		const char * cmdpath = (
-			elookup.lookup( FILE2GNX_CONFIG ) ?
-			elookup.getParser().c_str() :
-			elookup.defaultCommand()
-		);
-		
-		syslog( LOG_INFO, "Converting %s with extension %s using %s", pathname.c_str(), extn.c_str(), cmdpath );
+		ExtnLookup elookup( pathname, this->grammar );
+		string cmdpath( elookup.lookupParserUsingConfig( FILE2GNX_CONFIG ) );
+		syslog( LOG_INFO, "Converting %s using %s", pathname.c_str(), cmdpath.c_str() );
 		run( cmdpath, pathname );
 	}
 
+public:
+	
 	void main() {
 		if ( this->use_stdin ) {
 			this->useStdin();

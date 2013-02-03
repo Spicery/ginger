@@ -52,7 +52,7 @@ public:
 		this->executeLoadFileList( rcep );			
 		this->executeFileArguments( rcep );
 		if ( this->context.useStdin() ) {
-			this->executeStdin( rcep );
+			this->executeStdin( false, rcep );
 		}
 	    return EXIT_SUCCESS;
 	}

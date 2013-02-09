@@ -19,6 +19,8 @@
 #include <iostream>
 #include <cstdlib>
 #include <fstream>
+#include <list>
+#include <vector>
 
 #include <syslog.h>
 #include <unistd.h>
@@ -26,6 +28,8 @@
 #include <getopt.h>
 
 #include "config.h"
+
+#include "xdgconfigfiles.hpp"
 #include "mnx.hpp"
 #include "sax.hpp"
 #include "mishap.hpp"
@@ -44,9 +48,8 @@ using namespace Ginger;
 #define LISP2GNX 		( INSTALL_TOOL "/lisp2gnx" )
 #define GNX2GNX     	( "/bin/cat" )
 
-//	This will need to be significantly expanded when we adopt XDG
-//	standards properly.
-#define FILE2GNX_CONFIG 	"/etc/xdg/ginger/parser-mapping.mnx" 
+#define FILE2GNX_CONFIG_BASE	"parser-mapping.mnx"
+#define FILE2GNX_CONFIG 		( "/etc/xdg/ginger/" FILE2GNX_CONFIG_BASE )
 
 //
 //	Insecure. We need to do this more neatly. It would be best if common2gnx
@@ -57,38 +60,52 @@ using namespace Ginger;
 #define PARSER_EXT "ext"
 #define PARSER_EXE "exe"
 
+
+class ExtnFinder {
+private:
+	list< string > extns;
+
+public:
+	void addGrammar( const string & grammar ) {
+		this->extns.push_back( grammar );
+	}
+
+	void tryAddExtnOfPathName( const string & pathname ) {
+		const size_t n = pathname.rfind( '.' );
+		if ( n != string::npos ) {
+			//cerr << "Pushing back: " << n << endl;
+			this->extns.push_back( pathname.substr( n + 1, pathname.size() ) );
+		}
+	}
+
+	bool hasNext() {
+		//cerr << "Size of extensions list = " << this->extns.size() << endl;
+		return not( this->extns.empty() );
+	}
+
+	string next() {
+		string s = this->extns.back();
+		this->extns.pop_back();
+		return s;
+	}
+
+};
+
 class ExtnLookup : public Ginger::SaxHandler {
 private:
-	string pathname;
-	string grammar;
+	const string mnx_file_name;
 	string extn;
 	bool found;
 	string parser;
 
 public:
-	ExtnLookup( const string & grammar ) :
-		pathname( "<standard input>" ),
-		grammar( grammar ),
-		extn( grammar ),
+	ExtnLookup( const string & _extn, const string & _config_file ) :
+		mnx_file_name( _config_file ),
+		extn( _extn ),
 		found( false )
 	{
 	}
 	
-
-	ExtnLookup( const string & pathname, const string & grammar ) :
-		pathname( pathname ),
-		grammar( grammar ),
-		found( false )
-	{
-		//	Calculate the extension, using the grammar as a default.
-		const size_t n = pathname.rfind( '.' );
-		if ( n == string::npos ) {
-			this->extn = grammar;
-		} else {
-			this->extn = pathname.substr( n + 1, pathname.size() );
-		}
-	}
-
 public:
 	typedef map< string, string > Dict;
 	
@@ -107,8 +124,8 @@ public:
 
 private:
 
-	bool lookup( const char * mnx_file_name ) {
-		ifstream stream( mnx_file_name );
+	bool lookup() {
+		ifstream stream( this->mnx_file_name.c_str() );
 		if ( stream.good() ) {
 			Ginger::SaxParser saxp( stream, *this );
 			saxp.readElement();
@@ -118,7 +135,31 @@ private:
 		}
 	}
 
-	const char * defaultCommand( const string & ex ) {
+	
+public:
+	bool hasNext() {
+		if ( this->found ) return false;
+		this->lookup();
+		return this->found;
+	}
+
+	string next() {
+		return this->parser;
+	}
+
+};
+
+class StdExtnLookup {
+private:
+	const string & extn;
+	bool done;
+	const char * found;
+
+public:
+	StdExtnLookup( const string & _extn ) : extn( _extn ), done( false ) {}
+
+private:
+	static const char * defaultCommand( const string & ex ) {
 		if ( ex == "cmn" || ex == "common" ) {
 			return COMMON2GNX;
 		} else if ( ex == "cst" || ex == "cstyle" ) {
@@ -133,21 +174,18 @@ private:
 	}
 
 public:
-	string lookupParserUsingConfig( const char * mnx_file_name ) {
-		//	cerr << "Looking up: " << this->extn << " in " << mnx_file_name << endl;
-		this->lookup( mnx_file_name );
-		if ( this->found ) {
-			return this->parser;
-		} else {
-			const char * e = this->defaultCommand( this->extn );
-			if ( e != NULL ) return e;
-			e = this->defaultCommand( this->grammar );
-			if ( e != NULL ) return e;
-			throw Mishap( "Cannot detect syntax, giving up" ).culprit( "Source", pathname ).culprit( "Extension", extn );
-		}
+	bool hasNext() {
+		if ( this->done ) return false;
+		this->found = defaultCommand( this->extn );
+		this->done = true;
+		return this->found != NULL;
 	}
 
+	string next() {
+		return this->found;
+	}
 };
+
 
 void printGPL( const char * start, const char * end ) {
     bool printing = false;
@@ -320,38 +358,57 @@ public:
 
 private:
 
-	void run( const string & command, const string & pathname ) {
+	void run( const string & command, const vector< const char * > & args ) {
+		if ( args.size() > 1 ) {
+			throw Unreachable( __FILE__, __LINE__ );
+		}
 		const char * cmd = command.c_str();
-		execl( cmd, cmd, pathname.c_str(), (char)0 );
+		if ( args.empty() ) {
+			execl( cmd, cmd, (char)0 );
+		} else {
+			execl( cmd, cmd, args[ 0 ], (char)0 );
+		}
 	}
 
-	void runStdin( const string & command ) {
-		const char * cmd = command.c_str();
-		execl( cmd, cmd, (char)0 );	
+	void useExtnFinder( ExtnFinder & efinder, const vector< const char * > & args ) {
+		while ( efinder.hasNext() ) {
+			const string extn( efinder.next() );
+			//cerr << "EXTENSION " << extn << endl;
+			StdExtnLookup stdlookup( extn );
+			while ( stdlookup.hasNext() ) {
+				//cerr << "Doing std lookup for " << extn << endl;
+				string cmdpath( stdlookup.next() );
+				run( cmdpath, args );
+			}
+			XDGConfigFiles cfiles( FILE2GNX_CONFIG_BASE );
+			while ( cfiles.hasNext() ) {
+				const string cfile( cfiles.next() );
+				ExtnLookup elookup( extn, cfile );
+				//cerr << "Doing config lookup for " << extn << " in " << cfile << endl;
+				while ( elookup.hasNext() ) {
+					string cmdpath( elookup.next() );
+					run( cmdpath, args );
+				}
+			}
+		}
 	}
 
-	void useStdin() {
-		ExtnLookup elookup( this->grammar );
-		string cmdpath( elookup.lookupParserUsingConfig( FILE2GNX_CONFIG ) );
-		runStdin( cmdpath );
-	}
-
-	void useFile() {
-		const string & pathname( this->files[ 0 ] );
-		ExtnLookup elookup( pathname, this->grammar );
-		string cmdpath( elookup.lookupParserUsingConfig( FILE2GNX_CONFIG ) );
-		syslog( LOG_INFO, "Converting %s using %s", pathname.c_str(), cmdpath.c_str() );
-		run( cmdpath, pathname );
-	}
 
 public:
 	
 	void main() {
-		if ( this->use_stdin ) {
-			this->useStdin();
-		} else {
-			this->useFile();
+		vector< const char * > args;
+		ExtnFinder efinder;
+		if ( this->use_grammar ) {
+			efinder.addGrammar( this->grammar );
+		}
+		if ( not this->use_stdin ) {
+			const string & pathname( this->files[ 0 ] );
+			args.push_back( pathname.c_str() );
+			efinder.tryAddExtnOfPathName( pathname );
 		}		
+		this->useExtnFinder( efinder, args );
+		throw SystemError( "Cannot detect syntax, giving up" ).culprit( "Source", this->use_stdin ? string( "<stdin>" ) : this->files[ 0 ] );
 	}
 
 };

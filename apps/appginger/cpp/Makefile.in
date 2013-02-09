@@ -91,7 +91,7 @@ ginger:
 	echo 'echo "| and you are welcome to redistribute it under certain conditions.     |"' >> ginger-tmp
 	echo 'echo "| Use option --help=license for details.                               |"' >> ginger-tmp
 	echo 'echo "+----------------------------------------------------------------------+"' >> ginger-tmp
-	echo `which rlwrap`\ -pGreen\ -S\'\>\>\>\ \'\ $(INSTALL_TOOL)/ginger-cli -q $$\@ >> ginger-tmp
+	echo `which rlwrap`\ -pGreen\ -S\'\>\>\>\ \'\ $(INSTALL_TOOL)/ginger-cli -gcmn -q $$\@ >> ginger-tmp
 	chmod a-w,a+x ginger-tmp
 	mv ginger-tmp ginger
 

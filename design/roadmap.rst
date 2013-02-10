@@ -1,97 +1,16 @@
 Ginger Release Roadmap
 ======================
 
-Version 0.8
------------
+.. include:: version_0.8.rst
 
-Platforms
-~~~~~~~~~
-Version 0.8 will bebuild, install and tests run on the following:
-* Linux (Ubuntu)
-* Mac OS X
-
-Basic Language Features
-~~~~~~~~~~~~~~~~~~~~~~~
-
-*  binding to single variables
-*  assignment to single variables
-*  if/unless N-way conditionals and switch expressions
-*  short circuit conditionals (boolean & absent-oriented)
-*  function applications and partial applications
-*  higher-order functions with full lexical scoping
-*  undecorated throws which are not catchable (escalated to failover)
-*  garbage collection
-*  autoloading and autoconversion
-*  Environment variables via ${NAME} syntax.
-
-
-Basic Datatypes
-~~~~~~~~~~~~~~~
-
-*  simple primitives: absent, booleans, undefined, indeterminate.
-*  small integers and small integer arithmetic, overflowing to floating point.
-*  floating point arithmatic.
-*  ASCII strings, symbols and characters
-*  singly linked lists (Lisp-style)
-*  1D arrays (vectors)
-*  maps and maplets, including weak hash tables
-*  class objects
-
-Toolchain
-~~~~~~~~~
-
-These tools are not supposed to be on the $PATH of a typical user and will 
-be installed somewhere like /usr/local/libexec/ginger
-
-* common2gnx:     a front-end for Common, converts to GingerXML. [docs]
-* cstyle2gnx:     a front-end for a C-family syntax, converts to GingerXML. [docs+rename]
-* simplifygnx:    a GingerXML simplifier and annotation tool. [docs]
-* tidymnx:        a tool for pretty-printing MinXML (superset of GingerXML). [docs]
-* fetchgnx:       a tool for accessing Project contents [docs+revise]
-* ginger-cli:     a basic Ginger command-line interpreter (renaming of appginger). [docs+rename??]
-
-Ginger
-~~~~~~
-
-A command-line interpreter, ginger, that coordinates the toolchain components to
-provide an interactive shell for exploratory programming in a terminal. [design+docs+implement]
-
-* Simple, single-line, terminal based interpreter.
-  - Uses readline by default to provide command line editing.
-  - Consumes stdin.
-  - Interactive.
-* Exceptions always escalate to failover.
-* Traps failovers, reports them, resets, continues.
-* Panics abort the system (not sure this is correct).
-* Prints welcome banner.
-* Selectable syntax via --grammar option.
-* Starts up in ginger.interactive package.
-
-
-Ginger CGI
-~~~~~~~~~~
- 
-A CGI script runner, ginger-cgi (o.n.o.), that can be used to write CGI scripts 
-[docs+spawn]
-
-* supports #!/usr/local/bin/ginger-cgi (hash-bang) scripts.
-* can be used interactively for testing.
-
-
-Ginger #! Script Tool
-~~~~~~~~~~~~~~~~~~~~~
-A scripting tool, ginger-script (o.n.o.), that can be used to write UNIX scripts 
-[design+docs+spawn]
-
-* Immediately exits on error.
-* Supports hash-bang scripting #!/usr/local/bin/ginger-script
-
+.. include:: version_0.8.1.rst
 
 Version 0.9
 -----------
 
 Basic Language Features
 ~~~~~~~~~~~~~~~~~~~~~~~
+
 * Binding to multiple variables.
 * Assignment to multiple variables.
 * Anonymous variables.
@@ -102,16 +21,19 @@ Basic Language Features
 
 Novel Language Features
 ~~~~~~~~~~~~~~~~~~~~~~~
+
 * Partial application with ? syntax.
 
 Common Syntax
 ~~~~~~~~~~~~~
+
 * Curried definitions and lambdas.
 * --pythonic: supports the python-style indentation that Graham and I discussed.
 
 
 Basic Library
 ~~~~~~~~~~~~~
+
 * Equality
 * Simple file based I/O
 * valueClass works for all basic values
@@ -124,20 +46,19 @@ Ginger
 * Uses a user/team/department/.../world preferences hierarchy 
 * Provides the context of the current project and package
 
-* Autolocates the current project 
-  - current directory
-  - --project option
-  - ~/.config/ginger preferences
+  * Autolocates the current project 
+      - current directory
+      - --project option
+      - ~/.config/ginger preferences
 
-* Auto-imports the packages of the current project into the interactive
-  package.
+  * Auto-imports the packages of the current project into the interactive
+    package.
 
-* Special command ‘macros’
-  - !<unix command> - run a unix command in a subshell
-  - help - integrated help - launches a web-browser? - using javascript for
-    dynamic search?
-  - imports - edits interactive imports
-  - inspect - inspects variables (or the results of the last computation)
+  * Special command ‘macros’
+      - !<unix command> - run a unix command in a subshell
+      - help - integrated help - launches a web-browser? - using javascript for dynamic search?
+      - imports - edits interactive imports
+      - inspect - inspects variables (or the results of the last computation)
 
 
 
@@ -148,7 +69,9 @@ Ginger #! Script Tool
     % ginger-script script1.cmn script2.cmn script3.cmn
 * Additionally supports executing from the standard input in any 
   supported syntax.
+
     % echo 'println( "hello world" );' | ginger-script -i -g common
+
 
 
 Version 0.10: Delay-Force Sprint
@@ -160,8 +83,8 @@ and hence it deserves its own version.
 
 Novel Language Features
 ~~~~~~~~~~~~~~~~~~~~~~~
-* Explicit delay, implicit forcing.
 
+* Explicit delay, implicit forcing.
 
 Version 0.11
 ------------
@@ -180,31 +103,33 @@ Release 1.0
 
 Platforms
 ~~~~~~~~~
+
 * Linux: Debian (Ubuntu), Redhat (Fedora), OpenSUSE.
 * Mac OS X
 * Free BSD
 
 Basic Language Features
 ~~~~~~~~~~~~~~~~~~~~~~~
+
 * Single inheritance classes.
 * Single dispatch methods.
   
 Novel Features
 ~~~~~~~~~~~~~~
+
 * First class virtual machines.
 
 Documentation 
 ~~~~~~~~~~~~~
 
-*  a overview of the Ginger project, the manifesto, the motivation, the roadmap. [todo]
-*  all the tools in the toolchain [todo]
-*  all the source formats (Common syntax, C-style syntax, GingerXML, MinimalMnx) 
-       used in the toolchain. [todo]
-*  the programs (ginger, ginger-cgi, ginger-script) [todo]
-*  the Ginger language features [todo]
-*  the Ginger classes and standard library [todo]
-
- * Integration with the Sublime 2 text editor [todo]
+  * a overview of the Ginger project, the manifesto, the motivation, the roadmap. [todo]
+  * all the tools in the toolchain [todo]
+  * all the source formats (Common syntax, C-style syntax, GingerXML, MinimalMnx) 
+    used in the toolchain. [todo]
+  * the programs (ginger, ginger-cgi, ginger-script) [todo]
+  * the Ginger language features [todo]
+  * the Ginger classes and standard library [todo]
+  * Integration with the Sublime 2 text editor [todo]
   
 
 Ginger CGI
@@ -219,6 +144,7 @@ Release 2.0
 
 Basic Language Features
 ~~~~~~~~~~~~~~~~~~~~~~~
+
 * Keyword arguments with default values (via the -with- keyword)
 * Vectorclasses.
 * Multiple inheritance.
@@ -227,10 +153,12 @@ Basic Language Features
 
 Novel Features
 ~~~~~~~~~~~~~~
+
 * Alternative-returns (via the return keyword) escalating to panics.
 
 Standard Library
 ~~~~~~~~~~~~~~~~
+
 * File i/o.
 
 
@@ -251,11 +179,12 @@ Future Releases
 
 Novel Features
 ~~~~~~~~~~~~~~
+
 * Rollbacks.
 
 Ginger
 ~~~~~~
 
-* Long term development would be to become a terminal-based Project IDE suitable 
-  for use over SSH.
-* Emacs support.
+  * Long term development would be to become a terminal-based Project IDE suitable 
+    for use over SSH.
+  * Emacs support.

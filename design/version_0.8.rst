@@ -1,8 +1,8 @@
 Ginger Version 0.8
-==================
+------------------
 
 Platforms
----------
+~~~~~~~~~
 
 Version 0.8 will build, install and run tests on the following:
 
@@ -15,7 +15,7 @@ Installation will be from
   * Tarball
 
 Syntaxes Supported
-------------------
+~~~~~~~~~~~~~~~~~~
 
 There will be two front-end syntaxes supported.
 
@@ -24,7 +24,7 @@ There will be two front-end syntaxes supported.
     approachable.
 
 Basic Language Features
------------------------
+~~~~~~~~~~~~~~~~~~~~~~~
 
 *  binding and assignment to single variables
 *  if/unless N-way conditionals and switch expressions
@@ -37,7 +37,7 @@ Basic Language Features
 *  Environment variables via ${NAME} syntax.
 
 Basic Datatypes
----------------
+~~~~~~~~~~~~~~~
 
 This release of Ginger comes with the following datatypes built-in.
 
@@ -52,7 +52,7 @@ This release of Ginger comes with the following datatypes built-in.
 *  user-defined recordclasses
 
 Ginger Executable
------------------
+~~~~~~~~~~~~~~~~~
 
 A command-line interpreter, ginger, that coordinates the toolchain components to
 provide an interactive shell for exploratory programming in a terminal. [design+docs+implement]
@@ -65,12 +65,12 @@ provide an interactive shell for exploratory programming in a terminal. [design+
 * Traps failovers, reports them, resets, continues.
 * Panics abort the system (not sure this is correct).
 * Prints welcome banner.
-* Selectable syntax via --grammar option.
+* Selectable syntax via -~grammar option.
 * Starts up in ginger.interactive package.
 
 
 Ginger CGI Executable
----------------------
+~~~~~~~~~~~~~~~~~~~~~
 
 A CGI script runner, ginger-cgi (o.n.o.), that can be used to write CGI scripts.
 This is very much just a placeholder implementation. Future versions will
@@ -81,7 +81,7 @@ extend this capability very significantly.
 
 
 Ginger #! Script Executable
----------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 A scripting tool, ginger-script, that can be used to write UNIX scripts. 
 
@@ -89,7 +89,7 @@ A scripting tool, ginger-script, that can be used to write UNIX scripts.
 * Supports hash-bang scripting #!/usr/local/bin/ginger-script.
 
 Toolchain
----------
+~~~~~~~~~
 
 Additional tools that provide modular functionality. Over time the user
 will be able to add replacement or extensions to these. They are not 

@@ -16,14 +16,18 @@
     along with AppGinger.  If not, see <http://www.gnu.org/licenses/>.
 \******************************************************************************/
 
+//	C++ STL header files.
 #include <fstream>
 #include <iostream>
 #include <utility>
 
+//	C standard Unix header files.
 #include <unistd.h>
 
+//	Ginger library header files.
 #include "mishap.hpp"
 
+//	Project specific header files.
 #include "importsetinfo.hpp"
 #include "sax.hpp"
 

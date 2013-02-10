@@ -1,0 +1,76 @@
+################################################################################
+# Create a tarball for binary archive from an installed Ginger system.
+################################################################################
+
+# Idiom for getting hold of the name of this makefile.
+THISMAKEFILE := $(word $(words $(MAKEFILE_LIST)),$(MAKEFILE_LIST))
+ANDMAKE := $(MAKE) -f $(THISMAKEFILE)
+
+INSTALLED_BASE := /usr/local
+INSTALLED_SHARE := $(INSTALLED_BASE)/share/ginger
+INSTALLED_TOOLS := $(INSTALLED_BASE)/libexec/ginger
+INSTALLED_BIN := $(INSTALLED_BASE)/bin
+
+TB_BUILD_DIR := _build
+TB_PACKAGE := ginger
+TB_PREFIX_DIR := usr/local
+
+TB_ROOT_DIR := $(TB_BUILD_DIR)/$(TB_PACKAGE)_files
+TB_USR_DIR := $(TB_ROOT_DIR)/$(TB_PREFIX_DIR)
+
+TB_SHARE_DIR := $(TB_USR_DIR)/share/$(TB_PACKAGE)
+TB_TOOLS_DIR := $(TB_USR_DIR)/libexec/$(TB_PACKAGE)
+TB_BIN_DIR := $(TB_USR_DIR)/bin
+
+TB_WRAP_DIR := $(TB_BUILD_DIR)/$(TB_PACKAGE)
+TB_BUILD_INFO_FILE := $(TB_WRAP_DIR)/BUILD_INFO.txt
+
+TB_USR_TARBALL := $(TB_WRAP_DIR)/$(TB_PACKAGE)-files.tgz
+TB_WRAP_TARBALL := $(TB_BUILD_DIR)/$(TB_PACKAGE).tgz
+
+tarball-clean:
+	mkdir -p $(TB_BUILD_DIR)
+	rm -f $(TB_WRAP_TARBALL)
+	rm -rf $(TB_ROOT_DIR)
+	rm -rf $(TB_WRAP_DIR)
+
+tarball-as-is:
+	$(ANDMAKE) set-up
+	
+	$(ANDMAKE) copy-executables
+	$(ANDMAKE) copy-tools
+	$(ANDMAKE) copy-share
+
+	$(ANDMAKE) build-info
+	$(ANDMAKE) package-tarballs
+
+set-up:
+	$(ANDMAKE) tarball-clean
+	mkdir -p $(TB_WRAP_DIR)
+	mkdir -p $(TB_TOOLS_DIR)
+	mkdir -p $(TB_BIN_DIR)
+	mkdir -p $(TB_SHARE_DIR)	
+
+copy-executables:
+	cp $(INSTALLED_BIN)/ginger $(TB_BIN_DIR)
+	cp $(INSTALLED_BIN)/ginger-* $(TB_BIN_DIR)
+
+copy-share:
+	( cd $(INSTALLED_SHARE); tar cf - . ) | ( cd $(TB_SHARE_DIR); tar xf - )
+
+copy-tools:
+	( cd $(INSTALLED_TOOLS); tar cf - . ) | ( cd $(TB_TOOLS_DIR); tar xf - )
+
+
+package-tarballs:
+	( cd $(TB_USR_DIR); tar cf - . ) | gzip > $(TB_USR_TARBALL)
+	( cd $(TB_BUILD_DIR); tar cf - $(TB_PACKAGE) ) | gzip > $(TB_WRAP_TARBALL)
+
+build-info:
+	touch $(TB_BUILD_INFO_FILE)
+	echo "Ginger Tarball Build-time Information" >> $(TB_BUILD_INFO_FILE)
+	echo "-------------------------------------" >> $(TB_BUILD_INFO_FILE)
+	echo "date         : " `date` >> $(TB_BUILD_INFO_FILE)
+	echo "uname -mn    : " `uname -mn` >> $(TB_BUILD_INFO_FILE)
+	echo "uname -rsv   : " `uname -rsv` >> $(TB_BUILD_INFO_FILE)
+	( cd $(TB_ROOT_DIR); echo "space needed : " `du -shc | grep total` ) >> $(TB_BUILD_INFO_FILE)

@@ -141,66 +141,6 @@ ifeq (ginger,$(notdir $(INSTALL_LIB)))
 	rm -rf $(INSTALL_LIB)
 endif
 
-# Create a tarball for binary archive.
-TBBASE=ginger_files
-TBPACKAGE=ginger
-TBPREFIX=usr/local
-TBMAIN=${TBBASE}/${TBPREFIX}
-TBTOOL=${TBMAIN}/libexec/ginger
-TBBIN=${TBMAIN}/bin
-TBOUTPUT=ginger-files.tgz
-TBBUILDINFO=$(TBPACKAGE)/BUILD_INFO.txt
-
-tarball-clean:
-	mkdir -p _build
-	rm -f _build/$(TBOUTPUT)
-	rm -rf _build/$(TBBASE)
-	rm -rf _build/$(TBPACKAGE)
-
-tarball: all tarball-as-is
-
-tarball-as-is:
-	make tarball-clean
-	mkdir -p _build/$(TBPACKAGE)
-	mkdir -p _build/$(TBTOOL)
-	mkdir -p _build/$(TBBIN)
-	mkdir -p _build/$(TBMAIN)/share/ginger
-	( cd build_template; tar cf - . ) | ( cd _build/$(TBPACKAGE); tar xf - )
-	cp $(LIBEXECUTABLES) _build/$(TBTOOL)
-	cp $(USEREXECUTABLES) _build/$(TBBIN)
-	( cd _build/$(TBBIN); ln -sf ginger-script ginger-common )
-	( cd _build/$(TBBIN); ln -sf ginger-script ginger-ctyle )
-	cp COPYING _build/$(TBMAIN)/share/ginger
-	cp AUTHORS _build/$(TBMAIN)/share/ginger
-	mkdir -p _build/$(TBMAIN)/share/ginger/lisp2gnx/
-	cp apps/lisp2gnx/lsp/lisp2gnx.lsp _build/$(TBMAIN)/share/ginger/lisp2gnx/
-	cp -r projects/standard_library _build/$(TBMAIN)/share/ginger/
-
-	# Copy autodocs.
-	mkdir -p _build/$(TBMAIN)/share/ginger/autodocs
-	( cd autodocs/_build ; tar cf - . ) | ( cd _build/$(TBMAIN)/share/ginger/autodocs ; tar xf - )
-
-	# Cleanup.
-	find _build -type d -name .svn | xargs /bin/rm -rf
-	find _build -name '.DS_STORE' | xargs rm -f
-	find _build -name '._*'
-
-	# Build info.
-	make tarball-as-is-build-info
-
-	# Package tarballs.
-	( cd _build/$(TBMAIN); tar cf - . ) | gzip > _build/$(TBPACKAGE)/$(TBOUTPUT)
-	( cd _build; tar cf - $(TBPACKAGE) ) | gzip > _build/$(TBPACKAGE).tgz
-
-tarball-as-is-build-info:
-	touch _build/$(TBBUILDINFO)
-	echo "Ginger Tarball Build-time Information" >> _build/$(TBBUILDINFO)
-	echo "-------------------------------------" >> _build/$(TBBUILDINFO)
-	echo "date         : " `date` >> _build/$(TBBUILDINFO)
-	echo "uname -mn    : " `uname -mn` >> _build/$(TBBUILDINFO)
-	echo "uname -rsv   : " `uname -rsv` >> _build/$(TBBUILDINFO)
-	( cd _build/$(TBBASE); echo "space needed : " `du -shc | grep total` ) >> _build/$(TBBUILDINFO)
-
 unitcheck:
 	# To be done
 

@@ -20,6 +20,8 @@
 #include <iostream>
 #include <utility>
 
+#include <unistd.h>
+
 #include "mishap.hpp"
 
 #include "importsetinfo.hpp"

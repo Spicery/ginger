@@ -1,0 +1,11 @@
+BUILDDIR=_build
+INSTRUCTIONSDIR=../instruction_set
+
+all: _build/instruction_set.rst
+
+clean:
+	rm -f $(BUILDDIR)/instruction_set.rst
+
+$(BUILDDIR)/instruction_set.rst: *.i*
+	mkdir -p $(BUILDDIR)
+	python make_instrsetdocs.py $(INSTRUCTIONSDIR) > $(BUILDDIR)/instruction_set.rst

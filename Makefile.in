@@ -1,10 +1,12 @@
 all:
 	$(MAKE) -C apps $@
+	$(MAKE) -C autodocs $@
 	$(MAKE) -C projects $@
 
 clean:
 	rm -rf _build/
 	$(MAKE) -C apps $@
+	$(MAKE) -C autodocs $@
 	$(MAKE) -C projects $@
 
 distclean: clean
@@ -54,6 +56,7 @@ distclean: clean
 	rm -f apps/src2lnx/cpp/Makefile
 	rm -f apps/lnx2csv/Makefile
 	rm -f apps/lnx2csv/cpp/Makefile
+	rm -f apps/autodocs/Makefile
 	rm -f projects/Makefile
 	rm -f config.h
 	rm -f config.status
@@ -119,6 +122,9 @@ install-as-is:
 	# Add in the convenience links
 	( cd $(INSTALL_BIN); ln -sf ginger-script ginger-common )
 	( cd $(INSTALL_BIN); ln -sf ginger-script ginger-ctyle )
+	# Copy the autodocs
+	mkdir -p $(INSTALL_LIB)/autodocs
+	( cd autodocs/_build ; tar cf - . ) | ( cd $(INSTALL_LIB)/autodocs ; tar xf - )
 
 # N.B. The rm -rf commands are guarded by code that checks the
 # paths end '/ginger'
@@ -169,10 +175,20 @@ tarball-as-is:
 	mkdir -p _build/$(TBMAIN)/share/ginger/lisp2gnx/
 	cp apps/lisp2gnx/lsp/lisp2gnx.lsp _build/$(TBMAIN)/share/ginger/lisp2gnx/
 	cp -r projects/standard_library _build/$(TBMAIN)/share/ginger/
+
+	# Copy autodocs.
+	mkdir -p _build/$(TBMAIN)/share/ginger/autodocs
+	( cd autodocs/_build ; tar cf - . ) | ( cd _build/$(TBMAIN)/share/ginger/autodocs ; tar xf - )
+
+	# Cleanup.
 	find _build -type d -name .svn | xargs /bin/rm -rf
 	find _build -name '.DS_STORE' | xargs rm -f
 	find _build -name '._*'
+
+	# Build info.
 	make tarball-as-is-build-info
+
+	# Package tarballs.
 	( cd _build/$(TBMAIN); tar cf - . ) | gzip > _build/$(TBPACKAGE)/$(TBOUTPUT)
 	( cd _build; tar cf - $(TBPACKAGE) ) | gzip > _build/$(TBPACKAGE).tgz
 

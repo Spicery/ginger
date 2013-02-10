@@ -1,5 +1,7 @@
 #!/usr/bin/python
 
+import sys
+import os
 import glob
 import re
 
@@ -62,4 +64,6 @@ def processAllFiles():
 		extractDocs( open( f ) )
 		file_footer( f )
 	doc_footer()
+
+os.chdir( sys.argv[1] );	
 processAllFiles()

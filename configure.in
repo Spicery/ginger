@@ -114,6 +114,7 @@ AC_CONFIG_FILES([Makefile
                  apps/src2lnx/cpp/Makefile
                  apps/lnx2csv/Makefile
                  apps/lnx2csv/cpp/Makefile
+                 autodocs/Makefile
                  projects/Makefile])
 
 AC_OUTPUT

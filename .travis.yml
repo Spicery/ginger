@@ -1,0 +1,25 @@
+# http://travis-ci.org/#!/ghiggins/ginger
+language: c
+# whitelist
+branches:
+  only:
+    - master
+before_install:
+    - sudo apt-get -qq update
+    - sudo apt-get -qq install uuid-dev
+    - wget http://www.rudeserver.com/cgiparser/download/rudecgi-5.0.0.tar.bz2
+    - tar jxf rudecgi-5.0.0.tar.bz2
+    - pushd rudecgi-5.0.0
+    - ./configure --prefix=/usr/local
+    - sudo make install
+    - popd
+script:
+    - autoconf
+    - ./configure
+    - sudo make install
+
+notifications:
+  # irc:
+  #   channels: "irc.freenode.org#rdflib"
+  #   on_success: change
+  #   on_failure: change

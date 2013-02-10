@@ -1,10 +1,10 @@
 function print( x ) =>
-    _print( x )
+    _print( x );
 endfunction;
 
 function println( x ) =>
     _print( x );
-    _putchar( '\n' )
+    _putchar( '\n' );
 endfunction;
 
 function double( x ) =>
@@ -21,7 +21,6 @@ endfunction;
 
 function nfib( n ) =>
     if n <= 1 then
-
         1
     else
         1 + nfib( n - 1 ) + nfib( n - 2 )

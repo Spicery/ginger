@@ -53,7 +53,10 @@ public:
 	virtual const char * severity() = 0;
 	void setMessage( const std::string & msg ) { this->message = msg; }
 	void report();
+
+	//	TODO: Refactor to mnxReport!
 	void gnxReport();
+	
 	std::string getMessage();
 	std::pair< std::string, std::string > & getCulprit( int n );
 	int getCount();

@@ -25,6 +25,7 @@
 #include <stdarg.h>
 #include <stdlib.h>
 
+#include "mnx.hpp"
 #include "mishap.hpp"
 #include "gngversion.hpp"
 
@@ -113,13 +114,21 @@ void Problem::report() {
 }
 
 void Problem::gnxReport() {
-	cout << "<problem message=\"" << this->message << "\" severity=\"" << this->severity() << "\"" << ">";
+	cout << "<problem message=\"";
+	mnxRenderText( cout, this->message );
+	cout << "\" severity=\"";
+	mnxRenderText( cout, this->severity() );
+	cout << "\"" << ">";
 	for ( 	
 		vector< pair< string, string > >::iterator it = this->culprits.begin();
 		it != this->culprits.end();
 		++it
 	) {
-		cout << "<culprit name=\"" << it->first << "\" value=\"" << it->second << "\" />";
+		cout << "<culprit name=\"";
+		mnxRenderText( cout, it->first );
+		cout << "\" value=\"";
+		mnxRenderText( it->second );
+		cout << "\" />";
 	}
 	cout << "</problem>" << endl;	
 }

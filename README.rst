@@ -199,6 +199,6 @@ Eclipse (or similar e.g. IntelliJ):
 A C++ aware text editor.
     I use BBEdit on Mac OS X and gedit on Ubuntu.
 
-CI |build status|
+CI |build status| - `travis-ci <https://travis-ci.org/Spicery/ginger>`_
 
 .. |build status| image:: https://travis-ci.org/Spicery/ginger.png?branch=master

@@ -88,12 +88,14 @@ public:
 
 	void parseArgs( int argc, char **argv, char **envp ) {
 		this->use_stdin = true;
+		bool grammar_defined = false;
 		for(;;) {
 			int option_index = 0;
 			int c = getopt_long( argc, argv, "g:H::L::V", long_options, &option_index );
 			if ( c == -1 ) break;
 			switch ( c ) {
 				case 'g': {
+					grammar_defined = true;
 					this->grammar_file = optarg;
 					break;
 				}
@@ -116,6 +118,10 @@ public:
 				}
 			}
         }
+
+        if ( not grammar_defined ) {
+        	throw Mishap( "Missing grammar file (mandatory -g option)" );
+        }
         
 		argc -= optind;
 		argv += optind;
@@ -129,6 +135,9 @@ public:
 public:
 	void run() {
 		ifstream g( this->grammar_file.c_str() );
+		if ( g.bad() ) {
+			throw Mishap( "Cannot open grammar file" ).culprit( "File", this->grammar_file );
+		}
 		MnxReader reader( g );
 		shared< Mnx > grammar_description( reader.readMnx() );
 		

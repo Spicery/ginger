@@ -29,7 +29,7 @@ protected:
 protected:
 	void integrityChecks();
 	//std::string shellSafeName( const std::string & filename );
-	int printLicense( const char * arg ) const;
+	void printLicense( const char * arg ) const;
 
 protected:
 	void executeLoadFileList( RCEP & rcep );
@@ -40,6 +40,8 @@ protected:
 	void executeCommand( RCEP & rcep, const std::string command );
 	void runFrom( RCEP & rcep, Ginger::MnxReader & gnx_read );
 
+private:
+	bool parseArgcArgv( int argc, char **argv );
 
 public:
 	bool parseArgs( int argc, char **argv, char **envp );

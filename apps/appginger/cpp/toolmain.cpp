@@ -113,6 +113,7 @@ static void printUsage() {
 	cout << "-j, --project=PATH    add a project folder to the search path" << endl;
 	cout << "-L, --license         print out license information and exit" << endl;
     cout << "-l, --load=FILE       load a file from the load-folder of the current package" << endl;
+    cout << "-O, --options         compact multiple options as one option (for #! scripts)" << endl;
     cout << "-p, --package=PKG     initial interactive package" << endl;
 	cout << "-q, --quiet           no welcome banner" << endl;
 	cout << "-v, --level=LEVEL     set results level to 1 or 2" << endl;
@@ -138,7 +139,7 @@ static void printHelpLicense() {
 }
 
 
-int ToolMain::printLicense( const char * arg ) const {
+void ToolMain::printLicense( const char * arg ) const {
 	if ( arg == NULL || std::string( arg ) == std::string( "all" ) ) {
 		this->printGPL( NULL, NULL );
 	} else if ( std::string( arg ) == std::string( "warranty" ) ) {
@@ -147,22 +148,19 @@ int ToolMain::printLicense( const char * arg ) const {
 		this->printGPL( "TERMS AND CONDITIONS", "END OF TERMS AND CONDITIONS" );
 	} else {
 		std::cerr << "Unknown license option: " << arg << std::endl;
-		return EXIT_FAILURE;
 	}
-	return EXIT_SUCCESS;
 }
 
-//	We will get to use this later, when we add the -x,--xargs option.
 template < class ContainerT >
 void tokenize(
     const std::string& str, 
     ContainerT & tokens,
-    const std::string& delimiters = " ", 
+    char delimiter, 
     const bool trimEmpty = false
 ) {
     std::string::size_type pos, lastPos = 0;
     for (;;) {
-        pos = str.find_first_of( delimiters, lastPos );
+        pos = str.find_first_of( delimiter, lastPos );
         if ( pos == std::string::npos) {
             pos = str.length();
             if ( pos != lastPos || not trimEmpty ) {
@@ -207,6 +205,7 @@ bool ToolMain::parseArgs( int argc, char **argv, char **envp ) {
     this->integrityChecks();
 	if ( envp != NULL ) this->context.setEnvironmentVariables( envp );
 
+    //  TO-DO delete this section - a bad idea.
     //  If the name of the binary has a '-' sign in it, it is used as
     //  as the default grammar.
     {
@@ -221,11 +220,14 @@ bool ToolMain::parseArgs( int argc, char **argv, char **envp ) {
         }
 	}
 
+    return this->parseArgcArgv( argc, argv );
+}
+
+bool ToolMain::parseArgcArgv( int argc, char **argv ) {
     //bool meta_info_needed = false;
     for(;;) {
         int option_index = 0;
-        int c = getopt_long( argc, argv, "d:e:g:H::ij:L::l:m:p:qv:V", long_options, &option_index );
-        //cerr << "Got c = " << c << endl;
+        int c = getopt_long( argc, argv, "d:e:g:H::ij:L::l:m:O:p:qv:V", long_options, &option_index );
         if ( c == -1 ) break;
         switch ( c ) {
             case 'd': {
@@ -275,11 +277,51 @@ bool ToolMain::parseArgs( int argc, char **argv, char **envp ) {
             	break;
             }
             case 'L': {
-            	return printLicense( optarg );
+            	printLicense( optarg );
+                return false;
             }
             case 'l': {
                 this->context.addLoadFile( optarg );
                 break;
+            }
+            case 'O': {
+                //  Multiple options as one option.
+                
+                //  If optarg is less than 1 in length, forget it.
+                if ( optarg[ 0 ] == '\0' ) break;
+
+                const string packed_options( &optarg[ 1 ] );
+                vector< string > unpacked_options;
+                tokenize< vector< string > >( 
+                    packed_options,
+                    unpacked_options,
+                    optarg[ 0 ],
+                    true
+                );
+                vector< char * > new_argv;
+                new_argv.push_back( NULL );
+                for ( 
+                    vector< string >::iterator it = unpacked_options.begin(); 
+                    it != unpacked_options.end(); 
+                    ++it 
+                ) {
+                    new_argv.push_back( const_cast< char * >( it->c_str() ) );  
+                }
+                int new_argc = new_argv.size();
+                new_argv.push_back( NULL );
+
+                int current_optind = optind;
+                optind = 1;
+                
+                const bool rtn = this->parseArgcArgv( new_argc, &new_argv[0] );
+
+                optind = current_optind;
+
+                if ( rtn ) {
+                    break;
+                } else {
+                    return false;
+                }
             }
             case 'p': {
                 this->context.setInteractivePackage( optarg );
@@ -289,7 +331,7 @@ bool ToolMain::parseArgs( int argc, char **argv, char **envp ) {
             	this->context.welcomeBanner() = false;
             	break;
             }
-            case 'r': {
+            case 'v': {
             	int level = atoi( optarg );
             	this->context.printDetailLevel() = level;
             	break;

@@ -64,19 +64,21 @@ static string& lttrim( string& s ) {
 
 static const char * HELP = "help";
 
+static void sendStdoutToTerminal() {
+    //  Ensure that stdout goes to the terminal.
+    if ( dup2( STDERR_FILENO, STDOUT_FILENO ) < 0 ) {
+        perror( "gngreadline (dup failed)" );
+        exit( EXIT_FAILURE );
+    }    
+}
+
 int main( int argc, char ** argv ) {
-    //std::cerr<< "GNGREADLINE" << std::endl;
     std::string line;
     while ( !getline( std::cin, line ).eof() ) {
         if ( !line.empty() && line[0] == '!' ) {
             pid_t pid = fork();
             if ( pid == 0 ) {
-                //  Ensure that stdout goes to the terminal.
-                if ( dup2( STDERR_FILENO, STDOUT_FILENO ) < 0 ) {
-                    perror( "gngreadline (dup failed)" );
-                    exit( EXIT_FAILURE );
-                }
-                //cerr << "Forking! (child)" << endl;
+                sendStdoutToTerminal();
                 if ( line.size() == 1 ) {
                     execl( "/bin/bash", "/bin/bash", "-c", "/bin/bash -i", (char *)0 );
                     perror( "gngreadline (execl failed 1)" );
@@ -90,18 +92,17 @@ int main( int argc, char ** argv ) {
                 wait( &status );
             }
         } else if ( line == HELP ) {
-            //  TODO: OPEN default web browser on the starting page.
             if ( fork() == 0 ) {
+                sendStdoutToTerminal();
                 execl( INSTALL_TOOL "/ginger-help", "ginger-help", (char *)0 );
                 perror( "gngreadline" );
                 return EXIT_FAILURE;
             }
         } else if ( startsWith( line, HELP ) ) {
-            //  TODO: Open default web browser on the page with best matches to tags.
-            //  Chop off the leading "help", trim whitespace & pass through.
             string topic( line, strlen( HELP ) );
             lttrim( topic );
             if ( fork() == 0 ) {
+                sendStdoutToTerminal();
                 execl( INSTALL_TOOL "/ginger-help", "ginger-help", topic.c_str(), (char *)0 );
                 perror( "gngreadline" );
                 return EXIT_FAILURE;
@@ -110,5 +111,4 @@ int main( int argc, char ** argv ) {
             std::cout << line << std::endl;
         }
     }
-    //std::cerr << "End of file" << endl;
 }

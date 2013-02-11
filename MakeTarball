@@ -49,7 +49,8 @@ set-up:
 	mkdir -p $(TB_WRAP_DIR)
 	mkdir -p $(TB_TOOLS_DIR)
 	mkdir -p $(TB_BIN_DIR)
-	mkdir -p $(TB_SHARE_DIR)	
+	mkdir -p $(TB_SHARE_DIR)
+	( cd build_template; tar cf - . ) | ( cd $(TB_WRAP_DIR); tar xf - )
 
 copy-executables:
 	cp $(INSTALLED_BIN)/ginger $(TB_BIN_DIR)

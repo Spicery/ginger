@@ -3,8 +3,9 @@
 
 #include <string>
 #include <list>
+#include <iostream>
 
-#include <stdio.h>
+//#include <stdio.h>
 
 #include "item.hpp"
 #include "item_map.hpp"

@@ -1,7 +1,9 @@
+#include <iostream>
+//#include <cstdio>
+#include <cstdlib>
+
 #include "machine4.hpp"
 #include "instructions_context.hpp"
-#include <cstdio>
-#include <cstdlib>
 
 using namespace Ginger;
 using namespace std;

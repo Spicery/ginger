@@ -19,7 +19,6 @@
 #include <iostream>
 #include <fstream>
 
-#include <cstdio>
 #include <cstdlib>
 
 #include <syslog.h>
@@ -85,14 +84,14 @@ void ToolMain::parseArgs( int argc, char **argv, char **envp ) {
 				//  files and this will simply go there. Or run a web
 				//  browser pointed there.
 				if ( optarg == NULL ) {
-					printf( "Usage:  %s OPTIONS < LNX_IN > CSV_OUT\n", this->app_title );
-					printf( "OPTIONS\n" );
-					printf( "-T, --tokenise        tokenise only, generate LNX output instead of GNX\n" );
-					printf( "-H, --help[=TOPIC]    help info on optional topic (see --help=help)\n" );
-					printf( "-V, --version         print out version information and exit\n" );
-					printf( "-L, --license[=PART]  print out license information and exit (see --help=license)\n" );
-					printf( "-s, --nospan          suppress span attribution" );
-					printf( "\n" );
+					cout << "Usage:  " << this->app_title << " OPTIONS < LNX_IN > CSV_OUT" << endl;
+					cout << "OPTIONS" << endl;
+					cout << "-T, --tokenise        tokenise only, generate LNX output instead of GNX" << endl;
+					cout << "-H, --help[=TOPIC]    help info on optional topic (see --help=help)" << endl;
+					cout << "-V, --version         print out version information and exit" << endl;
+					cout << "-L, --license[=PART]  print out license information and exit (see --help=license)" << endl;
+					cout << "-s, --nospan          suppress span attribution" << endl;
+					cout << endl;
 				} else if ( std::string( optarg ) == "help" ) {
 					cout << "--help=help           this short help" << endl;
 					cout << "--help=licence        help on displaying license information" << endl;
@@ -101,7 +100,7 @@ void ToolMain::parseArgs( int argc, char **argv, char **envp ) {
 					cout << "--license=warranty    Shows warranty." << endl;
 					cout << "--license=conditions  Shows terms and conditions." << endl;
 				} else {
-					printf( "Unknown help topic %s\n", optarg );
+					cout << "Unknown help topic " << optarg << endl;
 				}
 				exit( EXIT_SUCCESS );   //  Is that right?
 			}
@@ -130,7 +129,7 @@ void ToolMain::parseArgs( int argc, char **argv, char **envp ) {
 				break;
 			}
 			default: {
-				printf( "?? getopt returned character code 0%x ??\n", static_cast< int >( c ) );
+				cout << "?? getopt returned character code 0%x ??" << static_cast< int >( c ) << endl;
 			}
 		}
 	}

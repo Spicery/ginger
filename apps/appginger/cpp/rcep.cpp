@@ -26,8 +26,6 @@
 
 #include "debug.hpp"
 
-#include <cstdio>
-
 #include "mnx.hpp"
 
 #include "common.hpp"

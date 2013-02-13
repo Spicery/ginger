@@ -89,13 +89,13 @@ public:
 					//  files and this will simply go there. Or run a web
 					//  browser pointed there.
 					if ( optarg == NULL ) {
-						printf( "Usage:  %s OPTIONS < LNX_IN > CSV_OUT\n", APP_NAME );
-						printf( "OPTIONS\n" );
-						printf( "-c, --columns         first line of output is a CSV header\n" );
-						printf( "-H, --help[=TOPIC]    help info on optional topic (see --help=help)\n" );
-						printf( "-V, --version         print out version information and exit\n" );
-						printf( "-L, --license[=PART]  print out license information and exit (see --help=license)\n" );
-						printf( "\n" );
+						cout << "Usage:  " << APP_NAME << " OPTIONS < LNX_IN > CSV_OUT" << endl;
+						cout << "OPTIONS" << endl;
+						cout << "-c, --columns         first line of output is a CSV header" << endl;
+						cout << "-H, --help[=TOPIC]    help info on optional topic (see --help=help)" << endl;
+						cout << "-V, --version         print out version information and exit" << endl;
+						cout << "-L, --license[=PART]  print out license information and exit (see --help=license)" << endl;
+						cout << endl;
 					} else if ( std::string( optarg ) == "help" ) {
 						cout << "--help=help           this short help" << endl;
 						cout << "--help=licence        help on displaying license information" << endl;
@@ -104,7 +104,7 @@ public:
 						cout << "--license=warranty    Shows warranty." << endl;
 						cout << "--license=conditions  Shows terms and conditions." << endl;
 					} else {
-						printf( "Unknown help topic %s\n", optarg );
+						cout << "Unknown help topic " << optarg << endl;
 					}
 					exit( EXIT_SUCCESS );   //  Is that right?
 				}
@@ -129,7 +129,7 @@ public:
 					break;
 				}
 				default: {
-					printf( "?? getopt returned character code 0%x ??\n", static_cast< int >( c ) );
+					cout << "?? getopt returned character code 0x" << hex << static_cast< int >( c ) << dec << endl;
 				}
 			}
         }

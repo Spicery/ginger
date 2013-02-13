@@ -23,9 +23,9 @@ Ref r;
 long n = ToLong( *( ++pc ) );
 
 #ifdef DBG_SPECIAL
-	fprintf( stderr, "Recovering %u from %d\n", ToULong( LOCAL(n) ), n );
-	fprintf( stderr, "Comparing with %u\n",  ToULong( VMVP ) );
-	fprintf( stderr, "Length of value stack = %d\n", ( VMVP - VMVP_base ) );
+    std::cerr << "Recovering " << ToULong( LOCAL(n) ) << " from " << n << std::endl;
+	std::cerr << "Comparing with " <<  ToULong( VMVP ) << std::endl;
+	std::cerr << "Length of value stack = " << ( VMVP - VMVP_base ) << std::endl;
 #endif
 
 r = ToRef( ToULong( VMVP ) - ToULong( LOCAL( n ) ) );

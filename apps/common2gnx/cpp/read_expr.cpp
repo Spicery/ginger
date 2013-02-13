@@ -3,7 +3,7 @@
 #include <sstream>
 
 #include <stddef.h>
-#include <stdio.h>
+//#include <stdio.h>
 #include <assert.h>
 
 #include "gnxconstants.hpp"
@@ -430,7 +430,7 @@ Node ReadStateClass::postfixProcessing( Node lhs, Item item, int prec ) {
 				add.end();
 				add.end();
 				Node t = add.build();
-				//fprintf( stderr, "DEBUG arity %d\n", term_arity( t ) );
+				//cerr << "DEBUG arity " << term_arity( t ) << endl;
 				return t;
 			}
 			case tokty_int: {
@@ -444,7 +444,7 @@ Node ReadStateClass::postfixProcessing( Node lhs, Item item, int prec ) {
 				add.end();
 				add.end();
 				Node t = add.build();
-				//fprintf( stderr, "DEBUG arity %d\n", term_arity( t ) );
+				//cerr << "DEBUG arity " << term_arity( t ) << endl;
 				return t;
 			}
 			/*

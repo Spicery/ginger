@@ -20,7 +20,6 @@
 #include <string>
 #include <iostream>
 
-#include <stdio.h>
 #include <string.h>
 
 #include "machine.hpp"

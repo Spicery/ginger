@@ -71,7 +71,6 @@ to it as a stream.
 #include <algorithm>
 
 #include <stddef.h>
-#include <stdio.h>
 #include <getopt.h>
 #include <syslog.h>
 #include <stdlib.h>
@@ -107,19 +106,19 @@ private:
 	
 public:
 	static void helpOptions() {
-		printf( "PROCESSING STAGE OPTIONS (n.b. -4 and -9 free for future use)\n" ) ;
-        printf( "-s, --standard        a standard set of transformations, equal to options 0-9\n" );
-        printf( "-u, --undefined       undefined allowed\n" );
-		printf( "-0, --self            replace named lambda self-references with special forms\n" );
-		printf( "-1, --absolute        add def.pkg attribute to all globals\n" );
-		printf( "-2, --arity           add arity marking to all subexpressions\n" );
-		printf( "-3, --flatten         eliminate nested sequences\n" );
-		printf( "-5, --lift            transform nested lambdas so that they only reference immediate locals\n" );
-		printf( "-6, --scope           mark all variable definitions and references as local or global\n" );
-		printf( "-7, --sysapp          replace calls to standard variable with sys-calls\n" );
-		printf( "-8, --tailcall        marks function applications as tail-call or not\n" );
-		printf( "-A, --slotalloc       assigns a frame slot to every variable\n" );
-		printf( "-B, --toplevel        moves every lambda to top-level\n" );
+		cout << "PROCESSING STAGE OPTIONS (n.b. -4 and -9 free for future use)" << endl;
+        cout << "-s, --standard        a standard set of transformations, equal to options 0-9" << endl;
+        cout << "-u, --undefined       undefined allowed" << endl;
+		cout << "-0, --self            replace named lambda self-references with special forms" << endl;
+		cout << "-1, --absolute        add def.pkg attribute to all globals" << endl;
+		cout << "-2, --arity           add arity marking to all subexpressions" << endl;
+		cout << "-3, --flatten         eliminate nested sequences" << endl;
+		cout << "-5, --lift            transform nested lambdas so that they only reference immediate locals" << endl;
+		cout << "-6, --scope           mark all variable definitions and references as local or global" << endl;
+		cout << "-7, --sysapp          replace calls to standard variable with sys-calls" << endl;
+		cout << "-8, --tailcall        marks function applications as tail-call or not" << endl;
+		cout << "-A, --slotalloc       assigns a frame slot to every variable" << endl;
+		cout << "-B, --toplevel        moves every lambda to top-level" << endl;
 	}	
 		
 public:
@@ -378,16 +377,16 @@ void Main::parseArgs( int argc, char **argv, char **envp ) {
                 //  files and this will simply go there. Or run a web
                 //  browser pointed there.
                 if ( optarg == NULL ) {
-                    printf( "Usage:  simplifygnx -p PACKAGE OPTIONS < GNX_IN > GNX_OUT\n" );
-                    printf( "GENERAL OPTIONS\n" );
-                    printf( "-d, --debug           retain debugging information\n" );
-                    printf( "-H, --help[=TOPIC]    help info on optional topic (see --help=help)\n" );
-                    printf( "-j, --project=PATH    adds a project folder onto the search path" );
-                    printf( "-L, --license[=PART]  print out license information and exit (see --help=license)\n" );
-                    printf( "-p, --package=PACKAGE defines the enclosing package\n" );
-                    printf( "-V, --version         print out version information and exit\n" );
+                    cout << "Usage:  simplifygnx -p PACKAGE OPTIONS < GNX_IN > GNX_OUT" << endl;
+                    cout << "GENERAL OPTIONS" << endl;
+                    cout << "-d, --debug           retain debugging information" << endl;
+                    cout << "-H, --help[=TOPIC]    help info on optional topic (see --help=help)" << endl;
+                    cout << "-j, --project=PATH    adds a project folder onto the search path" << endl;
+                    cout << "-L, --license[=PART]  print out license information and exit (see --help=license)" << endl;
+                    cout << "-p, --package=PACKAGE defines the enclosing package" << endl;
+                    cout << "-V, --version         print out version information and exit" << endl;
                     ProcessingOptions::helpOptions();
-                    printf( "\n" );
+                    cout << "" << endl;
                 } else if ( std::string( optarg ) == "help" ) {
                     cout << "--help=help           this short help" << endl;
                     cout << "--help=licence        help on displaying license information" << endl;
@@ -396,7 +395,7 @@ void Main::parseArgs( int argc, char **argv, char **envp ) {
                     cout << "--license=warranty    Shows warranty." << endl;
                     cout << "--license=conditions  Shows terms and conditions." << endl;
                 } else {
-                    printf( "Unknown help topic %s\n", optarg );
+                    cout << "Unknown help topic " << optarg << endl;
                 }
                 exit( EXIT_SUCCESS );   //  Is that right?
             }
@@ -428,7 +427,7 @@ void Main::parseArgs( int argc, char **argv, char **envp ) {
                 break;
             }
             default: {
-                printf( "?? getopt returned character code 0%x ??\n", static_cast< int >( c ) );
+                cout << "?? getopt returned character code 0x" << hex << static_cast< int >( c ) << dec << endl;
             }
         }
     }

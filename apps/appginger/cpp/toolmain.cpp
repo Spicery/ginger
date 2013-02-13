@@ -22,7 +22,6 @@
 #include <vector>
 #include <string>
 
-#include <cstdio>
 #include <cstdlib>
 #include <sstream>
 
@@ -264,7 +263,7 @@ bool ToolMain::parseArgcArgv( int argc, char **argv ) {
                 } else if ( std::string( optarg ) == "license" ) {
                 	printHelpLicense();
                 } else {
-                    printf( "Unknown help topic %s\n", optarg );
+                    cout << "Unknown help topic %s" << optarg << endl;
                 }
 				return false;
             }

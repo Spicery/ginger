@@ -38,8 +38,6 @@ Machine2::Machine2( AppContext * g ) :
 void Machine2::execute( Ref r ) {
 	pc = this->setUpPC( r );
 	vm = this;
-
-	//	printf( "Should return to %s\n", special_name( *(Special **)(*VM->sp) ) );
 	for (;;) {		
 		Special fn = (Special)( *pc );
 		#ifdef DBG_MACHINE

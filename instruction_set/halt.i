@@ -17,7 +17,7 @@ Result (Postcondition)
 \*****************************************************************************/
 
 #ifdef DBG_SPECIAL	
-printf( "\nhalt\n" );
+	std::cout << std::endl << "halt" << std::endl;
 #endif
-fprintf( stderr, "Compilation error - fell off the end of a function\n" );
+std::cerr << "Compilation error - fell off the end of a function" << std::endl;
 exit( EXIT_FAILURE );

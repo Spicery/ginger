@@ -20,7 +20,7 @@ Result (Postcondition)
 
 long n = ToLong( *( ++pc ) );
 #ifdef DBG_SPECIAL
-	fprintf( stderr, "Storing %u in %d\n", ToULong( ToRef( VMVP ) ), n );
+	std::cerr << "Storing " << std::hex << ToULong( ToRef( VMVP ) ) << std::dec << " in " << n << std::endl; 
 #endif
 LOCAL(n) = ToRef( VMVP );
 RETURN( pc + 1 );

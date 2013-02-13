@@ -23,7 +23,10 @@ Result (Postcondition)
 \*****************************************************************************/
 
 #ifdef DBG_SPECIAL
-	fprintf( stderr, "IFNOT finds %x on the stack (cf. %x & %x)\n", (unt)(*( VMVP )), (unt)(SYS_FALSE), (unt)(SYS_TRUE) );
+	std::cerr << "IFNOT finds " << std::hex << (unt)(*( VMVP )) <<
+	" on the stack (cf. " << 
+	(unt)(SYS_FALSE) << " & " << (unt)(SYS_TRUE) <<
+	std::dec << std::endl; 
 #endif
 
 RETURN(

@@ -16,12 +16,11 @@
     along with AppGinger.  If not, see <http://www.gnu.org/licenses/>.
 \******************************************************************************/
 
+#include <iostream>
 #include <string.h>
-#include <stdio.h>
 #include <vector>
 #include <stdexcept>
 
-#include <cstdio>
 #include <cstdlib>
 
 #include <stddef.h>
@@ -133,12 +132,10 @@ void XfrClass::xfrString( const std::string s ) {
 //  Copy characters from index a to b of s.
 void XfrClass::xfrSubstring( const char *s, int a, int b ) {
 	/*
-	printf(
-		"Copying from %d to %d = %d bytes = %d words\n",
-		a, b,
-		b - a + 1,
-		( sizeof( Ref ) + b - a ) / sizeof( Ref )
-	);
+	std::cout <<
+	"Copying from " << a << " to " << b << " = " << ( b - a + 1 ) << " bytes = " << 
+	( ( sizeof( Ref ) + b - a ) / sizeof( Ref ) ) << " words" << 
+	std::endl;
 	*/
 	memcpy( (void *)(this->tmptop), s + a, b - a + 1 );
 	this->tmptop += ( sizeof( Ref ) + b - a ) / sizeof( Ref );
@@ -181,7 +178,7 @@ Ref * XfrClass::makeRefRef() {
 		throw std::runtime_error( "Origin was not set during copy" );
 	}
 	this->cage->top = this->tmptop;
-	//	printf( "Origin = %x\n", ToUInt( *RefToPtr4( origin ) ) );
+	//std::cout << "Origin = " << std::hex << (unsigned long)( *RefToPtr4( origin ) ) << std::dec << std::endl;
 	return this->origin;
 }
 

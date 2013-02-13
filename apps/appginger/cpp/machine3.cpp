@@ -16,17 +16,15 @@
     along with AppGinger.  If not, see <http://www.gnu.org/licenses/>.
 \******************************************************************************/
 
-#include "machine3.hpp"
-
-#include <cstdio>
+#include <iostream>
 #include <cstdlib>
+
+#include "machine3.hpp"
 
 using namespace Ginger;
 
-
 //	Now source the auto-generated C++ file. 
 #include "instructions_context.hpp"
-
 
 
 Machine3::Machine3( AppContext * g ) :

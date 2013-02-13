@@ -17,7 +17,6 @@
 \******************************************************************************/
 
 #include <iostream>
-using namespace std;
 
 #include "common.hpp"
 #include "key.hpp"
@@ -26,6 +25,9 @@ using namespace std;
 #include "doublelayout.hpp"
 
 #include <cstring>
+
+using namespace std;
+
 
 //#define DBG_HEAP
 
@@ -87,7 +89,7 @@ Ref HeapClass::copyString( Ref * & pc, const char * s ) {
 	xfr.xfrRef( LongToRef( n ) );
 	xfr.setOrigin();
 	xfr.xfrRef( sysStringKey );
-	//	printf( "Set origin to '%x'\n", ToUInt( sysStringKey ) );
+	//cout << "Set origin to '" << ToUInt( sysStringKey ) << "'" << endl;
 	xfr.xfrSubstring( s, 0, n );
 	return xfr.makeRef();
 }

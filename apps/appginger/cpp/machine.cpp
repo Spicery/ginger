@@ -202,8 +202,6 @@ Ref * MachineClass::instructionShow( ostream & out, Ref *pc ) {
 			}
 			case 'c': {
 				refPrint( out, *pc );               
-				//printf( " " );
-				//out <<  "XXX ";
 				break;
 			}
 			case 'v': {

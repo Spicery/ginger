@@ -22,7 +22,6 @@
 #include <sstream>
 #include <tr1/memory>
 
-#include <stdio.h>
 #include <string.h>
 #include <errno.h>
 

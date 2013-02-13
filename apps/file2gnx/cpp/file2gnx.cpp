@@ -309,7 +309,7 @@ public:
 	                } else if ( std::string( optarg ) == "license" ) {
 	                	printHelpLicense();
 	                } else {
-	                    printf( "Unknown help topic %s\n", optarg );
+	                    cout << "Unknown help topic " << optarg << endl;
 	                }
 	                return false;
 	          	}

@@ -88,16 +88,20 @@ static struct option long_options[] =
 void ToolMain::printGPL( const char * start, const char * end ) const {
     bool printing = false;
     ifstream license( LICENSE_FILE );
-    std::string line;
-    while ( getline( license, line ) )  {
-        if ( !printing && ( start == NULL || line.find( start ) != string::npos ) ) {
-            printing = true;
-        } else if ( printing && end != NULL && line.find( end ) != string::npos ) {
-            printing = false;
+    if ( license.good() ) {
+        std::string line;
+        while ( getline( license, line ) )  {
+            if ( !printing && ( start == NULL || line.find( start ) != string::npos ) ) {
+                printing = true;
+            } else if ( printing && end != NULL && line.find( end ) != string::npos ) {
+                printing = false;
+            }
+            if ( printing ) {
+                std::cout << line << std::endl;
+            }
         }
-        if ( printing ) {
-            std::cout << line << std::endl;
-        }
+    } else {
+        std::cout << "License file not found." << endl;
     }
 }
 

@@ -21,6 +21,7 @@
 
 #include <iostream>
 #include <fstream>
+#include <sstream>
 
 //#include <cstdio>
 #include <cstdlib>
@@ -76,6 +77,7 @@ void AppContext::addProjectFolder( const char * folder ) {
 }
 
 void AppContext::initCgi() {
+    this->mode = CGI_MODE;
 #ifdef RUDECGI
 	this->cgi = new rude::CGI();
 #endif
@@ -112,4 +114,162 @@ const string AppContext::syntax( const std::string & filename ) {
     }
     cmd += Ginger::shellSafeName( filename );
     return cmd;
+}
+
+class ReSTRuntimeInfoDriver {
+public:
+    void startInfo() {}
+    void endInfo() {}
+
+    void startSection( const string topic ) {
+        cout << topic << endl;
+        this->underline( '-', topic );
+    }
+
+    void endSection() {
+        cout << endl;
+    }
+
+    void underline( const char u, const string topic ) {
+        this->underline( u, topic.size() );
+    }
+
+    void startFreeText() {
+        cout << endl << "::" << endl << endl;
+    }
+
+    void endFreeText() {
+        cout << endl;
+    }
+
+    void showLine( const string line ) {
+        cout << "\t" << line << endl;
+    }
+
+    void underline( const char u, const int n ) {
+        for ( int i = 0; i < n; i++ ) {
+            cout << u;
+        }
+        cout << endl;
+    }
+
+    void show( const string fieldname, const string value ) {
+        this->show( fieldname.c_str(), value.c_str() );
+    }
+    void show( const int n, const string value ) {
+        stringstream out;
+        out << n;
+        this->show( out.str(), value );
+    }
+    
+    void show( const char * fieldname, const int n ) {
+        stringstream out;
+        out << n;
+        this->show( fieldname, out.str().c_str() );
+    }
+
+    void show( const char * fieldname, const char * value ) {
+        cout << "* " << fieldname << ": " << value << endl;
+    }
+
+    void showEnabled( const char * fieldname, const bool enabled ) {
+        this->show( fieldname, enabled ? "enabled" : "disabled" );
+    }
+
+    void showEntry( const string e ) {
+        cout << "* " << e << endl;
+    }
+
+};
+
+void AppContext::initShell() {
+    this->mode = SHELL_MODE;
+}
+
+void AppContext::initScript() {
+    this->mode = SCRIPT_MODE;
+}
+
+bool AppContext::isCGIMode() {
+    return this->mode == CGI_MODE;
+}
+
+bool AppContext::isScriptMode() {
+    return this->mode == SCRIPT_MODE;
+}
+
+bool AppContext::isShellMode() {
+    return this->mode == SHELL_MODE;
+}
+
+/**
+ *  The main purpose of this function is to display information that will 
+ *  help programmers understand the launch configuration and dynamic 
+ *  environment of the Ginger virtual machine. Other information that is
+ *  displayed should be kept short and link to other more detailed
+ *  resources.
+ */
+void AppContext::showMeRuntimeInfo() {
+    ReSTRuntimeInfoDriver d;
+    d.startInfo();
+
+    d.startSection( "Application Environment" );
+    d.show( 
+        "Startup mode", 
+        this->isScriptMode() ? "Script" :
+        this->isShellMode() ? "Shell" :
+        this->isCGIMode() ? "CGI" : 
+        "Other" 
+    );
+    d.endSection();
+
+    d.startSection( "Main" );
+    d.show( "Ginger version", this->version() );
+    d.show( "VM Implementation ID", this->machine_impl_num );
+    d.showEnabled( "Garbage collection tracing", this->is_gctrace );
+    d.showEnabled( "Code generation tracing", this->getShowCode() );
+    d.show( "Reading standard input", this->use_stdin );
+    d.show( "Level of print detail", this->print_level );
+    d.showEnabled( "Showing welcome banner", this->welcoming );
+    d.show( "Interactive package", this->interactive_package );
+    d.show( "Default syntax", this->initial_syntax );
+    d.endSection();
+
+    d.startSection( "Project folders" );
+    if ( this->project_folder_list.empty() ) {
+        d.showEntry( "(None)" );
+    } else {
+        int count = 0;
+        for ( 
+            std::list< std::string >::iterator it = this->project_folder_list.begin();
+            it != this->project_folder_list.end();
+            ++it
+        ) {
+            d.show( ++count, *it );
+        }
+    }
+    d.endSection();
+
+    d.startSection( "Environment Variables" );
+    {
+        char ** envp = this->envp;
+        while ( *envp != NULL ) {
+            char * e = *envp++;
+            d.showEntry( e );
+        }
+    }
+    d.endSection();
+
+    d.startSection( "Installation Folders" );
+    d.show( "Executables folder", INSTALL_BIN );
+    d.show( "Tools folder", INSTALL_TOOL );
+    d.show( "Resources library (share) folder", INSTALL_LIB );
+    d.endSection();
+
+    d.startSection( "Legal" );
+    d.show( "Copyright", "Copyright (c) 2010  Stephen Leach <sfkleach@gmail.com>" );
+    d.show( "License", "GNU GENERAL PUBLIC LICENSE, Version 3, 29 June 2007 <http://www.gnu.org/licenses/gpl.txt>" );
+    d.endSection();
+
+    d.endInfo();
 }

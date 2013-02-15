@@ -203,6 +203,7 @@ public:
 
 public:
 	GingerMain( const char * name ) : ToolMain( name ) {
+		this->context.initShell();
 		this->context.printDetailLevel() = 2;
 	}
 	

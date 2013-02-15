@@ -419,6 +419,12 @@ Ref * sysBoolAbs( Ref *pc, class MachineClass * vm ) {
 	return pc;
 }
 
+Ref * sysShowMeRuntimeInfo( Ref * pc, class MachineClass * vm ) {
+	vm->getAppContext().showMeRuntimeInfo();
+	return pc;
+}
+
+
 #include "datatypes.cpp.auto"
 
 typedef std::map< std::string, SysInfo > SysMap;
@@ -478,6 +484,7 @@ const SysMap::value_type rawData[] = {
 	SysMap::value_type( "partApply", SysInfo( Arity( 1, true ), Arity( 1 ), sysPartApply, "Freezes arguments and a function together to make a new function" ) ),
 	SysMap::value_type( "functionInArity", SysInfo( Arity( 1  ), Arity( 1 ), sysFunctionInArity, "Input arity of a function" ) ),
 	SysMap::value_type( "functionOutArity", SysInfo( Arity( 1 ), Arity( 1 ), sysFunctionOutArity, "Output arity of a function" ) ),
+	SysMap::value_type( "showMeRuntimeInfo", SysInfo( Arity(0), Arity(0), sysShowMeRuntimeInfo, "Prints the runtime info to stdout" ) ),
 #include "sysapply.inc"
 #include "sysattrmap.inc"
 #include "syscgi.inc"

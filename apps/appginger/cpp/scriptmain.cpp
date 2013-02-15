@@ -59,6 +59,7 @@ public:
 
 public:
 	ScriptMain( const char * name ) : ToolMain( name ) {
+		this->context.initScript();
 		this->context.printDetailLevel() = 1;
 	}
 	

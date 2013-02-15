@@ -39,6 +39,13 @@ class MachineClass;
 class Package;
 
 class AppContext {
+public:
+	enum {
+		SCRIPT_MODE,
+		SHELL_MODE,
+		CGI_MODE
+	}							mode;
+
 private:
 	int 						machine_impl_num;
 	bool 						dbg_show_code;
@@ -77,13 +84,19 @@ public:
 	int & printDetailLevel() { return this->print_level; }
 	const char* cgiValue( const char* fieldname );
 	void initCgi();
+	bool isCGIMode();
+	void initShell();
+	bool isShellMode();
+	void initScript();
+	bool isScriptMode();
 	bool & welcomeBanner() { return this->welcoming; }
 	const std::string syntax( const bool interactively ); 
 	const std::string syntax( const std::string & filename ); 
 	void setSyntax( const std::string s ) { this->initial_syntax = s; }
 	const std::string getInteractivePackage() { return this->interactive_package; }
 	void setInteractivePackage( const std::string & ip ) { this->interactive_package = ip; }
- 
+ 	void showMeRuntimeInfo();
+
 public:
 	MachineClass * newMachine();
 	Package * initInteractivePackage( MachineClass * vm );

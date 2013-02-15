@@ -37,6 +37,7 @@ extern Ref * sysLength( Ref *pc, class MachineClass * vm );
 extern Ref * sysHash( Ref *pc, class MachineClass * vm );
 extern Ref * sysAppend( Ref *pc, class MachineClass * vm );
 extern Ref * sysFastGetFastIterator( Ref * pc, class MachineClass * vm );
+extern Ref * sysShowMeRuntimeInfo( Ref * pc, class MachineClass * vm );
 
 #include "datatypes.hpp.auto"
 

@@ -207,22 +207,6 @@ void ToolMain::integrityChecks() {
 bool ToolMain::parseArgs( int argc, char **argv, char **envp ) {
     this->integrityChecks();
 	if ( envp != NULL ) this->context.setEnvironmentVariables( envp );
-
-    //  TO-DO delete this section - a bad idea.
-    //  If the name of the binary has a '-' sign in it, it is used as
-    //  as the default grammar.
-    /*{
-        //cerr << "Infer grammar ..." << endl;
-        const string appname( argc >= 1 ? argv[ 0 ] : "" );
-        const size_t n = appname.rfind( '-' );
-        if ( n != string::npos ) {
-            this->context.setSyntax( appname.substr( n + 1, appname.size() ) );
-            //cerr << "Extn = " << appname.substr( n + 1, appname.size() ) << endl;
-        //} else {
-            //cerr << "None set" << endl;
-        }
-	}*/
-
     return this->parseArgcArgv( argc, argv );
 }
 

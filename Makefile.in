@@ -77,11 +77,17 @@ INSTALL_TOOL=@libexecdir@/@PACKAGE_TARNAME@
 INSTALL_LIB=@datarootdir@/@PACKAGE_TARNAME@
 INSTALL_DOC=@docdir@
 
+# These will be installed in /usr/local/bin and will be available
+# on the programmer's path.
 USEREXECUTABLES=\
 	apps/appginger/cpp/ginger-cgi \
 	apps/appginger/cpp/ginger-script \
-	apps/appginger/cpp/ginger 
+	apps/appginger/cpp/ginger \
+	apps/ginger-admin/cpp/ginger-admin \
+	apps/appginger/cpp/ginger-info
 
+# These will be installed in /usr/local/libexec/ginger and will not be
+# available on the programmer's path. They are helper functions.
 LIBEXECUTABLES=\
 	apps/appginger/cpp/appginger \
 	apps/common2gnx/cpp/common2gnx \
@@ -89,9 +95,7 @@ LIBEXECUTABLES=\
 	apps/fetchgnx/cpp/fetchgnx \
 	apps/file2gnx/cpp/file2gnx \
 	apps/appginger/cpp/ginger-cli \
-	apps/ginger-admin/cpp/ginger-admin \
 	apps/ginger-help/cpp/ginger-help \
-	apps/appginger/cpp/ginger-info \
 	apps/gngreadline/cpp/gngreadline \
 	apps/lisp2gnx/lsp/lisp2gnx \
 	apps/shebang/cpp/shebang \
@@ -119,9 +123,6 @@ install-as-is:
 	/usr/bin/install -m a=r apps/lisp2gnx/lsp/lisp2gnx.lsp $(INSTALL_LIB)/lisp2gnx
 	/usr/bin/install $(LIBEXECUTABLES) $(INSTALL_TOOL)
 	/usr/bin/install $(USEREXECUTABLES) $(INSTALL_BIN)
-	# Add in the convenience links
-	( cd $(INSTALL_BIN); ln -sf ginger-script ginger-common )
-	( cd $(INSTALL_BIN); ln -sf ginger-script ginger-ctyle )
 	# Copy the autodocs
 	mkdir -p $(INSTALL_LIB)/autodocs
 	( cd autodocs/_build ; tar cf - . ) | ( cd $(INSTALL_LIB)/autodocs ; tar xf - )

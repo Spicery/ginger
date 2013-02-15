@@ -211,7 +211,7 @@ bool ToolMain::parseArgs( int argc, char **argv, char **envp ) {
     //  TO-DO delete this section - a bad idea.
     //  If the name of the binary has a '-' sign in it, it is used as
     //  as the default grammar.
-    {
+    /*{
         //cerr << "Infer grammar ..." << endl;
         const string appname( argc >= 1 ? argv[ 0 ] : "" );
         const size_t n = appname.rfind( '-' );
@@ -221,7 +221,7 @@ bool ToolMain::parseArgs( int argc, char **argv, char **envp ) {
         //} else {
             //cerr << "None set" << endl;
         }
-	}
+	}*/
 
     return this->parseArgcArgv( argc, argv );
 }

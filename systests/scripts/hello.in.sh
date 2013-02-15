@@ -1,3 +1,3 @@
-#!/usr/local/bin/ginger-common
+#!/usr/local/bin/ginger-script -gcmn
 
 println( "Hello" );

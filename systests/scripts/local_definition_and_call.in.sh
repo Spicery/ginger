@@ -1,4 +1,4 @@
-#!/usr/local/bin/ginger-common
+#!/usr/local/bin/ginger-script -gcmn
 
 define f( x ) =>>
 	[ x, x ]

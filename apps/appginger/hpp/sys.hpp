@@ -26,6 +26,7 @@
 
 #include "common.hpp"
 #include "cmp.hpp"
+#include "mishap.hpp"
 
 class MachineClass;
 
@@ -47,8 +48,27 @@ enum InfoFlavour {
 	SYS_CALL_FLAVOUR
 };
 
+/**
+ * 	SysNames is anticipating the need for language-specific bindings
+ * 	for built-in functions. At the moment it is simply a name.
+ */
+class SysNames {
+private:
+	const char * def_name;
+
+public:
+	SysNames() : def_name( NULL ) {}
+	SysNames( const char * _name ) : def_name( _name ) {}
+
+public:
+	const char * name() {
+		if ( this->def_name == NULL ) throw Ginger::Unreachable( __FILE__, __LINE__ );
+		return this->def_name;
+	}	
+};
 
 struct SysInfo { 
+	SysNames names;
 	InfoFlavour flavour;		//	Is this system routine implemented as a VM instruction, comparison operator or as a system-call.
 	Instruction instruction;	//	Populated if VM_OP_FLAVOUR (else vmc_halt).
 	CMP_OP cmp_op;				//	Populated if CMP_OP_FLAVOUR (else CMP_EQ)
@@ -61,6 +81,10 @@ struct SysInfo {
 	bool isSysCall() const { return this->flavour == SYS_CALL_FLAVOUR; }
 	bool isCmpOp() const { return this->flavour == CMP_OP_FLAVOUR; }
 	bool isVMOp() const { return this->flavour == VM_OP_FLAVOUR; }
+
+	const char * name() {
+		return this->names.name();
+	}
 	
 	SysInfo( Instruction ins, Ginger::Arity in, Ginger::Arity out, const char * ds ) :
 		flavour( VM_OP_FLAVOUR ),
@@ -75,6 +99,19 @@ struct SysInfo {
 	}
 	
 	SysInfo( Ginger::Arity in, Ginger::Arity out, SysCall * s, const char * ds ) :
+		flavour( SYS_CALL_FLAVOUR ),
+		instruction( vmc_halt ),
+		cmp_op( CMP_EQ ),
+		in_arity( in ),
+		out_arity( out ),
+		syscall( s ),
+		docstring( ds ),
+		coreFunctionObject( NULL )
+	{
+	}
+
+	SysInfo( SysNames _names, Ginger::Arity in, Ginger::Arity out, SysCall * s, const char * ds ) :
+		names( _names ),
 		flavour( SYS_CALL_FLAVOUR ),
 		instruction( vmc_halt ),
 		cmp_op( CMP_EQ ),

@@ -89,7 +89,8 @@ after the key.
 
 This general scheme is constrained by our design goal of being able to perform
 a scan of all the objects in a cage, called a cage-crawl. This imposes a design
-constraint on the layout of fields before the key.
-
-
+constraint on the layout of fields before the key. In general there must either
+be a special value recognised by the garbage collector to help the heap crawl
+skip forward to the key OR the fields preceding the key must be guaranteed to
+be non-keys.
 

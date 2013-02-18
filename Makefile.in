@@ -15,6 +15,7 @@ distclean: clean
 	rm -f apps/appginger/Makefile
 	rm -f apps/appginger/cpp/Makefile
 	rm -f apps/appginger/unittest/Makefile
+	rm -f apps/autodocs/Makefile
 	rm -f apps/automatic/machine/Makefile
 	rm -f apps/automatic/metainfo/Makefile
 	rm -f apps/automatic/simple/Makefile

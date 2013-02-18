@@ -419,10 +419,23 @@ Ref * sysBoolAbs( Ref *pc, class MachineClass * vm ) {
 	return pc;
 }
 
+// - showMeRuntimeInfo ---------------------------------------------------------
+
 Ref * sysShowMeRuntimeInfo( Ref * pc, class MachineClass * vm ) {
 	vm->getAppContext().showMeRuntimeInfo();
 	return pc;
 }
+SysInfo infoShowMeRuntimeInfo(
+	SysNames( "showMeRuntimeInfo" ),
+	Arity( 0 ), 
+	Arity( 0 ), 
+	sysShowMeRuntimeInfo, 
+	"Prints the runtime info to stdout"
+);
+
+
+
+// - eraseAll ------------------------------------------------------------------
 
 Ref * sysEraseAll( Ref * pc, class MachineClass * vm ) {
 	vm->fastDrop( vm->count );
@@ -435,6 +448,226 @@ SysInfo infoEraseAll(
 	sysEraseAll, 
 	"Discards all the arguments it is given"
 );
+
+// - eraseLeading ---------------------------------------------------------------
+
+Ref * sysEraseLeading( Ref * pc, class MachineClass * vm ) {
+	if ( vm->count < 1 ) {
+		throw Ginger::Mishap( "No arguments" );
+	}
+	Ref count = vm->fastPop();
+	if ( not IsSmall( count ) ) {
+		throw Ginger::Mishap( "Last argument must be an integer" ).culprit( "Last arg", refToString( count ) );
+	}
+	long n = SmallToLong( count );
+	if ( n < 0 ) {
+		throw Ginger::Mishap( "Argument must be >= 0" ).culprit( "Erasure count", n );
+	}
+	long k = vm->count - 1;
+	if ( k <= n ) {
+		if ( k == n ) {
+			vm->fastDrop( n );
+		} else {
+			throw Ginger::Mishap( "Trying to erase more values than available" ).culprit( "Erasing", n ).culprit( "Available", k );
+		}
+	} else {
+		long k1 = k - 1;
+		long num_swaps = k - n;
+		for ( int i = 0; i < num_swaps; i++ ) {
+			vm->fastPeek( k1 - i ) = vm->fastPeek( k1 - n - i );
+		}
+		vm->fastDrop( n );
+	}
+	return pc;
+}
+SysInfo infoEraseLeading(
+	SysNames( "eraseLeading" ),
+	Arity( 1, true ),
+	Arity( 0, true ),
+	sysEraseLeading,
+	"Given args (arg1, ..., arg_n, N ) discards the first N arguments it is given"
+);
+
+// - eraseAllButLeading ---------------------------------------------------------
+
+Ref * sysEraseAllButLeading( Ref * pc, class MachineClass * vm ) {
+	if ( vm->count < 1 ) {
+		throw Ginger::Mishap( "Too few arguments" );
+	}
+	Ref count = vm->fastPop();
+	if ( not IsSmall( count ) ) {
+		throw Ginger::Mishap( "Last argument must be an integer" ).culprit( "Last arg", refToString( count ) );
+	}
+	long keep = SmallToLong( count );
+	if ( keep < 0 ) {
+		throw Ginger::Mishap( "Argument must be >= 0" ).culprit( "Leaving count", keep );
+	}
+	long k = vm->count - 1;
+	if ( k < keep ) {
+		throw Ginger::Mishap( "Trying to leave more values than available" ).culprit( "Leaving", keep ).culprit( "Available", k );
+	} else {
+		vm->fastDrop( k - keep );
+	}
+	return pc;
+}
+SysInfo infoEraseAllButLeading(
+	SysNames( "eraseAllButLeading" ),
+	Arity( 1, true ),
+	Arity( 0, true ),
+	sysEraseAllButLeading,
+	"Given args (arg1, ..., arg_n, N ) discards the last (n-N) arguments to return (arg1, ..., arg_N)"
+);
+
+// - eraseTrailing ---------------------------------------------------------------
+
+Ref * sysEraseTrailing( Ref * pc, class MachineClass * vm ) {
+	if ( vm->count < 1 ) {
+		throw Ginger::Mishap( "No arguments" );
+	}
+	Ref count = vm->fastPop();
+	if ( not IsSmall( count ) ) {
+		throw Ginger::Mishap( "Last argument must be an integer" ).culprit( "Last arg", refToString( count ) );
+	}
+	long n = SmallToLong( count );
+	if ( n < 0 ) {
+		throw Ginger::Mishap( "Argument must be >= 0" ).culprit( "Erasure count", n );
+	}
+	long k = vm->count - 1;
+	if ( k < n ) {
+		throw Ginger::Mishap( "Trying to erase more values than available" ).culprit( "Erasing", n ).culprit( "Available", k );
+	} else {
+		vm->fastDrop( n );
+	}
+	return pc;
+}
+SysInfo infoEraseTrailing(
+	SysNames( "eraseTrailing" ),
+	Arity( 1, true ),
+	Arity( 0, true ),
+	sysEraseTrailing,
+	"Given args (arg1, ..., arg_n, N ) discards the last N arguments, excluding N, that it is given"
+);
+
+// - eraseAllButTrailing ---------------------------------------------------------------
+
+Ref * sysEraseAllButTrailing( Ref * pc, class MachineClass * vm ) {
+	if ( vm->count < 1 ) {
+		throw Ginger::Mishap( "Too few arguments" );
+	}
+	Ref count = vm->fastPop();
+	if ( not IsSmall( count ) ) {
+		throw Ginger::Mishap( "Last argument must be an integer" ).culprit( "Last arg", refToString( count ) );
+	}
+	long n1 = SmallToLong( count );
+	if ( n1 < 0 ) {
+		throw Ginger::Mishap( "Argument must be >= 0" ).culprit( "Trailing count", n1 );
+	}
+	long k = vm->count - 1;
+	long n = k - n1;
+	if ( k <= n ) {
+		if ( k == n ) {
+			vm->fastDrop( n );
+		} else {
+			throw Ginger::Mishap( "Trying to erase more values than available" ).culprit( "Erasing", n ).culprit( "Available", k );
+		}
+	} else {
+		long k1 = k - 1;
+		long num_swaps = k - n;
+		for ( int i = 0; i < num_swaps; i++ ) {
+			vm->fastPeek( k1 - i ) = vm->fastPeek( k1 - n - i );
+		}
+		vm->fastDrop( n );
+	}
+	return pc;
+}
+SysInfo infoEraseAllButTrailing(
+	SysNames( "eraseAllButTrailing" ),
+	Arity( 1, true ),
+	Arity( 0, true ),
+	sysEraseAllButTrailing,
+	"Given args (arg1, ..., arg_n, N ) discards the first (n-N) arguments returning (arg_(n-N+1), ..., arg_n)"
+);
+
+// - eraseFirst ----------------------------------------------------------------
+
+Ref * sysEraseFirst( Ref * pc, class MachineClass * vm ) {
+	if ( vm->count < 1 ) {
+		throw Ginger::Mishap( "Too few arguments" );
+	}
+	long k = vm->count - 1;
+	if ( k == 1 ) {
+		vm->fastDrop( 1 );
+	} else {
+		long k1 = k - 1;
+		for ( int i = 0; i < k1; i++ ) {
+			vm->fastPeek( k1 - i ) = vm->fastPeek( k1 - 1 - i );
+		}
+		vm->fastDrop( 1 );
+	}
+	return pc;
+}
+SysInfo infoEraseFirst(
+	SysNames( "eraseFirst" ),
+	Arity( 1, true ),
+	Arity( 0, true ),
+	sysEraseFirst,
+	"Given args (arg1, ..., arg_n) discards the arg1 and returns (arg2, ..., arg_n)"
+);
+
+// - eraseAllButFirst ----------------------------------------------------------
+
+Ref * sysEraseAllButFirst( Ref * pc, class MachineClass * vm ) {
+	if ( vm->count < 1 ) {
+		throw Ginger::Mishap( "Too few arguments" );
+	}
+	vm->fastDrop( vm->count - 1 );
+	return pc;
+}
+SysInfo infoEraseAllButFirst(
+	SysNames( "eraseAllButFirst" ),
+	Arity( 1, true ),
+	Arity( 1 ),
+	sysEraseAllButFirst,
+	"Given args (arg1, ..., arg_n) returns (arg1)"
+);
+
+// - eraseLast ----------------------------------------------------------------
+
+Ref * sysEraseLast( Ref * pc, class MachineClass * vm ) {
+	if ( vm->count < 1 ) {
+		throw Ginger::Mishap( "Too few arguments" );
+	}
+	vm->fastDrop( 1 );
+	return pc;
+}
+SysInfo infoEraseLast(
+	SysNames( "eraseLast" ),
+	Arity( 1, true ),
+	Arity( 0, true ),
+	sysEraseLast,
+	"Given args (arg1, ..., arg_n) discards arg_n and returns (arg1, ..., arg_(n-1))"
+);
+
+// - eraseAllButLast ----------------------------------------------------------------
+
+Ref * sysEraseAllButLast( Ref * pc, class MachineClass * vm ) {
+	if ( vm->count < 1 ) {
+		throw Ginger::Mishap( "Too few arguments" );
+	}
+	Ref r = vm->fastPeek();
+	vm->fastDrop( vm->count );
+	vm->fastPush( r );				//	Safe because vm->count was >= 1.
+	return pc;
+}
+SysInfo infoEraseAllButLast(
+	SysNames( "eraseAllButLast" ),
+	Arity( 1, true ),
+	Arity( 1 ),
+	sysEraseAllButLast,
+	"Given args (arg1, ..., arg_n) returns (arg_n)"
+);
+
+// -----------------------------------------------------------------------------
 
 
 #include "datatypes.cpp.auto"
@@ -497,8 +730,16 @@ const SysMap::value_type rawData[] = {
 	SysMaplet( "partApply", SysInfo( Arity( 1, true ), Arity( 1 ), sysPartApply, "Freezes arguments and a function together to make a new function" ) ),
 	SysMaplet( "functionInArity", SysInfo( Arity( 1  ), Arity( 1 ), sysFunctionInArity, "Input arity of a function" ) ),
 	SysMaplet( "functionOutArity", SysInfo( Arity( 1 ), Arity( 1 ), sysFunctionOutArity, "Output arity of a function" ) ),
-	SysMaplet( "showMeRuntimeInfo", SysInfo( Arity(0), Arity(0), sysShowMeRuntimeInfo, "Prints the runtime info to stdout" ) ),
+	SysMaplet( infoShowMeRuntimeInfo.name(), infoShowMeRuntimeInfo ),
 	SysMaplet( infoEraseAll.name(), infoEraseAll ),
+	SysMaplet( infoEraseLeading.name(), infoEraseLeading ),
+	SysMaplet( infoEraseAllButLeading.name(), infoEraseAllButLeading ),
+	SysMaplet( infoEraseTrailing.name(), infoEraseTrailing ),
+	SysMaplet( infoEraseAllButTrailing.name(), infoEraseAllButTrailing ),
+	SysMaplet( infoEraseFirst.name(), infoEraseFirst ),
+	SysMaplet( infoEraseAllButFirst.name(), infoEraseAllButFirst ),
+	SysMaplet( infoEraseLast.name(), infoEraseLast ),
+	SysMaplet( infoEraseAllButLast.name(), infoEraseAllButLast ),
 #include "sysapply.inc"
 #include "sysattrmap.inc"
 #include "syscgi.inc"

@@ -26,6 +26,7 @@
 /* Find the object pointers in the function object */
 class FnObjCrawl {
 private:
+	Ref * datapool;
 	Ref * pc;
 	Ref * obj_N;
 	const InstructionSet & ins;

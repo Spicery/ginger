@@ -28,7 +28,8 @@
 #define OFFSET_TO_NUM_INPUTS				-1
 #define OFFSET_TO_NUM_SLOTS					-2
 #define OFFSET_TO_NUM_OUTPUTS				-3
-#define OFFSET_TO_FUNCTION_LENGTH			-4
+#define OFFSET_TO_DATA_POOL                 -4
+#define OFFSET_TO_FUNCTION_LENGTH           -5
 
 
 // Non-standard offsets (from PC or to-the-key)

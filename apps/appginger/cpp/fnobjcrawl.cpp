@@ -23,29 +23,36 @@
 #include "misclayout.hpp"
 
 Ref * FnObjCrawl::next() {
-	while ( this->pc < this->obj_N ) {
-		if ( *types == '\0' ) {
-			this->types = ins.signature( *pc );
-			this->name = ins.name( *pc );
-			this->sig = this->types;
-		} else {
-			const char ch = *types++;
-			Ref * current = pc++;
-			if ( ch == 'c' ) return current;
-			
-			//	If we want to be able to delete the global dictionary
-			//	then we must add in tracing through Idents too. They
-			//	have the char 'v'.
-			
+	if ( this->datapool == NULL ) {
+		while ( this->pc < this->obj_N ) {
+			if ( *types == '\0' ) {
+				this->types = ins.signature( *pc );
+				this->name = ins.name( *pc );
+				this->sig = this->types;
+			} else {
+				const char ch = *types++;
+				Ref * current = pc++;
+				if ( ch == 'c' ) return current;
+				
+				//	If we want to be able to delete the global dictionary
+				//	then we must add in tracing through Idents too. They
+				//	have the char 'v'.
+				
+			}
 		}
+		return static_cast< Ref * >( 0 );
+	} else {
+		Ref * d = this->datapool;
+		this->datapool = NULL;
+		return d;
 	}
-	return static_cast< Ref * >( 0 );
 }
 
 FnObjCrawl::FnObjCrawl( MachineClass * vm, Ref * obj_K ) :
+	datapool( &obj_K[ OFFSET_TO_DATA_POOL ] ),
 	ins( vm->instructionSet() ),
 	types( "" )
-{
+{	
 	this->pc = obj_K + 1;
 	this->obj_N = this->pc + sizeInstructionsAfterKeyOfFn( obj_K );
 }

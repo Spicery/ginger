@@ -667,6 +667,7 @@ Ref CodeGenClass::detach( const bool in_heap, Ref fnkey ) {
 		//	reasons.
 		//
 		xfr.xfrRef( ToRef( ( L << TAGGG ) | FUNC_LEN_TAGGG ) );  //	tagged for heap scanning
+		xfr.xfrRef( SYS_ABSENT );					//	placeholder for Data Pool.
 		xfr.xfrRef( ToRef( this->nresults ) );		//	raw R
 		xfr.xfrRef( ToRef( this->nlocals ) );		//	raw N
 		xfr.xfrRef( ToRef( this->ninputs ) );		//	raw A
@@ -685,6 +686,7 @@ Ref CodeGenClass::detach( const bool in_heap, Ref fnkey ) {
 		Ref * permanentStore = new Ref[ preflight_size ];		//	This store is never reclaimed.
 		Ref * p = permanentStore;
 		*p++ = ToRef( ( L << TAGGG ) | FUNC_LEN_TAGGG );
+		*p++ = SYS_ABSENT;										// 	Data Pool NOT allowed out of heap.
 		*p++ = ToRef( this->nresults );
 		*p++ = ToRef( this->nlocals );
 		*p++ = ToRef( this->ninputs );

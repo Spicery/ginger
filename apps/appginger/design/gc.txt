@@ -1,3 +1,9 @@
+Notes on the Ginger Garbage Collector
+=====================================
+
+Overview
+--------
+
 The garbage collector is a variant on a basic Cheney-style stop-and-copy 
 collector. There are four main reasons for using this algorithm: it is simple to 
 code, dead objects are not traced and entail no cost, it is easy to make good 
@@ -19,6 +25,9 @@ future it will be based on the ratio of GC time to total time, much as in Poplog
 plus some overriding criteria.  And a good example of an override would be when 
 allocating large objects, which would typically be allocated in their own new 
 cage regardless of the situation.
+
+Phases of the Garbage Collector
+-------------------------------
 
 The first phase of the garbage collector is to separate all the cages into two 
 groups: those that are in use and those that are empty. These become the 
@@ -65,3 +74,22 @@ are reconstituted from their freeze-dried parts.
 Finally, during the garbage collection cycle the from-cages have their contents 
 irrevocably trashed by the forwarding pointers. Hence the last phase of garbage 
 collection resets all the from-cages as empty.
+
+Object Layout
+-------------
+Objects contingous areas of store in the heap. They are referenced by (tagged) 
+pointers, called Refs. These point at a special location called the key of the 
+object. The key describes the fields of the object and loosely speaking is
+equivalent to the object's class.
+
+For record types the key is the first field of the object and the object has 
+a fixed number of fields beyond that. However, other types such as vectors
+have some fields before the key (e.g. length) and a variable numbers of fields
+after the key.
+
+This general scheme is constrained by our design goal of being able to perform
+a scan of all the objects in a cage, called a cage-crawl. This imposes a design
+constraint on the layout of fields before the key.
+
+
+

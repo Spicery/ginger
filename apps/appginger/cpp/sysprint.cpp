@@ -21,7 +21,9 @@
 #include <iostream>
 
 #include "mnx.hpp"
-    
+
+#include "sys.hpp"    
+
 #include "sysprint.hpp"
 #include "syskey.hpp"
 #include "misclayout.hpp"
@@ -397,4 +399,20 @@ std::string refToString( Ref ref ) {
 	refPrint( s, ref );
 	return s.str();
 }
+
+
+/*// - showMeRuntimeInfo ---------------------------------------------------------
+
+Ref * sysShowMeRuntimeInfo( Ref * pc, class MachineClass * vm ) {
+	vm->getAppContext().showMeRuntimeInfo();
+	return pc;
+}
+SysInfo infoShowMeRuntimeInfo(
+	SysNames( "showMeRuntimeInfo" ),
+	Ginger::Arity( 0 ), 
+	Ginger::Arity( 0 ), 
+	sysShowMeRuntimeInfo, 
+	"Prints the runtime info to stdout"
+);
+*/
 

@@ -26,8 +26,8 @@
 
 Ref makeSysFn( CodeGen codegen, std::string fn_name, Ref default_value ) {
 
-	SysMap::iterator smit = sysMap.find( fn_name );
-	if ( smit == sysMap.end() ) {
+	SysMap::iterator smit = SysMap::sysMap().find( fn_name );
+	if ( smit == SysMap::sysMap().end() ) {
 		return default_value;
 	}
 	SysInfo & info = smit->second;

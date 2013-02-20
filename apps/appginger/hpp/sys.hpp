@@ -85,6 +85,10 @@ struct SysInfo {
 	const char * name() {
 		return this->names.name();
 	}
+
+	//	Only declared to allow adding to std::map, which requires a
+	//	nullary constructor.
+	SysInfo() {}
 	
 	SysInfo( Instruction ins, Ginger::Arity in, Ginger::Arity out, const char * ds ) :
 		flavour( VM_OP_FLAVOUR ),
@@ -110,18 +114,7 @@ struct SysInfo {
 	{
 	}
 
-	SysInfo( SysNames _names, Ginger::Arity in, Ginger::Arity out, SysCall * s, const char * ds ) :
-		names( _names ),
-		flavour( SYS_CALL_FLAVOUR ),
-		instruction( vmc_halt ),
-		cmp_op( CMP_EQ ),
-		in_arity( in ),
-		out_arity( out ),
-		syscall( s ),
-		docstring( ds ),
-		coreFunctionObject( NULL )
-	{
-	}
+	SysInfo( SysNames _names, Ginger::Arity in, Ginger::Arity out, SysCall * s, const char * ds );
 
 	SysInfo( const CMP_OP cmp_op, Ginger::Arity in, Ginger::Arity out, const char * ds ) :
 		flavour( CMP_OP_FLAVOUR ),
@@ -136,8 +129,16 @@ struct SysInfo {
 	}
 	
 };
-typedef std::map< std::string, SysInfo > SysMap;
-extern SysMap sysMap;
+
+class SysMap : public std::map< std::string, SysInfo > {
+	typedef const std::map< std::string, SysInfo >::value_type * iter;
+private:
+	SysMap( iter start, iter end ) : std::map< std::string, SysInfo >( start, end ) {}
+	//SysMap( const SysMap::value_type * start, const SysMap::value_type * end ) : std::map< std::string, SysInfo >( start, end ) {}
+
+public:
+	static SysMap & sysMap(); 
+};
 
 #endif
 

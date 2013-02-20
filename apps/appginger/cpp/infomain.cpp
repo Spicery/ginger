@@ -397,8 +397,8 @@ private:
 		this->formatter->insertComment( "Summary of the built-in functions" );
 
 		for (
-			SysMap::iterator it = sysMap.begin();
-			it != sysMap.end();
+			SysMap::iterator it = SysMap::sysMap().begin();
+			it != SysMap::sysMap().end();
 			++it
 		) {
 			this->formatter->startValue( "sysfn" );

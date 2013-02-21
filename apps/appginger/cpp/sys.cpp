@@ -446,77 +446,78 @@ Ref * sysBoolAbs( Ref *pc, class MachineClass * vm ) {
 
 //typedef std::map< std::string, SysInfo > SysMap;
 typedef SysMap::value_type SysMaplet;
-const SysMap::value_type rawData[] = {
-	SysMaplet( "not", SysInfo( vmc_not, Arity( 1 ), Arity( 1 ), "Negates a boolean value" ) ),
-	SysMaplet( "boolAbs", SysInfo( Arity( 1 ), Arity( 1 ), sysBoolAbs, "Maps boolean into absence: false -> absent, true -> true" ) ),
-	SysMaplet( "absNot", SysInfo( Arity( 1 ), Arity( 1 ), sysAbsNot, "Negation of presence: absent->present; non-absent->absent" ) ),
-	SysMaplet( "+", SysInfo( vmc_add, Arity( 2 ), Arity( 1 ), "Adds two numbers" ) ),
-	SysMaplet( "-", SysInfo( vmc_sub, Arity( 2 ), Arity( 1 ), "Substracts two numbers" ) ),
-	SysMaplet( "negate", SysInfo( vmc_neg, Arity( 1 ), Arity( 1 ), "Negates a number" ) ),
-	SysMaplet( "*", SysInfo( vmc_mul, Arity( 2 ), Arity( 1 ), "Multiplies two numbers" ) ),
-	SysMaplet( "/", SysInfo( vmc_div, Arity( 2 ), Arity( 1 ), "Divides two numbers, result is a float" ) ),
-	SysMaplet( "quo", SysInfo( vmc_quo, Arity( 2 ), Arity( 1 ), "Integer quotient" ) ),
-	SysMaplet( "mod", SysInfo( vmc_mod, Arity( 2 ), Arity( 1 ), "Integer modulus" ) ),
-	//SysMaplet( "**", SysInfo( VM_OP_FLAVOUR, vmc_pow, fnc_pow, Arity( 2 ), Arity( 1 ), 0, "Exponentiates two numbers, result is float" ) ),
-	SysMaplet( "<", SysInfo( CMP_LT, Arity( 2 ), Arity( 1 ), "Less than, compares two real numbers" ) ),
-	SysMaplet( "<=", SysInfo( CMP_LTE, Arity( 2 ), Arity( 1 ), "Less than or equal to, compares two real number" ) ),
-	SysMaplet( "==", SysInfo( CMP_EQ, Arity( 2 ), Arity( 1 ), "Identity of two values, result is boolean" ) ),
-	SysMaplet( ">", SysInfo( CMP_GT, Arity( 2 ), Arity( 1 ), "Greater than, compares two real numbers" ) ),
-	SysMaplet( ">=", SysInfo( CMP_GTE, Arity( 2 ), Arity( 1 ), "Greater than or equal to, compares two real numbers" ) ),	
-	SysMaplet( "className", SysInfo( Arity( 1 ), Arity( 1 ), sysKeyName, "Returns the name of a key" ) ),
-	SysMaplet( "dataClass", SysInfo( Arity( 1 ), Arity( 1 ), sysObjectKey, "Returns the key of any value" ) ),
-	SysMaplet( "makeSymbol", SysInfo( Arity( 1 ), Arity( 1 ), sysMakeSymbol, "Returns a symbol with the same spelling as the string" ) ),
-	SysMaplet( "newRecordClass", SysInfo( Arity( 2 ), Arity( 1 ), sysNewRecordClass, "Returns a new class object for records" ) ),
-	SysMaplet( "newClass", SysInfo( Arity( 4 ), Arity( 1 ), sysNewClass, "Returns a new class object for instances" ) ),
-	SysMaplet( "newClassRecogniser", SysInfo( Arity( 1 ), Arity( 1 ), sysClassRecogniser, "Returns a function that recognises a given class" ) ),
-	SysMaplet( "newClassConstructor", SysInfo( Arity( 1 ), Arity( 1 ), sysClassConstructor, "Returns the constructor for a given class" ) ),
-	SysMaplet( "newClassAccessor", SysInfo( Arity( 1 ), Arity( 1 ), sysClassAccessor, "Returns the accessor for a given class" ) ),
-	SysMaplet( "newClassExploder", SysInfo( Arity( 1 ), Arity( 0, true ), sysClassExploder, "Returns the exploder for a given class" ) ),
-	SysMaplet( "newMethod", SysInfo( Arity( 3 ), Arity( 1 ), sysNewMethod, "Constructs a new empty method" ) ),
-	SysMaplet( "setMethod", SysInfo( Arity( 3 ), Arity( 0 ), sysSetMethod, "Sets the function for a method on an object" ) ),
-	SysMaplet( "setSlot", SysInfo( Arity( 3 ), Arity( 0 ), sysSetSlot, "Sets a method as the Nth slot of a class" ) ),
-	SysMaplet( "=", SysInfo( Arity( 2 ), Arity( 1 ), sysEquals, "Compare any two values as equal" ) ),
-	SysMaplet( "sysgarbage", SysInfo( Arity( 0 ), Arity( 0 ), sysGarbageCollect, "Forces a garbage collection - useful for tests" ) ),
-	SysMaplet( "hash", SysInfo( Arity( 1 ), Arity( 1 ), sysHash, "Computes a hash code for any value, returns a positive Small" ) ),
-	SysMaplet( "index", SysInfo( Arity( 2 ), Arity( 1 ), sysIndex, "Indexes any sequence" ) ),
-	SysMaplet( "updaterOfIndex", SysInfo( Arity( 3 ), Arity( 0 ), sysUpdaterOfIndex, "Updates the index of any sequence" ) ),
-	SysMaplet( "mapIndex", SysInfo( Arity( 2 ), Arity( 1 ), sysMapIndex, "Indexes a map" ) ),
-	SysMaplet( "listIndex", SysInfo( Arity( 2 ), Arity( 1 ), sysListIndex, "Indexes a list" ) ),
-	SysMaplet( "explode", SysInfo( Arity( 1 ), Arity( 0, true ), sysExplode, "Explodes any sequence into its members" ) ),
-	SysMaplet( "updaterOfExplode", SysInfo( Arity( 1, true ), Arity( 0 ), sysUpdaterOfExplode, "Updates the explode value of any sequence i.e. fills" ) ),
-	SysMaplet( "listExplode", SysInfo( Arity( 1 ), Arity( 0, true ), sysListExplode, "Explodes a list into its members" ) ),
-	SysMaplet( "length", SysInfo( Arity( 1 ), Arity( 1 ), sysLength, "Returns the length of any sequence" ) ),	
-	SysMaplet( "listLength", SysInfo( Arity( 1 ), Arity( 1 ), sysListLength, "Returns the length of a list" ) ),	
-	SysMaplet( "append", SysInfo( Arity( 2 ), Arity( 1 ), sysAppend, "Appends two sequences of the same type, result is a sequence of the same type" ) ),	
-	SysMaplet( "listAppend", SysInfo( Arity( 2 ), Arity( 1 ), sysListAppend, "Appends two lists" ) ),	
-	SysMaplet( "isNil", SysInfo( Arity( 1 ), Arity( 1 ), sysIsNil, "Tests whether a list is empty or not" ) ),
-	SysMaplet( "isList", SysInfo( Arity( 1 ), Arity( 1 ), sysIsList, "Tests whether an object is a list or not" ) ),	
-	SysMaplet( "isntAbsent", SysInfo( Arity( 1 ), Arity( 1 ), sysIsntAbsent, "Tests whether an object is non-absent" ) ),
-	SysMaplet( "newList", SysInfo( Arity( 0, true ), Arity( 1 ), sysNewList, "Builds a list from the arguments" ) ),
-	SysMaplet( "newListOnto", SysInfo( Arity( 1, true ), Arity( 1 ), sysNewListOnto, "Builds a list from the first N-1 args and appends that to the last argument" ) ),
-	SysMaplet( "newMap", SysInfo( Arity( 0, true ), Arity( 1 ), sysNewHardEqMap, "Builds a new map from maps and maplets" ) ),
-	SysMaplet( "newHardIdMap", SysInfo( Arity( 0, true ), Arity( 1 ), sysNewHardIdMap, "Builds a new map from maps and maplets that uses identity (==) for the equality test" ) ),
-	SysMaplet( "newWeakIdMap", SysInfo( Arity( 0, true ), Arity( 1 ), sysNewWeakIdMap, "Builds a new map from maps and maplets that only weakly retains its entries" ) ),
-	SysMaplet( "newCacheMap", SysInfo( Arity( 0, true ), Arity( 1 ), sysNewCacheEqMap, "Builds a new map from maps and maplets that the garbage collector can clear under pressure" ) ),
-	SysMaplet( "mapIndex", SysInfo( Arity( 2 ), Arity( 1 ), sysMapIndex, "Looks up a map for a given index" ) ),
-	SysMaplet( "partApply", SysInfo( Arity( 1, true ), Arity( 1 ), sysPartApply, "Freezes arguments and a function together to make a new function" ) ),
-	SysMaplet( "functionInArity", SysInfo( Arity( 1  ), Arity( 1 ), sysFunctionInArity, "Input arity of a function" ) ),
-	SysMaplet( "functionOutArity", SysInfo( Arity( 1 ), Arity( 1 ), sysFunctionOutArity, "Output arity of a function" ) ),
-#include "sysapply.inc"
-#include "sysattrmap.inc"
-#include "syscgi.inc"
-#include "syselement.inc"
-#include "sysexception.inc"
-#include "sysprint.inc"
-#include "sysstring.inc"
-#include "sysunix.inc"
-#include "sysvector.inc"
-#include "sysmap.inc.auto"
-};
-
-const int numElems = sizeof rawData / sizeof rawData[0];
 
 SysMap & SysMap::sysMap() {
-	static SysMap s( rawData, rawData + numElems );	
+
+	static SysMap::value_type rawData[] = {
+		SysMaplet( "not", SysInfo( vmc_not, Arity( 1 ), Arity( 1 ), "Negates a boolean value" ) ),
+		SysMaplet( "boolAbs", SysInfo( Arity( 1 ), Arity( 1 ), sysBoolAbs, "Maps boolean into absence: false -> absent, true -> true" ) ),
+		SysMaplet( "absNot", SysInfo( Arity( 1 ), Arity( 1 ), sysAbsNot, "Negation of presence: absent->present; non-absent->absent" ) ),
+		SysMaplet( "+", SysInfo( vmc_add, Arity( 2 ), Arity( 1 ), "Adds two numbers" ) ),
+		SysMaplet( "-", SysInfo( vmc_sub, Arity( 2 ), Arity( 1 ), "Substracts two numbers" ) ),
+		SysMaplet( "negate", SysInfo( vmc_neg, Arity( 1 ), Arity( 1 ), "Negates a number" ) ),
+		SysMaplet( "*", SysInfo( vmc_mul, Arity( 2 ), Arity( 1 ), "Multiplies two numbers" ) ),
+		SysMaplet( "/", SysInfo( vmc_div, Arity( 2 ), Arity( 1 ), "Divides two numbers, result is a float" ) ),
+		SysMaplet( "quo", SysInfo( vmc_quo, Arity( 2 ), Arity( 1 ), "Integer quotient" ) ),
+		SysMaplet( "mod", SysInfo( vmc_mod, Arity( 2 ), Arity( 1 ), "Integer modulus" ) ),
+		//SysMaplet( "**", SysInfo( VM_OP_FLAVOUR, vmc_pow, fnc_pow, Arity( 2 ), Arity( 1 ), 0, "Exponentiates two numbers, result is float" ) ),
+		SysMaplet( "<", SysInfo( CMP_LT, Arity( 2 ), Arity( 1 ), "Less than, compares two real numbers" ) ),
+		SysMaplet( "<=", SysInfo( CMP_LTE, Arity( 2 ), Arity( 1 ), "Less than or equal to, compares two real number" ) ),
+		SysMaplet( "==", SysInfo( CMP_EQ, Arity( 2 ), Arity( 1 ), "Identity of two values, result is boolean" ) ),
+		SysMaplet( ">", SysInfo( CMP_GT, Arity( 2 ), Arity( 1 ), "Greater than, compares two real numbers" ) ),
+		SysMaplet( ">=", SysInfo( CMP_GTE, Arity( 2 ), Arity( 1 ), "Greater than or equal to, compares two real numbers" ) ),	
+		SysMaplet( "className", SysInfo( Arity( 1 ), Arity( 1 ), sysKeyName, "Returns the name of a key" ) ),
+		SysMaplet( "dataClass", SysInfo( Arity( 1 ), Arity( 1 ), sysObjectKey, "Returns the key of any value" ) ),
+		SysMaplet( "makeSymbol", SysInfo( Arity( 1 ), Arity( 1 ), sysMakeSymbol, "Returns a symbol with the same spelling as the string" ) ),
+		SysMaplet( "newRecordClass", SysInfo( Arity( 2 ), Arity( 1 ), sysNewRecordClass, "Returns a new class object for records" ) ),
+		SysMaplet( "newClass", SysInfo( Arity( 4 ), Arity( 1 ), sysNewClass, "Returns a new class object for instances" ) ),
+		SysMaplet( "newClassRecogniser", SysInfo( Arity( 1 ), Arity( 1 ), sysClassRecogniser, "Returns a function that recognises a given class" ) ),
+		SysMaplet( "newClassConstructor", SysInfo( Arity( 1 ), Arity( 1 ), sysClassConstructor, "Returns the constructor for a given class" ) ),
+		SysMaplet( "newClassAccessor", SysInfo( Arity( 1 ), Arity( 1 ), sysClassAccessor, "Returns the accessor for a given class" ) ),
+		SysMaplet( "newClassExploder", SysInfo( Arity( 1 ), Arity( 0, true ), sysClassExploder, "Returns the exploder for a given class" ) ),
+		SysMaplet( "newMethod", SysInfo( Arity( 3 ), Arity( 1 ), sysNewMethod, "Constructs a new empty method" ) ),
+		SysMaplet( "setMethod", SysInfo( Arity( 3 ), Arity( 0 ), sysSetMethod, "Sets the function for a method on an object" ) ),
+		SysMaplet( "setSlot", SysInfo( Arity( 3 ), Arity( 0 ), sysSetSlot, "Sets a method as the Nth slot of a class" ) ),
+		SysMaplet( "=", SysInfo( Arity( 2 ), Arity( 1 ), sysEquals, "Compare any two values as equal" ) ),
+		SysMaplet( "sysgarbage", SysInfo( Arity( 0 ), Arity( 0 ), sysGarbageCollect, "Forces a garbage collection - useful for tests" ) ),
+		SysMaplet( "hash", SysInfo( Arity( 1 ), Arity( 1 ), sysHash, "Computes a hash code for any value, returns a positive Small" ) ),
+		SysMaplet( "index", SysInfo( Arity( 2 ), Arity( 1 ), sysIndex, "Indexes any sequence" ) ),
+		SysMaplet( "updaterOfIndex", SysInfo( Arity( 3 ), Arity( 0 ), sysUpdaterOfIndex, "Updates the index of any sequence" ) ),
+		SysMaplet( "mapIndex", SysInfo( Arity( 2 ), Arity( 1 ), sysMapIndex, "Indexes a map" ) ),
+		SysMaplet( "listIndex", SysInfo( Arity( 2 ), Arity( 1 ), sysListIndex, "Indexes a list" ) ),
+		SysMaplet( "explode", SysInfo( Arity( 1 ), Arity( 0, true ), sysExplode, "Explodes any sequence into its members" ) ),
+		SysMaplet( "updaterOfExplode", SysInfo( Arity( 1, true ), Arity( 0 ), sysUpdaterOfExplode, "Updates the explode value of any sequence i.e. fills" ) ),
+		SysMaplet( "listExplode", SysInfo( Arity( 1 ), Arity( 0, true ), sysListExplode, "Explodes a list into its members" ) ),
+		SysMaplet( "length", SysInfo( Arity( 1 ), Arity( 1 ), sysLength, "Returns the length of any sequence" ) ),	
+		SysMaplet( "listLength", SysInfo( Arity( 1 ), Arity( 1 ), sysListLength, "Returns the length of a list" ) ),	
+		SysMaplet( "append", SysInfo( Arity( 2 ), Arity( 1 ), sysAppend, "Appends two sequences of the same type, result is a sequence of the same type" ) ),	
+		SysMaplet( "listAppend", SysInfo( Arity( 2 ), Arity( 1 ), sysListAppend, "Appends two lists" ) ),	
+		SysMaplet( "isNil", SysInfo( Arity( 1 ), Arity( 1 ), sysIsNil, "Tests whether a list is empty or not" ) ),
+		SysMaplet( "isList", SysInfo( Arity( 1 ), Arity( 1 ), sysIsList, "Tests whether an object is a list or not" ) ),	
+		SysMaplet( "isntAbsent", SysInfo( Arity( 1 ), Arity( 1 ), sysIsntAbsent, "Tests whether an object is non-absent" ) ),
+		SysMaplet( "newList", SysInfo( Arity( 0, true ), Arity( 1 ), sysNewList, "Builds a list from the arguments" ) ),
+		SysMaplet( "newListOnto", SysInfo( Arity( 1, true ), Arity( 1 ), sysNewListOnto, "Builds a list from the first N-1 args and appends that to the last argument" ) ),
+		SysMaplet( "newMap", SysInfo( Arity( 0, true ), Arity( 1 ), sysNewHardEqMap, "Builds a new map from maps and maplets" ) ),
+		SysMaplet( "newHardIdMap", SysInfo( Arity( 0, true ), Arity( 1 ), sysNewHardIdMap, "Builds a new map from maps and maplets that uses identity (==) for the equality test" ) ),
+		SysMaplet( "newWeakIdMap", SysInfo( Arity( 0, true ), Arity( 1 ), sysNewWeakIdMap, "Builds a new map from maps and maplets that only weakly retains its entries" ) ),
+		SysMaplet( "newCacheMap", SysInfo( Arity( 0, true ), Arity( 1 ), sysNewCacheEqMap, "Builds a new map from maps and maplets that the garbage collector can clear under pressure" ) ),
+		SysMaplet( "mapIndex", SysInfo( Arity( 2 ), Arity( 1 ), sysMapIndex, "Looks up a map for a given index" ) ),
+		SysMaplet( "partApply", SysInfo( Arity( 1, true ), Arity( 1 ), sysPartApply, "Freezes arguments and a function together to make a new function" ) ),
+		SysMaplet( "functionInArity", SysInfo( Arity( 1  ), Arity( 1 ), sysFunctionInArity, "Input arity of a function" ) ),
+		SysMaplet( "functionOutArity", SysInfo( Arity( 1 ), Arity( 1 ), sysFunctionOutArity, "Output arity of a function" ) ),
+		#include "sysapply.inc"
+		#include "sysattrmap.inc"
+		#include "syscgi.inc"
+		#include "syselement.inc"
+		#include "sysexception.inc"
+		#include "sysprint.inc"
+		#include "sysstring.inc"
+		#include "sysunix.inc"
+		#include "sysvector.inc"
+		#include "sysmap.inc.auto"
+	};
+
+	static SysMap s( rawData, rawData + sizeof rawData / sizeof rawData[0] );	
+	
 	return s;
 }

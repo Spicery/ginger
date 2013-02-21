@@ -70,6 +70,8 @@ appginger: libappginger.a main.o
 ginger-info: libappginger.a infomain.o
 	ranlib libappginger.a ../../libgng/cpp/libgng.a
 	@CXX@ $(CXXFLAGS) $(BOOST_CPPFLAGS) -o $@ infomain.o libappginger.a ../../libgng/cpp/libgng.a /usr/local/lib/librudecgi.a
+	./ginger-info -H > info-debug.rst
+	./ginger-info -r > info-debug.rst
 
 ginger-cli: libappginger.a climain.o
 	ranlib libappginger.a ../../libgng/cpp/libgng.a

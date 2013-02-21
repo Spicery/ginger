@@ -46,11 +46,11 @@ class Formatter {
 public:
 	virtual void startDocument() = 0;
 	virtual void endDocument() = 0;
-	virtual void startSection( const string & sectionName ) = 0;
+	virtual void startSection( const string sectionName ) = 0;
 	virtual void endSection() = 0;
-	virtual void insertComment( const string & comment ) = 0;
-	virtual void startValue( const string & valueName ) = 0;
-	virtual void addAttribute( const string & key, const string & val ) = 0;
+	virtual void insertComment( const string comment ) = 0;
+	virtual void startValue( const string valueName ) = 0;
+	virtual void addAttribute( const string key, const string val ) = 0;
 	virtual void endValue() = 0;
 	virtual ~Formatter() {}
 };
@@ -99,7 +99,7 @@ public:
 		level -= 1;
 		cout << "</appginger>" << endl;
 	}
-	void startSection( const string & sectionName ) {
+	void startSection( const string sectionName ) {
 		this->sections.push_back( sectionName );
 		this->indent();
 		cout << "<" << sectionName << ">" << endl;
@@ -112,15 +112,15 @@ public:
 		this->indent();
 		cout << "</" << name << ">" << endl;
 	}
-	void insertComment( const string & comment ) {
+	void insertComment( const string comment ) {
 		this->indent();
 		cout << "<!-- " << comment << " -->" << endl;
 	}
-	void startValue( const string & valueName ) {
+	void startValue( const string valueName ) {
 		this->indent();
 		cout << "<" << valueName;
 	}
-	void addAttribute( const string & key, const string & val ) {
+	void addAttribute( const string key, const string val ) {
 		cout << " " << key << "=\"";
 		renderText( cout, val );
 		cout << "\"";
@@ -182,7 +182,7 @@ public:
 		this->level -= 1;
 		cout << "}" << endl;
 	}
-	void startSection( const string & sectionName ) {
+	void startSection( const string sectionName ) {
 		if ( this->section_count > 0 ) {
 			this->indent();
 			cout << "]," << endl;
@@ -204,14 +204,14 @@ public:
 		this->level -= 1;
 		this->section_count += 1;
 	}
-	void insertComment( const string & comment ) {
+	void insertComment( const string comment ) {
 		//	JSON does not support comments, strictly speaking.
 		if ( with_comments ) {
 			this->indent();
 			cout << "# " << comment << endl;
 		}
 	}
-	void startValue( const string & topic ) {
+	void startValue( const string topic ) {
 		if ( this->value_count > 0 ) {
 			cout << " }," << endl;
 		}
@@ -220,7 +220,7 @@ public:
 			cout << "{ \"topic\": \"" << topic << "\"";
 		}
 	}
-	void addAttribute( const string & key, const string & val ) {
+	void addAttribute( const string key, const string val ) {
 		//	N.B. We rely on the fact that the sysfn attributes are 
 		//	emitted in the order name, docstring, <others> to get
 		//	the formatting correct!
@@ -260,7 +260,7 @@ public:
 	}
 	void endDocument() {
 	}
-	void startSection( const string & sectionName ) {
+	void startSection( const string sectionName ) {
 		cout << sectionName << endl;
 		size_t n = sectionName.size();
 		for ( size_t i = 0; i < n; i++ ) {
@@ -271,13 +271,13 @@ public:
 	void endSection() {
 		cout << endl;
 	}
-	void insertComment( const string & comment ) {
+	void insertComment( const string comment ) {
 		cout << comment << endl << endl;
 	}
-	void startValue( const string & valueName ) {
+	void startValue( const string valueName ) {
 		cout << valueName << endl;
 	}
-	void addAttribute( const string & key, const string & val ) {
+	void addAttribute( const string key, const string val ) {
 		cout << "    " << key << endl;
 		cout << "        " << val << endl;
 	}

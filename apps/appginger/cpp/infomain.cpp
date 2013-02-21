@@ -72,7 +72,7 @@ private:
 		}		
 	}
 
-	void renderText( std::ostream & out, const std::string & str ) {
+	void renderText( std::ostream & out, const std::string str ) {
 		for ( std::string::const_iterator it = str.begin(); it != str.end(); ++it ) {
 			const unsigned char ch = *it;
 			if ( ch == '<' ) {
@@ -150,7 +150,7 @@ private:
 		}		
 	}
 
-	void renderText( const std::string & str ) {
+	void renderText( const std::string str ) {
 		for ( std::string::const_iterator it = str.begin(); it != str.end(); ++it ) {
 			const unsigned char ch = *it;
 			if ( ch == '"' ) {
@@ -368,7 +368,7 @@ public:
 	}
 
 private:
-	void renderText( std::ostream & out, const std::string & str ) {
+	void renderText( std::ostream & out, const std::string str ) {
 		for ( std::string::const_iterator it = str.begin(); it != str.end(); ++it ) {
 			const unsigned char ch = *it;
 			if ( ch == '<' ) {
@@ -385,7 +385,7 @@ private:
 		}
 	}
 
-	void printAttr( const char * name, const std::string & val ) {
+	void printAttr( const char * name, const std::string val ) {
 		cout << name << "=\"";
 		renderText( cout, val );
 		cout << "\" ";

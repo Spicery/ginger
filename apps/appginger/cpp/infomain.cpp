@@ -106,7 +106,7 @@ public:
 		this->level += 1;
 	}
 	void endSection() {
-		const string & name = this->sections.back();
+		const string name( this->sections.back() );
 		this->sections.pop_back();
 		this->level -= 1;
 		this->indent();

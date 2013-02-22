@@ -503,3 +503,16 @@ SysInfo infoDupAllButTrailing(
     "Given args (arg1, ..., arg_n, K) returns (arg1, ..., arg_n, arg_1, ..., arg_(n-K)), K <= n"
 );
 
+// - dupAllButTrailing -------------------------------------------------------------------
+
+Ref * sysIdentfn( Ref * pc, class MachineClass * vm ) {
+    return pc;
+}
+SysInfo infoIdentfn(
+    SysNames( "identfn" ),
+    Arity( 0, true ),
+    Arity( 0, true ),
+    sysIdentfn,
+    "Does nothing!"
+);
+

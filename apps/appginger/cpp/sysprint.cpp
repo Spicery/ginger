@@ -351,12 +351,30 @@ Ref * sysRefPrint( Ref * pc, class MachineClass * vm ) {
 	vm->fastDrop( vm->count );
 	return pc;
 }
+SysInfo infoRefPrint( 
+	SysNames( "print" ), 
+	Ginger::Arity( 0, true ), 
+	Ginger::Arity( 0 ), 
+	sysRefPrint, 
+	"Prints any values in reading format" 
+);
 
 Ref * sysRefPrintln( Ref * pc, class MachineClass * vm ) {
 	pc = sysRefPrint( pc, vm );
 	std::cout << std::endl;
 	return pc;
 }
+SysInfo infoRefPrintln( 
+	SysNames( "println" ), 
+	Ginger::Arity( 0, true ), 
+	Ginger::Arity( 0 ), 
+	sysRefPrintln, 
+	"Prints any values in reading format and then adds a new line" 
+);
+
+
+// - showMePrint ---------------------------------------------------------------
+
 
 Ref * sysRefShow( Ref * pc, class MachineClass * vm ) {
 	RefPrint printer( std::cout );
@@ -369,12 +387,31 @@ Ref * sysRefShow( Ref * pc, class MachineClass * vm ) {
 	vm->fastDrop( vm->count );
 	return pc;
 }
+SysInfo infoSysPrint( 
+	SysNames( "sysPrint" ), 
+	Ginger::Arity( 1, true ), 
+	Ginger::Arity( 0 ), 
+	sysRefShow, 
+	"Prints any values in summary format"
+);
+
+// - showMe --------------------------------------------------------------------
+
 
 Ref * sysRefShowln( Ref * pc, class MachineClass * vm ) {
 	pc = sysRefShow( pc, vm );
 	std::cout << std::endl;
 	return pc;
 }
+SysInfo infoSysPrintln( 
+	SysNames( "showMe", SysNames::SysAlias( "sysPrintln" ) ), 
+	Ginger::Arity( 1, true ), 
+	Ginger::Arity( 0 ), 
+	sysRefShowln, 
+	"Prints any values in summary format and then adds a new line" 
+);
+
+//------------------------------------------------------------------------------
 
 void refPrint( Ref r ) {
 	RefPrint printer( std::cout );
@@ -401,7 +438,7 @@ std::string refToString( Ref ref ) {
 }
 
 
-/*// - showMeRuntimeInfo ---------------------------------------------------------
+// - showMeRuntimeInfo ---------------------------------------------------------
 
 Ref * sysShowMeRuntimeInfo( Ref * pc, class MachineClass * vm ) {
 	vm->getAppContext().showMeRuntimeInfo();
@@ -414,5 +451,43 @@ SysInfo infoShowMeRuntimeInfo(
 	sysShowMeRuntimeInfo, 
 	"Prints the runtime info to stdout"
 );
-*/
+
+// - printf & printfln ---------------------------------------------------------
+//	
+//	%p = print
+//	%s = sysprint
+//
+
+Ref * sysPrintf( Ref * pc, class MachineClass * vm ) {
+	for ( int i = vm->count - 1; i >= 0; i-- ) {
+		Ref r = vm->fastSubscr( i );
+		refPrint( r );		
+	}
+	vm->fastDrop( vm->count );
+	return pc;
+}
+SysInfo infoPrintf( 
+	SysNames( "printf" ), 
+	Ginger::Arity( 1, true ), 
+	Ginger::Arity( 0 ), 
+	sysPrintf, 
+	"Formatted printing" 
+);
+
+Ref * sysPrintfln( Ref * pc, class MachineClass * vm ) {
+	pc = sysPrintf( pc, vm );
+	std::cout << std::endl;
+	return pc;
+}
+SysInfo infoPrintfln( 
+	SysNames( "printfln" ), 
+	Ginger::Arity( 1, true ), 
+	Ginger::Arity( 0 ), 
+	sysPrintfln, 
+	"Formatted printing and then adds a new line" 
+);
+
+
+
+
 

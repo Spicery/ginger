@@ -48,17 +48,28 @@ enum InfoFlavour {
 	SYS_CALL_FLAVOUR
 };
 
+
 /**
  * 	SysNames is anticipating the need for language-specific bindings
  * 	for built-in functions. At the moment it is simply a name.
  */
 class SysNames {
+public:
+
+	class SysAlias {
+	private:
+		const char * alias_name;
+	public:
+		SysAlias( const char * _alias_name ) : alias_name( _alias_name ) {}
+	};
+
 private:
 	const char * def_name;
 
 public:
 	SysNames() : def_name( NULL ) {}
 	SysNames( const char * _name ) : def_name( _name ) {}
+	SysNames( const char * _name, SysAlias _alias ) : def_name( _name ) {}
 
 public:
 	const char * name() {

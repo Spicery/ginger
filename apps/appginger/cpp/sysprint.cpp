@@ -358,6 +358,9 @@ Ref * sysRefPrintln( Ref * pc, class MachineClass * vm ) {
 	return pc;
 }
 
+// - showMePrint ---------------------------------------------------------------
+
+
 Ref * sysRefShow( Ref * pc, class MachineClass * vm ) {
 	RefPrint printer( std::cout );
 	printer.setShowing( true );
@@ -369,12 +372,31 @@ Ref * sysRefShow( Ref * pc, class MachineClass * vm ) {
 	vm->fastDrop( vm->count );
 	return pc;
 }
+SysInfo infoSysPrint( 
+	SysNames( "sysPrint" ), 
+	Ginger::Arity( 1, true ), 
+	Ginger::Arity( 0 ), 
+	sysRefShow, 
+	"Prints any values in summary format"
+);
+
+// - showMe --------------------------------------------------------------------
+
 
 Ref * sysRefShowln( Ref * pc, class MachineClass * vm ) {
 	pc = sysRefShow( pc, vm );
 	std::cout << std::endl;
 	return pc;
 }
+SysInfo infoSysPrintln( 
+	SysNames( "showMe", SysNames::SysAlias( "sysPrintln" ) ), 
+	Ginger::Arity( 1, true ), 
+	Ginger::Arity( 0 ), 
+	sysRefShowln, 
+	"Prints any values in summary format and then adds a new line" 
+);
+
+//------------------------------------------------------------------------------
 
 void refPrint( Ref r ) {
 	RefPrint printer( std::cout );
@@ -401,7 +423,7 @@ std::string refToString( Ref ref ) {
 }
 
 
-/*// - showMeRuntimeInfo ---------------------------------------------------------
+// - showMeRuntimeInfo ---------------------------------------------------------
 
 Ref * sysShowMeRuntimeInfo( Ref * pc, class MachineClass * vm ) {
 	vm->getAppContext().showMeRuntimeInfo();
@@ -414,5 +436,5 @@ SysInfo infoShowMeRuntimeInfo(
 	sysShowMeRuntimeInfo, 
 	"Prints the runtime info to stdout"
 );
-*/
+
 

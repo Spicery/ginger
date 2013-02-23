@@ -26,7 +26,6 @@
 
 #include <string.h>
 #include <errno.h>
-
 #include <getopt.h>
 #include <unistd.h>
 #include <stddef.h>
@@ -71,9 +70,42 @@ static void sendStdoutToTerminal() {
     }    
 }
 
-int main( int argc, char ** argv ) {
-    std::string line;
-    while ( !getline( std::cin, line ).eof() ) {
+#include <stdio.h>
+#include <unistd.h>
+#include <sys/select.h>
+
+class MainLoop {
+private:
+
+    int from_subprocess;
+    int to_subprocess;
+
+public:
+
+    MainLoop( int _f, int _t ) : from_subprocess( _f ), to_subprocess( _t ) {}
+
+public:
+    void writeLine( const std::string & line ) {
+        int n = line.size();
+        const char * buff = line.c_str();
+        while ( n > 0 ) {
+            int d = write( this->to_subprocess, buff, n );
+            n -= d;
+            buff += d;
+        }
+    }
+
+public:
+    bool getLine() {
+        std::string line;
+        
+        if ( getline( std::cin, line ).eof() ) {
+            #ifdef DEBUG
+                cerr << "End of terminal input" << endl;
+            #endif
+            return false;
+        }
+
         if ( !line.empty() && line[0] == '!' ) {
             pid_t pid = fork();
             if ( pid == 0 ) {
@@ -95,7 +127,7 @@ int main( int argc, char ** argv ) {
                 sendStdoutToTerminal();
                 execl( INSTALL_TOOL "/ginger-help", "ginger-help", (char *)0 );
                 perror( "gngreadline" );
-                return EXIT_FAILURE;
+                exit( EXIT_FAILURE );
             }
         } else if ( startsWith( line, HELP ) ) {
             string topic( line, strlen( HELP ) );
@@ -104,10 +136,129 @@ int main( int argc, char ** argv ) {
                 sendStdoutToTerminal();
                 execl( INSTALL_TOOL "/ginger-help", "ginger-help", topic.c_str(), (char *)0 );
                 perror( "gngreadline" );
-                return EXIT_FAILURE;
+                exit( EXIT_FAILURE );
             }
         } else {
-            std::cout << line << std::endl;
+            line += '\n';
+            this->writeLine( line );
+        }
+        return true;
+    }
+
+    bool relayOutputFromSubprocess() {
+        char buff[ 4096 ];
+        #ifdef DEBUG
+            cerr << "Reading from subprocess" << endl;
+        #endif
+        int n = read( this->from_subprocess, buff, sizeof buff );
+        #ifdef DEBUG
+            cerr << "Read " << n << " bytes" << endl;
+        #endif
+        write( STDOUT_FILENO, buff, n );
+        #ifdef DEBUG
+            if ( n == 0 ) cerr << "End of subprocess output" << endl;
+        #endif
+        return n != 0;
+    }
+
+    bool doSelect() {
+        
+        fd_set rfds;
+        FD_ZERO( &rfds );
+
+        FD_SET( STDIN_FILENO, &rfds );
+        FD_SET( this->from_subprocess, &rfds );
+
+        #ifdef DEBUG 
+            cerr << "Enter select" << endl;
+        #endif
+        int n = ( 
+            select( 
+                max( STDIN_FILENO, this->from_subprocess ) + 1,
+                &rfds, NULL, NULL, NULL
+            )
+        );
+
+        #ifdef DEBUG
+            cerr << "Got select reply: " << n << endl;
+        #endif
+
+        if ( n < 0 ) exit( EXIT_FAILURE );
+
+        if ( FD_ISSET( this->from_subprocess, &rfds ) ) {
+            #ifdef DEBUG
+                cerr << "Reply from subprocess" << endl;
+            #endif
+            return this->relayOutputFromSubprocess();
+        } else {
+            #ifdef DEBUG
+                cerr << "Reply from terminal" << endl;
+            #endif
+            return this->getLine();
         }
     }
+
+    void mainLoop() {
+        while ( doSelect() ) {
+            //  Continue.
+        }
+    }
+
+};
+
+
+
+
+int main( int argc, char ** argv ) {
+
+    int from_parent[ 2 ];
+    int to_parent[ 2 ];
+
+    if ( pipe( from_parent ) < 0 || pipe( to_parent ) ) {
+        perror( "Cannot open pipe" );
+        exit( EXIT_FAILURE );
+    }
+
+    pid_t pid = fork();
+    if ( pid == 0 ) {
+        //  Inside the child.
+        
+        #ifdef DEBUG
+            cerr << "Forking " << endl;
+            for ( char ** av = argv + 1; *av != NULL; av++ ) {
+                cerr << "  Argument = " << *av << endl;
+            }
+        #endif
+        
+        //  from_parent is used to write from the parent to the child.
+        //  So on the child end it is seen as a input - hence close the
+        //  unwanted output.
+        close( from_parent[ 1 ] );
+
+        //  The other way round for the to_parent.
+        close( to_parent[ 0 ] );
+
+        //  Now attach these pipes to stdin and stdout.
+        dup2( from_parent[ 0 ], STDIN_FILENO );
+        dup2( to_parent[ 1 ], STDOUT_FILENO );
+
+        execv( argv[ 1 ], argv + 1 );
+        //  If execution reaches here an error has occurred.
+        perror( "Cannot start subprocess" );
+        exit( EXIT_FAILURE );
+    } else {
+        //  Inside the parent.
+
+        //  from_parent is used to write from the parent to the child.
+        //  So on the parent end it is seen as an output input - hence close 
+        //  unwanted input.
+        close( from_parent[ 0 ] );
+
+        //  The other way round for the to_parent.
+        close( to_parent[ 1 ] );
+
+        MainLoop loop( to_parent[ 0 ], from_parent[ 1 ] );
+        loop.mainLoop();
+    }
+    return EXIT_SUCCESS;
 }

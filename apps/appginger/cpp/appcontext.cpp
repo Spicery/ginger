@@ -95,7 +95,7 @@ const char* AppContext::cgiValue( const char * fieldname ) {
 const string AppContext::syntax( const bool interactively ) { 
     string cmd;
     if ( interactively ) {
-        cmd += GNGREADLINE " | ";
+        cmd += GNGREADLINE " ";
     }
     cmd += FILE2GNX " ";
     if ( not this->initial_syntax.empty() ) {

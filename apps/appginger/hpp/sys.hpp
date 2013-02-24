@@ -67,8 +67,9 @@ public:
 	template< typename T >
 	class Iterator {
 	public:
-		virtual bool hasNext() = 0;
-		virtual T & next() = 0;
+		virtual bool isValid() = 0;
+		virtual T & current() = 0;
+		virtual void advance() = 0;
 		virtual ~Iterator() {}
 	};
 
@@ -80,8 +81,10 @@ public:
 		IteratorSysSynonym( std::list< SysSynonym > _list ) : start( _list.begin() ), end( _list.end() ) {}
 		virtual ~IteratorSysSynonym() {}
 	public:
-		bool hasNext() { return this->start != this->end; }
-		SysSynonym & next() { return *this->start++; }
+
+		bool isValid() { return this->start != this->end; }
+		SysSynonym & current() { return *this->start; }
+		void advance() { ++this->start; }
 	};
 
 private:

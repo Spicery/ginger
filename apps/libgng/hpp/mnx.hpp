@@ -155,6 +155,7 @@ public:
 	void putAttribute( const std::string & key, const std::string & value );
 	void putAttribute( const std::string & key, const long & value );
 	void putAttributeMap( std::map< std::string, std::string > & attrs );
+	bool removeAttribute( const std::string & key );
 	void addChild( shared< Mnx > child );
 	void popFrontChild();
 	void popLastChild();
@@ -186,6 +187,7 @@ public:
 	void start( const std::string & name );
 	void put( const std::string & key, const std::string & value );
 	void put( const std::string & key, const long & value );
+	bool remove( const std::string & key );
 	void add( shared< Mnx > & child );
 	void end();
 	void save();

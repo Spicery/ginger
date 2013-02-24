@@ -9,6 +9,7 @@
 #include "gnxconstants.hpp"
 #include "shared.hpp"
 #include "mishap.hpp"
+#include "mnx.hpp"
 
 #include "item_factory.hpp"
 #include "read_expr.hpp"
@@ -21,6 +22,7 @@
 
 using namespace std;
 
+#define CONSTANT_WAS_ANON "was.anon"
 
 typedef Ginger::MnxBuilder NodeFactory;
 
@@ -77,6 +79,10 @@ static void updateAsPattern( Node node, const bool val_vs_var ) {
 	if ( node->hasName( ID ) ) {
 		node->name() = VAR;
 		node->putAttribute( VID_PROTECTED, val_vs_var ? "true" : "false" );
+	} else if ( node->hasName( CONSTANT ) && node->hasAttribute( CONSTANT_WAS_ANON ) ) {
+		node->name() = VAR;
+		node->removeAttribute( CONSTANT_TYPE );
+		node->removeAttribute( CONSTANT_VALUE );
 	}
 }
 
@@ -1038,6 +1044,21 @@ Node ReadStateClass::readId( const std::string name ) {
 	}
 }
 
+Node ReadStateClass::readAnon( const std::string name ) {
+	NodeFactory anon;
+	if ( this->pattern_mode ) {
+		anon.start( VAR );
+	} else {
+		anon.start( CONSTANT );
+		anon.put( CONSTANT_TYPE, "absent" );
+		anon.put( CONSTANT_VALUE, "absent" );
+		anon.put( CONSTANT_WAS_ANON, name );
+	}
+	anon.put( COMMENT, name );
+	anon.end();
+	return anon.build();
+}
+
 Node ReadStateClass::readEnvVar() {
 	this->checkToken( tokty_obrace );
 	NodeFactory envvar;
@@ -1305,6 +1326,8 @@ Node ReadStateClass::prefixProcessingCore() {
 		}
 		case tokty_id: 
 			return this->readId( item->nameString() );
+		case tokty_anon:
+			return this->readAnon( item->nameString() );
 		// changed for ${VAR} case study
 		case tokty_envvar: 
 			return this->readEnvVar();

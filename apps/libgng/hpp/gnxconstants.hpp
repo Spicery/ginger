@@ -20,6 +20,7 @@
 #define GNX_CONSTANTS_HPP
 
 #define SPAN            "span"
+#define COMMENT         "comment"
 
 #define ARITY 			"arity"
 #define ARGS_ARITY		"args.arity"

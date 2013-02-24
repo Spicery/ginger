@@ -2,6 +2,8 @@
 
 #include <iostream>
 #include <cstdio>
+#include <cassert>
+
 #include <ctype.h>
 #include <stdlib.h>
 #include <string.h>
@@ -181,7 +183,7 @@ void ItemFactoryClass::readAtDigitOrMinus( int ch ) {
 	}
 }
 
-void ItemFactoryClass::readAtAlphaOrUnderbar( int ch ) {
+void ItemFactoryClass::readAtAlpha( int ch ) {
 	//	
 	//	Variables and keywords
 	//	
@@ -197,6 +199,22 @@ void ItemFactoryClass::readAtAlphaOrUnderbar( int ch ) {
 		it->role = PrefixRole;
 		it->nameString() = this->text;
 	}
+}
+
+void ItemFactoryClass::readAtUnderbar( int ch ) {
+	//	
+	//	Anonymous variables.
+	//	
+	assert( ch == '_' ); 
+	do {
+		this->text.push_back( ch );
+		ch = this->nextchar();
+	} while ( isalnum( ch ) || ch == '_' );
+	this->pushchar( ch );
+	Item it = this->item = this->spare;
+	it->tok_type = tokty_anon;
+	it->role = PrefixRole;
+	it->nameString() = this->text;
 }
 
 void ItemFactoryClass::readAtQuoteCharType( int ch ) {
@@ -361,8 +379,10 @@ Item ItemFactoryClass::read() {
 		this->readAtEndOfFile();
     } else if ( isdigit( ch ) || ( ch == '-' && isdigit( this->peekchar() ) ) ) {
     	this->readAtDigitOrMinus( ch );
-	} else if ( isalpha( ch ) || ch == '_' ) {
-		this->readAtAlphaOrUnderbar( ch );
+	} else if ( isalpha( ch ) ) {
+		this->readAtAlpha( ch );
+	} else if ( ch == '_' ) {
+		this->readAtUnderbar( ch );
     } else {
     	switch ( charType( ch ) ) {
     		case QuoteCharType:

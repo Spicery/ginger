@@ -91,6 +91,10 @@ void Mnx::putAttributeMap( std::map< std::string, std::string > & attrs ) {
 	this->attributes.insert( attrs.begin(), attrs.end() );
 }
 
+bool Mnx::removeAttribute( const std::string & key ) {
+	return this->attributes.erase( key ) == 1;
+}
+
 void Mnx::addChild( shared< Mnx > child ) {
 	this->children.push_back( child );
 }
@@ -422,7 +426,9 @@ void MnxBuilder::put( const std::string & key, const long & value ) {
 	this->stack.back()->putAttribute( key, value );
 }
 
-
+bool MnxBuilder::remove( const std::string & key ) {
+	return this->stack.back()->removeAttribute( key );
+}
 
 void MnxBuilder::end() {
 	#ifdef DEBUG

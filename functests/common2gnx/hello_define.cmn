@@ -1,12 +1,12 @@
 #   This will be built-in at some point soon.
 define print( x ) =>>
-    _print( x )
+    sys_print( x )
 enddefine;
 
 #   So will this.
 define println( x ) =>>
-    _print( x );
-    _putchar( '\n' )
+    sys_print( x );
+    sys_putchar( '\n' )
 enddefine;
 
 define hello() =>>

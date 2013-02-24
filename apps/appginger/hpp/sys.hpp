@@ -21,6 +21,7 @@
 
 #include <map>
 #include <iostream>
+#include <list>
 
 #include "arity.hpp"
 
@@ -56,26 +57,54 @@ enum InfoFlavour {
 class SysNames {
 public:
 
-	class SysAlias {
+	class SysSynonym {
 	private:
 		const char * alias_name;
 	public:
-		SysAlias( const char * _alias_name ) : alias_name( _alias_name ) {}
+		SysSynonym( const char * _alias_name ) : alias_name( _alias_name ) {}
+	};
+
+	template< typename T >
+	class Iterator {
+	public:
+		virtual bool hasNext() = 0;
+		virtual T & next() = 0;
+		virtual ~Iterator() {}
+	};
+
+	class IteratorSysSynonym : public Iterator< SysSynonym > {
+	private:
+		std::list< SysSynonym >::iterator start;
+		std::list< SysSynonym >::iterator end;
+	public:
+		IteratorSysSynonym( std::list< SysSynonym > _list ) : start( _list.begin() ), end( _list.end() ) {}
+		virtual ~IteratorSysSynonym() {}
+	public:
+		bool hasNext() { return this->start != this->end; }
+		SysSynonym & next() { return *this->start++; }
 	};
 
 private:
 	const char * def_name;
+	std::list< SysSynonym > synonyms;
 
 public:
 	SysNames() : def_name( NULL ) {}
 	SysNames( const char * _name ) : def_name( _name ) {}
-	SysNames( const char * _name, SysAlias _alias ) : def_name( _name ) {}
+	SysNames( const char * _name, SysSynonym _synonym ) : def_name( _name ) {
+		this->synonyms.push_back( _synonym );
+	}
 
 public:
 	const char * name() {
 		if ( this->def_name == NULL ) throw Ginger::Unreachable( __FILE__, __LINE__ );
 		return this->def_name;
-	}	
+	}
+
+	IteratorSysSynonym synonymIterator() {
+		return IteratorSysSynonym( this->synonyms );
+	}
+
 };
 
 struct SysInfo { 

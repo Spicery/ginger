@@ -1,3 +1,3 @@
 define print( x ) =>>
-    _print( x )
+    sys_print( x )
 enddefine;

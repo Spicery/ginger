@@ -44,7 +44,8 @@ private:
 	int eatsWhiteSpaceAndComments();
 	void readAtEndOfFile();
 	void readAtDigitOrMinus( int ch );
-	void readAtAlphaOrUnderbar( int ch );
+	void readAtAlpha( int ch );
+	void readAtUnderbar( int ch );
 	void readAtQuoteCharType( int ch );
 	void readAtSeparatorCharType( int ch );
 	void readAtBracketCharType( int ch );

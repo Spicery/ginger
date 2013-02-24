@@ -48,6 +48,7 @@ private:
 	Node readSwitchStmnts();
 	Node readThrow();
 	Node readId( const std::string item );
+	Node readAnon( const std::string item );
 	Node readEnvVar();
 	Node readDHat();
 	Node readPackage();

@@ -1,1 +1,1 @@
-<bind><var name="print" protected="true"/><fn name="print"><seq><var name="x"/></seq><app><id name="_print"/><id name="x"/></app></fn></bind>
+<bind><var name="print" protected="true"/><fn name="print"><seq><var name="x"/></seq><app><id name="sys_print"/><id name="x"/></app></fn></bind>

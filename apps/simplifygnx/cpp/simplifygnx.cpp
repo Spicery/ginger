@@ -1080,14 +1080,19 @@ public:
 				}
 			}
 		} else if ( nm == VAR ) {
-			//	Efficiency hack - only push the variable if it masks a 
-			//	function name! This keeps the length of the stack low which
-			//	is what pushes this to be an O(N^2) algorithm. 
-			const string & name = element.attribute( VID_NAME );
-			SelfInfoFinder finder( self_info );
-			if ( finder.find( name ) ) {
-				this->self_info.push_back( SelfInfo( &element, &name ) );
-			}
+            if ( element.hasAttribute( VID_NAME ) ) {
+    			//	Efficiency hack - only push the variable if it masks a 
+    			//	function name! This keeps the length of the stack low which
+    			//	is what pushes this to be an O(N^2) algorithm. 
+    			const string & name = element.attribute( VID_NAME );
+    			SelfInfoFinder finder( self_info );
+    			if ( finder.find( name ) ) {
+    				this->self_info.push_back( SelfInfo( &element, &name ) );
+    			}
+            } else {
+                //  Anonymous variable - cannot mask a function name.
+                //  No action needed.
+            }
 		} else if ( nm == FN ) {
 			this->scopes.push_back( this->self_info.size() );
 			this->self_info.push_back( 
@@ -1293,19 +1298,27 @@ public:
 				element.putAttribute( PROTECTED, v->is_protected ? "true" : "false" );
 			}
 		} else if ( x == VAR ) {
-			const string & name = element.attribute( VID_NAME );
-			const int uid = this->newUid();
-			this->var_of_uid[ uid ] = &element;
-			element.putAttribute( UID, uid );
-			if ( not element.hasAttribute( PROTECTED ) ) {
-				element.putAttribute( PROTECTED, "true" );
-			}
-			const bool is_protected = element.attribute( PROTECTED ) == "true";
-			const bool is_global = this->isGlobalScope();
-			element.putAttribute( SCOPE, is_global ? "global" : "local" );
-			//cerr << "Declaring " << name << " at level " << this->vars.size() << endl;
-			//cerr << "  -- but should it be " << this->scopes.size() << endl;
-			this->vars.push_back( VarInfo( &element, &name, uid, this->scopes.size(), is_protected, not is_global ) );
+            if ( element.hasAttribute( VID_NAME ) ) {
+    			const string & name = element.attribute( VID_NAME );
+    			const int uid = this->newUid();
+    			this->var_of_uid[ uid ] = &element;
+    			element.putAttribute( UID, uid );
+    			if ( not element.hasAttribute( PROTECTED ) ) {
+    				element.putAttribute( PROTECTED, "true" );
+    			}
+    			const bool is_protected = element.attribute( PROTECTED ) == "true";
+    			const bool is_global = this->isGlobalScope();
+    			element.putAttribute( SCOPE, is_global ? "global" : "local" );
+    			//cerr << "Declaring " << name << " at level " << this->vars.size() << endl;
+    			//cerr << "  -- but should it be " << this->scopes.size() << endl;
+    			this->vars.push_back( VarInfo( &element, &name, uid, this->scopes.size(), is_protected, not is_global ) );
+            } else {
+                //  Anonymous variable - should be marked as having local scope.
+                //  It also needs a unique ID to keep the slot counting code clean.
+                element.putAttribute( SCOPE, "local" );
+                element.putAttribute( UID, this->newUid() );
+                element.putAttribute( PROTECTED, "true" );      //  Not strictly required but correct & future-proofing.
+            }
 		} else if ( x == FN ) {
 			this->scopes.push_back( this->vars.size() );
 		}

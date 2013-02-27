@@ -59,9 +59,11 @@ public:
 
 	class SysSynonym {
 	private:
-		const char * alias_name;
+		std::string alias_name;
 	public:
 		SysSynonym( const char * _alias_name ) : alias_name( _alias_name ) {}
+	public:
+		std::string name() const { return this->alias_name; }
 	};
 
 	template< typename T >
@@ -75,21 +77,25 @@ public:
 
 	class IteratorSysSynonym : public Iterator< SysSynonym > {
 	private:
-		std::list< SysSynonym >::iterator start;
-		std::list< SysSynonym >::iterator end;
+		std::list< SysSynonym >::iterator start_it;
+		std::list< SysSynonym >::iterator end_it;
 	public:
-		IteratorSysSynonym( std::list< SysSynonym > _list ) : start( _list.begin() ), end( _list.end() ) {}
+		IteratorSysSynonym( std::list< SysSynonym > & _list ) : start_it( _list.begin() ), end_it( _list.end() ) {}
 		virtual ~IteratorSysSynonym() {}
 	public:
-
-		bool isValid() { return this->start != this->end; }
-		SysSynonym & current() { return *this->start; }
-		void advance() { ++this->start; }
+		bool isValid() { return this->start_it != this->end_it; }
+		SysSynonym & current() { 
+			return *this->start_it;
+		}
+		void advance() { 
+			++this->start_it; 
+		}
 	};
 
 private:
 	const char * def_name;
 	std::list< SysSynonym > synonyms;
+
 
 public:
 	SysNames() : def_name( NULL ) {}
@@ -127,6 +133,10 @@ struct SysInfo {
 
 	const char * name() {
 		return this->names.name();
+	}
+
+	SysNames & sysNames() {
+		return this->names;
 	}
 
 	//	Only declared to allow adding to std::map, which requires a

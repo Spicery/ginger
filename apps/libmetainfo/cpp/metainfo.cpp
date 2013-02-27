@@ -25,13 +25,15 @@ namespace Ginger {
 using namespace std;
 
 struct MetaInfo {
+	const std::string sysname;
 	Arity in_arity;
 	Arity out_arity;
 	
 	MetaInfo() {
 	}
 	
-	MetaInfo( Arity in, Arity out ) : 
+	MetaInfo( const std::string & sysname, Arity in, Arity out ) : 
+		sysname( sysname ),
 		in_arity( in ),
 		out_arity( out )
 	{	
@@ -42,10 +44,14 @@ typedef std::map< std::string, MetaInfo >::value_type MAPLET;
 
 const std::map< std::string, MetaInfo >::value_type rawData[] = {
 #include "../../automatic/metainfo/metainfo.cpp.inc"
-//MAPLET( "*", MetaInfo( Arity( 2, false ), Arity( 1, false ) ) ),
+//MAPLET( "*", MetaInfo( "*", Arity( 2, false ), Arity( 1, false ) ) ),
 };
 const int numElems = sizeof rawData / sizeof rawData[0];
 std::map< std::string, MetaInfo > metaInfo( rawData, rawData + numElems );
+
+const std::string baseName( const string & name ) {
+	return metaInfo[ name ].sysname;
+}
 
 Arity inArity( const string & name ) {
 	return metaInfo[ name ].in_arity;

@@ -102,6 +102,7 @@ public:
 	virtual ~OrdinaryPackage() {}
 };
 
+/*
 class StandardLibraryPackage : public Package {
 public:
 	void loadIfNeeded();
@@ -115,5 +116,6 @@ public:
 	}
 	virtual ~StandardLibraryPackage() {}
 };
+*/
 
 #endif

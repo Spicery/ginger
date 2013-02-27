@@ -26,21 +26,33 @@ class Arity:
 #   generateMetaInfoTable
 ################################################################################
 
+def writeMaplet( pw, alt_name, base_name, e ):
+	pw.write(
+		"MAPLET( \"{}\", MetaInfo( \"{}\", {}, {} ) ),\n".format(
+			alt_name, 
+			base_name,
+			Arity( e[ "in" ] ), 
+			Arity( e[ "out" ] )
+		)
+	)
+
 def generateMetaInfo():
 	metainfo = json.loads( subprocess.check_output( [ "../../appginger/cpp/ginger-info", "-j" ] ) )
 	stdinfo = metainfo[ "std" ]
+	synonyms = metainfo[ "synonyms" ]
 
 	pw = open( "metainfo.cpp.inc", 'w' )
    	
    	for name in stdinfo:
    		e = stdinfo[ name ]
-		pw.write(
-			"MAPLET( \"{}\", MetaInfo( {}, {} ) ),\n".format(
-				name, 
-				Arity( e[ "in" ] ), 
-				Arity( e[ "out" ] )
-			)
-		)
+   		writeMaplet( pw, name, name, e )
+
+	for sn in synonyms:
+		alt_name = sn[ "alt.name" ]
+		base_name = sn[ "base.name" ]
+		e = stdinfo[ base_name ]
+		writeMaplet( pw, alt_name, base_name, e )
+
 	pw.close()
 
 

@@ -60,21 +60,26 @@ def escapeName( name ):
 			list.append( ";" )
 	return "".join( list )
 
-def createDefinitionFile( ename, name ):
-	escname = escapeName( name )
+def createDefinitionAbsFile( ename, varname, sysname ):
+	escvarname = escapeName( varname )
+	escsysname = escapeName( sysname )
 	df = open( ename, 'w' )
-	df.write( '<bind><var name="{0}"/><constant type="sysfn" value="{0}"/></bind>\n'.format( escname ) )
+	df.write( '<bind><var name="{0}"/><constant type="sysfn" value="{1}"/></bind>\n'.format( escvarname, escsysname ) )
 	df.close()
 
+def makeDefinitionFile( dir, alt_name, base_name ):
+	ename = os.path.join( dir, encodeName( alt_name ) + ".gnx" )
+	createDefinitionAbsFile( ename, alt_name, base_name )
 
-def generateGingerLibrary( stdinfo ):
+def generateGingerLibrary( stdinfo, synonyms ):
 	"""Generates a definition file for all the sysfns (built-in functions)"""
 	dir = stdLibProjectDir()
 	if not os.path.exists( dir ):
 		os.makedirs( dir )
 	for k in stdinfo:
-		ename = os.path.join( dir, encodeName( k  ) + ".gnx" )
-		createDefinitionFile( ename, k )
+		makeDefinitionFile( dir, k, k )
+	for sn in synonyms:
+		makeDefinitionFile( dir, sn[ "alt.name" ], sn[ "base.name" ] )
 
 ################################################################################
 #   generateGingerLibraryExtras
@@ -142,7 +147,8 @@ def generateGingerInteractive():
 def standardLibraryFiles():
 	metainfo = json.loads( subprocess.check_output( [ "../apps/appginger/cpp/ginger-info", "-j" ] ) )
 	stdinfo = metainfo[ "std" ]
-	generateGingerLibrary( stdinfo )
+	synonyms = metainfo[ "synonyms" ]
+	generateGingerLibrary( stdinfo, synonyms )
 	generateGingerLibraryExtras( stdinfo )
 	generateGingerInteractive()
 

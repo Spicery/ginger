@@ -94,7 +94,7 @@ Ref * sysRefShowln( Ref * pc, class MachineClass * vm ) {
 	return pc;
 }
 SysInfo infoSysPrintln( 
-	SysNames( "showMe", SysNames::SysAlias( "sysPrintln" ) ), 
+	SysNames( "showMe", SysNames::SysSynonym( "sysPrintln" ) ), 
 	Ginger::Arity( 1, true ), 
 	Ginger::Arity( 0 ), 
 	sysRefShowln, 

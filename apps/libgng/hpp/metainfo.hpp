@@ -25,6 +25,7 @@
 
 namespace Ginger {
 
+extern const std::string baseName( const std::string & name );
 extern Arity inArity( const std::string & name );
 extern Arity outArity( const std::string & name );
 

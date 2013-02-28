@@ -66,6 +66,10 @@ Command::~Command() {
 	}
 }
 
+pid_t Command::getPid() {
+	return this->child_pid;
+}
+
 void Command::interrupt() {
 	#ifdef DBG_COMMAND
 		cerr << "Killing " << this->child_pid << endl;
@@ -74,7 +78,28 @@ void Command::interrupt() {
 }
 
 void Command::addArg( const std::string arg ) {
+	#ifdef DBG_COMMAND
+		cerr << "Adding arg: " << arg << endl;
+		for ( 
+			vector< string >::iterator it = this->args.begin();
+			it != this->args.end();
+			++it
+		) {
+			cerr << "  Current arg: " << *it << endl;
+		}
+	#endif
 	this->args.push_back( arg );
+}
+
+void Command::wrap( const std::string cmd ) {
+	#ifdef DBG_COMMAND
+		cerr << "Wrapping replacing " << this->command << " with " << cmd << endl;
+	#endif
+	this->args.insert( this->args.begin(), this->command );
+	this->command = cmd;
+	#ifdef DBG_COMMAND
+		cerr << "Old command " << this->args[ 0 ] << endl;
+	#endif
 }
 
 void Command::fill( vector< char * > & argv ) {
@@ -153,16 +178,16 @@ int Command::runWithOutput() {
 	this->fill( arg_vector );
 	
 	#ifdef DBG_COMMAND
-		cout << "Command: " << this->command << endl;
+		cerr << "Command: " << this->command << endl;
+		int n = 1;
 		for ( 
 			vector< string >::iterator it = this->args.begin();
 			it != this->args.end();
-			++it
+			++it, n += 1
 		) {
-			cout << "Arg: " << *it << endl;
+			cerr << "Arg[" << n << "]: " << *it << endl;
 		}
 	#endif
-	
 	
 	int pipe_fd[ 2 ];
 	pipe( pipe_fd );

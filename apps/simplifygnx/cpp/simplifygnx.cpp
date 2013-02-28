@@ -1407,7 +1407,7 @@ public:
 				//cout<<"IN 1" << endl;
 				const string name( element.attribute( VID_NAME ) );
 				element.clearAllAttributes();
-				element.putAttribute( CONSTANT_VALUE, name );
+				element.putAttribute( CONSTANT_VALUE, Ginger::baseName( name ) );
 				element.putAttribute( CONSTANT_TYPE, "sysfn" );
 				element.name() = CONSTANT;
 				this->changed = true;

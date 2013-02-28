@@ -170,23 +170,20 @@ public:
 		this->level += 1;
 		this->section_count = 0;
 	}
+	void addSectionCommaIfNeeded() {
+		if ( this->section_count > 0 ) {
+			cout << "," << endl;
+		}
+	}
 	void endDocument() {
 		if ( this->section_count > 0 ) {
-			this->indent();
-			if ( this->in_std ) {
-				cout << "}" << endl;
-			} else {
-				cout << "]" << endl;
-			}
+			cout << endl;
 		}
 		this->level -= 1;
 		cout << "}" << endl;
 	}
 	void startSection( const string sectionName ) {
-		if ( this->section_count > 0 ) {
-			this->indent();
-			cout << "]," << endl;
-		}
+		this->addSectionCommaIfNeeded();
 		this->value_count = 0;
 		this->indent();
 		this->in_std = ( sectionName == "std" );
@@ -198,8 +195,10 @@ public:
 		this->level += 1; 
 	}
 	void endSection() {
-		if ( this->value_count > 0 ) {
-			cout << " }" << endl;
+		if ( this->in_std ) {
+			cout << endl << "  }";
+		} else {
+			cout << endl << "  ]";
 		}
 		this->level -= 1;
 		this->section_count += 1;
@@ -211,10 +210,13 @@ public:
 			cout << "# " << comment << endl;
 		}
 	}
-	void startValue( const string topic ) {
+	void addCommaLineBreakBetweenValues() {
 		if ( this->value_count > 0 ) {
-			cout << " }," << endl;
+			cout << "," << endl;
 		}
+	}
+	void startValue( const string topic ) {
+		this->addCommaLineBreakBetweenValues();
 		this->indent();
 		if ( not this->in_std ) {
 			cout << "{ \"topic\": \"" << topic << "\"";
@@ -239,6 +241,7 @@ public:
 		}
 	}
 	void endValue() {
+		cout << " }";
 		this->value_count += 1;
 	}
 	virtual ~JSONFormatter() {}
@@ -412,6 +415,37 @@ private:
 		this->formatter->endSection();
 	}
 
+	void printSynonyms() {
+		this->formatter->startSection( "synonyms" );
+
+		this->formatter->insertComment( "Synonyms for built-in functions" );
+
+		for (
+			SysMap::iterator it = SysMap::sysMap().begin();
+			it != SysMap::sysMap().end();
+			++it
+		) {
+
+
+			for (
+				SysNames::IteratorSysSynonym synonyms( it->second.sysNames().synonymIterator() );
+				synonyms.isValid();
+				synonyms.advance()
+			) {
+				SysNames::SysSynonym & ss = synonyms.current();
+				this->formatter->startValue( "synonym" );
+				this->formatter->addAttribute( "base.name", it->first );
+				this->formatter->addAttribute( "alt.name", ss.name() );
+				this->formatter->endValue();
+			}
+
+
+		}
+
+		this->formatter->endSection();
+		
+	}
+
 	void printBuildInfo() {
 		this->formatter->startSection( "release" );
 
@@ -475,6 +509,7 @@ public:
 		this->printLicenseInfo();
 		this->printCommunityInfo();
 		this->printStdInfo();
+		this->printSynonyms();
 		this->formatter->endDocument();
 	}
 

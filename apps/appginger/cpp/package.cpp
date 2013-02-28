@@ -67,7 +67,7 @@ OrdinaryPackage::OrdinaryPackage( PackageManager * pkgmgr, const std::string tit
 PackageManager::PackageManager( MachineClass * vm ) :
 	vm( vm )
 {
-	this->packages[ STANDARD_LIBRARY_PACKAGE ] = new StandardLibraryPackage( this, std::string( STANDARD_LIBRARY_PACKAGE ) );
+	//this->packages[ STANDARD_LIBRARY_PACKAGE ] = new StandardLibraryPackage( this, std::string( STANDARD_LIBRARY_PACKAGE ) );
 }
 
 Package * PackageManager::getPackage( std::string title ) {
@@ -385,7 +385,7 @@ void OrdinaryPackage::loadIfNeeded() {
 *	Standard Library Package
 *******************************************************************************/
 
-
+/*
 Valof * StandardLibraryPackage::absoluteAutoload( const std::string & c ) {
 	Ref r = makeSysFn( this->pkgmgr->vm->codegen(), c, SYS_UNDEFINED );
 	if ( r == SYS_UNDEFINED ) {
@@ -400,4 +400,5 @@ Valof * StandardLibraryPackage::absoluteAutoload( const std::string & c ) {
 
 void StandardLibraryPackage::loadIfNeeded() {
 }
+*/
 

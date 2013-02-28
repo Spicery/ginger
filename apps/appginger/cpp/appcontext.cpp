@@ -92,27 +92,53 @@ const char* AppContext::cgiValue( const char * fieldname ) {
     #endif
 }
 
-const string AppContext::syntax( const bool interactively ) { 
-    string cmd;
-    if ( interactively ) {
-        cmd += GNGREADLINE " ";
+#ifdef OLD_SHELL_ESCAPES_REQUIRED
+
+    const string AppContext::syntax( const bool interactively ) { 
+        string cmd;
+        if ( interactively ) {
+            cmd += GNGREADLINE " ";
+        }
+        cmd += FILE2GNX " ";
+        if ( not this->initial_syntax.empty() ) {
+            cmd += "-g ";
+            cmd += Ginger::shellSafeName( this->initial_syntax );
+        }
+        return cmd;
     }
-    cmd += FILE2GNX " ";
+
+    const string AppContext::syntax( const std::string & filename ) { 
+        string cmd( FILE2GNX " " );
+        if ( not this->initial_syntax.empty() ) {
+            cmd += "-g ";
+            cmd += Ginger::shellSafeName( this->initial_syntax );
+            cmd += " ";
+        }
+        cmd += Ginger::shellSafeName( filename );
+        return cmd;
+    }
+
+#endif
+
+Ginger::Command AppContext::syntaxCommand( const bool interactively ) { 
+    Ginger::Command cmd( FILE2GNX );
     if ( not this->initial_syntax.empty() ) {
-        cmd += "-g ";
-        cmd += Ginger::shellSafeName( this->initial_syntax );
+        cmd.addArg( "-g" );
+        cmd.addArg( this->initial_syntax );
+    }
+    if ( interactively ) {
+        cmd.wrap( GNGREADLINE );
     }
     return cmd;
 }
 
-const string AppContext::syntax( const std::string & filename ) { 
-    string cmd( FILE2GNX " " );
+Ginger::Command AppContext::syntaxCommand( const std::string & filename ) { 
+    Ginger::Command cmd( FILE2GNX );
     if ( not this->initial_syntax.empty() ) {
-        cmd += "-g ";
-        cmd += Ginger::shellSafeName( this->initial_syntax );
-        cmd += " ";
+        cmd.addArg( "-g" );
+        cmd.addArg( this->initial_syntax );
     }
-    cmd += Ginger::shellSafeName( filename );
+    cmd.addArg( filename );
     return cmd;
 }
 

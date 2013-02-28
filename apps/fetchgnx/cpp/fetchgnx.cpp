@@ -52,6 +52,8 @@ using namespace std;
 
 #define STANDARD_LIBRARY	"standard_library"
 
+//#define DBG_FETCHGNX
+
 enum Task {
 	FETCH_DEFINITION,
 	RESOLVE_QUALIFIED,

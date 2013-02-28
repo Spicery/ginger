@@ -116,6 +116,28 @@ const string AppContext::syntax( const std::string & filename ) {
     return cmd;
 }
 
+Ginger::Command AppContext::syntaxCommand( const bool interactively ) { 
+    Ginger::Command cmd( FILE2GNX );
+    if ( not this->initial_syntax.empty() ) {
+        cmd.addArg( "-g" );
+        cmd.addArg( Ginger::shellSafeName( this->initial_syntax ) );
+    }
+    if ( interactively ) {
+        cmd.wrap( GNGREADLINE );
+    }
+    return cmd;
+}
+
+Ginger::Command AppContext::syntaxCommand( const std::string & filename ) { 
+    Ginger::Command cmd( FILE2GNX );
+    if ( not this->initial_syntax.empty() ) {
+        cmd.addArg( "-g" );
+        cmd.addArg( Ginger::shellSafeName( this->initial_syntax ) );
+    }
+    cmd.addArg( Ginger::shellSafeName( filename ) );
+    return cmd;
+}
+
 class ReSTRuntimeInfoDriver {
 public:
     void startInfo() {}

@@ -28,6 +28,7 @@
 	#include <rude/cgi.h>
 #endif
 
+#include "command.hpp"
 
 #include "gngversion.hpp"
 #include "common.hpp"
@@ -92,6 +93,8 @@ public:
 	bool & welcomeBanner() { return this->welcoming; }
 	const std::string syntax( const bool interactively ); 
 	const std::string syntax( const std::string & filename ); 
+	Ginger::Command syntaxCommand( const bool interactively ); 
+	Ginger::Command syntaxCommand( const std::string & filename ); 
 	void setSyntax( const std::string s ) { this->initial_syntax = s; }
 	const std::string getInteractivePackage() { return this->interactive_package; }
 	void setInteractivePackage( const std::string & ip ) { this->interactive_package = ip; }

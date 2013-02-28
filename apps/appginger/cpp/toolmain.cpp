@@ -22,6 +22,7 @@
 #include <vector>
 #include <string>
 
+#include <cstdio>
 #include <cstdlib>
 #include <sstream>
 
@@ -358,33 +359,61 @@ void ToolMain::runFrom( RCEP & rcep, Ginger::MnxReader & gnx_read ) {
     }           
 }
 
-void ToolMain::executeCommand( RCEP & rcep, const string command ) {
-    //cerr << "Command so far: " << command << endl;
-    FILE * gnxfp = popen( command.c_str(), "r" );
-    if ( gnxfp == NULL ) {
-        throw Ginger::Mishap( "Failed to translate input" );
+class FileMgr {
+private:
+    bool tidy_exit;
+    Ginger::Command & command;
+    FILE * file;
+
+public:
+    FILE * get() const { return this->file; }
+    void noteTidyExit() { this->tidy_exit = true; }
+
+public:
+    FileMgr( Ginger::Command & _command ) :
+        tidy_exit( false ),
+        command( _command ),
+        file( NULL )
+    {
+        this->file = fdopen( this->command.runWithOutput(), "r" );
+        if ( this->file == NULL ) {
+            throw Ginger::Mishap( "Failed to translate input" );
+        }
     }
+
+public:
+    ~FileMgr() { 
+        if ( not this->tidy_exit ) {
+            this->command.interrupt();
+        }
+        if ( this->file != NULL ) {
+            fclose( this->file ); 
+        }
+    }   
+};
+
+void ToolMain::executeCommand( RCEP & rcep, Ginger::Command command ) {
+    //cerr << "Command so far: " << command << endl;
+
+    FileMgr gnxfp( command );
+    
     // ... open the file, with whatever, pipes or who-knows ...
     // let's build a buffer from the FILE* descriptor ...
-    __gnu_cxx::stdio_filebuf<char> pipe_buf( gnxfp, ios_base::in );
-    
+    __gnu_cxx::stdio_filebuf<char> pipe_buf( gnxfp.get(), ios_base::in );
+
     // there we are, a regular istream is build upon the buffer.
     istream stream_pipe_in( &pipe_buf );
     
     while ( rcep.unsafe_read_comp_exec_print( stream_pipe_in, std::cout ) ) {}
-
-    pclose( gnxfp );    
+    gnxfp.noteTidyExit();    
 }
 
 void ToolMain::executeFile( RCEP & rcep, const string filename ) {
-    stringstream commstream;
-    //  tail is 1-indexed!
-    commstream << this->context.syntax( filename );
-    this->executeCommand( rcep, commstream.str() );
+    this->executeCommand( rcep, this->context.syntaxCommand( filename ) );
 }
 
 void ToolMain::executeStdin( const bool interactively, RCEP & rcep ) {
-    this->executeCommand( rcep, this->context.syntax( interactively ) );
+    this->executeCommand( rcep, this->context.syntaxCommand( interactively ) );
 }
 
 void ToolMain::executeFileArguments( RCEP & rcep ) {

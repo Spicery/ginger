@@ -38,9 +38,11 @@ private:
 	
 public:
 	void addArg( const std::string arg );
+	void wrap( const std::string arg );
 	int getInputFD() { return this->input_fd; }
 	int getOutputFD() { return this->output_fd; }
 	const std::string asPrintString();
+	pid_t getPid();
 	
 public:
 	int runWithOutput();
@@ -49,7 +51,7 @@ public:
 	void interrupt();
 	
 public:
-	Command( const std::string command );
+	Command( const std::string command = "" );
 	~Command();
 };
 

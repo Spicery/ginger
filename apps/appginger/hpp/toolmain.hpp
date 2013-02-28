@@ -37,7 +37,7 @@ protected:
 	void executeFileArguments( RCEP & rcep );
 	void executeStdin( const bool interactively, RCEP & rcep );
 	void executeFile( RCEP & rcep, const std::string filename );
-	void executeCommand( RCEP & rcep, const std::string command );
+	void executeCommand( RCEP & rcep, Ginger::Command command );
 	void runFrom( RCEP & rcep, Ginger::MnxReader & gnx_read );
 
 private:

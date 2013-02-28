@@ -40,6 +40,8 @@
 
 using namespace std;
 
+//#define DBG_CLIMAIN
+
 static void printWelcomeMessage() {
 	cout << PACKAGE_NAME << ": " << PACKAGE_VERSION << ", Copyright (c) 2010  Stephen Leach" << endl;
 	cout << "  +----------------------------------------------------------------------+" << endl;
@@ -138,18 +140,34 @@ private:
 	
 		#ifndef BLOCK2
 		for (;;) {
+			#ifdef DBG_CLIMAIN
+				cerr << "Entering executeStdin" << endl;
+			#endif
 			try {
 				this->executeStdin( true, rcep );
+				#ifdef DBG_CLIMAIN
+					cerr << "Loop finished naturally, end of input" << endl;
+				#endif
 				break;
 			} catch ( Ginger::Mishap & e ) {
+				#ifdef DBG_CLIMAIN
+					cerr << "Mishap detected" << endl;
+				#endif
 				e.report();
 				cerr << endl << SYS_MSG_PREFIX << "Reset after runtime error ..." << endl;
 				vm->resetMachine();
 		 	} catch ( Ginger::CompileTimeError & e ) {
+				#ifdef DBG_CLIMAIN
+					cerr << "CompileTimeError detected" << endl;
+				#endif
 				e.report();
 				cerr << endl << SYS_MSG_PREFIX << "Reset after compilation error ..." << endl;
 				vm->resetMachine();
 		 	}
+		 	#ifdef DBG_CLIMAIN
+				cerr << "Back to loop start" << endl;
+			#endif
+
 		}
 		#endif
 		

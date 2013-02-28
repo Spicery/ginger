@@ -92,35 +92,39 @@ const char* AppContext::cgiValue( const char * fieldname ) {
     #endif
 }
 
-const string AppContext::syntax( const bool interactively ) { 
-    string cmd;
-    if ( interactively ) {
-        cmd += GNGREADLINE " ";
-    }
-    cmd += FILE2GNX " ";
-    if ( not this->initial_syntax.empty() ) {
-        cmd += "-g ";
-        cmd += Ginger::shellSafeName( this->initial_syntax );
-    }
-    return cmd;
-}
+#ifdef OLD_SHELL_ESCAPES_REQUIRED
 
-const string AppContext::syntax( const std::string & filename ) { 
-    string cmd( FILE2GNX " " );
-    if ( not this->initial_syntax.empty() ) {
-        cmd += "-g ";
-        cmd += Ginger::shellSafeName( this->initial_syntax );
-        cmd += " ";
+    const string AppContext::syntax( const bool interactively ) { 
+        string cmd;
+        if ( interactively ) {
+            cmd += GNGREADLINE " ";
+        }
+        cmd += FILE2GNX " ";
+        if ( not this->initial_syntax.empty() ) {
+            cmd += "-g ";
+            cmd += Ginger::shellSafeName( this->initial_syntax );
+        }
+        return cmd;
     }
-    cmd += Ginger::shellSafeName( filename );
-    return cmd;
-}
+
+    const string AppContext::syntax( const std::string & filename ) { 
+        string cmd( FILE2GNX " " );
+        if ( not this->initial_syntax.empty() ) {
+            cmd += "-g ";
+            cmd += Ginger::shellSafeName( this->initial_syntax );
+            cmd += " ";
+        }
+        cmd += Ginger::shellSafeName( filename );
+        return cmd;
+    }
+
+#endif
 
 Ginger::Command AppContext::syntaxCommand( const bool interactively ) { 
     Ginger::Command cmd( FILE2GNX );
     if ( not this->initial_syntax.empty() ) {
         cmd.addArg( "-g" );
-        cmd.addArg( Ginger::shellSafeName( this->initial_syntax ) );
+        cmd.addArg( this->initial_syntax );
     }
     if ( interactively ) {
         cmd.wrap( GNGREADLINE );
@@ -132,9 +136,9 @@ Ginger::Command AppContext::syntaxCommand( const std::string & filename ) {
     Ginger::Command cmd( FILE2GNX );
     if ( not this->initial_syntax.empty() ) {
         cmd.addArg( "-g" );
-        cmd.addArg( Ginger::shellSafeName( this->initial_syntax ) );
+        cmd.addArg( this->initial_syntax );
     }
-    cmd.addArg( Ginger::shellSafeName( filename ) );
+    cmd.addArg( filename );
     return cmd;
 }
 

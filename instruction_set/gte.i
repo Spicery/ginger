@@ -13,6 +13,9 @@ Exceptions (Checked Preconditions)
 	
 Result (Postcondition)		
 
+Tags
+	* Arithmetic comparison
+
 \*****************************************************************************/
 
 Ref b = *( VMVP-- );

@@ -15,6 +15,9 @@ Exceptions (Checked Preconditions)
 Result (Postcondition)		
 	*	The two items are removed and replaced by a single boolean value.
 
+Tags
+	* Arithmetic comparison
+
 \*****************************************************************************/
 
 Ref b = *( VMVP-- );

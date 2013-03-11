@@ -17,6 +17,9 @@ Result (Postcondition)
 	* R = X mod Y is pushed.
 	* Execution continues at the next instruction.
 
+Tags
+	* Arithmetic operator
+
 \*****************************************************************************/
 
 Ref ry = *( VMVP-- );

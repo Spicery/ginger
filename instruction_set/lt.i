@@ -19,6 +19,9 @@ Result (Postcondition)
 	* R is true if A < B, else false.
 	* Execution continues at the next instruction.
 
+Tags
+	* Arithmetic comparison
+
 \*****************************************************************************/
 
 Ref b = *( VMVP-- );

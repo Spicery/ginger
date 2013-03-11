@@ -18,6 +18,9 @@ Checked Preconditions
 Result
 	Control continues at L if A <= K otherwise fallthru.
 
+Tags
+	* Arithmetic comparison
+
 \*****************************************************************************/
 
 long s = ToLong( pc[1] );

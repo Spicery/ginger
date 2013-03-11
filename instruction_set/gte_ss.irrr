@@ -20,6 +20,9 @@ Result (Postcondition)
 	* 	Control is transferred to the target forwards or backwards if
 		two local variables are greater-than-or-equal-to each other.
 
+Tags
+	* Arithmetic comparison
+
 \*****************************************************************************/
 
 long s = ToLong( pc[1] );

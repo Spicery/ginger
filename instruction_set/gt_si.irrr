@@ -12,6 +12,9 @@ Exceptions (Checked Preconditions)
 	
 Result (Postcondition)		
 
+Tags
+	* Arithmetic comparison
+
 \*****************************************************************************/
 
 long s = ToLong( pc[1] );

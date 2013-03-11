@@ -18,6 +18,9 @@ Exceptions
 Postcondition
 	X & Y are replaced by X*Y
 
+Tags
+	* Arithmetic operator
+
 \*****************************************************************************/
 
 Ref ry = *( VMVP-- );

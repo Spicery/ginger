@@ -20,6 +20,9 @@ Postcondition
 	* X & Y are replaced by X - Y
 	* Execution continues at the next instruction.
 
+Tags
+	* Arithmetic operator
+
 \*****************************************************************************/
 
 Ref ry = *( VMVP-- );

@@ -14,6 +14,9 @@ Exceptions (Checked Preconditions)
 Result (Postcondition)
 	The top of the stack X1 is one greater than before.
 
+Tags
+	* Arithmetic operator
+
 \*****************************************************************************/
 
 Ref rx = *VMVP;

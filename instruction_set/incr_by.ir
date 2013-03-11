@@ -15,6 +15,9 @@ Exceptions (Checked Preconditions)
 Result (Postcondition)
 	The top of the stack has been incremented by N.
 
+Tags
+	* Arithmetic operator
+
 \*****************************************************************************/
 
 Ref ry = ToRef( pc[ 1 ] );

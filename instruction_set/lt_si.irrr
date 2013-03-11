@@ -21,6 +21,9 @@ Result (Postcondition)
 	* 	Control is transferred to the target forwards or backwards if
 		a numerical local variables is less-than a constant.
 
+Tags
+	* Arithmetic comparison
+
 \*****************************************************************************/
 
 long s = ToLong( pc[1] );

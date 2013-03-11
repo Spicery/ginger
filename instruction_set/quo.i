@@ -15,6 +15,9 @@ Result (Postcondition)
 	* X & Y are removed from the stack and replaced by R
 	* R = X div Y
 
+Tags
+	* Arithmetic operator
+
 \*****************************************************************************/
 
 Ref ry = *( VMVP-- );

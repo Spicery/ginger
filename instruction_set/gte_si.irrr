@@ -21,6 +21,8 @@ Result (Postcondition)
 	* 	Control is transferred to the target forwards or backwards if
 		a numerical local variables is greater-than-or-equal to a constant.
 
+Tags
+	* Arithmetic comparison
 
 \*****************************************************************************/
 

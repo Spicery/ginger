@@ -23,6 +23,9 @@ Result (Postcondition)
 	* R is equal to A / B with A & B converted to floating point.
 	* Execution continues at the next instruction.
 
+Tags
+	* Arithmetic operator
+
 \*****************************************************************************/
 
 Ref ry = *( VMVP-- );

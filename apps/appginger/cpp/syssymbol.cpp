@@ -133,6 +133,6 @@ extern const std::string & symbolToStdString( Ref r ) {
 	if ( it != revsymtab.end() ) {
 		return it->second;
 	} else {
-		throw Ginger::SystemError( "Corrupt symbol table" );
+		throw SystemError( "Corrupt symbol table" );
 	}
 }

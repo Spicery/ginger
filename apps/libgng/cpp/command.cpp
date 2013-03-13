@@ -158,7 +158,7 @@ void Command::runSilent() {
 			return;
 		}
 	}
-	throw Unreachable( __FILE__, __LINE__ );
+	throw Unreachable();
 	
 }
 
@@ -215,7 +215,7 @@ int Command::runWithOutput() {
 			return this->input_fd;
 		}
 	}
-	throw Unreachable( __FILE__, __LINE__ );
+	throw Unreachable();
 }
 
 void Command::runWithInputAndOutput() {
@@ -276,7 +276,7 @@ void Command::runWithInputAndOutput() {
 			return;
 		}
 	}
-	throw Unreachable( __FILE__, __LINE__ );
+	throw Unreachable();
 }
 
 } // namespace

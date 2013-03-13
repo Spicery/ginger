@@ -52,7 +52,7 @@ Ref makeSysFn( CodeGen codegen, std::string fn_name, Ref default_value ) {
 		//	Native instruction.
 		codegen->vmiINSTRUCTION( info.instruction );
 	} else {
-		throw Ginger::SystemError( "Internal error" );
+		throw SystemError( "Internal error" );
 	}
 	codegen->vmiSYS_RETURN();
 	Ref r = codegen->vmiENDFUNCTION( false );

@@ -114,7 +114,7 @@ static Ref * sysClassSlots( Ref * pc, MachineClass * vm ) {
 	
 	const long Q = required_slots.size();
 	if ( Q > P ) {
-		throw Ginger::SystemError( "Incorrect calculation of slots for class!" );
+		throw SystemError( "Incorrect calculation of slots for class!" );
 	}
 	
 	XfrClass xfr( vm->heap().preflight( 2 + Q ) );

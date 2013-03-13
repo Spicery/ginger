@@ -210,7 +210,7 @@ Ref * findObjectKey( Ref * obj_A ) {
 				return x;
 			}
 		}
-		throw Ginger::Unreachable( __FILE__, __LINE__ );
+		throw Unreachable();
 	}
 }
 
@@ -258,7 +258,7 @@ unsigned long lengthAfterObjectKey( Ref * obj_K ) {
 				break;
 			}
 			default: 
-				throw Ginger::Unreachable(  __FILE__, __LINE__ );
+				throw Unreachable();
 		}
 	} else if ( IsFunctionKey( key ) ) {
 		return sizeAfterKeyOfFn( obj_K );

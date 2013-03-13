@@ -79,7 +79,7 @@ int main( int argc, char **argv, char **envp ) {
 	try {
 		CgiMain main( APPGINGER_NAME );
 		return main.parseArgs( argc, argv, envp ) ? main.run() : EXIT_SUCCESS;
-	} catch ( Ginger::Problem & e ) {
+	} catch ( Ginger::Mishap & e ) {
 		e.report();
 		return EXIT_FAILURE;
 	}

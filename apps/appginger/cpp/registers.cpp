@@ -57,7 +57,7 @@ Ref & Registers::reserve( unsigned long & mask ) {
 			return this->regs[ i ];
 		}
 	}
-	throw Ginger::SystemError( "Too few registers" );
+	throw SystemError( "Too few registers" );
 }
 
 void Registers::release( int count, unsigned long mask ) {

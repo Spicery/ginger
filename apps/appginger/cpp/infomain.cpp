@@ -553,7 +553,7 @@ public:
 	            default: {
 	            	//	This should not happen. It indicates that the option string 
 	            	//	does not conform to the cases of this switch statement.
-	            	throw Ginger::SystemError( "Unrecognised option" ).culprit( "Option code", static_cast< long >( c ) );
+	            	throw SystemError( "Unrecognised option" ).culprit( "Option code", static_cast< long >( c ) );
 	            }
 	        }
 	    }

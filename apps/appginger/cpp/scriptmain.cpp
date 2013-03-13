@@ -60,7 +60,7 @@ public:
 public:
 	ScriptMain( const char * name ) : ToolMain( name ) {
 		this->context.initScript();
-		this->context.printDetailLevel() = 1;
+		this->context.printDetailLevel().setBasic();
 	}
 	
 	virtual ~ScriptMain() {}
@@ -72,7 +72,7 @@ int main( int argc, char **argv, char **envp ) {
 	try {
 		ScriptMain main( APP_TITLE );
 		return main.parseArgs( argc, argv, envp ) ? main.run() : EXIT_SUCCESS;
-	} catch ( Ginger::Problem & e ) {
+	} catch ( Ginger::Mishap & e ) {
 		e.report();
 		return EXIT_FAILURE;
 	}

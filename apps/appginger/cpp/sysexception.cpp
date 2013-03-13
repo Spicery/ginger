@@ -49,7 +49,7 @@ using namespace std;
 	}
 #endif
 
-static void decorateProblem( class MachineClass * vm, Ginger::Problem & problem ) {
+static void decorateProblem( class MachineClass * vm, Ginger::Mishap & problem ) {
 	if ( vm->count == 2 ) {
 		Ref args = vm->fastPop();
 		Ref event_name = vm->fastPeek();
@@ -84,7 +84,7 @@ Ref * sysFailover( Ref * pc, class MachineClass * vm ) {
 */
 Ref * sysPanic( Ref * pc, class MachineClass * vm ) {
 	//	Initialise message with default.
-	Ginger::SystemError syserror( "Internal error: throw called with invalid arguments" ); 
+	Ginger::Mishap syserror( "Internal error: throw called with invalid arguments", Ginger::Mishap::SYSTEM_ERROR_SEVERITY ); 
 	decorateProblem( vm, syserror );
 	throw syserror;
 }

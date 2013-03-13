@@ -423,7 +423,7 @@ private:
 		Ref key = *obj_K;
 		if ( IsFunctionKey( key ) ) {
 			if ( IsCoreFunctionKey( key ) ) {
-				throw Ginger::Unreachable( __FILE__, __LINE__ );
+				throw Unreachable();
 			}
 			if ( this->tracker ) this->tracker->startFnObj();
 			if ( IsMethodKey( key ) ) {
@@ -549,6 +549,7 @@ private:
 			}
 			if ( this->tracker ) this->tracker->endInstance( obj_K );
 		} else {
+			/// @todo Loose end in the garbage collector.
 			throw Ginger::Mishap( "ToBeDone" );
 		}
 		if ( this->tracker ) this->tracker->endContents();
@@ -575,7 +576,7 @@ private:
 					this->forwardTarget( assoc_K[ ASSOC_OFFSET_VALUE ] );
 					if ( isntTargetForwarded( assoc_K[ ASSOC_OFFSET_VALUE ] ) ) {
 						cerr << "Target[1] not forwarded!" << endl;
-						throw Ginger::Unreachable( __FILE__, __LINE__ );
+						throw Unreachable();
 					}
 				} else {
 					//	This is a candidate for GC.
@@ -606,7 +607,7 @@ private:
 				this->forwardTarget( wroot_K[ ASSOC_OFFSET_VALUE ] );
 				if ( isntTargetForwarded( wroot_K[ ASSOC_OFFSET_VALUE ] ) ) {
 					cerr << "Target[2] not forwarded!" << endl;
-					throw Ginger::Unreachable( __FILE__, __LINE__ );
+					throw Unreachable();
 				}
 				cout << "Nudge" << endl;
 				
@@ -637,13 +638,13 @@ private:
 				
 				if ( traced1 != traced2 ) {
 					//cerr << "Key invariant violated" << endl;
-					throw Ginger::SystemError( "GC weak assoc invariant [1] violated" );
+					throw SystemError( "GC weak assoc invariant [1] violated" );
 				}
 				
 				const bool traced3 = isTargetForwarded( assoc_K[ ASSOC_OFFSET_VALUE ] );
 				if ( traced1 && not( traced3 ) ) {
 					//cerr << "All very wrong" << endl;
-					throw Ginger::SystemError( "GC weak assoc invariant [2] violated" );
+					throw SystemError( "GC weak assoc invariant [2] violated" );
 				}
 				
 				if ( not traced1 ) {

@@ -31,7 +31,7 @@ void LabelClass::labelSet() {
 		clog << "Setting label at [" << here << "]" << endl;
 	#endif
 	if ( this->is_set ) {
-		throw Ginger::Unreachable( __FILE__, __LINE__ );
+		throw Unreachable();
 	}
 	this->the_location = here;
 	this->is_set = true;

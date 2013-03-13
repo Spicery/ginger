@@ -22,6 +22,7 @@
 #include <string>
 #include <vector>
 #include <list>
+#include <map>
 
 
 #ifdef RUDECGI
@@ -29,15 +30,130 @@
 #endif
 
 #include "command.hpp"
+#include "gson.hpp"
+#include "xdgconfigfiles.hpp"
 
 #include "gngversion.hpp"
 #include "common.hpp"
 
 #define APPGINGER_NAME		"appginger"
 #define APPGINGER_VERSION	PACKAGE_VERSION
+#define USER_SETTINGS_FILE	"settings.gson"
 
 class MachineClass;
 class Package;
+
+class PrintDetailLevel {
+private:
+	int print_level;
+public:
+	PrintDetailLevel() : print_level( 0 ) {}
+public:
+	int & level() { return this->print_level; }
+	
+	/** setBasic = non-silent */
+	void setBasic() { this->print_level |= 0x1; }
+	
+	/** setChatty implies setBasic too */
+	void setChatty() { this->print_level |= 0x3; }
+
+	/** setTimed implies setChatty and hence setBasic too */
+	void setTimed() { this->print_level |= 0x7; }
+
+	bool isBasic() const { return ( this->print_level & 0x1 ) != 0; }
+
+	bool isChatty() const { return ( this->print_level & 0x2 ) != 0; }
+
+	bool isTimed() const { return ( this->print_level & 0x4 ) != 0; }
+
+	bool isntSilent() const { return ( this->print_level ) != 0; }
+};
+
+
+const std::string RESULT_BULLET = "ResultBullet";
+const std::string RESULT_HEADER = "ResultHeader";
+const std::string RESULT_FOOTER = "ResultFooter";
+
+class UserSettings {
+
+private:
+	std::string filename;
+	bool initialised;
+	Ginger::GSON settings;
+
+public:
+	UserSettings( const char * _filename ) :
+		filename( _filename ),
+		initialised( false )
+	{
+	}
+
+	Ginger::GSON & getSettings() {
+		if ( this->initialised ) return this->settings;
+
+		Ginger::XDGConfigFiles config( this->filename.c_str() );
+		if ( config.hasNext() ) {
+			this->settings = Ginger::GSON::readSettingsFile( config.next() );
+		} else {
+			Ginger::GSONBuilder b;
+			b.beginMap();
+			b.endMap();
+			this->settings = b.newGSON();
+		}
+
+		this->initialised = true;
+		return this->settings;
+	}
+
+public:
+	std::string stringSetting( const std::string & key, const std::string & def ) {
+		Ginger::GSON value = this->getSettings().index( key );
+		if ( not value || not value.isString() ) {
+			return def;
+		} else {
+			return value.getString();
+		}
+	}
+	
+	std::string resultBullet() {
+		return this->stringSetting( RESULT_BULLET, "" );
+	}
+
+	Ginger::GSON resultHeading( int n, const std::string & def ) {
+		Ginger::GSON value = this->getSettings().index( RESULT_HEADER );
+		if ( not value ) {
+			return Ginger::GSON( new Ginger::StringGSONData( def ) );
+		} else if ( value.isList() && not value.isEmpty() ) {
+			if ( n < value.size() ) {
+				return value.at( n );
+			} else {
+				return value.last();
+			}
+		} else {
+			return value;
+		}
+	}
+
+	//	@todo refactor to eliminate duplication
+	Ginger::GSON resultFooter( int n, const std::string & def ) {
+		Ginger::GSON value = this->getSettings().index( RESULT_FOOTER );
+		if ( not value ) {
+			return Ginger::GSON( new Ginger::StringGSONData( def ) );
+		} else if ( value.isList() && not value.isEmpty() ) {
+			if ( n < value.size() ) {
+				return value.at( n );
+			} else {
+				return value.last();
+			}
+		} else {
+			return value;
+		}
+	}
+
+
+
+};
+
 
 class AppContext {
 public:
@@ -59,10 +175,11 @@ private:
 		rude::CGI * 			cgi;
 	#endif
 	bool						use_stdin;
-	int							print_level;
+	PrintDetailLevel			print_detail_level;
 	bool						welcoming;
 	std::string         		initial_syntax;
 	std::string					interactive_package;
+	UserSettings 				user_settings;
 
 public:
 	void setGCTrace( bool t ) { this->is_gctrace = t; }
@@ -82,7 +199,9 @@ public:
 	void addArgument( const char * s ) { this->arg_list.push_back( s ); }
 	std::vector< std::string > & arguments() { return this->arg_list; }
 	bool & useStdin() { return this->use_stdin; }
-	int & printDetailLevel() { return this->print_level; }
+
+	PrintDetailLevel & printDetailLevel() { return this->print_detail_level; }
+
 	const char* cgiValue( const char* fieldname );
 	void initCgi();
 	bool isCGIMode();
@@ -104,6 +223,8 @@ public:
 	void setInteractivePackage( const std::string & ip ) { this->interactive_package = ip; }
  	void showMeRuntimeInfo();
 
+ 	UserSettings & userSettings() { return this->user_settings; }
+
 public:
 	MachineClass * newMachine();
 	Package * initInteractivePackage( MachineClass * vm );
@@ -116,9 +237,9 @@ public:
 		//is_trapping_mishap( true ),
 		is_gctrace( false ),
 		use_stdin( false ),
-		print_level( 0 ),
 		welcoming( true ),
-		interactive_package( INTERACTIVE_PACKAGE )
+		interactive_package( INTERACTIVE_PACKAGE ),
+		user_settings( USER_SETTINGS_FILE )
 	{
 		//std::cout << "AppContext: " << interactive_package << std::endl;
 		#ifdef RUDECGI	

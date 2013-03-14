@@ -7,3 +7,4 @@ dox:
 clean:
 	$(MAKE) -C cpp $@
 	$(MAKE) -C unittest $@
+	/bin/rm -rf _dox/

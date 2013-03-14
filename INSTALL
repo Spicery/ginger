@@ -10,9 +10,9 @@ Installing on Ubuntu (from the command-line)
 --------------------------------------------
 
 *	Pre-requisites: you'll need some basic developer tools 
-		git, python, g++, autoconf, uuid
+		git, python, g++, autoconf, uuid, readline
 	You can ensure you have these in one step with
-		% sudo apt-get git python g++ autoconf uuid-dev
+		% sudo apt-get git python g++ autoconf uuid-dev libreadline-dev
 
 *	We also need the RudeCGI library
 		% mkdir /tmp/rudecgi

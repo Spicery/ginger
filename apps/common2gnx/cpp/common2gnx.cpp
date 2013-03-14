@@ -34,9 +34,5 @@ int main( int argc, char **argv, char **envp ) {
 		p.culprit( "Detected by", APP_TITLE );
 		p.gnxReport();
 		return EXIT_FAILURE;
-	} catch ( Ginger::Problem & p ) {
-		p.culprit( "Detected by", APP_TITLE );
-		p.gnxReport();
-		return EXIT_FAILURE;
 	}
 }

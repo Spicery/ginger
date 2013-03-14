@@ -5,17 +5,8 @@
 
 #include "toktype.hpp"
 #include "role.hpp"
+#include "precedences.hpp"
 
-enum {
-	prec_tight	= 	 100,
-	prec_negate =    500,
-	prec_not	=   1600,
-	prec_assign = 	2000,
-    prec_arrow  =  10000,
-    prec_comma  =  20000,
-    prec_semi   =  30000,
-    prec_max    = 100000
-};
 
 
 class ItemClass {

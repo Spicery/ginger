@@ -1262,7 +1262,7 @@ private:
 			if ( uidstream >> uid ) {
 				this->is_assigned_to.insert( uid );
 			} else {
-				throw Ginger::SystemError( "Missing UID" ).culprit( "GNX", id->toString() );
+				throw SystemError( "Missing UID" ).culprit( "GNX", id->toString() );
 			}
 		}
 	}
@@ -1511,7 +1511,7 @@ public:
 		) {
 			const string & uid = *it;
 			Ginger::Mnx * v = this->dec_outer[ uid ];
-			if ( v == NULL ) throw Ginger::SystemError( "Internal error" );
+			if ( v == NULL ) throw SystemError( "Internal error" );
 			//cout << "SO FAR: ";
 			/*v->render();
 			cout << endl;*/
@@ -2006,11 +2006,7 @@ int main( int argc, char ** argv, char **envp ) {
 		main.parseArgs( argc, argv, envp );
 		main.run();
 	    return EXIT_SUCCESS;
-	} catch ( Ginger::SystemError & p ) {
-		p.culprit( "Detected by", SIMPLIFYGNX );
-		p.gnxReport();
-		return EXIT_FAILURE;
-	} catch ( Ginger::Problem & p ) {
+	} catch ( Ginger::Mishap & p ) {
 		p.culprit( "Detected by", SIMPLIFYGNX );
 		p.gnxReport();
 		return EXIT_FAILURE;

@@ -73,7 +73,7 @@ bool XDGConfigFiles::callHasNext() {
 			return false;
 		}
 		default: {
-			throw Unreachable( __FILE__, __LINE__ );
+			throw Unreachable();
 		}
 	}
 }

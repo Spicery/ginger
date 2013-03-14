@@ -124,12 +124,9 @@ private:
 	 		this->executeLoadFileList( rcep );
 	 		this->executeFileArguments( rcep );
 	 	} catch ( Ginger::Mishap & e ) {
+	 		if ( e.isSystemError() ) throw;
 			e.report();
 			cerr << endl << SYS_MSG_PREFIX << "Reset after runtime error ..." << endl;
-			vm->resetMachine();
-	 	} catch ( Ginger::CompileTimeError & e ) {
-			e.report();
-			cerr << endl << SYS_MSG_PREFIX << "Reset after compilation error ..." << endl;
 			vm->resetMachine();
 	 	}
 		
@@ -150,18 +147,12 @@ private:
 				#endif
 				break;
 			} catch ( Ginger::Mishap & e ) {
+				if ( not e.isExecutionTimeError() ) throw;
 				#ifdef DBG_CLIMAIN
 					cerr << "Mishap detected" << endl;
 				#endif
 				e.report();
 				cerr << endl << SYS_MSG_PREFIX << "Reset after runtime error ..." << endl;
-				vm->resetMachine();
-		 	} catch ( Ginger::CompileTimeError & e ) {
-				#ifdef DBG_CLIMAIN
-					cerr << "CompileTimeError detected" << endl;
-				#endif
-				e.report();
-				cerr << endl << SYS_MSG_PREFIX << "Reset after compilation error ..." << endl;
 				vm->resetMachine();
 		 	}
 		 	#ifdef DBG_CLIMAIN
@@ -196,13 +187,15 @@ private:
 						while ( rcep.unsafe_read_comp_exec_print( stream_pipe_in, std::cout ) ) {}
 						cont = false;
 					} catch ( Ginger::Mishap & e ) {
+						if ( not e.isExecutionTimeError() ) throw;
 						e.report();
 						cerr << endl << SYS_MSG_PREFIX << "Reset after runtime error ..." << endl;
 						vm->resetMachine();
 						break;
 					} 			
 				}
-			} catch ( Ginger::CompileTimeError & e ) {
+			} catch ( Ginger::Mishap & e ) {
+				if ( not e.isCompileTimeError() ) throw;
 				e.report();
 				cerr << endl << SYS_MSG_PREFIX << "Reset after compilation error ..." << endl;
 				vm->resetMachine();
@@ -222,7 +215,7 @@ public:
 public:
 	GingerMain( const char * name ) : ToolMain( name ) {
 		this->context.initShell();
-		this->context.printDetailLevel() = 2;
+		this->context.printDetailLevel().setChatty();
 	}
 	
 	virtual ~GingerMain() {}
@@ -234,7 +227,7 @@ int main( int argc, char **argv, char **envp ) {
 	try {
 		GingerMain main( APP_TITLE );
 		return main.parseArgs( argc, argv, envp ) ? main.run() : EXIT_SUCCESS;
-	} catch ( Ginger::Problem & e ) {
+	} catch ( Ginger::Mishap & e ) {
 		e.report();
 		return EXIT_FAILURE;
 	}

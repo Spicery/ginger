@@ -255,7 +255,7 @@ void AppContext::showMeRuntimeInfo() {
     d.showEnabled( "Garbage collection tracing", this->is_gctrace );
     d.showEnabled( "Code generation tracing", this->getShowCode() );
     d.show( "Reading standard input", this->use_stdin );
-    d.show( "Level of print detail", this->print_level );
+    d.show( "Level of print detail", this->print_detail_level.level() );
     d.showEnabled( "Showing welcome banner", this->welcoming );
     d.show( "Interactive package", this->interactive_package );
     d.show( "Default syntax", this->initial_syntax );

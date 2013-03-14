@@ -113,7 +113,7 @@ void CodeGenClass::emitVIDENT_REF( const VIdent & id ) {
 	} else if ( id.isConstant() ) {
 		this->emitRef( id.getRef() );
 	} else {
-		throw Ginger::SystemError( "Internal error" );
+		throw SystemError( "Internal error" );
 	}
 }
 
@@ -239,7 +239,7 @@ void CodeGenClass::vmiPOP( const VIdent & id, const bool assign_vs_bind ) {
 		this->emitSPC( vmc_pop_global );
 		this->emitValof( v );
 	} else {
-		throw Ginger::SystemError( "Internal Error" );
+		throw SystemError( "Internal Error" );
 	}
 }
 
@@ -272,7 +272,7 @@ void CodeGenClass::vmiPUSH( const VIdent & vid ) {
 		this->emitSPC( vmc_push_global );
 		this->emitValof( vid.getValof() );
 	} else {
-		throw Ginger::SystemError( "Internal Error" );
+		throw SystemError( "Internal Error" );
 	}
 }
 
@@ -286,7 +286,7 @@ void CodeGenClass::vmiPUSH( const VIdent & vid, LabelClass * contn ) {
 		this->emitValof( vid.getValof() );
 		this->continueFrom( contn );
 	} else {
-		throw Ginger::SystemError( "Internal Error" );
+		throw SystemError( "Internal Error" );
 	}
 }
 
@@ -356,7 +356,7 @@ void CodeGenClass::vmiEND_CALL_ID( int var, const VIdent & ident ) {
 		this->emitRef( ToRef( var ) );
 		this->emitVIDENT_REF( ident );
 	} else {
-		throw Ginger::Unreachable( __FILE__, __LINE__ );
+		throw Unreachable();
 	}
 }
 
@@ -370,7 +370,7 @@ void CodeGenClass::vmiSET_CALL_ID( int in_arity, const VIdent & ident ) {
 		this->emitRef( ToRef( in_arity ) );
 		this->emitVIDENT_REF( ident );
 	} else {
-		throw Ginger::Unreachable( __FILE__, __LINE__ );
+		throw Unreachable();
 	}
 }
 
@@ -600,7 +600,7 @@ void CodeGenClass::vmiGOTO( LabelClass * d ) {
 	if ( d->isReturn() ) {
 		this->emitSPC( vmc_return );
 	} else if ( d == CONTINUE_LABEL ) {
-		throw Ginger::SystemError( "Trying to GOTO a fake label" );
+		throw SystemError( "Trying to GOTO a fake label" );
 	} else {
 		this->emitSPC( vmc_goto );
 		d->labelInsert();
@@ -691,7 +691,7 @@ Ref CodeGenClass::detach( const bool in_heap, Ref fnkey ) {
 		*p++ = ToRef( this->nlocals );
 		*p++ = ToRef( this->ninputs );
 		Ref * func = p;
-		if ( fnkey != sysCoreFunctionKey ) throw Ginger::Unreachable( __FILE__, __LINE__ );
+		if ( fnkey != sysCoreFunctionKey ) throw Unreachable();
 		*p++ = sysCoreFunctionKey;
 		for ( std::vector< Ref >::iterator it = this->code_data->begin(); it != this->code_data->end(); ++it ) {
 			*p++ = *it;
@@ -862,7 +862,7 @@ void CompileQuery::compileQueryInit( Gnx query, LabelClass * contn ) {
 		this->codegen->vmiPOP_INNER_SLOT( tmp_state );
 	
 	} else {
-		throw Ginger::SystemError( "Not implemented general queries" );
+		throw SystemError( "Not implemented general queries" );
 	}
 	this->codegen->continueFrom( contn );
 }
@@ -885,7 +885,7 @@ void CompileQuery::compileQueryNext( Gnx query, LabelClass * contn ) {
 	} else if ( nm == IN ) {
 		//	Nothing.
 	} else {
-		throw Ginger::SystemError( "Not implemented general queries" );
+		throw SystemError( "Not implemented general queries" );
 	}
 	this->codegen->continueFrom( contn );
 }
@@ -918,7 +918,7 @@ void CompileQuery::compileQueryIfSo( Gnx query, LabelClass * dst, LabelClass * c
 		VIdent termin( SYS_TERMIN );
 		this->codegen->compileComparison( id_tmp_state, CMP_NEQ, termin, dst, contn );
 	} else {
-		throw Ginger::SystemError( "Not implemented general queries" );
+		throw SystemError( "Not implemented general queries" );
 	}
 }
 
@@ -1039,7 +1039,7 @@ void CodeGenClass::compileChildrenChecked( Gnx mnx, Arity arity ) {
 		this->vmiSET( v );
 		this->vmiCHECK_COUNT( arity.count() );
 	} else {	
-		throw Ginger::Unreachable( __FILE__, __LINE__ );
+		throw Unreachable();
 	}
 }
 
@@ -1178,7 +1178,7 @@ Ref CodeGenClass::calcConstant( Gnx mnx ) {
 		if ( not s.empty() ) {
 			return CharToCharacter( s[ 0 ] );
 		} else {
-			throw Ginger::SystemError( "Invalid character string" );
+			throw SystemError( "Invalid character string" );
 		}
 	} else if ( type == "string" ) {
 		return this->vm->heap().copyString( mnx->attribute( CONSTANT_VALUE ).c_str() );
@@ -1238,10 +1238,10 @@ Ref CodeGenClass::calcConstant( Gnx mnx ) {
 			//	TODO: Function keys - not as easy as the documentation makes out.
 			//	TODO: Map keys - same deal
 			//			<sysclass value="Fn"/>              ### class for function objects
-			throw Ginger::SystemError( "Constant not recognised" ).culprit( "Expression", mnx->toString() );
+			throw SystemError( "Constant not recognised" ).culprit( "Expression", mnx->toString() );
 		}
 	} else {
-		throw Ginger::SystemError( "Constant not recognised" ).culprit( "Expression", mnx->toString() );
+		throw SystemError( "Constant not recognised" ).culprit( "Expression", mnx->toString() );
 	}
 }
 
@@ -1262,7 +1262,7 @@ static void throwProblem( Gnx mnx ) {
 		}
 		throw mishap;
 	} else {
-		Ginger::SystemError mishap( mnx->attribute( PROBLEM_MESSAGE ) );
+		Ginger::Mishap mishap( mnx->attribute( PROBLEM_MESSAGE ), Ginger::Mishap::SYSTEM_ERROR_SEVERITY );
 		MnxChildIterator mnxit ( mnx );
 		while ( mnxit.hasNext() ) {
 			Gnx & culprit = mnxit.next();
@@ -1429,7 +1429,7 @@ void CodeGenClass::compileGnx( Gnx mnx, LabelClass * contn ) {
 		} else if ( mnx->hasAttribute( ASSERT_TAILCALL, "true" ) ) {			
 			throw Ginger::Mishap( "Return found in non-tailcall position" );
 		} else {
-			throw Ginger::SystemError( "Unimplemented assertion" );
+			throw SystemError( "Unimplemented assertion" );
 		}
 	} else if ( nm == SELF_APP ) {
 		this->compileGnxSelfCall( mnx, contn );
@@ -1442,7 +1442,7 @@ void CodeGenClass::compileGnx( Gnx mnx, LabelClass * contn ) {
 	} else if ( nm == FROM or nm == IN ) {
 		throw Ginger::Mishap( "Naked queries not yet supported" ).culprit( "Expression", mnx->toString() );
 	} else {
-		throw Ginger::SystemError( "GNX not recognised" ).culprit( "Expression", mnx->toString() );
+		throw SystemError( "GNX not recognised" ).culprit( "Expression", mnx->toString() );
 	}
 }
 

@@ -72,7 +72,7 @@ void MachineClass::gcLiftVeto() {
 	if ( this->veto_count > 0 ) {
 		this->veto_count -= 1;
 	} else {
-		throw Ginger::SystemError( "Trying to decrement veto-count less than zero!" );
+		throw SystemError( "Trying to decrement veto-count less than zero!" );
 	}
 }
 
@@ -227,25 +227,62 @@ void MachineClass::printResults( float time_taken ) {
 }
 
 void MachineClass::printResults( std::ostream & out, float time_taken ) {
-	if ( this->appg->printDetailLevel() >= 1 ) {
-		const bool chatty = this->appg->printDetailLevel() >= 2;
-	
+	PrintDetailLevel & pdl = this->appg->printDetailLevel();
+	if ( pdl.isntSilent() ) {
 		int n = this->vp - this->vp_base;
-	
-		if ( chatty ) {
-			out << "There " << ( n == 1 ? "is" : "are" ) << " " << 
-			n << " result" << ( n == 1 ? "" : "s" ) << "\t(" << 
-			time_taken << "s)" << endl;
+		if ( pdl.isChatty() ) {
+
+			bool newline_needed = false;
+
+			Ginger::GSON heading( this->getAppContext().userSettings().resultHeading( n, ( n == 0 ? "No results" : "Results..." ) ) );
+			if ( heading.isString() ) {
+				Ginger::GSONBuilder b;
+				b.beginList();
+				b.longValue( n );
+				b.endList();
+				b.newGSON().formatUsing( out, heading.getString() );
+				newline_needed = true;
+			}
+
+			if ( pdl.isTimed() ) {
+				int prev = out.precision();
+				out.precision( 2 );
+				out << std::fixed;
+				out << "\t(" << time_taken << "s)"; 
+				out.unsetf( std::ios::floatfield );
+				out.precision( prev );
+				newline_needed = true;
+			}
+
+			if ( newline_needed ) {
+				out << endl;
+			}
 		}
+
+		const std::string bullet( this->getAppContext().userSettings().resultBullet() );
+
 		for ( int i = 0; i < n; i++ ) {
-			if ( chatty ) {
-				out << ( i + 1 ) << ".\t";
+			if ( pdl.isChatty() ) {
+				Ginger::GSONBuilder b;
+				b.beginList();
+				b.longValue( i + 1 );
+				b.endList();
+				b.newGSON().formatUsing( out, bullet );
+				//out << bullet << ( i + 1 ) << ".\t";
 			}
 			refPrint( out, this->vp[ 1 + i - n ] );
 			out << endl;
 		}
-		if ( chatty ) {
-			out << endl;
+		if ( pdl.isChatty() ) {
+			Ginger::GSON footer( this->getAppContext().userSettings().resultFooter( n, ( n == 0 ? "No results" : "Results..." ) ) );
+			if ( footer.isString() ) {
+				Ginger::GSONBuilder b;
+				b.beginList();
+				b.longValue( n );
+				b.endList();
+				b.newGSON().formatUsing( out, footer.getString() );
+				out << endl;
+			}
 		}
 	}	
 	this->vp = this->vp_base;

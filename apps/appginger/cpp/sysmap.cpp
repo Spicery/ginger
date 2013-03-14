@@ -521,7 +521,7 @@ void gngRehashMapPtr( Ref * map_K ) {
 	if ( map_K[0] == sysWeakIdMapKey && count < count_current ) {
 		map_K[ MAP_OFFSET_COUNT ] = LongToSmall( count );
 	} else if ( count != count_current ) {
-		throw Ginger::SystemError( "Map count differs after GC" );
+		throw SystemError( "Map count differs after GC" );
 	}
 	
 	if ( SAFE_MODE ) {

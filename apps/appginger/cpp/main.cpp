@@ -69,7 +69,7 @@ public:
 
 public:
 	Main( const char * name ) : ToolMain( name ) {
-		this->context.printDetailLevel() = 2;
+		this->context.printDetailLevel().setChatty();
 	}
 	
 	virtual ~Main() {}
@@ -81,7 +81,7 @@ int main( int argc, char **argv, char **envp ) {
 	try {
 		Main main( APPGINGER_NAME );
 		return main.parseArgs( argc, argv, envp ) ? main.run() : EXIT_SUCCESS;
-	} catch ( Ginger::SystemError & e ) {
+	} catch ( Ginger::Mishap & e ) {
 		e.report();
 		return EXIT_FAILURE;
 	}

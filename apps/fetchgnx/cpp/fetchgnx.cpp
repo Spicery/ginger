@@ -414,11 +414,7 @@ int main( int argc, char ** argv, char **envp ) {
 		#endif
 		main.run();
 	    return EXIT_SUCCESS;
-	} catch ( Ginger::SystemError & p ) {
-		p.culprit( "Detected by", FETCHGNX );
-		p.gnxReport();
-		return EXIT_FAILURE;
-	} catch ( Ginger::Problem & p ) {
+	} catch ( Ginger::Mishap & p ) {
 		p.culprit( "Detected by", FETCHGNX );
 		p.gnxReport();
 		return EXIT_FAILURE;

@@ -77,6 +77,7 @@ INSTALL_BIN=@bindir@
 INSTALL_TOOL=@libexecdir@/@PACKAGE_TARNAME@
 INSTALL_LIB=@datarootdir@/@PACKAGE_TARNAME@
 INSTALL_DOC=@docdir@
+SAVED_INSTALLATION_DIR=~/.config/ginger/saved-installation
 
 # These will be installed in /usr/local/bin and will be available
 # on the programmer's path.
@@ -142,6 +143,21 @@ ifeq (ginger,$(notdir $(INSTALL_LIB)))
 	# Removing the support files from $(INSTALL_LIB)
 	rm -rf $(INSTALL_LIB)
 endif
+
+save-installation:
+	mkdir -p $(SAVED_INSTALLATION_DIR)/bin
+	mkdir -p $(SAVED_INSTALLATION_DIR)/libexec/ginger
+	mkdir -p $(SAVED_INSTALLATION_DIR)/share/ginger
+	cp $(INSTALL_BIN)/ginger $(SAVED_INSTALLATION_DIR)/bin
+	cp $(INSTALL_BIN)/ginger-* $(SAVED_INSTALLATION_DIR)/bin
+	( cd $(INSTALL_TOOL); tar cf - . ) | ( cd $(SAVED_INSTALLATION_DIR)/libexec/ginger; tar xf - )
+	( cd $(INSTALL_LIB); tar cf - . ) | ( cd $(SAVED_INSTALLATION_DIR)/share/ginger; tar xf - )
+
+restore-saved-installation:
+	cp $(SAVED_INSTALLATION_DIR)/bin/* $(INSTALL_BIN)
+	( cd $(SAVED_INSTALLATION_DIR)/libexec/ginger; tar cf - ) | ( cd $(INSTALL_TOOL); tar xf - . ) 
+	( cd $(SAVED_INSTALLATION_DIR)/share/ginger; tar cf - ) | ( cd $(INSTALL_LIB); tar xf - . ) 
+
 
 unitcheck:
 	# To be done

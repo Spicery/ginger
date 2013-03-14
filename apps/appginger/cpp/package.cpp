@@ -293,7 +293,7 @@ Valof * OrdinaryPackage::absoluteAutoload( const std::string & c ) {
 		#endif	
 		rcep.unsafe_read_comp_exec_print( prog, cout );		
 		return id;		
-	} catch ( Ginger::Problem & e ) {
+	} catch ( Ginger::Mishap & e ) {
 		//	Undo the forward declaration.
 		if ( id->valof == SYS_UNASSIGNED ) {
 			//	The autoloading failed. Undo the declaration.

@@ -106,7 +106,7 @@ public:
 
 public:
 	const char * name() {
-		if ( this->def_name == NULL ) throw Ginger::Unreachable( __FILE__, __LINE__ );
+		if ( this->def_name == NULL ) throw Unreachable();
 		return this->def_name;
 	}
 

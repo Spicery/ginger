@@ -360,7 +360,7 @@ private:
 
 	void run( const string & command, const vector< const char * > & args ) {
 		if ( args.size() > 1 ) {
-			throw Unreachable( __FILE__, __LINE__ );
+			throw Unreachable();
 		}
 		const char * cmd = command.c_str();
 		if ( args.empty() ) {
@@ -421,10 +421,6 @@ int main( int argc, char ** argv ) {
 		}
 		return EXIT_SUCCESS;
 	} catch ( Ginger::Mishap & m ) {
-		m.culprit( "Detected by", APP_TITLE );
-		m.gnxReport();
-		return EXIT_FAILURE;
-	} catch ( Ginger::Problem & m ) {
 		m.culprit( "Detected by", APP_TITLE );
 		m.gnxReport();
 		return EXIT_FAILURE;

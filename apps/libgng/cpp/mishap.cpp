@@ -34,7 +34,7 @@ using namespace std;
 #define PREFIX "    "
 #define ORIGIN ( PREFIX "Cause" )
 
-Problem & Problem::cause( Problem & problem ) {
+Mishap & Mishap::cause( Mishap & problem ) {
 	this->culprit( ORIGIN, problem.getMessage() );
 	for ( 	
 		vector< pair< string, string > >::iterator it = problem.culprits.begin();
@@ -48,22 +48,22 @@ Problem & Problem::cause( Problem & problem ) {
 	return *this;
 }
 
-Problem & Problem::culprit( const std::string reason, const std::string arg ) {
+Mishap & Mishap::culprit( const std::string reason, const std::string arg ) {
 	this->culprits.push_back( pair< const string, const string >( reason, arg ) );
 	return *this;
 }
 
-Problem & Problem::culprit( const char * reason, const std::string arg ) {
+Mishap & Mishap::culprit( const char * reason, const std::string arg ) {
 	this->culprits.push_back( pair< const string, const string >( reason, arg ) );
 	return *this;
 }
 
-Problem & Problem::culprit( const char * reason, const char * arg ) {
+Mishap & Mishap::culprit( const char * reason, const char * arg ) {
 	this->culprits.push_back( pair< const string, const string >( reason, arg ) );
 	return *this;
 }
 
-Problem & Problem::culprit( const std::string reason, const long N ) {
+Mishap & Mishap::culprit( const std::string reason, const long N ) {
 	std::ostringstream s;
 	s << N;
 	const std::string result( s.str() );
@@ -71,7 +71,7 @@ Problem & Problem::culprit( const std::string reason, const long N ) {
 	return *this;
 }
 
-Problem & Problem::culprit( const std::string reason, const char N ) {
+Mishap & Mishap::culprit( const std::string reason, const char N ) {
 	std::ostringstream s;
 	s << N;
 	const std::string result( s.str() );
@@ -79,17 +79,31 @@ Problem & Problem::culprit( const std::string reason, const char N ) {
 	return *this;
 }
 
-Problem & Problem::culprit( const std::string arg ) {
+Mishap & Mishap::culprit( const std::string arg ) {
 	this->culprits.push_back( std::pair< const string, const string >( "Argument", arg ) );
 	return *this;
 }
 
-static const char * ERR_MSG = "Error";
+std::string Mishap::severity() const {
+	switch ( this->mishap_severity ) {
+		case EXECUTION_TIME_SEVERITY:
+			return "Mishap";
+		case SYSTEM_ERROR_SEVERITY:
+			return "Panic";
+		case COMPILE_TIME_SEVERITY:
+			return "Compilation Error";
+		default:
+			return "(Unknown)";
+	}
+}
 
 
-void Problem::report() {
+//static const char * ERR_MSG = "Error";
 
-	size_t width = strlen( ERR_MSG );	
+
+void Mishap::report() {
+
+	size_t width = this->severity().size();
 	for ( 	
 		vector< pair< string, string > >::iterator it = this->culprits.begin();
 		it != this->culprits.end();
@@ -101,7 +115,7 @@ void Problem::report() {
 	
 
 	cerr << endl;
-	cerr << SYS_MSG_PREFIX << left << setw( width ) << ERR_MSG << " : " << this->message << endl;
+	cerr << SYS_MSG_PREFIX << left << setw( width ) << this->severity() << " : " << this->message << endl;
 	for ( 	
 		vector< pair< string, string > >::iterator it = this->culprits.begin();
 		it != this->culprits.end();
@@ -112,7 +126,7 @@ void Problem::report() {
 	cerr << endl;
 }
 
-void Problem::gnxReport() {
+void Mishap::gnxReport() {
 	cout << "<problem message=\"";
 	mnxRenderText( cout, this->message );
 	cout << "\" severity=\"";
@@ -132,25 +146,16 @@ void Problem::gnxReport() {
 	cout << "</problem>" << endl;	
 }
 
-std::string Problem::getMessage() {
+std::string Mishap::getMessage() {
 	return this->message;
 }
 
-std::pair< std::string, std::string > & Problem::getCulprit( int n ) {
+std::pair< std::string, std::string > & Mishap::getCulprit( int n ) {
 	return this->culprits[ n ];
 }
 
-int Problem::getCount() {
+int Mishap::getCount() {
 	return this->culprits.size();
-}
-
-Unreachable::Unreachable( const char * file, int line ) : 
-	SystemError( "Unreachable" ) 
-{
-	stringstream s;
-	s << line;
-	this->culprit( "File", file );
-	this->culprit( "Line", s.str() );
 }
 
 } // namespace Ginger

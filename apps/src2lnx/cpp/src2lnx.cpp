@@ -171,10 +171,7 @@ int main( int argc, char **argv, char **envp ) {
 		main.parseArgs( argc, argv, envp );
 		main.run();
 	    return EXIT_SUCCESS;
-	} catch ( Ginger::SystemError & p ) {
-		p.report();
-		return EXIT_FAILURE;
-	} catch ( Ginger::Problem & p ) {
+	} catch ( Ginger::Mishap & p ) {
 		p.report();
 		return EXIT_FAILURE;
 	}

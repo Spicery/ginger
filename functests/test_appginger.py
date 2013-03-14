@@ -20,7 +20,7 @@ def test_examples():
 def runproblem( in_file_name ):
     res = commands.getoutput( "cat {0} | {1} -i -g gnx".format( in_file_name, executable ) )
     print "res = '" + res + "'"
-    nose.tools.assert_true( res.startswith( "\n### Error " ) )
+    nose.tools.assert_true( res.startswith( "\n### Mishap " ) )
 
 
 def test_problems():

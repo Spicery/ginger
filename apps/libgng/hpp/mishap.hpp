@@ -34,101 +34,57 @@ public:
 	virtual ~NormalExit() throw() {}
 };
 
-class Problem : public std::exception {
-protected:
+class Mishap : public std::exception {
+public:
+	enum SEVERITY {
+		EXECUTION_TIME_SEVERITY,
+		SYSTEM_ERROR_SEVERITY,
+		COMPILE_TIME_SEVERITY
+	};
+private:
 	std::string message;
 	std::vector< std::pair< std::string, std::string > > culprits;
+	enum SEVERITY mishap_severity;
+
+public:
+	Mishap( const std::string & msg, enum SEVERITY severity = EXECUTION_TIME_SEVERITY ) : 
+		message( msg ),
+		mishap_severity( severity )
+	{}
+	virtual ~Mishap() throw() {}
+
 
 public:	
-	Problem & culprit( const char * reason, const std::string arg );
-	Problem & culprit( const char * reason, const char * arg );
-	Problem & culprit( const std::string reason, const std::string arg );
-	Problem & culprit( const std::string arg );
-	Problem & culprit( const std::string reason, const long N );
-	Problem & culprit( const std::string reason, const char N );
+	Mishap & culprit( const char * reason, const std::string arg );
+	Mishap & culprit( const char * reason, const char * arg );
+	Mishap & culprit( const std::string reason, const std::string arg );
+	Mishap & culprit( const std::string arg );
+	Mishap & culprit( const std::string reason, const long N );
+	Mishap & culprit( const std::string reason, const char N );
 
-	Problem & cause( Problem & problem );
+	Mishap & cause( Mishap & problem );
 	
 public:
-	virtual const char * severity() = 0;
 	void setMessage( const std::string & msg ) { this->message = msg; }
-	void report();
+	virtual std::string severity() const; 
+	bool isCompileTimeError() { return this->mishap_severity == COMPILE_TIME_SEVERITY; }
+	bool isExecutionTimeError() { return this->mishap_severity == EXECUTION_TIME_SEVERITY; }
+	bool isSystemError() { return this->mishap_severity == SYSTEM_ERROR_SEVERITY; }
 
-	//	TODO: Refactor to mnxReport!
+	void report();
 	void gnxReport();
 	
 	std::string getMessage();
 	std::pair< std::string, std::string > & getCulprit( int n );
 	int getCount();
 	
-protected:
-	Problem( const std::string & msg ) : message( msg ), culprits() {}
-	virtual ~Problem() throw() {}
+	const char * what() const throw() { return this->message.c_str(); }
 };
 
-
-//	Abstract
-class Mishap : public Problem {
-public:
-	Mishap & culprit( const std::string reason, const std::string arg ) { this->Problem::culprit( reason, arg ); return *this; }
-	Mishap & culprit( const std::string arg ) { this->Problem::culprit( arg ); return *this; }
-	Mishap & culprit( const std::string arg, const long N ) { this->Problem::culprit( arg, N ); return *this; }
-	Mishap & culprit( const std::string arg, const char N ) { this->Problem::culprit( arg, N ); return *this; }
-
-	Mishap & cause( Problem & problem ) { this->Problem::cause( problem ); return *this; }
-
-
-public:
-	virtual const char * severity() { return "rollback"; }
-
-public:
-	Mishap( const std::string & msg ) : Problem( msg ) {}
-	virtual ~Mishap() throw() {}
-};
-
-class SystemError : public Problem {
-public:
-	SystemError & culprit( const std::string reason, const std::string arg ) { this->Problem::culprit( reason, arg ); return *this; }
-	SystemError & culprit( const std::string arg ) { this->Problem::culprit( arg ); return *this; }
-	SystemError & culprit( const std::string arg, const long N ) { this->Problem::culprit( arg, N ); return *this; }
-	SystemError & culprit( const std::string arg, const char N ) { this->Problem::culprit( arg, N ); return *this; }
-
-	SystemError & cause( Problem & problem ) { this->Problem::cause( problem ); return *this; }
-
-
-public:	
-	virtual const char * severity() { return "failover"; }
-	
-public:
-	SystemError( const std::string & msg ) : Problem( msg ) {}
-	SystemError() : Problem( "System Error (see log file)" ) {}
-	virtual ~SystemError()  throw() {}
-};
-
-class CompileTimeError : public Problem {
-public:
-	CompileTimeError & culprit( const std::string reason, const std::string arg ) { this->Problem::culprit( reason, arg ); return *this; }
-	CompileTimeError & culprit( const std::string arg ) { this->Problem::culprit( arg ); return *this; }
-	CompileTimeError & culprit( const std::string arg, const long N ) { this->Problem::culprit( arg, N ); return *this; }
-	CompileTimeError & culprit( const std::string arg, const char N ) { this->Problem::culprit( arg, N ); return *this; }
-
-	CompileTimeError & cause( Problem & problem ) { this->Problem::cause( problem ); return *this; }
-
-public:	
-	virtual const char * severity() { return "failover"; }
-	
-public:
-	CompileTimeError( const std::string & msg ) : Problem( msg ) {}
-	CompileTimeError() : Problem( "Compilation Error (see log file)" ) {}
-	virtual ~CompileTimeError()  throw() {}
-};
-
-class Unreachable : public SystemError {
-public:
-	Unreachable( const char * file, int line );
-	virtual ~Unreachable()  throw() {}
-};
-
+#define Problem( Message ) Ginger::Mishap( (Message), Ginger::Mishap::PROBLEM_SEVERITY )
+#define SystemError( Message ) Ginger::Mishap( (Message), Ginger::Mishap::SYSTEM_ERROR_SEVERITY )
+#define CompileTimeError( Message ) Ginger::Mishap( (Message), Ginger::Mishap::COMPILE_TIME_SEVERITY )
+#define Unreachable() Ginger::Mishap( "Internal error", Ginger::Mishap::SYSTEM_ERROR_SEVERITY ).culprit( "FILE", __FILE__ ).culprit( "LINE", (long)__LINE__ )
 
 } // namespace Ginger
 

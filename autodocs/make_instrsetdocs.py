@@ -53,6 +53,10 @@ def doc_header():
 	print "Ginger Instruction Set"
 	print "======================"
 	print
+	with open( "README.rst" ) as intro:
+		for line in intro:
+			print line,
+
 
 def doc_footer():
 	print ".. End of document"
@@ -65,5 +69,5 @@ def processAllFiles():
 		file_footer( f )
 	doc_footer()
 
-os.chdir( sys.argv[1] );	
+os.chdir( sys.argv[1] )
 processAllFiles()

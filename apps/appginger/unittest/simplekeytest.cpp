@@ -21,6 +21,8 @@ static int inferredLayout( Ref simple_key ) {
 		case ATTR_KIND:
 		case MIXED_KIND:
 			return MIXED_LAYOUT;
+		case WRECORD_KIND:
+			return WRECORD_LAYOUT;
 		default:
 			return KEYLESS_LAYOUT;
 	}
@@ -38,7 +40,7 @@ void SimpleKeyTest::testOK() {
 	CPPUNIT_ASSERT( inferredLayout( sysStringKey ) == LayoutOfSimpleKey( sysStringKey ) );
 	CPPUNIT_ASSERT( inferredLayout( sysSymbolKey ) == LayoutOfSimpleKey( sysSymbolKey ) );
 	CPPUNIT_ASSERT( inferredLayout( sysSmallKey ) == LayoutOfSimpleKey( sysSmallKey ) );
-	CPPUNIT_ASSERT( inferredLayout( sysFloatKey ) == LayoutOfSimpleKey( sysFloatKey ) );
+	CPPUNIT_ASSERT( inferredLayout( sysDoubleKey ) == LayoutOfSimpleKey( sysDoubleKey ) );
 	CPPUNIT_ASSERT( inferredLayout( sysUnicodeKey ) == LayoutOfSimpleKey( sysUnicodeKey ) );
 	CPPUNIT_ASSERT( inferredLayout( sysCharKey ) == LayoutOfSimpleKey( sysCharKey ) );
 	CPPUNIT_ASSERT( inferredLayout( sysMapletKey ) == LayoutOfSimpleKey( sysMapletKey ) );

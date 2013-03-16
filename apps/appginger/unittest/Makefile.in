@@ -4,7 +4,10 @@ CC=@CXX@
 CXXFLAGS=-g -I../hpp -I../../libgng/hpp -I../../automatic/machine -I../../automatic/sys -I../../automatic/simple `cppunit-config --cflags` -Wall -Wnon-virtual-dtor
 CFLAGS=-Wmissing-prototypes 
 LDFLAGS=`cppunit-config --libs` 
-OBJS=example.o testrunner.o gctest.o gcstats.o archtest.o simplekeytest.o constants.o
+OBJS=example.o testrunner.o archtest.o simplekeytest.o constants.o
+### Disabling a test that has suffered bitrot!
+### gctest.o gcstats.o 
+
 
 all: testrunner
 

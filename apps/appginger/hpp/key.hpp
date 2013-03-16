@@ -130,7 +130,7 @@ KEYLESS_KIND
 
 #define KIND_WIDTH				( LAYOUT_WIDTH + SUBLAYOUT_WIDTH )
 #define KIND_OFFSET				( LAYOUT_OFFSET )
-#define KIND_MASK				( 0x1F << KIND_OFFSET )
+#define KIND_MASK				( SUBLAYOUT_MASK | LAYOUT_MASK )
 #define IsSimpleKey( r )		( ( ToULong( r ) & TAGG_MASK ) == KEY_TAGG )
 #define KindOfSimpleKey( k )	( ( ToULong( k ) & KIND_MASK ) >> KIND_OFFSET )
 #define LayoutOfSimpleKey( k )  ( ( ToULong( k ) & LAYOUT_MASK ) >> LAYOUT_OFFSET )

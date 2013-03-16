@@ -17,7 +17,7 @@
 \******************************************************************************/
 
 #include <sstream>
-using namespace std;
+#include <iostream>
 
 #include <stddef.h>
 #include <cppunit/TestAssert.h>
@@ -33,6 +33,9 @@ using namespace std;
 #include "listlayout.hpp"
 #include "reflayout.hpp"
 #include "sysmap.hpp"
+
+using namespace std;
+
 
 void GCTest::setUp() {
 	this->context = new AppContext();

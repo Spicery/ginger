@@ -1,0 +1,10 @@
+all:
+	$(MAKE) -C cpp $@
+	
+dox:
+	doxygen Doxyfile
+
+clean:
+	$(MAKE) -C cpp $@
+	$(MAKE) -C unittest $@
+	/bin/rm -rf _dox/

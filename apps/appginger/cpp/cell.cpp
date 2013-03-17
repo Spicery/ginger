@@ -22,7 +22,7 @@
 #include "cell.hpp"
 #include "refprint.hpp"
 
-
+namespace Ginger {
 using namespace std;
 
 std::string HeapObject::asString() const {
@@ -68,3 +68,5 @@ std::string HeapObject::toPrintString() const {
 Cell HeapObject::asCell() const {
 	return Cell( Ptr4ToRef( this->obj_K ) );
 }
+
+} // namespace Ginger

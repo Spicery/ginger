@@ -31,7 +31,7 @@
 //#define DBG_SYSPRINT
 
 using namespace std;
-
+using namespace Ginger;
 
 Ref * sysRefPrint( Ref * pc, class MachineClass * vm ) {
 	for ( int i = vm->count - 1; i >= 0; i-- ) {

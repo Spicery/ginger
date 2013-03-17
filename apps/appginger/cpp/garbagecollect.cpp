@@ -64,7 +64,7 @@ private:
 	CageClass *				currentQueueCage;
 	vector< CageClass * > 	fromSpace;
 	vector< CageClass * > 	toSpace;
-	GCTracker *				tracker;
+	Ginger::GCTracker *		tracker;
 
 private:
 	
@@ -172,7 +172,7 @@ public:
 	}
 	
 public:
-	ToSpaceCopier( MachineClass * vm, GCTracker * tracker ) :
+	ToSpaceCopier( MachineClass * vm, Ginger::GCTracker * tracker ) :
 		vm( vm ),
 		heap( vm->heap() ),
 		tracker( tracker )
@@ -252,7 +252,7 @@ The Garbage Collector implements a stop-and-copy algorithm.
 
 class GarbageCollect {
 private:
-	GCTracker *				tracker;
+	Ginger::GCTracker *		tracker;
 	MachineClass * 			vm;
 	bool 					scan_call_stack;
 	ToSpaceCopier 			copier;
@@ -274,7 +274,7 @@ public:
 	}
 	
 public:
-	void setGCTracker( GCTracker * t ) {
+	void setGCTracker( Ginger::GCTracker * t ) {
 		this->tracker = t;
 	}
 	
@@ -742,7 +742,7 @@ Ref * sysGarbageCollect( Ref * pc, MachineClass * vm ) {
 	return vm->program_counter;
 }
 
-void sysQuiescentGarbageCollect( MachineClass *vm, GCTracker * stats ) {
+void sysQuiescentGarbageCollect( MachineClass *vm, Ginger::GCTracker * stats ) {
 	GarbageCollect gc( vm, false );
 	gc.setGCTracker( stats );
 	gc.collectGarbage();

@@ -1,0 +1,39 @@
+prefix=@prefix@
+exec_prefix=@prefix@
+datarootdir=@datarootdir@
+PACKAGE_TARNAME=@PACKAGE_TARNAME@
+INSTALL_BIN=@bindir@
+INSTALL_TOOL=@libexecdir@/@PACKAGE_TARNAME@
+INSTALL_LIB=@datarootdir@/@PACKAGE_TARNAME@
+INSTALL_DOC=@docdir@
+
+#LICENSE_FILE="$(INSTALL_LIB)/COPYING"
+#LICENSE_FILE="$(INSTALL_LIB)/COPYING"
+
+CC=@CXX@
+
+INSTALLDIRS=-DINSTALL_BIN='"$(INSTALL_BIN)"' -DINSTALL_LIB='"$(INSTALL_LIB)"' -DINSTALL_TOOL='"$(INSTALL_TOOL)"'
+
+CFLAGS=-Wall -Wmissing-prototypes -Wnon-virtual-dtor
+CXXFLAGS=$(CFLAGS) -DRUDECGI $(INSTALLDIRS) -g -I../hpp -I../../appginger/hpp -I../../libgng/hpp -I../../automatic/machine -I../../automatic/simple
+
+OBJS=gvmtest.o gvm.o
+
+all: gvmtest
+
+################################################################################
+# 	Main executables
+################################################################################
+
+# $@ is make shorthand for the target.
+# $@ is make shorthand for the dependencies
+gvmtest: $(OBJS)
+	@CXX@ $(CXXFLAGS) $(BOOST_CPPFLAGS) -o $@ $(OBJS) ../../appginger/cpp/libappginger.a ../../libgng/cpp/libgng.a /usr/local/lib/librudecgi.a
+
+clean:
+	rm -f *.o
+	rm -f gvmtest
+	rm -f *.a
+
+#	Nothing needs doing.
+check:

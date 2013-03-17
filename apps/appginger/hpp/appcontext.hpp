@@ -124,7 +124,7 @@ public:
 		if ( not value ) {
 			return Ginger::GSON( new Ginger::StringGSONData( def ) );
 		} else if ( value.isList() && not value.isEmpty() ) {
-			if ( n < value.size() ) {
+			if ( n < static_cast< int >( value.size() ) ) {
 				return value.at( n );
 			} else {
 				return value.last();
@@ -140,7 +140,7 @@ public:
 		if ( not value ) {
 			return Ginger::GSON( new Ginger::StringGSONData( def ) );
 		} else if ( value.isList() && not value.isEmpty() ) {
-			if ( n < value.size() ) {
+			if ( n < static_cast< int >( value.size() ) ) {
 				return value.at( n );
 			} else {
 				return value.last();

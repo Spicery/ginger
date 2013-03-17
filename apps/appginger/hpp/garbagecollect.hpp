@@ -24,6 +24,6 @@
 #include "gctracker.hpp"
 
 extern Ref * sysGarbageCollect( Ref * pc, MachineClass * vm );
-extern void sysQuiescentGarbageCollect( MachineClass * vm, GCTracker * );
+extern void sysQuiescentGarbageCollect( MachineClass * vm, Ginger::GCTracker * );
 
 #endif

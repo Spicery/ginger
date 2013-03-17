@@ -26,6 +26,8 @@
 #include "stringlayout.hpp"
 #include "mishap.hpp"
 
+namespace Ginger {
+
 class Cell;
 
 class HeapObject {
@@ -78,5 +80,7 @@ public:
 
 	void println( std::ostream & out, bool showing = false ) const;
 };
+
+} // namspace Ginger
 
 #endif 

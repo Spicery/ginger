@@ -22,6 +22,7 @@
 #include "common.hpp"
 #include "fnobjcrawl.hpp"
 
+namespace Ginger {
 
 class GCTracker {
 public:
@@ -66,5 +67,7 @@ public:
 public:
 	virtual ~GCTracker() {};
 };
+
+} // namespace Ginger
 
 #endif

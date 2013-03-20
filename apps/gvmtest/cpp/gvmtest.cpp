@@ -211,9 +211,16 @@ public:
 
     void doStack() {
         vector< Cell > stack( this->vm->stack() );
-        for ( vector< Cell >::iterator it = stack.begin(); it != stack.end(); ++it ) {
-            Cell & c = *it;
-            c.println( std::cout, true );
+        if ( this->command->hasAttribute( "order", "top-last" ) ) {
+             for ( vector< Cell >::iterator it = stack.begin(); it != stack.end(); ++it ) {
+                Cell & c = *it;
+                c.println( std::cout, true );
+            }
+       } else {
+            for ( vector< Cell >::reverse_iterator it = stack.rbegin(); it != stack.rend(); ++it ) {
+                Cell & c = *it;
+                c.println( std::cout, true );
+            }
         }
     }
 
@@ -267,6 +274,7 @@ public:
             std::string file_name( INSTALL_LIB );
             file_name += "/gvmtest/help/";
             file_name += topic;
+            file_name += ".rst";
             if ( access( file_name.c_str(), F_OK ) == 0 ) {
                 #ifndef NO_PAGER
                     pid_t pid = fork();

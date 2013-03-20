@@ -20,6 +20,7 @@
 #include <iostream>
 #include <string>
 #include <vector>    
+#include <fstream>
 
 //  Standard C libraries.
 #include <unistd.h>
@@ -34,25 +35,133 @@
 using namespace std;
 using namespace Ginger;
 
-class Result {
+class Reporter {
 public:
-    virtual ~Result() {}
+    virtual ~Reporter() {}
 public:
+    virtual void indent( const int n = 1 ) = 0;
+    virtual void binding( const std::string & key, const long n ) = 0;
     virtual void longValue( const long n ) = 0;
 };
 
-class TextResult : public Result {
+class TextReporter : public Reporter {
+private:
+    int indent_level;
+public:
+    TextReporter() : indent_level( 0 ) {}
+public:
+    void indent( int n ) {
+        this->indent_level += n;
+    }
+    void binding( const std::string & key, const long n ) {
+        for ( int i = 0; i < this->indent_level; i++ ) {
+            cout << "    ";
+        }
+        cout << key << ": " << n << endl;
+    }
     void longValue( const long n ) {
         cout << n << endl;
     }
 };
 
 class Tracer : public HeapTracer {
+public:
+    Tracer( const bool _allow_zeros ) : allow_zeros( _allow_zeros ) {}
 private:
-    long num;
+    const bool allow_zeros;
+private:
+    struct Counts {
+    private:
+        long num_obj;
+        long num_fn_obj;
+        long num_core_fn_obj;
+        long num_method_fn_obj;
+        long num_inst_obj;
+        long num_vec_obj;
+        long num_mixed_obj;
+        long num_rec_obj;
+        long num_pair_obj;
+        long num_map_obj;
+        long num_wrec_obj;
+        long num_atomicwrec_obj;
+        long num_str_obj;
+        long num_other_obj;
+    public:
+        Counts() :
+            num_obj( 0 ),
+            num_fn_obj( 0 ),
+            num_core_fn_obj( 0 ),
+            num_method_fn_obj( 0 ),
+            num_inst_obj( 0 ),
+            num_vec_obj( 0 ),
+            num_mixed_obj( 0 ),
+            num_rec_obj( 0 ),
+            num_pair_obj( 0 ),
+            num_map_obj( 0 ),
+            num_wrec_obj( 0 ),
+            num_atomicwrec_obj( 0 ),
+            num_str_obj( 0 ),
+            num_other_obj( 0 )
+        {}
+    private:
+        void reportBinding( Reporter & reporter, const bool allow_zeros, const std::string & key, const long n ) {
+            if ( allow_zeros || n > 0 ) {
+                reporter.binding( key, n );
+            }
+        }
+    public:
+        void report( Reporter & reporter, const bool allow_zeros = true ) {
+            reporter.indent( 1 );
+            reportBinding( reporter, allow_zeros, "#Function", num_fn_obj );
+            reportBinding( reporter, allow_zeros, "#Function/Core", num_core_fn_obj );
+            reportBinding( reporter, allow_zeros, "#Function/Method", num_method_fn_obj );
+            reportBinding( reporter, allow_zeros, "#Instance", num_inst_obj );
+            reportBinding( reporter, allow_zeros, "#Vector", num_vec_obj );
+            reportBinding( reporter, allow_zeros, "#Mixed", num_mixed_obj );
+            reportBinding( reporter, allow_zeros, "#Record", num_rec_obj );
+            reportBinding( reporter, allow_zeros, "#Pair", num_pair_obj );
+            reportBinding( reporter, allow_zeros, "#Map", num_map_obj );
+            reportBinding( reporter, allow_zeros, "#WRecord", num_wrec_obj );
+            reportBinding( reporter, allow_zeros, "#AtomicWRecord", num_atomicwrec_obj );
+            reportBinding( reporter, allow_zeros, "#String", num_str_obj );
+            reportBinding( reporter, allow_zeros, "#OTHER", num_other_obj );
+        }
+        void bump( HeapObject h ) {
+            this->num_obj += 1;
+            if ( h.isFunctionObject() ) {
+                this->num_fn_obj += 1;
+                if ( h.isCoreFunctionObject() ) {
+                    this->num_core_fn_obj += 1;
+                } else if ( h.isMethodFunctionObject() ) {
+                    this->num_method_fn_obj += 1;
+                }
+            } else if ( h.isInstanceObject() ) {
+                this->num_inst_obj += 1;
+            } else if ( h.isVectorObject() ) {
+                this->num_vec_obj += 1;
+            } else if ( h.isMixedObject() ) {
+                this->num_mixed_obj += 1;
+            } else if ( h.isRecordObject() ) {
+                this->num_rec_obj += 1;
+            } else if ( h.isPairObject() ) {
+                this->num_pair_obj += 1;
+            } else if ( h.isMapObject() ) {
+                this->num_map_obj += 1;
+            } else if ( h.isWRecordObject() ) {
+                this->num_wrec_obj += 1;
+            } else if ( h.isAtomicWRecordObject() ) {
+                this->num_atomicwrec_obj += 1;
+            } else if ( h.isStringObject() ) {
+                this->num_str_obj += 1;
+            } else {
+                this->num_other_obj += 1;
+            }
+        }
+    } counts;
+
 public:
     virtual void startCage() {
-        this->num = 0;
+        this->counts = Counts();
         cout << "Start Cage" << endl;
     }
 
@@ -69,12 +178,13 @@ public:
     }
 
     virtual void endCage() {
-        cout << "    #Objects: " << this->num << endl;
+        TextReporter reporter;
+        this->counts.report( reporter, this->allow_zeros );
         cout << "End Cage" << endl;        
     }
 
     virtual void atObject( HeapObject heap_object ) {
-        this->num += 1;
+        this->counts.bump( heap_object );
     }
 };
 
@@ -82,13 +192,13 @@ class Cmd {
 private:
     VirtualMachine * vm;
     shared< Mnx > command;
-    Result & result;
+    Reporter & reporter;
 
 public:
-    Cmd( VirtualMachine * vm, shared< Mnx > command, Result & result ) : 
+    Cmd( VirtualMachine * vm, shared< Mnx > command, Reporter & reporter ) : 
         vm( vm ), 
         command( command ),
-        result( result )
+        reporter( reporter )
     {}
 
 public:
@@ -108,7 +218,7 @@ public:
     }
 
     void doStackLength() {
-        this->result.longValue( this->vm->stackLength() );
+        this->reporter.longValue( this->vm->stackLength() );
     }
 
     void doGarbageCollect() {
@@ -154,12 +264,46 @@ public:
             cout << "<compile> GNX </compile>         <help topic=\"compile\"/>" << endl;
             cout << "<code> INSTRUCTION* </code>      <help topic=\"code\"/>" << endl;
         } else {
-            cout << "Help not implemented for topic: " << topic << endl;
+            std::string file_name( INSTALL_LIB );
+            file_name += "/gvmtest/help/";
+            file_name += topic;
+            if ( access( file_name.c_str(), F_OK ) == 0 ) {
+                #ifndef NO_PAGER
+                    pid_t pid = fork();
+                    if ( pid == 0 ) {
+                        // In the child process.
+                        execl(
+                            "/usr/bin/less",
+                            "/usr/bin/less",
+                            file_name.c_str(),
+                            0
+                        );
+                        cerr << "Problem opening help file: " << file_name << endl;
+                    } else {
+                        // In the parent process.
+                        wait( 0 );
+                    }
+                #else
+                    ifstream file( file_name.c_str() );
+                    if ( file.good() ) {
+                        ifstream file( file_name.c_str() );
+                        string line;
+                        while( getline( file, line ) ) {  
+                            cout << line << endl;
+                        }
+                    } else {
+                        cerr << "Problem opening help file: " << file_name << endl;
+                    }
+                #endif
+            } else {
+                cerr << "Sorry, help not implemented for topic: " << topic << endl;
+                cerr << "File required: " << file_name << endl;
+            }
         }
     }
 
     void doHeapCrawl() {
-        Tracer tracer;
+        Tracer tracer( this->command->attribute( "zeros", "" ) == "true" );
         this->vm->crawlHeap( tracer );
     }
 
@@ -203,8 +347,8 @@ int main( int argc, char ** argv ) {
             MnxReader read_xml( std::cin );
             shared< Mnx > mnx( read_xml.readMnx() );
             if ( not mnx ) break;
-            TextResult result;
-            Cmd( vm, mnx, result ).doCommand();
+            TextReporter reporter;
+            Cmd( vm, mnx, reporter ).doCommand();
         } catch ( Ginger::Mishap m ) {
             m.report();
        }

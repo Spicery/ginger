@@ -124,6 +124,8 @@ install-as-is:
 	/usr/bin/install -m a=r COPYING $(INSTALL_LIB)
 	mkdir -p $(INSTALL_LIB)/lisp2gnx
 	/usr/bin/install -m a=r apps/lisp2gnx/lsp/lisp2gnx.lsp $(INSTALL_LIB)/lisp2gnx
+	mkdir -p $(INSTALL_LIB)/gvmtest
+	cp -r apps/gvmtest/cpp/help $(INSTALL_LIB)/gvmtest
 	/usr/bin/install $(LIBEXECUTABLES) $(INSTALL_TOOL)
 	/usr/bin/install $(USEREXECUTABLES) $(INSTALL_BIN)
 	# Copy the autodocs

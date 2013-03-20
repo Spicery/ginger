@@ -106,7 +106,8 @@ LIBEXECUTABLES=\
 	apps/gson2gnx/cpp/gson2gnx \
 	apps/src2lnx/cpp/src2lnx \
 	apps/lnx2csv/cpp/lnx2csv \
-	apps/lnx2mnx/cpp/lnx2mnx
+	apps/lnx2mnx/cpp/lnx2mnx \
+	apps/gvmtest/cpp/gvmtest
 
 install: all install-as-is
 

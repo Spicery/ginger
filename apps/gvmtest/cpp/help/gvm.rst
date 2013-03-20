@@ -7,6 +7,7 @@ The Ginger Virtual Machine is made up of the following main areas:
 	* Value stack
 	* Call stack
 	* Heap
+	* Symbol dictionary
 
 Each of these 
 
@@ -79,3 +80,9 @@ plan is to share cages of deeply-immutable objects, where deeply-immutable means
 that all other objects reachable from the chosen object are also immutable. The
 garbage collector will be responsible for migrating objects into the shareable,
 cages of deeply-immutable objects.
+
+Symbols Dictionary
+------------------
+This is an area dedicated to the storage of symbols, which was an early 
+decision to have a robust but simple implementation of symbols. (It's one of 
+the many tricks used to keep non-ephemeral objects out of the heap.)

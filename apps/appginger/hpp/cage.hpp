@@ -84,6 +84,11 @@ public:
 public:
 	long serialNumber() { return this->cage_id; }
 	
+	Ref * endRefPtr() const { return this->end; }
+	bool contains( Ref * p ) const { return this->start <= p && p < this->end; }
+	bool atOrAfterStart( Ref * p ) const { return this->start <= p; }
+	bool beforeEnd( Ref * p ) const { return p < this->end; }
+
 public:
 	friend class XfrClass;
 	CageClass( int capacity );

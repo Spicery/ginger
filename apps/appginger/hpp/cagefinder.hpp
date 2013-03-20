@@ -16,43 +16,37 @@
     along with AppGinger.  If not, see <http://www.gnu.org/licenses/>.
 \******************************************************************************/
 
-#ifndef HEAP_HPP
-#define HEAP_HPP
+#ifndef CAGE_FINDER_HPP
+#define CAGE_FINDER_HPP
 
 #include <map>
+#include <cassert>
+
+#include "common.hpp"
 
 #include "cage.hpp"
 
-class HeapClass {
-friend class HeapCrawl;
-friend class CageFinder;
+namespace Ginger {
+
+class CageFinder {
+	typedef std::map< Ref *, CageClass * >::iterator iterator;
 private:
-	CageClass *						current;
-	std::vector< CageClass * >		zoo;
-	MachineClass *					machine_ptr;
-	
+	int num_cages;	///	Only used for optimisation.
+	CageClass * last_cage;
+	std::map< Ref *, CageClass * > cages;
 public:
-	bool wouldGC( int size );
-	CageClass * preflight( Ref * & pc, int size );
-	CageClass * preflight( int size );
-	Ref copyString( const char *s );				//	Copy string, possibly causing GC
-	Ref copyString( Ref * & pc, const char *s );	//	Copy string, possibly causing GC
-	Ref copyDouble( gngdouble_t d );					//	Copy double, possibly causing GC
-	Ref copyDouble( Ref * & pc, gngdouble_t d );		//	Copy double, possibly causing GC
+	CageFinder() : num_cages( 0 ), last_cage( NULL ) {}
 
 public:
-	void selectCurrent();
-	CageClass * newCageClass();
+	void add( CageClass * cage ) {
+		assert( cage != NULL );
+		num_cages += 1;
+		this->cages[ cage->endRefPtr() ] = cage;
+	}
 
-public:
-	typedef std::vector< CageClass * >::iterator cage_iterator;
-	cage_iterator begin() { return this->zoo.begin(); }
-	cage_iterator end() { return this->zoo.end(); }
-
-public:
-	HeapClass( MachineClass * machine );
-	~HeapClass();
-
+	CageClass * find( Ref * obj_K );
 };
+
+} // namespace Ginger
 
 #endif

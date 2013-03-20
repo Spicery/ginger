@@ -153,6 +153,13 @@ class Implementation( object ):
 		output.write( "        \"?\"\n" )
 		output.write( "    );\n" )
 		output.write( "}\n\n" )
+
+		output.write( "Instruction InstructionSet::findInstruction( const std::string & name ) const {\n" )
+		for inst in instructionSet:
+			iname = inst.getName();
+			output.write( "    if ( name == \"{0}\" ) return vmc_{0};\n".format( iname, ) );
+		output.write( "    throw Mishap( \"Bad instruction name\" );\n" )
+		output.write( "}\n\n" ) 
 		
 		output.write(  "const char * InstructionSet::signature( Ref x ) const {\n" )
 		for inst in instructionSet:

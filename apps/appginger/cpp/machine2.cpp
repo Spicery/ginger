@@ -35,8 +35,8 @@ Machine2::Machine2( AppContext * g ) :
 }
 
 
-void Machine2::execute( Ref r ) {
-	pc = this->setUpPC( r );
+void Machine2::execute( Ref r, const bool clear_stack ) {
+	pc = this->setUpPC( r, clear_stack );
 	vm = this;
 	for (;;) {		
 		Special fn = (Special)( *pc );

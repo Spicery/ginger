@@ -23,8 +23,8 @@ typedef Instruction Special;
 
 Machine4::Machine4( AppContext * g ) : MachineClass( g ) {}
 
-void Machine4::execute( Ref r ) {
-	Ref * pc = this->setUpPC( r );
+void Machine4::execute( Ref r, const bool clear_stack ) {
+	Ref * pc = this->setUpPC( r, clear_stack );
 	execute_loop: {
 		Special code = *reinterpret_cast< Special * >( pc );
 		switch ( code ) {

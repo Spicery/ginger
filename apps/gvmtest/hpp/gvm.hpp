@@ -62,6 +62,19 @@ public:
 
 };
 
+class HeapTracer {
+public:
+    virtual ~HeapTracer() {}
+public:
+    virtual void startCage() {}
+    virtual void serialNumberCage( long serial_number ) {}
+    virtual void usedCage( long cells_used ) {}
+    virtual void capacityCage( long capacity_in_cells ) {}
+    virtual void endCage() {}
+
+    virtual void atObject( HeapObject heap_object ) {}
+};
+
 class VirtualMachine {
 friend class VirtualMachineFactory;
 private:
@@ -78,11 +91,14 @@ public:
     }
 public: //  Garbage collection
     void garbageCollect( Ginger::GCData & gcdata );
+    void crawlHeap( HeapTracer & tracer );
 public: //  Eval operations.
     void execGnx( shared< Ginger::Mnx > gnx );
+    void execCode( shared< Ginger::Mnx > code );
 public: //  Stack operations.
     ptrdiff_t stackLength();
-    Cell peek( int n );
+    void clearStack();
+    Cell peek( int n = 0 );
     std::vector< Cell > stack();
 };
 
@@ -97,6 +113,7 @@ public:
     }
 public:
     VirtualMachine * newVirtualMachine();
+    void setShowCode( const bool b ) { this->app_context->setShowCode( b ); }
 };
 
 

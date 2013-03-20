@@ -1,6 +1,8 @@
 #ifndef INSTRUCTION_SET_HPP
 #define INSTRUCTION_SET_HPP
 
+#include <string>
+
 #include "common.hpp"
 #include "instruction.hpp"
 #include "listlayout.hpp"
@@ -14,6 +16,7 @@ public:
 #include "instruction_set.hpp.auto"
 public: 
 	Ref lookup( Instruction instr ) const;
+	Instruction findInstruction( const std::string & name  ) const;
 	const char * name( Ref spc ) const;
 	const char * signature( Ref x ) const;
 };

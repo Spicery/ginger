@@ -33,8 +33,8 @@ Machine3::Machine3( AppContext * g ) :
 	this->core( true, 0 );
 }
 
-void Machine3::execute( Ref r ) {
-	Ref * PC = this->setUpPC( r );
+void Machine3::execute( Ref r, const bool clear_stack ) {
+	Ref * PC = this->setUpPC( r, clear_stack );
 	this->core( false, PC );
 }
 

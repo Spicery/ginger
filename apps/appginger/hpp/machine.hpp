@@ -143,12 +143,14 @@ public:
 	virtual Ref sysFastStringIterator();
 	
 public:
-	virtual Ref * setUpPC( Ref r );
-	virtual void execute( Ref r ) = 0;
+	virtual Ref * setUpPC( Ref r, const bool clear_stack );
+	virtual void execute( Ref r, const bool clear_stack = true ) = 0;
 	virtual const InstructionSet & instructionSet() = 0;
+	void clearStack();
+	void clearCallStack();
 
 public:
-	void executeQueue();
+	void executeQueue( const bool clear_stack = true );
 	void addToQueue( Ref r );
 
 public:

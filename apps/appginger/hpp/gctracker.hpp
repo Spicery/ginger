@@ -65,7 +65,7 @@ public:
 	virtual void atWRecord( Ref * obj_K ) {}
 	
 public:
-	virtual ~GCTracker() {};
+	virtual ~GCTracker() {}
 };
 
 } // namespace Ginger

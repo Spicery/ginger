@@ -683,8 +683,8 @@ private:
 	void copyPhase() {
 		for (;;) {
 			Ref * obj = copier.next();
-			if ( this->tracker ) this->tracker->pickedObjectToCopy( obj );
 			if ( not obj ) break;
+			if ( this->tracker ) this->tracker->pickedObjectToCopy( obj );
 			this->forwardContents( obj );
 		}
 	}				

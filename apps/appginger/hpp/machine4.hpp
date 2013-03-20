@@ -29,7 +29,7 @@ private:
 	InstructionSet4 instruction_set;
 	
 public:
-	virtual void execute( Ref r );
+	virtual void execute( Ref r, const bool clear_stack = true );
 	virtual const InstructionSet & instructionSet() {
 		return this->instruction_set;
 	}

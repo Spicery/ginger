@@ -311,10 +311,15 @@ implementations = [
 #    Main
 ################################################################################
 
+pw = open( "instruction_set.xdef.auto", 'w' )
+for inst in instructionSet:
+	pw.write( 'X( vmc_{0}, "{0}", "{1}" )\n'.format( inst.getName(), inst.getType() ) )
+pw.close()
+
 generic = GenericImplementation()
 pw = open( "instruction_set.hpp.auto", 'w' )
 generic.generateInstructionSetHPP( pw )
-pw.close();
+pw.close()
 
 pw = open( "instruction_set.cpp.auto", 'w' )
 generic.generateInstructionSetCPP( pw )

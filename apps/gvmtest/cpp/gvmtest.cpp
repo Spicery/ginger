@@ -270,6 +270,10 @@ public:
             cout << "----------------" << endl;
             cout << "<compile> GNX </compile>         <help topic=\"compile\"/>" << endl;
             cout << "<code> INSTRUCTION* </code>      <help topic=\"code\"/>" << endl;
+        } else if ( topic == "gvm.instructions" ) {
+            #define X( VMC, NAME, SIG ) cout << NAME << "\t" << SIG << endl;
+            #include "instruction_set.xdef.auto"
+            #undef X
         } else {
             std::string file_name( INSTALL_LIB );
             file_name += "/gvmtest/help/";

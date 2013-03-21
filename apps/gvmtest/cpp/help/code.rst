@@ -13,6 +13,11 @@ Instruction Names
 NAME must be one of the instructions named in the ${GINGER_DEV_SRC}/instruction_set
 folder e.g. "add", "mul", "gt". To get a complete list of instructions run
 
+	% gvmtest 
+	<help topic="gvm.instructions"/>
+
+or
+
 	% ginger-info -v
 
 

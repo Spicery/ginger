@@ -351,6 +351,7 @@ static struct option long_options[] =
         { "json",			no_argument,			0, 'j' },
         { "hexkeys",		no_argument,			0, 'K' },
         { "rst",            no_argument,      		0, 'r' },
+        { "verbose",		no_argument,			0, 'v' },
         { "version",        no_argument,            0, 'V' },
         { "xml",          	no_argument,      		0, 'x' },
         { 0, 0, 0, 0 }
@@ -358,13 +359,13 @@ static struct option long_options[] =
 
 class Main {
 private:
+	bool verbose;
 	AppContext context;
 	OutputFormat oformat;
 	Formatter * formatter;
 
 public:
-	Main() : oformat( XML_FORMAT ), formatter( NULL ) {
-	}
+	Main() : verbose( false ), oformat( XML_FORMAT ), formatter( NULL ) {}
 
 	~Main() {
 		delete this->formatter;
@@ -499,6 +500,21 @@ private:
 		this->formatter->endSection();
 	}
 
+	void addInstruction( const std::string & name, const std::string & type ) {
+		this->formatter->startValue( "instruction" );
+		this->formatter->addAttribute( "name", name );
+		this->formatter->addAttribute( "type", type );
+		this->formatter->endValue();
+	}
+
+	void printGVMInstructions() {
+		this->formatter->startSection( "gvm.instructions" );
+		#define X( VMC, NAME, SIG ) this->addInstruction( NAME, SIG );
+		#include "instruction_set.xdef.auto"
+		#undef X
+		this->formatter->endSection();
+	}
+
 public:
 	void printMetaInfo() {
 		this->formatter->startDocument();
@@ -510,6 +526,7 @@ public:
 		this->printCommunityInfo();
 		this->printStdInfo();
 		this->printSynonyms();
+		if ( this->verbose ) this->printGVMInstructions();
 		this->formatter->endDocument();
 	}
 
@@ -518,7 +535,7 @@ public:
 	    if ( envp != NULL ) this->context.setEnvironmentVariables( envp );
 		for(;;) {
 	        int option_index = 0;
-	        int c = getopt_long( argc, argv, "HjkrVx", long_options, &option_index );
+	        int c = getopt_long( argc, argv, "HjkrvVx", long_options, &option_index );
 	        
 	        if ( c == -1 ) break;
 	        switch ( c ) {
@@ -541,6 +558,10 @@ public:
 	            case 'H': {
 	                printUsage();
 	                return false;
+	            }
+	            case 'v': {
+	            	this->verbose = true;
+	            	break;
 	            }
 	            case 'V': {
 	            	cout << APP_TITLE << ": version " << this->context.version() << " (" << __DATE__ << " " << __TIME__ << ")" << endl;

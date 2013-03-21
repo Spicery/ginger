@@ -27,7 +27,16 @@
 
 //  Our own header file.
 #include "gvm.hpp"
+
+//  Ginger VM header files (required for heap crawling)    
 #include "garbagecollect.hpp"
+#include "machine.hpp"
+#include "heapcrawl.hpp"
+#include "cagecrawl.hpp"
+//#include "sys.hpp"
+#include "key.hpp"
+#include "garbagecollect.hpp"
+
 
 using namespace std;
 using namespace Ginger;
@@ -124,8 +133,7 @@ void VirtualMachine::execGnx( shared< Mnx > gnx ) {
         codegen->vmiRETURN();                               //      TODO: We might be able to eliminate this.
         Ref r = codegen->vmiENDFUNCTION();
         this->machine->addToQueue( r );
-        this->machine->executeQueue();
-
+        this->machine->executeQueue( false );
         //  We should never normally reach here.
         cerr << "Somehow the GVM returned rather than exited with a throw! Wrong!" << endl;
         exit( EXIT_FAILURE );   //  Probably need to force a continuation to permit debugging.
@@ -133,7 +141,7 @@ void VirtualMachine::execGnx( shared< Mnx > gnx ) {
     } catch ( Ginger::NormalExit ) {
         //      Do nothing! Just exit nicely.
         //  TODO: ELiminate this message.
-        cerr << "Note: Virtual machine quit normally" << endl;
+        cerr << "Note: Virtual machine stopped normally" << endl;
     }
  }
 
@@ -152,3 +160,76 @@ vector< Cell > VirtualMachine::stack() {
     }
     return sofar;
 }
+
+void VirtualMachine::execCode( shared< Mnx > code ) {
+    CodeGen codegen = this->machine->codegen();
+    codegen->vmiFUNCTION( 0, 0 );
+    MnxChildIterator it( code ); 
+    while( it.hasNext() ) {
+        shared< Mnx > & c = it.next();
+        if ( c->hasAttribute( "name" ) ) {
+            const std::string name = c->attribute( "name" );
+            Instruction vmc = this->machine->instructionSet().findInstruction( name );
+            codegen->vmiINSTRUCTION( vmc );
+            MnxChildIterator args( c );
+            while ( args.hasNext() ) {
+                shared< Mnx > & arg = args.next();
+                if ( arg->hasName( "constant" ) ) {
+                    codegen->emitRef( codegen->calcConstant( arg ) );
+                } else {
+                    throw Ginger::Mishap( "Unexpected arg" );
+                }
+            }
+        } else {
+            throw Ginger::Mishap( "Instruction missing name" );
+        }
+    }
+    codegen->vmiINSTRUCTION( vmc_reset );
+    Ref r = codegen->vmiENDFUNCTION();
+    this->machine->addToQueue( r );
+    try {
+        this->machine->executeQueue( false );
+    } catch ( Ginger::NormalExit ) {
+        cerr << "Note: VM stopped normally" << endl;
+    } catch ( Ginger::Mishap m ) {
+        m.report();
+    }
+}
+
+void VirtualMachine::clearStack() {
+    this->machine->clearStack();
+}
+
+
+void VirtualMachine::crawlHeap( HeapTracer & tracer ) {
+    HeapCrawl hcrawl( this->machine->heap() );
+    for (;;) {
+        CageClass * cage = hcrawl.next();
+        if ( not cage ) break; 
+        tracer.startCage();
+
+        tracer.serialNumberCage( cage->serialNumber() );
+        tracer.usedCage( cage->nboxesInUse() );
+        tracer.capacityCage( cage->capacity() );
+
+        //out << "  Cage[" << cage->serialNumber() << "] at " << (unsigned long)cage << " with " << cage->nboxesInUse() << "/" << cage->capacity() << " cells" << endl;
+
+        CageCrawl ccrawl( cage );
+        for (;;) {
+            Ref * key = ccrawl.next();
+            if ( not key ) break;
+            tracer.atObject( HeapObject( key ) );
+
+            //out << hex << "    @" << (unsigned long) key << " : " << keyName( *key ) << endl;
+            //out << "Value = ";
+            //refPtrPrint( out, key );
+            //out << endl;
+        }
+
+        tracer.endCage();
+    }
+}
+
+
+
+

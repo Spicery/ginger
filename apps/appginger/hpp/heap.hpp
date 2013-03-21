@@ -19,10 +19,13 @@
 #ifndef HEAP_HPP
 #define HEAP_HPP
 
+#include <map>
+
 #include "cage.hpp"
 
 class HeapClass {
 friend class HeapCrawl;
+friend class CageFinder;
 private:
 	CageClass *						current;
 	std::vector< CageClass * >		zoo;
@@ -40,6 +43,11 @@ public:
 public:
 	void selectCurrent();
 	CageClass * newCageClass();
+
+public:
+	typedef std::vector< CageClass * >::iterator cage_iterator;
+	cage_iterator begin() { return this->zoo.begin(); }
+	cage_iterator end() { return this->zoo.end(); }
 
 public:
 	HeapClass( MachineClass * machine );

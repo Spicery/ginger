@@ -17,8 +17,8 @@ Machine1::Machine1( AppContext * g ) :
 }*/
 	
 
-void Machine1::execute( Ref r ) {
-	Ref * PC = this->setUpPC( r );
+void Machine1::execute( Ref r, const bool clear_stack ) {
+	Ref * PC = this->setUpPC( r, clear_stack );
 	for (;;) {			
 		//sanity_check( this->func_of_program_counter ); // debug
 		Special fn = (Special)( *PC );

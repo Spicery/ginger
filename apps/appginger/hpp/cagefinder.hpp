@@ -16,28 +16,37 @@
     along with AppGinger.  If not, see <http://www.gnu.org/licenses/>.
 \******************************************************************************/
 
-#ifndef MACHINE4_HPP
-#define MACHINE4_HPP
+#ifndef CAGE_FINDER_HPP
+#define CAGE_FINDER_HPP
 
-#include "machine.hpp"
-#include "instruction_set4.hpp"
-#include "appcontext.hpp"
+#include <map>
+#include <cassert>
 
-class Machine4 : public MachineClass {
+#include "common.hpp"
 
+#include "cage.hpp"
+
+namespace Ginger {
+
+class CageFinder {
+	typedef std::map< Ref *, CageClass * >::iterator iterator;
 private:
-	InstructionSet4 instruction_set;
-	
+	int num_cages;	///	Only used for optimisation.
+	CageClass * last_cage;
+	std::map< Ref *, CageClass * > cages;
 public:
-	virtual void execute( Ref r, const bool clear_stack = true );
-	virtual const InstructionSet & instructionSet() {
-		return this->instruction_set;
+	CageFinder() : num_cages( 0 ), last_cage( NULL ) {}
+
+public:
+	void add( CageClass * cage ) {
+		assert( cage != NULL );
+		num_cages += 1;
+		this->cages[ cage->endRefPtr() ] = cage;
 	}
 
-public:
-	Machine4( AppContext * g );
-	virtual ~Machine4() {}
-
+	CageClass * find( Ref * obj_K );
 };
+
+} // namespace Ginger
 
 #endif

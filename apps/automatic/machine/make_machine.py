@@ -153,6 +153,13 @@ class Implementation( object ):
 		output.write( "        \"?\"\n" )
 		output.write( "    );\n" )
 		output.write( "}\n\n" )
+
+		output.write( "Instruction InstructionSet::findInstruction( const std::string & name ) const {\n" )
+		for inst in instructionSet:
+			iname = inst.getName();
+			output.write( "    if ( name == \"{0}\" ) return vmc_{0};\n".format( iname, ) );
+		output.write( "    throw Mishap( \"Bad instruction name\" );\n" )
+		output.write( "}\n\n" ) 
 		
 		output.write(  "const char * InstructionSet::signature( Ref x ) const {\n" )
 		for inst in instructionSet:
@@ -304,10 +311,15 @@ implementations = [
 #    Main
 ################################################################################
 
+pw = open( "instruction_set.xdef.auto", 'w' )
+for inst in instructionSet:
+	pw.write( 'X( vmc_{0}, "{0}", "{1}" )\n'.format( inst.getName(), inst.getType() ) )
+pw.close()
+
 generic = GenericImplementation()
 pw = open( "instruction_set.hpp.auto", 'w' )
 generic.generateInstructionSetHPP( pw )
-pw.close();
+pw.close()
 
 pw = open( "instruction_set.cpp.auto", 'w' )
 generic.generateInstructionSetCPP( pw )

@@ -44,6 +44,10 @@
 #include "reflayout.hpp"
 #include "sysmap.hpp"
 
+#ifdef CAGE_FINDER_NEEDED
+	#include "cagefinder.hpp"
+#endif
+
 using namespace std;
 
 //#define DBG_GC
@@ -263,7 +267,10 @@ private:
 	set< Ref * >			weak_roots;
 	set< Ref * >			weak_refs;
 	set< Ref * >			rehash_needed;
-	
+
+#ifdef CAGE_FINDER_NEEDED
+	Ginger::CageFinder		cage_finder;
+#endif
 public:
 	GarbageCollect( MachineClass * virtual_machine, bool scan_call_stack ) :
 		tracker( NULL ),
@@ -271,6 +278,16 @@ public:
 		copier( virtual_machine, NULL ),
 		prev_num_assoc_chains( 0 )
 	{
+		#ifdef CAGE_FINDER_NEEDED
+			// Commented out until we add in different kind of cages.
+			HeapClass & heap = virtual_machine->heap();
+			for ( HeapClass::cage_iterator it = heap.begin(); it != heap.end(); ++it ) {
+				//	Note that we should only add cages to the cage_finder if we need 
+				//	to find the cages! So in reality we would only populate with the
+				//	cages that have interesting flags.
+				cage_finder.add( *it );
+			}
+		#endif
 	}
 	
 public:
@@ -293,6 +310,20 @@ private:
 					//	Pick up the to-space address.
 					current = Ptr4ToRef( FwdToPtr4( *obj ) );
 				} else {
+
+					#ifdef DBG_CAGE_FINDER
+						CageClass * c = this->cage_finder.find( obj );
+						if ( c != NULL ) {
+							cerr << "Checking cage of object: " << obj << endl;
+							cerr << "    cage         : " << c->serialNumber() << endl;
+							cerr << "    contained?   : " << c->contains( obj ) << endl;
+							cerr << "    after start? : " << c->atOrAfterStart( obj ) << endl;
+							cerr << "    before end?  : " << c->beforeEnd( obj ) << endl;
+						} else {
+							cerr << "FAILED TO FIND CONTAINING CAGE!" << obj << endl;
+						}
+					#endif
+
 					Ref * half_copied_obj  = copier.copy( obj );
 					current = Ptr4ToRef( half_copied_obj );
 					
@@ -683,8 +714,8 @@ private:
 	void copyPhase() {
 		for (;;) {
 			Ref * obj = copier.next();
-			if ( this->tracker ) this->tracker->pickedObjectToCopy( obj );
 			if ( not obj ) break;
+			if ( this->tracker ) this->tracker->pickedObjectToCopy( obj );
 			this->forwardContents( obj );
 		}
 	}				

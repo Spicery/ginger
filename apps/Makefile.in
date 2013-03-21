@@ -11,6 +11,7 @@ all clean:
 	$(MAKE) -C ginger-help $@
 	$(MAKE) -C gngreadline $@
 	$(MAKE) -C gson2gnx $@
+	$(MAKE) -C gvmtest $@
 	$(MAKE) -C automatic/metainfo $@
 	$(MAKE) -C libmetainfo $@
 	$(MAKE) -C lisp2gnx $@

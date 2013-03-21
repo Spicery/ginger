@@ -84,12 +84,12 @@ void MachineClass::addToQueue( Ref r ) {
 	this->queue.push_back( r );
 }
 
-void MachineClass::executeQueue() {
+void MachineClass::executeQueue( const bool clear_stack ) {
 	if ( this->queue.size() == 1 ) {
 		Ref r = this->queue.front();
 		this->queue.clear();
 		this->gcLiftAllVetoes();
-	    this->execute( r );
+	    this->execute( r, clear_stack );
 	} else {		
 		CodeGen codegen = this->codegen();
 	    codegen->vmiFUNCTION( "Execute Queue", 0, 0 );
@@ -104,9 +104,9 @@ void MachineClass::executeQueue() {
         }
         this->queue.clear();
 	    codegen->vmiRETURN();
-	    Ref r =  codegen->vmiENDFUNCTION();
+	    Ref r = codegen->vmiENDFUNCTION();
 		this->gcLiftAllVetoes();
-		this->execute( r );
+		this->execute( r, clear_stack );
 	}
 }
 
@@ -132,7 +132,23 @@ HeapClass & MachineClass::heap() {
 	return *this->heap_aptr.get();
 }
 
-Ref * MachineClass::setUpPC( Ref r ) {
+void MachineClass::clearStack() {
+	this->vp = this->vp_base;
+	*this->vp = SYS_SYSTEM_ONLY;	
+}
+
+void MachineClass::clearCallStack() {
+	this->sp = this->sp_base;
+	*this->sp = SYS_SYSTEM_ONLY;
+	//	And the previous stack point is additionally set to null.
+	this->sp[ SP_PREV_SP ] = 0;
+	//	The previous link address should be set to null too.
+	this->sp[ SP_LINK ] = 0;
+	//	The previous function object should be set to null.
+	this->sp[ SP_FUNC ] = 0;	
+}
+
+Ref * MachineClass::setUpPC( Ref r, const bool clear_stack ) {
 	static Ref launch[ 1 ] = { this->instructionSet().lookup( vmc_reset ) };
 	
 	// pointer to the function object.
@@ -140,21 +156,15 @@ Ref * MachineClass::setUpPC( Ref r ) {
 	// +1 to get a pointer to ENTRY instruction.
 	this->program_counter = this->func_of_program_counter + 1;
 
+	if ( clear_stack ) {
+		this->clearStack();
+	}
 
-	this->sp = this->sp_base;
-	this->vp = this->vp_base;
-	*this->vp = SYS_SYSTEM_ONLY;
-
-	*this->sp = SYS_SYSTEM_ONLY;
-	//	And the previous stack point is additionally set to null.
-	this->sp[ SP_PREV_SP ] = 0;
-	//	The previous link address should be set to null too.
-	this->sp[ SP_LINK ] = 0;
-	//	The previous function object should be set to null.
-	this->sp[ SP_FUNC ] = 0;
+	this->clearCallStack();
 		
-	//	Now store a fake return address.  This will cause this to halt.
-	//	That's a little bit nasty but we'll sort that out later.
+	//	Now store a fake return address.  This will cause this to reset.
+	//	i.e. throw. That's a little bit nasty but if needed we will sort
+	//	out later.
 	this->link = ToRefRef( &launch );
 	this->func_of_link = 0x0;
 
@@ -163,6 +173,8 @@ Ref * MachineClass::setUpPC( Ref r ) {
 	return this->program_counter;
 }
 
+/// @todo This is no longer correct. The structure of a function object
+/// should be encapsulated anyway.
 void MachineClass::printfn( ostream & out, Ref x ) {
 	Ref * obj_K = RefToPtr4( x );
 	Ref * obj_K1 = obj_K + 1;
@@ -363,6 +375,7 @@ AppContext & MachineClass::getAppContext() {
 
 //	The following routines are a bit peculiar as they are really intended
 //	to be used with gdb.
+///	@todo remove!
 static void bite_me() {
 	throw;
 }

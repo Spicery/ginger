@@ -187,7 +187,7 @@ public:
 	void setMachineImplNum( const int n ) { this->machine_impl_num = n; }
 	int getMachineImplNum() { return this->machine_impl_num; }
 	const char * version() { return APPGINGER_VERSION; }
-	void setShowCode() { this->dbg_show_code = true; }
+	void setShowCode( const bool b = true ) { this->dbg_show_code = b; }
 	bool getShowCode() { return this->dbg_show_code; }
 	std::list< std::string > & getProjectFolderList() { return this->project_folder_list; }
 	void addProjectFolder( const std::string & folder );

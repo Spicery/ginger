@@ -42,6 +42,7 @@ public:
     virtual void indent( const int n = 1 ) = 0;
     virtual void binding( const std::string & key, const long n ) = 0;
     virtual void longValue( const long n ) = 0;
+    virtual void binding( const std::string & key, HeapObject heap_object ) = 0;
 };
 
 class TextReporter : public Reporter {
@@ -53,11 +54,20 @@ public:
     void indent( int n ) {
         this->indent_level += n;
     }
+    void doIndent() {
+         for ( int i = 0; i < this->indent_level; i++ ) {
+            cout << "    ";
+        }       
+    }
     void binding( const std::string & key, const long n ) {
         for ( int i = 0; i < this->indent_level; i++ ) {
             cout << "    ";
         }
         cout << key << ": " << n << endl;
+    }
+    void binding( const std::string & key, HeapObject heap_object ) {
+        this->doIndent();
+        cout << key << ": " << heap_object.toPrintString() << endl;
     }
     void longValue( const long n ) {
         cout << n << endl;
@@ -255,6 +265,10 @@ public:
     void doHelp() {
         const std::string topic = this->command->attribute( "topic", "" );
         if ( topic == "" ) {
+            cout << "Register Commands" << endl;
+            cout << "-----------------" << endl;
+            cout << "<registers/>                     <help topic=\"registers\"/>" << endl;
+            cout << endl;
             cout << "Stack Commands" << endl;
             cout << "--------------" << endl;
             cout << "<peek/>                          <help topic=\"peek\"/>" << endl;
@@ -263,6 +277,7 @@ public:
             cout << "<stack/>                         <help topic=\"stack\"/>" << endl;
             cout << endl;
             cout << "Heap Commands" << endl;
+            cout << "-------------" << endl;
             cout << "<heap.crawl/>                    <help topic=\"heap.crawl\"/>" << endl;
             cout << "<gc/>                            <help topic=\"gc\"/>" << endl;
             cout << endl;
@@ -319,10 +334,26 @@ public:
         this->vm->crawlHeap( tracer );
     }
 
+    void doRegisters() {
+        /*  Scaffolding
+            * PC    virtual program counter, pointer to currently executing instruction
+            * FUNC  pointer to currently executing function
+            * COUNT the number of items passed on the stack to the current call
+            * LINK  the previous PC i.e. return address
+            * FUNCLINK the previous value of FUNC
+        */
+        this->reporter.binding( "COUNT", this->vm->countRegister() );
+        this->reporter.binding( "PC (offset from FUNC)", this->vm->offsetProgramCounterRegister() );
+        this->reporter.binding( "FUNC", this->vm->funcRegister() );
+        this->reporter.binding( "FUNCLINK", this->vm->funcLinkRegister() );
+    }
+
     void doCommand() {
         const string & name = command->name();
         if ( name == "help" ) {
             this->doHelp();
+        } else if ( name == "registers" ) {
+            this->doRegisters();
         } else if ( name == "stack" ) {
             this->doStack();
         } else if ( name == "stack.length" ) {

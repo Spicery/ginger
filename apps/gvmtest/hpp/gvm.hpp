@@ -100,6 +100,11 @@ public: //  Stack operations.
     void clearStack();
     Cell peek( int n = 0 );
     std::vector< Cell > stack();
+public: //  Registers
+    HeapObject funcRegister() { return Ginger::HeapObject( this->machine->func_of_program_counter ); }
+    HeapObject funcLinkRegister() { return Ginger::HeapObject( this->machine->func_of_link ); }
+    long countRegister() { return this->machine->count; }
+    ptrdiff_t offsetProgramCounterRegister() { return this->machine->program_counter - this->machine->func_of_program_counter; }
 };
 
 class VirtualMachineFactory {

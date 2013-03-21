@@ -62,7 +62,11 @@ std::string Cell::toPrintString() const {
 }
 
 std::string HeapObject::toPrintString() const {
-	return this->asCell().toPrintString();
+	if ( this->obj_K != NULL ) {
+		return this->asCell().toPrintString();
+	} else {
+		return "<NULL>";
+	}
 }
 
 Cell HeapObject::asCell() const {

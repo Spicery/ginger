@@ -34,6 +34,8 @@ distclean: clean
 	rm -f apps/ginger-help/cpp/Makefile
 	rm -f apps/gngreadline/Makefile
 	rm -f apps/gngreadline/cpp/Makefile
+	rm -f apps/gvmtest/Makefile
+	rm -f apps/gvmtest/cpp/Makefile
 	rm -f apps/libgng/Makefile
 	rm -f apps/libgng/cpp/Makefile
 	rm -f apps/libgng/unittest/Makefile

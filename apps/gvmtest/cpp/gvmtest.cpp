@@ -25,6 +25,7 @@
 //  Standard C libraries.
 #include <unistd.h>
 #include <time.h>
+#include <sys/wait.h>
 
 //  libgng libraries
 #include "mnx.hpp"

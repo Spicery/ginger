@@ -34,6 +34,8 @@ extern Ref * sysMapIndex( Ref *pc, class MachineClass * vm );
 extern void gngPrintMapPtr( std::ostream & out, Ref * r );
 extern void gngRehashMapPtr( Ref * map_K );
 extern unsigned int gngIdHash( Ref ref );
+extern unsigned int gngIdHash( Ref ref );
+
 
 namespace Ginger {
 

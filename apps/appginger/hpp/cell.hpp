@@ -41,6 +41,7 @@ class MapletObject;
 
 class Cell {
 friend class HeapObject;
+friend class MapObject;
 private:
 	Ref ref;
 

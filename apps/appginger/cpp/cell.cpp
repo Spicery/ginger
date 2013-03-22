@@ -29,6 +29,8 @@
 #include "refprint.hpp"
 #include "sysprint.hpp"
 #include "gnxconstants.hpp"
+#include "sysmap.hpp"
+#include "sysequals.hpp"
 
 namespace Ginger {
 using namespace std;
@@ -179,6 +181,14 @@ void HeapObject::dump( MnxBuilder & b, const bool deep ) const {
 				b.start( "map" );
 				if ( deep ) {
 					/// @todo iterate over the children.
+					MapObject m( this->obj_K );
+					for ( MapObject::Generator g( m ); !!g; ++g ) {
+						pair< Cell, Cell > p = *g;
+						b.start( "maplet" );
+						p.first.dump( b, deep );
+						p.second.dump( b, deep );
+						b.end();
+					}
 				}
 				b.end();
 				break;
@@ -257,25 +267,6 @@ std::string StringObject::getString() const {
 
 // -- MapObject ----------------------------------------------------------------
 
-/*Ref * sysMapValues( Ref *pc, class MachineClass * vm ) {
-	if ( vm->count != 1 ) throw Ginger::Mishap( "ArgsMismatch" );
-	Ref r = vm->fastPop();
-	if ( !IsMap( r ) ) throw Ginger::Mishap( "Map needed" ).culprit( "Object", refToString( r ) );
-	Ref * map_K = RefToPtr4( r );
-	long len = SmallToLong( map_K[ MAP_OFFSET_COUNT ] );
-	vm->checkStackRoom( len );
-	
-	MapCrawl map_crawl( map_K );
-	for (;;) {
-		Ref * bucket_K = map_crawl.nextBucket();
-		if ( bucket_K == NULL ) break;
-		Ref v = bucket_K[ ASSOC_OFFSET_VALUE ];
-		vm->fastPush( v );
-	}
-	
-	return pc;
-}*/
-
 
 MapObject::Generator::Generator( MapObject m ) :
 	current_bucket( NULL ),
@@ -305,9 +296,30 @@ std::pair< Cell, Cell > MapObject::Generator::operator *() const {
 	);
 }
 
-/*
-Cell MapObject::index( Cell c ) const;
-generator< MapletObject > & MapObject::entries();
-*/
+Cell MapObject::index( Cell c ) const {
+	const Ref idx = c.ref;
+	Ref * map_K = this->obj_K;
+	const Ref map_key = *( this->obj_K );
+	
+	const long width = fastMapPtrWidth( map_K );
+	const bool eq = MapKeyEq( map_key );
+
+	const unsigned long hk = ( eq ? gngEqHash( idx ) : gngIdHash( idx ) ) & ( ( 1 << width ) - 1 );
+	const Ref data = this->obj_K[ MAP_OFFSET_DATA ];
+	Ref bucket = RefToPtr4( data )[ hk + 1 ];
+	
+	while ( bucket != SYS_ABSENT ) {
+		Ref k1 = fastAssocKey( bucket );
+		if ( eq ? refEquals( idx, k1 ) : idx == k1 ) {
+			//	Found it.
+			return Cell( fastAssocValue( bucket ) );
+		} else {
+			bucket = fastAssocNext( bucket );
+		}
+	}
+
+	return Cell( SYS_ABSENT );
+}
+
 
 } // namespace Ginger

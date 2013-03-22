@@ -388,7 +388,7 @@ Ref * sysMapIndex( Ref * pc, class MachineClass * vm ) {
 	//}
 
 	const unsigned long hk = ( eq ? gngEqHash( idx ) : gngIdHash( idx ) ) & ( ( 1 << width ) - 1 );
-	const Ref data = RefToPtr4( map )[ MAP_OFFSET_DATA ];
+	const Ref data = map_K[ MAP_OFFSET_DATA ];
 	Ref bucket = RefToPtr4( data )[ hk + 1 ];
 	
 	while ( bucket != SYS_ABSENT ) {

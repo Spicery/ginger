@@ -140,37 +140,31 @@ static long log2( unsigned long v ) {
 	}
 }
 
-class MapCrawl {
-private:
-	long size_of_data;
-	int index_of_data;
-	Ref * data;
-	Ref bucket;
-
-public:
-	Ref * nextBucket() { 
-		if ( this->bucket != SYS_ABSENT ) {
-			Ref * x = RefToPtr4( this->bucket );
-			this->bucket = x[ ASSOC_OFFSET_NEXT ];
-			return x;
-		} else {
-			while ( index_of_data < size_of_data ) {
-				this->bucket = this->data[ this->index_of_data++ ];
-				if ( this->bucket != SYS_ABSENT ) return this->nextBucket();
-			}
-			return NULL;
+Ref * Ginger::MapCrawl::nextBucket() { 
+	if ( this->bucket != SYS_ABSENT ) {
+		Ref * x = RefToPtr4( this->bucket );
+		this->bucket = x[ ASSOC_OFFSET_NEXT ];
+		return x;
+	} else {
+		while ( index_of_data < size_of_data ) {
+			this->bucket = this->data[ this->index_of_data++ ];
+			if ( this->bucket != SYS_ABSENT ) return this->nextBucket();
 		}
+		return NULL;
 	}
+}
 
-public:
-	MapCrawl( Ref * map_K ) :
-		size_of_data( SmallToLong( map_K[ MAP_OFFSET_COUNT ] ) ),
-		index_of_data( 0 ),
-		data( RefToPtr4( map_K[1] ) + 1 ),
-		bucket( SYS_ABSENT )
-	{}
-	
-};
+bool Ginger::MapCrawl::hasBeenCalled() const {
+	return this->index_of_data > 0;
+}
+
+
+Ginger::MapCrawl::MapCrawl( Ref * map_K ) :
+	size_of_data( SmallToLong( map_K[ MAP_OFFSET_COUNT ] ) ),
+	index_of_data( 0 ),
+	data( RefToPtr4( map_K[1] ) + 1 ),
+	bucket( SYS_ABSENT )
+{}
 
 
 
@@ -224,7 +218,7 @@ private:
 	}
 	
 	void addMap( Ref r ) {
-		MapCrawl map_crawl( RefToPtr4( r ) );
+		Ginger::MapCrawl map_crawl( RefToPtr4( r ) );
 		for (;;) {
 			Ref * bucket = map_crawl.nextBucket();
 			if ( bucket == NULL ) break;
@@ -333,7 +327,7 @@ Ref * sysMapValues( Ref *pc, class MachineClass * vm ) {
 	long len = SmallToLong( map_K[ MAP_OFFSET_COUNT ] );
 	vm->checkStackRoom( len );
 	
-	MapCrawl map_crawl( map_K );
+	Ginger::MapCrawl map_crawl( map_K );
 	for (;;) {
 		Ref * bucket_K = map_crawl.nextBucket();
 		if ( bucket_K == NULL ) break;
@@ -360,7 +354,7 @@ Ref * sysMapExplode( Ref *pc, class MachineClass * vm ) {
 	vm->checkStackRoom( count );
 	
 	Ref * map_K = RefToPtr4( r );
-	MapCrawl map_crawl( map_K );
+	Ginger::MapCrawl map_crawl( map_K );
 	for (;;) {
 		Ref * bucket_K = map_crawl.nextBucket();
 		if ( bucket_K == NULL ) break;
@@ -417,7 +411,7 @@ static const char * MAP_CLOSE = "}";
 static const char * MAP_ARROW = "=>";
 
 void gngPrintMapPtr( std::ostream & out, Ref * map_K ) {
-	MapCrawl map_crawl( map_K );
+	Ginger::MapCrawl map_crawl( map_K );
 	bool sep = false;
 	out << MAP_OPEN;
 	for (;;) {

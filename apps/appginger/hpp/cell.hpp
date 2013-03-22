@@ -19,6 +19,7 @@
 #ifndef CELL_HPP
 #define CELL_HPP
 
+#include <algorithm>
 #include <string>
 #include <ostream>
 #include <cstddef>
@@ -26,6 +27,7 @@
 #include "key.hpp"
 #include "stringlayout.hpp"
 #include "mishap.hpp"
+#include "sysmap.hpp"
 
 namespace Ginger {
 
@@ -34,6 +36,8 @@ class StringObject;
 class VectorObject;
 class DoubleObject;
 class PairObject;
+class MapObject;
+class MapletObject;
 
 class Cell {
 friend class HeapObject;
@@ -43,10 +47,10 @@ private:
 public:
 	Cell() : ref( SYS_ABSENT ) {}
 	Cell( Ref _r ) : ref( _r ) {}
+	Cell( HeapObject _h );
 
 public:
 
-	StringObject asStringObject() const;
 	HeapObject asHeapObject() const;
 
 	bool isString() const { return IsString( this->ref ); }
@@ -55,9 +59,7 @@ public:
 	bool isVectorObject() const { return IsVector( this->ref ); }
 
 	std::string toPrintString() const;
-
 	void print( std::ostream & out, bool showing = false ) const;
-
 	void println( std::ostream & out, bool showing = false ) const;
 
 private:
@@ -72,26 +74,25 @@ protected:
 
 public:
 	HeapObject( Ref * _p ) : obj_K( _p ) {}
+	HeapObject( Cell _c ) : obj_K( RefToPtr4( _c.ref ) ) {}
 
 public:	//	Generic methods (works on any value)
 	std::string toPrintString() const;
 	shared< Mnx > toMnx() const;
 	Cell deref() const;
+	Cell upCast() const { return Cell( Ptr4ToRef( this->obj_K ) ); }
 
-
-public:	//	String methods (only works on strings or is especially relevant to)
-	bool isStringObject() const { return IsSimple( *this->obj_K ) && KindOfSimpleKey( *this->obj_K ) == STRING_KIND; }
+public:	//	Checked downcasts.
 	StringObject asStringObject() const;
-	
-public:	//	Vector methods (only works on vectors or is especially relevant to)
 	VectorObject asVectorObject() const;
-	bool isVectorObject() const { return IsSimple( *this->obj_K ) && KindOfSimpleKey( *this->obj_K ) == VECTOR_KIND; }
-	
+	MapObject asMapObject() const;	
 
 public:	//	Others
 	bool isFunctionObject() const { return IsFunctionKey( *this->obj_K ); }
 	bool isCoreFunctionObject() const { return IsFunctionKey( *this->obj_K ) && IsCoreFunctionKey( *this->obj_K ); }
 	bool isMethodFunctionObject() const { return IsFunctionKey( *this->obj_K ) && IsMethodKey( *this->obj_K ); }
+	bool isStringObject() const { return IsSimple( *this->obj_K ) && KindOfSimpleKey( *this->obj_K ) == STRING_KIND; }
+	bool isVectorObject() const { return IsSimple( *this->obj_K ) && KindOfSimpleKey( *this->obj_K ) == VECTOR_KIND; }
 	bool isInstanceObject() const { return IsObj( *this->obj_K ); }
 	bool isMixedObject() const { return IsSimple( *this->obj_K ) && KindOfSimpleKey( *this->obj_K ) == MIXED_KIND; }
 	bool isRecordObject() const { return IsSimple( *this->obj_K ) && KindOfSimpleKey( *this->obj_K ) == RECORD_KIND; }
@@ -107,6 +108,8 @@ private:
 class PairObject : public HeapObject {
 public:
 	PairObject( Ref * _p ) : HeapObject( _p ) {}
+	PairObject( HeapObject _h ) : HeapObject( _h ) {}
+	PairObject( Cell _c ) : HeapObject( _c ) {}
 
 public:
 	Cell front() const;
@@ -116,6 +119,8 @@ public:
 class VectorObject : public HeapObject {
 public:
 	VectorObject( Ref * _p ) : HeapObject( _p ) {}
+	VectorObject( HeapObject _h ) : HeapObject( _h ) {}
+	VectorObject( Cell _c ) : HeapObject( _c ) {}
 
 public:
 	Cell index1( ptrdiff_t n ) const;
@@ -125,6 +130,8 @@ public:
 class StringObject : public HeapObject {
 public:
 	StringObject( Ref * _p ) : HeapObject( _p ) {}
+	StringObject( HeapObject _h ) : HeapObject( _h ) {}
+	StringObject( Cell _c ) : HeapObject( _c ) {}
 
 public:
 	char index0( ptrdiff_t n ) const;
@@ -135,16 +142,35 @@ public:
 class DoubleObject : public HeapObject {
 public:
 	DoubleObject( Ref * _p ) : HeapObject( _p ) {}
+	DoubleObject( HeapObject _h ) : HeapObject( _h ) {}
+	DoubleObject( Cell _c ) : HeapObject( _c ) {}
 
 public:
 	std::string toString() const;
 	double getDouble() const;
 };
 
+class MapObject : public HeapObject {
+	class Generator {
+	private:
+		Ref * current_bucket;
+		MapCrawl map_crawl;
+	public:
+		Generator( MapObject m );
+		bool operator!();
+		Generator & operator ++();
+		std::pair< Cell, Cell > operator *() const;
+	};
+public:
+	MapObject( Ref * _p ) : HeapObject( _p ) {}
+	MapObject( HeapObject _h ) : HeapObject( _h ) {}
+	MapObject( Cell _c ) : HeapObject( _c ) {}
 
+public:
+	Cell index( Cell c ) const;
+	Generator & entries();
+};
 
-
-
-} // namspace Ginger
+} // namespace Ginger
 
 #endif 

@@ -35,6 +35,28 @@ extern void gngPrintMapPtr( std::ostream & out, Ref * r );
 extern void gngRehashMapPtr( Ref * map_K );
 extern unsigned int gngIdHash( Ref ref );
 
+namespace Ginger {
+
+    /// Moving this utility class into the Ginger namespace is just
+    /// part of a highly extended refactoring to move all the Ginger
+    /// implementation into its own namespaces.
+    class MapCrawl {
+    private:
+        long size_of_data;
+        int index_of_data;
+        Ref * data;
+        Ref bucket;
+
+    public:
+        MapCrawl( Ref * map_K );
+
+    public:
+        Ref * nextBucket();
+        bool hasBeenCalled() const;
+
+    };
+
+} // namespace Ginger
 
 
 #endif

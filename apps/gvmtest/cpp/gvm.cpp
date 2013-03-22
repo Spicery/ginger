@@ -214,17 +214,18 @@ void VirtualMachine::crawlHeap( HeapTracer & tracer ) {
 
         //out << "  Cage[" << cage->serialNumber() << "] at " << (unsigned long)cage << " with " << cage->nboxesInUse() << "/" << cage->capacity() << " cells" << endl;
 
+        tracer.startCrawl();
         CageCrawl ccrawl( cage );
         for (;;) {
             Ref * key = ccrawl.next();
             if ( not key ) break;
             tracer.atObject( HeapObject( key ) );
-
             //out << hex << "    @" << (unsigned long) key << " : " << keyName( *key ) << endl;
             //out << "Value = ";
             //refPtrPrint( out, key );
             //out << endl;
         }
+        tracer.endCrawl();
 
         tracer.endCage();
     }

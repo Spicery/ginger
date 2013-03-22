@@ -43,6 +43,7 @@ public:
     virtual void binding( const std::string & key, const long n ) = 0;
     virtual void longValue( const long n ) = 0;
     virtual void binding( const std::string & key, HeapObject heap_object ) = 0;
+    virtual void mnx( shared< Mnx > mnx ) = 0;
 };
 
 class TextReporter : public Reporter {
@@ -50,10 +51,13 @@ private:
     int indent_level;
 public:
     TextReporter() : indent_level( 0 ) {}
-public:
+private:
     void indent( int n ) {
+        //cerr << "indent was: " << this->indent_level;
         this->indent_level += n;
+        //cerr << ", now is: " << this->indent_level << ", n = " << n << endl;
     }
+public:
     void doIndent() {
          for ( int i = 0; i < this->indent_level; i++ ) {
             cout << "    ";
@@ -70,15 +74,39 @@ public:
         cout << key << ": " << heap_object.toPrintString() << endl;
     }
     void longValue( const long n ) {
+        this->doIndent();
         cout << n << endl;
+    }
+    void mnx( shared< Mnx > mnx ) {
+        this->doIndent();
+        mnx->render();
+        cout << endl;
+    }
+    void startSection( const std::string & name ) {
+        this->doIndent();
+        cout << name << " {" << endl;
+        this->indent( 1 );        
+    }
+    void endSection() {
+        this->indent( -1 );
+        this->doIndent();
+        cout << "}" << endl;
     }
 };
 
 class Tracer : public HeapTracer {
 public:
-    Tracer( const bool _allow_zeros ) : allow_zeros( _allow_zeros ) {}
+    Tracer( 
+        const bool _allow_zeros,
+        const bool _dump_needed 
+    ) : 
+        allow_zeros( _allow_zeros ),
+        dump_needed( _dump_needed )
+    {}
 private:
+    TextReporter reporter;
     const bool allow_zeros;
+    const bool dump_needed;
 private:
     struct Counts {
     private:
@@ -121,7 +149,6 @@ private:
         }
     public:
         void report( Reporter & reporter, const bool allow_zeros = true ) {
-            reporter.indent( 1 );
             reportBinding( reporter, allow_zeros, "#Function", num_fn_obj );
             reportBinding( reporter, allow_zeros, "#Function/Core", num_core_fn_obj );
             reportBinding( reporter, allow_zeros, "#Function/Method", num_method_fn_obj );
@@ -172,29 +199,37 @@ private:
 public:
     virtual void startCage() {
         this->counts = Counts();
-        cout << "Start Cage" << endl;
+        this->reporter.startSection( "Start Cage" );
     }
 
     virtual void serialNumberCage( long serial_number ) {
-        cout << "    Serial : " << serial_number << endl;
+        this->reporter.binding( "Serial", serial_number );
     }
 
     virtual void usedCage( long cells_used ) {
-        cout << "    Used   : " << cells_used << endl;
+        this->reporter.binding( "Used", cells_used );
     }
 
     virtual void capacityCage( long capacity_in_cells ) {
-        cout << "    Capacity: " << capacity_in_cells << endl;
+        this->reporter.binding( "Capacity", capacity_in_cells );
     }
 
     virtual void endCage() {
-        TextReporter reporter;
-        this->counts.report( reporter, this->allow_zeros );
-        cout << "End Cage" << endl;        
+        this->counts.report( this->reporter, this->allow_zeros );
+        this->reporter.endSection();       
+    }
+
+    virtual void startCrawl() {
+        this->reporter.startSection( "Object Dump" );
+    }
+
+    virtual void endCrawl() {
+        this->reporter.endSection();
     }
 
     virtual void atObject( HeapObject heap_object ) {
         this->counts.bump( heap_object );
+        this->reporter.mnx( heap_object.toMnx() );
     }
 };
 
@@ -330,7 +365,10 @@ public:
     }
 
     void doHeapCrawl() {
-        Tracer tracer( this->command->attribute( "zeros", "" ) == "true" );
+        Tracer tracer( 
+            this->command->hasAttribute( "zeros", "true" ),
+            this->command->hasAttribute( "dump", "true"      )
+        );
         this->vm->crawlHeap( tracer );
     }
 

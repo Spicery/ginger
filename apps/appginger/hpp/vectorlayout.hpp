@@ -20,6 +20,7 @@
 #ifndef VECTOR_LAYOUT_HPP
 #define VECTOR_LAYOUT_HPP
 
+#include <cstddef>
 #include "common.hpp"
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -35,6 +36,7 @@
 extern long sizeAfterKeyOfVectorLayout( Ref * key );
 extern long lengthOfVectorLayout( Ref * key );
 extern Ref refVectorLayoutLength( Ref r );
+extern Ref indexVectorLayout( Ref * obj_K, ptrdiff_t n );
 
 ////////////////////////////////////////////////////////////////////////////////
 //	End of file

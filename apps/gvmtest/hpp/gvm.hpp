@@ -72,7 +72,9 @@ public:
     virtual void capacityCage( long capacity_in_cells ) {}
     virtual void endCage() {}
 
+    virtual void startCrawl() {}
     virtual void atObject( HeapObject heap_object ) {}
+    virtual void endCrawl() {}
 };
 
 class VirtualMachine {

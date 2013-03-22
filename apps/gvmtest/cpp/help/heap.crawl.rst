@@ -1,5 +1,5 @@
-Command <heap.crawl [zeros=("true"|"false")]/>
-==============================================
+Command <heap.crawl [zeros=("true"|"false")] [dump=("true"|"false")]/>
+======================================================================
 
 Each virtual machine has a large area of store devoted to managing variable
 sized objects. The <heap.crawl/> command performs a "forward crawl" of the 
@@ -39,6 +39,14 @@ Option zeros=("true"|"false")
 
 If the optional attribute zeros is set to "true" then zero-counts will be 
 reported. Otherwise they are suppressed (default).
+
+
+Option dump=("true"|"false")
+----------------------------
+
+If the optional attribute dump is set to "true" then output is generated for
+each object discovered during the heap-crawl.
+
 
 Example Output
 --------------

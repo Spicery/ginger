@@ -156,7 +156,7 @@ void gngPrintf( ostream & out, Ref * pc, class MachineClass * vm ) {
 	}
 	
 	//	The control string is the first argument.
-	std::string control( Cell( vm->fastPeek( vm->count - 1 ) ).asString() );
+	std::string control( Cell( vm->fastPeek( vm->count - 1 ) ).asStringObject().getString() );
 
 	RefPrint printer( out );
 	

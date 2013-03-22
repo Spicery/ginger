@@ -46,6 +46,12 @@ Ref refVectorLayoutLength( Ref r ) {
 	return RefToPtr4( r )[ VECTOR_OFFSET_LENGTH ];
 }
 
+/// 1-indexed access to the elements of a vector-layout object.
+Ref indexVectorLayout( Ref * obj_K, ptrdiff_t n ) {
+    return obj_K[ n ];
+}
+
+
 ////////////////////////////////////////////////////////////////////////////////
 //	End of file
 ////////////////////////////////////////////////////////////////////////////////

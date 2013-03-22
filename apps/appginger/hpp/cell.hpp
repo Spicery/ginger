@@ -152,6 +152,7 @@ public:
 };
 
 class MapObject : public HeapObject {
+public:
 	class Generator {
 	private:
 		Ref * current_bucket;

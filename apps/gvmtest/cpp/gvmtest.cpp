@@ -53,7 +53,6 @@ public:
     TextReporter() : indent_level( 0 ) {}
 private:
     void indent( int n ) {
-        //cerr << "indent was: " << this->indent_level;
         this->indent_level += n;
         //cerr << ", now is: " << this->indent_level << ", n = " << n << endl;
     }
@@ -343,8 +342,8 @@ public:
                         cerr << "Problem opening help file: " << file_name << endl;
                     } else {
                         // In the parent process.
-                        int stat_loc;
-                        wait( &stat_loc );
+                        int status;
+                        wait( &status );
                     }
                 #else
                     ifstream file( file_name.c_str() );

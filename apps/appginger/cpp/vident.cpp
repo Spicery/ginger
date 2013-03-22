@@ -25,7 +25,8 @@
 #include "gnxconstants.hpp"
 #include "mishap.hpp"
 #include "vident.hpp"
-#include "package.cpp"
+#include "package.hpp"
+#include "codegen.hpp"
 
 using namespace std;
 
@@ -66,7 +67,7 @@ VIdent::VIdent( CodeGen codegen, shared< Ginger::Mnx > vid ) {
 	} else if ( nm == CONSTANT ) {
 		this->flavour = CONSTANT_FLAVOUR;
 		this->valof = NULL;
-		this->slot = NULL;
+		this->slot = 0;
 		this->ref = codegen->calcConstant( vid );
 	} else {
 		throw "TODO";

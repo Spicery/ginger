@@ -288,12 +288,13 @@ public:
                             "/usr/bin/less",
                             "/usr/bin/less",
                             file_name.c_str(),
-                            0
+                            (char *)0
                         );
                         cerr << "Problem opening help file: " << file_name << endl;
                     } else {
                         // In the parent process.
-                        wait( 0 );
+                        int stat_loc;
+                        wait( &stat_loc );
                     }
                 #else
                     ifstream file( file_name.c_str() );

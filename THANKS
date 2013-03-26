@@ -1,11 +1,12 @@
 Thanks to everyone who has commented and contributed to the Ginger virtual
 machine project over the many years we have been running. In particular it is
 a pleasure to acknowledge the long standing support and willingness to
-share their insights of the Spice group - that is Chris Dollin, Kevin Rogers, 
-Luc Beaudoin and Graham Higgins. 
+share their insights - that is Phil Allen, Luc Beaudoin, Chris Dollin, 
+Graham Higgins, and Kevin Rogers.
 
 Also a special thank you goes to Dave Raggett who sparked this work with his
 suggestion that we needed to design a better stylesheet language - we'll get
 there one day! 
 
 Stephen Leach, Nov 2012.
+Revised Mar 2013.

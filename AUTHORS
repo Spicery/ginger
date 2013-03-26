@@ -1,18 +1,22 @@
-AUTHORS.txt for Ginger
-
-Ginger - the ginger virtual machine project
+AUTHORS.txt for the Ginger Virtual Machine Project
 
 Copyright (c) 2010 Stephen Leach. Ginger is distributed under the terms 
 of the GNU General Public License. This file is part of Ginger.
 
 Development:
-  Stephen Leach <steve@steelypip.com>   
-    appginger, ginger-cli, ginger-script, ginger-info, ginger-cgi, 
-    fetchgnx, file2gnx, lisp2gnx and common2gnx development
-  Graham Higgins <gjh@bel-epa.com>      
-    Continuous integration, autoconf & RPM packaging
+  	Stephen Leach <sfkleach@gmail.com>   
+    	ginger, ginger-cli, ginger-script, ginger-info, ginger-cgi, 
+    	fetchgnx, file2gnx, lisp2gnx, common2gnx and gvmtest development
+  	Graham Higgins <gjh@bel-epa.com>      
+    	Continuous integration, autoconf & RPM packaging
   
 Design Team:
-  Stephen Leach <steve@steelypip.com>
-  Chris Dollin <eh@electric-hedgehog.com> 
+  	Stephen Leach <sfkleach@gmail.com>
+  	Chris Dollin <eh@electric-hedgehog.com> 
 
+Testing and Review:
+  	Phil Allen <phil.allen.gm@gmail.com>
+
+Documentation:
+  	Stephen Leach <sfkleach@gmail.com>   
+  	Graham Higgins <gjh@bel-epa.com>

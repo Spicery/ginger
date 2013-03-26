@@ -48,7 +48,7 @@ void GCData::Count::show() {
     cout << "Number of record objects copied      : " << this->rec_objs << endl;
     cout << "Number of user objects copied        : " << this->user_objs << endl;
     cout << "Number of string objects copied      : " << this->string_objs << endl;
-    cout << "Number of wide-record objects copied : " << this->wrecord_objs << endl;           
+    cout << "Number of word-record objects copied : " << this->wrecord_objs << endl;           
 }
 
 void GCData::show() {

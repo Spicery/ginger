@@ -85,7 +85,7 @@ exposes this ...
 	Number of record objects copied      : 0
 	Number of user objects copied        : 0
 	Number of string objects copied      : 0
-	Number of wide-record objects copied : 0
+	Number of word-record objects copied : 0
 	%% <stack/>
 	`hello world`
 	%% 

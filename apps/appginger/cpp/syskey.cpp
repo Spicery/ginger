@@ -62,6 +62,8 @@ Ref refDataKey( Ref r ) {
 			return sysIndeterminateKey;
 		} else if ( r == SYS_PRESENT ) {
 			return sysPresentKey;
+		} else if ( r == SYS_TERMIN ) {
+			return sysTerminKey;
 		} else {
 			//	TODO: Improve error message.
 			throw Ginger::Mishap( "Internal error (refDataKey): Unimplemented misc key" ).culprit( "Object", ToLong( r ) );

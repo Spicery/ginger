@@ -24,8 +24,10 @@
 #include <iostream>
 
 extern void refPrint( Ref r );
+extern void refShow( const Ref r );
 extern void refPtrPrint( Ref * r );
 extern void refPrint( std::ostream & out, Ref r );
+extern void refShow( std::ostream & out, const Ref r );
 extern void refPtrPrint( std::ostream & out, Ref * r );
 extern std::string refToString( Ref ref );
 extern Ref * sysRefPrint( Ref * pc, MachineClass * );

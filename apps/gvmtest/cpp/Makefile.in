@@ -25,10 +25,17 @@ all: gvmtest
 # 	Main executables
 ################################################################################
 
+LIBAPPGINGER:=
+ifneq ($(shell uname),Darwin)
+	LIBAPPGINGER=-Wl,--whole-archive ../../appginger/cpp/libappginger.a -Wl,--no-whole-archive
+else
+	LIBAPPGINGER=-Wl,-force_load ../../appginger/cpp/libappginger.a
+endif
+
 # $@ is make shorthand for the target.
 # $@ is make shorthand for the dependencies
 gvmtest: $(OBJS)
-	@CXX@ $(CXXFLAGS) $(BOOST_CPPFLAGS) -o $@ $(OBJS) ../../appginger/cpp/libappginger.a ../../libgng/cpp/libgng.a /usr/local/lib/librudecgi.a
+	@CXX@ $(CXXFLAGS) $(BOOST_CPPFLAGS) -o $@ $(OBJS) $(LIBAPPGINGER) ../../libgng/cpp/libgng.a /usr/local/lib/librudecgi.a
 
 clean:
 	rm -f *.o

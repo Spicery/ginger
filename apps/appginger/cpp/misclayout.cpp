@@ -16,6 +16,7 @@
     along with AppGinger.  If not, see <http://www.gnu.org/licenses/>.
 \******************************************************************************/
 
+#include <iostream>
 #include <cassert>
 
 #include "misclayout.hpp"
@@ -146,9 +147,10 @@ void findObjectLimits( Ref * obj_K, Ref * & obj_A, Ref * & obj_Z1 ) {
 			}
 			case WRECORD_LAYOUT: {
 				assert( LayoutOfSimpleKey( key ) == WRECORD_LAYOUT );
-				assert( KindOfSimpleKey( key ) == WRECORD_KIND );
 				obj_A = obj_K;
 				obj_Z1 = obj_K1 + sizeAfterKeyOfWRecordLayout( obj_K );
+				//std::cerr << "obj_A: " << obj_A << ", " << "obj_Z1: " << obj_Z1 << std::endl;
+				return;
 			}
 			default: throw "Unreachable";
 		}
@@ -253,7 +255,6 @@ unsigned long lengthAfterObjectKey( Ref * obj_K ) {
 			}
 			case WRECORD_LAYOUT: {
 				assert( LayoutOfSimpleKey( key ) == WRECORD_LAYOUT );
-				assert( KindOfSimpleKey( key ) == WRECORD_KIND );
 				return sizeAfterKeyOfWRecordLayout( obj_K );
 				break;
 			}

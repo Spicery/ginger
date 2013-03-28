@@ -299,6 +299,7 @@ Ref * sysExplode( Ref *pc, class MachineClass * vm ) {
 							pc = sysListExplode( pc, vm );
 							break;
 						}
+						case EXTERNAL_KIND:
 						case WRECORD_KIND: {
 							//	The problem here is that we need to box the words
 							//	before pushing them onto the stack. But what do the
@@ -390,6 +391,7 @@ Ref * sysLength( Ref *pc, class MachineClass * vm ) {
 							vm->fastPeek() = fastMapCount( r );
 							break;
 						}
+						case EXTERNAL_KIND:
 						case WRECORD_KIND:
 						case RECORD_KIND: {
 							//vm->fastPeek() = LongToSmall( sizeAfterKeyOfRecordLayout( obj_K ) );

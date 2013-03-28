@@ -138,6 +138,7 @@ Kind.ATTR_KIND 		= Kind( "ATTR", Layout.MIXED_LAYOUT, Kind.MIXED_SUBLAYOUT.next(
 Kind.MIXED_KIND 	= Kind( "MIXED", Layout.MIXED_LAYOUT, Kind.MIXED_SUBLAYOUT.next() )	
 #print "MIXED KIND", Kind.MIXED_KIND.kind()
 Kind.WRECORD_KIND 	= Kind( "WRECORD", Layout.WRECORD_LAYOUT, Kind.WRECORD_SUBLAYOUT.next() )	
+Kind.EXTERNAL_KIND 	= Kind( "EXTERNAL", Layout.WRECORD_LAYOUT, Kind.WRECORD_SUBLAYOUT.next() )	
 Kind.ATOMIC_WRECORD_KIND = Kind( "ATOMIC_WRECORD", Layout.WRECORD_LAYOUT, Kind.ATOMIC_SUBLAYOUT )
 
 ################################################################################
@@ -223,6 +224,9 @@ keys = [
 	KeyData( "Exception",      	30, 3,  Kind.RECORD_KIND	),
 	KeyData( "Double",          31, wordsPerDouble,  Kind.WRECORD_KIND   ),
 	KeyData( "Present",         32, 0,  Kind.KEYLESS_KIND   ),
+	KeyData( "External",		33, 1, 	Kind.EXTERNAL_KIND  ),
+	KeyData( "InputStream",		34, 1, 	Kind.EXTERNAL_KIND  ),
+	KeyData( "OutputStream",	35, 1, 	Kind.EXTERNAL_KIND  ),
 ]
 
 

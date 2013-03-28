@@ -143,6 +143,7 @@ bool refEquals( Ref x, Ref y ) {
 						case PAIR_KIND: 	return refPairEquals( x, y );
 						case MAP_KIND:		return refMapEquals( x_K, y_K );
 						case RECORD_KIND: 	return refRecordEquals( x_K, y_K );
+						case EXTERNAL_KIND:	//	fallthru.
 						case WRECORD_KIND: 	return refWRecordEquals( x_K, y_K );
 						case STRING_KIND: 	return refStringEquals( x_K, y_K );
 						default: {
@@ -208,6 +209,17 @@ unsigned long gngEqHash( Ref r ) {
 					if ( n > 0 ) {
 						e.add( trivHash( obj_K[1] ) );
 						e.add( trivHash( obj_K[n] ) );
+					}
+					return e.hash();
+				}
+				case EXTERNAL_KIND:
+				case WRECORD_KIND: {
+					HashEngine e( ToULong( key ) );
+					unsigned long n = sizeAfterKeyOfRecordLayout( obj_K );
+					e.add( n );
+					if ( n > 0 ) {
+						e.add( ToULong( obj_K[1] ) );
+						e.add( ToULong( obj_K[n] ) );
 					}
 					return e.hash();
 				}

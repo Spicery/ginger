@@ -134,7 +134,7 @@ class MethodOptions:
 		C = constructor
 		T = initialiser (using T temporarily as a refactoring step to switching to I)
 		D = deconstructor
-		R = recogniser
+		R/r = recogniser (using Is${Name} versus testing against sys${Name}Key)
 		F = record fields
 	 	G = vector get-indexer
 	 	S = vector set-indexer
@@ -143,7 +143,8 @@ class MethodOptions:
 		self.gen_constructor = ( opts.find( 'C' ) != -1 )
 		self.gen_initialiser = ( opts.find( 'T' ) != -1 )
 		self.gen_deconstructor = ( opts.find( 'D' ) != -1 )
-		self.gen_recogniser = ( opts.find( 'R' ) != -1 )
+		self.gen_recogniser_via_key = ( opts.find( 'r' ) != -1 )
+		self.gen_recogniser = ( opts.find( 'R' ) != -1 or self.gen_recogniser_via_key )
 		self.gen_fields = ( opts.find( 'F' ) != -1 )
 		self.gen_get_indexer = ( opts.find( 'G' ) != -1 )
 		self.gen_set_indexer = ( opts.find( 'S' ) != -1 )
@@ -156,6 +157,9 @@ class MethodOptions:
 
 	def isGenRecogniser( self ):
 		return self.gen_recogniser
+
+	def isGenRecogniserViaKey( self ):
+		return self.gen_recogniser_via_key
 
 	def isGenFields( self ):
 		return self.gen_fields
@@ -245,7 +249,10 @@ class DataClassGenerator( object ):
 		cpp.write( "Ref * {}( Ref * pc, class MachineClass * vm ) {{\n".format( recogniser_name ) )
 		cpp.write( "    if ( vm->count == 1 ) {\n" )
 		cpp.write( "        Ref r = vm->fastPeek();\n" )
-		cpp.write( "        vm->fastPeek() = {}( r ) ? SYS_TRUE : SYS_FALSE;\n".format( self.isName() ) )
+		if self.options.isGenRecogniserViaKey():
+			cpp.write( "        vm->fastPeek() = ( IsObj( r ) && ( *RefToPtr4( r ) == {} ) ) ? SYS_TRUE : SYS_FALSE;\n".format( self.keyName() ) )
+		else:
+			cpp.write( "        vm->fastPeek() = {}( r ) ? SYS_TRUE : SYS_FALSE;\n".format( self.isName() ) )
 		cpp.write( "        return pc;\n" )
 		cpp.write( "    } else {\n" )
 		cpp.write( "        throw Mishap( \"Wrong number of arguments for recogniser\" );\n" )
@@ -255,7 +262,21 @@ class DataClassGenerator( object ):
 		hpp.write( "extern Ref * {}( Ref * pc, MachineClass * vm );\n".format( recogniser_name ) )
 		self.addSysConst( "is" + self.data_key_root, 1, 1, recogniser_name );
 
+################################################################################
+#   WordRecordClassGenerator
+################################################################################
 
+class WordRecordClassGenerator( DataClassGenerator ):
+	
+	memcpy = False
+
+	def __init__( self, sysconsts, className, options ):
+		super( WordRecordClassGenerator, self ).__init__( sysconsts, className )
+		self.options = options
+		
+	def generate( self, cpp, hpp ):
+		if self.options.isGenRecogniser():
+			self.generateRecogniser( cpp, hpp )
 
 
 ################################################################################
@@ -268,6 +289,7 @@ class FullRecordClassGenerator( DataClassGenerator ):
 
 	def __init__( self, sysconsts, className, *fieldNames ):
 		super( FullRecordClassGenerator, self ).__init__( sysconsts, className )
+		self.options = MethodOptions()
 		self.fieldNames = fieldNames
 
 	def generate( self, cpp, hpp ):
@@ -604,6 +626,15 @@ ref.generateFilesWithPrefix( "attrmap" )
 
 ref = FullMixedClassGenerator( sysconsts, "Element", MethodOptions( "CRGF" ), "elementAttrMap" )
 ref.generateFilesWithPrefix( "element" )
+
+ref = WordRecordClassGenerator( sysconsts, "Double", MethodOptions( "R" ) )
+ref.generateFilesWithPrefix( "double" )
+ref = WordRecordClassGenerator( sysconsts, "External", MethodOptions( "r" ) )
+ref.generateFilesWithPrefix( "external" )
+ref = WordRecordClassGenerator( sysconsts, "InputStream", MethodOptions( "r" ) )
+ref.generateFilesWithPrefix( "inputstream" )
+ref = WordRecordClassGenerator( sysconsts, "OutputStream", MethodOptions( "r" ) )
+ref.generateFilesWithPrefix( "outputstream" )
 
 #	Create the insert for the sysMap table.
 inc = open( "sysmap.inc.auto", 'w' )

@@ -66,6 +66,16 @@ public:
 	Pressure() : pressure( 0.0 ) {}
 };
 
+class ExternalTracker {
+private:
+	std::list< Ref * > external_object_list;
+public:
+	void add( Ref * exobj ) {
+		this->external_object_list.push_back( exobj );
+	}
+
+	void cleanUpAfterGarbageCollection();
+};
 
 class MachineClass {
 friend class GarbageCollect;
@@ -78,6 +88,7 @@ private:
 	std::vector< Ref >				queue;
 
 public:
+	ExternalTracker					external_objects;
 	Registers						registers;
 	bool							sigint_flag;
 	
@@ -167,7 +178,12 @@ public:
 	void gcLiftVeto();					//	bump -1, moving allowed if level = 0.
 	bool gcMoveEnabled();
 	void log( std::string msg ) {}	
-	
+	void trackExternalObject( Ref * exobj ) {
+		this->external_objects.add( exobj );
+	}
+	void postGCManageExternalObjects() {
+		this->external_objects.cleanUpAfterGarbageCollection();
+	}
 
 public:
 	MachineClass( AppContext * appg );

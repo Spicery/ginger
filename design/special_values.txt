@@ -20,8 +20,8 @@ The Values
 
 absent
 ~~~~~~
-This value says that the code can find no more solutions. It is used to 
-express the end of a sequence of values.
+This value says that the code cannot find a solutions. It is used to 
+express the alternative to a single value.
 
 For example, one might write code to solve where a curve cuts the x-axis.
 If the curve doesn't cut the x-axis it would be appropriate to return 
@@ -30,6 +30,15 @@ absent.
 One might use absent to signal that an optional welcome message was missing.
 This would be different from using the empty string - which would imply
 a blank welcome message.
+
+termin
+~~~~~~
+This value says that the code can find no more solutions. It is used to 
+express the end of a sequence of values.
+
+For example, one might write a pattern matcher. Each time it found a 
+pattern it would return the location of the pattern, finally returning
+termin to say there were no more solutions. 
 
 undefined
 ~~~~~~~~~
@@ -62,5 +71,6 @@ are solutions-of-a-kind but they lack a required quality (normally uniqueness).
 * Undefined:: constraints not applied.
 * Indeterminate:: under constrained, many/inadequate solutions.
 * Absent:: over constrained, no solution.
+* Termin:: end of a sequence of solutions, typically of indefinite length.
 
 

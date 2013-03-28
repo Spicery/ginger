@@ -50,7 +50,7 @@ const char * keyName( Ref key );
 
 #define ULongToSmall( x ) 	ToRef( ( x ) << TAG | INT_TAG )
 
-#define FwdToPtr4( r )		( ToULong( r ) & ~0x3 )
+#define FwdToPtr4( r )		( reinterpret_cast< Ref * >( ToULong( r ) & ~0x3 ) )
 #define Ptr4ToFwd( p )		ToRef( ToULong( p ) | FWD_TAG )
 
 #define IsObj( r )			( ( TAG_MASK & ToULong( r ) ) == OBJ_TAG )

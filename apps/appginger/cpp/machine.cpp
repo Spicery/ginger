@@ -18,6 +18,7 @@
 
 #include <cstdlib>
 #include <iostream>
+#include <cassert>
 
 #include <stddef.h>
 
@@ -31,6 +32,7 @@
 #include "sys.hpp"
 #include "sysprint.hpp"
 #include "mishap.hpp"
+#include "externalkind.hpp"
 //#include "vmi.hpp"
 
 using namespace std;
@@ -282,7 +284,7 @@ void MachineClass::printResults( std::ostream & out, float time_taken ) {
 				b.newGSON().formatUsing( out, bullet );
 				//out << bullet << ( i + 1 ) << ".\t";
 			}
-			refPrint( out, this->vp[ 1 + i - n ] );
+			refShow( out, this->vp[ 1 + i - n ] );
 			out << endl;
 		}
 		if ( pdl.isChatty() ) {
@@ -402,4 +404,36 @@ void MachineClass::check_call_stack_integrity() {
 
 Pressure & MachineClass::getPressure() { 
 	return this->pressure; 
+}
+
+void ExternalTracker::cleanUpAfterGarbageCollection() {
+	std::deque< Ginger::External * > for_deletion;
+	
+	//cerr << "Running the post GC External Object cleanup" << endl;
+	//cerr << "    Num external objects before : " << this->external_object_list.size() << endl;
+	
+	std::list< Ref * >::iterator it = this->external_object_list.begin();
+	while (	it != this->external_object_list.end() ) {
+		Ref * exobj = *it;
+		Ref key = *exobj;
+		//cerr << "Key: " << key << ", " << static_cast< Ref >( sysInputStreamKey ) << endl;
+		if ( IsFwd( key ) ) {
+			Ref * e = FwdToPtr4( key );
+			//cerr << "Fwd: " << exobj << " -> " << e << endl;
+			assert( IsSimpleKey( *e ) );
+			assert( KindOfSimpleKey( *e ) == EXTERNAL_KIND );
+
+			*it++ = e;
+		} else {
+			for_deletion.push_back( static_cast< Ginger::External * >( exobj[ EXTERNAL_KIND_OFFSET_VALUE ] ) );
+			it = this->external_object_list.erase( it );
+		}
+	}
+
+	//cerr << "    Num external objects after  : " << this->external_object_list.size() << endl;
+
+	while ( not for_deletion.empty() ) {
+		delete for_deletion.front();
+		for_deletion.pop_front();
+	}
 }

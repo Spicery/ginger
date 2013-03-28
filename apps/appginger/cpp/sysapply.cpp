@@ -41,6 +41,7 @@
 #include "sys.hpp"
 
 #include "sysapply.hpp"
+#include "externalkind.hpp"
 
 using namespace std;
 
@@ -176,6 +177,9 @@ Ref * sysApply( Ref * pc, MachineClass *vm ) {
                 */
                 case STRING_KIND: {
                     return sysStringIndex( sysFastSwap( pc, vm ), vm );
+                }
+                case EXTERNAL_KIND: {
+                    return reinterpret_cast< Ginger::External * >( object_K[ EXTERNAL_KIND_OFFSET_VALUE ] )->sysApply( pc, vm );
                 }
                 default: {
                     throw Ginger::Mishap( "Trying to apply non-applicable obect" ).culprit( "Object", refToString( object ) );

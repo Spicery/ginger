@@ -19,6 +19,7 @@
 #include <ostream>
 #include <sstream>
 
+#include "externalkind.hpp"
 #include "functionlayout.hpp"
 #include "vectorlayout.hpp"
 #include "listlayout.hpp"
@@ -31,6 +32,7 @@
 #include "gnxconstants.hpp"
 #include "sysmap.hpp"
 #include "sysequals.hpp"
+#include "syskey.hpp"
 
 namespace Ginger {
 using namespace std;
@@ -193,6 +195,12 @@ void HeapObject::dump( MnxBuilder & b, const bool deep ) const {
 				b.end();
 				break;
 			}
+			case EXTERNAL_KIND: {
+				b.start( "external" );
+				b.put( "class", keyName( this->obj_K ) );
+				b.end();
+				break;
+			}
 			default: {
 				if ( *this->obj_K == sysDoubleKey ) {
 					DoubleObject d( this->obj_K );
@@ -264,6 +272,13 @@ std::string StringObject::getString() const {
 	char * s = ToChars( &this->obj_K[ 1 ] );
 	return std::string( s, s + this->length() );
 }
+
+// -- ExternalObject -----------------------------------------------------------
+
+External * ExternalObject::getExternal() const {
+	return reinterpret_cast< External * >( this->obj_K[ EXTERNAL_KIND_OFFSET_VALUE ] );
+}
+
 
 // -- MapObject ----------------------------------------------------------------
 

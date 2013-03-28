@@ -565,8 +565,8 @@ private:
 				}
 				case WRECORD_LAYOUT: {
 					assert( LayoutOfSimpleKey( key ) == WRECORD_LAYOUT );
-					assert( KindOfSimpleKey( key ) == WRECORD_KIND );
 					if ( this->tracker ) this->tracker->atWRecord( obj_K );
+					break;
 				}
 				default: {
 					throw "unimplemented (other)";
@@ -759,6 +759,8 @@ public:
 		
 		postGCSymbolTable( this->vm->isGCTrace() );
 		this->postGCRehash();
+		this->vm->postGCManageExternalObjects();
+
 		this->vm->getPressure().decreasePressure();
 		if ( this->tracker ) this->tracker->endGarbageCollection();
 		this->vm->check_call_stack_integrity();		//	debug

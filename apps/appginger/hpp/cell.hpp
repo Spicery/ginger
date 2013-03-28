@@ -28,6 +28,7 @@
 #include "stringlayout.hpp"
 #include "mishap.hpp"
 #include "sysmap.hpp"
+#include "external.hpp"
 
 namespace Ginger {
 
@@ -38,6 +39,7 @@ class DoubleObject;
 class PairObject;
 class MapObject;
 class MapletObject;
+class ExternalObject;
 
 class Cell {
 friend class HeapObject;
@@ -101,6 +103,7 @@ public:	//	Others
 	bool isMapObject() const { return IsSimple( *this->obj_K ) && KindOfSimpleKey( *this->obj_K ) == MAP_KIND; }
 	bool isWRecordObject() const { return IsSimple( *this->obj_K ) && KindOfSimpleKey( *this->obj_K ) == WRECORD_KIND; }
 	bool isAtomicWRecordObject() const { return IsSimple( *this->obj_K ) && KindOfSimpleKey( *this->obj_K ) == ATOMIC_WRECORD_KIND; }
+	bool isExternalObject() const { return IsSimple( *this->obj_K ) && KindOfSimpleKey( *this->obj_K ) == EXTERNAL_KIND; }
 
 private:
 	void dump( MnxBuilder & b, const bool deep = false ) const;
@@ -171,6 +174,16 @@ public:
 public:
 	Cell index( Cell c ) const;
 	Generator & entries();
+};
+
+class ExternalObject : public HeapObject {
+public:
+	ExternalObject( Ref * _p ) : HeapObject( _p ) {}
+	ExternalObject( HeapObject _h ) : HeapObject( _h ) {}
+	ExternalObject( Cell _c ) : HeapObject( _c ) {}
+
+public:
+	External * getExternal() const;
 };
 
 } // namespace Ginger

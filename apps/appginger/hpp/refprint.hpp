@@ -56,6 +56,7 @@ private:
 
 	void refRecordPrint( Ref * rec_K );
 
+	void refExternalPrint( const Ref * obj_K );
 	void refWRecordPrint( Ref * rec_K );
 
 	//	<TYPE FIELD ...>

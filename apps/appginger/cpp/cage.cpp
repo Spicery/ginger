@@ -32,6 +32,8 @@
 
 #include <iostream>
 
+class Ginger::External;
+
 static long cage_id_seq = 0;
 
 CageClass::CageClass( int capacity ) {
@@ -166,6 +168,10 @@ void XfrClass::xfrCopy( Ref * obj_A, Ref * obj_Z1 ) {
 	if ( d < 0 ) throw "Assertion violation";
 	memcpy( this->tmptop, obj_A, d * sizeof( Ref ) );
 	this->tmptop += d;
+}
+
+void XfrClass::xfrCopy( Ginger::External * e ) {
+	this->xfrRef( static_cast< void * >( e ) );
 }
 
 //  set the object origin

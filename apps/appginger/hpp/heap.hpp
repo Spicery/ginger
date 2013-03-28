@@ -37,8 +37,8 @@ public:
 	CageClass * preflight( int size );
 	Ref copyString( const char *s );				//	Copy string, possibly causing GC
 	Ref copyString( Ref * & pc, const char *s );	//	Copy string, possibly causing GC
-	Ref copyDouble( gngdouble_t d );					//	Copy double, possibly causing GC
-	Ref copyDouble( Ref * & pc, gngdouble_t d );		//	Copy double, possibly causing GC
+	Ref copyDouble( gngdouble_t d );				//	Copy double, possibly causing GC
+	Ref copyDouble( Ref * & pc, gngdouble_t d );	//	Copy double, possibly causing GC
 
 public:
 	void selectCurrent();

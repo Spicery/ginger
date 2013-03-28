@@ -31,6 +31,7 @@
 #include "sysdouble.hpp"
 #include "functionlayout.hpp"
 #include "refprint.hpp"
+#include "externalkind.hpp"
 
 const char * OPEN_LIST = "[%";
 const char * CLOSE_LIST = "%]";
@@ -205,6 +206,11 @@ void RefPrint::refFunctionPrint( const Ref fn ) {
 	this->out << ">";
 }
 
+void RefPrint::refExternalPrint( const Ref * obj_K ) {
+	Ginger::External * e = reinterpret_cast< Ginger::External * >( obj_K[ EXTERNAL_KIND_OFFSET_VALUE ] );
+	e->print( this->out );
+}
+
 void RefPrint::refPrint( const Ref r ) {
 	#ifdef DBG_SYSPRINT
 		cerr << "Printing ref: " << r << endl;
@@ -252,6 +258,10 @@ void RefPrint::refPrint( const Ref r ) {
 					this->refRecordPrint( obj_K );
 					break;
 				}
+				case EXTERNAL_KIND: {
+					this->refExternalPrint( obj_K );
+					break;
+				}
 				case WRECORD_KIND: {
 					//cout << "sysDoubleKey = " << hex << sysDoubleKey << endl;
 					//cout << "*obj_K = " << hex << *obj_K << endl;
@@ -294,6 +304,8 @@ void RefPrint::refPrint( const Ref r ) {
 			this->out << "undefined";
 		} else if ( k == sysIndeterminateKey ) {
 			this->out << "indeterminate";
+		} else if ( k == sysTerminKey ) {
+			this->out << "termin";
 		} else if ( k == sysCharKey ) {
 			#ifdef DBG_SYSPRINT
 				cerr << "--  character: " << (int)(CharacterToChar( r )) << endl;

@@ -108,8 +108,20 @@ void refPrint( Ref r ) {
 	printer.refPrint( r );
 }
 
+void refShow( const Ref r ) {
+	RefPrint printer( std::cout );
+	printer.setShowing( true );
+	printer.refPrint( r );
+}
+
 void refPrint( std::ostream & out, const Ref r ) {
 	RefPrint printer( out );
+	printer.refPrint( r );
+}
+
+void refShow( std::ostream & out, const Ref r ) {
+	RefPrint printer( out );
+	printer.setShowing( true );
 	printer.refPrint( r );
 }
 

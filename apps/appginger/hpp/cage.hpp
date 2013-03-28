@@ -25,6 +25,7 @@
 #include <cstddef>
 
 #include "common.hpp"
+#include "external.hpp"
 
 class MachineClass;
 class HeapClass;
@@ -47,6 +48,7 @@ public:
 	void xfrSubstringFinish( int offset );
 	void xfrCopy( Ref *p, int n );
 	void xfrCopy( Ref * obj_A, Ref * obj_Z1 );
+	void xfrCopy( Ginger::External * );
 
 	void setOrigin();      						//  set the object origin
 	Ref makeRef();              				//  return valid ptr

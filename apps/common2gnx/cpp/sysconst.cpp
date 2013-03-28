@@ -31,11 +31,13 @@ public:
 		#ifdef PRESENT_CONSTANT_REQUIRED
 			CONST( "present", "present" );
 		#endif
+
 		//	Booleans
 		CONST( "bool", "true" );
 		CONST( "bool", "false" );
 		
 		//	Misc.
+		CONST( "termin", "termin" );
 		CONST( "undefined", "undefined" );
 		CONST( "indeterminate", "indeterminate" );
 		

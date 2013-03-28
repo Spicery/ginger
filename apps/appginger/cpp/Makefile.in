@@ -17,7 +17,8 @@ INSTALLDIRS=-DINSTALL_BIN='"$(INSTALL_BIN)"' -DINSTALL_LIB='"$(INSTALL_LIB)"' -D
 CXXFLAGS=-DRUDECGI $(INSTALLDIRS) -g -I../hpp -I../../libgng/hpp -I../../automatic/machine -I../../automatic/sys -I../../automatic/simple -Wall -Wnon-virtual-dtor
 CFLAGS=-Wmissing-prototypes
 
-OBJS=inputstreamexternal.o cagefinder.o cell.o refprint.o vident.o codegen.o \
+OBJS=inputstreamexternal.o outputstreamexternal.o \
+	cagefinder.o cell.o refprint.o vident.o codegen.o \
 	simplify.o cage.o registers.o roots.o cmp.o \
 	rcep.o label.o package.o \
 	sys.o \

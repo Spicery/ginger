@@ -30,8 +30,9 @@
 #include "heap.hpp"
 #include "externalkind.hpp"
 #include "inputstreamexternal.hpp"
+#include "outputstreamexternal.hpp"
 
-//namespace Ginger {
+namespace Ginger {
 
 using namespace Ginger;
 
@@ -72,8 +73,29 @@ SysInfo infoNewInputStream(
 
 
 Ref * sysNewOutputStream( Ref * pc, MachineClass * vm ) {
-    /// @todo 
-    std::cerr << "TO BE DONE" << std::endl;
+    if ( vm->count != 1 ) {
+        throw Mishap( "Wrong number of arguments supplied" );
+    }
+
+    XfrClass xfr( pc, *vm, EXTERNAL_KIND_SIZE );
+    
+    Cell fname( vm->fastPeek() );
+    // Type checks on the fly.
+    std::string filename = fname.asHeapObject().asStringObject().getString();
+    /// @todo potential store leak (in event of exception)
+    OutputStreamExternal * e = new OutputStreamExternal( filename );
+    //std::cerr << "Input Stream: " << std::hex << long( e ) << ", " << e << std::dec << std::endl;
+    if ( e->isGood() ) {
+        xfr.setOrigin();
+        xfr.xfrRef( sysOutputStreamKey );
+        xfr.xfrCopy( e );
+        Ref * r = xfr.makeRefRef();
+        vm->trackExternalObject( r );
+        vm->fastPeek() = Ptr4ToRef( r );
+    } else {
+        delete e;
+        throw Mishap( "Could not open file" ).culprit( "File", filename );    
+    }
     return pc;
 }
 SysInfo infoNewOutputStream( 
@@ -85,4 +107,4 @@ SysInfo infoNewOutputStream(
 );
 
 
-//} // namespace Ginger
+} // namespace Ginger

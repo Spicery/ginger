@@ -118,7 +118,6 @@ ItemMap::ItemMap( const bool cstyle ) {
 	add( true,	 	KW_IMPORT,			tokty_import,		PrF,		0		);
 	add( true,	 	KW_IN,				tokty_in,			PoF,		prec_in	);
 	add( true,		KW_MOD,				tokty_mod,			BSy, 		prec_mod		);
-	//	add( true,		"indeterminate",	tokty_indeterminate,PrF,		0		);	//	NO!
 	add( true,	 	KW_OR,				tokty_or,			BFo, 		prec_or	);
 	add( true,	 	KW_PACKAGE,			tokty_package,		PrF, 		0		);
 	add( true,		KW_PANIC,			tokty_panic, 		PrF, 		0		);
@@ -131,7 +130,6 @@ ItemMap::ItemMap( const bool cstyle ) {
 	add( true,		KW_TO,				tokty_to,			PrF,		0		);
 	add( true,		KW_TRANSACTION,		tokty_transaction,	PrF,		0		);
 	add( true,		KW_TRY,				tokty_try,			PrF,		0		);
-	//	add( true, 		"undefined",    tokty_undefined,    PrF, 		0		);	//	NO!
 	add( !cstyle,	KW_UNLESS,			tokty_unless,		PrF, 		0		);
 	add( true,		KW_UNTIL, 			tokty_until,		PrF, 		0		);
 	add( true,		KW_VAL,				tokty_val,			PrF, 		0		);

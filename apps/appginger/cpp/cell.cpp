@@ -87,6 +87,14 @@ std::string Cell::toPrintString() const {
 	return str.str();
 }
 
+CharacterCell Cell::asCharacterCell() const {
+	if ( IsCharacter( this->ref ) ) {
+		return CharacterCell( this->ref );
+	} else {
+		throw Ginger::Mishap( "Character needed" ).culprit( "Argument", this->toPrintString() );
+	}
+}
+
 
 
 // -- HeapObjects --------------------------------------------------------------
@@ -271,6 +279,10 @@ long StringObject::length() const {
 std::string StringObject::getString() const {
 	char * s = ToChars( &this->obj_K[ 1 ] );
 	return std::string( s, s + this->length() );
+}
+
+const char * StringObject::getCharPtr() const {
+	return ToChars( &this->obj_K[ 1 ] );
 }
 
 // -- ExternalObject -----------------------------------------------------------

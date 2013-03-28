@@ -1169,6 +1169,8 @@ Ref CodeGenClass::calcConstant( Gnx mnx ) {
 		return mnx->hasAttribute( CONSTANT_VALUE, "false" ) ? SYS_FALSE : SYS_TRUE;
 	} else if ( type == "absent" ) {
 		return SYS_ABSENT;
+	} else if ( type == "termin" ) {
+		return SYS_TERMIN;
 	} else if ( type == "undefined" ) {
 		return SYS_UNDEFINED;
 	} else if ( type == "indeterminate" ) {

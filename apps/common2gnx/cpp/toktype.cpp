@@ -69,6 +69,7 @@ const char * tok_type_as_sysapp( TokType fnc ) {
 const char *tok_type_as_type( TokType fnc ) {
     switch ( fnc ) {
 	case tokty_absent : return "absent";
+	case tokty_termin : return "termin";
 	case tokty_bool : return "bool";
 	case tokty_int : return "int";
 	case tokty_double : return "double";

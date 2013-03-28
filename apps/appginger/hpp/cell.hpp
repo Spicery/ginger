@@ -40,11 +40,12 @@ class PairObject;
 class MapObject;
 class MapletObject;
 class ExternalObject;
+class CharacterCell;
 
 class Cell {
 friend class HeapObject;
 friend class MapObject;
-private:
+protected:
 	Ref ref;
 
 public:
@@ -56,7 +57,12 @@ public:
 
 	HeapObject asHeapObject() const;
 
-	bool isString() const { return IsString( this->ref ); }
+	bool isTermin() const { return this->ref == SYS_TERMIN; }
+	bool isAbsent() const { return this->ref == SYS_ABSENT; }
+	bool isSmall() const { return IsSmall( this->ref ); }
+	bool isCharacter() const { return IsCharacter( this->ref ); }
+	CharacterCell asCharacterCell() const;
+	bool isStringObject() const { return IsString( this->ref ); }
 	bool isHeapObject() const { return IsObj( this->ref ); }
 	bool isPairObject() const { return IsPair( this->ref ); }
 	bool isVectorObject() const { return IsVector( this->ref ); }
@@ -68,7 +74,6 @@ public:
 private:
 	void dump( MnxBuilder & b, const bool deep ) const;
 };
-
 
 class HeapObject {
 friend class Cell;
@@ -141,6 +146,7 @@ public:
 	char index0( ptrdiff_t n ) const;
 	long length() const;
 	std::string getString() const;
+	const char * getCharPtr() const;
 };
 
 class DoubleObject : public HeapObject {
@@ -185,6 +191,18 @@ public:
 public:
 	External * getExternal() const;
 };
+
+class CharacterCell : public Cell {
+public:
+	CharacterCell() : Cell() {}
+	CharacterCell( Ref _r ) : Cell( _r ) {}
+	CharacterCell( HeapObject _h ) : Cell( _h ) {}
+
+public:
+	char getChar() const { return CharacterToChar( this->ref ); }
+};
+
+
 
 } // namespace Ginger
 

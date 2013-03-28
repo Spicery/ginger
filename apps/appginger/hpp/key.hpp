@@ -60,7 +60,7 @@ const char * keyName( Ref key );
 #define IsSimple( r )		( ( TAG_MASK & ToULong( r ) ) == SIM_TAG )
 #define IsPrimitive( r )	( IsSimple( r ) || IsSmall( r ) )
 #define IsDouble( r )       ( IsObj( r ) && *RefToPtr4( r ) == sysDoubleKey )
-
+#define IsCharacter( r )    ( ( TAGGG_MASK & ToULong( r ) ) == CHAR_TAGGG )
 #define IntToChar( i )		( (Ref)( ( i ) << TAGGG | CHAR_TAGGG ) )
 
 #define AddSmall( a, b )	ToRef( ToLong( a ) + ToLong( b ) )

@@ -25,23 +25,33 @@ Tags
 
 Ref ry = *( VMVP-- );
 Ref rx = *( VMVP );
-if ( IsSmall( rx ) && IsSmall( ry ) ) {
-	gnglong_t hy = (gnglong_t)ry >> 1;	//	Scale down by factor of 2 & strip off low bit.
-	gnglong_t hx = (gnglong_t)rx >> 1; 	//  As above.
-	if ( SignedOverflow::mulOverflowCheck( hx, hy ) ) {
-		//std::cout << "Overflowed" << std::endl;
-		gngdouble_t x = static_cast< gngdouble_t >( SmallToLong( rx ) );
-		gngdouble_t y = static_cast< gngdouble_t >( SmallToLong( ry ) );
-		//std::cout << "x = " << x << ", lx = " << SmallToLong( rx ) << std::endl;
-		//std::cout << "y = " << y << ", ly = " << SmallToLong( ry ) << std::endl;
-		//std::cout << "x * y = " << ( x * y ) << std::endl;
+if ( IsSmall( rx ) ) {
+	if ( IsSmall( ry ) ) {
+		gnglong_t hy = (gnglong_t)ry >> 1;	//	Scale down by factor of 2 & strip off low bit.
+		gnglong_t hx = (gnglong_t)rx >> 1; 	//  As above.
+		if ( SignedOverflow::mulOverflowCheck( hx, hy ) ) {
+			//std::cout << "Overflowed" << std::endl;
+			gngdouble_t x = static_cast< gngdouble_t >( SmallToLong( rx ) );
+			gngdouble_t y = static_cast< gngdouble_t >( SmallToLong( ry ) );
+			//std::cout << "x = " << x << ", lx = " << SmallToLong( rx ) << std::endl;
+			//std::cout << "y = " << y << ", ly = " << SmallToLong( ry ) << std::endl;
+			//std::cout << "x * y = " << ( x * y ) << std::endl;
+			*( VMVP ) = vm->heap().copyDouble( x * y );
+		} else {
+			//std::cout << "Normal *" << std::endl;
+			//	Note that the multiply will effectively restore the 00-tag.
+			*VMVP = ToRef( hx * hy );
+		}
+		RETURN( pc + 1 );
+	} else if ( IsDouble( ry ) ) {
+		gngdouble_t x, y;
+		y = gngFastDoubleValue( ry );
+		x = static_cast< gngdouble_t >( SmallToLong( rx ) );
 		*( VMVP ) = vm->heap().copyDouble( x * y );
+		RETURN( pc + 1 );
 	} else {
-		//std::cout << "Normal *" << std::endl;
-		//	Note that the multiply will effectively restore the 00-tag.
-		*VMVP = ToRef( hx * hy );
+		throw Mishap( "Bad arguments for * operation" ).culprit( "First", refToString( rx ) ).culprit( "Second", refToString( ry ) );
 	}
-	RETURN( pc + 1 );
 } else if ( IsDouble( rx ) ) {
 	gngdouble_t x, y;
 	x = gngFastDoubleValue( rx );
@@ -55,5 +65,5 @@ if ( IsSmall( rx ) && IsSmall( ry ) ) {
 	*( VMVP ) = vm->heap().copyDouble( x * y );
 	RETURN( pc + 1 );
 } else {
-	throw Mishap( "Numbers only" ).culprit( "First", refToString( rx ) ).culprit( "Second", refToString( ry ) );
+	throw Mishap( "Bad arguments for * operation" ).culprit( "First", refToString( rx ) ).culprit( "Second", refToString( ry ) );
 } 

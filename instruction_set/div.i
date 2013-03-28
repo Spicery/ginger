@@ -30,11 +30,21 @@ Tags
 
 Ref ry = *( VMVP-- );
 Ref rx = *( VMVP );
-if ( IsSmall( rx ) && IsSmall( ry ) ) {
-	gngdouble_t y = static_cast< gngdouble_t >( SmallToLong( ry ) );
-	gngdouble_t x = static_cast< gngdouble_t >( SmallToLong( rx ) );
-	*VMVP = vm->heap().copyDouble( x / y );
-	RETURN( pc + 1 );
+if ( IsSmall( rx ) ) {
+	if ( IsSmall( ry ) ) {
+		gngdouble_t y = static_cast< gngdouble_t >( SmallToLong( ry ) );
+		gngdouble_t x = static_cast< gngdouble_t >( SmallToLong( rx ) );
+		*VMVP = vm->heap().copyDouble( x / y );
+		RETURN( pc + 1 );
+	} else if ( IsDouble( ry ) ) {
+		gngdouble_t x, y;
+		y = gngFastDoubleValue( ry );
+		x = static_cast< gngdouble_t >( SmallToLong( rx ) );
+		*( VMVP ) = vm->heap().copyDouble( x / y );
+		RETURN( pc + 1 );
+	} else {
+		throw Mishap( "Bad arguments for / operator" ).culprit( "First", refToString( rx ) ).culprit( "Second", refToString( ry ) );
+	}
 } else if ( IsDouble( rx ) ) {
 	gngdouble_t x, y;
 	x = gngFastDoubleValue( rx );
@@ -43,11 +53,11 @@ if ( IsSmall( rx ) && IsSmall( ry ) ) {
 	} else if ( IsDouble( ry ) ) {
 		y = gngFastDoubleValue( ry );
 	} else {
-		throw Mishap( "Invalid arguments for /" );
+		throw Mishap( "Bad arguments for / operator" ).culprit( "First", refToString( rx ) ).culprit( "Second", refToString( ry ) );
 	}
 	*( VMVP ) = vm->heap().copyDouble( x / y );
 	RETURN( pc + 1 );
 } else {
-	throw Mishap( "Numbers only" ).culprit( "First", refToString( rx ) ).culprit( "Second", refToString( ry ) );
+	throw Mishap( "Bad arguments for / operator" ).culprit( "First", refToString( rx ) ).culprit( "Second", refToString( ry ) );
 } 
 

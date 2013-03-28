@@ -55,3 +55,9 @@ examples
 instruction_set
     Source code for instructions, C++ 
 
+Build status
+------------
+
+`travis-ci.org <https://travis-ci.org/Spicery/ginger>`_
+
+.. image:: https://travis-ci.org/Spicery/ginger.png?branch=master

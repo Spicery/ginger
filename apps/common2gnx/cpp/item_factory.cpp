@@ -171,6 +171,14 @@ void ItemFactoryClass::readAtDigitOrMinus( int ch ) {
 			} while ( isdigit( ch ) );
 		}
 	}
+
+	if ( ch == '%' ) {
+		//	Percentages count as doubles.
+		this->text.push_back( (char)ch );
+		ch = this->nextchar();
+		decimal_point_seen = true;
+	}
+	
 	this->pushchar( ch );
 
 	if ( not digit_seen ) {

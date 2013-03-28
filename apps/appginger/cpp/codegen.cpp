@@ -1191,6 +1191,10 @@ Ref CodeGenClass::calcConstant( Gnx mnx ) {
 		if ( not ( i >> d ) ) {
 			throw Ginger::Mishap( "Format of double precision number incorrect" ).culprit( "Number", numtext );
 		} else {
+			char c;
+			if ( i >> c && c == '%' ) {
+				d *= 0.01;
+			}
 			return this->vm->heap().copyDouble( d );
 		}
 	} else if ( type == "symbol" ) {

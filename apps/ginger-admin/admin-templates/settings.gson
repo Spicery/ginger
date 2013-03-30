@@ -1,0 +1,25 @@
+################################################################################
+#	The following three settings control how results are printed when 
+#	using Ginger in interactive mode. The printing proceeds by printing an
+#	optional header, then the results (each followed by newlines), and
+#	then an optional footer.
+################################################################################
+
+#	This may be 
+#		1.	absent, meaning don't print a header.
+#		2.	a format string, the parameter %p is substituted by the count of results
+#		3.	a list of N values, the value picked depending on the number of
+#			results (0-indexed). If there are 0 results then the first
+#			value is selected, if there are 1 results the next one is selected,
+#			and so on. If there are more results then the last element is used.
+#			This is useful for grammatically correct messages (e.g. there
+#			are 'no result*s*' versus 'one result')
+#
+ResultHeader = [ absent, "There is one result.", "There are %p results." ]
+
+# 	This is a format string. The parameter %p is substituted with the
+#	position of the results (counting from 1).
+ResultBullet = "%p.\t"
+
+#	Exactly like the ResultHeader.
+ResultFooter = absent

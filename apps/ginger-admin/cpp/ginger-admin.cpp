@@ -105,6 +105,7 @@ static void printUsage() {
     cout << "--new-project=PATH    creates a new project folder (from template)" << endl;
     cout << "--package=PKG         sets the package folder" << endl;
     cout << "--project=PATH        sets the project folder" << endl;
+    cout << "--settings            creates a new settings file (if it doesn't exist already)" << endl;
     cout << "--version             print out version information and exit" << endl;
     cout << endl;
 }
@@ -226,6 +227,29 @@ public:
     UsageTask( int s ) : status( s ) {}
     UsageTask() : status( EXIT_SUCCESS ) {}
     virtual ~UsageTask() {}
+};
+
+class CreateSettingsTask : public Task {
+public:
+    virtual ~CreateSettingsTask() {}
+public:
+    int run() {
+        cout << "Creating new user settings file: $HOME/.config/ginger/settings.gson" << endl;
+
+        stringstream command;
+        command << "/bin/mkdir -p $HOME/.config/ginger;";
+        command << "/bin/cp -i " << INSTALL_LIB << "/admin-templates/settings.gson $HOME/.config/ginger/settings.gson" << endl;
+        
+        if ( system( command.str().c_str() ) != 0 ) {
+            cerr << "Error: template copy failed" << endl;
+            return EXIT_FAILURE;
+        } else {
+            cout << "* Settings file created successfully" << endl;
+        }
+
+        return EXIT_SUCCESS;
+
+    }
 };
 
 class NewProjectTask : public Task {
@@ -408,7 +432,7 @@ public:
         TaskPtr mode( new InteractiveTask() );
         while ( mode->acceptsMoreArgs() ) {
             int option_index = 0;
-            int c = getopt_long( argc, argv, "M:P:H::IJ:L::p:t:V", long_options, &option_index );
+            int c = getopt_long( argc, argv, "M:P:H::IJ:L::p:St:V", long_options, &option_index );
             //cerr << "Got c = " << c << endl;
             if ( c == -1 ) break;
             switch ( c ) {
@@ -452,6 +476,11 @@ public:
                         Status status( mode->trySetPackageArg( optarg ) );
                         mode = status.check( mode );
                     }
+                    break;
+                }
+                case 'S': {
+                    //  --settings
+                    mode = TaskPtr( new CreateSettingsTask() );
                     break;
                 }
                 case 't': {

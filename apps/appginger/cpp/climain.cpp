@@ -59,52 +59,6 @@ void sigint_handler( int s ){
 	*SIGINT_FLAG = true;
 }
 
-#ifdef BLOCK2
-class Popen : public Ginger::Command {
-private:
-	FILE * fp;
-	
-public:
-	FILE * file() { return this->fp; }
-	
-	void cleanShutdown() {
-		this->fp = NULL;
-	}
-
-public:
-	Popen( const string command ) : 
-		Command( "/bin/sh" )
-	{
-		this->addArg( "-c" );
-		this->addArg( command );
-		this->runWithOutput();
-		fp = fdopen( this->getInputFD(), "r" );
-		#ifdef DBG_POPEN
-			cerr << "Opening popen " << this->child_pid << endl;
-		#endif
-	}
-	
-	~Popen() {
-		#ifdef DBG_POPEN
-			cerr << "Closing popen" << endl;
-		#endif
-		if ( fp != NULL ) {
-			#ifdef DBG_POPEN
-				cerr << "Interrupting" << endl;
-			#endif
-			this->interrupt();
-			#ifdef DBG_POPEN
-				cerr << "Closing (1)" << endl;
-			#endif
-			fclose( fp );
-			#ifdef DBG_POPEN
-				cerr << "Closing (2)" << endl;
-			#endif
-		}
-	}
-};
-#endif
-
 class GingerMain : public ToolMain {
 private:
 	void mainLoop() {	
@@ -129,13 +83,7 @@ private:
 			cerr << endl << SYS_MSG_PREFIX << "Reset after runtime error ..." << endl;
 			vm->resetMachine();
 	 	}
-		
-		/**********************************************************************\
-		*	BLOCK1, replacement for BLOCK2, see comment below. This is the
-		* 	version I want to use.
-		\**********************************************************************/
-	
-		#ifndef BLOCK2
+
 		for (;;) {
 			#ifdef DBG_CLIMAIN
 				cerr << "Entering executeStdin" << endl;
@@ -147,10 +95,10 @@ private:
 				#endif
 				break;
 			} catch ( Ginger::Mishap & e ) {
-				if ( not e.isExecutionTimeError() ) throw;
 				#ifdef DBG_CLIMAIN
 					cerr << "Mishap detected" << endl;
 				#endif
+				if ( e.isSystemError() ) throw;
 				e.report();
 				cerr << endl << SYS_MSG_PREFIX << "Reset after runtime error ..." << endl;
 				vm->resetMachine();
@@ -160,48 +108,6 @@ private:
 			#endif
 
 		}
-		#endif
-		
-		/**********************************************************************\
-		*	The following code BLOCK2 is commented out until testing confirms
-		* 	the BLOCK1 code correctly replaces it. I had some strange 
-		*	compilation & runtime issues that I solved by trial and error
-		* 	Hopefully BLOCK1, which is perfectly elegant, solves this fully.
-		\**********************************************************************/
-
-		#ifdef BLOCK2
-		bool cont = true;
-		while ( cont ) {
-			try {
-				Popen p( this->context.syntax() );		
-				// ... open the file, with whatever, pipes or who-knows ...
-				// let's build a buffer from the FILE* descriptor ...
-				__gnu_cxx::stdio_filebuf<char> pipe_buf( p.file(), ios_base::in );
-				// there we are, a regular istream is build upon the buffer :
-				istream stream_pipe_in( &pipe_buf );
-					
-				while ( cont ) {
-					//	This block is required to neatly force the closure of the
-					//	piped.
-					try {
-						while ( rcep.unsafe_read_comp_exec_print( stream_pipe_in, std::cout ) ) {}
-						cont = false;
-					} catch ( Ginger::Mishap & e ) {
-						if ( not e.isExecutionTimeError() ) throw;
-						e.report();
-						cerr << endl << SYS_MSG_PREFIX << "Reset after runtime error ..." << endl;
-						vm->resetMachine();
-						break;
-					} 			
-				}
-			} catch ( Ginger::Mishap & e ) {
-				if ( not e.isCompileTimeError() ) throw;
-				e.report();
-				cerr << endl << SYS_MSG_PREFIX << "Reset after compilation error ..." << endl;
-				vm->resetMachine();
-			}
-		}
-		#endif
 
 	}
 

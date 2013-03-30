@@ -1256,28 +1256,16 @@ void CodeGenClass::compileGnxConstant( Gnx mnx, LabelClass * contn ) {
 }
 
 static void throwProblem( Gnx mnx ) {
-	const string & sev = mnx->attribute( PROBLEM_SEVERITY );
-	if ( sev == "rollback" ) {
-		Ginger::Mishap mishap( mnx->attribute( PROBLEM_MESSAGE ) );
-		MnxChildIterator mnxit( mnx );
-		while ( mnxit.hasNext() ) {
-			Gnx & culprit = mnxit.next();
-			if ( culprit->hasName( CULPRIT ) && culprit->hasAttribute( CULPRIT_NAME ) && culprit->hasAttribute( CULPRIT_VALUE ) ) {
-				mishap.culprit( culprit->attribute( CULPRIT_NAME ), culprit->attribute( CULPRIT_VALUE ) );
-			}
+	Ginger::Mishap::SEVERITY severity = Ginger::Mishap::codeToSeverity( mnx->attribute( PROBLEM_SEVERITY, "system" ).c_str() );
+	Ginger::Mishap mishap( mnx->attribute( PROBLEM_MESSAGE ), severity );
+	MnxChildIterator mnxit( mnx );
+	while ( mnxit.hasNext() ) {
+		Gnx & culprit = mnxit.next();
+		if ( culprit->hasName( CULPRIT ) && culprit->hasAttribute( CULPRIT_NAME ) && culprit->hasAttribute( CULPRIT_VALUE ) ) {
+			mishap.culprit( culprit->attribute( CULPRIT_NAME ), culprit->attribute( CULPRIT_VALUE ) );
 		}
-		throw mishap;
-	} else {
-		Ginger::Mishap mishap( mnx->attribute( PROBLEM_MESSAGE ), Ginger::Mishap::SYSTEM_ERROR_SEVERITY );
-		MnxChildIterator mnxit ( mnx );
-		while ( mnxit.hasNext() ) {
-			Gnx & culprit = mnxit.next();
-			if ( culprit->hasName( CULPRIT ) && culprit->hasAttribute( CULPRIT_NAME ) && culprit->hasAttribute( CULPRIT_VALUE ) ) {
-				mishap.culprit( culprit->attribute( CULPRIT_NAME ), culprit->attribute( CULPRIT_VALUE ) );
-			}
-		}
-		throw mishap;
 	}
+	throw mishap;
 }
 
 /**

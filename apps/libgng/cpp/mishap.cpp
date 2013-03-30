@@ -130,7 +130,7 @@ void Mishap::gnxReport() {
 	cout << "<problem message=\"";
 	mnxRenderText( cout, this->message );
 	cout << "\" severity=\"";
-	mnxRenderText( cout, this->severity() );
+	cout << severityToCode( this->mishap_severity );
 	cout << "\"" << ">";
 	for ( 	
 		vector< pair< string, string > >::iterator it = this->culprits.begin();

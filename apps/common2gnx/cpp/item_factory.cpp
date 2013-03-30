@@ -254,7 +254,7 @@ void ItemFactoryClass::readAtQuoteCharType( int ch ) {
 					if ( isalpha( ch ) ) {
 						entity.push_back( (char)ch );
 					} else {
-						throw Ginger::Mishap( "Unexpected character while reading HTML character entity" ).culprit( "Char", (char)ch );
+						throw CompileTimeError( "Unexpected character while reading HTML character entity" ).culprit( "Char", (char)ch );
 					}
 				}
 				
@@ -267,7 +267,7 @@ void ItemFactoryClass::readAtQuoteCharType( int ch ) {
 				} else if ( entity == "amp" ) {
 					this->text.append( "&" );
 				} else {
-					throw Ginger::Mishap( "Unrecognised HTML character entity" ).culprit( "Entity", entity );
+					throw CompileTimeError( "Unrecognised HTML character entity" ).culprit( "Entity", entity );
 				}
 				continue;
 			} else if ( ch == '(' ) {
@@ -276,13 +276,13 @@ void ItemFactoryClass::readAtQuoteCharType( int ch ) {
 				//	is raise a warning.
 				std::cerr << "STRING INTERPOLATION NOT IMPLEMENTED YET" << std::endl;
 			} else {
-				throw Ginger::Mishap( "Unexpected character after \\ in string" ).culprit( "Character", (char)ch );	// ch
+				throw CompileTimeError( "Unexpected character after \\ in string" ).culprit( "Character", (char)ch );	// ch
 			}
 		}
 		this->text.push_back( ch );
 	}
 	if ( ch == '\n' ) {
-		throw Ginger::Mishap( "Unterminated string" ).culprit( "String so far", this->text );
+		throw CompileTimeError( "Unterminated string" ).culprit( "String so far", this->text );
 	}
 	Item it = this->item = this->spare;
 	it->tok_type = ( open_quote == '"' ) ? tokty_string : ( open_quote == '\'' ) ? tokty_charseq : tokty_symbol;
@@ -298,7 +298,7 @@ void ItemFactoryClass::readAtQuoteCharType( int ch ) {
 //  	this->item = this->itemMap.lookup( this->text );
 //  	if ( this->item == NULL ) {
 //  		//	Never happens.
-//  		throw Ginger::Mishap( "Invalid punctuation token" ); 
+//  		throw CompileTimeError( "Invalid punctuation token" ); 
 //  	}
 //  }
 
@@ -311,7 +311,7 @@ void ItemFactoryClass::readAtBracketCharType( int ch ) {
 	}
 	this->item = this->itemMap.lookup( this->text );
 	if ( this->item == NULL ) {
-		throw Ginger::Mishap( "Invalid punctuation token" ); 
+		throw CompileTimeError( "Invalid punctuation token" ); 
 	}
 }
 
@@ -324,7 +324,7 @@ void ItemFactoryClass::readAtBracketDecorationCharType( int ch ) {
 	}
 	this->item = this->itemMap.lookup( this->text );
 	if ( this->item == NULL ) {
-		throw Ginger::Mishap( "Invalid punctuation token" ); 
+		throw CompileTimeError( "Invalid punctuation token" ); 
 	}
 }
 
@@ -346,7 +346,7 @@ void ItemFactoryClass::readAtSelfGlueCharType( int ch ) {
 	}
 	Item it = this->item = this->itemMap.lookup( this->text );
 	if ( it == NULL ) {
-		throw Ginger::Mishap( "Invalid repeated-character sign" ).culprit( "Token", this->text );
+		throw CompileTimeError( "Invalid repeated-character sign" ).culprit( "Token", this->text );
 	}
 }
 
@@ -370,7 +370,7 @@ void ItemFactoryClass::readAtSignCharType( int ch ) {
 	this->pushchar( ch );
 	it = this->item = this->itemMap.lookup( this->text );
 	if ( it == NULL ) {
-		throw Ginger::Mishap( "Invalid sign (combination of special characters)" ).culprit( "Sign", this->text );
+		throw CompileTimeError( "Invalid sign (combination of special characters)" ).culprit( "Sign", this->text );
 	}
 }
 

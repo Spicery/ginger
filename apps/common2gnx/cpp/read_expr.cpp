@@ -17,6 +17,7 @@
 #include "role.hpp"
 #include "sysconst.hpp"
 #include "gnxconstants.hpp"
+#include "mishap.hpp"
 
 //#define DBG_COMMON2GNX
 
@@ -95,7 +96,7 @@ string ReadStateClass::readPkgName() {
 const string ReadStateClass::readIdName() {
 	Item it = this->item_factory->read();
 	if ( it->tok_type != tokty_id ) {
-		throw Ginger::Mishap( "Identifier expected" ).culprit( "Found", it->nameString() );
+		throw CompileTimeError( "Identifier expected" ).culprit( "Found", it->nameString() );
 	}
 	return it->nameString();
 }
@@ -105,9 +106,9 @@ Node ReadStateClass::readExprPrec( int prec ) {
 	if ( not e ) {
 		Item it = this->item_factory->peek();
 		if ( it->item_is_anyfix() ) {
-			throw Ginger::Mishap( "Found reserved word" ).culprit( it->nameString() );
+			throw CompileTimeError( "Found reserved word" ).culprit( it->nameString() );
 		} else {
-			throw Ginger::Mishap( "Unexpected end of expression" ).culprit( it->nameString() );
+			throw CompileTimeError( "Unexpected end of expression" ).culprit( it->nameString() );
 		}
 	}
 	return e;
@@ -116,7 +117,7 @@ Node ReadStateClass::readExprPrec( int prec ) {
 void ReadStateClass::checkToken( TokType fnc ) {
 	Item it = this->item_factory->read();
 	if ( it->tok_type != fnc ) {
-		throw Ginger::Mishap( "Unexpected token" ).culprit( "Found", it->nameString() ).culprit( "Expected", tok_type_name( fnc ) );
+		throw CompileTimeError( "Unexpected token" ).culprit( "Found", it->nameString() ).culprit( "Expected", tok_type_name( fnc ) );
 	}
 }
 
@@ -133,7 +134,7 @@ bool ReadStateClass::tryPeekCloser() {
 void ReadStateClass::checkPeekToken( TokType fnc ) {
 	Item it = this->item_factory->peek();
 	if ( it->tok_type != fnc ) {
-		throw Ginger::Mishap( "Unexpected token" ).culprit( "Found", it->nameString() ).culprit( "Expected", tok_type_name( fnc ) );
+		throw CompileTimeError( "Unexpected token" ).culprit( "Found", it->nameString() ).culprit( "Expected", tok_type_name( fnc ) );
 	}
 }
 
@@ -232,7 +233,7 @@ Node ReadStateClass::readSingleStmnt() {
 		if ( this->item_factory->peek()->role.IsCloser() ) {
 			return n;	
 		} else {
-			throw Ginger::Mishap( "Missing semi-colon?" ).culprit( "Token", this->item_factory->peek()->nameString() );
+			throw CompileTimeError( "Missing semi-colon?" ).culprit( "Token", this->item_factory->peek()->nameString() );
 		}
 	}
 }
@@ -313,7 +314,7 @@ Node ReadStateClass::postfixProcessing( Node lhs, Item item, int prec ) {
 			a.end();
 			return a.build();			
 		} else {
-			throw Ginger::Mishap( "Internal error - postfixProcessing" );
+			throw CompileTimeError( "Internal error - postfixProcessing" );
 		}
 	} else if ( role.IsUnary() ) {
 		if ( role.IsSys() ) {
@@ -331,7 +332,7 @@ Node ReadStateClass::postfixProcessing( Node lhs, Item item, int prec ) {
 			a.end();
 			return a.build();			
 		} else {
-			throw Ginger::Mishap( "Internal error (postfixProcessing): None of these cases defined yet" );			
+			throw CompileTimeError( "Internal error (postfixProcessing): None of these cases defined yet" );			
 		}
 	} else {
 		switch ( fnc ) {
@@ -465,7 +466,7 @@ Node ReadStateClass::postfixProcessing( Node lhs, Item item, int prec ) {
 			}
 			*/
 			default: {
-				throw Ginger::Mishap( "This keyword not handled" ).culprit( "Keyword", item->nameString() );
+				throw CompileTimeError( "This keyword not handled" ).culprit( "Keyword", item->nameString() );
 			}
 		}
 	}
@@ -536,7 +537,7 @@ Node ReadStateClass::readSyscall() {
 		sc.end();
 		return sc.build();
 	} else {
-		throw Ginger::Mishap( "Invalid token after >-> (syscall) arrow" ).culprit( it->nameString() );
+		throw CompileTimeError( "Invalid token after >-> (syscall) arrow" ).culprit( it->nameString() );
 	}
 }
 
@@ -565,7 +566,7 @@ static void squash( NodeFactory acc, Node rhs ) {
 	} else if ( name == VAR ) {
 		acc.add( rhs );
 	} else {
-		throw Ginger::Mishap( "Invalid form for definition" );
+		throw CompileTimeError( "Invalid form for definition" );
 	}
 }
 
@@ -586,7 +587,7 @@ static void flatten( bool name_needed, Node & ap, Node & fn, Node & args ) {
 		acc.end();
 		args = acc.build();
 	} else {
-		Ginger::Mishap mishap( "Invalid function header" );
+		Ginger::Mishap mishap( "Invalid function header", Ginger::Mishap::COMPILE_TIME_SEVERITY );
 		mishap.culprit( "Name", ap->name() );
 		if ( ap->name() == SYSAPP ) {
 			mishap.culprit( "Reason", "Trying to redefine a system function" );
@@ -627,7 +628,7 @@ static void readTags( ReadStateClass & r, NodeFactory & imp, const char * prefix
 				
 				item = ifact->read();
 				if ( item->tok_type != tokty_comma ) {
-					if ( item->tok_type != tokty_cparen ) throw Ginger::Mishap( "Expecting close parenthesis" );
+					if ( item->tok_type != tokty_cparen ) throw CompileTimeError( "Expecting close parenthesis" );
 					break;
 				}
 			}	
@@ -682,7 +683,7 @@ Node ReadStateClass::readAtomicExpr() {
 	} else if ( fnc == tokty_oparen ) {
 		return this->readExprCheck( tokty_cparen );
 	} else {
-		throw Ginger::Mishap( "Unexpected token while reading attribute in element" ).culprit( "Token", item->nameString() );
+		throw CompileTimeError( "Unexpected token while reading attribute in element" ).culprit( "Token", item->nameString() );
 	}
 }
 
@@ -852,7 +853,7 @@ Node ReadStateClass::readElement() {
 			if ( not ended ) {
 				const string ename( this->readIdName() );
 				if ( ename != element_name ) {
-					throw Ginger::Mishap( "Element close tag does not match open tag" ).culprit( "Open tag", element_name ).culprit( "Close tag", ename );
+					throw CompileTimeError( "Element close tag does not match open tag" ).culprit( "Open tag", element_name ).culprit( "Close tag", ename );
 				}
 				this->checkToken( tokty_gt );
 			}
@@ -960,7 +961,7 @@ Node ReadStateClass::readSwitch() {
 				sw.add( b );
 			} else if ( this->tryToken( tokty_default ) ) {
 				if ( else_seen ) {
-					throw Ginger::Mishap( "Switch with two default parts" );
+					throw CompileTimeError( "Switch with two default parts" );
 				}
 				else_seen = true;
 				this->checkToken( tokty_colon );
@@ -983,7 +984,7 @@ Node ReadStateClass::readSwitch() {
 				sw.add( b );
 			} else if ( this->tryToken( tokty_else ) ) {
 				if ( else_seen ) {
-					throw Ginger::Mishap( "Switch with two else parts" );
+					throw CompileTimeError( "Switch with two else parts" );
 				}
 				else_seen = true;
 				swelse = this->readOptExpr();
@@ -1310,7 +1311,7 @@ Node ReadStateClass::prefixProcessingCore() {
 			sf.end();
 			return sf.build();
 		} else {
-			throw Ginger::Mishap( "Internal error - unreachable code reached" );
+			throw CompileTimeError( "Internal error - unreachable code reached" );
 		}
 	}
 
@@ -1435,7 +1436,7 @@ Node ReadStateClass::readOptExprPrec( int prec ) {
 				t.put( "value", it->nameString() );
 				t.end();
 			} else {
-				throw Ginger::Mishap( "Only integers supported so far" ).culprit( "Item", it->nameString() );
+				throw CompileTimeError( "Only integers supported so far" ).culprit( "Item", it->nameString() );
 			}
 			t.end();
 			e = t.build();

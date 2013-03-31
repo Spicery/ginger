@@ -55,6 +55,8 @@ private:
 	Node readImport();
 	Node readReturn();
 	Node readRecordClass();
+	Node readCanonicalLambdaLHS( const bool name_needed );
+
 
 public:
 	void setPatternMode() { this->pattern_mode = true; }

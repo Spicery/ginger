@@ -555,46 +555,6 @@ Node ReadStateClass::readFor() {
 	return for_node.build();
 }
 
-static void squash( NodeFactory acc, Node rhs ) {
-	const std::string 
-	name = rhs->name();
-	if ( name == SEQ ) {
-		int n = rhs->size();
-		for ( int i = 0; i < n; i++ ) {
-			squash( acc, rhs->child( i ) );
-		}
-	} else if ( name == VAR ) {
-		acc.add( rhs );
-	} else {
-		throw CompileTimeError( "Invalid form for definition" );
-	}
-}
-
-static void flatten( bool name_needed, Node & ap, Node & fn, Node & args ) {
-	if ( ap->name() == APP ) {
-		fn = ap->child( 0 );
-		Node rhs = ap->child( 1 );
-		NodeFactory acc;
-		acc.start( SEQ );
-		squash( acc, ap->child( 1 ) ); 
-		acc.end();
-		args = acc.build();
-	} else if ( not name_needed ) {
-		//fn = NULL;
-		NodeFactory acc;
-		acc.start( SEQ );
-		squash( acc, ap );
-		acc.end();
-		args = acc.build();
-	} else {
-		Ginger::Mishap mishap( "Invalid function header", Ginger::Mishap::COMPILE_TIME_SEVERITY );
-		mishap.culprit( "Name", ap->name() );
-		if ( ap->name() == SYSAPP ) {
-			mishap.culprit( "Reason", "Trying to redefine a system function" );
-		}
-		throw mishap;
-	}
-}
 
 
 static void readImportQualifiers( ReadStateClass & r, bool & pervasive, bool & qualified ) {
@@ -687,60 +647,246 @@ Node ReadStateClass::readAtomicExpr() {
 	}
 }
 
-Node ReadStateClass::readLambda() {
-	#ifdef DBG_COMMON2GNX
-		cerr << "LAMBDA" << endl;
-	#endif
-		
+class Canonise {
+private:
+	const bool assume_no_name;
+	Node raw;
+public:
+	Canonise( bool _nameless, Node ap ) : 
+		assume_no_name( _nameless ),
+		raw( ap ) 
+	{}
+
+public:
+	///	build is guaranteed to return a (left) spine of APP nodes
+	///	that terminates in a VAR nodes. The terminating VAR node may
+	///	be anonymous.
+	Node build() {
+		#ifdef DBG_COMMON2GNX
+			cerr << "Canonise" << endl;
+			cerr << "  Before: ";
+			this->raw->render( cerr );
+			cerr << endl;
+		#endif
+
+		Node answer = this->canonise( 0, this->raw );
+
+		#ifdef DBG_COMMON2GNX
+			cerr << "  After: ";
+			answer->render( cerr );
+			cerr << endl;
+		#endif
+
+		return answer;
+	}
+
+private:
+	void squash( NodeFactory acc, Node rhs ) {
+		const std::string 
+		name = rhs->name();
+		if ( name == SEQ ) {
+			int n = rhs->size();
+			for ( int i = 0; i < n; i++ ) {
+				squash( acc, rhs->child( i ) );
+			}
+		} else {
+			acc.add( rhs );
+		}
+	}
+
+	Node canonise( const int level, Node fn ) {
+		const bool is_var = fn->hasName( VAR );
+		if ( is_var && not this->assume_no_name && level > 0 ) {
+			return fn;
+		} else if ( ( is_var && this->assume_no_name ) || fn->hasName( SEQ ) ) {
+			NodeFactory b;
+			b.start( APP );
+			b.start( VAR ); // But no name - anonymous.
+			b.end();
+			b.start( SEQ );
+			squash( b, fn );
+			b.end();
+			b.end();
+			return b.build();			
+		} else if ( fn->hasName( APP ) && fn->size() == 2 ) {
+			NodeFactory b;
+			b.start( APP );
+			Node n = this->canonise( level + 1, fn->child( 0 ) );
+			b.add( n );
+			b.start( SEQ );
+			squash( b, fn->child( 1 ) );
+			b.end();
+			b.end();
+			return b.build();					
+		} else {
+			throw this->badHeader();
+		}
+	}
+
+	Ginger::Mishap badHeader() {
+		Ginger::Mishap mishap( "Invalid function header", Ginger::Mishap::COMPILE_TIME_SEVERITY );
+		mishap.culprit( "Name", this->raw->name() );
+		if ( this->raw->name() == SYSAPP ) {
+			mishap.culprit( "Reason", "Trying to redefine a system function" );
+		}
+		return mishap;
+	}
+};
+
+class Uncurry {
+private:
+	Node lhs;
+	Node rhs;
+public:
+	Uncurry( Node _lhs, Node _rhs ) : lhs( _lhs ), rhs( _rhs ) {}
+public:
+	void uncurry() {
+		#ifdef DBG_COMMON2GNX
+			cerr << "At start of uncurrying" << endl;
+			cerr << "  LHS: ";
+			this->lhs->render( cerr );
+			cerr << endl;
+			cerr << "  RHS: ";
+			this->rhs->render( cerr );
+			cerr << endl;
+		#endif
+
+		while ( this->isCurryd() ) {
+			NodeFactory b;
+			b.start( FN );
+			Node arg = this->lhs->child( 1 );
+			if ( arg->hasName( SEQ ) ) {
+				b.add( arg );
+			} else {
+				b.start( SEQ );
+				b.add( arg );
+				b.end();
+			}
+			b.add( this->rhs );
+			b.end();
+			this->rhs = b.build();
+			this->lhs = this->lhs->child( 0 );
+			#ifdef DBG_COMMON2GNX
+				cerr << "Uncurried" << endl;
+				cerr << "  LHS: ";
+				this->lhs->render( cerr );
+				cerr << endl;
+				cerr << "  RHS: ";
+				this->rhs->render( cerr );
+				cerr << endl;
+			#endif
+		}
+	}
+
+	Node getFun() const {
+		return this->lhs->child( 0 );
+	}
+
+	Node getArgs() const {
+		Node args = this->lhs->child( 1 );
+		if ( args->hasName( SEQ ) ) return args;
+		NodeFactory b;
+		b.start( SEQ );
+		b.add( args );
+		b.end();
+		return b.build();
+	}
+
+	Node getBody() const {
+		return this->rhs;
+	}
+private:
+	bool isCurryd() const {
+		return isApp( this->lhs ) && isApp( this->lhs->child( 0 ) );
+	}
+	static bool isApp( const Node & n ) {
+		return n->hasName( APP ) && n->size() == 2;
+	}
+};
+
+
+Node ReadStateClass::readCanonicalLambdaLHS( const bool name_needed ) {
+
+	const bool starts_with_oparen = this->item_factory->peek()->tok_type == tokty_oparen;
+
 	ReadStateClass pattern( *this );
 	pattern.setPatternMode();
 	#ifdef DBG_COMMON2GNX
 		cerr << "About to read pattern" << endl;
 	#endif
 	Node ap = pattern.readExprPrec( prec_arrow );
-	Node fun;
-	Node args;
-	flatten( false, ap, fun, args );
-	
 	#ifdef DBG_COMMON2GNX
 		cerr << "Pattern read" << endl;
 	#endif
+	Canonise canonise( not name_needed && starts_with_oparen, ap );
+	#ifdef DBG_COMMON2GNX
+		cerr << "About to canonicalise" << endl;
+	#endif
 
+	return canonise.build();
+}
+
+Node ReadStateClass::readLambda() {
+	#ifdef DBG_COMMON2GNX
+		cerr << "LAMBDA" << endl;
+	#endif
+
+	Node ap = this->readCanonicalLambdaLHS( false );
+	#ifdef DBG_COMMON2GNX
+		cerr << "Now check =>> is next token" << endl;
+	#endif
 	if ( not this->cstyle_mode ) this->checkToken( tokty_fnarrow );
 	Node body = this->readCompoundStmnts();
 	if ( not this->cstyle_mode ) this->checkToken( tokty_endfn );	
-	#ifdef DBG_COMMON2GNX
-		cerr << "About to check stuff????? <-----<" << endl;
-	#endif
+
+	Uncurry components( ap, body );
+	components.uncurry();
+
+	Node fun = components.getFun();
+	
 	NodeFactory fn;
 	fn.start( FN );
 	if ( fun && fun->hasAttribute( "name" ) ) {
 		fn.put( FN_NAME, fun->attribute( "name" ) );
 	}
-	fn.add( args );
-	fn.add( body );
+	{
+		Node a = components.getArgs();
+		fn.add( a );
+		Node b = components.getBody();
+		fn.add( b );
+	}
 	fn.end();
-	return fn.build();			
+	Node lambda = fn.build();			
+	#ifdef DBG_COMMON2GNX
+		cerr << "Built lambda: ";
+		lambda->render( cerr );
+		cerr << endl;
+	#endif
+	return lambda;
 }
 
 Node ReadStateClass::readDefinition() {
 	//cerr << "DEFINITION" << endl;
-	ReadStateClass pattern( *this );
-	pattern.setPatternMode();
-	Node ap = pattern.readExprPrec( prec_arrow );
-	Node fn;
-	Node args;
-	flatten( true, ap, fn, args );
-	const std::string name( fn->attribute( VID_NAME ) );
+	Node ap = this->readCanonicalLambdaLHS( true );
+
 	if ( not this->cstyle_mode ) this->checkToken( tokty_fnarrow );
-	Node body = this->readCompoundStmnts();
+	Node body0 = this->readCompoundStmnts();
 	if ( not this->cstyle_mode ) this->checkToken( tokty_enddefine );
 	if ( this->cstyle_mode ) {
-		//cerr << "postfix NOT allowed (2)" << endl;
 		this->is_postfix_allowed = false;
-	} else {
-		//cerr << "Huh?" << endl;
 	}
+
+	Uncurry components( ap, body0 );
+	components.uncurry();
+
+	Node fn = components.getFun();
+	if ( not fn->hasAttribute( "name" ) ) {
+		throw Ginger::Mishap( "Cannot determine function name" );
+	}
+	Node args = components.getArgs();
+	Node body = components.getBody();
+
+	const std::string name( fn->attribute( VID_NAME ) );
 	NodeFactory def;
 	def.start( BIND );
 	def.start( VAR );

@@ -564,6 +564,19 @@ MnxChildIterator::MnxChildIterator( Mnx & mnx ) {
 	this->end = mnx.children.end();
 }
 
+bool MnxChildIterator::operator !() const {
+	return this->it == this->end;
+}
+
+SharedMnx & MnxChildIterator::operator *() const {
+	return *this->it;
+}
+
+MnxChildIterator & MnxChildIterator::operator ++() {
+	++this->it;
+	return *this;
+}
+
 bool MnxChildIterator::hasNext() {
 	return this->it != this->end;
 }

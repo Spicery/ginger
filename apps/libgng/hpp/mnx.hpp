@@ -95,6 +95,10 @@ private:
 public:
 	bool hasNext();
 	SharedMnx & next();
+	bool operator !() const;
+	SharedMnx & operator *() const;
+	MnxChildIterator & operator ++();
+
 public:
 	MnxChildIterator( SharedMnx mnx );
 	MnxChildIterator( Mnx & mnx );

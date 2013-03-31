@@ -265,7 +265,7 @@ private:
 	void compileTry( Gnx mnx, LabelClass * contn );
 	void compileThrow( Gnx mnx, LabelClass * contn );
 
-	bool tryFlatten( Gnx expr, std::vector< Gnx > & vars );
+	bool tryFlatten( Gnx expr, const char * name, std::vector< Gnx > & vars );
 
 public:
 	void compileGnx( Gnx mnx, LabelClass * contn );

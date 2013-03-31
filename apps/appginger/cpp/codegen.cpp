@@ -1310,15 +1310,15 @@ void CodeGenClass::compileErase( Gnx mnx, LabelClass * contn ) {
 	this->continueFrom( contn );
 }
 
-bool CodeGenClass::tryFlatten( Gnx mnx, std::vector< Gnx > & vars ) {
-	if ( mnx->hasName( VAR ) ) {
+bool CodeGenClass::tryFlatten( Gnx mnx, const char * name, std::vector< Gnx > & vars ) {
+	if ( mnx->hasName( name ) ) {
 		vars.push_back( mnx );
 		return true;
 	} else if ( mnx->hasName( SEQ ) ) {
 		MnxChildIterator children( mnx );
 		while ( children.hasNext() ) {
 			Gnx child = children.next();
-			if ( not this->tryFlatten( child, vars ) ) return false;
+			if ( not this->tryFlatten( child, name, vars ) ) return false;
 		}
 		return true;
 	} else {
@@ -1381,7 +1381,7 @@ void CodeGenClass::compileGnx( Gnx mnx, LabelClass * contn ) {
 			this->continueFrom( contn );
 		} else if ( lhs->hasName( SEQ ) ) {
 			std::vector< Gnx > vars;
-			if ( this->tryFlatten( lhs, vars ) ) {
+			if ( this->tryFlatten( lhs, VAR, vars ) ) {
 				this->compileN( rhs, vars.size(), CONTINUE_LABEL );
 
 				for ( std::vector< Gnx >::reverse_iterator it = vars.rbegin(); it != vars.rend(); ++it ) {
@@ -1433,10 +1433,31 @@ void CodeGenClass::compileGnx( Gnx mnx, LabelClass * contn ) {
 		this->vmiSYS_CALL( sysNewVector );
 		this->continueFrom( contn );
 	} else if ( nm == SET and mnx->size() == 2 ) {
-		VIdent vid( this, mnx->child( 1 ) );
-		this->compile1( mnx->child( 0 ), CONTINUE_LABEL );
-		this->vmiPOP( vid, true );
-		this->continueFrom( contn );
+		Gnx dst = mnx->child( 1 );
+		Gnx src = mnx->child( 0 );
+		if ( dst->hasName( VAR ) ) {
+			VIdent vid( this, dst );
+			this->compile1( src, CONTINUE_LABEL );
+			this->vmiPOP( vid, true );
+			this->continueFrom( contn );
+		} else if ( dst->hasName( SEQ ) ) {
+			std::vector< Gnx > vars;
+			if ( this->tryFlatten( dst, ID, vars ) ) {
+				this->compileN( src, vars.size(), CONTINUE_LABEL );
+
+				for ( std::vector< Gnx >::reverse_iterator it = vars.rbegin(); it != vars.rend(); ++it ) {
+					VIdent vid( this, *it );
+					this->vmiPOP( vid, true );
+				}
+
+				this->continueFrom( contn );
+			} else {
+				throw Ginger::Mishap( "BIND not fully implemented [1]" );
+			}
+
+		} else {
+			throw Ginger::Mishap( "SET not fully implemented yet" );
+		}
 	} else if ( nm == FN ) {
 		this->compileGnxFn( mnx, contn );
 	} else if ( nm == DEREF and mnx->size() == 1 ) {

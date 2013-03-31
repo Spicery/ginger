@@ -84,6 +84,11 @@ static void updateAsPattern( Node node, const bool val_vs_var ) {
 		node->name() = VAR;
 		node->removeAttribute( CONSTANT_TYPE );
 		node->removeAttribute( CONSTANT_VALUE );
+	} else if ( node->hasName( SEQ ) ) {
+		for ( Ginger::MnxChildIterator chit( node ); !!chit; ++chit ) {
+			Node child = *chit;
+			updateAsPattern( child, val_vs_var );
+		}
 	}
 }
 

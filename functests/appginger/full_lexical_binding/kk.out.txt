@@ -1,2 +1,2 @@
-foo
-gort
+"foo"
+"gort"

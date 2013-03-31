@@ -171,8 +171,9 @@ public:
 	void vmiCALLS();
 	void vmiCHAIN_LITE( Ref fn, long N );
 	void vmiCHECK_COUNT( int N );
-	void vmiCHECK_MARK0( int N );
-	void vmiCHECK_MARK1( int N );
+	void vmiCHECK_MARK( int local_N, int count_K );
+	void vmiCHECK_MARK0( int local_N );
+	void vmiCHECK_MARK1( int local_N );
 	void vmiDECR( const long d );
 	void vmiDEREF();
 	void vmiEND_CALL_ID( int var, const VIdent & ident );
@@ -264,6 +265,7 @@ private:
 	void compileTry( Gnx mnx, LabelClass * contn );
 	void compileThrow( Gnx mnx, LabelClass * contn );
 
+	bool tryFlatten( Gnx expr, std::vector< Gnx > & vars );
 
 public:
 	void compileGnx( Gnx mnx, LabelClass * contn );
@@ -271,6 +273,7 @@ public:
 	void compileChildrenChecked( Gnx mnx, Ginger::Arity arity );
 
 	Ref detach( bool in_heap, Ref fnkey );
+	void compileN( Gnx mnx, int N, LabelClass * contn );
 	void compile1( Gnx mnx, LabelClass * contn );
 	void compile0( Gnx mnx, LabelClass * contn );
 	void compileIf( bool sense, Gnx mnx, LabelClass * dst, LabelClass * contn );

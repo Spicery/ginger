@@ -412,6 +412,12 @@ void CodeGenClass::vmiCHECK_COUNT( int v ) {
 	this->emitRef( ToRef( v ) );
 }
 
+void CodeGenClass::vmiCHECK_MARK( int v, int N ) {
+	this->emitSPC( vmc_check_mark1 );
+	this->emitRef( ToRef( v ) );
+	this->emitRef( ToRef( N ) );
+}
+
 void CodeGenClass::vmiCHECK_MARK1( int v ) {
 	this->emitSPC( vmc_check_mark1 );
 	this->emitRef( ToRef( v ) );
@@ -1304,6 +1310,22 @@ void CodeGenClass::compileErase( Gnx mnx, LabelClass * contn ) {
 	this->continueFrom( contn );
 }
 
+bool CodeGenClass::tryFlatten( Gnx mnx, std::vector< Gnx > & vars ) {
+	if ( mnx->hasName( VAR ) ) {
+		vars.push_back( mnx );
+		return true;
+	} else if ( mnx->hasName( SEQ ) ) {
+		MnxChildIterator children( mnx );
+		while ( children.hasNext() ) {
+			Gnx child = children.next();
+			if ( not this->tryFlatten( child, vars ) ) return false;
+		}
+		return true;
+	} else {
+		return false;
+	}
+}
+
 void CodeGenClass::compileGnx( Gnx mnx, LabelClass * contn ) {
 	#ifdef DBG_CODEGEN
 		cerr << "appginger/compileGnx" << endl;
@@ -1347,14 +1369,33 @@ void CodeGenClass::compileGnx( Gnx mnx, LabelClass * contn ) {
 			mnx->child( 1 )->render( cerr );	
 			cerr << "]]" << endl;
 		#endif
-		VIdent vid( this, mnx->child( 0 ) );
-		#ifdef DBG_CODEGEN
-			cerr << "  (VIdent::VIdent done)" << endl;
-		#endif
-		this->compile1( mnx->child( 1 ), CONTINUE_LABEL );
-		this->vmiPOP( vid, false );
-		this->continueFrom( contn );
+		Gnx lhs = mnx->child( 0 );
+		Gnx rhs = mnx->child( 1 );
+		if ( lhs->hasName( VAR ) ) {
+			VIdent vid( this, mnx->child( 0 ) );
+			#ifdef DBG_CODEGEN
+				cerr << "  (VIdent::VIdent done)" << endl;
+			#endif
+			this->compile1( rhs, CONTINUE_LABEL );
+			this->vmiPOP( vid, false );
+			this->continueFrom( contn );
+		} else if ( lhs->hasName( SEQ ) ) {
+			std::vector< Gnx > vars;
+			if ( this->tryFlatten( lhs, vars ) ) {
+				this->compileN( rhs, vars.size(), CONTINUE_LABEL );
 
+				for ( std::vector< Gnx >::reverse_iterator it = vars.rbegin(); it != vars.rend(); ++it ) {
+					VIdent vid( this, *it );
+					this->vmiPOP( vid, false );
+				}
+
+				this->continueFrom( contn );
+			} else {
+				throw Ginger::Mishap( "BIND not fully implemented [1]" );
+			}
+		} else {
+			throw Ginger::Mishap( "BIND not fully implemented [2]" );
+		}
 	} else if ( nm == FOR and mnx->size() == 2 ) {
 		this->compileGnxFor( mnx, contn );
 	} else if ( nm == LIST ) {
@@ -1488,6 +1529,29 @@ void CodeGenClass::compile1( Gnx mnx, LabelClass * contn ) {
 		this->compileGnx( mnx, contn );
 	} else {
 		throw Ginger::Mishap( "Wrong number of results in single context" ).culprit( "#Results", "" + a.count() );
+	}
+}
+
+void CodeGenClass::compileN( Gnx mnx, int N, LabelClass * contn ) {
+	if ( N == 0 ) {
+		this->compile0( mnx, contn );
+	} else if ( N == 1 ) {
+		this->compile1( mnx, contn );
+	} else {
+		Ginger::Arity a( mnx->attribute( "arity", "+0" ) );
+		if ( a.isntExact() ) {
+			int n = this->current_slot;
+			int v = this->tmpvar();
+			this->vmiSTART_MARK( v );
+			this->compileGnx( mnx, CONTINUE_LABEL );
+			this->vmiCHECK_MARK( v, N );
+			this->current_slot = n;
+			this->continueFrom( contn );
+		} else if ( a.count() == N ) {
+			this->compileGnx( mnx, contn );
+		} else {
+			throw Ginger::Mishap( "Wrong number of results in context of known arity" ).culprit( "#Results", "" + a.count() );
+		}
 	}
 }
 

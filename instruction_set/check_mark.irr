@@ -1,0 +1,32 @@
+/*****************************************************************************\
+Definition 
+	CHECK_MARK LOCAL_N COUNT
+
+Summary
+	Checks that the value of the local variable LOCAL_N is N less
+	than the address of the top of the stack.
+	
+Unchecked Precondition
+	Pointer values are long-aligned and hence masquerade as Smalls
+	as far as the garbage collector is concerned.
+	
+Exceptions (Checked Preconditions)
+	The difference between the two pointers LOCAL[n] & VMVP isn't N.
+	
+Result (Postcondition)		
+	It is confirmed that no values were pushed on the stack.
+
+\*****************************************************************************/
+
+long n = ToLong( *( ++pc ) );
+long K = ToLong( *( ++pc ) );
+#ifdef DBG_SPECIAL
+	std::cerr << 
+	"Difference between " <<
+	ToULong( VMVP ) << " and " << ToULong( LOCAL(n) ) <<
+	" (held in " << n ")" << 
+	std::endl;
+#endif
+if ( VMVP == ToRefRef( LOCAL(n) ) + K ) RETURN( pc + 1 );
+throw Mishap( "Wrong number of results (needed 0)" ).culprit( "#Results", "" + ( VMVP - ToRefRef( LOCAL(n) ) ) );
+RETURN( NULL );	// stupid compiler

@@ -57,6 +57,7 @@ instructionSet = [
 	Instruction( "check_count", "ir" ),
 	Instruction( "check_mark0", "ir" ),
 	Instruction( "check_mark1", "ir" ),
+	Instruction( "check_mark", "irr" ),
 	Instruction( "end_mark", "ir" ),
 	Instruction( "end1_calls", "ir" ),
 	Instruction( "end_call_global", "irv" ),

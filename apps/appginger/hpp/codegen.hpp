@@ -217,7 +217,7 @@ public:
 	void vmiSET_CALL_INNER_SLOT( int in_arity, int slot );
 	void vmiSET_CALLS( int in_arity );
 	void vmiSET_SYS_CALL( SysCall * r, int A );
-	void vmiSET( int A );
+	void vmiSET_COUNT_TO_MARK( int A );
 	void vmiSETCONT();
 	void vmiSTART_MARK( int N );
 	void vmiSYS_CALL_ARG( SysCall * r, Ref ref );

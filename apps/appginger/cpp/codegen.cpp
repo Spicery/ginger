@@ -169,7 +169,7 @@ void CodeGenClass::vmiSYS_CALL_ARGDAT( SysCall * sys, Ref ref, unsigned long dat
 
 
 void CodeGenClass::vmiSET_SYS_CALL( SysCall * r, int A ) {
-	this->emitSPC( vmc_set_syscall );
+	this->emitSPC( vmc_set_count_syscall );
 	this->emitRef( ToRef( A ) );
 	this->emitRef( ToRef( r ) );
 }
@@ -331,7 +331,7 @@ void CodeGenClass::vmiSETCONT() {
 	this->vmiSYS_CALL( sysSetIndirectionCont );
 }
 
-void CodeGenClass::vmiSET( int A ) {
+void CodeGenClass::vmiSET_COUNT_TO_MARK( int A ) {
 	this->emitSPC( vmc_set );
 	this->emitRef( ToRef( A ) );
 }
@@ -348,7 +348,7 @@ void CodeGenClass::vmiCALLS() {
 
 void CodeGenClass::vmiEND_CALL_ID( int var, const VIdent & ident ) {
 	if ( ident.isLocal() ) {
-		this->vmiEND_MARK( var );
+		this->vmiSET_COUNT_TO_MARK( var );
 		this->vmiPUSH( ident );
 		this->emitSPC( vmc_calls );
 	} else if ( ident.isGlobal() ) {
@@ -362,21 +362,19 @@ void CodeGenClass::vmiEND_CALL_ID( int var, const VIdent & ident ) {
 
 void CodeGenClass::vmiSET_CALL_ID( int in_arity, const VIdent & ident ) {
 	if ( ident.isLocal() ) {
-		this->vmiSET( in_arity );
-		this->vmiPUSH( ident );
-		this->emitSPC( vmc_calls );
+		this->emitSPC( vmc_set_count_call_local );
 	} else if ( ident.isGlobal() ) {
-		this->emitSPC( vmc_set_call_global );
-		this->emitRef( ToRef( in_arity ) );
-		this->emitVIDENT_REF( ident );
+		this->emitSPC( vmc_set_count_call_global );
 	} else {
 		throw Unreachable();
 	}
+	this->emitRef( ToRef( in_arity ) );
+	this->emitVIDENT_REF( ident );
 }
 
 //	Not very efficient :(
 void CodeGenClass::vmiSET_CALL_INNER_SLOT( int in_arity, int slot ) {
-	this->vmiSET( in_arity );
+	this->vmiSET_COUNT_TO_MARK( in_arity );
 	this->vmiPUSH_INNER_SLOT( slot );
 	this->emitSPC( vmc_calls );
 }
@@ -388,7 +386,7 @@ void CodeGenClass::vmiEND1_CALLS( int var ) {
 }
 
 void CodeGenClass::vmiSET_CALLS( int in_arity ) {
-	this->emitSPC( vmc_set_calls );
+	this->emitSPC( vmc_set_count_calls );
 	this->emitRef( ToRef( in_arity ) );
 }
 
@@ -1042,7 +1040,7 @@ void CodeGenClass::compileChildrenChecked( Gnx mnx, Arity arity ) {
 		int v = this->tmpvar();
 		this->vmiSTART_MARK( v );
 		this->compileChildren( mnx, CONTINUE_LABEL );
-		this->vmiSET( v );
+		this->vmiSET_COUNT_TO_MARK( v );
 		this->vmiCHECK_COUNT( arity.count() );
 	} else {	
 		throw Unreachable();
@@ -1058,7 +1056,7 @@ void CodeGenClass::compileGnxSysApp( Gnx mnx, LabelClass * contn ) {
 			int v = this->tmpvar();
 			this->vmiSTART_MARK( v );
 			this->compileChildren( mnx, CONTINUE_LABEL );
-			this->vmiSET( v );
+			this->vmiSET_COUNT_TO_MARK( v );
 			this->vmiSYS_CALL( info.syscall );
 		} else if ( info.isVMOp() ) {
 			//cerr << "VM OP" << endl;
@@ -1158,7 +1156,7 @@ void CodeGenClass::compileGnxSelfCall( Gnx mnx, LabelClass * contn ) {
 		int v = this->tmpvar();
 		this->vmiSTART_MARK( v );
 		this->compileChildren( mnx, CONTINUE_LABEL );
-		this->vmiSET( v );
+		this->vmiSET_COUNT_TO_MARK( v );
 		this->vmiSELF_CALL();
 	}
 }
@@ -1405,7 +1403,7 @@ void CodeGenClass::compileGnx( Gnx mnx, LabelClass * contn ) {
 			int v = this->tmpvar();
 			this->vmiSTART_MARK( v );
 			this->compileChildren( mnx, CONTINUE_LABEL );
-			this->vmiSET( v );
+			this->vmiSET_COUNT_TO_MARK( v );
 			this->vmiSYS_CALL( sysNewList );			
 			this->continueFrom( contn );
 		}
@@ -1415,13 +1413,13 @@ void CodeGenClass::compileGnx( Gnx mnx, LabelClass * contn ) {
 			this->vmiSTART_MARK( v );
 			this->compileChildren( mnx->child( 0 ), CONTINUE_LABEL );
 			this->compileGnx( mnx->child( 1 ), CONTINUE_LABEL );
-			this->vmiSET( v );
+			this->vmiSET_COUNT_TO_MARK( v );
 			this->vmiSYS_CALL( sysNewListOnto );
 		} else {
 			int v = this->tmpvar();
 			this->vmiSTART_MARK( v );
 			this->compileChildren( mnx, CONTINUE_LABEL );
-			this->vmiSET( v );
+			this->vmiSET_COUNT_TO_MARK( v );
 			this->vmiSYS_CALL( sysListAppend );			
 		}
 		this->continueFrom( contn );
@@ -1429,7 +1427,7 @@ void CodeGenClass::compileGnx( Gnx mnx, LabelClass * contn ) {
 		int v = this->tmpvar();
 		this->vmiSTART_MARK( v );
 		this->compileChildren( mnx, CONTINUE_LABEL );
-		this->vmiSET( v );
+		this->vmiSET_COUNT_TO_MARK( v );
 		this->vmiSYS_CALL( sysNewVector );
 		this->continueFrom( contn );
 	} else if ( nm == SET and mnx->size() == 2 ) {
@@ -1510,7 +1508,7 @@ void CodeGenClass::compileThrow( Gnx mnx, LabelClass * contn ) {
 		int v = this->tmpvar();
 		this->vmiSTART_MARK( v );
 		this->compileGnx( mnx->child( 0 ), CONTINUE_LABEL );
-		this->vmiSET( v );
+		this->vmiSET_COUNT_TO_MARK( v );
 		this->vmiSYS_CALL( sysNewList );			
 	#else
 		this->vmiPUSHQ( SYS_NIL );

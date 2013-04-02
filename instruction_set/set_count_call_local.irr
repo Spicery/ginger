@@ -1,0 +1,40 @@
+/*****************************************************************************\
+Define
+    * SET_COUNT_CALL_LOCAL RAW_COUNT LOCAL_N
+    * VMCOUNT = RAW_COUNT
+
+Summary
+    Calls the Nth local variable with a fixed count of the arguments. Note
+    that the local does not have to be a function. If it is not a 
+    function it is pushed and sysApply is invoked.
+
+Unchecked Precondition
+    * There is space on the stack for one more value, if the local is not
+      a function object.
+	
+Exceptions (Checked Preconditions)
+    None.
+	
+Result (Postcondition)		
+    * The local variable has been entered.
+
+\*****************************************************************************/
+
+Ref r = LOCAL( ToLong( pc[2] ) );
+VMCOUNT = ToLong( pc[ 1 ] );
+{    
+    Ref *ptr;
+    if ( IsObj( r ) && IsFunctionKey( *( ptr = RefToPtr4( r ) ) ) ) {
+        VMLINK = pc + 3;
+        VMLINKFUNC = VMPCFUNC;
+    	VMPCFUNC = ptr;
+        RETURN( ptr + 1 );
+    } else {
+        *( ++VMVP ) = r;
+        VMCOUNT += 1;
+        FREEZE;
+        pc = sysApply( pc + 3, vm );
+        MELT;
+        RETURN( pc );
+    }
+}

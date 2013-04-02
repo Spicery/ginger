@@ -5,6 +5,8 @@ Definition
 	* VPC += 2
 
 Summary
+	Sets the VMCOUNT to the previously set MARK.
+	
 	Assigns the VMCOUNT to the difference between the top of the stack
 	and the previous value cached in LOCAL.
 

@@ -654,11 +654,13 @@ Node ReadStateClass::readAtomicExpr() {
 
 class Canonise {
 private:
+	const bool name_needed;
 	const bool assume_no_name;
 	Node raw;
 public:
-	Canonise( bool _nameless, Node ap ) : 
-		assume_no_name( _nameless ),
+	Canonise( bool _name_needed, bool _nameless, Node ap ) : 
+		name_needed( _name_needed ),
+		assume_no_name( not _name_needed and _nameless ),
 		raw( ap ) 
 	{}
 
@@ -699,20 +701,31 @@ private:
 		}
 	}
 
+	Node anon( Node fn ) {
+		NodeFactory b;
+		b.start( APP );
+		b.start( VAR ); // But no name - anonymous.
+		b.end();
+		b.start( SEQ );
+		squash( b, fn );
+		b.end();
+		b.end();
+		return b.build();	
+	}
+
 	Node canonise( const int level, Node fn ) {
 		const bool is_var = fn->hasName( VAR );
-		if ( is_var && not this->assume_no_name && level > 0 ) {
-			return fn;
-		} else if ( ( is_var && this->assume_no_name ) || fn->hasName( SEQ ) ) {
-			NodeFactory b;
-			b.start( APP );
-			b.start( VAR ); // But no name - anonymous.
-			b.end();
-			b.start( SEQ );
-			squash( b, fn );
-			b.end();
-			b.end();
-			return b.build();			
+		if ( is_var ) {
+			if ( level == 0 ) {
+				if ( this->name_needed ) this->badHeader();
+				return this->anon( fn );
+			} else if ( this->assume_no_name ) {
+				return this->anon( fn );
+			} else {
+				return fn;
+			}
+		} else if ( fn->hasName( SEQ ) && not this->name_needed ) {
+			return this->anon( fn );
 		} else if ( fn->hasName( APP ) && fn->size() == 2 ) {
 			NodeFactory b;
 			b.start( APP );
@@ -823,7 +836,7 @@ Node ReadStateClass::readCanonicalLambdaLHS( const bool name_needed ) {
 	#ifdef DBG_COMMON2GNX
 		cerr << "Pattern read" << endl;
 	#endif
-	Canonise canonise( not name_needed && starts_with_oparen, ap );
+	Canonise canonise( name_needed, starts_with_oparen, ap );
 	#ifdef DBG_COMMON2GNX
 		cerr << "About to canonicalise" << endl;
 	#endif

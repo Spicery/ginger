@@ -33,6 +33,7 @@
 #include "sysprint.hpp"
 #include "mishap.hpp"
 #include "externalkind.hpp"
+#include "functionlayout.hpp"
 //#include "vmi.hpp"
 
 using namespace std;
@@ -180,10 +181,10 @@ Ref * MachineClass::setUpPC( Ref r, const bool clear_stack ) {
 void MachineClass::printfn( ostream & out, Ref x ) {
 	Ref * obj_K = RefToPtr4( x );
 	Ref * obj_K1 = obj_K + 1;
-	long A = SmallToLong( obj_K[ -1 ] );
-	long N = ToLong( obj_K[ -2 ] );
-	long R = ToLong( obj_K[ -3 ] );
-	long C = ToULong( obj_K[ -4 ] ) >> TAGGG;
+	long A = SmallToLong( obj_K[ OFFSET_TO_NUM_INPUTS ] );
+	long N = ToLong( obj_K[ OFFSET_TO_NUM_SLOTS ] );
+	long R = ToLong( obj_K[ OFFSET_TO_NUM_OUTPUTS ] );
+	long C = ToULong( obj_K[ OFFSET_TO_FUNCTION_LENGTH ] ) >> TAGGG;
 	Ref * obj_Z1 = obj_K + C + 1;
 	out << "define: " << A << " args, " << N << " locals, " << R << " results, " << C << " #words used" << endl;
 	{

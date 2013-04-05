@@ -12,7 +12,7 @@ Installing on Ubuntu (from the command-line)
 *	Pre-requisites: you'll need some basic developer tools 
 		git, python, g++, autoconf, uuid, readline
 	You can ensure you have these in one step with
-		% sudo apt-get git python g++ autoconf uuid-dev libreadline-dev
+		% sudo apt-get install git python g++ autoconf uuid-dev libreadline-dev
 
 *	We also need the RudeCGI library
 		% mkdir /tmp/rudecgi
@@ -22,7 +22,7 @@ Installing on Ubuntu (from the command-line)
 		% cd rude-5.0.0
 		% ./configure
 		% make
-		% sudo make install
+		% sudo make install-as-is
 
 * 	The ginger interepreter makes use of rlwrap. Fortunately that's just
 	another agt-get
@@ -45,8 +45,6 @@ Installing on Ubuntu (from the command-line)
 
 Installing onto Mac OS X
 ------------------------
-
-
 
 * Unpack the Ginger tarball into a local folder $APPGINGER.
 

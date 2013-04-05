@@ -34,6 +34,9 @@ extern void mnxFRenderText( FILE * f, const std::string & string );
 extern void mnxRenderText( std::ostream & out, const std::string & string );
 extern void mnxRenderText( const std::string & string );
 
+extern void mnxFRenderChar( FILE * f, const char ch );
+extern void mnxRenderChar( std::ostream & out, const char ch );
+
 class Mnx;
 typedef shared< Mnx > SharedMnx;
 

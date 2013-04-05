@@ -29,45 +29,54 @@ using namespace std;
 
 bool MnxWalkPath::isLastIndex() const { return this->mnx.size() == this->index + 1; }
 
+void mnxRenderChar( std::ostream & out, const char ch ) {
+	if ( ch == '<' ) {
+		out << "&lt;";
+	} else if ( ch == '>' ) {
+		out << "&gt;";
+	} else if ( ch == '&' ) {
+		out << "&amp;";
+	} else if ( ch == '"' ) {
+		out << "&quot;";
+	} else if ( ch == '\'' ) {
+		out << "&apos;";
+	} else if ( 32 <= ch && ch < 127 ) {
+		out << ch;
+	} else {
+		out << "&#" << (int)ch << ";";
+	}
+}
+
 void mnxRenderText( std::ostream & out, const std::string & str ) {
 	for ( std::string::const_iterator it = str.begin(); it != str.end(); ++it ) {
 		const unsigned char ch = *it;
-		if ( ch == '<' ) {
-			out << "&lt;";
-		} else if ( ch == '>' ) {
-			out << "&gt;";
-		} else if ( ch == '&' ) {
-			out << "&amp;";
-		} else if ( ch == '"' ) {
-			out << "&quot;";
-		} else if ( ch == '\'' ) {
-			out << "&apos;";
-		} else if ( 32 <= ch && ch < 127 ) {
-			out << ch;
-		} else {
-			out << "&#" << (int)ch << ";";
-		}
+		mnxRenderChar( out, ch );
 	}
 }
+
+void mnxFRenderChar( FILE * f, const char ch ) {
+	if ( ch == '<' ) {
+		fprintf( f, "&lt;" );
+	} else if ( ch == '>' ) {
+		fprintf( f, "&gt;" );
+	} else if ( ch == '&' ) {
+		fprintf( f,  "&amp;" );
+	} else if ( ch == '"' ) {
+		fprintf( f, "&quot;" );
+	} else if ( ch == '\'' ) {
+		fprintf( f, "&apos;" );
+	} else if ( 32 <= ch && ch < 127 ) {
+		fprintf( f, "%c", ch );
+	} else {
+		fprintf( f, "&#%d;", (int)ch );
+	}
+}
+
 
 void mnxFRenderText( FILE * f, const std::string & str ) {
 	for ( std::string::const_iterator it = str.begin(); it != str.end(); ++it ) {
 		const unsigned char ch = *it;
-		if ( ch == '<' ) {
-			fprintf( f, "&lt;" );
-		} else if ( ch == '>' ) {
-			fprintf( f, "&gt;" );
-		} else if ( ch == '&' ) {
-			fprintf( f,  "&amp;" );
-		} else if ( ch == '"' ) {
-			fprintf( f, "&quot;" );
-		} else if ( ch == '\'' ) {
-			fprintf( f, "&apos;" );
-		} else if ( 32 <= ch && ch < 127 ) {
-			fprintf( f, "%c", ch );
-		} else {
-			fprintf( f, "&#%d;", (int)ch );
-		}
+		mnxFRenderChar( f, ch );
 	}
 }
 

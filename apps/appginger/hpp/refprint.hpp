@@ -25,6 +25,7 @@ class RefPrint {
 private:
 	std::ostream & out;
 	bool showing;
+	bool html_escaping;
 
 public:
 	RefPrint( std::ostream & out ) : out( out ), showing( false ) {}
@@ -34,6 +35,10 @@ public:
 	}
 
 private:
+	void output( const char ch );
+	void output( const char * s );
+	void output( const std::string & s );
+
 	//	Relies on null termination, which is potentially dodgy - except this
 	//	is only for formatting printable characters.
 	void refStringPrint( Ref * str_K ) ;

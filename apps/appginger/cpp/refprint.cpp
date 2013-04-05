@@ -16,6 +16,9 @@
     along with AppGinger.  If not, see <http://www.gnu.org/licenses/>.
 \******************************************************************************/
 
+
+#include <sstream>
+
 #include "mnx.hpp"
 
 #include "sys.hpp"    
@@ -43,54 +46,77 @@ const char * STRING_QUOTE = "\"";
 const char * CHAR_QUOTE = "'";
 const char * SYMBOL_QUOTE = "`";
 
+void RefPrint::output( const char ch ) {
+	if ( this->html_escaping && not this->showing ) {
+		Ginger::mnxRenderChar( this->out, ch );
+	} else {
+		this->out << ch;
+	}
+}
+
+void RefPrint::output( const char * s ) {
+	if ( this->html_escaping && not this->showing ) {
+		Ginger::mnxRenderText( this->out, s );
+	} else {
+		this->out << s;
+	}
+}
+
+void RefPrint::output( const std::string & s ) {
+	if ( this->html_escaping && not this->showing 	) {
+		Ginger::mnxRenderText( this->out, s );
+	} else {
+		this->out << s;
+	}
+}
 
 //	Relies on null termination, which is potentially dodgy - except this
 //	is only for formatting printable characters.
 void RefPrint::refStringPrint( Ref * str_K ) {
 	char *s = ToChars( str_K + 1 );
-	if ( this->showing ) this->out << STRING_QUOTE;
-	this->out << s;	
-	if ( this->showing ) this->out << STRING_QUOTE;
+	if ( this->showing ) this->output( STRING_QUOTE );
+	this->output( s );
+	if ( this->showing ) this->output( STRING_QUOTE );
 }
 
 void RefPrint::refListPrint( Ref sofar ) {
 	bool sep = false;
-	this->out << OPEN_LIST;
+	this->output( OPEN_LIST );
 	while ( IsPair( sofar ) ) {
-		if ( sep ) { this->out << ","; } else { sep = true; }
+		if ( sep ) { this->output( "," ); } else { sep = true; }
 		this->refPrint( *( RefToPtr4( sofar ) + 1 ) );
 		sofar = *( RefToPtr4( sofar ) + 2 );
 	}
-	this->out << CLOSE_LIST;
+	this->output( CLOSE_LIST );
 }
 
 void RefPrint::refVectorPrint( Ref * vec_K ) {
 	bool sep = false;
-	this->out << OPEN_VECTOR;
+	this->output( OPEN_VECTOR );
 	long len = RefToLong( vec_K[ -1 ] );
 	for ( long i = 1; i <= len; i++ ) {
-		if ( sep ) { this->out << ","; } else { sep = true; }
+		if ( sep ) { this->output( ',' ); } else { sep = true; }
 		this->refPrint( vec_K[ i ] ); 
 	}
-	this->out << CLOSE_VECTOR;
+	this->output( CLOSE_VECTOR );
 }
 
 void RefPrint::refMixedPrint( Ref * mix_K ) {
 	bool sep = false;
-	this->out << "mixed[";
+	this->output( "mixed[" );
 	long len = numFieldsOfMixedLayout( mix_K );
 	for ( long i = 1; i <= len; i++ ) {
-		if ( sep ) { this->out << ","; } else { sep = true; }
+		if ( sep ) { this->output( ',' ); } else { sep = true; }
 		this->refPrint( mix_K[ i ] ); 
 	}	
-	this->out <<"]{";
+	this->output( "]{" );
 	sep = false;
 	len = RefToLong( mix_K[ MIXED_LAYOUT_OFFSET_LENGTH ] );
 	for ( long i = 1; i <= len; i++ ) {
-		if ( sep ) { this->out << ","; } else { sep = true; }
+		if ( sep ) { this->output( ',' ); } else { sep = true; }
 		this->refPrint( mix_K[ i ] ); 
 	}
-	this->out << "}";
+	this->output( "}" );
 }
 
 
@@ -129,7 +155,9 @@ void RefPrint::refElementPrint( Ref * mix_K ) {
 	if ( length > 0 ) {
 		this->refAttrMapPrint( attrmap_K, TAG_OPEN );
 		for ( long i = 0; i < length; i++ ) {
-			this->refPrint( mix_K[ 2 + i ] );
+			RefPrint xhtml( *this );
+			xhtml.html_escaping = true;
+			xhtml.refPrint( mix_K[ 2 + i ] );
 		}
 		this->refAttrMapPrint( attrmap_K, TAG_CLOSE );
 	} else {
@@ -140,24 +168,24 @@ void RefPrint::refElementPrint( Ref * mix_K ) {
 void RefPrint::refRecordPrint( Ref * rec_K ) {
 	unsigned long len = lengthOfRecordLayout( rec_K );
 	bool sep = false;
-	this->out << "record{";
+	this->output( "record{" );
 	for ( unsigned long i = 1; i <= len; i++ ) {
-		if ( sep ) { this->out << ","; } else { sep = true; }
+		if ( sep ) { this->output( ',' ); } else { sep = true; }
 		this->refPrint( rec_K[ i ] ); 
 	}
-	this->out << "}";
+	this->output( '}' );
 }
 
 //	TODO: This looks very wrong!!!!
 void RefPrint::refWRecordPrint( Ref * rec_K ) {
 	unsigned long len = lengthOfWRecordLayout( rec_K );
 	bool sep = false;
-	this->out << "wrecord{";
+	this->output( "wrecord{" );
 	for ( unsigned long i = 1; i <= len; i++ ) {
-		if ( sep ) { this->out << ","; } else { sep = true; }
+		if ( sep ) { this->output( ',' ); } else { sep = true; }
 		this->refPrint( rec_K[ i ] ); 	//	TODO: NO!!!
 	}
-	this->out << "}";
+	this->output( '}' );
 }
 
 //	<TYPE FIELD ...>
@@ -166,25 +194,29 @@ void RefPrint::refInstancePrint( Ref * rec_K ) {
 	unsigned long len = lengthOfInstance( rec_K );
 	//std::cout << "Length of object " << len << std::endl;
 	//bool sep = false;
-	this->out << "<";
+	this->output( "<" );
 	this->refPrint( titleOfInstance( rec_K ) );
 	//this->out << "[" << len << "]{";
 	for ( unsigned long i = 1; i <= len; i++ ) {
 		//if ( sep ) { this->out << ","; } else { sep = true; }
-		this->out << " ";
+		this->output( ' ' );
 		this->refPrint( rec_K[ i ] ); 
 	}
-	this->out << ">";
+	this->output( ">" );
 }
 
 void RefPrint::refDoublePrint( const Ref r ) {
+	std::stringstream str;
 	gngdouble_t d = gngFastDoubleValue( r );
-	this->out << d;
+	str << d;
+	this->output( str.str() );
 }
 
 void RefPrint::refKeyPrint( const Ref r ) {
 	const char * name = keyName( r );
-	this->out << "<class " << name << ">";
+	this->output( "<class " );
+	this->output( name );
+	this->output( ">" );
 }
 
 void RefPrint::refFunctionPrint( const Ref fn ) {
@@ -194,16 +226,17 @@ void RefPrint::refFunctionPrint( const Ref fn ) {
 	const std::string name( nameOfFn( fn_K ) );
 
 	if ( IsCoreFunctionKey( key ) ) {
-		this->out << "<sysfn";
+		this->output( "<sysfn" );
 	} else if ( IsMethodKey( key ) ) {
-		this->out << "<method";
+		this->output( "<method" );
 	} else {
-		this->out << "<function";
+		this->output( "<function" );
 	}
 	if ( name.size() > 0 ) {
-		this->out << " " << name;
+		this->output( ' ' );
+		this->output( name );
 	}
-	this->out << ">";
+	this->output( '>' );
 }
 
 void RefPrint::refExternalPrint( const Ref * obj_K ) {
@@ -225,7 +258,7 @@ void RefPrint::refPrint( const Ref r ) {
 			refFunctionPrint( r );
 		} else if ( key == sysMapletKey ) {
 			refPrint( fastMapletKey( r ) );
-			this->out << " => ";
+			this->output( " => " );
 			refPrint( fastMapletValue( r ) );
 		} else if ( IsSimpleKey( key ) ) {
 			#ifdef DBG_SYSPRINT
@@ -285,7 +318,7 @@ void RefPrint::refPrint( const Ref r ) {
 			//	Compound keys not implemented yet.
 			this->refInstancePrint( obj_K );
 		} else {
-			this->out << "<printing undefined>";
+			this->output( "<printing undefined>" );
 		}
 	} else {
 		Ref k = refDataKey( r );
@@ -295,35 +328,37 @@ void RefPrint::refPrint( const Ref r ) {
 		if ( k == sysSmallKey ) {
 			this->out << SmallToLong( r );
 		} else if ( k == sysBoolKey ) {
-			this->out << ( r == SYS_FALSE ? "false" : "true" );
+			this->output( r == SYS_FALSE ? "false" : "true" );
 		} else if ( k == sysAbsentKey ) {
-			this->out << "absent";
+			this->output( "absent" );
 		} else if ( k == sysPresentKey ) {
-			this->out << "present";
+			this->output( "present" );
 		} else if ( k == sysUndefinedKey ) {
-			this->out << "undefined";
+			this->output( "undefined" );
 		} else if ( k == sysIndeterminateKey ) {
-			this->out << "indeterminate";
+			this->output( "indeterminate" );
 		} else if ( k == sysTerminKey ) {
-			this->out << "termin";
+			this->output( "termin" );
 		} else if ( k == sysCharKey ) {
 			#ifdef DBG_SYSPRINT
 				cerr << "--  character: " << (int)(CharacterToChar( r )) << endl;
 			#endif
 			//this->out << "<char " << r  << ">";
-			if ( this->showing ) this->out << CHAR_QUOTE;
+			if ( this->showing ) this->output( CHAR_QUOTE );
 			this->out << CharacterToChar( r );
-			if ( this->showing ) this->out << CHAR_QUOTE;
+			if ( this->showing ) this->output( CHAR_QUOTE );
 		} else if ( k == sysSymbolKey ) {
-			if ( this->showing ) this->out << SYMBOL_QUOTE;
+			if ( this->showing ) this->output( SYMBOL_QUOTE );
 			this->out << symbolToStdString( r );
-			if ( this->showing ) this->out << SYMBOL_QUOTE;
+			if ( this->showing ) this->output( SYMBOL_QUOTE );
 		} else if ( k == sysNilKey ) {
 			this->refListPrint( r );
 		} else if ( k == sysClassKey ) {
 			this->refKeyPrint( r );
 		} else {
-			this->out << "?(" << std::hex << ToULong( r ) << std::dec << ")";
+			this->output( "?(" );
+			this->out << std::hex << ToULong( r ) << std::dec;
+			this->output( ")" );
 		}
 	}
 }

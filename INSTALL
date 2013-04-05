@@ -22,7 +22,7 @@ Installing on Ubuntu (from the command-line)
 		% cd rude-5.0.0
 		% ./configure
 		% make
-		% sudo make install-as-is
+		% sudo make install
 
 * 	The ginger interepreter makes use of rlwrap. Fortunately that's just
 	another agt-get

@@ -16,6 +16,7 @@
     along with AppGinger.  If not, see <http://www.gnu.org/licenses/>.
 \******************************************************************************/
 
+#ifndef MACHINE4_EXCLUDED
 #ifndef MACHINE4_HPP
 #define MACHINE4_HPP
 
@@ -40,4 +41,5 @@ public:
 
 };
 
+#endif
 #endif

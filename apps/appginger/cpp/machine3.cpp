@@ -16,6 +16,7 @@
     along with AppGinger.  If not, see <http://www.gnu.org/licenses/>.
 \******************************************************************************/
 
+#ifndef MACHINE3_EXCLUDED
 #include <iostream>
 #include <cstdlib>
 
@@ -48,3 +49,4 @@ typedef void *Special;
 #define RETURN( e )     { pc = ( e ); goto **pc; }
 
 #include "machine3.cpp.auto"
+#endif

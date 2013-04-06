@@ -17,6 +17,14 @@ INSTALLDIRS=-DINSTALL_BIN='"$(INSTALL_BIN)"' -DINSTALL_LIB='"$(INSTALL_LIB)"' -D
 CXXFLAGS=-DRUDECGI $(INSTALLDIRS) -g -I../hpp -I../../libgng/hpp -I../../automatic/machine -I../../automatic/sys -I../../automatic/simple -Wall -Wnon-virtual-dtor
 CFLAGS=-Wmissing-prototypes
 
+# In order to exclude machine implementations, uncomment one or more of
+# the following lines.
+#CXXFLAGS += -DMACHINE1_EXCLUDED
+#CXXFLAGS += -DMACHINE2_EXCLUDED
+#CXXFLAGS += -DMACHINE3_EXCLUDED
+#CXXFLAGS += -DMACHINE4_EXCLUDED
+
+
 OBJS=inputstreamexternal.o outputstreamexternal.o \
 	cagefinder.o cell.o refprint.o vident.o codegen.o \
 	simplify.o cage.o registers.o roots.o cmp.o \

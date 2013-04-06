@@ -16,6 +16,8 @@
     along with AppGinger.  If not, see <http://www.gnu.org/licenses/>.
 \******************************************************************************/
 
+#ifndef MACHINE2_EXCLUDED
+
 #include "machine2.hpp"
 
 
@@ -49,6 +51,4 @@ void Machine2::execute( Ref r, const bool clear_stack ) {
 
 #include "machine2.cpp.auto"
 
-
-
-
+#endif

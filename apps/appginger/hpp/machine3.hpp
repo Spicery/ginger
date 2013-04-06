@@ -16,6 +16,7 @@
     along with AppGinger.  If not, see <http://www.gnu.org/licenses/>.
 \******************************************************************************/
 
+#ifndef MACHINE3_EXCLUDED
 #ifndef MACHINE3_HPP
 #define MACHINE3_HPP
 
@@ -44,4 +45,5 @@ public:
 	virtual ~Machine3() {}
 };
 
+#endif
 #endif

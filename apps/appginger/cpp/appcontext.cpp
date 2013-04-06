@@ -50,18 +50,52 @@ Package * AppContext::initInteractivePackage( MachineClass * vm ) {
     return interactive_pkg;
 }
 
+static MachineClass * makeMachine1( AppContext * appcxt ) {
+    #ifndef MACHINE1_EXCLUDED
+        return new Machine1( appcxt );
+    #else
+        return NULL;
+    #endif
+}
+
+static MachineClass * makeMachine2( AppContext * appcxt ) {
+    #ifndef MACHINE2_EXCLUDED
+        return new Machine2( appcxt );
+    #else
+        return NULL;
+    #endif
+}
+
+static MachineClass * makeMachine3( AppContext * appcxt ) {
+    #ifndef MACHINE3_EXCLUDED
+        return new Machine3( appcxt );
+    #else
+        return NULL;
+    #endif
+}
+
+static MachineClass * makeMachine4( AppContext * appcxt ) {
+    #ifndef MACHINE4_EXCLUDED
+        return new Machine4( appcxt );
+    #else
+        return NULL;
+    #endif
+}
+
+static MachineClass * makeNewMachine( int machine_impl_num, AppContext * appcxt ) {
+    switch ( machine_impl_num ) {
+        case 1: return makeMachine1( appcxt );
+        case 2: return makeMachine2( appcxt );
+        case 3: return makeMachine3( appcxt );
+        case 4: return makeMachine4( appcxt );
+        default: return NULL;
+    }   
+}
+
 MachineClass * AppContext::newMachine() {
-   switch ( this->machine_impl_num ) {
-        case 1: return new Machine1( this );
-        case 2: return new Machine2( this );
-        case 3: return new Machine3( this );
-        case 4: return new Machine4( this );
-        default: {
-            cerr <<  "Invalid implementation (" << this->machine_impl_num << ") using implementation 1" << endl;
-            return new Machine1( this );
-            break;
-        }
-    }
+    MachineClass * m = makeNewMachine( this->machine_impl_num, this );
+    if ( m != NULL ) return m;
+    throw Ginger::Mishap( "Unavailable implementation" ).culprit( "Implementation#", static_cast< long >( this->machine_impl_num ) );
 }
 
 void AppContext::addLoadFile( const char * load_file_name ) {

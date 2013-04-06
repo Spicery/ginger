@@ -16,6 +16,7 @@
     along with AppGinger.  If not, see <http://www.gnu.org/licenses/>.
 \******************************************************************************/
 
+#ifndef MACHINE2_EXCLUDED
 #ifndef MACHINE2_HPP
 #define MACHINE2_HPP
 
@@ -43,3 +44,4 @@ public:
 };
 
 #endif
+#endif 

@@ -22,8 +22,7 @@
 
 #include <stddef.h>
 
-#include "machine1.hpp"
-#include "machine2.hpp"
+#include "callstacklayout.hpp"
 #include "common.hpp"
 #include "machine.hpp"
 #include "codegen.hpp"

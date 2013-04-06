@@ -43,9 +43,6 @@
 #include "rcep.hpp"
 #include "mishap.hpp"
 #include "sys.hpp"
-#include "machine1.hpp"
-#include "machine2.hpp"
-#include "machine3.hpp"
 #include "misclayout.hpp"
 #include "functionlayout.hpp"
 

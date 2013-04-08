@@ -112,21 +112,21 @@ static struct option long_options[] =
     };
 
 static void printUsage() {
-	cout << "Usage:  fetchgnx MODE_OPTION -j PROJECT -p PACKAGE [-a ALIAS] -v VARIABLE\n" << endl;
-	cout << "MODE OPTIONS\n" << endl;
-	cout << "-R, --resolve         find the origin package::variable of a reference\n" << endl;
-	cout << "-D, --definition      find the definition of a package::variable\n" << endl;
-	cout << "-H, --help[=TOPIC]    help info on optional topic (see --help=help)\n" << endl;
-	cout << "-I, --initial         fetch initialisation code for a package\n" << endl;
-	cout << "-V, --version         print out version information and exit\n" << endl;
-	cout << "-L, --license[=PART]  print out license information and exit (see --help=license)\n" << endl;
-	cout << "ARGUMENTS FOR -R AND -D\n" << endl;
-	cout << "-j, --project=PATH    defines project folder, there may be more than one\n" << endl;
-	cout << "-f, --folder=PATH     alternative to --project option\n" << endl;
-	cout << "-p, --package=NAME    sets the package name\n" << endl;
-	cout << "-a, --alias=NAME      sets the alias name, optional\n" << endl;
-	cout << "-v, --variable=NAME   sets the variable name\n" << endl;
-	cout << "-U, --undefined       allow undefined variables\n" << endl;
+	cout << "Usage:  fetchgnx MODE_OPTION -j PROJECT -p PACKAGE [-a ALIAS] -v VARIABLE" << endl;
+	cout << "MODE OPTIONS" << endl;
+	cout << "-R, --resolve         find the origin package::variable of a reference" << endl;
+	cout << "-D, --definition      find the definition of a package::variable" << endl;
+	cout << "-H, --help[=TOPIC]    help info on optional topic (see --help=help)" << endl;
+	cout << "-I, --initial         fetch initialisation code for a package" << endl;
+	cout << "-V, --version         print out version information and exit" << endl;
+	cout << "-L, --license[=PART]  print out license information and exit (see --help=license)" << endl;
+	cout << "ARGUMENTS FOR -R AND -D" << endl;
+	cout << "-j, --project=PATH    defines project folder, there may be more than one" << endl;
+	cout << "-f, --folder=PATH     alternative to --project option" << endl;
+	cout << "-p, --package=NAME    sets the package name" << endl;
+	cout << "-a, --alias=NAME      sets the alias name, optional" << endl;
+	cout << "-v, --variable=NAME   sets the variable name" << endl;
+	cout << "-U, --undefined       allow undefined variables" << endl;
 	cout << endl;
 }
 

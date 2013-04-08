@@ -19,25 +19,79 @@
 #ifndef REF_PRINT_HPP
 #define REF_PRINT_HPP
 
+#include <vector>
+
 #include "key.hpp"
 
+class Numbering {
+private:
+	std::vector< int > numbers;
+public:
+	int number( const int depth );
+	std::string styledNumber( const int depth );
+private:
+	void alphabetical( std::ostream & out, const int k );
+};
+
 class RefPrint {
+public:
+	enum FORMAT {
+		PRINT,
+		SHOW,
+		LIST,
+		XHTML
+	};
 private:
 	std::ostream & out;
-	bool showing;
-	bool html_escaping;
+	enum FORMAT format;
+	int indentation_level;
+	int & column;
+	bool list_style;
+	Numbering numbering;
 
 public:
-	RefPrint( std::ostream & out ) : out( out ), showing( false ) {}
+	RefPrint( std::ostream & out, int & c, const enum FORMAT f = PRINT ) : 
+		out( out ), 
+		format( f ),
+		indentation_level( 0 ),
+		column( c ),
+		list_style( false )		//	false = unordered
+	{
+		this->column = 0;
+	}
 
-	void setShowing( const bool showing ) {
-		this->showing = showing;
+	RefPrint( const RefPrint & that, const enum FORMAT f ) : 
+		out( that.out ), 
+		format( f ),
+		indentation_level( that.indentation_level ),
+		column( that.column ),
+		list_style( false )		//	false = unordered
+	{
+		this->column = 0;
 	}
 
 private:
 	void output( const char ch );
+	void output( const long n );
 	void output( const char * s );
 	void output( const std::string & s );
+
+	void indent();
+	void indentIfNeeded( const char ch );
+
+	void startList( const bool ordered );
+	void startListItem( const bool is_ordered, const int count );
+	void endListItem( const bool is_ordered, const int count );
+	void endList( const bool ordered );
+
+	void startMap();
+	void startMapletKey( const int count );
+	void endMapletKey( const int count );
+	void startMapletValue( const int count );
+	void endMapletValue( const int count );
+	void endMap();
+
+private:
 
 	//	Relies on null termination, which is potentially dodgy - except this
 	//	is only for formatting printable characters.
@@ -46,6 +100,9 @@ private:
 	void refListPrint( Ref sofar );
 
 	void refVectorPrint( Ref * vec_K );
+
+	void refMapPrint( Ref * r );
+	void refMapletPrint( Ref key, Ref value );
 
 	void refMixedPrint( Ref * mix_K );
 

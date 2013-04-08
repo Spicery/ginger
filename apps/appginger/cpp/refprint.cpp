@@ -18,6 +18,7 @@
 
 
 #include <sstream>
+#include <iomanip>
 
 #include "mnx.hpp"
 
@@ -35,6 +36,35 @@
 #include "functionlayout.hpp"
 #include "refprint.hpp"
 #include "externalkind.hpp"
+#include "cell.hpp"
+
+int Numbering::number( const int depth ) {
+	this->numbers.resize( depth, 0 );
+	return this->numbers.back()++;
+}
+
+std::string Numbering::styledNumber( const int depth ) {
+	std::ostringstream out;
+	const int n = this->number( depth );
+	if ( depth <= 1 ) {
+		out << "[" << ( n + 1 ) << "]";
+	} else if ( depth == 2 ) {
+		this->alphabetical( out, n );
+	} else {
+		out << ( n + 1 ) << ".";
+	}
+	return out.str();
+}
+
+void Numbering::alphabetical( std::ostream & out, const int k ) {
+	out << "(";
+	out << static_cast< char >( 'a' + k % 25 );
+	const int k1 = k / 25;
+	if ( k1 > 0 ) {
+		out << k1;
+	}
+	out << ")";
+}
 
 const char * OPEN_LIST = "[%";
 const char * CLOSE_LIST = "%]";
@@ -42,29 +72,75 @@ const char * CLOSE_LIST = "%]";
 const char * OPEN_VECTOR = "[";
 const char * CLOSE_VECTOR = "]";
 
+const char * OPEN_MAP = "{";
+const char * CLOSE_MAP = "}";
+
 const char * STRING_QUOTE = "\"";
 const char * CHAR_QUOTE = "'";
 const char * SYMBOL_QUOTE = "`";
 
+void RefPrint::indent() {
+	for ( int i = this->indentation_level - 1; i >= 0; i -= 1 ) {
+		if ( i > 0 ) {
+			this->out << "    ";
+		} else {
+			if ( this->list_style ) {
+				const std::string num = this->numbering.styledNumber( this->indentation_level );
+				this->out << std::left << std::setw( 4 ) << num;
+			} else {
+				this->out << "  * ";
+			}
+		}
+	}
+}
+
+///	Suitable default for ch is anything except '\n'.
+void RefPrint::indentIfNeeded( const char ch = '\0' ) {
+	//this->out << "[" << this->column << "," << this->format << "]";
+	if ( this->format == RefPrint::LIST ) {
+		if ( this->column == 0 ) this->indent();
+		this->column += 1;
+		if ( ch == '\n' ) {
+			this->column = 0;
+		}
+	}
+}
+
 void RefPrint::output( const char ch ) {
-	if ( this->html_escaping && not this->showing ) {
+	if ( this->format == RefPrint::XHTML ) {
 		Ginger::mnxRenderChar( this->out, ch );
 	} else {
+		this->indentIfNeeded( ch );
 		this->out << ch;
 	}
 }
 
+void RefPrint::output( const long n ) {
+	if ( this->format == RefPrint::XHTML ) {
+		this->out << n;
+	} else {
+		this->indentIfNeeded();
+		this->out << n;
+	}
+}
+
 void RefPrint::output( const char * s ) {
-	if ( this->html_escaping && not this->showing ) {
+	if ( this->format == RefPrint::XHTML ) {
 		Ginger::mnxRenderText( this->out, s );
+	} else if ( this->format == RefPrint::LIST ) {
+		while ( *s != '\0' ) {
+			this->output( *s++ );
+		}
 	} else {
 		this->out << s;
 	}
 }
 
 void RefPrint::output( const std::string & s ) {
-	if ( this->html_escaping && not this->showing 	) {
+	if ( this->format == RefPrint::XHTML	) {
 		Ginger::mnxRenderText( this->out, s );
+	} else if ( this->format == RefPrint::LIST ) {
+		this->output( s.c_str() );
 	} else {
 		this->out << s;
 	}
@@ -73,32 +149,161 @@ void RefPrint::output( const std::string & s ) {
 //	Relies on null termination, which is potentially dodgy - except this
 //	is only for formatting printable characters.
 void RefPrint::refStringPrint( Ref * str_K ) {
-	char *s = ToChars( str_K + 1 );
-	if ( this->showing ) this->output( STRING_QUOTE );
+	char * s = ToChars( str_K + 1 );
+	if ( this->format == RefPrint::SHOW ) this->output( STRING_QUOTE );
 	this->output( s );
-	if ( this->showing ) this->output( STRING_QUOTE );
+	if ( this->format == RefPrint::SHOW ) this->output( STRING_QUOTE );
+}
+
+
+void RefPrint::startList( const bool ordered ) {
+	if ( this->format == RefPrint::XHTML ) {
+		this->out << ( ordered ? "<ol>" : "<ul>" );
+	} else if ( this->format == RefPrint::LIST ) {
+		//	Skip.
+	} else {
+		this->out << ( ordered ? OPEN_VECTOR : OPEN_LIST );
+	}
+}
+
+void RefPrint::startListItem( const bool is_ordered, const int n ) {
+	if ( this->format == RefPrint::XHTML ) {
+		this->out << "<li>";
+	} else if ( this->format == RefPrint::LIST ) {
+		this->list_style = is_ordered;		
+		//	This is an obscure idiom that implements separators.
+		if ( n > 0 ) {
+			this->output( '\n' );
+		}
+	} else if ( n > 0 ) {
+		this->out << ", ";
+	}
+}
+
+void RefPrint::endListItem( const bool is_ordered, const int n ) {
+	if ( this->format == RefPrint::XHTML ) {
+		this->out << "</li>";
+	} else if ( this->format == RefPrint::LIST ) {
+		//	Skip.
+	}
+}
+
+void RefPrint::endList( const bool ordered ) {
+	if ( this->format == RefPrint::XHTML ) {
+		this->out << ( ordered ? "</ol>" : "</ul>" );
+	} else if ( this->format == RefPrint::LIST ) {
+		//	Skip.
+	} else {
+		this->out << ( ordered ? CLOSE_VECTOR : CLOSE_LIST );
+	}
 }
 
 void RefPrint::refListPrint( Ref sofar ) {
-	bool sep = false;
-	this->output( OPEN_LIST );
+	RefPrint printer( *this, RefPrint::LIST );
+	printer.indentation_level += 1;
+	int n = 0;
+	printer.startList( false );
 	while ( IsPair( sofar ) ) {
-		if ( sep ) { this->output( "," ); } else { sep = true; }
-		this->refPrint( *( RefToPtr4( sofar ) + 1 ) );
+		printer.startListItem( false, n );
+		printer.refPrint( *( RefToPtr4( sofar ) + 1 ) );
 		sofar = *( RefToPtr4( sofar ) + 2 );
+		printer.endListItem( false, n++ );
 	}
-	this->output( CLOSE_LIST );
+	printer.endList( false );
 }
 
 void RefPrint::refVectorPrint( Ref * vec_K ) {
-	bool sep = false;
-	this->output( OPEN_VECTOR );
+	RefPrint printer( *this, RefPrint::LIST );
+	printer.indentation_level += 1;
 	long len = RefToLong( vec_K[ -1 ] );
+	printer.startList( true );
 	for ( long i = 1; i <= len; i++ ) {
-		if ( sep ) { this->output( ',' ); } else { sep = true; }
-		this->refPrint( vec_K[ i ] ); 
+		printer.startListItem( true, i - 1);
+		printer.refPrint( vec_K[ i ] ); 
+		printer.endListItem( true, i - 1 );
 	}
-	this->output( CLOSE_VECTOR );
+	printer.endList( true );
+}
+
+void RefPrint::startMap() {
+	if ( this->format == XHTML ) {
+		this->out << "<dl>";
+	} else if ( this->format == LIST ) {
+		//	Skip.
+	} else {
+		this->out << OPEN_MAP;
+	}
+}
+
+void RefPrint::startMapletKey( const int count ) {
+	if ( this->format == XHTML ) {
+		this->out << "<dt>";
+	} else if ( this->format == LIST ) {
+		//	This is an obscure idiom that implements separators.
+		if ( count != 0 ) {
+			this->output( '\n' );
+		}
+	}
+}
+
+void RefPrint::endMapletKey( const int count ) {
+	if ( this->format == XHTML ) {
+		this->out << "</dt>";
+	} else if ( this->format == LIST ) {
+		this->output( ": " );
+	}
+}
+
+void RefPrint::startMapletValue( const int count ) {
+	if ( this->format == XHTML ) {
+		this->out << "<dd>";
+	} else if ( this->format == LIST ) {
+		//	Skip
+	} else {
+		this->out << " => ";
+	}
+}
+
+void RefPrint::endMapletValue( const int count ) {
+	this->indentation_level -= 1;
+	if ( this->format == XHTML ) {
+		this->out << "</dd>";
+	} 
+}
+
+void RefPrint::endMap() {
+	this->indentation_level -= 1;
+	if ( this->format == XHTML ) {
+		this->out << "</dl>";
+	} else if ( this->format == PRINT ) {
+		//this->lineBreak();
+	} else {
+		this->out << CLOSE_MAP;
+	}
+}
+
+void RefPrint::refMapPrint( Ref * r ) {
+	RefPrint printer( *this, LIST );
+	printer.indentation_level += 1;
+	int count = 0;
+	Ginger::MapObject m( r );
+	this->startMap();
+	for ( Ginger::MapObject::Generator g( m ); !!g; ++g ) {
+		std::pair< Ginger::Cell, Ginger::Cell > p = *g;
+		this->startMapletKey( count );
+		this->refPrint( p.first.asRef() );
+		this->endMapletKey( count );
+		this->startMapletValue( count );
+		this->refPrint( p.second.asRef() );
+		this->endMapletValue( count++ );
+	}
+	this->endMap();
+}
+
+void RefPrint::refMapletPrint( Ref key, Ref value ) {
+	this->refPrint( key );
+	this->output( " => " );
+	this->refPrint( value );	
 }
 
 void RefPrint::refMixedPrint( Ref * mix_K ) {
@@ -155,8 +360,7 @@ void RefPrint::refElementPrint( Ref * mix_K ) {
 	if ( length > 0 ) {
 		this->refAttrMapPrint( attrmap_K, TAG_OPEN );
 		for ( long i = 0; i < length; i++ ) {
-			RefPrint xhtml( *this );
-			xhtml.html_escaping = true;
+			RefPrint xhtml( *this, XHTML );
 			xhtml.refPrint( mix_K[ 2 + i ] );
 		}
 		this->refAttrMapPrint( attrmap_K, TAG_CLOSE );
@@ -192,13 +396,9 @@ void RefPrint::refWRecordPrint( Ref * rec_K ) {
 //	
 void RefPrint::refInstancePrint( Ref * rec_K ) {
 	unsigned long len = lengthOfInstance( rec_K );
-	//std::cout << "Length of object " << len << std::endl;
-	//bool sep = false;
 	this->output( "<" );
 	this->refPrint( titleOfInstance( rec_K ) );
-	//this->out << "[" << len << "]{";
 	for ( unsigned long i = 1; i <= len; i++ ) {
-		//if ( sep ) { this->out << ","; } else { sep = true; }
 		this->output( ' ' );
 		this->refPrint( rec_K[ i ] ); 
 	}
@@ -241,6 +441,7 @@ void RefPrint::refFunctionPrint( const Ref fn ) {
 
 void RefPrint::refExternalPrint( const Ref * obj_K ) {
 	Ginger::External * e = reinterpret_cast< Ginger::External * >( obj_K[ EXTERNAL_KIND_OFFSET_VALUE ] );
+	this->indentIfNeeded();
 	e->print( this->out );
 }
 
@@ -257,9 +458,7 @@ void RefPrint::refPrint( const Ref r ) {
 		if ( IsFunctionKey( key ) ) {
 			refFunctionPrint( r );
 		} else if ( key == sysMapletKey ) {
-			refPrint( fastMapletKey( r ) );
-			this->output( " => " );
-			refPrint( fastMapletValue( r ) );
+			this->refMapletPrint( fastMapletKey( r ), fastMapletValue( r ) );
 		} else if ( IsSimpleKey( key ) ) {
 			#ifdef DBG_SYSPRINT
 				cerr << "-- printing simple key = " << hex << ToULong( key ) << dec << endl;
@@ -284,7 +483,7 @@ void RefPrint::refPrint( const Ref r ) {
 					break;
 				}
 				case MAP_KIND: {
-					gngPrintMapPtr( this->out, obj_K );
+					this->refMapPrint( obj_K );
 					break;
 				}
 				case RECORD_KIND: {
@@ -310,7 +509,7 @@ void RefPrint::refPrint( const Ref r ) {
 					break;
 				}
 				default: {
-					this->out << "<printing undefined>";
+					this->output( "<printing undefined>" );
 					break;
 				}
 			}
@@ -326,7 +525,7 @@ void RefPrint::refPrint( const Ref r ) {
 			cerr << "--  primitive" << endl;
 		#endif
 		if ( k == sysSmallKey ) {
-			this->out << SmallToLong( r );
+			this->output( SmallToLong( r ) );
 		} else if ( k == sysBoolKey ) {
 			this->output( r == SYS_FALSE ? "false" : "true" );
 		} else if ( k == sysAbsentKey ) {
@@ -344,13 +543,15 @@ void RefPrint::refPrint( const Ref r ) {
 				cerr << "--  character: " << (int)(CharacterToChar( r )) << endl;
 			#endif
 			//this->out << "<char " << r  << ">";
-			if ( this->showing ) this->output( CHAR_QUOTE );
-			this->out << CharacterToChar( r );
-			if ( this->showing ) this->output( CHAR_QUOTE );
+			if ( this->format == RefPrint::SHOW ) this->output( CHAR_QUOTE );
+			this->output( CharacterToChar( r ) );
+			if ( this->format == RefPrint::SHOW ) this->output( CHAR_QUOTE );
 		} else if ( k == sysSymbolKey ) {
-			if ( this->showing ) this->output( SYMBOL_QUOTE );
-			this->out << symbolToStdString( r );
-			if ( this->showing ) this->output( SYMBOL_QUOTE );
+			if ( this->format == RefPrint::SHOW ) this->output( SYMBOL_QUOTE );
+			this->output( symbolToStdString( r ) );
+			if ( this->format == RefPrint::SHOW ) this->output( SYMBOL_QUOTE );
+		} else if ( k == sysNilKey ) {
+			this->refListPrint( r );
 		} else if ( k == sysNilKey ) {
 			this->refListPrint( r );
 		} else if ( k == sysClassKey ) {

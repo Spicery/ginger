@@ -56,6 +56,7 @@ public:
 public:
 
 	HeapObject asHeapObject() const;
+	Ref asRef() const { return this->ref; }
 
 	bool isTermin() const { return this->ref == SYS_TERMIN; }
 	bool isAbsent() const { return this->ref == SYS_ABSENT; }

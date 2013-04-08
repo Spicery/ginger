@@ -68,21 +68,22 @@ void Cell::dump( MnxBuilder & b, const bool deep ) const {
 }
 
 void Cell::print( ostream & out, bool showing ) const {
-	RefPrint printer( out );
-	printer.setShowing( showing );
+	int column = 0;
+	RefPrint printer( out, column, RefPrint::SHOW );
 	printer.refPrint( this->ref );
 }
 
 void Cell::println( ostream & out, bool showing ) const {
-	RefPrint printer( out );
-	printer.setShowing( showing );
+	int column = 0;
+	RefPrint printer( out, column, RefPrint::SHOW );
 	printer.refPrint( this->ref );
 	out << endl;		
 }
 
 std::string Cell::toPrintString() const {
 	stringstream str;
-	RefPrint printer( str );
+	int column = 0;
+	RefPrint printer( str, column );
 	printer.refPrint( this->ref );
 	return str.str();
 }

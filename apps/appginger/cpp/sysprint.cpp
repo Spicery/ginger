@@ -34,9 +34,11 @@ using namespace std;
 using namespace Ginger;
 
 Ref * sysRefPrint( Ref * pc, class MachineClass * vm ) {
+	int column = 0;
+	RefPrint printer( std::cout, column );
 	for ( int i = vm->count - 1; i >= 0; i-- ) {
 		Ref r = vm->fastSubscr( i );
-		refPrint( r );		
+		printer.refPrint( r );		
 	}
 	vm->fastDrop( vm->count );
 	return pc;
@@ -67,8 +69,8 @@ SysInfo infoRefPrintln(
 
 
 Ref * sysRefShow( Ref * pc, class MachineClass * vm ) {
-	RefPrint printer( std::cout );
-	printer.setShowing( true );
+	int column = 0;
+	RefPrint printer( std::cout, column, RefPrint::SHOW );
 	for ( int i = vm->count - 1; i >= 0; i-- ) {
 		Ref r = vm->fastSubscr( i );
 		printer.refPrint( r );		
@@ -104,24 +106,26 @@ SysInfo infoSysPrintln(
 //------------------------------------------------------------------------------
 
 void refPrint( Ref r ) {
-	RefPrint printer( std::cout );
+	int column = 0;
+	RefPrint printer( std::cout, column );
 	printer.refPrint( r );
 }
 
 void refShow( const Ref r ) {
-	RefPrint printer( std::cout );
-	printer.setShowing( true );
+	int column = 0;
+	RefPrint printer( std::cout, column, RefPrint::SHOW );
 	printer.refPrint( r );
 }
 
 void refPrint( std::ostream & out, const Ref r ) {
-	RefPrint printer( out );
+	int column = 0;
+	RefPrint printer( out, column );
 	printer.refPrint( r );
 }
 
 void refShow( std::ostream & out, const Ref r ) {
-	RefPrint printer( out );
-	printer.setShowing( true );
+	int column = 0;
+	RefPrint printer( out, column, RefPrint::SHOW );
 	printer.refPrint( r );
 }
 
@@ -170,7 +174,8 @@ void gngPrintf( ostream & out, Ref * pc, class MachineClass * vm ) {
 	//	The control string is the first argument.
 	std::string control( Cell( vm->fastPeek( vm->count - 1 ) ).asHeapObject().asStringObject().getString() );
 
-	RefPrint printer( out );
+	int column = 0;
+	RefPrint printer( out, column );
 	
 	//	Iterate over the control string.
 	int index = vm->count - 2;
@@ -235,7 +240,7 @@ SysInfo infoPrintfln(
 );
 
 Ref * sysStringf( Ref * pc, class MachineClass * vm ) {
-	stringstream str;
+	std::ostringstream str;
 	gngPrintf( str, pc, vm );
 	vm->fastDrop( vm->count );
 	vm->fastPush( vm->heap().copyString( str.str().c_str() ) );	//	May cause garbage collection!
@@ -249,6 +254,32 @@ SysInfo infoStringf(
 	"Returns a formatted string" 
 );
 
+// - stringPrint ---------------------------------------------------------------
 
+static void gngStringPrint( ostream & out, Ref * pc, class MachineClass * vm ) {
+	int column;
+	RefPrint printer( out, column );
+	//	Iterate over the value stack.
+	for ( int index = vm->count - 1; index >= 0; index -= 1 ) {
+		printer.refPrint( vm->fastPeek( index ) );
+	}
+}
 
+Ref * sysStringPrint( Ref * pc, class MachineClass * vm ) {
+	std::ostringstream out;
+	gngStringPrint( out, pc, vm );
+	vm->fastDrop( vm->count );
+	if ( vm->count == 0 ) {
+		vm->checkStackRoom( 1 );
+	}
+	vm->fastPush( vm->heap().copyString( pc, out.str().c_str() ) );
+	return pc;
+}
+SysInfo infoStringPrint( 
+	SysNames( "stringPrint" ), 
+	Ginger::Arity( 0, true ), 
+	Ginger::Arity( 1 ), 
+	sysStringPrint, 
+	"Concatenates the print strings of an arbitrary number of items" 
+);
 

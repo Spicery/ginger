@@ -111,7 +111,7 @@ static bool refStringEquals( Ref * rx, Ref * ry ) {
 static bool refWRecordEquals( Ref * rx, Ref * ry ) {
 	unsigned long n = sizeAfterKeyOfRecordLayout( rx );
 	for ( unsigned long i = 1; i <= n; i++ ) {
-		if ( rx[ i ] == ry[ i ] ) return false;
+		if ( rx[ i ] != ry[ i ] ) return false;
 	}
 	return true;
 }

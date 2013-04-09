@@ -62,7 +62,7 @@ public:
 
 	RefPrint( const RefPrint & that, const enum FORMAT f ) : 
 		out( that.out ), 
-		format( f ),
+		format( that.format == PRINT ? f : that.format ),
 		indentation_level( that.indentation_level ),
 		column( that.column ),
 		list_style( false )		//	false = unordered

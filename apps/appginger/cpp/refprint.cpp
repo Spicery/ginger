@@ -80,6 +80,7 @@ const char * CHAR_QUOTE = "'";
 const char * SYMBOL_QUOTE = "`";
 
 void RefPrint::indent() {
+	//this->out << "{" << this->indentation_level << "}";
 	for ( int i = this->indentation_level - 1; i >= 0; i -= 1 ) {
 		if ( i > 0 ) {
 			this->out << "    ";
@@ -235,12 +236,12 @@ void RefPrint::startMap() {
 	}
 }
 
-void RefPrint::startMapletKey( const int count ) {
+void RefPrint::startMapletKey( const int it_count ) {
 	if ( this->format == XHTML ) {
 		this->out << "<dt>";
 	} else if ( this->format == LIST ) {
 		//	This is an obscure idiom that implements separators.
-		if ( count != 0 ) {
+		if ( it_count > 0 ) {
 			this->output( '\n' );
 		}
 	}
@@ -254,7 +255,7 @@ void RefPrint::endMapletKey( const int count ) {
 	}
 }
 
-void RefPrint::startMapletValue( const int count ) {
+void RefPrint::startMapletValue( const int it_count ) {
 	if ( this->format == XHTML ) {
 		this->out << "<dd>";
 	} else if ( this->format == LIST ) {
@@ -265,17 +266,15 @@ void RefPrint::startMapletValue( const int count ) {
 }
 
 void RefPrint::endMapletValue( const int count ) {
-	this->indentation_level -= 1;
 	if ( this->format == XHTML ) {
 		this->out << "</dd>";
 	} 
 }
 
 void RefPrint::endMap() {
-	this->indentation_level -= 1;
 	if ( this->format == XHTML ) {
 		this->out << "</dl>";
-	} else if ( this->format == PRINT ) {
+	} else if ( this->format == LIST ) {
 		//this->lineBreak();
 	} else {
 		this->out << CLOSE_MAP;
@@ -285,19 +284,19 @@ void RefPrint::endMap() {
 void RefPrint::refMapPrint( Ref * r ) {
 	RefPrint printer( *this, LIST );
 	printer.indentation_level += 1;
-	int count = 0;
+	int iteration_count = 0;
 	Ginger::MapObject m( r );
-	this->startMap();
+	printer.startMap();
 	for ( Ginger::MapObject::Generator g( m ); !!g; ++g ) {
 		std::pair< Ginger::Cell, Ginger::Cell > p = *g;
-		this->startMapletKey( count );
-		this->refPrint( p.first.asRef() );
-		this->endMapletKey( count );
-		this->startMapletValue( count );
-		this->refPrint( p.second.asRef() );
-		this->endMapletValue( count++ );
+		printer.startMapletKey( iteration_count );
+		printer.refPrint( p.first.asRef() );
+		printer.endMapletKey( iteration_count );
+		printer.startMapletValue( iteration_count );
+		printer.refPrint( p.second.asRef() );
+		printer.endMapletValue( iteration_count++ );
 	}
-	this->endMap();
+	printer.endMap();
 }
 
 void RefPrint::refMapletPrint( Ref key, Ref value ) {

@@ -177,7 +177,7 @@ void RefPrint::startListItem( const bool is_ordered, const int n ) {
 			this->output( '\n' );
 		}
 	} else if ( n > 0 ) {
-		this->out << ", ";
+		this->out << ",";
 	}
 }
 
@@ -243,6 +243,10 @@ void RefPrint::startMapletKey( const int it_count ) {
 		//	This is an obscure idiom that implements separators.
 		if ( it_count > 0 ) {
 			this->output( '\n' );
+		}
+	} else {
+		if ( it_count > 0 ) {
+			this->output( "," );
 		}
 	}
 }

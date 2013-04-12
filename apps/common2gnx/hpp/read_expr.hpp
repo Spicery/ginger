@@ -74,7 +74,7 @@ public:
 	Node readOptEmptyExprPrec( int prec );
 	Node readOptEmptyExprCheck( TokType fnc );
 	Node readOptExprPrec( int prec );
-	Node readSingleStmnt();
+	Node readSingleStmnt( const bool top_level = false );
 	void checkToken( TokType fnc );
 	void checkPeekToken( TokType fnc );
 	bool tryToken( TokType fnc );

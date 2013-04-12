@@ -13,6 +13,12 @@
 		</sysapp>
 	</bind>
 	<bind>
+		<var name="explodeFoo"/>
+		<sysapp name="newClassExploder">
+			<id name="Foo"/>
+		</sysapp>
+	</bind>
+	<bind>
 		<var name="isFoo"/>
 		<sysapp name="newClassRecogniser">
 			<id name="Foo"/>

@@ -124,6 +124,7 @@ ItemMap::ItemMap( const bool cstyle ) {
 	add( true, 		KW_RECORDCLASS,		tokty_recordclass,	PrF,		0		);
 	add( true,	 	KW_RETURN,			tokty_return,		PrF, 		0		);
 	add( true,		KW_SLOT,			tokty_slot,			Clo,		0		);
+	add( true,		KW_FIELD,			tokty_slot,			Clo,		0		);
 	add( true,      KW_SWITCH,			tokty_switch,       PrF,        0       );
 	add( !cstyle,	KW_THEN,			tokty_then,			Clo, 		0		);
 	add( true,		KW_THROW,			tokty_throw,		PrF,		0		);

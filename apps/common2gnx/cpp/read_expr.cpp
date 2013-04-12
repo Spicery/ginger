@@ -194,7 +194,7 @@ Node ReadStateClass::readCompoundStmnts() {
 	}
 }
 
-Node ReadStateClass::readSingleStmnt() {
+Node ReadStateClass::readSingleStmnt( const bool top_level ) {
 	if ( this->cstyle_mode ) {
 		Item it = this->item_factory->read();
 		//cerr << "SINGLE " << tok_type_name( it->tok_type ) << endl;
@@ -235,7 +235,7 @@ Node ReadStateClass::readSingleStmnt() {
 	} else if ( this->tryToken( tokty_semi ) ) {
 		return n;
 	} else {
-		if ( this->item_factory->peek()->role.IsCloser() ) {
+		if ( this->item_factory->peek()->role.IsCloser() && not top_level ) {
 			return n;	
 		} else {
 			throw CompileTimeError( "Missing semi-colon?" ).culprit( "Token", this->item_factory->peek()->nameString() );
@@ -1393,6 +1393,24 @@ Node ReadStateClass::readRecordClass() {
 	f.end();	//	ID
 	f.end();	//	SYSAPP
 	f.end(); //	BIND
+
+	//	Exploder
+	f.start( BIND );
+	f.start( VAR );
+	{
+		stringstream s;
+		s << "explode";
+		s << class_name;
+		f.put( VID_NAME, s.str() );		
+	}
+	f.end();		//	VAR
+	f.start( SYSAPP );
+	f.put( SYSAPP_NAME, "newClassExploder" );
+	f.start( ID );
+	f.put( VID_NAME, class_name );
+	f.end();		// 	ID
+	f.end();		//	SYAPP
+	f.end();		//	BIND
 
 	//	Recogniser
 	f.start( BIND );

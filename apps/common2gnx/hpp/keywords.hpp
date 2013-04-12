@@ -69,6 +69,7 @@
 #define KW_FAT_BRACKET_OPEN			"[%"
 #define KW_FAT_PAREN_CLOSE			"%)"
 #define KW_FAT_PAREN_OPEN			"(%"
+#define KW_FIELD                    "field"
 #define KW_FN_ARROW					"=>>"
 #define KW_FOR                      "for"
 #define KW_FROM 					"from"

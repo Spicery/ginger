@@ -216,7 +216,7 @@ void ToolMain::parse( FILE * in ) {
 		input.reset();
 		//cerr << "reset ... " << input.isPostfixAllowed() << endl;
 		//cerr << "about to read" << endl;
-		Node n = input.readSingleStmnt();
+		Node n = input.readSingleStmnt( true );
 		//cerr << "read expr" << endl;
 		if ( not n ) return;
 		//cerr << "about to render" << endl;

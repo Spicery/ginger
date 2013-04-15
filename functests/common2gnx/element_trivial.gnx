@@ -1,1 +1,1 @@
-<sysapp name="newElement"><sysapp name="newAttrMap"><constant type="string" value="foo"/></sysapp></sysapp>
+<sysapp name="newElement"><sysapp name="newAttrMap"><constant type="symbol" value="foo"/></sysapp></sysapp>

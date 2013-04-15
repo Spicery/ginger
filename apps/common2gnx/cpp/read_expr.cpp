@@ -640,18 +640,22 @@ static Node makeSymbol( const std::string & name ) {
 	return sym.build();
 }
 
-static Node makeAssertN( Node node, int n ) {
-	NodeFactory assert1;
-	assert1.start( "assert" );
-	assert1.put( "n", n );
-	assert1.add( node );
-	assert1.end();
-	return assert1.build();
+static Node makeAssert1( Node node ) {
+	if ( node->hasName( CONSTANT ) ) {
+		return node;
+	} else {
+		NodeFactory assert1;
+		assert1.start( "assert" );
+		assert1.put( "n", 1 );
+		assert1.add( node );
+		assert1.end();
+		return assert1.build();
+	}
 }
 
 static Node maybeMakeAssert1( const bool only1, Node node ) {
 	if ( only1 ) {
-		return makeAssertN( node, 1 );
+		return makeAssert1( node );
 	} else {
 		return node;
 	}
@@ -1031,8 +1035,8 @@ Node ReadStateClass::readElement() {
 
 			Node key_or_keyvalue = this->readAtomicExpr( false );
 
-			if ( this->tryPeekToken( tokty_equal ) ) {
-				Node a1 = makeAssertN( key_or_keyvalue, 1 );
+			if ( this->tryToken( tokty_equal ) ) {
+				Node a1 = makeAssert1( key_or_keyvalue );
 				element.add( a1 );
 				Node value = this->readAtomicExpr();
 				element.add( value );

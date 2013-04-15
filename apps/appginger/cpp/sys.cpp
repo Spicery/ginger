@@ -510,7 +510,6 @@ SysMap & SysMap::sysMap() {
 		#include "sysapply.inc"
 		#include "sysattrmap.inc"
 		#include "syscgi.inc"
-		#include "syselement.inc"
 		#include "sysexception.inc"
 		#include "sysstring.inc"
 		#include "sysunix.inc"

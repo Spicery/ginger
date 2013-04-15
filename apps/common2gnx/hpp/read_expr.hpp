@@ -34,7 +34,7 @@ private:
 	Node readIf( TokType sense, TokType closer );
 	Node readSyscall();
 	Node readFor();
-	Node readAtomicExpr();
+	Node readAtomicExpr( const bool only1 = true );
 	Node readLambda();
 	Node readDefinition();
 	Node readVarVal( TokType fnc );

@@ -631,7 +631,34 @@ static Node makeCharSequence( Item item ) {
 	}
 }
 
-Node ReadStateClass::readAtomicExpr() {
+static Node makeSymbol( const std::string & name ) {
+	NodeFactory sym;
+	sym.start( "constant" );
+	sym.put( "type", "symbol" );
+	sym.put( "value", name );
+	sym.end();
+	return sym.build();
+}
+
+static Node makeAssertN( Node node, int n ) {
+	NodeFactory assert1;
+	assert1.start( "assert" );
+	assert1.put( "n", n );
+	assert1.add( node );
+	assert1.end();
+	return assert1.build();
+}
+
+static Node maybeMakeAssert1( const bool only1, Node node ) {
+	if ( only1 ) {
+		return makeAssertN( node, 1 );
+	} else {
+		return node;
+	}
+}
+
+///	@param only1 True if one and only one result permitted.
+Node ReadStateClass::readAtomicExpr( const bool only1 ) {
 	ItemFactory ifact = this->item_factory;
 	Item item = ifact->read();
 	TokType fnc = item->tok_type;
@@ -643,10 +670,13 @@ Node ReadStateClass::readAtomicExpr() {
 		simple.put( CONSTANT_VALUE, item->nameString() );
 		simple.end();
 	 	return simple.build();
+	} else if ( fnc == tokty_id ) {
+		return makeSymbol( item->nameString() );
 	} else if ( fnc == tokty_charseq ) {
-		return makeCharSequence( item );
+		//	TODO: Could give a better error message here.
+		return maybeMakeAssert1( only1, makeCharSequence( item ) );
 	} else if ( fnc == tokty_oparen ) {
-		return this->readExprCheck( tokty_cparen );
+		return maybeMakeAssert1( only1, this->readExprCheck( tokty_cparen ) );
 	} else {
 		throw CompileTimeError( "Unexpected token while reading attribute in element" ).culprit( "Token", item->nameString() );
 	}
@@ -983,26 +1013,35 @@ Node ReadStateClass::readElement() {
 		element.start( SYSAPP );
 		element.put( SYSAPP_NAME, "newAttrMap" );
 
-		const string element_name( this->readIdName() );
-		element.start( CONSTANT );
-		element.put( CONSTANT_TYPE, "string" );
-		element.put( CONSTANT_VALUE, element_name );
-		element.end();
-		
+		// Cache the element name for the close tag. Anything other than
+		// a literal name will need the close-anything tag.
+		std::string element_name;
+		Item item = this->item_factory->peek();
+		if ( item->tok_type == tokty_id ) {
+			element_name = item->nameString();
+		}
+
+		Node name = this->readAtomicExpr();
+		element.add( name );	
+
 		bool closed = false;
 		for (;;) {
 			if ( this->tryToken( tokty_gt ) ) break;
 			if ( this->tryToken( tokty_slashgt ) ) { closed = true; break; }
-			element.start( CONSTANT );
-			element.put( CONSTANT_TYPE, "string" );
-			element.put( CONSTANT_VALUE, this->readIdName() );
-			element.end();
-			this->checkToken( tokty_equal );
-			element.start( "assert" );
-			element.put( "n", "1" );
-			Node value = this->readAtomicExpr();
-			element.add( value );
-			element.end();
+
+			Node key_or_keyvalue = this->readAtomicExpr( false );
+
+			if ( this->tryPeekToken( tokty_equal ) ) {
+				Node a1 = makeAssertN( key_or_keyvalue, 1 );
+				element.add( a1 );
+				Node value = this->readAtomicExpr();
+				element.add( value );
+			} else {
+				element.start( SYSAPP );
+				element.put( SYSAPP_NAME, "explodeMapsAndMaplets" );
+				element.add( key_or_keyvalue );
+				element.end();
+			}
 		}
 		element.end(); 	// newAttrMap.
 		if ( not closed ) {

@@ -119,7 +119,7 @@ int ItemFactoryClass::eatsWhiteSpaceAndComments() {
     for(;;) {
         ch = this->nextchar();
         if ( isspace( ch ) ) continue;
-        if ( ch == '#' || ( ch == '/' && this->trychar( '/' ) ) ) {
+        if ( ch == '#' || ( this->cstyle_mode && ch == '/' && this->trychar( '/' ) ) ) {
             do
                 ch = this->nextchar();
             while ( ch != '\n' && ch != '\r' );

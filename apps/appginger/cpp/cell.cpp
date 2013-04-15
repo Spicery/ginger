@@ -114,6 +114,13 @@ MapObject HeapObject::asMapObject() const {
 	return MapObject( this->obj_K );
 }
 
+MapletObject HeapObject::asMapletObject() const {
+	if ( not this->isMapletObject() ) {
+		throw Ginger::Mishap( "Maplet needed" ).culprit( "Argument", this->toPrintString() );
+	}
+	return MapletObject( this->obj_K );
+}
+
 StringObject HeapObject::asStringObject() const {
 	if ( not this->isStringObject() ) {
 		throw Ginger::Mishap( "String needed" ).culprit( "Argument", this->toPrintString() );
@@ -292,6 +299,15 @@ External * ExternalObject::getExternal() const {
 	return reinterpret_cast< External * >( this->obj_K[ EXTERNAL_KIND_OFFSET_VALUE ] );
 }
 
+// -- MapletObject -------------------------------------------------------------
+
+Cell MapletObject::key() const {
+	return this->obj_K[ MAPLET_KEY_OFFSET ];
+}
+
+Cell MapletObject::value() const {
+	return this->obj_K[ MAPLET_VALUE_OFFSET ];
+}
 
 // -- MapObject ----------------------------------------------------------------
 

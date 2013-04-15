@@ -95,6 +95,7 @@ public:	//	Checked downcasts.
 	StringObject asStringObject() const;
 	VectorObject asVectorObject() const;
 	MapObject asMapObject() const;	
+	MapletObject asMapletObject() const;	
 
 public:	//	Others
 	bool isFunctionObject() const { return IsFunctionKey( *this->obj_K ); }
@@ -107,6 +108,7 @@ public:	//	Others
 	bool isRecordObject() const { return IsSimple( *this->obj_K ) && KindOfSimpleKey( *this->obj_K ) == RECORD_KIND; }
 	bool isPairObject() const { return IsSimple( *this->obj_K ) && KindOfSimpleKey( *this->obj_K ) == PAIR_KIND; }
 	bool isMapObject() const { return IsSimple( *this->obj_K ) && KindOfSimpleKey( *this->obj_K ) == MAP_KIND; }
+	bool isMapletObject() const { return IsMaplet( this->obj_K ); }
 	bool isWRecordObject() const { return IsSimple( *this->obj_K ) && KindOfSimpleKey( *this->obj_K ) == WRECORD_KIND; }
 	bool isAtomicWRecordObject() const { return IsSimple( *this->obj_K ) && KindOfSimpleKey( *this->obj_K ) == ATOMIC_WRECORD_KIND; }
 	bool isExternalObject() const { return IsSimple( *this->obj_K ) && KindOfSimpleKey( *this->obj_K ) == EXTERNAL_KIND; }
@@ -181,6 +183,16 @@ public:
 public:
 	Cell index( Cell c ) const;
 	Generator & entries();
+};
+
+class MapletObject : public HeapObject {
+public:
+	MapletObject( Ref * _p ) : HeapObject( _p ) {}
+	MapletObject( HeapObject _h ) : HeapObject( _h ) {}
+	MapletObject( Cell _c ) : HeapObject( _c ) {}
+public:
+	Cell key() const;
+	Cell value() const;
 };
 
 class ExternalObject : public HeapObject {

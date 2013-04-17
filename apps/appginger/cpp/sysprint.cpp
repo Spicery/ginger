@@ -151,7 +151,7 @@ Ref * sysShowMeRuntimeInfo( Ref * pc, class MachineClass * vm ) {
 	return pc;
 }
 SysInfo infoShowMeRuntimeInfo(
-	SysNames( "showMeRuntimeInfo" ),
+	SysNames( "showMeRuntimeInfo", SysNames::SysSynonym( "gingerInfo" ) ),
 	Ginger::Arity( 0 ), 
 	Ginger::Arity( 0 ), 
 	sysShowMeRuntimeInfo, 

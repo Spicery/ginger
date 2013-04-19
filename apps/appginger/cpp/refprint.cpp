@@ -364,6 +364,9 @@ void RefPrint::refElementPrint( Ref * mix_K ) {
 		this->refAttrMapPrint( attrmap_K, TAG_OPEN );
 		for ( long i = 0; i < length; i++ ) {
 			RefPrint xhtml( *this, XHTML );
+			if ( i != 0 && this->format == RefPrint::SHOW ) {
+				this->out << ",";
+			}
 			xhtml.refPrint( mix_K[ 2 + i ] );
 		}
 		this->refAttrMapPrint( attrmap_K, TAG_CLOSE );

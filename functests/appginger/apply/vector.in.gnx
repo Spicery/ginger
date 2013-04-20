@@ -1,0 +1,9 @@
+<app>
+	<vector>
+		<constant type="char" value="a"/>
+		<constant type="char" value="b"/>
+		<constant type="char" value="c"/>
+		<constant type="char" value="d"/>
+	</vector>
+	<constant type="int" value="2"/>
+</app>

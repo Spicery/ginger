@@ -175,6 +175,9 @@ public:
 		Generator & operator ++();
 		std::pair< Cell, Cell > operator *() const;
 	};
+private:
+	long numBuckets() const;
+	
 public:
 	MapObject( Ref * _p ) : HeapObject( _p ) {}
 	MapObject( HeapObject _h ) : HeapObject( _h ) {}

@@ -29,7 +29,7 @@ using namespace std;
 Ref * sysCheckBool( Ref * pc, class MachineClass * vm ) {
 	Ref b = vm->fastPeek();
 	if ( ! IsBoolean( b ) ) {
-		throw Ginger::Mishap( "Boolean needed" ).culprit( "Value", refToString( b ) );
+		throw Ginger::Mishap( "Boolean needed" ).culprit( "Value", refToShowString( b ) );
 	}
 	return pc;
 }

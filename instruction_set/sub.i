@@ -50,7 +50,7 @@ if ( IsSmall( rx ) ) {
 		*( VMVP ) = vm->heap().copyDouble( x - y );
 		RETURN( pc + 1 );
 	} else {
-		throw Mishap( "Bad arguments for - operation" ).culprit( "First", refToString( rx ) ).culprit( "Second", refToString( ry ) );
+		throw Mishap( "Bad arguments for - operation" ).culprit( "First", refToShowString( rx ) ).culprit( "Second", refToShowString( ry ) );
 	}
 } else if ( IsDouble( rx ) ) {
 	gngdouble_t x, y;
@@ -60,10 +60,10 @@ if ( IsSmall( rx ) ) {
 	} else if ( IsDouble( ry ) ) {
 		y = gngFastDoubleValue( ry );
 	} else {
-		throw Mishap( "Bad arguments for - operation" ).culprit( "First", refToString( rx ) ).culprit( "Second", refToString( ry ) );
+		throw Mishap( "Bad arguments for - operation" ).culprit( "First", refToShowString( rx ) ).culprit( "Second", refToShowString( ry ) );
 	}
 	*( VMVP ) = vm->heap().copyDouble( x - y );
 	RETURN( pc + 1 );
 } else {
-	throw Mishap( "Bad arguments for - operation" ).culprit( "First", refToString( rx ) ).culprit( "Second", refToString( ry ) );
+	throw Mishap( "Bad arguments for - operation" ).culprit( "First", refToShowString( rx ) ).culprit( "Second", refToShowString( ry ) );
 } 

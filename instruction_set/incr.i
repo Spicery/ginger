@@ -37,6 +37,6 @@ if ( IsSmall( rx ) ) {
 	*( VMVP ) = vm->heap().copyDouble( gngFastDoubleValue( rx ) + 1.0 );
 	RETURN( pc + 1 );
 } else {
-	throw Mishap( "INCR instruction: Number needed" ).culprit( "Value", refToString( rx ) );
+	throw Mishap( "INCR instruction: Number needed" ).culprit( "Value", refToShowString( rx ) );
 }
 

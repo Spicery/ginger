@@ -46,7 +46,7 @@
 using namespace std;
 
 static std::exception failApply( Ref object ) {
-    throw Ginger::Mishap( "Trying to apply inappropriate value" ).culprit( "Value", refToString( object ) );
+    throw Ginger::Mishap( "Trying to apply inappropriate value" ).culprit( "Value", refToShowString( object ) );
 }
 
 static Ref * gngApplySimpleKey( Ref simple_key, Ref * pc, MachineClass * vm ) {
@@ -141,10 +141,10 @@ Ref * sysApply( Ref * pc, MachineClass *vm ) {
         } else if ( IsSimpleKey( key ) ) {
             switch ( KindOfSimpleKey( key ) ) {
                 case VECTOR_KIND: {
-                    return sysGetIndexVector( sysFastSwap( pc, vm ), vm );
+                    return sysGetIndexVector( pc, vm ); //sysFastSwap( pc, vm ), vm );
                 }
                 case PAIR_KIND: {
-                    return sysListIndex( sysFastSwap( pc, vm ), vm );
+                    return sysListIndex( pc, vm ); //sysFastSwap( pc, vm ), vm );
                 }
                 case MAP_KIND: {
                     throw Ginger::Mishap( "Internal error (sysApply) - not implemented" );
@@ -176,13 +176,13 @@ Ref * sysApply( Ref * pc, MachineClass *vm ) {
                 }
                 */
                 case STRING_KIND: {
-                    return sysStringIndex( sysFastSwap( pc, vm ), vm );
+                    return sysStringIndex( pc, vm );    //sysFastSwap( pc, vm ), vm );
                 }
                 case EXTERNAL_KIND: {
                     return reinterpret_cast< Ginger::External * >( object_K[ EXTERNAL_KIND_OFFSET_VALUE ] )->sysApply( pc, vm );
                 }
                 default: {
-                    throw Ginger::Mishap( "Trying to apply non-applicable obect" ).culprit( "Object", refToString( object ) );
+                    throw Ginger::Mishap( "Trying to apply non-applicable obect" ).culprit( "Object", refToShowString( object ) );
                 }
             }
         } else if ( IsObj( key ) ) {

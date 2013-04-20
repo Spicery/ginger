@@ -38,5 +38,5 @@ if ( IsSmall( rx ) ) {
 	*( VMVP ) = vm->heap().copyDouble( -x );
 	RETURN( pc + 1 );
 } else {
-	throw Mishap( "Trying to negate a non-number" ).culprit( "First", refToString( rx ) );
+	throw Mishap( "Trying to negate a non-number" ).culprit( "First", refToShowString( rx ) );
 } 

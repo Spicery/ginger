@@ -319,8 +319,10 @@ MapObject::Generator::Generator( MapObject m ) :
 }
 
 bool MapObject::Generator::operator!() {
+	//std::cerr << "calling !: " << ( this->current_bucket == NULL ) << ", " << this->map_crawl.hasBeenCalled() << std::endl;
 	if ( this->current_bucket != NULL ) return false;
 	if ( not this->map_crawl.hasBeenCalled() ) {
+		//std::cerr << "calling (should update next bucket)" << std::endl;
 		++*this;
 	} 
 	return this->current_bucket == NULL;
@@ -363,6 +365,10 @@ Cell MapObject::index( Cell c ) const {
 	}
 
 	return Cell( SYS_ABSENT );
+}
+
+long MapObject::numBuckets() const {
+	return 1 << fastMapPtrWidth( this->obj_K );
 }
 
 

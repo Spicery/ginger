@@ -28,7 +28,7 @@ Ref * sysAttrMapExplode( Ref *pc, class MachineClass * vm ) {
 	if ( vm->count != 1) throw Ginger::Mishap( "ArgsMismatch" );
 	const Ref amap = vm->fastPop();
 	
-	if ( !IsAttrMap( amap ) ) throw Ginger::Mishap( "Map needed" ).culprit( "Object", refToString( amap ) );
+	if ( !IsAttrMap( amap ) ) throw Ginger::Mishap( "Map needed" ).culprit( "Object", refToShowString( amap ) );
 	
 	Ref * amap_K = RefToPtr4( amap );
 	const long N = SmallToLong( amap_K[ ATTR_MAP_OFFSET_LENGTH ] );
@@ -46,7 +46,7 @@ Ref * sysAttrMapIndex( Ref *pc, class MachineClass * vm ) {
 	const Ref amap = vm->fastPop();
 	const Ref idx = vm->fastPop();
 	
-	if ( !IsAttrMap( amap ) ) throw Ginger::Mishap( "Map needed" ).culprit( "Object", refToString( amap ) );
+	if ( !IsAttrMap( amap ) ) throw Ginger::Mishap( "Map needed" ).culprit( "Object", refToShowString( amap ) );
 	
 	Ref * amap_K = RefToPtr4( amap );
 	const long N = RefToLong( amap_K[ ATTR_MAP_OFFSET_LENGTH ] );

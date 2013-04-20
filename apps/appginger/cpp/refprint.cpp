@@ -331,7 +331,7 @@ void RefPrint::refMixedPrint( Ref * mix_K ) {
 //	WARNING: KNOWN ERRORS. There is not the proper quoting of characters 
 //	in the name, key or value.
 void RefPrint::refAttrMapPrint( Ref * attrmap_K, enum Tag flag ) {
-	std::string name( refToString( attrmap_K[ 1 ] ) );
+	std::string name( refToPrintString( attrmap_K[ 1 ] ) );
 	if ( flag == TAG_CLOSE ) {
 		this->out << "</";
 		Ginger::mnxRenderText( this->out, name );
@@ -342,10 +342,10 @@ void RefPrint::refAttrMapPrint( Ref * attrmap_K, enum Tag flag ) {
 		long length = SmallToULong( attrmap_K[ MIXED_LAYOUT_OFFSET_LENGTH ] );
 		for ( long i = 0; i < length; i += 2 ) {
 			this->out << " ";
-			std::string key( refToString( attrmap_K[ 2 + i ] ) );
+			std::string key( refToPrintString( attrmap_K[ 2 + i ] ) );
 			Ginger::mnxRenderText( this->out, key );
 			this->out << "=\"";
-			std::string value( refToString( attrmap_K[ 3 + i ] ) );
+			std::string value( refToPrintString( attrmap_K[ 3 + i ] ) );
 			Ginger::mnxRenderText( this->out, value );
 			this->out << "\"";
 		}
@@ -356,7 +356,7 @@ void RefPrint::refAttrMapPrint( Ref * attrmap_K, enum Tag flag ) {
 void RefPrint::refElementPrint( Ref * mix_K ) {
 	Ref attrmap = mix_K[ 1 ];
 	if ( ! IsAttrMap( attrmap ) ) {
-		throw Ginger::Mishap( "Attribute map needed" ).culprit( "Item", refToString( attrmap ) );
+		throw Ginger::Mishap( "Attribute map needed" ).culprit( "Item", refToShowString( attrmap ) );
 	}
 	Ref * attrmap_K = RefToPtr4( attrmap );
 	long length = SmallToULong( mix_K[ MIXED_LAYOUT_OFFSET_LENGTH ] );

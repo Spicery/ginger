@@ -137,9 +137,19 @@ void refPtrPrint( std::ostream & out, Ref * r ) {
 	refPrint( out, Ptr4ToRef( r ) );
 }
 
-std::string refToString( Ref ref ) {
+std::string refToPrintString( Ref ref ) {
 	std::ostringstream s;
-	refPrint( s, ref );
+	int column = 0;
+	RefPrint printer( s, column, RefPrint::PRINT );
+	printer.refPrint( ref );
+	return s.str();
+}
+
+std::string refToShowString( Ref ref ) {
+	std::ostringstream s;
+	int column = 0;
+	RefPrint printer( s, column, RefPrint::SHOW );
+	printer.refPrint( ref );
 	return s.str();
 }
 

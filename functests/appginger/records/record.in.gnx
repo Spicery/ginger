@@ -44,7 +44,7 @@
 	</app>
 </bind>
 <bind>
-	<var name="E" protected="true" tag="public" />
+	<var name="Ex" protected="true" tag="public" />
 	<app>
 		<id name="newClassExploder" />
 		<seq>
@@ -68,6 +68,6 @@
 	<app><id name="A"/><id name="X"/></app>
 	<app><id name="B"/><id name="X"/></app>
 	<sysapp name="newList">
-		<app><id name="E"/><id name="X"/></app>
+		<app><id name="Ex"/><id name="X"/></app>
 	</sysapp>
 </sysapp>

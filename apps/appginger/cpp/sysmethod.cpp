@@ -34,11 +34,11 @@ Ref * sysNewMethod( Ref * pc, MachineClass * vm ) {
 	Ref ninputs = vm->fastPop();
 	Ref name = vm->fastPop();
 	
-	if ( !IsSmall( noutputs ) || !IsSmall( ninputs ) ) throw Ginger::Mishap( "Invalid arguments" ).culprit( "#Outputs", refToString( noutputs ) ).culprit( "Inputs", refToString( ninputs ) );
+	if ( !IsSmall( noutputs ) || !IsSmall( ninputs ) ) throw Ginger::Mishap( "Invalid arguments" ).culprit( "#Outputs", refToShowString( noutputs ) ).culprit( "Inputs", refToShowString( ninputs ) );
 	
 	CodeGen codegen = vm->codegen();
 	codegen->vmiFUNCTION( 
-		name == SYS_ABSENT ? std::string( EMPTY_FN_NAME ) : refToString( name ),
+		name == SYS_ABSENT ? std::string( EMPTY_FN_NAME ) : refToShowString( name ),
 		SmallToLong( ninputs ), 
 		SmallToLong( noutputs ) 
 	);
@@ -67,9 +67,9 @@ Ref * sysSetSlot( Ref * pc, MachineClass * vm ) {
 	Ref position = vm->fastPop();
 	Ref gclass = vm->fastPop();
 
-	if ( !IsMethod( method ) ) throw Ginger::Mishap( "Method needed" ).culprit( "Method", refToString( method ) );
-	if ( !IsSmall( position ) ) throw Ginger::Mishap( "Small needed" ).culprit( "Position", refToString( position ) );
-	if ( !IsClass( gclass ) ) throw Ginger::Mishap( "Class needed" ).culprit( "Class", refToString( gclass ) );
+	if ( !IsMethod( method ) ) throw Ginger::Mishap( "Method needed" ).culprit( "Method", refToShowString( method ) );
+	if ( !IsSmall( position ) ) throw Ginger::Mishap( "Small needed" ).culprit( "Position", refToShowString( position ) );
+	if ( !IsClass( gclass ) ) throw Ginger::Mishap( "Class needed" ).culprit( "Class", refToShowString( gclass ) );
 	
 	long pos = SmallToLong( position );
 	long nfields = SmallToLong( RefToPtr4( gclass )[ CLASS_OFFSET_NFIELDS ] );

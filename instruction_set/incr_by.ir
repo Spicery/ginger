@@ -45,7 +45,7 @@ if ( IsSmall( rx ) ) {
 		)
 	);	
 } else {
-	throw Mishap( "INCR_BY instruction: Number needed" ).culprit( "Value", refToString( rx ) );
+	throw Mishap( "INCR_BY instruction: Number needed" ).culprit( "Value", refToShowString( rx ) );
 } 
 
 RETURN( pc + 2 );

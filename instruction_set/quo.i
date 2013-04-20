@@ -24,7 +24,7 @@ Ref ry = *( VMVP-- );
 Ref rx = *( VMVP );
 if ( IsSmall( rx ) && IsSmall( ry ) ) {
 	if ( IsZeroSmall( ry ) ) {
-		throw Mishap( "MOD Instruction: Dividing by zero" ).culprit( "Numerator", refToString( rx ) );
+		throw Mishap( "MOD Instruction: Dividing by zero" ).culprit( "Numerator", refToShowString( rx ) );
 	} else {
 		long b = ToLong( ry );
 		long a = ToLong( rx );
@@ -32,6 +32,6 @@ if ( IsSmall( rx ) && IsSmall( ry ) ) {
 		RETURN( pc + 1 );
 	}
 } else {
-	throw Mishap( "QUO Instruction: Integers only" ).culprit( "First", refToString( rx ) ).culprit( "Second", refToString( ry ) );
+	throw Mishap( "QUO Instruction: Integers only" ).culprit( "First", refToShowString( rx ) ).culprit( "Second", refToShowString( ry ) );
 }
 

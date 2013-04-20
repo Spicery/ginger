@@ -224,7 +224,7 @@ Ref * sysargRecognise( Ref * pc, MachineClass * vm ) {
 static const std::string makeName( const char * prefix, Ref title ) {
 	if ( title == SYS_ABSENT ) return EMPTY_FN_NAME;
 	std::string t( prefix == NULL ? "" : prefix );
-	return t + refToString( title );
+	return t + refToPrintString( title );
 }
 
 /*
@@ -286,7 +286,7 @@ static Ref * sysargdatAccess( Ref * pc, MachineClass *vm ) {
 	if ( refDataKey( this_item ) == that_key ) {
 		vm->fastPeek() = RefToPtr4( this_item )[ N ];
 	} else {
-		throw Ginger::Mishap( "Invalid type for field access" ).culprit( "Expected", refToString( that_key ) ).culprit( "Actual", refToString( this_item ) );
+		throw Ginger::Mishap( "Invalid type for field access" ).culprit( "Expected", refToShowString( that_key ) ).culprit( "Actual", refToShowString( this_item ) );
 	}
 	return pc;
 }
@@ -345,9 +345,9 @@ static Ref * sysargExplode( Ref * pc, MachineClass * vm ) {
 	long nfields = SmallToLong( RefToPtr4( the_key )[ CLASS_OFFSET_NFIELDS ] );
 	if ( vm->count != 1 ) throw Ginger::Mishap( "Wrong number of arguments" );
 	Ref obj = vm->fastPop();
-	if ( !IsObj( obj ) ) throw Ginger::Mishap( "Object needed" ).culprit( "Argument", refToString( obj ) );
+	if ( !IsObj( obj ) ) throw Ginger::Mishap( "Object needed" ).culprit( "Argument", refToShowString( obj ) );
 	Ref * obj_K = RefToPtr4( obj );
-	if ( obj_K[ 0 ] != the_key ) throw Ginger::Mishap( "Wrong type of Object" ).culprit( "Object", refToString( obj ) );
+	if ( obj_K[ 0 ] != the_key ) throw Ginger::Mishap( "Wrong type of Object" ).culprit( "Object", refToShowString( obj ) );
 	for ( int i = 1; i <= nfields; i++ ) {
 		vm->fastPush( obj_K[ i ] );
 	}

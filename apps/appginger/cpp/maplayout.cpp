@@ -50,7 +50,8 @@ Ref & fastAssocNext( Ref r ) {
 }
 
 /*
-	Layout of the flags field.
+	Layout of the flags field. 
+	TODO: I believe the 2-bit tag is no longer current. [SFKL]
 	
 		+-----------+--------------+-----------+
 		|   Bit 8   |   Bits 2-7   |  Bit 0-1  |

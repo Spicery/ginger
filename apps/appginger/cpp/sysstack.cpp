@@ -66,7 +66,7 @@ Ref * sysEraseLeading( Ref * pc, class MachineClass * vm ) {
     }
     Ref count = vm->fastPop();
     if ( not IsSmall( count ) ) {
-        throw Ginger::Mishap( "Last argument must be an integer" ).culprit( "Last arg", refToString( count ) );
+        throw Ginger::Mishap( "Last argument must be an integer" ).culprit( "Last arg", refToShowString( count ) );
     }
     long n = SmallToLong( count );
     if ( n < 0 ) {
@@ -105,7 +105,7 @@ Ref * sysEraseAllButLeading( Ref * pc, class MachineClass * vm ) {
     }
     Ref count = vm->fastPop();
     if ( not IsSmall( count ) ) {
-        throw Ginger::Mishap( "Last argument must be an integer" ).culprit( "Last arg", refToString( count ) );
+        throw Ginger::Mishap( "Last argument must be an integer" ).culprit( "Last arg", refToShowString( count ) );
     }
     long keep = SmallToLong( count );
     if ( keep < 0 ) {
@@ -135,7 +135,7 @@ Ref * sysEraseTrailing( Ref * pc, class MachineClass * vm ) {
     }
     Ref count = vm->fastPop();
     if ( not IsSmall( count ) ) {
-        throw Ginger::Mishap( "Last argument must be an integer" ).culprit( "Last arg", refToString( count ) );
+        throw Ginger::Mishap( "Last argument must be an integer" ).culprit( "Last arg", refToShowString( count ) );
     }
     long n = SmallToLong( count );
     if ( n < 0 ) {
@@ -165,7 +165,7 @@ Ref * sysEraseAllButTrailing( Ref * pc, class MachineClass * vm ) {
     }
     Ref count = vm->fastPop();
     if ( not IsSmall( count ) ) {
-        throw Ginger::Mishap( "Last argument must be an integer" ).culprit( "Last arg", refToString( count ) );
+        throw Ginger::Mishap( "Last argument must be an integer" ).culprit( "Last arg", refToShowString( count ) );
     }
     long n1 = SmallToLong( count );
     if ( n1 < 0 ) {
@@ -343,7 +343,7 @@ Ref * sysDupLeading( Ref * pc, class MachineClass * vm ) {
     }
     Ref rK = vm->fastPop();
     if ( not IsSmall( rK ) ) {
-        throw Ginger::Mishap( "Small integer needed" ).culprit( "Duplication count", refToString( rK ) );
+        throw Ginger::Mishap( "Small integer needed" ).culprit( "Duplication count", refToShowString( rK ) );
     }
     long K = SmallToLong( rK );
     long n = vm->count - 1;
@@ -375,7 +375,7 @@ Ref * sysDupAllButLeading( Ref * pc, class MachineClass * vm ) {
     }
     Ref rK = vm->fastPop();
     if ( not IsSmall( rK ) ) {
-        throw Ginger::Mishap( "Small integer needed" ).culprit( "Count", refToString( rK ) );
+        throw Ginger::Mishap( "Small integer needed" ).culprit( "Count", refToShowString( rK ) );
     }
     long K = SmallToLong( rK );
     long n = vm->count - 1;
@@ -447,7 +447,7 @@ Ref * sysDupTrailing( Ref * pc, class MachineClass * vm ) {
     }
     Ref rK = vm->fastPop();
     if ( not IsSmall( rK ) ) {
-        throw Ginger::Mishap( "Small integer needed" ).culprit( "Count", refToString( rK ) );
+        throw Ginger::Mishap( "Small integer needed" ).culprit( "Count", refToShowString( rK ) );
     }
     long K = SmallToLong( rK );
     long n = vm->count - 1;
@@ -480,7 +480,7 @@ Ref * sysDupAllButTrailing( Ref * pc, class MachineClass * vm ) {
     }
     Ref rK = vm->fastPop();
     if ( not IsSmall( rK ) ) {
-        throw Ginger::Mishap( "Small integer needed" ).culprit( "Count", refToString( rK ) );
+        throw Ginger::Mishap( "Small integer needed" ).culprit( "Count", refToShowString( rK ) );
     }
     long K = SmallToLong( rK );
     long n = vm->count - 1;

@@ -87,7 +87,7 @@ Ref * sysFastGetFastIterator( Ref * pc, class MachineClass * vm ) {
 		Ref key = *obj_K;
 		if ( IsSimpleKey( key ) ) {
 			if ( SublayoutOfSimpleKey( key ) == ATOMIC_SUBLAYOUT ) {
-				throw Mishap( "Trying to iterate over atomic value" ).culprit( "Value", refToString( obj_K ) );
+				throw Mishap( "Trying to iterate over atomic value" ).culprit( "Value", refToShowString( obj_K ) );
 			} else {
 				switch ( KindOfSimpleKey( key ) ) {
 					case PAIR_KIND: {
@@ -98,7 +98,7 @@ Ref * sysFastGetFastIterator( Ref * pc, class MachineClass * vm ) {
 					}
 					case WRECORD_KIND:
 					case RECORD_KIND: {
-						throw Mishap( "Trying to iterate over record value" ).culprit( "Value", refToString( obj_K ) );
+						throw Mishap( "Trying to iterate over record value" ).culprit( "Value", refToShowString( obj_K ) );
 						break;
 					}
 					case STRING_KIND: {
@@ -219,7 +219,7 @@ Ref * sysUpdaterOfIndex( Ref *pc, class MachineClass * vm ) {
 				//case STRING_KIND: return pc = sysStringIndex( pc, vm );
 				//case MAP_KIND: return pc = sysMapIndex( pc, vm );
 				//case ATTR_KIND: return pc = sysAttrMapIndex( pc, vm );
-				default: throw Ginger::Mishap( "ToBeDone: sysUpdaterOfIndex" ).culprit( "Item", refToString( map ) );
+				default: throw Ginger::Mishap( "ToBeDone: sysUpdaterOfIndex" ).culprit( "Item", refToShowString( map ) );
 			}
 		} else {
 			throw Ginger::Mishap( "ToBeDone: sysUpdaterOfIndex (1)" );
@@ -228,7 +228,7 @@ Ref * sysUpdaterOfIndex( Ref *pc, class MachineClass * vm ) {
 		//return sysListIndex( pc, vm );
 		throw Ginger::Mishap( "ToBeDone: sysUpdaterOfIndex (2)" );
 	} else {
-		throw Ginger::Mishap( "ToBeDone: sysUpdaterOfIndex (3)" ).culprit( "Item", refToString( map ) );
+		throw Ginger::Mishap( "ToBeDone: sysUpdaterOfIndex (3)" ).culprit( "Item", refToShowString( map ) );
 	}
 
 }
@@ -284,7 +284,7 @@ Ref * sysExplode( Ref *pc, class MachineClass * vm ) {
 				throw Mishap( "Trying to explode (...) a function object" );
 			} else if ( IsSimpleKey( key ) ) {
 				if ( SublayoutOfSimpleKey( key ) == ATOMIC_SUBLAYOUT ) {
-					throw Mishap( "Trying to explode an atomic value" ).culprit( "Value", refToString( obj_K ) );
+					throw Mishap( "Trying to explode an atomic value" ).culprit( "Value", refToShowString( obj_K ) );
 				} else {
 					switch ( KindOfSimpleKey( key ) ) {
 						case VECTOR_KIND: {
@@ -367,7 +367,7 @@ Ref * sysLength( Ref *pc, class MachineClass * vm ) {
 				throw Mishap( "Trying to take the length of a function object" );
 			} else if ( IsSimpleKey( key ) ) {
 				if ( SublayoutOfSimpleKey( key ) == ATOMIC_SUBLAYOUT ) {
-					throw Mishap( "Trying to take the length of an atomic object" ).culprit( "Object", refToString( obj_K ) );
+					throw Mishap( "Trying to take the length of an atomic object" ).culprit( "Object", refToShowString( obj_K ) );
 				} else {
 					switch ( KindOfSimpleKey( key ) ) {
 						case VECTOR_KIND: {
@@ -395,7 +395,7 @@ Ref * sysLength( Ref *pc, class MachineClass * vm ) {
 						case WRECORD_KIND:
 						case RECORD_KIND: {
 							//vm->fastPeek() = LongToSmall( sizeAfterKeyOfRecordLayout( obj_K ) );
-							throw Mishap( "Trying to take the length of a record" ).culprit( "Object", refToString( obj_K ) );
+							throw Mishap( "Trying to take the length of a record" ).culprit( "Object", refToShowString( obj_K ) );
 							break;
 						}
 						default: {

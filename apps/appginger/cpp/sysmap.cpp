@@ -141,13 +141,16 @@ static long log2( unsigned long v ) {
 }
 
 Ref * Ginger::MapCrawl::nextBucket() { 
+	//std::cerr << "Updating next bucket: " << ( this->bucket != SYS_ABSENT ) << std::endl;
 	if ( this->bucket != SYS_ABSENT ) {
 		Ref * x = RefToPtr4( this->bucket );
 		this->bucket = x[ ASSOC_OFFSET_NEXT ];
 		return x;
 	} else {
+		//std::cerr << "Advancing: " << index_of_data << " < " << size_of_data << " ?" << std::endl;
 		while ( index_of_data < size_of_data ) {
 			this->bucket = this->data[ this->index_of_data++ ];
+			//std::cerr << "  advance... " << ( this->bucket == SYS_ABSENT ) << std::endl;
 			if ( this->bucket != SYS_ABSENT ) return this->nextBucket();
 		}
 		return NULL;
@@ -160,7 +163,7 @@ bool Ginger::MapCrawl::hasBeenCalled() const {
 
 
 Ginger::MapCrawl::MapCrawl( Ref * map_K ) :
-	size_of_data( SmallToLong( map_K[ MAP_OFFSET_COUNT ] ) ),
+	size_of_data( 1 << fastMapPtrWidth( map_K ) ),
 	index_of_data( 0 ),
 	data( RefToPtr4( map_K[1] ) + 1 ),
 	bucket( SYS_ABSENT )
@@ -322,7 +325,7 @@ Ref * sysNewCacheEqMap( Ref *pc, MachineClass * vm ) {
 Ref * sysMapValues( Ref *pc, class MachineClass * vm ) {
 	if ( vm->count != 1 ) throw Ginger::Mishap( "ArgsMismatch" );
 	Ref r = vm->fastPop();
-	if ( !IsMap( r ) ) throw Ginger::Mishap( "Map needed" ).culprit( "Object", refToString( r ) );
+	if ( !IsMap( r ) ) throw Ginger::Mishap( "Map needed" ).culprit( "Object", refToShowString( r ) );
 	Ref * map_K = RefToPtr4( r );
 	long len = SmallToLong( map_K[ MAP_OFFSET_COUNT ] );
 	vm->checkStackRoom( len );
@@ -341,7 +344,7 @@ Ref * sysMapValues( Ref *pc, class MachineClass * vm ) {
 Ref * sysMapExplode( Ref *pc, class MachineClass * vm ) {
 	if ( vm->count != 1 ) throw Ginger::Mishap( "ArgsMismatch" );
 	Ref r = vm->fastPeek();		// Don't remove from stack yet, may need to GC.
-	if ( !IsMap( r ) ) throw Ginger::Mishap( "Map needed" ).culprit( "Object", refToString( r ) );
+	if ( !IsMap( r ) ) throw Ginger::Mishap( "Map needed" ).culprit( "Object", refToShowString( r ) );
 
 	//	See if we need a garbage collection.
 	long count = SmallToLong( fastMapCount( r ) );
@@ -377,7 +380,7 @@ Ref * sysMapIndex( Ref * pc, class MachineClass * vm ) {
 	const Ref map = vm->fastPop();
 	const Ref idx = vm->fastPop();
 	
-	if ( !IsMap( map ) ) throw Ginger::Mishap( "Map needed" ).culprit( "Object", refToString( map ) );
+	if ( !IsMap( map ) ) throw Ginger::Mishap( "Map needed" ).culprit( "Object", refToShowString( map ) );
 	Ref * map_K = RefToPtr4( map );
 	const Ref map_key = *map_K;
 	

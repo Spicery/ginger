@@ -45,5 +45,5 @@ if ( IsSmall( a ) ) {
 	} 
 } 
 
-throw Mishap( "LT: Numbers needed" ).culprit( "First", refToString( a ) ).culprit( "Second", refToString( b ) );
+throw Mishap( "LT: Numbers needed" ).culprit( "First", refToShowString( a ) ).culprit( "Second", refToShowString( b ) );
 RETURN( NULL ); // sop for compiler.

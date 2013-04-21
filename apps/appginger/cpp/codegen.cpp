@@ -1211,39 +1211,21 @@ Ref CodeGenClass::calcConstant( Gnx mnx ) {
 		return r;
 	} else if ( type == "sysclass" ) {
 		/*
-		<sysclass value="Absent"/>          ### class for absent
-		<sysclass value="Bool"/>            ### class for true & false
-		<sysclass value="SmallInt"/>        ### class for 'small' integers
-		<sysclass value="Float"/>           ### class for floats
-		<sysclass value="String"/>          ### class for strings
-		<sysclass value="Char"/>            ### class for characters
-		<sysclass value="Nil"/>             ### class for nil
-		<sysclass value="Pair"/>            ### class for list pairs
-		<sysclass value="Vector"/>          ### class for vectors
-		<sysclass value="Class"/>           ### class for classes
+		<constant type="sysclass" value="Absent"/>          ### class for absent
+		<constant type="sysclass" value="Bool"/>            ### class for true & false
+		<constant type="sysclass" value="Small"/>        	### class for 'small' integers
+		<constant type="sysclass" value="Float"/>           ### class for floats
+		<constant type="sysclass" value="String"/>          ### class for strings
+		<constant type="sysclass" value="Char"/>            ### class for characters
+		<constant type="sysclass" value="Nil"/>             ### class for nil
+		<constant type="sysclass" value="Pair"/>            ### class for list pairs
+		<constant type="sysclass" value="Vector"/>          ### class for vectors
+		<constant type="sysclass" value="Class"/>           ### class for classes
 		*/
-		const std::string& cname( mnx->attribute( CONSTANT_VALUE ) );
-		if ( cname == "Absent" ) {
-			return sysAbsentKey;
-		} else if ( cname == "Bool" ) {
-			return sysBoolKey;
-		} else if ( cname == "Small" ) {
-			return sysSmallKey;
-		} else if ( cname == "Double" ) {
-			//	TODO: Add Float?
-			return sysDoubleKey;
-		} else if ( cname == "String" ) {
-			return sysStringKey;
-		} else if ( cname == "Char" ) {
-			return sysCharKey;
-		} else if ( cname == "Nil" ) {
-			return sysNilKey;
-		} else if ( cname == "Pair" ) {
-			return sysPairKey;
-		} else if ( cname == "Vector" ) {
-			return sysVectorKey;
-		} else if ( cname == "Class" ) {
-			return sysClassKey;
+		const std::string cname( mnx->attribute( CONSTANT_VALUE ) );
+		Ref r = nameToKey( cname );
+		if ( r != SYS_ABSENT ) {
+			return r;
 		} else {
 			//	TODO: Function keys - not as easy as the documentation makes out.
 			//	TODO: Map keys - same deal

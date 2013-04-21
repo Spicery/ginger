@@ -16,6 +16,8 @@
     along with AppGinger.  If not, see <http://www.gnu.org/licenses/>.
 \******************************************************************************/
 
+#include <string>
+
 #include "key.hpp"
 #include "mishap.hpp"
 
@@ -50,4 +52,9 @@ const char * keyName( Ref key ) {
 	} else {
 		return "<Also Unknown>";
 	}
+}
+
+Ref nameToKey( const std::string & name ) {
+	#include "name_to_simplekey.cpp.auto"
+	return SYS_ABSENT;
 }

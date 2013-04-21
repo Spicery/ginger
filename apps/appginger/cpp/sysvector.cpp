@@ -19,6 +19,7 @@
 #include "key.hpp"
 #include "common.hpp"
 #include "vectorlayout.hpp"
+#include "sys.hpp"
 #include "sysvector.hpp"
 
 #include <string.h>
@@ -67,38 +68,28 @@ Ref * sysVectorAppend( Ref * pc, class MachineClass * vm ) {
 
 	vm->fastPush( xfr.makeRef() );
 	return pc;
-
 }
+SysInfo infoVectorAppend( 
+	SysNames( "appendVector" ), 
+	Ginger::Arity( 2 ), 
+	Ginger::Arity( 1 ), 
+	sysVectorAppend, 
+	"Appends two vectors"
+);
 
-Ref * sysIsMutableVector( Ref *pc, class MachineClass * vm ) {
+
+Ref * sysIsDynamicVector( Ref *pc, class MachineClass * vm ) {
 	Ref vec = vm->fastPeek();
-	vm->fastPeek() = IsMutableVector( vec ) ? SYS_TRUE : SYS_FALSE;
+	vm->fastPeek() = IsDynamicVector( vec ) ? SYS_TRUE : SYS_FALSE;
 	return pc;
 }
-
-
-//	TODO: Deprecate in favour of sysVectorGetIndex which is automatically generated
-/*
-Ref * sysVectorIndex( Ref *pc, class MachineClass * vm ) {
-	if ( vm->count != 2 ) throw Ginger::Mishap( "ArgsMismatch" );
-	Ref idx = vm->fastPop();
-	if ( not IsSmall( idx ) ) throw Ginger::Mishap( "TypeError (vector needed)" );
-	Ref vec = vm->fastPeek();
-	if ( not IsVector( vec ) ) throw Ginger::Mishap( "TypeError (vector needed)" );
-	Ref * vec_K = RefToPtr4( vec );
-	
-	const long I = SmallToLong( idx );
-	const long N = SmallToLong( vec_K[ VECTOR_OFFSET_LENGTH ] );
-	
-	if ( 1 <= I && I <= N ) {
-		vm->fastPeek() = vec_K[ I ];
-	} else {
-		throw Ginger::Mishap( "OutOfRange" );
-	}
-	
-	return pc;
-}
-*/
+SysInfo infoIsDynamicVector( 
+	SysNames( "isDynamicVector" ), 
+	Ginger::Arity( 1 ), 
+	Ginger::Arity( 1 ), 
+	sysIsDynamicVector, 
+	"Return true if the vector is mutable, else false"
+);
 
 Ref * sysVectorExplode( Ref *pc, class MachineClass * vm ) {
 	if ( vm->count != 1 ) throw Ginger::Mishap( "Wrong number of arguments for vectorExplode" );
@@ -115,6 +106,14 @@ Ref * sysVectorExplode( Ref *pc, class MachineClass * vm ) {
 	
 	return pc;
 }
+SysInfo infoVectorExplode( 
+	SysNames( "explodeVector" ), 
+	Ginger::Arity( 1 ), 
+	Ginger::Arity( 0, true ), 
+	sysVectorExplode, 
+	"Explodes a vector into its members"
+);
+
 
 Ref * sysVectorLength( Ref *pc, class MachineClass * vm ) {
 	if ( vm->count != 1 ) throw Ginger::Mishap( "Wrong number of arguments for vectorLength" );
@@ -125,6 +124,14 @@ Ref * sysVectorLength( Ref *pc, class MachineClass * vm ) {
 	vm->fastPeek() = LongToSmall( sizeAfterKeyOfVectorLayout( obj_K ) );
 	return pc;
 }
+SysInfo infoVectorLength( 
+	SysNames( "lengthVector" ), 
+	Ginger::Arity( 1 ), 
+	Ginger::Arity( 1 ), 
+	sysVectorLength, 
+	"Returns the length of a vector"
+);
+
 
 Ref * sysFastVectorLength( Ref *pc, class MachineClass * vm ) {
 	Ref r = vm->fastPeek();
@@ -132,5 +139,4 @@ Ref * sysFastVectorLength( Ref *pc, class MachineClass * vm ) {
 	vm->fastPeek() = LongToSmall( sizeAfterKeyOfVectorLayout( obj_K ) );
 	return pc;
 }
-
 

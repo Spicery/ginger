@@ -513,7 +513,6 @@ SysMap & SysMap::sysMap() {
 		#include "sysexception.inc"
 		#include "sysstring.inc"
 		#include "sysunix.inc"
-		#include "sysvector.inc"
 		#include "sysmap.inc.auto"
 	};
 

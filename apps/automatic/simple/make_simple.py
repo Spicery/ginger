@@ -189,12 +189,13 @@ keys = [
 	KeyData( "Symbol", 			7, 	1, 	Kind.KEYLESS_KIND	),
 
 	#	Do NOT move references without changing IsVectorID and
-	#	IsMutableVectorID. Must be on a multiple of 2 boundary.
+	#	IsDynamicVectorID. Must be on a multiple of 2 boundary.
+	# 	Also reserving 10 & 11 to make way for Updateable Vector.
 	KeyData( "Vector",			8, 	0, 	Kind.VECTOR_KIND	),
-	KeyData( "MutableVector",   9,  0,  Kind.VECTOR_KIND    ),
+	KeyData( "DynamicVector",   9,  0,  Kind.VECTOR_KIND    ),
 
-	KeyData( "Termin",			10, 0, 	Kind.KEYLESS_KIND	),
-	KeyData( "Unicode", 		11, 0, 	Kind.KEYLESS_KIND	),
+	#KeyData( "Unicode", 		10, 0, 	Kind.KEYLESS_KIND	),	# Free, making room for UpdateableVector.
+	KeyData( "Termin",			11, 0, 	Kind.KEYLESS_KIND	),
 	KeyData( "Char", 			12, 0, 	Kind.KEYLESS_KIND	),
 	KeyData( "Maplet",  		13, 2, 	Kind.RECORD_KIND	),
 	KeyData( "Indirection", 	14, 1, 	Kind.RECORD_KIND	),
@@ -273,6 +274,12 @@ def generateCPP():
 		file.write( 'case {}: return "{}";\n'.format( a.ordinal(), a.name() ) )
 	file.close()
 
+def generateNameToKeyCPP():
+	file = open( "name_to_simplekey.cpp.auto", 'w' )
+	for a in keys:
+		file.write( 'if ( name == "{}" ) return sys{}Key;\n'.format( a.name(), a.name() ) )
+	file.close()
+
 ################################################################################
 #	Main
 ################################################################################
@@ -280,6 +287,7 @@ def generateCPP():
 def generate():
 	generateHPP()
 	generateCPP()
+	generateNameToKeyCPP()
 
 generate()
 

@@ -1230,10 +1230,10 @@ Ref CodeGenClass::calcConstant( Gnx mnx ) {
 			//	TODO: Function keys - not as easy as the documentation makes out.
 			//	TODO: Map keys - same deal
 			//			<sysclass value="Fn"/>              ### class for function objects
-			throw SystemError( "Constant not recognised" ).culprit( "Expression", mnx->toString() );
+			throw SystemError( "System class not recognised" ).culprit( "Expression", mnx->toString() );
 		}
 	} else {
-		throw SystemError( "Constant not recognised" ).culprit( "Expression", mnx->toString() );
+		throw SystemError( "System constant not recognised" ).culprit( "Expression", mnx->toString() );
 	}
 }
 

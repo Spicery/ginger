@@ -1768,7 +1768,7 @@ public:
 	the stack frame by
 	(1) determining the number of arguments to take off the stack.
 	(2) the total size of the stack frame, ignoring temporaries.
-	(3) assign indexes into the stack frame (slots) for inner variale
+	(3) assign indexes into the stack frame (slots) for inner variables.
 */
 class SlotAllocation : public Ginger::MnxWalker {
 private:
@@ -1850,6 +1850,9 @@ public:
 			this->popCount();			
 		} else if ( x == BLOCK || x == FOR || isBranchIf( path ) || isBranchSwitch( path ) ) {
 			this->popCount();
+            if ( x == BLOCK ) {
+                element.name() = SEQ;
+            }
 		} else if ( isFormalArgs( path ) ) {
 			//	We are ending an argument list. Stash the count of the formals.
 			getParent( path ).putAttribute( "args.count", this->count );

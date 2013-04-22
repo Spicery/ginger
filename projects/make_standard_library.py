@@ -121,7 +121,7 @@ def generateGingerLibraryExtras( stdinfo ):
 	pkg.createConstantClassFile( "Nil" )
 	pkg.createConstantClassFile( "Pair" )
 	pkg.createConstantClassFile( "Vector" )
-	pkg.createConstantClassFile( "DynamicVector" )
+	pkg.createConstantClassFile( "UpdateableVector" )
 	pkg.createConstantClassFile( "Class" )
 
 

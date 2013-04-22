@@ -189,10 +189,10 @@ keys = [
 	KeyData( "Symbol", 			7, 	1, 	Kind.KEYLESS_KIND	),
 
 	#	Do NOT move references without changing IsVectorID and
-	#	IsDynamicVectorID. Must be on a multiple of 2 boundary.
+	#	IsUpdateableVectorID. Must be on a multiple of 2 boundary.
 	# 	Also reserving 10 & 11 to make way for Updateable Vector.
 	KeyData( "Vector",			8, 	0, 	Kind.VECTOR_KIND	),
-	KeyData( "DynamicVector",   9,  0,  Kind.VECTOR_KIND    ),
+	KeyData( "UpdateableVector",   9,  0,  Kind.VECTOR_KIND    ),
 
 	#KeyData( "Unicode", 		10, 0, 	Kind.KEYLESS_KIND	),	# Free, making room for UpdateableVector.
 	KeyData( "Termin",			11, 0, 	Kind.KEYLESS_KIND	),

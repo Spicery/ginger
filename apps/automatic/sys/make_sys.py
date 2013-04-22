@@ -204,8 +204,8 @@ class DataClassGenerator( object ):
 	def isName( self ):
 		return "Is" + self.data_key_root
 
-	def isDynamicName( self ):
-		return "IsDynamic" + self.data_key_root
+	def isUpdateableName( self ):
+		return "IsUpdateable" + self.data_key_root
 
 	def consName( self ):
 		return "sysNew" + self.data_key_root
@@ -404,7 +404,7 @@ class FullVectorClassGenerator( DataClassGenerator ):
 		cpp.write( "       Ref n = vm->fastPop();\n" )
 		cpp.write( "       Ref x = vm->fastPop();\n" )
 		cpp.write( "       Ref * p = RefToPtr4( v );\n" )
-		cpp.write( "       if ( {}( v ) ) {{\n".format( self.isDynamicName() ) )
+		cpp.write( "       if ( {}( v ) ) {{\n".format( self.isUpdateableName() ) )
 		cpp.write( "           if ( IsSmall( n ) && LongToSmall( 1 ) <= n && n <= p[ -1 ] ) {\n" )
 		cpp.write( "               p[ SmallToLong( n ) ] = x;\n" )
 		cpp.write( "           } else {\n" )
@@ -555,7 +555,7 @@ class FullMixedClassGenerator( DataClassGenerator ):
 		cpp.write( "       Ref n = vm->fastPop();\n" );
 		cpp.write( "       Ref v = vm->fastPeek();\n" );
 		cpp.write( "       Ref * p = RefToPtr4( v );\n" );
-		cpp.write( "       if ( {}( v ) ) {{\n".format( self.isDynamicName() ) )
+		cpp.write( "       if ( {}( v ) ) {{\n".format( self.isUpdateableName() ) )
 		cpp.write( "           if ( IsSmall( n ) && LongToSmall( 1 ) <= n && n <= p[ -1 ] ) {\n" );
 		cpp.write( "               vm->fastPeek() = p[ {} + SmallToLong( n ) ];\n".format( len( self.fieldNames ) ) )
 		cpp.write( "           } else {\n" );
@@ -618,7 +618,7 @@ ref = FullRecordClassGenerator( sysconsts, "Maplet", "mapletKey", "mapletValue" 
 ref.generateFilesWithPrefix( "maplet" )
 
 ref = FullVectorClassGenerator( sysconsts, "Vector" )
-ref.addKeyRoots( "", "Dynamic" )
+ref.addKeyRoots( "", "Updateable" )
 ref.generateFilesWithPrefix( "vector" )
 
 ref = FullMixedClassGenerator( sysconsts, "AttrMap", MethodOptions( "CRF" ), "attrMapName" )

@@ -2,7 +2,7 @@
 
 val numdoors := 100;
 
-val doors := initMutableVector( numdoors, false );
+val doors := initUpdateableVector( numdoors, false );
 for i from 1 to numdoors do
     for j from i by i to numdoors do
     	#setIndexVector( not( doors[ j ] ), j, doors );

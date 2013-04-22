@@ -78,16 +78,16 @@ SysInfo infoVectorAppend(
 );
 
 
-Ref * sysIsDynamicVector( Ref *pc, class MachineClass * vm ) {
+Ref * sysIsUpdateableVector( Ref *pc, class MachineClass * vm ) {
 	Ref vec = vm->fastPeek();
-	vm->fastPeek() = IsDynamicVector( vec ) ? SYS_TRUE : SYS_FALSE;
+	vm->fastPeek() = IsUpdateableVector( vec ) ? SYS_TRUE : SYS_FALSE;
 	return pc;
 }
-SysInfo infoIsDynamicVector( 
-	SysNames( "isDynamicVector" ), 
+SysInfo infoIsUpdateableVector( 
+	SysNames( "isUpdateableVector" ), 
 	Ginger::Arity( 1 ), 
 	Ginger::Arity( 1 ), 
-	sysIsDynamicVector, 
+	sysIsUpdateableVector, 
 	"Return true if the vector is mutable, else false"
 );
 

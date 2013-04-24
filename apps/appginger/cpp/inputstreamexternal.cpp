@@ -20,9 +20,12 @@
 #include <iostream>
 #include <fstream>
 
+#include "listlayout.hpp"
+#include "inputstreamlayout.hpp"
 #include "inputstreamexternal.hpp"
 #include "machine.hpp"
 #include "key.hpp"
+#include "cell.hpp"
 
 namespace Ginger {
 using namespace std;
@@ -43,15 +46,36 @@ void InputStreamExternal::print( std::ostream & out ) {
     out << "<InputStream \"" << this->file_name << "\">";
 }
 
+
 Ref * InputStreamExternal::sysApply( Ref * pc, MachineClass * vm ) {
-    // Safe to assign to top, replacing the ref to the input stream.
-    char c;
-    vm->fastPeek() = this->input->get( c ).good() ? IntToChar( c ) : SYS_TERMIN;
+    Ref * input_stream_K = RefToPtr4( vm->fastPeek() );
+    Ref pushed = input_stream_K[ PUSHBACK_OFFSET_INPUT_STREAM ];
+    if ( pushed == SYS_NIL ) {
+        // Safe to assign to top, replacing the ref to the input stream.
+        char c;
+        vm->fastPeek() = this->input->get( c ).good() ? IntToChar( c ) : SYS_TERMIN;
+    } else {
+        Ref * pair_K = RefToPtr4( pushed );
+        Ref item = pair_K[ PAIR_HEAD_OFFSET ];
+        vm->fastPeek() = item;
+
+        if ( item == SYS_TERMIN ) {
+            //  If we return TERMIN then we are closed.
+            input_stream_K[ PUSHBACK_OFFSET_INPUT_STREAM ] = SYS_NIL;
+            this->close();
+        } else {
+            input_stream_K[ PUSHBACK_OFFSET_INPUT_STREAM ] = pair_K[ PAIR_TAIL_OFFSET ];
+        }
+    }
     return pc;
 }
 
 bool InputStreamExternal::isGood() const {
     return this->input->good();
+}
+
+void InputStreamExternal::close() {
+    this->input->close();
 }
 
 } // namespace Ginger

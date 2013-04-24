@@ -16,36 +16,9 @@
     along with AppGinger.  If not, see <http://www.gnu.org/licenses/>.
 \******************************************************************************/
 
-#ifndef GNG_INPUT_STREAM_HPP
-#define GNG_INPUT_STREAM_HPP
+#ifndef INPUT_STREAM_LAYOUT_HPP
+#define INPUT_STREAM_LAYOUT_HPP
 
-#include <memory>
-#include <fstream>
-#include <string>
-
-#include "external.hpp"
-
-
-namespace Ginger {
-
-class InputStreamExternal : public External {
-private:
-    std::string file_name; 
-    std::auto_ptr< std::ifstream > input;
-
-public:
-    InputStreamExternal( std::string & _fname );
-    virtual ~InputStreamExternal();
-
-public:
-    void print( std::ostream & out );
-    Ref * sysApply( Ref * pc, MachineClass * vm );
-
-public:
-    bool isGood() const;
-    void close();
-};
-
-} // namespace Ginger
+#define PUSHBACK_OFFSET_INPUT_STREAM 2
 
 #endif

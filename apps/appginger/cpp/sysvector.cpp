@@ -91,6 +91,19 @@ SysInfo infoIsUpdateableVector(
 	"Return true if the vector is mutable, else false"
 );
 
+Ref * sysIsVectorLike( Ref *pc, class MachineClass * vm ) {
+	Ref vec = vm->fastPeek();
+	vm->fastPeek() = IsVectorLike( vec ) ? SYS_TRUE : SYS_FALSE;
+	return pc;
+}
+SysInfo infoIsVectorLike( 
+	SysNames( "isVectorLike" ), 
+	Ginger::Arity( 1 ), 
+	Ginger::Arity( 1 ), 
+	sysIsVectorLike, 
+	"Return true if the argument is a vector, else false"
+);
+
 Ref * sysVectorExplode( Ref *pc, class MachineClass * vm ) {
 	if ( vm->count != 1 ) throw Ginger::Mishap( "Wrong number of arguments for vectorExplode" );
 	

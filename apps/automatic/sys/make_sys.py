@@ -295,7 +295,8 @@ class FullRecordClassGenerator( DataClassGenerator ):
 	def generate( self, cpp, hpp ):
 		for aname in self.allKeyRoots():
 			self.generateConstructor( aname, cpp, hpp )
-		self.generateRecogniser( cpp, hpp )
+		if self.options.isGenRecogniser():
+			self.generateRecogniser( cpp, hpp )
 		for i in range( len( self.fieldNames ) ):
 			self.generateField( i, cpp, hpp )
 
@@ -631,9 +632,15 @@ ref = WordRecordClassGenerator( sysconsts, "Double", MethodOptions( "R" ) )
 ref.generateFilesWithPrefix( "double" )
 ref = WordRecordClassGenerator( sysconsts, "External", MethodOptions( "r" ) )
 ref.generateFilesWithPrefix( "external" )
-ref = WordRecordClassGenerator( sysconsts, "InputStream", MethodOptions( "r" ) )
+
+#	N.B. I am making external records FULL RECORDS on the basis that the
+#	pointers appear as integer tags.
+ref = FullRecordClassGenerator( sysconsts, "InputStream"  )
+ref.options = MethodOptions( "r" )
 ref.generateFilesWithPrefix( "inputstream" )
-ref = WordRecordClassGenerator( sysconsts, "OutputStream", MethodOptions( "r" ) )
+
+ref = FullRecordClassGenerator( sysconsts, "OutputStream" )
+ref.options = MethodOptions( "r" )
 ref.generateFilesWithPrefix( "outputstream" )
 
 #	Create the insert for the sysMap table.

@@ -29,6 +29,7 @@
 #include "cell.hpp"
 #include "heap.hpp"
 #include "externalkind.hpp"
+#include "inputstreamlayout.hpp"
 #include "inputstreamexternal.hpp"
 #include "outputstreamexternal.hpp"
 
@@ -36,6 +37,50 @@ namespace Ginger {
 
 using namespace Ginger;
 
+static Ref * getInputStreamKeyPtr( MachineClass * vm, int n ) {
+    if ( vm->count <= n ) throw Mishap( "Too few arguments supplied" );
+    Ref input_stream = vm->fastPeek( n );
+    if ( not IsObj( input_stream ) ) throw Ginger::Mishap( "Invalid argument instead of InputStream" ).culprit( "Argument", refToShowString( input_stream ) );
+    Ref * input_stream_K = RefToPtr4( input_stream );
+    if ( input_stream_K[0] != sysInputStreamKey ) {
+        throw Ginger::Mishap( "Argument not an InputStream" ).culprit( "Argument", refToShowString( input_stream ) );
+    }    
+    return input_stream_K;
+}
+
+Ref * sysCloseInputStream( Ref * pc, MachineClass * vm ) {
+    Ref * input_stream_K = getInputStreamKeyPtr( vm, 0 );
+    input_stream_K[ PUSHBACK_OFFSET_INPUT_STREAM ] = SYS_NIL;
+    reinterpret_cast< Ginger::InputStreamExternal * >( input_stream_K[ EXTERNAL_KIND_OFFSET_VALUE ] )->close();
+    return pc;
+}
+SysInfo infoCloseInputStream( 
+    SysNames( "closeInputStream" ), 
+    Arity( 1 ), 
+    Arity( 0 ), 
+    sysCloseInputStream, 
+    "Closes an input stream"
+);
+
+Ref * sysIsOpenInputStream( Ref * pc, MachineClass * vm ) {
+    Ref * input_stream_K = getInputStreamKeyPtr( vm, 0 );
+    Ref pushed = input_stream_K[ PUSHBACK_OFFSET_INPUT_STREAM ];
+    if ( pushed == SYS_NIL ) {
+        //  No pushback, so simply return the status of the output stream
+        vm->fastPeek() = reinterpret_cast< Ginger::InputStreamExternal * >( input_stream_K[ EXTERNAL_KIND_OFFSET_VALUE ] )->isGood() ? SYS_TRUE : SYS_FALSE;
+    } else {
+        //  There is pushback, so return -false- if the head of the pushback
+        //  list is -termin-, else -true-.
+        vm->fastPeek() = RefToPtr4( pushed )[ PAIR_HEAD_OFFSET ] == SYS_TERMIN ? SYS_FALSE : SYS_TRUE;
+    }
+}
+SysInfo infoIsOpenInputStream( 
+    SysNames( "isOpenInputStream" ), 
+    Arity( 1 ), 
+    Arity( 1 ), 
+    sysIsOpenInputStream, 
+    "Returns true if the input stream is open (the next value to be returned will not be termin)"
+);
 
 Ref * sysNewInputStream( Ref * pc, MachineClass * vm ) {
     if ( vm->count != 1 ) {
@@ -54,6 +99,7 @@ Ref * sysNewInputStream( Ref * pc, MachineClass * vm ) {
         xfr.setOrigin();
         xfr.xfrRef( sysInputStreamKey );
         xfr.xfrCopy( e );
+        xfr.xfrRef( SYS_NIL );      //  The pushback list, initially empty.
         Ref * r = xfr.makeRefRef();
         vm->trackExternalObject( r );
         vm->fastPeek() = Ptr4ToRef( r );
@@ -69,6 +115,71 @@ SysInfo infoNewInputStream(
     Arity( 1 ), 
     sysNewInputStream, 
     "Builds an input stream from a file name" 
+);
+
+Ref * sysNextInputStream( Ref * pc, MachineClass * vm ) {
+    Ref * input_stream_K = getInputStreamKeyPtr( vm, 0 );
+    return reinterpret_cast< Ginger::InputStreamExternal * >( input_stream_K[ EXTERNAL_KIND_OFFSET_VALUE ] )->sysApply( pc, vm );
+}
+SysInfo infoNextInputStream(
+    SysNames( "nextInputStream" ), 
+    Arity( 1 ), 
+    Arity( 1 ), 
+    sysNextInputStream, 
+    "Returns the next item from the input stream"
+);
+
+Ref * sysPeekInputStream( Ref * pc, MachineClass * vm ) {
+    Ref * input_stream_K = getInputStreamKeyPtr( vm, 0 );
+    Ref pushed = input_stream_K[ PUSHBACK_OFFSET_INPUT_STREAM ];
+    if ( pushed == SYS_NIL ) {
+        XfrClass xfr( pc, *vm, LengthOfSimpleKey( sysPairKey ) );
+        pc = reinterpret_cast< Ginger::InputStreamExternal * >( input_stream_K[ EXTERNAL_KIND_OFFSET_VALUE ] )->sysApply( pc, vm );
+        xfr.setOrigin();
+        xfr.xfrRef( sysPairKey );
+        xfr.xfrRef( vm->fastPeek() );   //  New item on top of stack.
+        xfr.xfrRef( pushed );
+        input_stream_K[ PUSHBACK_OFFSET_INPUT_STREAM ] = xfr.makeRef();
+    } else {
+        vm->fastPeek() = RefToPtr4( pushed )[ PAIR_HEAD_OFFSET ];
+    } 
+    return pc;
+}
+SysInfo infoPeekInputStream(
+    SysNames( "peekInputStream" ), 
+    Arity( 1 ), 
+    Arity( 1 ), 
+    sysPeekInputStream, 
+    "Peeks at the next item from an input stream without removing it from the stream"
+);
+
+//  input_stream.pushInputStream( values )
+Ref * sysPushbackInputStream( Ref * pc, MachineClass * vm ) {
+    int vm_count_1 = vm->count - 1;
+    Ref * input_stream_K = getInputStreamKeyPtr( vm, vm_count_1 );
+    
+    //  We will need to allocate vm->count - 1 pairs.
+    XfrClass xfr( pc, *vm, vm_count_1 * LengthOfSimpleKey( sysPairKey ) );
+    
+    Ref pushed = input_stream_K[ PUSHBACK_OFFSET_INPUT_STREAM ];
+    for ( int i = 0; i < vm_count_1; i++ ) {
+        xfr.setOrigin();
+        xfr.xfrRef( sysPairKey );
+        xfr.xfrRef( vm->fastPeek( i ) );
+        xfr.xfrRef( pushed );
+        pushed = xfr.makeRef();
+    }
+    input_stream_K[ PUSHBACK_OFFSET_INPUT_STREAM ] = pushed;
+
+    vm->fastDrop( vm->count );
+    return pc;
+}
+SysInfo infoPushbackInputStream(
+    SysNames( "pushInputStream" ), 
+    Arity( 1, true ), 
+    Arity( 0 ), 
+    sysPushbackInputStream, 
+    "Pushes items back onto an input stream" 
 );
 
 

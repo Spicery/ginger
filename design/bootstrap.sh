@@ -37,6 +37,8 @@ sudo make install-as-is
 # Followed by building the Gingerdocs
 ###############################################################################
 
+sudo apt-get install -y python-sphinx
+
 cd $SPICERY_HOME
 git clone https://github.com/Spicery/gingerdocs.git
 cd gingerdocs

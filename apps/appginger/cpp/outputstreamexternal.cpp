@@ -74,4 +74,14 @@ bool OutputStreamExternal::isGood() const {
     return this->output->good();
 }
 
+bool OutputStreamExternal::isOpen() const {
+    return this->output->is_open();
+}
+
+
+
+void OutputStreamExternal::close() {
+    return this->output->close();
+}
+
 } // namespace Ginger

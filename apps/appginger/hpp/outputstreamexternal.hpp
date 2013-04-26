@@ -41,7 +41,9 @@ public:
     Ref * sysApply( Ref * pc, MachineClass * vm );
 
 public:
+    bool isOpen() const;
     bool isGood() const;
+    void close();
 };
 
 } // namespace Ginger

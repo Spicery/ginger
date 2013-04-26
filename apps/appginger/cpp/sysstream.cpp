@@ -299,5 +299,60 @@ SysInfo infoNewOutputStream(
     "Builds an output stream from a file name" 
 );
 
+Ref * getOutputStreamK( MachineClass * vm ) {
+    if ( vm->count != 1 ) {
+        throw Mishap( "Wrong number of arguments supplied" );
+    }
+    Ref object = vm->fastPeek();
+    if ( not IsObj( object ) ) {
+        throw Mishap( "OutputStream needed" ).culprit( "Value", refToShowString( object ) );
+    }
+    return RefToPtr4( object );   
+}
+
+Ref * isOpenOutputStream( Ref * pc, MachineClass * vm, Ref trueval, Ref falseval ) {
+    Ref * object_K = getOutputStreamK( vm );
+    OutputStreamExternal * e = reinterpret_cast< Ginger::OutputStreamExternal * >( object_K[ EXTERNAL_KIND_OFFSET_VALUE ] );
+    vm->fastPeek() = e->isOpen() ? trueval : falseval;
+    return pc;
+}
+
+Ref * sysIsOpenOutputStream( Ref * pc, MachineClass * vm ) {
+    return isOpenOutputStream( pc, vm, SYS_TRUE, SYS_FALSE );
+}
+SysInfo infoIsOpenOutputStream(
+    SysNames( "isOpenOutputStream" ), 
+    Arity( 1 ), 
+    Arity( 1 ), 
+    sysIsOpenOutputStream, 
+    "Returns true if the output stream is open, else false" 
+);
+
+Ref * sysIsClosedOutputStream( Ref * pc, MachineClass * vm ) {
+    return isOpenOutputStream( pc, vm, SYS_FALSE, SYS_TRUE );
+}
+SysInfo infoIsClosedOutputStream(
+    SysNames( "isClosedOutputStream" ), 
+    Arity( 1 ), 
+    Arity( 1 ), 
+    sysIsClosedOutputStream, 
+    "Returns true if the output stream is closed, else false" 
+);
+
+Ref * sysCloseOutputStream( Ref * pc, MachineClass * vm ) {
+    Ref * object_K = getOutputStreamK( vm );
+    OutputStreamExternal * e = reinterpret_cast< Ginger::OutputStreamExternal * >( object_K[ EXTERNAL_KIND_OFFSET_VALUE ] );
+    e->close();
+    vm->fastDrop( 1 );
+    return pc;
+}
+SysInfo infoCloseOutputStream(
+    SysNames( "closeOutputStream" ), 
+    Arity( 1 ), 
+    Arity( 0 ), 
+    sysCloseOutputStream, 
+    "Closes an output stream" 
+);
+
 
 } // namespace Ginger

@@ -62,17 +62,88 @@ SysInfo infoCloseInputStream(
     "Closes an input stream"
 );
 
-Ref * sysIsOpenInputStream( Ref * pc, MachineClass * vm ) {
+Ref * sysNextLineInputStream( Ref * pc, MachineClass * vm ) {
+    Ref * input_stream_K = getInputStreamKeyPtr( vm, 0 );
+    Ref pushed = input_stream_K[ PUSHBACK_OFFSET_INPUT_STREAM ];
+    if ( pushed == SYS_NIL ) {
+        // Safe to assign to top, replacing the ref to the input stream.
+        std::string line;
+        InputStreamExternal * e = reinterpret_cast< Ginger::InputStreamExternal * >( input_stream_K[ EXTERNAL_KIND_OFFSET_VALUE ] );
+        if ( e->getline( line ) ) {
+            vm->fastPeek() = vm->heap().copyString( pc, line.c_str() );
+        } else {
+            vm->fastPeek() = SYS_TERMIN;
+        }
+    } else {
+        Ref * pair_K = RefToPtr4( pushed );
+        Ref item = pair_K[ PAIR_HEAD_OFFSET ];
+        vm->fastPeek() = item;
+        input_stream_K[ PUSHBACK_OFFSET_INPUT_STREAM ] = pair_K[ PAIR_TAIL_OFFSET ];
+    }
+    return pc;
+}
+SysInfo infoNextLineInputStream( 
+    SysNames( "nextLineInputStream" ), 
+    Arity( 1 ), 
+    Arity( 1 ), 
+    sysNextLineInputStream, 
+    "Gets the next line from an input stream"
+);
+
+Ref * sysPeekLineInputStream( Ref * pc, MachineClass * vm ) {
+    Ref * input_stream_K = getInputStreamKeyPtr( vm, 0 );
+    Ref pushed = input_stream_K[ PUSHBACK_OFFSET_INPUT_STREAM ];
+    if ( pushed == SYS_NIL ) {
+        std::string line;
+        const bool ok = reinterpret_cast< Ginger::InputStreamExternal * >( input_stream_K[ EXTERNAL_KIND_OFFSET_VALUE ] )->getline( line );
+        if ( ok ) {
+            vm->fastPeek() = vm->heap().copyString( pc, line.c_str() );  
+
+            //  INVALIDATES input_stream_K! Must recalculate.
+            Ref * input_stream_K = getInputStreamKeyPtr( vm, 0 );
+            Ref pushed = input_stream_K[ PUSHBACK_OFFSET_INPUT_STREAM ];
+
+            XfrClass xfr( pc, *vm, LengthOfSimpleKey( sysPairKey ) );
+            xfr.setOrigin();
+            xfr.xfrRef( sysPairKey );
+            xfr.xfrRef( vm->fastPeek() );   //  New item on top of stack.
+            xfr.xfrRef( pushed );
+            input_stream_K[ PUSHBACK_OFFSET_INPUT_STREAM ] = xfr.makeRef();
+        } else {
+            vm->fastPeek() = SYS_TERMIN;
+            return pc;
+        }
+    } else {
+        vm->fastPeek() = RefToPtr4( pushed )[ PAIR_HEAD_OFFSET ];
+    } 
+    return pc;
+}
+SysInfo infoPeekLineInputStream(
+    SysNames( "peekLineInputStream" ), 
+    Arity( 1 ), 
+    Arity( 1 ), 
+    sysPeekLineInputStream, 
+    "Peeks at the next line from an input stream without removing it from the stream"
+);
+
+
+
+static Ref * isOpenInputStream( Ref * pc, MachineClass * vm, Ref trueval, Ref falseval ) {
     Ref * input_stream_K = getInputStreamKeyPtr( vm, 0 );
     Ref pushed = input_stream_K[ PUSHBACK_OFFSET_INPUT_STREAM ];
     if ( pushed == SYS_NIL ) {
         //  No pushback, so simply return the status of the output stream
-        vm->fastPeek() = reinterpret_cast< Ginger::InputStreamExternal * >( input_stream_K[ EXTERNAL_KIND_OFFSET_VALUE ] )->isGood() ? SYS_TRUE : SYS_FALSE;
+        vm->fastPeek() = reinterpret_cast< Ginger::InputStreamExternal * >( input_stream_K[ EXTERNAL_KIND_OFFSET_VALUE ] )->isGood() ? trueval : falseval;
     } else {
         //  There is pushback, so return -false- if the head of the pushback
         //  list is -termin-, else -true-.
-        vm->fastPeek() = RefToPtr4( pushed )[ PAIR_HEAD_OFFSET ] == SYS_TERMIN ? SYS_FALSE : SYS_TRUE;
+        vm->fastPeek() = RefToPtr4( pushed )[ PAIR_HEAD_OFFSET ] == SYS_TERMIN ? falseval : trueval;
     }
+    return pc;
+}
+
+Ref * sysIsOpenInputStream( Ref * pc, MachineClass * vm ) {
+    return isOpenInputStream( pc, vm, SYS_TRUE, SYS_FALSE );
 }
 SysInfo infoIsOpenInputStream( 
     SysNames( "isOpenInputStream" ), 
@@ -80,6 +151,17 @@ SysInfo infoIsOpenInputStream(
     Arity( 1 ), 
     sysIsOpenInputStream, 
     "Returns true if the input stream is open (the next value to be returned will not be termin)"
+);
+
+Ref * sysIsClosedInputStream( Ref * pc, MachineClass * vm ) {
+    return isOpenInputStream( pc, vm, SYS_FALSE, SYS_TRUE );
+}
+SysInfo infoIsClosedInputStream( 
+    SysNames( "isClosedInputStream" ), 
+    Arity( 1 ), 
+    Arity( 1 ), 
+    sysIsClosedInputStream, 
+    "Returns true if the input stream is closed (the next value to be returned will be termin)"
 );
 
 Ref * sysNewInputStream( Ref * pc, MachineClass * vm ) {

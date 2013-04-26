@@ -480,7 +480,7 @@ private:
 					assert( LayoutOfSimpleKey( key ) == RECORD_LAYOUT );
 					assert( KindOfSimpleKey( key ) == PAIR_KIND || KindOfSimpleKey( key ) == MAP_KIND || KindOfSimpleKey( key ) == RECORD_KIND );
 					if ( this->tracker ) this->tracker->startRecord( obj_K );
-					if ( IsRefSimpleKey( key ) ) {
+					if ( IsLikeRefSimpleKey( key ) ) {
 						if ( this->isEffectivelyWeakRef( key, obj_K ) ) {
 							this->weak_refs.insert( &obj_K[ REF_OFFSET_CONT ] );
 						} else {

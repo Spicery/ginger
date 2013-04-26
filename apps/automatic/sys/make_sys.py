@@ -75,12 +75,12 @@ class LogCreated:
 		self.hpp_file_list = []
 	
 	def addSysConst( self, ginger_name, in_arity, out_arity, internal_name, doc_string = None ):
-		nm = self.mapping.get( ginger_name )
-		if nm is None:
+		info = self.mapping.get( ginger_name )
+		if info is None:
 			self.mapping[ ginger_name ] = SysInfo( internal_name, in_arity, out_arity, doc_string )
 			self.order.append( ginger_name )
 		else:
-			raise Exception( "Repeated name: " + nm )
+			raise Exception( "Repeated name: " + info.getName() )
 
 		
 	def addCppFile( self, name ):
@@ -132,22 +132,47 @@ class MethodOptions:
 
 	"""
 		C = constructor
-		T = initialiser (using T temporarily as a refactoring step to switching to I)
+		T = initialiser (using T temporarily as a refactoring step to switching to I) 
 		D = deconstructor
+		L/l = liker (using IsLike${Name} versus testing against sys${Name}Key)
 		R/r = recogniser (using Is${Name} versus testing against sys${Name}Key)
 		F = record fields
 	 	G = vector get-indexer
 	 	S = vector set-indexer
 	"""
-	def __init__( self, opts = "CTDRFGS" ):
+	def __init__( self, opts = "CTDLRFGS" ):
 		self.gen_constructor = ( opts.find( 'C' ) != -1 )
 		self.gen_initialiser = ( opts.find( 'T' ) != -1 )
 		self.gen_deconstructor = ( opts.find( 'D' ) != -1 )
 		self.gen_recogniser_via_key = ( opts.find( 'r' ) != -1 )
 		self.gen_recogniser = ( opts.find( 'R' ) != -1 or self.gen_recogniser_via_key )
+		self.gen_liker_via_key = ( opts.find( 'l' ) != -1 )
+		self.gen_liker = ( opts.find( 'L' ) != -1 or self.gen_liker_via_key )
 		self.gen_fields = ( opts.find( 'F' ) != -1 )
 		self.gen_get_indexer = ( opts.find( 'G' ) != -1 )
 		self.gen_set_indexer = ( opts.find( 'S' ) != -1 )
+
+	def add( self, opts ):
+		if opts.find( 'C' ) != -1:
+			self.gen_constructor = True
+		if opts.find( 'T' ) != -1:
+			self.gen_initialiser = True
+		if opts.find( 'D' ) != -1:
+			self.gen_deconstructor = True
+		if opts.find( 'r' ) != -1:
+			self.gen_recogniser_via_key = True
+		if opts.find( 'R' ) != -1 or self.gen_recogniser_via_key:
+			self.gen_recogniser = True
+		if opts.find( 'l' ) != -1:
+			self.gen_liker_via_key = True
+		if opts.find( 'L' ) != -1 or self.gen_liker_via_key:
+			self.gen_liker = True
+		if opts.find( 'F' ) != -1:
+			self.gen_fields = True
+		if opts.find( 'G' ) != -1:
+			self.gen_get_indexer = True
+		if opts.find( 'S' ) != -1:
+			self.gen_set_indexer = True
 
 	def isGenConstructor( self ):
 		return self.gen_constructor
@@ -160,6 +185,12 @@ class MethodOptions:
 
 	def isGenRecogniserViaKey( self ):
 		return self.gen_recogniser_via_key
+
+	def isGenLiker( self ):
+		return self.gen_liker
+
+	def isGenLikerViaKey( self ):
+		return self.gen_liker_via_key
 
 	def isGenFields( self ):
 		return self.gen_fields
@@ -181,19 +212,24 @@ class MethodOptions:
 
 class DataClassGenerator( object ):
 
-	def __init__( self, sysconsts, classname ):
-		self.alt_key_roots = []
-		self.data_key_root = classname
+	def __init__( self, sysconsts, classroot, prefixes = [ "" ] ):
+		self.alt_key_roots = prefixes
+		self.data_key_root = classroot
 		self.log = sysconsts
 
 	def allKeyRoots( self ):
-		if self.alt_key_roots == []:
+		if self.alt_key_roots == None:
 			self.alt_key_roots.append( "" )
 		return self.alt_key_roots
 
-	def addKeyRoots( self, *alt ):
-		for a in alt:
-			self.alt_key_roots.append( a )
+	def hasSingleClass( self ):
+		return len( self.alt_key_roots ) <= 1
+
+	#def addKeyRoots( self, *alt ):
+	#	if not self.alt_key_roots:
+	#		self.alt_key_roots = []
+	#	for a in alt:
+	#		self.alt_key_roots.append( a )
 
 	def keyName( self ):
 		return "sys" + self.data_key_root + "Key";
@@ -203,6 +239,13 @@ class DataClassGenerator( object ):
 
 	def isName( self ):
 		return "Is" + self.data_key_root
+
+	def altIsName( self, aname ):
+		return "Is" + aname + self.data_key_root
+
+	def isLikeName( self ):
+		return "IsLike" + self.data_key_root
+
 
 	def isUpdateableName( self ):
 		return "IsUpdateable" + self.data_key_root
@@ -243,16 +286,45 @@ class DataClassGenerator( object ):
 	def addSysConstWithIntegerArities( self, gname, a, b, cname ):
 		self.log.addSysConst( gname, Arity( a ), Arity( b ), cname )
 
-	def generateRecogniser( self, cpp, hpp ):
-		recogniser_name = "sysIs" + self.data_key_root
+	def writeTestPart( self, v, cpp ):
+		if self.hasSingleClass():
+			if self.options.isGenRecogniserViaKey():
+				cpp.write( "IsObj( {} ) && ( *RefToPtr4( {} ) == {} )".format( v,v, self.keyName() ) )
+			else:
+				cpp.write( "{}( {} )".format( self.isName(), v ) )
+		else:
+			if self.options.isGenLikerViaKey():
+				cpp.write( "IsObj( {} ) && ( false".format( v ) )
+				for alt_name in allKeyRoots():
+					cpp.write( " || ( *RefToPtr4( {} ) == {} )".format( v, self.altKeyName( alt_name ) ) )
+				cpp.write( " )" )
+			else:
+				cpp.write( "{}( {} )".format( self.isLikeName(), v ) )
 
+	def generateRecogniser( self, cpp, hpp ):
+		if self.hasSingleClass():
+			self.generateSingleRecogniser( "", cpp, hpp )
+		else:
+			all_roots = self.allKeyRoots()
+			for alt_name in all_roots:
+				self.generateSingleRecogniser( alt_name, cpp, hpp )
+			if self.options.isGenLiker():
+				self.generateLikeRecogniser( all_roots, cpp, hpp )
+
+	def generateLikeRecogniser( self, all_roots, cpp, hpp ):
+		recogniser_name = "sysIsLike" + self.data_key_root
 		cpp.write( "Ref * {}( Ref * pc, class MachineClass * vm ) {{\n".format( recogniser_name ) )
 		cpp.write( "    if ( vm->count == 1 ) {\n" )
 		cpp.write( "        Ref r = vm->fastPeek();\n" )
-		if self.options.isGenRecogniserViaKey():
-			cpp.write( "        vm->fastPeek() = ( IsObj( r ) && ( *RefToPtr4( r ) == {} ) ) ? SYS_TRUE : SYS_FALSE;\n".format( self.keyName() ) )
+		if self.options.isGenLikerViaKey():
+			cpp.write( "        if ( not IsObj( r ) ) { vm->fastPeek() = SYS_FALSE; return pc; }\n" );
+			cpp.write( "        Ref k = *RefToPtr4( r );\n" )
+			for alt_name in all_roots:
+				cpp.write( "        if ( k == {} ) {{ vm->fastPeek() = SYS_TRUE; return pc; }}\n".format( self.altKeyName( alt_name ) ) )
+			cpp.write( "        vm->fastPeek() = SYS_FALSE;\n" )
 		else:
-			cpp.write( "        vm->fastPeek() = {}( r ) ? SYS_TRUE : SYS_FALSE;\n".format( self.isName() ) )
+			cpp.write( "        vm->fastPeek() = {}( r ) ? SYS_TRUE : SYS_FALSE;\n".format( self.isLikeName() ) )
+		
 		cpp.write( "        return pc;\n" )
 		cpp.write( "    } else {\n" )
 		cpp.write( "        throw Mishap( \"Wrong number of arguments for recogniser\" );\n" )
@@ -260,7 +332,25 @@ class DataClassGenerator( object ):
 		cpp.write( "}\n\n" )
 
 		hpp.write( "extern Ref * {}( Ref * pc, MachineClass * vm );\n".format( recogniser_name ) )
-		self.addSysConst( "is" + self.data_key_root, 1, 1, recogniser_name );
+		self.addSysConst( recogniser_name, 1, 1, recogniser_name );
+
+	def generateSingleRecogniser( self, alt_name, cpp, hpp ):
+		recogniser_name = "sysIs" + alt_name + self.data_key_root
+		cpp.write( "Ref * {}( Ref * pc, class MachineClass * vm ) {{\n".format( recogniser_name ) )
+		cpp.write( "    if ( vm->count == 1 ) {\n" )
+		cpp.write( "        Ref r = vm->fastPeek();\n" )
+		if self.options.isGenRecogniserViaKey():
+			cpp.write( "        vm->fastPeek() = ( IsObj( r ) && ( *RefToPtr4( r ) == {} ) ) ? SYS_TRUE : SYS_FALSE;\n".format( self.altKeyName( alt_name ) ) )
+		else:
+			cpp.write( "        vm->fastPeek() = {}( r ) ? SYS_TRUE : SYS_FALSE;\n".format( self.altIsName( alt_name ) ) )
+		cpp.write( "        return pc;\n" )
+		cpp.write( "    } else {\n" )
+		cpp.write( "        throw Mishap( \"Wrong number of arguments for recogniser\" );\n" )
+		cpp.write( "    }\n" )
+		cpp.write( "}\n\n" )
+
+		hpp.write( "extern Ref * {}( Ref * pc, MachineClass * vm );\n".format( recogniser_name ) )
+		self.addSysConst( recogniser_name, 1, 1, recogniser_name );
 
 ################################################################################
 #   WordRecordClassGenerator
@@ -270,8 +360,8 @@ class WordRecordClassGenerator( DataClassGenerator ):
 	
 	memcpy = False
 
-	def __init__( self, sysconsts, className, options ):
-		super( WordRecordClassGenerator, self ).__init__( sysconsts, className )
+	def __init__( self, sysconsts, className, options, prefixes = [ "" ] ):
+		super( WordRecordClassGenerator, self ).__init__( sysconsts, className, prefixes )
 		self.options = options
 		
 	def generate( self, cpp, hpp ):
@@ -287,8 +377,8 @@ class FullRecordClassGenerator( DataClassGenerator ):
 	
 	memcpy = False
 
-	def __init__( self, sysconsts, className, *fieldNames ):
-		super( FullRecordClassGenerator, self ).__init__( sysconsts, className )
+	def __init__( self, sysconsts, className, fieldNames, prefixes = [ "" ] ):
+		super( FullRecordClassGenerator, self ).__init__( sysconsts, className, prefixes )
 		self.options = MethodOptions()
 		self.fieldNames = fieldNames
 
@@ -307,7 +397,12 @@ class FullRecordClassGenerator( DataClassGenerator ):
 		cpp.write( "Ref * {}( Ref * pc, class MachineClass * vm ) {{\n".format( accessorName ) )
 		cpp.write( "    if ( vm->count == 1 ) {\n" )
 		cpp.write( "        Ref x = vm->fastPeek();\n" )
-		cpp.write( "        if ( {}( x ) ) {{\n".format( self.isName() ) )
+
+		#cpp.write( "        if ( {}( x ) ) {{\n".format( self.isName() ) )
+		cpp.write( "        if ( " )
+		self.writeTestPart( "x", cpp ) 
+		cpp.write( " ) {\n" )
+		
 		cpp.write( "            vm->fastPeek() = RefToPtr4( x )[ {} ];\n".format( n + 1 ) )
 		cpp.write( "        } else {\n" )
 		cpp.write( "            throw Mishap( \"Trying to take the {} of non-{}\" );\n".format( field, self.data_key_root ) )
@@ -357,8 +452,8 @@ class FullRecordClassGenerator( DataClassGenerator ):
 	
 class FullVectorClassGenerator( DataClassGenerator ):
 	
-	def __init__( self, sysconsts, className, options = MethodOptions( "CTGRS" ) ):
-		super( FullVectorClassGenerator, self ).__init__( sysconsts, className )
+	def __init__( self, sysconsts, className, options = MethodOptions( "CTGRS" ), prefixes = [ "" ] ):
+		super( FullVectorClassGenerator, self ).__init__( sysconsts, className, prefixes )
 		self.options = options
 
 	def generate( self, cpp, hpp ):
@@ -380,7 +475,10 @@ class FullVectorClassGenerator( DataClassGenerator ):
 		cpp.write( "       Ref v = vm->fastPop();\n" )
 		cpp.write( "       Ref n = vm->fastPeek();\n" )
 		cpp.write( "       Ref * p = RefToPtr4( v );\n" )
-		cpp.write( "       if ( {}( v ) ) {{\n".format( self.isName() ) )
+		cpp.write( "       if ( " )
+		self.writeTestPart( "v", cpp )
+		cpp.write( " ) {\n" )
+		#cpp.write( "       if ( {}( v ) ) {{\n".format( self.isName() ) )
 		cpp.write( "           if ( IsSmall( n ) && LongToSmall( 1 ) <= n && n <= p[ -1 ] ) {\n" )
 		cpp.write( "               vm->fastPeek() = p[ SmallToLong( n ) ];\n" )
 		cpp.write( "           } else {\n" )
@@ -413,7 +511,7 @@ class FullVectorClassGenerator( DataClassGenerator ):
 		cpp.write( "           }\n" )
 		cpp.write( "           return pc;\n" )
 		cpp.write( "       } else {\n" )
-		cpp.write( "           throw Mishap( \"Vector needed\" );\n" )
+		cpp.write( "           throw Mishap( \"Updateable vector needed\" );\n" )
 		cpp.write( "       }\n" )
 		cpp.write( "   } else {\n" )
 		cpp.write( "       throw Mishap( \"Wrong number of arguments for index-based update\" );\n" )
@@ -484,8 +582,8 @@ class FullVectorClassGenerator( DataClassGenerator ):
 
 class FullMixedClassGenerator( DataClassGenerator ):
 
-	def __init__( self, sysconsts, className, options, *fieldNames ):
-		super( FullMixedClassGenerator, self ).__init__( sysconsts, className )
+	def __init__( self, sysconsts, className, options, fieldNames, prefixes = [ "" ] ):
+		super( FullMixedClassGenerator, self ).__init__( sysconsts, className, prefixes )
 		self.options = options
 		self.fieldNames = fieldNames
 
@@ -608,24 +706,23 @@ class FullMixedClassGenerator( DataClassGenerator ):
 
 sysconsts = LogCreated()
 
-ref = FullRecordClassGenerator( sysconsts, "Ref", "refCont" )
-ref.addKeyRoots( "Hard", "Soft", "Weak" )
+ref = FullRecordClassGenerator( sysconsts, "Ref", [ "refCont" ], prefixes = [ "Hard", "Soft", "Weak" ] )
+ref.options.add( "r" )
 ref.generateFilesWithPrefix( "ref" )
 
-ref = FullRecordClassGenerator( sysconsts, "Pair", "head", "tail" )
+ref = FullRecordClassGenerator( sysconsts, "Pair", [ "head", "tail" ] )
 ref.generateFilesWithPrefix( "pair" )
 
-ref = FullRecordClassGenerator( sysconsts, "Maplet", "mapletKey", "mapletValue" )
+ref = FullRecordClassGenerator( sysconsts, "Maplet", [ "mapletKey", "mapletValue" ] )
 ref.generateFilesWithPrefix( "maplet" )
 
-ref = FullVectorClassGenerator( sysconsts, "Vector" )
-ref.addKeyRoots( "", "Updateable" )
+ref = FullVectorClassGenerator( sysconsts, "Vector", prefixes = [ "", "Updateable" ] )
 ref.generateFilesWithPrefix( "vector" )
 
-ref = FullMixedClassGenerator( sysconsts, "AttrMap", MethodOptions( "CRF" ), "attrMapName" )
+ref = FullMixedClassGenerator( sysconsts, "AttrMap", MethodOptions( "CRF" ), [ "attrMapName" ] )
 ref.generateFilesWithPrefix( "attrmap" )
 
-ref = FullMixedClassGenerator( sysconsts, "Element", MethodOptions( "CRGF" ), "elementAttrMap" )
+ref = FullMixedClassGenerator( sysconsts, "Element", MethodOptions( "CRGF" ), [ "elementAttrMap" ] )
 ref.generateFilesWithPrefix( "element" )
 
 ref = WordRecordClassGenerator( sysconsts, "Double", MethodOptions( "R" ) )
@@ -635,11 +732,11 @@ ref.generateFilesWithPrefix( "external" )
 
 #	N.B. I am making external records FULL RECORDS on the basis that the
 #	pointers appear as integer tags.
-ref = FullRecordClassGenerator( sysconsts, "InputStream"  )
+ref = FullRecordClassGenerator( sysconsts, "InputStream", []  )
 ref.options = MethodOptions( "r" )
 ref.generateFilesWithPrefix( "inputstream" )
 
-ref = FullRecordClassGenerator( sysconsts, "OutputStream" )
+ref = FullRecordClassGenerator( sysconsts, "OutputStream", [] )
 ref.options = MethodOptions( "r" )
 ref.generateFilesWithPrefix( "outputstream" )
 

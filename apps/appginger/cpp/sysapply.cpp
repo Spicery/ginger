@@ -141,10 +141,10 @@ Ref * sysApply( Ref * pc, MachineClass *vm ) {
         } else if ( IsSimpleKey( key ) ) {
             switch ( KindOfSimpleKey( key ) ) {
                 case VECTOR_KIND: {
-                    return sysGetIndexVector( pc, vm ); //sysFastSwap( pc, vm ), vm );
+                    return sysGetIndexVector( pc, vm ); 
                 }
                 case PAIR_KIND: {
-                    return sysListIndex( pc, vm ); //sysFastSwap( pc, vm ), vm );
+                    return sysListIndex( pc, vm );
                 }
                 case MAP_KIND: {
                     throw Ginger::Mishap( "Internal error (sysApply) - not implemented" );
@@ -176,7 +176,7 @@ Ref * sysApply( Ref * pc, MachineClass *vm ) {
                 }
                 */
                 case STRING_KIND: {
-                    return sysStringIndex( pc, vm );    //sysFastSwap( pc, vm ), vm );
+                    return sysStringIndex( pc, vm ); 
                 }
                 case EXTERNAL_KIND: {
                     return reinterpret_cast< Ginger::External * >( object_K[ EXTERNAL_KIND_OFFSET_VALUE ] )->sysApply( pc, vm );

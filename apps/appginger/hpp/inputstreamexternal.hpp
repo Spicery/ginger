@@ -44,6 +44,7 @@ public:
 public:
     bool isGood() const;
     void close();
+    bool getline( std::string & line );
 };
 
 } // namespace Ginger

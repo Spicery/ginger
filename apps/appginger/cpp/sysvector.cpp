@@ -77,23 +77,9 @@ SysInfo infoVectorAppend(
 	"Appends two vectors"
 );
 
-
-Ref * sysIsUpdateableVector( Ref *pc, class MachineClass * vm ) {
-	Ref vec = vm->fastPeek();
-	vm->fastPeek() = IsUpdateableVector( vec ) ? SYS_TRUE : SYS_FALSE;
-	return pc;
-}
-SysInfo infoIsUpdateableVector( 
-	SysNames( "isUpdateableVector" ), 
-	Ginger::Arity( 1 ), 
-	Ginger::Arity( 1 ), 
-	sysIsUpdateableVector, 
-	"Return true if the vector is mutable, else false"
-);
-
 Ref * sysIsVectorLike( Ref *pc, class MachineClass * vm ) {
 	Ref vec = vm->fastPeek();
-	vm->fastPeek() = IsVectorLike( vec ) ? SYS_TRUE : SYS_FALSE;
+	vm->fastPeek() = IsLikeVector( vec ) ? SYS_TRUE : SYS_FALSE;
 	return pc;
 }
 SysInfo infoIsVectorLike( 

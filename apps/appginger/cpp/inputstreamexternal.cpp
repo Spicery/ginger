@@ -58,14 +58,7 @@ Ref * InputStreamExternal::sysApply( Ref * pc, MachineClass * vm ) {
         Ref * pair_K = RefToPtr4( pushed );
         Ref item = pair_K[ PAIR_HEAD_OFFSET ];
         vm->fastPeek() = item;
-
-        if ( item == SYS_TERMIN ) {
-            //  If we return TERMIN then we are closed.
-            input_stream_K[ PUSHBACK_OFFSET_INPUT_STREAM ] = SYS_NIL;
-            this->close();
-        } else {
-            input_stream_K[ PUSHBACK_OFFSET_INPUT_STREAM ] = pair_K[ PAIR_TAIL_OFFSET ];
-        }
+        input_stream_K[ PUSHBACK_OFFSET_INPUT_STREAM ] = pair_K[ PAIR_TAIL_OFFSET ];
     }
     return pc;
 }
@@ -76,6 +69,10 @@ bool InputStreamExternal::isGood() const {
 
 void InputStreamExternal::close() {
     this->input->close();
+}
+
+bool InputStreamExternal::getline( std::string & line ) {
+    return std::getline( *this->input, line ).good();
 }
 
 } // namespace Ginger

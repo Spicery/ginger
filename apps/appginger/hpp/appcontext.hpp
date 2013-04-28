@@ -151,6 +151,23 @@ public:
 	}
 
 
+	//	@todo refactor to eliminate duplication
+	Ginger::GSON resultFooter( int n ) {
+		Ginger::GSON value = this->getSettings().index( RESULT_FOOTER );
+		if ( not value ) {
+			return Ginger::GSON( new Ginger::AbsentGSONData() );
+		} else if ( value.isList() && not value.isEmpty() ) {
+			if ( n < static_cast< int >( value.size() ) ) {
+				return value.at( n );
+			} else {
+				return value.last();
+			}
+		} else {
+			return value;
+		}
+	}
+
+
 
 };
 

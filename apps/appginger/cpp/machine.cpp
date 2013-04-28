@@ -288,7 +288,7 @@ void MachineClass::printResults( std::ostream & out, float time_taken ) {
 			out << endl;
 		}
 		if ( pdl.isChatty() ) {
-			Ginger::GSON footer( this->getAppContext().userSettings().resultFooter( n, "" ) );
+			Ginger::GSON footer( this->getAppContext().userSettings().resultFooter( n ) );
 			if ( footer.isString() ) {
 				Ginger::GSONBuilder b;
 				b.beginList();

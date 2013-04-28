@@ -23,6 +23,8 @@
 #include <cstdlib>
 
 #include "machine4.hpp"
+#include "enginefactory.hpp"
+
 #include "instructions_context.hpp"
 
 using namespace Ginger;
@@ -55,5 +57,24 @@ void Machine4::execute( Ref r, const bool clear_stack ) {
 	}
 }
 
+class Engine4Factory : public Ginger::EngineFactory {
+public:
+	MachineClass * newEngine( ::AppContext * cxt ) {
+		return new Machine4( cxt );
+	}
+public:
+	Engine4Factory() :
+		EngineFactory( 
+			"4", 
+			"bytecoded", 
+			"Instructions are small integers that are used as the argument to a large switch in the main interpreter loop"
+		)
+	{}
+
+	virtual ~Engine4Factory() {}
+};
+Ginger::EngineFactoryRegistration engine4factory ( 
+	new Engine4Factory()
+);
 
 #endif

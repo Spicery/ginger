@@ -229,7 +229,7 @@ bool ToolMain::parseArgcArgv( int argc, char **argv ) {
             }
             case 'e':
             case 'm' : {
-                this->context.setMachineImplNum( atoi( optarg ) );
+                this->context.setMachineImplName( optarg );
                 break;
             }
             case 'g': {

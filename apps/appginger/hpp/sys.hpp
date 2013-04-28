@@ -167,6 +167,7 @@ struct SysInfo {
 	{
 	}
 
+	//	This is the one that causes self-registration.
 	SysInfo( SysNames _names, Ginger::Arity in, Ginger::Arity out, SysCall * s, const char * ds );
 
 	SysInfo( const CMP_OP cmp_op, Ginger::Arity in, Ginger::Arity out, const char * ds ) :

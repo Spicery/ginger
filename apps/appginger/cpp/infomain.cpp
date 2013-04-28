@@ -30,6 +30,7 @@
 #include "appcontext.hpp"
 #include "key.hpp"
 #include "sys.hpp"
+#include "enginefactory.hpp"
 
 #define APP_TITLE "ginger-info"
 
@@ -458,7 +459,21 @@ private:
 		this->formatter->addAttribute( "date", __DATE__ );
 		this->formatter->addAttribute( "time", __TIME__ );
 		this->formatter->endValue();
-
+		this->formatter->endSection();
+		
+		this->formatter->startSection( "engines" );
+		for ( 
+			Ginger::EngineFactoryRegistration::Generator g = Ginger::EngineFactoryRegistration::generator();
+			!!g;
+			++g
+		) {
+			Ginger::EngineFactory * e = *g;
+			this->formatter->startValue( "engine" );
+			this->formatter->addAttribute( "short.name", e->getShortName() );
+			this->formatter->addAttribute( "long.name", e->getLongName() );
+			this->formatter->addAttribute( "description", e->getDescription() );
+			this->formatter->endValue();
+		}
 		this->formatter->endSection();
 	}
 

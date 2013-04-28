@@ -164,7 +164,7 @@ public:
 	}							mode;
 
 private:
-	int 						machine_impl_num;
+	std::string 				machine_impl_name;
 	bool 						dbg_show_code;
 	bool 						is_gctrace;
 	std::list< std::string >	project_folder_list;
@@ -184,8 +184,8 @@ private:
 public:
 	void setGCTrace( bool t ) { this->is_gctrace = t; }
 	bool isGCTrace() { return this->is_gctrace; }
-	void setMachineImplNum( const int n ) { this->machine_impl_num = n; }
-	int getMachineImplNum() { return this->machine_impl_num; }
+	void setMachineImplName( const std::string & n ) { this->machine_impl_name = n; }
+	const std::string getMachineImplName() { return this->machine_impl_name; }
 	const char * version() { return APPGINGER_VERSION; }
 	void setShowCode( const bool b = true ) { this->dbg_show_code = b; }
 	bool getShowCode() { return this->dbg_show_code; }
@@ -232,7 +232,7 @@ public:
 public:
 	AppContext() :
 		//mode( InteractiveMode ),
-		machine_impl_num( 1 ),
+		machine_impl_name( "sysfn" ),
 		dbg_show_code( false ),
 		//is_trapping_mishap( true ),
 		is_gctrace( false ),

@@ -37,10 +37,12 @@
 #include "appcontext.hpp"
 #include "mishap.hpp"
 #include "sys.hpp"
+#include "machine.hpp"
 #include "machine1.hpp"
 #include "machine2.hpp"
 #include "machine3.hpp"
 #include "machine4.hpp"
+#include "enginefactory.hpp"
 
 using namespace std;
 
@@ -50,6 +52,7 @@ Package * AppContext::initInteractivePackage( MachineClass * vm ) {
     return interactive_pkg;
 }
 
+/*
 static MachineClass * makeMachine1( AppContext * appcxt ) {
     #ifndef MACHINE1_EXCLUDED
         return new Machine1( appcxt );
@@ -91,11 +94,12 @@ static MachineClass * makeNewMachine( int machine_impl_num, AppContext * appcxt 
         default: return NULL;
     }   
 }
+*/
 
 MachineClass * AppContext::newMachine() {
-    MachineClass * m = makeNewMachine( this->machine_impl_num, this );
-    if ( m != NULL ) return m;
-    throw Ginger::Mishap( "Unavailable implementation" ).culprit( "Implementation#", static_cast< long >( this->machine_impl_num ) );
+    Ginger::EngineFactory * e = Ginger::EngineFactoryRegistration::findMatch( this->machine_impl_name );
+    if ( e == NULL ) throw Ginger::Mishap( "Unavailable implementation" ).culprit( "Implementation#", this->machine_impl_name );
+    return e->newEngine( this );    
 }
 
 void AppContext::addLoadFile( const char * load_file_name ) {
@@ -285,7 +289,7 @@ void AppContext::showMeRuntimeInfo() {
 
     d.startSection( "Main" );
     d.show( "Ginger version", this->version() );
-    d.show( "VM Implementation ID", this->machine_impl_num );
+    d.show( "VM Engine ID", this->machine_impl_name );
     d.showEnabled( "Garbage collection tracing", this->is_gctrace );
     d.showEnabled( "Code generation tracing", this->getShowCode() );
     d.show( "Reading standard input", this->use_stdin );

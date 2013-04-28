@@ -42,7 +42,7 @@ OBJS=inputstreamexternal.o outputstreamexternal.o \
 	vectorlayout.o stringlayout.o wrecordlayout.o \
 	heapcrawl.o cagecrawl.o callstackcrawl.o fnobjcrawl.o \
 	garbagecollect.o scanfunc.o scanpkg.o \
-	machine.o instruction_set.o \
+	machine.o instruction_set.o enginefactory.o \
 	machine1.o instruction_set1.o \
 	machine2.o instruction_set2.o \
 	machine3.o instruction_set3.o \

@@ -16,60 +16,29 @@
     along with AppGinger.  If not, see <http://www.gnu.org/licenses/>.
 \******************************************************************************/
 
-#ifndef MACHINE2_EXCLUDED
 
-#include "machine2.hpp"
+#include <vector>
+#include <string>
 #include "enginefactory.hpp"
 
+namespace Ginger {
 
-//	Now source the auto-generated C++ file. 
-#include "instructions_context.hpp"
+std::vector< EngineFactory * > & EngineFactoryRegistration::getRegister() {
+	static std::vector< EngineFactory * > the_register;
+	return the_register;
+}
 
-Ref *pc;
-Machine vm;
-
-
-typedef void SpecialFn( void );
-typedef SpecialFn *Special;
-
-Machine2::Machine2( AppContext * g ) :
-	MachineClass( g )
-{
+EngineFactory * EngineFactoryRegistration::findMatch( const std::string & name ) {
+	for ( 
+		std::vector< EngineFactory * >::iterator it = getRegister().begin();
+		it != getRegister().end();
+		++it
+	) {
+		EngineFactory * e = *it;
+		if ( e->match( name ) ) return e;
+	}
+	return NULL;
 }
 
 
-void Machine2::execute( Ref r, const bool clear_stack ) {
-	pc = this->setUpPC( r, clear_stack );
-	vm = this;
-	for (;;) {		
-		Special fn = (Special)( *pc );
-		#ifdef DBG_MACHINE
-			special_show( pc );
-		#endif
-		fn();
-	}
-}
-
-#include "machine2.cpp.auto"
-
-class Engine2Factory : public Ginger::EngineFactory {
-public:
-	MachineClass * newEngine( ::AppContext * cxt ) {
-		return new Machine2( cxt );
-	}
-public:
-	Engine2Factory() :
-		EngineFactory( 
-			"2", 
-			"globfn", 
-			"Instructions are pointers to functions that take their arguments from global register variables"
-		)
-	{}
-
-	virtual ~Engine2Factory() {}
-};
-Ginger::EngineFactoryRegistration engine2factory ( 
-	new Engine2Factory()
-);
-
-#endif
+} // namespace

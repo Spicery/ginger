@@ -19,6 +19,7 @@
 #ifndef MACHINE1_EXCLUDED
 
 #include "machine1.hpp"
+#include "enginefactory.hpp"
 
 //	Now source the auto-generated C++ file. 
 #include "instructions_context.hpp"
@@ -50,5 +51,25 @@ void Machine1::execute( Ref r, const bool clear_stack ) {
 }
 
 #include "machine1.cpp.auto"
+
+class Engine1Factory : public Ginger::EngineFactory {
+public:
+	MachineClass * newEngine( ::AppContext * cxt ) {
+		return new Machine1( cxt );
+	}
+public:
+	Engine1Factory() :
+		EngineFactory( 
+			"1", 
+			"sysfn", 
+			"Instructions are pointers to functions that are passed the virtual program counter and engine pointer"
+		)
+	{}
+
+	virtual ~Engine1Factory() {}
+};
+Ginger::EngineFactoryRegistration engine1factory ( 
+	new Engine1Factory()
+);
 
 #endif

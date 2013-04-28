@@ -21,6 +21,7 @@
 #include <cstdlib>
 
 #include "machine3.hpp"
+#include "enginefactory.hpp"
 
 using namespace Ginger;
 
@@ -49,4 +50,25 @@ typedef void *Special;
 #define RETURN( e )     { pc = ( e ); goto **pc; }
 
 #include "machine3.cpp.auto"
+
+class Engine3Factory : public Ginger::EngineFactory {
+public:
+    MachineClass * newEngine( ::AppContext * cxt ) {
+        return new Machine3( cxt );
+    }
+public:
+    Engine3Factory() :
+        EngineFactory( 
+            "3", 
+            "threaded", 
+            "Threaded interpreter, instructions are pointers to addresses in the main interpreter loop."
+        )
+    {}
+
+    virtual ~Engine3Factory() {}
+};
+Ginger::EngineFactoryRegistration engine3factory ( 
+    new Engine3Factory()
+);
+
 #endif

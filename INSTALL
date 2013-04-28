@@ -6,8 +6,8 @@ Introduction
 This note describes how to install the Ginger Virtual Machine from source
 onto a bare machine.
 
-Installing on Ubuntu (from the command-line)
---------------------------------------------
+Installing on Ubuntu or Mac OS X
+--------------------------------
 
 *	Pre-requisites: you'll need some basic developer tools 
 		git, python, g++, autoconf, uuid, readline, make
@@ -42,32 +42,54 @@ Installing on Ubuntu (from the command-line)
 		% make
 		% sudo make install
 
+Installing from Source Using Vagrant
+------------------------------------
+If you have Vagrant available, then you can use the source-bootstrap.sh file to 
+build Ginger from source. 
 
-Installing onto Mac OS X
-------------------------
+*	Create a Spicery folder for ginger and any sister projects. e.g.
+		% SPICERY_HOME=~/Spicery
+		% mkdir $SPICERY_HOME
+		% cd $SPICERY_HOME
 
-* Unpack the Ginger tarball into a local folder $APPGINGER.
+*	Clone from the GitHub repository into a folder.
+		% git clone https://github.com/Spicery/ginger.git
 
-	$ GINGER_HOME=~/ginger
-	$ mkdir $APPGINGER
-	$ tar zxf appginger.tgz
+*	Create a Vagrant folder for running Ginger. e.g. ginger-[BASEBOX]
+	you will find minimal Vagrantfile's for baseboxes precise32 and
+	precise64 in $SPICERY_HOME/ginger/vagrant. Here's the script for
+	building against the precise32 base box.
+		% cd $SPICERY_HOME/ginger/vagrant
+		% mkdir ginger-precise32
+		% cp Vagrantfile.precise32 ginger-precise32/Vagrantfile
+		% cp source-bootstrap.sh ginger-precise32
+		% cd ginger-precise32
+		% vagrant up
 
-* Change directory to that folder.
+Installing from Tarball Using Vagrant
+-------------------------------------
+For a quicker startup, you can use the Ginger tarball and the 
+tarball-bootstrap.sh file.
 
-	$ cd $APPGINGER
+*	Create a Spicery folder for ginger and any sister projects. e.g.
+		% SPICERY_HOME=~/Spicery
+		% mkdir $SPICERY_HOME
+		% cd $SPICERY_HOME
 
-* Run configure	and make
+*	Download the latest tarball. Install into the folder you intend to
+	use for the virtual machine
+	e.g. $SPICERY_HOME/ginger/vagrant/ginger-[BASEBOX]
+	In this case we'll build for the precise32 basebox. For other baseboxes
+	just change the name accordingly.
+		% cd ginger/vagrant
+		% mkdir ginger-precise32
+		% cd ginger-precise32
+		% wget <url of latest ginger tarball>
 
-	$ ./configure
-	$ make
-	
-If all goes well you will find the $APPGINGER/bin folder has two executables
+* 	Copy in the tarball-bootstrap.sh file and rename to bootstrap.sh. 
+	Set up the Vagrantfile appropriate for the base box.
+		% cp ../tarball-bootstrap.sh bootstrap.sh
+		% cp ../Vagrantfile.precise32 Vagrantfile
 
-	* appginger
-	* common2gnx
-
-
-Installing from Source (GitHub)
--------------------------------
-
-* Clone the Ginger repository into a local folder.
+* 	And vagrant up
+		% vagrant up

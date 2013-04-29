@@ -19,7 +19,11 @@
 #ifndef METHOD_LAYOUT_HPP
 #define METHOD_LAYOUT_HPP
 
+namespace Ginger {
+
 #define METHOD_OFFSET_CACHE				2
 #define METHOD_OFFSET_DISPATCH_TABLE 	3
+
+} // namespace Ginger
 
 #endif

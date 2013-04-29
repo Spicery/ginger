@@ -21,8 +21,11 @@
 
 #include "common.hpp"
 
+namespace Ginger {
+
 extern unsigned long lengthOfInstance( Ref * obj_K );
 extern Ref titleOfInstance( Ref * obj_K );
 
+} // namespace Ginger
 
 #endif

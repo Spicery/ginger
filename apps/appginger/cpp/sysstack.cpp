@@ -22,7 +22,7 @@
 #include "sysprint.hpp"
 #include "sys.hpp"
 
-using namespace Ginger;
+namespace Ginger {
 
 Ref * sysFastSwap( Ref *pc, class MachineClass * vm ) {
     Ref r = vm->fastPeek();
@@ -516,3 +516,5 @@ SysInfo infoIdentfn(
     "Does nothing!"
 );
 
+
+} // namespace Ginger

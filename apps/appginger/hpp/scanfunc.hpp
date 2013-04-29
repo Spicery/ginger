@@ -21,6 +21,8 @@
 
 #include "instruction_set.hpp"
 
+namespace Ginger {
+
 class ScanFunc {
 private:
 	Ref * pc;
@@ -34,5 +36,7 @@ public:
 public:
 	ScanFunc( const InstructionSet &, Ref * p );
 };
+
+} // namespace Ginger
 
 #endif

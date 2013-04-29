@@ -23,6 +23,8 @@
 #include "mishap.hpp"
 #include "sysprint.hpp"
 
+namespace Ginger {
+
 unsigned long lengthOfInstance( Ref * obj_K ) {
 	Ref key = *obj_K;
 	if ( IsObj( key ) && *RefToPtr4( key ) == sysClassKey ) {
@@ -43,3 +45,5 @@ Ref titleOfInstance( Ref * obj_K ) {
 		throw Ginger::Mishap( "Instance needed" ).culprit( "Argument", refToShowString( Ptr4ToRef( obj_K ) ) );
 	}
 }
+
+} // namespace Ginger

@@ -27,7 +27,7 @@
 
 #include "instructions_context.hpp"
 
-using namespace Ginger;
+namespace Ginger {
 using namespace std;
 
 #define FREEZE
@@ -59,7 +59,7 @@ void Machine4::execute( Ref r, const bool clear_stack ) {
 
 class Engine4Factory : public Ginger::EngineFactory {
 public:
-	MachineClass * newEngine( ::AppContext * cxt ) {
+	MachineClass * newEngine( AppContext * cxt ) {
 		return new Machine4( cxt );
 	}
 public:
@@ -76,5 +76,7 @@ public:
 Ginger::EngineFactoryRegistration engine4factory ( 
 	new Engine4Factory()
 );
+
+} // namespace Ginger
 
 #endif

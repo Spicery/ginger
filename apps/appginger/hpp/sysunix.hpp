@@ -22,8 +22,12 @@
 #include "common.hpp"
 #include "machine.hpp"
 
+namespace Ginger {
+
 Ref * sysGetEnv( Ref * pc, class MachineClass * vm );
 Ref * sysPutEnv( Ref * pc, class MachineClass * vm );
 Ref * sysEnvVars( Ref * pc, class MachineClass * vm );
+
+} // namespace Ginger
 
 #endif

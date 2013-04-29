@@ -49,10 +49,6 @@
 #include "toolmain.hpp"
 #include "wellknownpaths.hpp"
 
-using namespace std;
-
-
-
 /*
 	This is the structure of struct option, which does not seem to be
 	especially well documented. Included for handy reference.
@@ -82,6 +78,10 @@ static struct option long_options[] =
         { "level",		    required_argument,		0, 'v' },
         { 0, 0, 0, 0 }
     };
+
+namespace Ginger  {
+using namespace std;
+
 
 void ToolMain::printGPL( const char * start, const char * end ) const {
     bool printing = false;
@@ -487,3 +487,5 @@ void ToolMain::loadFileFromPackage( RCEP & rcep, Package * pkg, const std::strin
     #endif
     while ( rcep.unsafe_read_comp_exec_print( prog, std::cout ) ) {}
 }
+
+} // namespace Ginger

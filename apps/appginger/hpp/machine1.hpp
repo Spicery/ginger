@@ -27,6 +27,8 @@
 #include "instruction_set1.hpp"
 #include "appcontext.hpp"
 
+namespace Ginger {
+
 class Machine1 : public MachineClass {
 
 private:
@@ -43,6 +45,8 @@ public:
 	virtual ~Machine1() {}
 
 };
+
+}
 
 #endif
 #endif

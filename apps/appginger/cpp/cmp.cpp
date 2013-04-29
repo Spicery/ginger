@@ -18,6 +18,8 @@
 
 #include "cmp.hpp"
 
+namespace Ginger {
+
 CMP_OP revCmpOp( const CMP_OP cmp ) {
 	switch ( cmp ) {
 		case CMP_GTE: 	return CMP_LT;
@@ -66,3 +68,4 @@ Instruction cmpLocalLocalInstruction( const CMP_OP cmp ) {
 	}
 }
 
+} // namespace Ginger

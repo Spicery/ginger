@@ -27,6 +27,8 @@
 #include "common.hpp"
 #include "external.hpp"
 
+namespace Ginger {
+
 class MachineClass;
 class HeapClass;
 class CageClass;
@@ -100,6 +102,8 @@ public:
 
 typedef class MachineClass * Machine;
 typedef class CageClass *Cage;
+
+} // namespace Ginger
 
 #endif
 

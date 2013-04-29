@@ -30,7 +30,7 @@
 #include "simplify.hpp"
 
 
-using namespace Ginger;
+namespace Ginger {
 using namespace std;
 
 #define SIMPLIFYGNX     ( INSTALL_TOOL "/simplifygnx" )
@@ -96,7 +96,7 @@ Gnx Simplify::simplify( Gnx x ) {
         cerr << "]]" << endl;
     #endif 
 
-
-
     return r;
 }
+
+} // namespace Ginger

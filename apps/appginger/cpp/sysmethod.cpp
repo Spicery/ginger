@@ -23,8 +23,9 @@
 #include "machine.hpp"
 
 #include "mishap.hpp"
-//#include "vmi.hpp"
 #include "sysprint.hpp"
+
+namespace Ginger {
 
 Ref * sysNewMethod( Ref * pc, MachineClass * vm ) {
 	//	newMethod( name:String, ninputs:Small, noutputs:Small ) -> m:Method
@@ -173,3 +174,4 @@ Ref * sysOverrideMethod( Ref * pc, MachineClass * vm ) {
 	return gngSetMethod( pc, vm, true );
 }
 
+} // namespace Ginger

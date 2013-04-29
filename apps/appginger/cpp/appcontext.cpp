@@ -46,6 +46,8 @@
 
 using namespace std;
 
+namespace Ginger {
+
 Package * AppContext::initInteractivePackage( MachineClass * vm ) {
     const std::string name( this->getInteractivePackage() );
     Package * interactive_pkg = vm->getPackage( name );
@@ -337,3 +339,5 @@ void AppContext::showMeRuntimeInfo() {
 
     d.endInfo();
 }
+
+} // namespace Ginger

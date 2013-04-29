@@ -22,8 +22,12 @@
 #include "common.hpp"
 #include "external.hpp"
 
+namespace Ginger {
+
 #define EXTERNAL_KIND_VALUE_SIZE      ( ( sizeof( ::Ginger::External * ) + sizeof( Ref ) - 1 ) / sizeof( Ref ) )
 #define EXTERNAL_KIND_SIZE            ( 1 + EXTERNAL_KIND_VALUE_SIZE )
 #define EXTERNAL_KIND_OFFSET_VALUE    1
+
+} // namespace Ginger
 
 #endif

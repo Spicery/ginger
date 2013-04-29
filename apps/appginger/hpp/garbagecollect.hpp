@@ -20,10 +20,13 @@
 #define GARBAGE_COLLECT_HPP
 
 #include "machine.hpp"
-
 #include "gctracker.hpp"
+
+namespace Ginger {
 
 extern Ref * sysGarbageCollect( Ref * pc, MachineClass * vm );
 extern void sysQuiescentGarbageCollect( MachineClass * vm, Ginger::GCTracker * );
+
+} // namespace Ginger
 
 #endif

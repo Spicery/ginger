@@ -24,6 +24,8 @@
 #include "mishap.hpp"
 #include "key.hpp"
 
+namespace Ginger {
+
 Ref * sysAttrMapExplode( Ref *pc, class MachineClass * vm ) {
 	if ( vm->count != 1) throw Ginger::Mishap( "ArgsMismatch" );
 	const Ref amap = vm->fastPop();
@@ -62,3 +64,5 @@ Ref * sysAttrMapIndex( Ref *pc, class MachineClass * vm ) {
 	vm->fastPush( SYS_ABSENT );
 	return pc;
 }
+
+} // namespace Ginger

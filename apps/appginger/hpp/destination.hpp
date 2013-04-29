@@ -21,6 +21,8 @@
 
 #include <vector>
 
+namespace Ginger {
+
 typedef class CodeGenClass * CodeGen;
 
 class DestinationClass {
@@ -43,5 +45,6 @@ public:
 
 typedef DestinationClass * Destination;
 
-#endif
+} // namespace Ginger
 
+#endif

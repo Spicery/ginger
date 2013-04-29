@@ -21,6 +21,8 @@
 #include "key.hpp"
 #include "listlayout.hpp"
 
+namespace Ginger {
+
 Ref * sysNewList( Ref * pc, class MachineClass * vm ) {
 	Ref sofar = SYS_NIL;
 	int n = vm->count;
@@ -194,4 +196,4 @@ Ref * sysFastListLength( Ref *pc, class MachineClass * vm ) {
 	return pc;
 }
 
-
+} // namespace Ginger

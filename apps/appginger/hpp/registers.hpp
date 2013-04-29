@@ -21,6 +21,8 @@
 
 #include "common.hpp"
 
+namespace Ginger {
+
 class Registers {
 friend class GarbageCollect;
 friend class Roots;
@@ -43,5 +45,7 @@ public:
 public:
 	Registers();
 };
+
+} // namespace Ginger
 
 #endif

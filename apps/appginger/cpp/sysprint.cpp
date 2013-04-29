@@ -25,13 +25,15 @@
 
 #include "refprint.hpp"
 #include "machine.hpp"
-#include "sys.hpp"    
+#include "sys.hpp"  
+#include "cell.hpp"
+  
 
 
 //#define DBG_SYSPRINT
 
+namespace Ginger {
 using namespace std;
-using namespace Ginger;
 
 Ref * sysRefPrint( Ref * pc, class MachineClass * vm ) {
 	int column = 0;
@@ -174,7 +176,6 @@ SysInfo infoShowMeRuntimeInfo(
 //	%s = sysprint
 //
 
-#include "cell.hpp"
 
 void gngPrintf( ostream & out, Ref * pc, class MachineClass * vm ) {
 	if ( vm->count < 1 ) {
@@ -293,3 +294,4 @@ SysInfo infoStringPrint(
 	"Concatenates the print strings of an arbitrary number of items" 
 );
 
+} // namespace Ginger

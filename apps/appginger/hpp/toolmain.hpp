@@ -21,6 +21,8 @@
 
 #include "rcep.hpp"
 
+namespace Ginger {
+
 class ToolMain {
 protected:
 	const char * appname;
@@ -56,5 +58,6 @@ public:
 	virtual ~ToolMain() {}
 };
 
+} // namespace Ginger
 
 #endif

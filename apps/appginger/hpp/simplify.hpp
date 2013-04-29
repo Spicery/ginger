@@ -26,6 +26,8 @@
 #include "appcontext.hpp"
 #include "package.hpp"
 
+namespace Ginger {
+
 typedef shared< Ginger::Mnx > Gnx;
 
 class Simplify {
@@ -46,5 +48,7 @@ public:
     Simplify( AppContext & cxt, Package * package );
     ~Simplify();
 };
+
+} // namespace Ginger
 
 #endif

@@ -22,6 +22,8 @@
 #include "instruction_set.hpp"
 #include "key.hpp"
 
+namespace Ginger {
+
 ScanFunc::ScanFunc( const InstructionSet & ins, Ref * r ) {
 	this->inset = ins;
 	this->pc = r + 1;
@@ -48,3 +50,5 @@ Ref * ScanFunc::next() {
 	}
 	return 0;
 }
+
+} // namespace Ginger

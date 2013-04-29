@@ -21,6 +21,8 @@
 
 #include "cage.hpp"
 
+namespace Ginger {
+
 class CageCrawl {
 private:
 	CageClass * 			cage;
@@ -48,7 +50,8 @@ public:
 		this->current = obj_A;
 	}
 
-
 };
+
+} // namespace Ginger
 
 #endif

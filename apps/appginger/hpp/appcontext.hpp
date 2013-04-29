@@ -40,6 +40,8 @@
 #define APPGINGER_VERSION	PACKAGE_VERSION
 #define USER_SETTINGS_FILE	"settings.gson"
 
+namespace Ginger {
+
 class MachineClass;
 class Package;
 
@@ -268,6 +270,8 @@ public:
 		//std::cout << "~Appcontext" << std::endl;
 	}
 };
+
+} // namespace Ginger
 
 #endif
 

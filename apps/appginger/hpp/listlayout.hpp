@@ -21,6 +21,8 @@
 
 #include "common.hpp"
 
+namespace Ginger {
+
 #define PAIR_HEAD_OFFSET 1
 #define PAIR_TAIL_OFFSET 2
 #define PAIR_SIZE 3
@@ -28,5 +30,7 @@
 extern bool isList( Ref r );
 extern Ref fastPairHead( Ref r );
 extern Ref fastPairTail( Ref r );
+
+} // namespace Ginger
 
 #endif

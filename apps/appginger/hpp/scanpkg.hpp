@@ -22,6 +22,8 @@
 #include "package.hpp"
 #include <string>
 
+namespace Ginger {
+
 class ScanPkg {
 private:
 	std::string var;	//	debug
@@ -39,5 +41,7 @@ public:
 public:
 	ScanPkg( Package * d );
 };
+
+} // namespace Ginger
 
 #endif

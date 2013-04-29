@@ -1,1 +1,0 @@
-SysMap::value_type( "applyData", SysInfo( Arity( 1, true ), Arity( 0, true ), sysApply, "Applies any object to a set of arguments, the object to be applied is the last argument" ) ),

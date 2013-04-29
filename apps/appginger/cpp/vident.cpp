@@ -28,6 +28,7 @@
 #include "package.hpp"
 #include "codegen.hpp"
 
+namespace Ginger {
 using namespace std;
 
 VIdent::VIdent( CodeGen codegen, shared< Ginger::Mnx > vid ) {
@@ -73,3 +74,5 @@ VIdent::VIdent( CodeGen codegen, shared< Ginger::Mnx > vid ) {
 		throw "TODO";
 	}
 }
+
+} // namespace Ginger

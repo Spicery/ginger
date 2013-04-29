@@ -21,6 +21,8 @@
 #include "gctracker.hpp"
 #include "common.hpp"
 
+namespace Ginger {
+
 class GCLogger  : public GCTracker {
 private:
 	bool 					scan_call_stack;
@@ -59,3 +61,5 @@ public:
 	GCLogger( const bool scs );
 	~GCLogger();
 };
+
+} // namespace Ginger

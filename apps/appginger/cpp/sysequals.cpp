@@ -25,6 +25,8 @@
 
 #include <string.h>
 
+namespace Ginger {
+
 static inline Ref FastPairHead( Ref r ) {
 	return RefToPtr4( r )[ 1 ];
 }
@@ -268,3 +270,4 @@ Ref * sysEquals( Ref * pc, class MachineClass * vm ) {
 	}
 }
 
+} // namespace Ginger

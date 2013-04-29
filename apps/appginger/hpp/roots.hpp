@@ -23,6 +23,8 @@
 #include "machine.hpp"
 #include "registers.hpp"
 
+namespace Ginger {
+
 class Roots {
 private:
 	Registers & registers;
@@ -36,5 +38,7 @@ public:
 	Roots( MachineClass * vm );
 	~Roots();
 };
+
+} // namespace Ginger
 
 #endif

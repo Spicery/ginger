@@ -23,6 +23,8 @@
 #include "machine.hpp"
 #include <ostream>
 
+namespace Ginger {
+
 extern Ref * sysNewHardEqMap( Ref * pc, MachineClass * vm );
 extern Ref * sysNewHardIdMap( Ref * pc, MachineClass * vm );
 extern Ref * sysNewWeakIdMap( Ref * pc, MachineClass * vm );
@@ -37,26 +39,24 @@ extern unsigned int gngIdHash( Ref ref );
 extern unsigned int gngIdHash( Ref ref );
 
 
-namespace Ginger {
+/// Moving this utility class into the Ginger namespace is just
+/// part of a highly extended refactoring to move all the Ginger
+/// implementation into its own namespaces.
+class MapCrawl {
+private:
+    long size_of_data;
+    int index_of_data;
+    Ref * data;
+    Ref bucket;
 
-    /// Moving this utility class into the Ginger namespace is just
-    /// part of a highly extended refactoring to move all the Ginger
-    /// implementation into its own namespaces.
-    class MapCrawl {
-    private:
-        long size_of_data;
-        int index_of_data;
-        Ref * data;
-        Ref bucket;
+public:
+    MapCrawl( Ref * map_K );
 
-    public:
-        MapCrawl( Ref * map_K );
+public:
+    Ref * nextBucket();
+    bool hasBeenCalled() const;
 
-    public:
-        Ref * nextBucket();
-        bool hasBeenCalled() const;
-
-    };
+};
 
 } // namespace Ginger
 

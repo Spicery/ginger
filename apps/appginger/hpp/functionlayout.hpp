@@ -24,6 +24,8 @@
 #include "common.hpp"
 #include "methodlayout.hpp"
 
+namespace Ginger {
+
 //	Standard offsets from the key.
 #define OFFSET_TO_NUM_INPUTS				-1
 #define OFFSET_TO_NUM_SLOTS					-2
@@ -47,5 +49,7 @@ extern long numInputsOfFn( Ref * key );
 const std::string nameOfFn( Ref * fn_K );
 
 #define EMPTY_FN_NAME ""
+
+} // namespace Ginger 
 
 #endif

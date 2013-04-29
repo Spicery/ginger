@@ -384,7 +384,8 @@ class FullRecordClassGenerator( DataClassGenerator ):
 
 	def generate( self, cpp, hpp ):
 		for aname in self.allKeyRoots():
-			self.generateConstructor( aname, cpp, hpp )
+			if self.options.isGenConstructor():
+				self.generateConstructor( aname, cpp, hpp )
 		if self.options.isGenRecogniser():
 			self.generateRecogniser( cpp, hpp )
 		for i in range( len( self.fieldNames ) ):

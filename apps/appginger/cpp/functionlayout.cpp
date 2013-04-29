@@ -21,6 +21,8 @@
 #include "functionlayout.hpp"
 #include "key.hpp"
 
+namespace Ginger {
+
 unsigned long sizeInstructionsAfterKeyOfFn( Ref * fn_K ) {
     return ToULong( fn_K[ OFFSET_TO_FUNCTION_LENGTH ] ) >> TAGGG;
 }
@@ -58,3 +60,5 @@ const std::string nameOfFn( Ref * fn_K ) {
     }
     return sofar;
 }
+
+} // namespace Ginger

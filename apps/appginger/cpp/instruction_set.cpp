@@ -1,7 +1,7 @@
 #include "instruction_set.hpp"
 #include "mishap.hpp"
 
-using namespace Ginger;
+namespace Ginger {
 
 void enter_error( int B, int A ) {
 	throw Ginger::Mishap( "Wrong number of arguments" ).culprit( "Found", "" + B ).culprit( "Wanted", "" + A );
@@ -17,3 +17,5 @@ void invoke_error() {
 
 
 #include "instruction_set.cpp.auto"
+
+} // namespace Ginger

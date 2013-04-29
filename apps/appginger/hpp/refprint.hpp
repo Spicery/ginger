@@ -23,6 +23,8 @@
 
 #include "key.hpp"
 
+namespace Ginger {
+
 class Numbering {
 private:
 	std::vector< int > numbers;
@@ -134,5 +136,7 @@ public:
 	void refPrint( const Ref r );
 
 };	//	end class.
+
+} // namespace Ginger
 
 #endif

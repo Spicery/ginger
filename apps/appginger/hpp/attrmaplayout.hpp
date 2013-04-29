@@ -21,10 +21,12 @@
 
 #include "common.hpp"
 
+namespace Ginger {
+
 #define ATTR_MAP_OFFSET_LENGTH 		-1
 #define ATTR_MAP_OFFSET_NAME 		1
 #define ATTR_MAP_OFFSET_VECTOR 		2
 
-//Ref fastAttrMapLength( Ref r );
+}
 
 #endif

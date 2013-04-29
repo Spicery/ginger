@@ -22,8 +22,11 @@
 #include "common.hpp"
 #include "doublelayout.hpp"
 
+namespace Ginger {
 
 //extern Ref * sysNewDouble( Ref *pc, MachineClass * vm );
 extern gngdouble_t gngFastDoubleValue( Ref r );
+
+} // namespace Ginger
 
 #endif

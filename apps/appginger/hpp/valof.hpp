@@ -28,6 +28,8 @@
 //	For std::string
 #include <string>
 
+namespace Ginger {
+
 class Valof {
 public:
 	Ref					valof;
@@ -60,5 +62,7 @@ public:
 
 
 };
+
+} // namespace Ginger
 
 #endif

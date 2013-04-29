@@ -21,6 +21,8 @@
 
 #include "common.hpp"
 
+namespace Ginger {
+
 //	DEPRECATED
 extern Ref * sysMakeIndirection( Ref * pc, class MachineClass * vm );
 extern Ref * sysCopyIndirection( Ref * pc, class MachineClass * vm );
@@ -34,5 +36,7 @@ extern Ref & fastIndirectionCont( Ref indirection );
 Ref * sysSetIndirectionCont( Ref * pc, class MachineClass * vm );
 Ref * sysIndirectionCont( Ref * pc, class MachineClass * vm );
 Ref * sysNewIndirection( Ref * pc, class MachineClass * vm );
+
+} // namespace Ginger
 
 #endif

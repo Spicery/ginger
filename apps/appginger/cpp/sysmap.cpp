@@ -18,7 +18,6 @@
 
 //#include <iostream>
 #include <vector>
-using namespace std;
 
 //	For memcpy.
 #include <string.h>	
@@ -36,6 +35,10 @@ using namespace std;
 #include "misclayout.hpp"
 #include "vectorlayout.hpp"
 #include "maplayout.hpp"
+
+namespace Ginger {
+using namespace std;
+
 
 typedef unsigned int ub4;
 
@@ -140,7 +143,7 @@ static long log2( unsigned long v ) {
 	}
 }
 
-Ref * Ginger::MapCrawl::nextBucket() { 
+Ref * MapCrawl::nextBucket() { 
 	//std::cerr << "Updating next bucket: " << ( this->bucket != SYS_ABSENT ) << std::endl;
 	if ( this->bucket != SYS_ABSENT ) {
 		Ref * x = RefToPtr4( this->bucket );
@@ -157,12 +160,12 @@ Ref * Ginger::MapCrawl::nextBucket() {
 	}
 }
 
-bool Ginger::MapCrawl::hasBeenCalled() const {
+bool MapCrawl::hasBeenCalled() const {
 	return this->index_of_data > 0;
 }
 
 
-Ginger::MapCrawl::MapCrawl( Ref * map_K ) :
+MapCrawl::MapCrawl( Ref * map_K ) :
 	size_of_data( 1 << fastMapPtrWidth( map_K ) ),
 	index_of_data( 0 ),
 	data( RefToPtr4( map_K[1] ) + 1 ),
@@ -221,7 +224,7 @@ private:
 	}
 	
 	void addMap( Ref r ) {
-		Ginger::MapCrawl map_crawl( RefToPtr4( r ) );
+		MapCrawl map_crawl( RefToPtr4( r ) );
 		for (;;) {
 			Ref * bucket = map_crawl.nextBucket();
 			if ( bucket == NULL ) break;
@@ -330,7 +333,7 @@ Ref * sysMapValues( Ref *pc, class MachineClass * vm ) {
 	long len = SmallToLong( map_K[ MAP_OFFSET_COUNT ] );
 	vm->checkStackRoom( len );
 	
-	Ginger::MapCrawl map_crawl( map_K );
+	MapCrawl map_crawl( map_K );
 	for (;;) {
 		Ref * bucket_K = map_crawl.nextBucket();
 		if ( bucket_K == NULL ) break;
@@ -357,7 +360,7 @@ Ref * sysMapExplode( Ref *pc, class MachineClass * vm ) {
 	vm->checkStackRoom( count );
 	
 	Ref * map_K = RefToPtr4( r );
-	Ginger::MapCrawl map_crawl( map_K );
+	MapCrawl map_crawl( map_K );
 	for (;;) {
 		Ref * bucket_K = map_crawl.nextBucket();
 		if ( bucket_K == NULL ) break;
@@ -414,7 +417,7 @@ static const char * MAP_CLOSE = "}";
 static const char * MAP_ARROW = "=>";
 
 void gngPrintMapPtr( std::ostream & out, Ref * map_K ) {
-	Ginger::MapCrawl map_crawl( map_K );
+	MapCrawl map_crawl( map_K );
 	bool sep = false;
 	out << MAP_OPEN;
 	for (;;) {
@@ -527,5 +530,5 @@ void gngRehashMapPtr( Ref * map_K ) {
 	}
 }
 
-
+} // namespace Ginger
 

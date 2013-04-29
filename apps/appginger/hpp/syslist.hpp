@@ -23,6 +23,8 @@
 #include "machine.hpp"
 #include "mishap.hpp"
 
+namespace Ginger {
+
 extern Ref * sysNewList( Ref * pc, MachineClass * vm );
 extern Ref * sysNewListOnto( Ref * pc, MachineClass * vm );
 extern Ref * sysIsNil( Ref * pc, class MachineClass * vm );
@@ -33,5 +35,6 @@ extern Ref * sysListIndex( Ref *pc, class MachineClass * vm );
 extern Ref * sysListLength( Ref *pc, class MachineClass * vm );
 extern Ref * sysFastListLength( Ref *pc, class MachineClass * vm );
 
+} // namespace Ginger
 
 #endif

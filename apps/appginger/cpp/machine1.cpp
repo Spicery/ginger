@@ -24,6 +24,7 @@
 //	Now source the auto-generated C++ file. 
 #include "instructions_context.hpp"
 
+namespace Ginger {
 
 typedef Ref *SpecialFn( Ref *pc, Machine vm );
 typedef SpecialFn *Special;
@@ -54,7 +55,7 @@ void Machine1::execute( Ref r, const bool clear_stack ) {
 
 class Engine1Factory : public Ginger::EngineFactory {
 public:
-	MachineClass * newEngine( ::AppContext * cxt ) {
+	MachineClass * newEngine( AppContext * cxt ) {
 		return new Machine1( cxt );
 	}
 public:
@@ -71,5 +72,7 @@ public:
 Ginger::EngineFactoryRegistration engine1factory ( 
 	new Engine1Factory()
 );
+
+} // namespace Ginger
 
 #endif

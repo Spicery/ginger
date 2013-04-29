@@ -18,16 +18,13 @@
 
 #ifndef MACHINE2_EXCLUDED
 
-#include "instruction_set2.hpp"
-
-#include "instructions_context.hpp"
-
 #include <iostream>
-//#include <cstdio>
 #include <cstdlib>
 
-using namespace Ginger;
+#include "instruction_set2.hpp"
+#include "instructions_context.hpp"
 
+namespace Ginger {
 
 #define FREEZE
 #define MELT
@@ -41,5 +38,7 @@ extern Ref *pc;
 extern Machine vm;
 #define RETURN( e ) 	{ pc = ( e ); return; }
 #include "instruction_set2.cpp.auto"
+
+} // namespace Ginger
 
 #endif

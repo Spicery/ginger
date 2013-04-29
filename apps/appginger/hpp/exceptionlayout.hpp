@@ -22,10 +22,14 @@
 
 #include "common.hpp"
 
+namespace Ginger {
+
 //	Number of fields + 1 for the key.
 #define EXCEPTION_SIZE 4
 
 //	Offset of the tag field.
 #define EXCEPTION_OFFSET_TAG 1
+
+} // namespace Ginger
 
 #endif

@@ -22,6 +22,8 @@
 #include "common.hpp"
 #include "machine.hpp"
 
+namespace Ginger {
+
 extern Ref * sysNewClass( Ref * pc, MachineClass * vm );
 extern Ref * sysNewRecordClass( Ref * pc, MachineClass * vm );
 extern Ref * sysClassConstructor( Ref * pc, MachineClass * vm );
@@ -30,6 +32,8 @@ extern Ref * sysClassAccessor( Ref * pc, MachineClass *vm );
 extern Ref * sysClassExploder( Ref * pc, MachineClass *vm );
 
 void gngRehashMapPtr( Ref * map_K );
+
+} // namespace Ginger
 
 #endif
 

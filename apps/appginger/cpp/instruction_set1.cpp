@@ -17,15 +17,14 @@
 \******************************************************************************/
 
 #ifndef MACHINE1_EXCLUDED
-#include "instruction_set1.hpp"
-
-#include "instructions_context.hpp"
 
 #include <iostream>
-//#include <cstdio>
 #include <cstdlib>
 
-using namespace Ginger;
+#include "instruction_set1.hpp"
+#include "instructions_context.hpp"
+
+namespace Ginger {
 
 #define FREEZE
 #define MELT
@@ -38,4 +37,7 @@ using namespace Ginger;
 #define RETURN( e ) 	return( e )
 
 #include "instruction_set1.cpp.auto"
+
+} // namespace Ginger
+
 #endif

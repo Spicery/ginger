@@ -23,6 +23,8 @@
 #include "common.hpp"
 #include <iostream>
 
+namespace Ginger {
+
 extern void refPrint( Ref r );
 extern void refShow( const Ref r );
 extern void refPtrPrint( Ref * r );
@@ -35,6 +37,8 @@ extern Ref * sysRefPrint( Ref * pc, MachineClass * );
 extern Ref * sysRefPrintln( Ref * pc, MachineClass * );
 extern Ref * sysRefShow( Ref * pc, MachineClass * );
 extern Ref * sysRefShowln( Ref * pc, MachineClass * );
+
+} // namespace Ginger
 
 #endif
 

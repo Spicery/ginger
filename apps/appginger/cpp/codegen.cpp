@@ -48,8 +48,8 @@
 #include "syslist.hpp"
 #include "sysindirection.hpp"
 
+namespace Ginger {
 using namespace std;
-using namespace Ginger;
 
 
 #ifndef NULL
@@ -1573,3 +1573,4 @@ void CodeGenClass::compile0( Gnx mnx, LabelClass * contn ) {
 	}
 }
 
+} // namespace Ginger

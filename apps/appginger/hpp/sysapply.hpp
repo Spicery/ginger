@@ -21,6 +21,10 @@
 
 #include "common.hpp"
 
+namespace Ginger {
+
 extern Ref * sysApply( Ref * pc, class MachineClass *vm );
+
+}
 
 #endif

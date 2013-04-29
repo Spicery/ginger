@@ -43,6 +43,7 @@
 #include "sysapply.hpp"
 #include "externalkind.hpp"
 
+namespace Ginger {
 using namespace std;
 
 static std::exception failApply( Ref object ) {
@@ -194,4 +195,12 @@ Ref * sysApply( Ref * pc, MachineClass *vm ) {
         return pc;
     }
 }
+SysInfo infoApplyData( 
+    SysNames( "applyData" ),   
+    Arity( 1, true ), 
+    Arity( 0, true ), 
+    sysApply, 
+    "Applies any object to a set of arguments, the object to be applied is the last argument" 
+);
 
+} // namespace Ginger

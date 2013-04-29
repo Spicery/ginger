@@ -17,11 +17,14 @@
 \******************************************************************************/
 
 #include <iostream>
-using namespace std;
 
 #include "label.hpp"
 #include "codegen.hpp"
 #include "mishap.hpp"
+
+namespace Ginger {
+using namespace std;
+
 
 /** This is used to set the destination of a label.
 */
@@ -72,3 +75,5 @@ LabelClass * LabelClass::jumpToJump( LabelClass * contn ) {
 		return contn;
 	}
 }
+
+} // namespace Ginger

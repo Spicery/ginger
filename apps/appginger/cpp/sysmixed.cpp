@@ -24,6 +24,7 @@
 
 #include <string.h>
 
+namespace Ginger {
 
 Ref * sysMixedKindIndex( Ref *pc, class MachineClass * vm, Ref key ) {
 	if ( vm->count != 2 ) throw Ginger::Mishap( "ArgsMismatch" );
@@ -84,3 +85,4 @@ Ref * sysFastMixedKindLength( Ref *pc, class MachineClass * vm ) {
 }
 
 
+} // namespace Ginger

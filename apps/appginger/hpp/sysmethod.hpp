@@ -22,9 +22,12 @@
 #include "common.hpp"
 #include "machine.hpp"
 
+namespace Ginger {
+
 extern Ref * sysNewMethod( Ref * pc, MachineClass * vm );
 extern Ref * sysSetMethod( Ref * pc, MachineClass * vm );
 extern Ref * sysSetSlot( Ref * pc, MachineClass * vm );
 
+} // namespace Ginger
 
 #endif

@@ -26,6 +26,7 @@
 
 #include <cstring>
 
+namespace Ginger {
 using namespace std;
 
 
@@ -147,3 +148,5 @@ void HeapClass::selectCurrent() {
 	//	I do not believe we can ever get here. We should *always* have a 
 	if ( not this->current ) this->current = this->newCageClass();
 }
+
+} // namespace Ginger

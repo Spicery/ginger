@@ -48,6 +48,7 @@
 	#include "cagefinder.hpp"
 #endif
 
+namespace Ginger {
 using namespace std;
 
 //#define DBG_GC
@@ -780,3 +781,5 @@ void sysQuiescentGarbageCollect( MachineClass *vm, Ginger::GCTracker * stats ) {
 	gc.setGCTracker( stats );
 	gc.collectGarbage();
 }
+
+} // namespace Ginger

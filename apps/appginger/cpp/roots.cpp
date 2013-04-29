@@ -18,6 +18,8 @@
 
 #include "roots.hpp"
 
+namespace Ginger {
+
 Roots::Roots( MachineClass * vm ) :
 	registers( vm->registers ),
 	mask( 0 ),
@@ -33,3 +35,5 @@ Ref & Roots::ref( Ref r ) {
 	this->count += 1;
 	return this->registers.reserve( this->mask ) = r;
 }
+
+} // namespace Ginger

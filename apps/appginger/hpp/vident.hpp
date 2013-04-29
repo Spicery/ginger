@@ -24,6 +24,8 @@
 #include "shared.hpp"
 #include "valof.hpp"
 
+namespace Ginger {
+
 typedef class CodeGenClass *CodeGen;
 
 
@@ -54,6 +56,8 @@ public:
 	VIdent( CodeGen codegen, shared< Ginger::Mnx > vid );
 	VIdent( Ref ref ) : flavour( CONSTANT_FLAVOUR ), slot( -1 ), valof( NULL ), ref( ref ) {}
 };
+
+}
 
 #endif
 

@@ -19,6 +19,10 @@
 #ifndef INPUT_STREAM_LAYOUT_HPP
 #define INPUT_STREAM_LAYOUT_HPP
 
+namespace Ginger {
+
 #define PUSHBACK_OFFSET_INPUT_STREAM 2
+
+} // namespace Ginger
 
 #endif

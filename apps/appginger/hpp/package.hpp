@@ -25,9 +25,9 @@
 #include <utility>
 #include "valof.hpp"
 
+namespace Ginger {
+
 class Package;
-
-
 
 class PackageManager {
 public:		//	Will need to make this private.
@@ -102,20 +102,6 @@ public:
 	virtual ~OrdinaryPackage() {}
 };
 
-/*
-class StandardLibraryPackage : public Package {
-public:
-	void loadIfNeeded();
-protected:
-	virtual Valof * absoluteAutoload( const std::string & c );
-
-public:
-	StandardLibraryPackage( PackageManager * pkgmgr, std::string title ) :
-		Package( pkgmgr, title )
-	{
-	}
-	virtual ~StandardLibraryPackage() {}
-};
-*/
+} // namespace Ginger
 
 #endif

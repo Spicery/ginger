@@ -38,6 +38,8 @@
 #include "externalkind.hpp"
 #include "cell.hpp"
 
+namespace Ginger {
+
 int Numbering::number( const int depth ) {
 	this->numbers.resize( depth, 0 );
 	return this->numbers.back()++;
@@ -569,3 +571,5 @@ void RefPrint::refPrint( const Ref r ) {
 		}
 	}
 }
+
+} // namespace Ginger

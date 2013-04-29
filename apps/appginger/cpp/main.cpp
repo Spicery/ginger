@@ -35,6 +35,7 @@
 #include "rcep.hpp"
 #include "wellknownpaths.hpp"
 
+namespace Ginger {
 using namespace std;
 
 static void printWelcomeMessage() {
@@ -75,11 +76,13 @@ public:
 	virtual ~Main() {}
 };
 
+} // namespace Ginger
+
 int main( int argc, char **argv, char **envp ) {
 	openlog( APPGINGER_NAME, 0, LOG_LOCAL2 );
 	setlogmask( LOG_UPTO( LOG_INFO ) );
 	try {
-		Main main( APPGINGER_NAME );
+		Ginger::Main main( APPGINGER_NAME );
 		return main.parseArgs( argc, argv, envp ) ? main.run() : EXIT_SUCCESS;
 	} catch ( Ginger::Mishap & e ) {
 		e.report();

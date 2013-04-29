@@ -23,11 +23,14 @@
 #include "machine.hpp"
 #include "mishap.hpp"
 
+namespace Ginger {
+
 extern Ref * sysMixedKindExplode( Ref *pc, class MachineClass * vm, Ref key );
 extern Ref * sysMixedKindIndex( Ref *pc, class MachineClass * vm, Ref key );
 extern Ref * sysMixedKindLength( Ref *pc, class MachineClass * vm, Ref key );
 extern Ref * sysFastMixedKindLength( Ref *pc, class MachineClass * vm, Ref key );
 
+} // namespace Ginger
 
 #endif
 

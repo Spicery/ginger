@@ -16,9 +16,12 @@
     along with AppGinger.  If not, see <http://www.gnu.org/licenses/>.
 \******************************************************************************/
 
-using namespace std;
 
 #include "gclogger.hpp"
+
+namespace Ginger {
+using namespace std;
+
 
 GCLogger::GCLogger( const bool scs ) :
 	scan_call_stack( scs )
@@ -138,3 +141,4 @@ void GCLogger::atString( Ref * obj_K ) {
 	gclog << "  (String)" << endl;
 }
 
+} // namespace Ginger

@@ -22,6 +22,10 @@
 #include "common.hpp"
 #include "machine.hpp"
 
+namespace Ginger {
+
 extern Ref * sysCheckBool( Ref *pc, MachineClass * vm );
+
+}
 
 #endif

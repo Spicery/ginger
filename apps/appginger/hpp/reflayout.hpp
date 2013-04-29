@@ -19,6 +19,10 @@
 #ifndef REF_LAYOUT_HPP
 #define REF_LAYOUT_HPP
 
+namespace Ginger {
+
 #define REF_OFFSET_CONT 	1
+
+} // namespace Ginger
 
 #endif

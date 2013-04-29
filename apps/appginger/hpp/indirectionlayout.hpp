@@ -21,9 +21,13 @@
 
 #include "common.hpp"
 
+namespace Ginger {
+
 #define INDIRECTION_CONT_OFFSET 1
 
 ///	Argument for preflight of an indirection
 #define INDIRECTION_SIZE 2
+
+} // namespace Ginger
 
 #endif

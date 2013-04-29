@@ -19,7 +19,6 @@
 #include "debug.hpp"
 
 #include <iostream>
-using namespace std;
 
 #include "sysindirection.hpp"
 #include "indirectionlayout.hpp"
@@ -28,6 +27,8 @@ using namespace std;
 #include "machine.hpp"
 #include "mishap.hpp"
 
+namespace Ginger {
+using namespace std;
 
 /**
 	sysMakeIndirection will be called with pc[-1] storing the
@@ -121,3 +122,5 @@ Ref * sysSetIndirectionCont( Ref * pc, class MachineClass * vm ) {
 	fastIndirectionCont( var ) = vm->fastPop();
 	return pc;
 }
+
+} // Ginger

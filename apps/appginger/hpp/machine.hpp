@@ -31,6 +31,8 @@
 #include "package.hpp"
 #include "registers.hpp"
 
+namespace Ginger {
+
 class CodeGenClass;
 typedef CodeGenClass * CodeGen;
 
@@ -81,7 +83,7 @@ class MachineClass {
 friend class GarbageCollect;
 
 private:
-	AppContext *					appg;
+	Ginger::AppContext *			appg;
 	std::auto_ptr<CodeGenClass>		codegen_aptr;
 	std::auto_ptr<HeapClass>		heap_aptr;
 	Pressure						pressure;
@@ -194,6 +196,8 @@ typedef class MachineClass *Machine;
 
 Machine machine_new( int n );
 void machine_reset( Machine vm );
+
+} // namespace Ginger
 
 #endif
 

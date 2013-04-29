@@ -25,6 +25,8 @@
 //	Now source the auto-generated C++ file. 
 #include "instructions_context.hpp"
 
+namespace Ginger {
+
 Ref *pc;
 Machine vm;
 
@@ -54,7 +56,7 @@ void Machine2::execute( Ref r, const bool clear_stack ) {
 
 class Engine2Factory : public Ginger::EngineFactory {
 public:
-	MachineClass * newEngine( ::AppContext * cxt ) {
+	MachineClass * newEngine( AppContext * cxt ) {
 		return new Machine2( cxt );
 	}
 public:
@@ -71,5 +73,7 @@ public:
 Ginger::EngineFactoryRegistration engine2factory ( 
 	new Engine2Factory()
 );
+
+} // namespace Ginger
 
 #endif

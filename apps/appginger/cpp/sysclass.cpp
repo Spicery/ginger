@@ -18,14 +18,12 @@
 
 #include <set>
 #include <list>
-using namespace std;
 
 #include "sysclass.hpp"
 #include "syskey.hpp"
 #include "common.hpp"
 #include "key.hpp"
 #include "mishap.hpp"
-//#include "vmi.hpp"
 #include "machine.hpp"
 #include "classlayout.hpp"
 #include "misclayout.hpp"
@@ -34,6 +32,10 @@ using namespace std;
 #include "sysmethod.hpp"
 #include "sysprint.hpp"
 #include "functionlayout.hpp"
+
+namespace Ginger {
+using namespace std;
+
 
 static long preflightNewClass( MachineClass * vm ) {
 	Ref overrides = vm->vp[ 0 ];
@@ -374,3 +376,4 @@ Ref * sysClassExploder( Ref * pc, MachineClass * vm ) {
 }
 
 
+} // namespace Ginger

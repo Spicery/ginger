@@ -22,11 +22,13 @@
 #include "common.hpp"
 #include "key.hpp"
 
+namespace Ginger {
 namespace Numbers {
 
 	const gnglong_t MIN_SMALL = -( 1 << ( sizeof( Ref ) * 4 - TAG ) );
 	const gnglong_t MAX_SMALL = 1 << ( sizeof( Ref ) * 4 - TAG ) - 1;
 
+}
 }
 
 #endif

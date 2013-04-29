@@ -16,11 +16,10 @@
     along with AppGinger.  If not, see <http://www.gnu.org/licenses/>.
 \******************************************************************************/
 
-
-
 #include "fnobjcrawl.hpp"
-
 #include "misclayout.hpp"
+
+namespace Ginger {
 
 Ref * FnObjCrawl::next() {
 	if ( this->datapool == NULL ) {
@@ -57,4 +56,4 @@ FnObjCrawl::FnObjCrawl( MachineClass * vm, Ref * obj_K ) :
 	this->obj_N = this->pc + sizeInstructionsAfterKeyOfFn( obj_K );
 }
 
-
+} // namespace Ginger

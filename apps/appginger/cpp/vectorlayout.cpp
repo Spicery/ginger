@@ -16,8 +16,6 @@
     along with AppGinger.  If not, see <http://www.gnu.org/licenses/>.
 \******************************************************************************/
 
-
-
 #include <cassert>
 
 #include "vectorlayout.hpp"
@@ -28,6 +26,7 @@
 #include "key.hpp"
 #include "mishap.hpp"
 
+namespace Ginger {
 
 ////////////////////////////////////////////////////////////////////////////////
 //	Full vectors
@@ -52,6 +51,4 @@ Ref indexVectorLayout( Ref * obj_K, ptrdiff_t n ) {
 }
 
 
-////////////////////////////////////////////////////////////////////////////////
-//	End of file
-////////////////////////////////////////////////////////////////////////////////
+} // namespace Ginger

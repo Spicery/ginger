@@ -33,6 +33,7 @@
 	#include <iostream>
 #endif
 
+namespace Ginger {
 using namespace std;
 
 
@@ -90,3 +91,5 @@ Ref * sysKeyName( Ref * pc, MachineClass * vm ) {
 		throw Ginger::Mishap( "Wrong number of arguments for className" );
 	}	
 }
+
+} // namespace Ginger

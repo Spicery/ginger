@@ -23,6 +23,8 @@
 #include "stringlayout.hpp"
 #include "heap.hpp"
 
+namespace Ginger {
+
 Ref * sysStringAppend( Ref * pc, class MachineClass * vm ) {
 
 	//	Variables here would be unaffected by a GC.
@@ -126,3 +128,4 @@ Ref * sysNewString( Ref *pc, class MachineClass * vm ) {
 	return pc;
 }
 
+} // namespace Ginger

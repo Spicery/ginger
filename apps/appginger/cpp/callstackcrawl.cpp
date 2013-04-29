@@ -18,6 +18,7 @@
 
 #include "callstackcrawl.hpp"
 
+namespace Ginger {
 
 Ref * CallStackCrawl::next() {
 	//	To-do: This should be just this->sp == NULL
@@ -27,3 +28,4 @@ Ref * CallStackCrawl::next() {
 	return answer;
 }
 
+} // namespace Ginger

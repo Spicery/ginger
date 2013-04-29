@@ -22,8 +22,11 @@
 #include "common.hpp"
 #include "machine.hpp"
 
+namespace Ginger {
 
 extern Ref * sysAttrMapExplode( Ref *pc, class MachineClass * vm );
 extern Ref * sysAttrMapIndex( Ref *pc, class MachineClass * vm );
+
+} // namespace Ginger
 
 #endif

@@ -21,6 +21,8 @@
 #include "key.hpp"
 #include "mishap.hpp"
 
+namespace Ginger {
+
 bool isKey( Ref x ) {
 	unsigned long u = ToULong( x );
 	if ( ( u & TAG_MASK ) == OBJ_TAG ) {
@@ -58,3 +60,5 @@ Ref nameToKey( const std::string & name ) {
 	#include "name_to_simplekey.cpp.auto"
 	return SYS_ABSENT;
 }
+
+} // namespace Ginger

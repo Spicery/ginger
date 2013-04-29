@@ -29,6 +29,8 @@
 #include "cmp.hpp"
 #include "mishap.hpp"
 
+namespace Ginger {
+
 class MachineClass;
 
 extern Ref * sysExplode( Ref *pc, class MachineClass * vm );
@@ -193,6 +195,8 @@ private:
 public:
 	static SysMap & sysMap(); 
 };
+
+} // namespace Ginger
 
 #endif
 

@@ -18,9 +18,12 @@
 #ifndef SYS_SYMBOL_HPP
 #define SYS_SYMBOL_HPP
 
+#include <string>
+
 #include "common.hpp"
 #include "machine.hpp"
-#include <string>
+
+namespace Ginger {
 
 extern void preGCSymbolTable( const bool gctrace );
 extern void postGCSymbolTable( const bool gctrace );
@@ -28,5 +31,7 @@ extern void gcTouchSymbol( Ref r );
 extern Ref * sysMakeSymbol( Ref *pc, MachineClass * vm );
 extern const std::string & symbolToStdString( Ref r );
 extern Ref refMakeSymbol( const std::string & );
+
+} // namespace Ginger
 
 #endif

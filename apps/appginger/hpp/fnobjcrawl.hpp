@@ -23,6 +23,8 @@
 #include "instruction_set.hpp"
 #include "machine.hpp"
 
+namespace Ginger {
+
 /* Find the object pointers in the function object */
 class FnObjCrawl {
 private:
@@ -47,5 +49,7 @@ public:
 public:
 	FnObjCrawl( MachineClass * vm, Ref * obj_K );
 };
+
+}
 
 #endif

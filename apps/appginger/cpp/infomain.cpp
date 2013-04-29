@@ -34,7 +34,7 @@
 
 #define APP_TITLE "ginger-info"
 
-
+namespace Ginger {
 using namespace std;
 
 enum OutputFormat {
@@ -611,8 +611,10 @@ public:
 	}
 };
 
+} // namespace Ginger
+
 int main( int argc, char **argv, char **envp ) {
-	Main main;
+	Ginger::Main main;
 	if ( main.parseArgs( argc, argv, envp ) ) {
 		main.printMetaInfo();
 	}

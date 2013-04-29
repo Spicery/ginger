@@ -21,6 +21,8 @@
 #include "key.hpp"
 #include "mishap.hpp"
 
+namespace Ginger {
+
 Registers::Registers() :	
 	free_hint( 0 ),
 	in_use( 0 )
@@ -64,3 +66,5 @@ void Registers::release( int count, unsigned long mask ) {
 	this->free_hint = ( this->free_hint + NREG - count ) & NREG_MASK;
 	this->in_use &= ~mask;
 }
+
+} // namespace Ginger

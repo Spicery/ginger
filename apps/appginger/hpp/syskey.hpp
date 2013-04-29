@@ -22,9 +22,13 @@
 #include "common.hpp"
 #include "machine.hpp"
 
+namespace Ginger {
+
 extern Ref * sysObjectKey( Ref * pc, MachineClass * vm );
 extern Ref * sysKeyName( Ref * pc, MachineClass * vm );
 extern Ref refDataKey( Ref r );
+
+} // namespace Ginger
 
 #endif
 

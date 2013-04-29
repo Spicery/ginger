@@ -11,6 +11,8 @@
 #include "maplayout.hpp"
 #include "sysapply.hpp"
 
+namespace Ginger {
+
 class InstructionSet {
 public:
 #include "instruction_set.hpp.auto"
@@ -28,5 +30,7 @@ void results_error( int d );
 void arith_error( int x, int y );
 void arith_error( int x );
 void normal_exit();
+
+}
 
 #endif

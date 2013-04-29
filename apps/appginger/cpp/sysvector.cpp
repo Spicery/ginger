@@ -24,6 +24,8 @@
 
 #include <string.h>
 
+namespace Ginger {
+
 Ref * sysVectorAppend( Ref * pc, class MachineClass * vm ) {
 
 	//	Variables here would be unaffected by a GC.
@@ -139,3 +141,4 @@ Ref * sysFastVectorLength( Ref *pc, class MachineClass * vm ) {
 	return pc;
 }
 
+} // namespace Ginger

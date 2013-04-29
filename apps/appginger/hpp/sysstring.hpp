@@ -23,11 +23,14 @@
 #include "machine.hpp"
 #include "mishap.hpp"
 
+namespace Ginger {
+
 extern Ref * sysStringAppend( Ref *pc, class MachineClass * vm );
 extern Ref * sysStringIndex( Ref *pc, class MachineClass * vm );
 extern Ref * sysStringExplode( Ref *pc, class MachineClass * vm );
 extern Ref * sysStringLength( Ref *pc, class MachineClass * vm );
 extern Ref * sysNewString( Ref *pc, class MachineClass * vm );
 
+} // namespace Ginger
 
 #endif

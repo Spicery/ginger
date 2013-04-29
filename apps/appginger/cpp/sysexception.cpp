@@ -23,6 +23,7 @@
 #include "mishap.hpp"
 #include "sysprint.hpp"
 
+namespace Ginger {
 using namespace std;
 
 #ifdef EXCEPTIONS_IMPLEMENTED
@@ -88,3 +89,5 @@ Ref * sysPanic( Ref * pc, class MachineClass * vm ) {
 	decorateProblem( vm, syserror );
 	throw syserror;
 }
+
+} // namespace Ginger

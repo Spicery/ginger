@@ -23,6 +23,7 @@
 #include "mishap.hpp"
 #include "sysunix.hpp"
 
+namespace Ginger {
 using namespace std;
 
 unsigned long sizeNeededForStrLen( size_t strlen_n ) {
@@ -101,3 +102,4 @@ Ref * sysEnvVars( Ref * pc, class MachineClass * vm ) {
 	return pc;
 }
 
+} // namespace Ginger

@@ -21,8 +21,12 @@
 
 #include "common.hpp"
 
+namespace Ginger {
+
 #define DOUBLE_VALUE_SIZE           ( ( sizeof( gngdouble_t ) + sizeof( Ref ) - 1 ) / sizeof( Ref ) )
 #define DOUBLE_SIZE                 ( 1 + DOUBLE_VALUE_SIZE )
 #define DOUBLE_OFFSET_VALUE         1
+
+} // namespace Ginger
 
 #endif

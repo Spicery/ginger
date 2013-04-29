@@ -22,11 +22,12 @@
 
 #include "instructions_context.hpp"
 
-using namespace Ginger;
-
+namespace Ginger {
 
 InstructionSet3::InstructionSet3() {
 	//	Nothing to do!
 }
+
+} // namespace Ginger
 
 #endif

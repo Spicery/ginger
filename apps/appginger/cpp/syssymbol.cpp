@@ -27,6 +27,7 @@
 #include "stringlayout.hpp"
 #include "syssymbol.hpp"
 
+namespace Ginger {
 using namespace std;
 
 /*
@@ -136,3 +137,5 @@ extern const std::string & symbolToStdString( Ref r ) {
 		throw SystemError( "Corrupt symbol table" );
 	}
 }
+
+} // namepsace Ginger

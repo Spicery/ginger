@@ -21,6 +21,8 @@
 
 #include "common.hpp"
 
+namespace Ginger {
+
 /*
 +-------------+-------------+----------+---------+
 |  sysMapKey  | AssocChain  |  Count   | Flags   |
@@ -70,5 +72,7 @@ extern bool fastMapDirtyBit( Ref map );
 extern bool fastMapPtrDirtyBit( Ref * map_K );
 extern void fastSetMapDirtyBit( Ref map, bool db );
 extern void fastSetMapPtrDirtyBit( Ref * map_K, bool db );
+
+} // namespace Ginger
 
 #endif

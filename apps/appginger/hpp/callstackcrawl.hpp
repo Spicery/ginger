@@ -23,6 +23,8 @@
 #include "callstacklayout.hpp"
 #include "machine.hpp"
 
+namespace Ginger {
+
 class CallStackCrawl {
 private:
 	Ref *			sp;
@@ -38,5 +40,7 @@ public:
 	{
 	}
 };
+
+} // namespace
 
 #endif

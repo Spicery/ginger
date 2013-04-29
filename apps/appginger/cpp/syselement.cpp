@@ -18,15 +18,14 @@
 
 #include <vector>
 
-#include <cell.hpp>
-
+#include "cell.hpp"
 #include "syselement.hpp"
 #include "sysattrmap.hpp"
 #include "mishap.hpp"
 #include "sys.hpp"
 
+namespace Ginger {
 using namespace std;
-using namespace Ginger;
 
 Ref * sysElementName( Ref *pc, class MachineClass * vm ) {
 	if ( vm->count != 1 ) throw Ginger::Mishap( "ArgsMismatch" );
@@ -110,3 +109,5 @@ SysInfo infoExplodeMapsAndMaplets(
     sysExplodeMapsAndMaplets, 
     "Explodes maps into maplets and maplets into 2-tuples" 
 );
+
+} // namespace Ginger

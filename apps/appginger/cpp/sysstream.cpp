@@ -34,7 +34,6 @@
 #include "outputstreamexternal.hpp"
 
 namespace Ginger {
-
 using namespace Ginger;
 
 static Ref * getInputStreamKeyPtr( MachineClass * vm, int n ) {
@@ -164,6 +163,7 @@ SysInfo infoIsClosedInputStream(
     "Returns true if the input stream is closed (the next value to be returned will be termin)"
 );
 
+
 Ref * sysNewInputStream( Ref * pc, MachineClass * vm ) {
     if ( vm->count != 1 ) {
         throw Mishap( "Wrong number of arguments supplied" );
@@ -198,6 +198,7 @@ SysInfo infoNewInputStream(
     sysNewInputStream, 
     "Builds an input stream from a file name" 
 );
+
 
 Ref * sysNextInputStream( Ref * pc, MachineClass * vm ) {
     Ref * input_stream_K = getInputStreamKeyPtr( vm, 0 );
@@ -298,6 +299,7 @@ SysInfo infoNewOutputStream(
     sysNewOutputStream, 
     "Builds an output stream from a file name" 
 );
+
 
 Ref * getOutputStreamK( MachineClass * vm ) {
     if ( vm->count != 1 ) {

@@ -24,6 +24,8 @@
 #include "heap.hpp"
 #include "cage.hpp"
 
+namespace Ginger {
+
 class HeapCrawl {
 private:
 	std::vector< CageClass * >::iterator	cages;
@@ -35,5 +37,7 @@ public:
 public:
 	HeapCrawl( HeapClass & h );
 };
+
+} // namespace Ginger
 
 #endif

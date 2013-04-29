@@ -23,6 +23,7 @@
 #include "sysprint.hpp"
 #include "syscheck.hpp"
 
+namespace Ginger {
 using namespace std;
 
 //	Added in case-study: Adding New Element Type.
@@ -34,3 +35,4 @@ Ref * sysCheckBool( Ref * pc, class MachineClass * vm ) {
 	return pc;
 }
 
+} // namespace Ginger

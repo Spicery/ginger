@@ -37,7 +37,7 @@
 
 #include "wellknownpaths.hpp"
 
-
+namespace Ginger {
 using namespace std;
 
 //#define DBG_CLIMAIN
@@ -127,14 +127,17 @@ public:
 	virtual ~GingerMain() {}
 };
 
+} // namespace Ginger
+
 int main( int argc, char **argv, char **envp ) {
 	openlog( APPGINGER_NAME, 0, LOG_LOCAL2 );
 	setlogmask( LOG_UPTO( LOG_INFO ) );
 	try {
-		GingerMain main( APP_TITLE );
+		Ginger::GingerMain main( APP_TITLE );
 		return main.parseArgs( argc, argv, envp ) ? main.run() : EXIT_SUCCESS;
 	} catch ( Ginger::Mishap & e ) {
 		e.report();
 		return EXIT_FAILURE;
 	}
 }
+

@@ -23,6 +23,8 @@
 
 #include "cage.hpp"
 
+namespace Ginger {
+
 class HeapClass {
 friend class HeapCrawl;
 friend class CageFinder;
@@ -54,5 +56,7 @@ public:
 	~HeapClass();
 
 };
+
+} // namespace Ginger
 
 #endif

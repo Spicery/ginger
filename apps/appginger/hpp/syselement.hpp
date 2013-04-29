@@ -22,8 +22,11 @@
 #include "common.hpp"
 #include "machine.hpp"
 
+namespace Ginger {
+
 extern Ref * sysElementName( Ref *pc, class MachineClass * vm );
 extern Ref * sysElementAttribute( Ref *pc, class MachineClass * vm );
 
+} // namespace Ginger
 
 #endif

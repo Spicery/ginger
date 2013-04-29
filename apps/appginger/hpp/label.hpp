@@ -21,6 +21,8 @@
 
 #include <vector>
 
+namespace Ginger {
+
 class CodeGenClass;
 
 class LabelClass {
@@ -58,6 +60,8 @@ public:
 typedef LabelClass * Label;
 
 #define CONTINUE_LABEL ((LabelClass*)0)
+
+} // namespace Ginger
 
 #endif
 

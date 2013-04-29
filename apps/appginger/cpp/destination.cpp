@@ -25,6 +25,8 @@ using namespace std;
 
 //#define DBG_DESTINATION
 
+namespace Ginger {
+
 DestinationClass::DestinationClass( CodeGen codegen ) {
 	this->codegen = codegen;
 	this->is_set = false;
@@ -68,3 +70,4 @@ void DestinationClass::destinationInsert() {
 	}
 }
 
+} // namespace Ginger

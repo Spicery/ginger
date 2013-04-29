@@ -34,6 +34,7 @@
 #include "mishap.hpp"
 #include "simplify.hpp"
 
+namespace Ginger {
 using namespace std;
 
 //#define DBG_RCEP
@@ -195,3 +196,5 @@ bool RCEP::read_comp_exec_print( istream & input, std::ostream & output ) {
 void RCEP::printResults( std::ostream & output, float time_taken ) {
 	this->getMachine()->printResults( output, time_taken );
 }
+
+} // namespace Ginger

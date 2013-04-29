@@ -26,6 +26,7 @@
 #include "machine.hpp"
 #include "package.hpp"
 
+namespace Ginger {
 
 class RCEP {
 private:
@@ -74,6 +75,8 @@ public:
 		level -= 1;
 	}
 };
+
+} // namespace Ginger
 
 #endif
 

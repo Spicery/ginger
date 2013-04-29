@@ -80,10 +80,10 @@ public:
 class VirtualMachine {
 friend class VirtualMachineFactory;
 private:
-    shared< ::AppContext > app_context;
-    ::MachineClass * machine;
+    shared< AppContext > app_context;
+    MachineClass * machine;
 private:
-    VirtualMachine( shared< ::AppContext > a, ::MachineClass * m ) : 
+    VirtualMachine( shared< AppContext > a, MachineClass * m ) : 
         app_context( a ),
         machine( m ) 
     {}
@@ -111,7 +111,7 @@ public: //  Registers
 
 class VirtualMachineFactory {
 private:
-    shared< ::AppContext > app_context;
+    shared< AppContext > app_context;
 public:
     VirtualMachineFactory() :
         app_context( new AppContext() )
@@ -125,4 +125,5 @@ public:
 
 
 } // namespace Ginger
+
 #endif

@@ -23,6 +23,7 @@
 #include "machine.hpp"
 #include "mishap.hpp"
 
+namespace Ginger {
 
 //  TODO: 
 //  Really this should include the auto-generated headers and NOT
@@ -31,12 +32,14 @@
 
 #include "vector.hpp.auto"
 
+
 extern Ref * sysVectorAppend( Ref *pc, class MachineClass * vm );
 extern Ref * sysVectorExplode( Ref *pc, class MachineClass * vm );
 extern Ref * sysIsUpdateableVector( Ref *pc, class MachineClass * vm );
 extern Ref * sysVectorLength( Ref *pc, class MachineClass * vm );
 extern Ref * sysFastVectorLength( Ref *pc, class MachineClass * vm );
 
+} // namespace Ginger
 
 #endif
 

@@ -45,6 +45,7 @@
 
 #include "wellknownpaths.hpp"
 
+namespace Ginger {
 using namespace std;
 
 //#define DBG_PACKAGE_AUTOLOAD 1
@@ -380,25 +381,4 @@ void OrdinaryPackage::loadIfNeeded() {
 	this->loaded = true;
 }
 
-
-/*******************************************************************************
-*	Standard Library Package
-*******************************************************************************/
-
-/*
-Valof * StandardLibraryPackage::absoluteAutoload( const std::string & c ) {
-	Ref r = makeSysFn( this->pkgmgr->vm->codegen(), c, SYS_UNDEFINED );
-	if ( r == SYS_UNDEFINED ) {
-		//	Doesn't match a system call. Fail.
-		return NULL;
-	} else {
-		Valof * id = this->add( c, true );
-		id->valof = r;
-		return id;
-	}
-}
-
-void StandardLibraryPackage::loadIfNeeded() {
-}
-*/
-
+} // namespace Ginger

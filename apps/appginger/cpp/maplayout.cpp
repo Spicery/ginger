@@ -21,6 +21,8 @@
 #include "common.hpp"
 #include "key.hpp"
 
+namespace Ginger {
+
 Ref & fastMapData( Ref r ) {
 	return RefToPtr4( r )[ MAP_OFFSET_DATA ];
 }
@@ -91,3 +93,5 @@ void fastSetMapPtrDirtyBit( Ref * map_K, bool db ) {
 		*reinterpret_cast< unsigned long * >( loc ) &= ~0x100;
 	}
 }
+
+} // namespace Ginger

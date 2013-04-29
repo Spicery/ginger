@@ -35,6 +35,7 @@
 #include "functionlayout.hpp"
 //#include "vmi.hpp"
 
+namespace Ginger {
 using namespace std;
 
 //#define DBG_MACHINE
@@ -437,3 +438,5 @@ void ExternalTracker::cleanUpAfterGarbageCollection() {
 		for_deletion.pop_front();
 	}
 }
+
+} // namespace Ginger

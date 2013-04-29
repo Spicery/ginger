@@ -20,6 +20,8 @@
 
 #include "key.hpp"
 
+namespace Ginger {
+
 bool isList( Ref r ) {
 	return IsPair( r ) || IsNil( r );
 }
@@ -32,4 +34,4 @@ Ref fastPairTail( Ref r ) {
 	return RefToPtr4( r )[ PAIR_TAIL_OFFSET ];
 }
 
-
+} // namespace Ginger

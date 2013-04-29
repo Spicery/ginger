@@ -22,8 +22,10 @@
 #include "common.hpp"
 #include "machine.hpp"
 
-//	Ref * sysXXX( Ref * pc, class MachineClass * vm );
+namespace Ginger {
+
 Ref * cgiValue( Ref * pc, class MachineClass * vm );
 
+} // namespace Ginger
 
 #endif

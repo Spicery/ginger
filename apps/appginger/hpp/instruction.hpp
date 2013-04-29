@@ -19,9 +19,12 @@
 #ifndef INSTRUCTION_HPP
 #define INSTRUCTION_HPP
 
+namespace Ginger {
+
 enum Instruction {
 #include "instruction.hpp.auto"
 };
 
+}
 
 #endif

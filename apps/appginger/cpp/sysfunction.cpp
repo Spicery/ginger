@@ -22,7 +22,8 @@
 #include "key.hpp"
 #include "mishap.hpp"
 #include "sysprint.hpp"
-//#include "vmi.hpp"
+
+namespace Ginger {
 
 Ref * sysApplyFunction( Ref * pc, class MachineClass * vm ) {
 	Ref r = vm->fastPop();
@@ -117,3 +118,4 @@ Ref * sysFunctionOutArity( Ref *pc, class MachineClass * vm ) {
 	return pc;
 }
 
+} // namespace Ginger

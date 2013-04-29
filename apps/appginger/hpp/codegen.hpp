@@ -36,6 +36,8 @@
 #include "cmp.hpp"
 #include "valof.hpp"
 
+namespace Ginger {
+
 class MachineClass;
 typedef MachineClass * Machine;
 
@@ -287,7 +289,7 @@ public:
 
 typedef class CodeGenClass *CodeGen;
 
-
+} // namespace Ginger
 
 #endif
 

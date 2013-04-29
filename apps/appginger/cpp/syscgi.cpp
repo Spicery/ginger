@@ -17,8 +17,10 @@
 \******************************************************************************/
 
 #include "mishap.hpp"
-
 #include "syscgi.hpp"
+#include "sys.hpp"
+
+namespace Ginger {
 
 Ref * cgiValue( Ref * pc, class MachineClass * vm ) {
 	if ( vm->count != 1 ) throw Ginger::Mishap( "ArgsMismatch" );
@@ -32,3 +34,12 @@ Ref * cgiValue( Ref * pc, class MachineClass * vm ) {
 	vm->fastPeek() = vm->heap().copyString( pc, value );
 	return pc;
 }
+SysInfo infoCgiValue( 
+    SysNames( "cgiValue" ), 
+    Arity( 1 ), 
+    Arity( 1 ), 
+    cgiValue, 
+    "Returns value of a CGI " 
+);
+
+} // namespace Ginger

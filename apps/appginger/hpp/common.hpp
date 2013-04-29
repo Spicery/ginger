@@ -19,6 +19,8 @@
 #ifndef COMMON_HPP
 #define COMMON_HPP
 
+namespace Ginger {
+
 /*
 	SAFE_MODE is a compile-time flag that controls the execution of
 	relatively expensive run-time checks. Should be disabled for release.
@@ -53,6 +55,8 @@ typedef Ref * SysCall( Ref * pc, MachineClass * );
 
 #define STANDARD_LIBRARY_PACKAGE	"ginger.library"
 #define INTERACTIVE_PACKAGE			"ginger.interactive"
+
+} // namespace Ginger
 
 #endif
 

@@ -23,6 +23,7 @@
 #include "codegen.hpp"
 #include "mishap.hpp"
 
+namespace Ginger {
 
 Ref makeSysFn( CodeGen codegen, std::string fn_name, Ref default_value ) {
 
@@ -62,3 +63,4 @@ Ref makeSysFn( CodeGen codegen, std::string fn_name, Ref default_value ) {
 	
 }
 
+} // namespace Ginger

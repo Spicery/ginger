@@ -21,7 +21,11 @@
 
 #include "common.hpp"
 
+namespace Ginger {
+
 extern Ref * sysFastSwap( Ref *pc, class MachineClass * vm );
 extern Ref * sysSwap( Ref *pc, class MachineClass * vm );
+
+} // namespace Ginger
 
 #endif

@@ -21,8 +21,12 @@
 
 #include "key.hpp"
 
+namespace Ginger {
+
 extern unsigned long sizeAfterKeyOfWRecordLayout( Ref * key );
 extern unsigned long lengthOfWRecordLayout( Ref * key );
+
+} // namepsace Ginger
 
 #endif
 

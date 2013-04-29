@@ -19,6 +19,11 @@
 #ifndef MISC_LAYOUT_HPP
 #define MISC_LAYOUT_HPP
 
+#include "common.hpp"
+#include "functionlayout.hpp"
+
+namespace Ginger {
+
 /******************************************************************************\
 |
 |	Object Layout describes the different kinds of objects in the system
@@ -34,8 +39,6 @@
 |
 \******************************************************************************/
 
-#include "common.hpp"
-#include "functionlayout.hpp"
 
 ////////////////////////////////////////////////////////////////////////////////
 //	Generic layout parameters
@@ -112,6 +115,6 @@ extern Ref * findObjectKey( Ref * obj_A );
 extern unsigned long lengthAfterObjectKey( Ref * obj_K );
 
 
-////////////////////////////////////////////////////////////////////////////////
+} // namespace Ginger 
 
 #endif

@@ -49,6 +49,7 @@
 
 //#define DBG_CGI_MAIN
 
+namespace Ginger {
 using namespace std;
 
 class CgiMain : public ToolMain {
@@ -73,11 +74,13 @@ public:
 	virtual ~CgiMain() {}
 };
 
+} // namespace Ginger
+
 int main( int argc, char **argv, char **envp ) {
 	openlog( APP_TITLE, 0, LOG_LOCAL2 );
 	setlogmask( LOG_UPTO( LOG_INFO ) );
 	try {
-		CgiMain main( APPGINGER_NAME );
+		Ginger::CgiMain main( APPGINGER_NAME );
 		return main.parseArgs( argc, argv, envp ) ? main.run() : EXIT_SUCCESS;
 	} catch ( Ginger::Mishap & e ) {
 		e.report();

@@ -30,9 +30,9 @@
 #include "mishap.hpp"
 #include "machine.hpp"
 
-#include <iostream>
+namespace Ginger {
 
-class Ginger::External;
+class External;
 
 static long cage_id_seq = 0;
 
@@ -192,3 +192,5 @@ Ref * XfrClass::makeRefRef() {
 Ref XfrClass::makeRef() {
 	return Ptr4ToRef( this->makeRefRef() );
 }
+
+} // namespace Ginger

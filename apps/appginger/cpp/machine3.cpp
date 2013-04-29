@@ -22,11 +22,11 @@
 
 #include "machine3.hpp"
 #include "enginefactory.hpp"
-
-using namespace Ginger;
-
-//	Now source the auto-generated C++ file. 
+//  Now source the auto-generated C++ file. 
 #include "instructions_context.hpp"
+
+namespace Ginger {
+
 
 
 Machine3::Machine3( AppContext * g ) :
@@ -53,7 +53,7 @@ typedef void *Special;
 
 class Engine3Factory : public Ginger::EngineFactory {
 public:
-    MachineClass * newEngine( ::AppContext * cxt ) {
+    MachineClass * newEngine( AppContext * cxt ) {
         return new Machine3( cxt );
     }
 public:
@@ -70,5 +70,7 @@ public:
 Ginger::EngineFactoryRegistration engine3factory ( 
     new Engine3Factory()
 );
+
+}
 
 #endif

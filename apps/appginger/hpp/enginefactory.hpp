@@ -24,9 +24,9 @@
 #include "machine.hpp"
 #include "generator.hpp"
 
-class AppContext;
-
 namespace Ginger {
+
+class AppContext;
 
 class EngineFactory {
 private:
@@ -52,7 +52,7 @@ public:
 	const std::string getLongName() { return this->long_name; }
 	const std::string getDescription() { return this->description; }
 public:
-	virtual MachineClass * newEngine( ::AppContext * cxt ) = 0;
+	virtual MachineClass * newEngine( AppContext * cxt ) = 0;
 };
 
 class EngineFactoryRegistration {

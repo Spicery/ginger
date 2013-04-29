@@ -18,6 +18,9 @@
 
 #include "scanpkg.hpp"
 
+namespace Ginger {
+
+
 Ref * ScanPkg::next() {
 	if ( it == pkg->table.end() ) return static_cast< Ref * >( 0 );
 	this->var = (*it).first;	//	debug
@@ -32,3 +35,4 @@ ScanPkg::ScanPkg( Package * d ) :
 {
 }
 
+} // namespace Ginger

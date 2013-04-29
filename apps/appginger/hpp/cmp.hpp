@@ -21,6 +21,7 @@
 
 #include "instruction.hpp"
 
+namespace Ginger {
 
 enum CMP_OP {
 	CMP_GTE,
@@ -35,5 +36,7 @@ extern CMP_OP revCmpOp( const CMP_OP );
 extern Instruction cmpOpInstruction( const CMP_OP cmp );
 extern Instruction cmpLocalSmallInstruction( const CMP_OP cmp );
 extern Instruction cmpLocalLocalInstruction( const CMP_OP cmp );
+
+} // namespace Ginger
 
 #endif

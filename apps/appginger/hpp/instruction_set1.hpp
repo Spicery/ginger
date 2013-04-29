@@ -23,10 +23,14 @@
 
 #include "instruction_set.hpp"
 
+namespace Ginger {
+
 class InstructionSet1 : public InstructionSet {
 public:
 	InstructionSet1();
 };
+
+} // namespace Ginger
 
 #endif
 #endif

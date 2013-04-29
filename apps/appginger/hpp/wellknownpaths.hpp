@@ -19,6 +19,7 @@
 #ifndef GNG_WELL_KNOWN_PATHS_HPP
 #define GNG_WELL_KNOWN_PATHS_HPP
 
+namespace Ginger {
 
 #define LICENSE_FILE	INSTALL_LIB "/COPYING"
 
@@ -35,8 +36,6 @@
 
 #define TAIL			"/usr/bin/tail"
 
-
-
-
+} // namespace Ginger 
 
 #endif

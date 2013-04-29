@@ -22,6 +22,8 @@
 #include <string>
 #include "common.hpp"
 
+namespace Ginger {
+
 bool isKey( Ref x );
 const char * keyName( Ref key );
 Ref nameToKey( const std::string & name );
@@ -242,9 +244,7 @@ KEYLESS_KIND
 #define IsNil( x )				( x == SYS_NIL )
 
 
+} // namespace Ginger
 
-////////////////////////////////////////////////////////////////////////
-//	End of file
-////////////////////////////////////////////////////////////////////////
 #endif
 

@@ -17,17 +17,20 @@
 \******************************************************************************/
 
 #ifndef MACHINE4_EXCLUDED
-#include "instruction_set4.hpp"
-
-#include "instructions_context.hpp"
 
 #include <iostream>
-//#include <cstdio>
 #include <cstdlib>
 
-using namespace Ginger;
+#include "instruction_set4.hpp"
+#include "instructions_context.hpp"
+
+
+namespace Ginger {
 
 InstructionSet4::InstructionSet4() {
 	#include "instruction_set4.cpp.auto"
 }
+
+} // namespace Ginger 
+
 #endif

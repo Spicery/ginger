@@ -19,6 +19,7 @@
 #ifndef CALL_STACK_LAYOUT_HPP
 #define CALL_STACK_LAYOUT_HPP
 
+namespace Ginger {
 
 //	Variant without NSLOT
 /*	DOWN is DECREASING addresses
@@ -50,5 +51,7 @@
 #define LOCAL( N ) 			VMSP[N]
 #define LOCAL_OF( X, N ) 	(X)[N]
 #define NSLOTS( sp )( ToRefRef( (sp)[ SP_PREV_SP ] ) - (sp) ) - SP_OVERHEAD;
+
+} // namespace Ginger
 
 #endif

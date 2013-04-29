@@ -18,6 +18,8 @@
 
 #include "heapcrawl.hpp"
 
+namespace Ginger {
+
 CageClass * HeapCrawl::next() {
 	if ( this->cages == this->end ) {
 		return static_cast< CageClass * >( 0 );
@@ -36,3 +38,4 @@ CageClass * HeapCrawl::next() {
 	this->end = h.zoo.end();
 }
 
+} // namespace Ginger

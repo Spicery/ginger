@@ -22,6 +22,8 @@
 #include "key.hpp"
 #include "misclayout.hpp"
 
+namespace Ginger {
+
 Ref * CageCrawl::next() {
 	if ( this->current < this->cage->top ) {
 		Ref * key = findObjectKey( this->current );
@@ -32,3 +34,5 @@ Ref * CageCrawl::next() {
 		return 0;
 	}
 }
+
+} // namespace Ginger

@@ -741,7 +741,8 @@ public:
 		} else if ( x == LIST || x == LIST_APPEND || x == VECTOR ) {
 			element.putAttribute( ARITY, "1" );
 		} else if ( x == FOR ) {
-			if ( element.hasAttribute( ARITY ) && element.attribute( ARITY ) == "0" ) {
+            //  TODO: Check this is correct - looks wrong!
+			if ( element.hasAttribute( ARITY, "0" ) ) {
 				element.putAttribute( ARITY, "0" );
 			}
 		} else if ( x == SET || x == BIND ) {

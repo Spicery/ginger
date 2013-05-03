@@ -42,6 +42,13 @@ enum {
 
 	prec_from			=   2000,
 	prec_in 			= 	2000,
+	prec_cross			=	2100,
+	prec_zip			=	2200,
+	prec_where			=	2300,
+	prec_whileuntil		=  	2300,
+	prec_then			=  	2300,
+	prec_finally		=  	2300,
+	prec_do				=  	2400,
     prec_arrow  		=  10000,
     prec_comma  		=  20000,
     prec_semi   		=  30000,

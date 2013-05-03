@@ -56,31 +56,33 @@ struct CodeGenState {
 class CompileQuery {
 private:
 	CodeGenClass * codegen;
-	VIdent * loop_var;
+	std::vector< shared< VIdent > > loop_vars;
 
 private:
-	void setLoopVar( VIdent * v ) {
-		this->loop_var = v;
+	int newLoopVar( VIdent * v ) {
+		int n = this->loop_vars.size();
+		this->loop_vars.push_back( shared< VIdent >( v ) );
+		return n;
 	}
 
-	VIdent & getLoopVar();
+	VIdent & getLoopVar( int n ) {
+		return *( this->loop_vars[ n ] );
+	}
 
 private:
+	//	INIT, TEST, BODY, ADVN, FINI
+	void compileQueryDecl( Gnx query );
 	void compileQueryInit( Gnx query, LabelClass * contn );
-	void compileQueryNext( Gnx query, LabelClass * contn );
-	void compileQueryIfSo( Gnx query, LabelClass * dst, LabelClass * contn );
+	void compileQueryTest( Gnx query, LabelClass * dst, LabelClass * contn );
+	void compileQueryBody( Gnx query, LabelClass * contn );
+	void compileQueryAdvn( Gnx query, LabelClass * contn );
+	void compileQueryFini( Gnx query, LabelClass * contn );
+	
+public:
+	void compileFor( Gnx query, LabelClass * contn );
 
 public:
-	void compileFor( Gnx query, Gnx body, LabelClass * contn );
-
-public:
-	CompileQuery( CodeGenClass * cg ) : codegen( cg ), loop_var( NULL ) {}
-
-	~CompileQuery() {
-		if ( this->loop_var ) {
-			delete this->loop_var;
-		}
-	}
+	CompileQuery( CodeGenClass * cg ) : codegen( cg ) {}
 };
 
 
@@ -246,7 +248,6 @@ private:
 	void compileQueryInit( Gnx query, LabelClass * contn );
 	void compileQueryNext( Gnx query, LabelClass * contn );
 	void compileQueryIfSo( Gnx query, LabelClass * dst, LabelClass * contn );
-	void compileFor( Gnx query, Gnx body, LabelClass * contn );
 	void compileIfTest( bool sense, Gnx mnx, LabelClass * dst, LabelClass * contn );
 	void compileGnxConstant( Gnx mnx, LabelClass * contn );
 	void compileGnxIf( Gnx mnx, LabelClass * contn );

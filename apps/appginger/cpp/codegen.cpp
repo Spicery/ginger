@@ -519,31 +519,33 @@ void CodeGenClass::vmiNOT() {
 }
 
 void CodeGenClass::vmiAND( LabelClass * dst ) {
+	if ( dst == CONTINUE_LABEL ) throw SystemError( "vmiAND passed CONTINUE_LABEL" );
 	this->emitSPC( vmc_and );
 	dst->labelInsert();
 }
 
 void CodeGenClass::vmiOR( LabelClass * dst ) {
+	if ( dst == CONTINUE_LABEL ) throw SystemError( "vmiOR passed CONTINUE_LABEL" );
 	this->emitSPC( vmc_or );
 	dst->labelInsert();
 }
 
 void CodeGenClass::vmiABS_AND( LabelClass * dst ) {
+	if ( dst == CONTINUE_LABEL ) throw SystemError( "vmiABS_AND passed CONTINUE_LABEL" );
 	this->emitSPC( vmc_absand );
 	dst->labelInsert();
 }
 
 void CodeGenClass::vmiABS_OR( LabelClass * dst ) {
+	if ( dst == CONTINUE_LABEL ) throw SystemError( "vmiABS_OR passed CONTINUE_LABEL" );
 	this->emitSPC( vmc_absor );
 	dst->labelInsert();
 }
 
-void CodeGenClass::vmiIFNOT( LabelClass * d, LabelClass * contn ) {
-	this->vmiIFSO( contn, d );
-}
-
 void CodeGenClass::vmiIFSO( LabelClass * dst ) {
-	if ( dst->isntReturn() ) {
+	if ( dst == CONTINUE_LABEL ) {
+		throw SystemError( "vmiIFSO called with CONTINUE_LABEL" );
+	} else if ( dst->isntReturn() ) {
 		this->emitSPC( vmc_ifso );
 		dst->labelInsert();
 	} else {
@@ -552,13 +554,16 @@ void CodeGenClass::vmiIFSO( LabelClass * dst ) {
 }
 
 void CodeGenClass::vmiIFNOT( LabelClass * dst ) {
-	if ( dst->isntReturn() ) {
+	if ( dst == CONTINUE_LABEL ) {
+		throw SystemError( "vmiIFNOT called with CONTINUE_LABEL" );
+	} else if ( dst->isntReturn() ) {
 		this->emitSPC( vmc_ifnot );
 		dst->labelInsert();
 	} else {
 		this->emitSPC( vmc_return_ifnot );
 	}	
 }
+
 
 void CodeGenClass::vmiIFTEST( const bool sense, LabelClass * dst ) {
 	if ( sense ) {
@@ -568,6 +573,10 @@ void CodeGenClass::vmiIFTEST( const bool sense, LabelClass * dst ) {
 	}
 }
 
+/**
+ * 	@param dst destination label if top of stack non-false.
+ *  @param contn continuation label if top of stack false.
+ */
 void CodeGenClass::vmiIFSO( LabelClass * d, LabelClass * contn ) {
 	if ( contn == CONTINUE_LABEL ) {
 		if ( d == CONTINUE_LABEL ) {
@@ -592,6 +601,18 @@ void CodeGenClass::vmiIFSO( LabelClass * d, LabelClass * contn ) {
 	}
 }
 
+/**
+ * 	@param dst destination label if top of stack false.
+ *  @param contn continuation label if top of stack non-false.
+ */
+void CodeGenClass::vmiIFNOT( LabelClass * d, LabelClass * contn ) {
+	this->vmiIFSO( contn, d );
+}
+
+/**
+ * 	@param dst destination label if top of stack agrees with sense.
+ *  @param contn continuation label if top of stack disagrees with sense.
+ */
 void CodeGenClass::vmiIF( bool sense, LabelClass * dst, LabelClass * contn ) {
 	if ( sense ) {
 		this->vmiIFSO( dst, contn );
@@ -600,14 +621,17 @@ void CodeGenClass::vmiIF( bool sense, LabelClass * dst, LabelClass * contn ) {
 	}
 }
 
-void CodeGenClass::vmiGOTO( LabelClass * d ) {
-	if ( d->isReturn() ) {
-		this->emitSPC( vmc_return );
-	} else if ( d == CONTINUE_LABEL ) {
+/**
+ * 	@param dst A proper label (not CONTINUE_LABEL)
+ */
+void CodeGenClass::vmiGOTO( LabelClass * dst ) {
+	if ( dst == CONTINUE_LABEL ) {
 		throw SystemError( "Trying to GOTO a fake label" );
+	} else if ( dst->isReturn() ) {
+		this->emitSPC( vmc_return );
 	} else {
 		this->emitSPC( vmc_goto );
-		d->labelInsert();
+		dst->labelInsert();
 	}
 }
 
@@ -615,13 +639,18 @@ void CodeGenClass::vmiDECR( const long d ) {
 	this->vmiINCR( -d );
 }
 
+/**
+ * 	@param dst A proper label (not CONTINUE_LABEL)
+ */
 void CodeGenClass::vmiTEST( 
 	const VIdent & vid0, 
 	CMP_OP cmp_op, 
 	const VIdent & vid1, 
 	LabelClass * dst 
 ) { 
-	if ( vid0.isLocal() and vid1.isLocal() ) {
+	if ( dst == CONTINUE_LABEL ) {
+		throw SystemError( "vmiTEST called with CONTINUE_LABEL" );
+	} else if ( vid0.isLocal() and vid1.isLocal() ) {
 		this->vmiINSTRUCTION( cmpLocalLocalInstruction( cmp_op ) );
 		this->emitVIDENT_REF( vid0 );
 		this->emitVIDENT_REF( vid1 );
@@ -798,25 +827,58 @@ void CodeGenClass::compileComparison(
 	LabelClass * dst, 
 	LabelClass * contn 
 ) {
-	this->vmiTEST( vid0, cmp_op, vid1, dst );
-	this->continueFrom( contn );
+	if ( dst == contn ) {
+		//	No point in test!
+		this->continueFrom( contn );
+	} else if ( dst == CONTINUE_LABEL ) {
+		this->vmiTEST( vid0, revCmpOp( cmp_op ), vid1, contn );
+	} else {
+		this->vmiTEST( vid0, cmp_op, vid1, dst );
+		this->continueFrom( contn );
+	}
 }
 
-VIdent & CompileQuery::getLoopVar() {
-	if ( this->loop_var == NULL ) {
-		throw Ginger::Mishap( "Internal error (getLoopVar): loop_var not set" );
+void CompileQuery::compileQueryDecl( Gnx query ) {
+	const string & nm = query->name();
+	const int N = query->size();
+	if ( ( ( nm == DO || nm == WHERE || nm == FINALLY ) && N == 2 ) || ( nm == WHILE && N == 3 ) ) {
+		this->compileQueryDecl( query->child( 0 )  );
+	} else if ( ( nm == CROSS || nm == ZIP ) && N == 2 ) {
+		this->compileQueryDecl( query->child( 0 ) );
+		this->compileQueryDecl( query->child( 1 ) );
+	} else if ( nm == FROM && N >= 2 ) {
+		Gnx var( query->child( 0 ) );
+		int tmp_loop_var = this->newLoopVar( new VIdent( this->codegen, var ) );
+		query->putAttribute( "tmp.loop.var", tmp_loop_var );
+	} else if ( nm == IN && N >= 2 ) {
+		int tmp_loop_var = this->newLoopVar( new VIdent( this->codegen, query->child( 0 ) ) );
+		//this->setLoopVar( new VIdent( this->codegen, query->child( 0 ) ) );
+		query->putAttribute( "tmp.loop.var", tmp_loop_var );
+	} else {
+		throw SystemError( "Not implemented general queries" );
 	}
-	return *this->loop_var;
 }
+
 
 void CompileQuery::compileQueryInit( Gnx query, LabelClass * contn ) {
 	const string & nm = query->name();
 	const int N = query->size();
-	if ( nm == FROM && N >= 2 ) {
+	if ( ( ( nm == DO || nm == WHERE || nm == FINALLY ) && N == 2 ) || ( nm == WHILE && N == 3 ) ) {
+		this->compileQueryInit( query->child( 0 ), contn );
+	} else if ( nm == CROSS && N == 2 ) {
+		int tmp_cross_needs_test_lhs = this->codegen->tmpvar();
+		query->putAttribute( "tmp.cross.needs.test.lhs", tmp_cross_needs_test_lhs );
+		this->compileQueryInit( query->child( 0 ), contn );
+	} else if ( nm == ZIP && N == 2 ) {
+		this->compileQueryInit( query->child( 0 ), CONTINUE_LABEL );
+		this->compileQueryInit( query->child( 1 ), contn );
+	} else if ( nm == FROM && N >= 2 ) {
 
 		Gnx var( query->child( 0 ) );
-		this->setLoopVar( new VIdent( this->codegen, var ) );
-		
+		//this->setLoopVar( new VIdent( this->codegen, var ) );
+		int tmp_loop_var = this->newLoopVar( new VIdent( this->codegen, var ) );
+		query->putAttribute( "tmp.loop.var", tmp_loop_var );
+				
 		Gnx start_expr( query->child( 1 ) );
 		this->codegen->compile1( start_expr, CONTINUE_LABEL );
 		this->codegen->vmiPOP( var, false );
@@ -848,11 +910,15 @@ void CompileQuery::compileQueryInit( Gnx query, LabelClass * contn ) {
 			this->codegen->compile1( end_expr, CONTINUE_LABEL );
 			this->codegen->vmiPOP_INNER_SLOT( tmp_end_expr );
 		}
+
+		this->codegen->continueFrom( contn );
 		
 	} else if ( nm == IN && N >= 2 ) {
 
-		this->setLoopVar( new VIdent( this->codegen, query->child( 0 ) ) );
-	
+		int tmp_loop_var = this->newLoopVar( new VIdent( this->codegen, query->child( 0 ) ) );
+		//this->setLoopVar( new VIdent( this->codegen, query->child( 0 ) ) );
+		query->putAttribute( "tmp.loop.var", tmp_loop_var );
+
 		this->codegen->compile1( query->child( 1 ), CONTINUE_LABEL );
 		this->codegen->vmiINSTRUCTION( vmc_getiterator );
 		int tmp_next_fn = this->codegen->tmpvar();
@@ -864,47 +930,80 @@ void CompileQuery::compileQueryInit( Gnx query, LabelClass * contn ) {
 		this->codegen->vmiPOP_INNER_SLOT( tmp_next_fn );
 		this->codegen->vmiPOP_INNER_SLOT( tmp_context );
 		this->codegen->vmiPOP_INNER_SLOT( tmp_state );
+		this->codegen->continueFrom( contn );
 	
 	} else {
 		throw SystemError( "Not implemented general queries" );
 	}
-	this->codegen->continueFrom( contn );
-}
-
-void CompileQuery::compileQueryNext( Gnx query, LabelClass * contn ) {
-	const string & nm = query->name();
-	if ( nm == FROM ) {
-
-		//	Obvious candidate for a merged instruction.
-		this->codegen->vmiPUSH( this->getLoopVar() );
-		if ( query->hasAttribute( "tmp.by.expr" ) ) {
-			VIdent by( query->attributeToInt( "tmp.by.expr" ) );
-			this->codegen->vmiPUSH( by );
-			this->codegen->vmiINSTRUCTION( vmc_add );
-		} else {
-			this->codegen->vmiINSTRUCTION( vmc_incr );
-		}
-		this->codegen->vmiPOP( this->getLoopVar(), false );
-
-	} else if ( nm == IN ) {
-		//	Nothing.
-	} else {
-		throw SystemError( "Not implemented general queries" );
-	}
-	this->codegen->continueFrom( contn );
 }
 
 /**	Compiles a query so that if the query evaluates to true we jump to label 
 	'dst' otherwise we continue at label 'contn'.
 */
-void CompileQuery::compileQueryIfSo( Gnx query, LabelClass * dst, LabelClass * contn ) {
+void CompileQuery::compileQueryTest( Gnx query, LabelClass * dst, LabelClass * contn ) {
 	const string & nm = query->name();
-	if ( nm == FROM ) {
+	const int N = query->size();
+	if ( nm == DO && N == 2 ) {
+		this->compileQueryTest( query->child( 0 ), dst, contn );
+	} else if ( nm == CROSS && N == 2 ) {
+		
+		int tmp_cross_needs_test_lhs = query->attributeToInt( "tmp.cross.needs.test.lhs" );
+		
+		LabelClass outer_loop_label( this->codegen );
+		LabelClass inner_loop_label( this->codegen );
+		LabelClass done_label( this->codegen );
+		
+		outer_loop_label.labelSet();
+
+		this->codegen->vmiPUSH_INNER_SLOT( tmp_cross_needs_test_lhs );
+		this->codegen->vmiIFNOT( &inner_loop_label );
+
+		this->compileQueryTest( query->child( 0 ), CONTINUE_LABEL, done_label.jumpToJump( contn ) );
+		this->codegen->vmiPUSHQ( SYS_FALSE );
+		this->codegen->vmiPOP_INNER_SLOT( tmp_cross_needs_test_lhs );
+
+		this->compileQueryBody( query->child( 0 ), CONTINUE_LABEL );
+		this->compileQueryInit( query->child( 1 ), CONTINUE_LABEL );
+
+		inner_loop_label.labelSet();
+
+		this->compileQueryTest( query->child( 1 ), done_label.jumpToJump( dst ), CONTINUE_LABEL );
+		this->codegen->vmiPUSHQ( SYS_TRUE );
+		this->codegen->vmiPOP_INNER_SLOT( tmp_cross_needs_test_lhs );
+		this->compileQueryAdvn( query->child( 0 ), &outer_loop_label );
+
+		done_label.labelSet();
+
+	} else if ( nm == ZIP && N == 2 ) {
+		LabelClass done_label( this->codegen );
+		this->compileQueryTest( query->child( 0 ), CONTINUE_LABEL, done_label.jumpToJump( contn ) );
+		this->compileQueryTest( query->child( 1 ), dst, contn );
+		done_label.labelSet();
+	} else if ( nm == WHILE && N == 3 ) {
+		LabelClass done_label( this->codegen );
+		this->compileQueryTest( query->child( 0 ), CONTINUE_LABEL, & done_label );
+		this->codegen->compileIfSo( query->child( 1 ), done_label.jumpToJump( dst ), CONTINUE_LABEL );
+		this->codegen->compileGnx( query->child( 2 ), contn );
+		done_label.labelSet();
+	} else if ( nm == WHERE && N == 2 ) {
+		LabelClass start_label( this->codegen );
+		LabelClass done_label( this->codegen );
+		start_label.labelSet();
+		this->compileQueryTest( query->child( 0 ), CONTINUE_LABEL, done_label.jumpToJump( contn ) );
+		this->codegen->compileIfSo( query->child( 1 ), dst, CONTINUE_LABEL );
+		this->compileQueryAdvn( query->child( 0 ), &start_label );
+		done_label.labelSet();
+	} else if ( nm == FINALLY && N == 2 ) {
+		LabelClass done_label( this->codegen );
+		this->compileQueryTest( query->child( 0 ), done_label.jumpToJump( dst ), CONTINUE_LABEL );
+		this->codegen->compileGnx( query->child( 1 ), contn );
+		done_label.labelSet();
+	} else if ( nm == FROM ) {
 		const int N = query->size();
 		if ( N >= 3 ) {
 			VIdent end_expr( query->attributeToInt( "tmp.end.expr" ) );
-			this->codegen->compileComparison( true, this->getLoopVar(), CMP_LTE, end_expr, dst, contn );		
-		} else {
+			this->codegen->compileComparison( this->getLoopVar( query->attributeToInt( "tmp.loop.var" ) ), CMP_LTE, end_expr, dst, contn );
+		} else if ( dst != CONTINUE_LABEL ) {
 			this->codegen->vmiGOTO( dst );
 		}
 	} else if ( nm == IN ) {
@@ -916,7 +1015,7 @@ void CompileQuery::compileQueryIfSo( Gnx query, LabelClass * dst, LabelClass * c
 		this->codegen->vmiPUSH_INNER_SLOT( tmp_context );	
 		this->codegen->vmiSET_CALL_INNER_SLOT( 2, tmp_next_fn );		
 		this->codegen->vmiPOP_INNER_SLOT( tmp_state );
-		this->codegen->vmiPOP( this->getLoopVar(), false );
+		this->codegen->vmiPOP( this->getLoopVar( query->attributeToInt( "tmp.loop.var" ) ), false );
 		
 		VIdent id_tmp_state( tmp_state );
 		VIdent termin( SYS_TERMIN );
@@ -926,20 +1025,82 @@ void CompileQuery::compileQueryIfSo( Gnx query, LabelClass * dst, LabelClass * c
 	}
 }
 
-void CompileQuery::compileFor( Gnx query, Gnx body, LabelClass * contn ) {
-	LabelClass body_label( this->codegen );
-	LabelClass test_label( this->codegen );
-	this->compileQueryInit( query, &test_label );
-	body_label.labelSet();
-	this->codegen->compileGnx( body, CONTINUE_LABEL );
-	this->compileQueryNext( query, CONTINUE_LABEL );
-	test_label.labelSet();
-	this->compileQueryIfSo( query, &body_label, contn );
+void CompileQuery::compileQueryBody( Gnx query, LabelClass * contn ) {
+	const string & nm = query->name();
+	const int N = query->size();
+	if ( nm == DO && N == 2 ) {
+		this->compileQueryBody( query->child( 0 ), CONTINUE_LABEL );
+		this->codegen->compileGnx( query->child( 1 ), contn );
+	} else if ( nm == CROSS && N == 2 ) {
+		this->compileQueryBody( query->child( 1 ), contn );
+	} else if (
+		( nm == WHERE && N == 2 ) || 
+		( nm == WHILE && N == 3 ) ||
+		( nm == FINALLY && N == 2 )
+	) {
+		this->compileQueryBody( query->child( 0 ), contn );
+	} else if ( nm == ZIP && N == 2 ) {
+		this->compileQueryBody( query->child( 0 ), CONTINUE_LABEL );
+		this->compileQueryBody( query->child( 1 ), contn );
+	}
 }
 
-void CodeGenClass::compileFor( Gnx query, Gnx body, LabelClass * contn ) {
-	CompileQuery cq( this );
-	cq.compileFor( query, body, contn );
+void CompileQuery::compileQueryAdvn( Gnx query, LabelClass * contn ) {
+	const string & nm = query->name();
+	const int N = query->size();
+	if ( 
+		( ( nm == DO || nm == WHERE || nm == FINALLY ) && N == 2 ) || 
+		( nm == WHILE && N == 3 )
+	) {
+		this->compileQueryAdvn( query->child( 0 ), contn );
+	} else if ( nm == ZIP && N == 2 ) {
+		this->compileQueryAdvn( query->child( 0 ), CONTINUE_LABEL );
+		this->compileQueryAdvn( query->child( 1 ), contn );
+	} else if ( nm == CROSS && N == 2 ) {
+		this->compileQueryAdvn( query->child( 1 ), contn );
+	} else if ( nm == FROM ) {
+
+		//	Obvious candidate for a merged instruction.
+		VIdent & lv = this->getLoopVar( query->attributeToInt( "tmp.loop.var" ) );
+		this->codegen->vmiPUSH( lv );
+		if ( query->hasAttribute( "tmp.by.expr" ) ) {
+			VIdent by( query->attributeToInt( "tmp.by.expr" ) );
+			this->codegen->vmiPUSH( by );
+			this->codegen->vmiINSTRUCTION( vmc_add );
+		} else {
+			this->codegen->vmiINSTRUCTION( vmc_incr );
+		}
+		this->codegen->vmiPOP( lv, false );
+
+	} else if ( nm == IN ) {
+		//	Nothing.
+	} else {
+		throw SystemError( "Not implemented general queries" );
+	}
+	this->codegen->continueFrom( contn );
+}
+
+void CompileQuery::compileQueryFini( Gnx query, LabelClass * contn ) {
+	const string & nm = query->name();
+	const int N = query->size();
+	if ( nm == DO && N == 2 ) {
+		this->compileQueryFini( query->child( 0 ), contn );
+	} else {
+		this->codegen->continueFrom( contn );
+	}
+}
+
+void CompileQuery::compileFor( Gnx query, LabelClass * contn ) {
+	LabelClass body_label( this->codegen );
+	LabelClass test_label( this->codegen );
+	this->compileQueryDecl( query );
+	this->compileQueryInit( query, &test_label );
+	body_label.labelSet();
+	this->compileQueryBody( query, CONTINUE_LABEL );
+	this->compileQueryAdvn( query, CONTINUE_LABEL );
+	test_label.labelSet();
+	this->compileQueryTest( query, &body_label, CONTINUE_LABEL );
+	this->compileQueryFini( query, contn );
 }
 
 void CodeGenClass::compileGnxSwitch( const int offset, const int switch_slot, int tmp_slot, Gnx mnx, LabelClass * contn ) {
@@ -1125,8 +1286,9 @@ void CodeGenClass::compileGnxApp( Gnx mnx, LabelClass * contn ) {
 	this->continueFrom( contn );
 }
 
-void CodeGenClass::compileGnxFor( Gnx mnx, LabelClass * contn ) {
-	this->compileFor( mnx->child( 0 ), mnx->child( 1 ), contn );
+void CodeGenClass::compileGnxFor( Gnx query, LabelClass * contn ) {
+	CompileQuery cq( this );
+	cq.compileFor( query, contn );
 }
 
 void CodeGenClass::compileGnxDeref( Gnx mnx, LabelClass * contn ) {
@@ -1263,7 +1425,7 @@ static void throwProblem( Gnx mnx ) {
 
 void CodeGenClass::compileBoolAbsAndOr( bool bool_vs_abs, bool and_vs_or, Gnx mnx, LabelClass * contn ) {
 	LabelClass e( this );
-	LabelClass *end = e.jumpToJump( contn );
+	LabelClass * end = e.jumpToJump( contn );
 	this->compile1( mnx->child( 0 ), CONTINUE_LABEL );
 	if ( bool_vs_abs ) {
 		if ( and_vs_or ) {
@@ -1314,6 +1476,7 @@ void CodeGenClass::compileGnx( Gnx mnx, LabelClass * contn ) {
 		cerr << "]]" << endl;
 	#endif
 	const string & nm = mnx->name();
+	const int N = mnx->size();
 	if ( nm == CONSTANT ) {
 		this->compileGnxConstant( mnx, contn );
 	} else if ( nm == ID ) {
@@ -1339,7 +1502,7 @@ void CodeGenClass::compileGnx( Gnx mnx, LabelClass * contn ) {
 		this->compileChildren( mnx, contn );
 	} else if ( nm == ERASE ) {
 		this->compileErase( mnx, contn );
-	} else if ( nm == BIND and mnx->size() == 2 ) {
+	} else if ( nm == BIND and N == 2 ) {
 		#ifdef DBG_CODEGEN
 			cerr << "appginger/compileGnx/BIND" << endl;
 			cerr << "  [[";
@@ -1376,8 +1539,8 @@ void CodeGenClass::compileGnx( Gnx mnx, LabelClass * contn ) {
 		} else {
 			throw Ginger::Mishap( "BIND not fully implemented [2]" );
 		}
-	} else if ( nm == FOR and mnx->size() == 2 ) {
-		this->compileGnxFor( mnx, contn );
+	} else if ( nm == FOR and N == 1 ) {
+		this->compileGnxFor( mnx->child( 0 ), contn );
 	} else if ( nm == LIST ) {
 		if ( mnx->size() == 0 ) {
 			this->vmiPUSHQ( SYS_NIL, contn );

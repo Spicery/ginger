@@ -352,11 +352,78 @@ Node ReadStateClass::postfixProcessing( Node lhs, Item item, int prec ) {
 				bind.end();
 				return bind.build();
 			}
+			case tokty_cross:
+			case tokty_zip: {
+				NodeFactory factory;
+				factory.start( fnc == tokty_cross ? CROSS : ZIP );
+				factory.add( lhs );
+				Node rhs = this->readExprPrec( prec );
+				factory.add( rhs );
+				factory.end();
+				return factory.build();				
+			}
+			case tokty_finally: {
+				NodeFactory finally;
+				finally.start( FINALLY );
+				finally.add( lhs );
+				Node rhs = this->readExprPrec( prec );
+				finally.add( rhs );
+				finally.end();
+				return finally.build();
+			}
+			case tokty_until:
+			case tokty_while: {
+				NodeFactory whileuntil;
+				whileuntil.start( WHILE );
+				whileuntil.add( lhs );
+				Node rhs = this->readExprPrec( prec );
+				if ( fnc == tokty_until ) {
+					whileuntil.start( SYSAPP );
+					whileuntil.put( SYSAPP_NAME, "not" );
+				}
+				whileuntil.add( rhs );
+				if ( fnc == tokty_until ) {
+					whileuntil.end();
+				}
+				if ( this->tryToken( tokty_then ) ) {
+					Node then = this->readExprPrec( prec_then );
+					whileuntil.add( then );
+				} else {
+					whileuntil.start( SEQ );
+					whileuntil.end();
+				}
+				whileuntil.end();
+				return whileuntil.build();				
+			}
+			case tokty_where: {
+				NodeFactory where;
+				where.start( WHERE );
+				where.add( lhs );
+				Node rhs = this->readExprPrec( prec );
+				where.add( rhs );
+				where.end();
+				return where.build();
+			}
+			case tokty_do: {
+				NodeFactory node;
+				node.start( DO );
+				node.add( lhs );
+				Node do_stmnts = this->readCompoundStmnts();
+				if ( not (
+					this->tryPeekToken( tokty_endfor ) ||
+					this->tryPeekToken( tokty_endif )
+				) ) {
+					this->checkToken( tokty_enddo );
+				}
+				node.add( do_stmnts );
+				node.end();
+				return node.build();
+			}
 			case tokty_from: {				
 				updateAsPattern( lhs, true );
 				NodeFactory node;
 				node.start( FROM );
-				Node from_expr = this->readExpr();
+				Node from_expr = this->readExprPrec( prec );
 				node.add( lhs );
 				node.add( from_expr );
 
@@ -388,7 +455,7 @@ Node ReadStateClass::postfixProcessing( Node lhs, Item item, int prec ) {
 			}
 			case tokty_in: {				
 				updateAsPattern( lhs, true );
-				Node in_expr = this->readExpr();
+				Node in_expr = this->readExprPrec( prec );
 				NodeFactory node;
 				node.start( IN );
 				node.add( lhs );
@@ -547,20 +614,29 @@ Node ReadStateClass::readSyscall() {
 }
 
 Node ReadStateClass::readFor() {
-	if ( this->cstyle_mode ) this->checkToken( tokty_oparen );
-	Node query = this->readQuery();
-	this->checkToken( this->cstyle_mode ? tokty_cparen : tokty_do );
-	Node body = this->readStmnts();
-	if ( not this->cstyle_mode ) this->checkToken( tokty_endfor );
-	NodeFactory for_node;
-	for_node.start( FOR );
-	for_node.add( query );
-	for_node.add( body );
-	for_node.end();
-	return for_node.build();
+	if ( this->cstyle_mode ) {
+		this->checkToken( tokty_oparen );
+		Node query = this->readQuery();
+		this->checkToken( tokty_cparen );
+		Node body = this->readStmnts();
+		NodeFactory for_node;
+		for_node.start( FOR );
+		for_node.start( DO );
+		for_node.add( query );
+		for_node.add( body );
+		for_node.end(); // DO
+		for_node.end();
+		return for_node.build();
+	} else {
+		Node query = this->readQuery();
+		NodeFactory for_node;
+		for_node.start( FOR );
+		for_node.add( query );
+		this->checkToken( tokty_endfor );
+		for_node.end();
+		return for_node.build();
+	}
 }
-
-
 
 static void readImportQualifiers( ReadStateClass & r, bool & pervasive, bool & qualified ) {
 	pervasive = true;

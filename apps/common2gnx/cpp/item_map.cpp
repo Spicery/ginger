@@ -36,6 +36,7 @@ ItemMap::ItemMap( const bool cstyle ) {
 	add( true,	 	KW_SET_LEFT,		tokty_assignrev,	BFo,		prec_assign	);
 	add( true,	 	KW_COMMA, 			tokty_comma, 		BFo, 		prec_comma	);
 	add( cstyle,	KW_COLON,			tokty_colon,		Clo,		0 		);
+	add( !cstyle, 	KW_CROSS,			tokty_cross,		PoF,		prec_cross );
 	add( !cstyle, 	KW_SEMICOLON, 		tokty_semi, 		PoF, 		prec_semi	);
 	add( cstyle, 	KW_SEMICOLON, 		tokty_semi, 		Clo, 		0		);
 	add( !cstyle, 	KW_2_SEMICOLON,		tokty_dsemi,		PoF,		prec_semi	);
@@ -93,13 +94,14 @@ ItemMap::ItemMap( const bool cstyle ) {
 	add( true,		KW_CATCH,			tokty_catch, 		Clo, 		0		);
 	add( cstyle,	KW_DEFAULT,			tokty_default, 		Clo, 		0		);
 	add( !cstyle,	KW_DEFINE,			tokty_define, 		PrF, 		0		);
-	add( !cstyle,	KW_DO,				tokty_do, 			Clo, 		0		);
+	add( !cstyle,	KW_DO,				tokty_do, 			PoF, 		prec_do		);
 	add( true,      KW_QUO,             tokty_quo,          BSy, 		prec_quo		);
 	add( true,	 	KW_ELSE,			tokty_else, 		Clo, 		0		);
 	add( !cstyle,	KW_ELSEIF,			tokty_elseif, 		Clo, 		0		);
 	add( !cstyle,	KW_ELSEUNLESS,		tokty_elseunless, 	Clo, 		0		);
 	add( !cstyle,	KW_ENDDEFINE,		tokty_enddefine, 	Clo, 		0		);
-	add( !cstyle,	KW_ENDLAMBDA,			tokty_endfn, 		Clo, 		0		);
+	add( !cstyle, 	KW_ENDDO,			tokty_enddo,		Clo,		0		);
+	add( !cstyle,	KW_ENDLAMBDA,		tokty_endfn, 		Clo, 		0		);
 	add( !cstyle,	KW_ENDFOR,			tokty_endfor, 		Clo, 		0		);
 	add( !cstyle,	KW_ENDIF,			tokty_endif, 		Clo, 		0		);
 	add( !cstyle,	KW_ENDPACKAGE,		tokty_endpackage, 	Clo, 		0		);
@@ -110,6 +112,7 @@ ItemMap::ItemMap( const bool cstyle ) {
 	add( !cstyle,	KW_ENDUNLESS,		tokty_endunless, 	Clo, 		0		);
 	//add( true,		"escape",		tokty_escape, 		PrF, 		0		);
 	//add( true,		"!!",			tokty_failover,		PrF, 		0		);
+	add( !cstyle, 	KW_FINALLY, 		tokty_finally,		PoF,		prec_finally );
 	add( !cstyle,	KW_LAMBDA,			tokty_fn,			PrF, 		0		);
 	add( true,	 	KW_FOR,				tokty_for,			PrF, 		0		);
 	add( true,	 	KW_FROM,			tokty_from,			PoF,		prec_from	);
@@ -132,11 +135,13 @@ ItemMap::ItemMap( const bool cstyle ) {
 	add( true,		KW_TRANSACTION,		tokty_transaction,	PrF,		0		);
 	add( true,		KW_TRY,				tokty_try,			PrF,		0		);
 	add( !cstyle,	KW_UNLESS,			tokty_unless,		PrF, 		0		);
-	add( true,		KW_UNTIL, 			tokty_until,		PrF, 		0		);
+	add( true,		KW_UNTIL, 			tokty_until,		PoF, 		prec_whileuntil		);
 	add( true,		KW_VAL,				tokty_val,			PrF, 		0		);
 	add( true,	 	KW_VAR,				tokty_var,			PrF,		0		);
-	add( true,		KW_WHILE,			tokty_while,		PrF,		0		);
+	add( !cstyle,	KW_WHERE,			tokty_where,		PoF,		prec_where		);
+	add( true,		KW_WHILE,			tokty_while,		PoF,		prec_whileuntil		);
 	add( !cstyle,	KW_WITH,			tokty_with,			Clo, 		0		);
+	add( !cstyle,	KW_ZIP,				tokty_zip,			PoF,		prec_zip );
 }
 
 ItemClass * ItemMap::lookup( const char * name ) {

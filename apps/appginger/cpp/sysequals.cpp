@@ -110,6 +110,8 @@ static bool refStringEquals( Ref * rx, Ref * ry ) {
 	}
 }
 
+//	TODO: This is where comparison of doubles needs to be
+//	implemented.
 static bool refWRecordEquals( Ref * rx, Ref * ry ) {
 	unsigned long n = sizeAfterKeyOfRecordLayout( rx );
 	for ( unsigned long i = 1; i <= n; i++ ) {

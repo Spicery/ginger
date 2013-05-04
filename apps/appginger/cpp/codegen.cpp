@@ -117,7 +117,17 @@ void CodeGenClass::emitVIDENT_REF( const VIdent & id ) {
 	}
 }
 
-
+//	TODO: Avoid compiling the message string into the heap. What would be 
+//	a lot cuter is to plant a pointer to an "external" object.
+//		class SysFunObj {
+//			virtual Ref * run( Ref * pc, MachineClass * vm ) = 0;
+//			virtual ~SysFunObj() { deregister & free any resources }
+//		}
+//	This would need some integration with the garbage collector along
+//	with a new instruction-field marker.
+void CodeGenClass::vmiFAIL() {
+	this->emitSPC( vmc_fail );
+}
 
 void CodeGenClass::vmiINSTRUCTION( Instruction instr ) {
 	this->emitSPC( instr );
@@ -1103,6 +1113,30 @@ void CompileQuery::compileFor( Gnx query, LabelClass * contn ) {
 	this->compileQueryFini( query, contn );
 }
 
+/*	
+//	TODO: Restore this (or something like it) when we implement
+//	instruction-objects.
+static std::string contextHint( Gnx query ) {
+	string context = "cause ";
+	context += query->attribute( "context", "-" );
+	context += " ";
+	context += "at ";
+	context += query->attribute( "span", "-" );
+	context += " ";
+	context += "from " + query->attribute( "src", "-" );
+	return context;
+}
+*/
+
+void CompileQuery::compileNakedQuery( Gnx query, LabelClass * contn ) {
+	LabelClass ok_label( this->codegen );
+	this->compileQueryDecl( query );
+	this->compileQueryInit( query, CONTINUE_LABEL );
+	this->compileQueryTest( query, &ok_label, CONTINUE_LABEL );
+	this->codegen->vmiFAIL();
+	ok_label.labelSet();
+}
+
 void CodeGenClass::compileGnxSwitch( const int offset, const int switch_slot, int tmp_slot, Gnx mnx, LabelClass * contn ) {
 	const int a = mnx->size() - offset;
 	if ( a == 0 ) {
@@ -1638,11 +1672,27 @@ void CodeGenClass::compileGnx( Gnx mnx, LabelClass * contn ) {
 		this->compileTry( mnx, contn );
 	} else if ( nm == PROBLEM ) {
 		throwProblem( mnx );
-	} else if ( nm == FROM or nm == IN ) {
-		throw Ginger::Mishap( "Naked queries not yet supported" ).culprit( "Expression", mnx->toString() );
 	} else {
-		throw SystemError( "GNX not recognised" ).culprit( "Expression", mnx->toString() );
-	}
+		CompileQuery cq( this );
+		if ( cq.isValidQuery( mnx ) ) {
+			cq.compileNakedQuery( mnx, contn );
+		} else {
+			throw SystemError( "Invalid GNX" ).culprit( "Expression", mnx->toString() );
+		}
+	}	
+}
+
+bool CompileQuery::isValidQuery( Gnx query ) {
+	const string & nm = query->name();
+	const int N = query->size();
+	if ( nm == IN && N == 2 ) return true;
+	if ( nm == FROM && 2 <= N && N <= 4 ) return true;
+	if ( nm == WHERE && N == 2 ) return true;
+	if ( nm == WHILE && N == 3 ) return true;
+	if ( nm == DO && N == 2 ) return true;
+	if ( nm == ZIP && N == 2 ) return true;
+	if ( nm == CROSS && N == 2 ) return true;
+	return false;
 }
 
 void CodeGenClass::compileThrow( Gnx mnx, LabelClass * contn ) {

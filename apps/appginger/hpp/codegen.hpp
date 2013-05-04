@@ -79,7 +79,9 @@ private:
 	void compileQueryFini( Gnx query, LabelClass * contn );
 	
 public:
+	bool isValidQuery( Gnx query );
 	void compileFor( Gnx query, LabelClass * contn );
+	void compileNakedQuery( Gnx query, LabelClass * contn );
 
 public:
 	CompileQuery( CodeGenClass * cg ) : codegen( cg ) {}
@@ -185,6 +187,7 @@ public:
 	void vmiEND1_CALLS( int var );
 	void vmiENTER();
 	void vmiERASE_MARK( int var );
+	void vmiFAIL();
 	void vmiFIELD( long index );
 	void vmiFUNCTION( int N, int A );
 	void vmiFUNCTION( const std::string name, int N, int A );

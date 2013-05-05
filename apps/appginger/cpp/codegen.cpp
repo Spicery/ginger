@@ -1275,22 +1275,44 @@ void CodeGenClass::compileGnxIf( int offset, Gnx mnx, LabelClass * contn ) {
 	} else if ( a == 1 ) {
 		this->compileGnx( mnx->child( offset ), contn );
 	} else if ( a == 2 ) {
-		//	codegen1( codegen, term_index( mnx, 0 ) );
-		//	vmiIFNOT( codegen, d );
-		LabelClass doneLab( this );
-		this->compileIfNot( mnx->child( offset ), doneLab.jumpToJump( contn ), CONTINUE_LABEL );
-		this->compileGnx( mnx->child( offset + 1 ), contn );
-		doneLab.labelSet();
+		Gnx if_part = mnx->child( offset );
+		Gnx then_part = mnx->child( offset + 1 );
+		if ( CompileQuery::isValidQuery( if_part ) ) {
+			MnxBuilder ifthen;
+			ifthen.start( DO );
+			ifthen.add( if_part );
+			ifthen.add( then_part );
+			ifthen.end();
+			this->compileGnx( ifthen.build(), contn );
+		} else {
+			LabelClass doneLab( this );
+			this->compileIfNot( mnx->child( offset ), doneLab.jumpToJump( contn ), CONTINUE_LABEL );
+			this->compileGnx( mnx->child( offset + 1 ), contn );
+			doneLab.labelSet();
+		}
 	} else {
-		LabelClass elseLab( this );
-		//	codegen1( codegen, term_index( mnx, 0 ) );
-		//	vmiIFNOT( codegen, e );
-		LabelClass doneLab( this );
-		this->compileIfNot( mnx->child( offset ), &elseLab, CONTINUE_LABEL );
-		this->compileGnx( mnx->child( offset + 1 ), doneLab.jumpToJump( contn ) );
-		elseLab.labelSet();
-		this->compileGnxIf( offset + 2, mnx, contn );
-		doneLab.labelSet();
+		Gnx if_part = mnx->child( offset );
+		Gnx then_part = mnx->child( offset + 1 );
+		if ( CompileQuery::isValidQuery( if_part) ) {
+			LabelClass done_label( this );
+			LabelClass else_label( this );
+			CompileQuery cq( this );
+			cq.compileQueryDecl( if_part );
+			cq.compileQueryInit( if_part, CONTINUE_LABEL );
+			cq.compileQueryTest( if_part, CONTINUE_LABEL, & else_label );
+			this->compileGnx( then_part, done_label.jumpToJump( contn ));
+			else_label.labelSet();
+			this->compileGnxIf( offset + 2, mnx, contn );
+			done_label.labelSet();
+		} else {
+			LabelClass elseLab( this );
+			LabelClass doneLab( this );
+			this->compileIfNot( mnx->child( offset ), &elseLab, CONTINUE_LABEL );
+			this->compileGnx( mnx->child( offset + 1 ), doneLab.jumpToJump( contn ) );
+			elseLab.labelSet();
+			this->compileGnxIf( offset + 2, mnx, contn );
+			doneLab.labelSet();
+		}
 	}
 }
 

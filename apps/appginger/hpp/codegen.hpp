@@ -69,7 +69,7 @@ private:
 		return *( this->loop_vars[ n ] );
 	}
 
-private:
+public:
 	//	INIT, TEST, BODY, ADVN, FINI
 	void compileQueryDecl( Gnx query );
 	void compileQueryInit( Gnx query, LabelClass * contn );
@@ -79,7 +79,7 @@ private:
 	void compileQueryFini( Gnx query, LabelClass * contn );
 	
 public:
-	bool isValidQuery( Gnx query );
+	static bool isValidQuery( Gnx query );
 	void compileFor( Gnx query, LabelClass * contn );
 	void compileNakedQuery( Gnx query, LabelClass * contn );
 
@@ -249,9 +249,9 @@ public:
 
 
 private:
-	void compileQueryInit( Gnx query, LabelClass * contn );
-	void compileQueryNext( Gnx query, LabelClass * contn );
-	void compileQueryIfSo( Gnx query, LabelClass * dst, LabelClass * contn );
+	//void compileQueryInit( Gnx query, LabelClass * contn );
+	//void compileQueryNext( Gnx query, LabelClass * contn );
+	//void compileQueryIfSo( Gnx query, LabelClass * dst, LabelClass * contn );
 	void compileIfTest( bool sense, Gnx mnx, LabelClass * dst, LabelClass * contn );
 	void compileGnxConstant( Gnx mnx, LabelClass * contn );
 	void compileGnxIf( Gnx mnx, LabelClass * contn );

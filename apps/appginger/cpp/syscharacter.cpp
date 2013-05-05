@@ -33,7 +33,7 @@ Ref * sysIsLowerCase( Ref * pc, class MachineClass * vm ) {
         vm->fastPeek() = islower( CharacterToChar( r ) ) ? SYS_TRUE : SYS_FALSE;
     } else if ( IsString( r ) ) {
         Ref * str_K = RefToPtr4( r );
-        char * s = reinterpret_cast< char * >( str_K[ 1 ] );
+        char * s = reinterpret_cast< char * >( &str_K[ 1 ] );
         vm->fastPeek() = SYS_TRUE;
         while ( *s != 0 ) {
             if ( not islower( *s++ ) ) {
@@ -63,7 +63,7 @@ Ref * sysIsUpperCase( Ref * pc, class MachineClass * vm ) {
         vm->fastPeek() = isupper( CharacterToChar( r ) ) ? SYS_TRUE : SYS_FALSE;
     } else if ( IsString( r ) ) {
         Ref * str_K = RefToPtr4( r );
-        char * s = reinterpret_cast< char * >( str_K[ 1 ] );
+        char * s = reinterpret_cast< char * >( &str_K[ 1 ] );
         vm->fastPeek() = SYS_TRUE;
         while ( *s != 0 ) {
             if ( not isupper( *s++ ) ) {

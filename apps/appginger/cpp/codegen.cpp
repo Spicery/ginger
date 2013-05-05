@@ -921,6 +921,8 @@ void CompileQuery::compileQueryInit( Gnx query, LabelClass * contn ) {
 	} else if ( nm == CROSS && N == 2 ) {
 		int tmp_cross_needs_test_lhs = this->codegen->tmpvar();
 		query->putAttribute( "tmp.cross.needs.test.lhs", tmp_cross_needs_test_lhs );
+		this->codegen->vmiPUSHQ( SYS_TRUE );
+		this->codegen->vmiPOP_INNER_SLOT( tmp_cross_needs_test_lhs );
 		this->compileQueryInit( query->child( 0 ), contn );
 	} else if ( nm == ZIP && N == 2 ) {
 		this->compileQueryInit( query->child( 0 ), CONTINUE_LABEL );

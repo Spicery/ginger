@@ -62,6 +62,7 @@
 #define FROM            "from"
 #define IF              "if"
 #define IN              "in"
+#define OK              "ok"
 #define OR              "or"
 #define SEQ             "seq"
 #define SET             "set"

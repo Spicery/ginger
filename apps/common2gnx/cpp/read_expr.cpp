@@ -262,9 +262,35 @@ Node ReadStateClass::readExpr() {
 	return this->readExprPrec( prec_semi );
 }
 
-//	1st approximation. It is too permissive as it stands.
 Node ReadStateClass::readQuery() {
-	return this->readExpr();
+	return this->readQueryPrec( prec_semi );
+}
+
+
+Node ReadStateClass::readQueryPrec( const int prec ) {
+	Node e = this->readExprPrec( prec );
+	const std::string name = e->name();
+	if ( 
+		name == BIND 	||
+		name == IN 		||
+		name == FROM 	||
+		name == WHERE 	||
+		name == WHILE   ||
+		name == ZIP 	||
+		name == CROSS 	||
+		name == OK 		||
+		name == DO
+	) {
+		return e;
+	} else {
+		NodeFactory where;
+		where.start( WHERE );
+		where.start( OK );
+		where.end();
+		where.add( e );
+		where.end();
+		return where.build();
+	}
 }
 
 Node ReadStateClass::readOptExpr() {
@@ -357,7 +383,7 @@ Node ReadStateClass::postfixProcessing( Node lhs, Item item, int prec ) {
 				NodeFactory factory;
 				factory.start( fnc == tokty_cross ? CROSS : ZIP );
 				factory.add( lhs );
-				Node rhs = this->readExprPrec( prec );
+				Node rhs = this->readQueryPrec( prec );
 				factory.add( rhs );
 				factory.end();
 				return factory.build();				
@@ -366,7 +392,7 @@ Node ReadStateClass::postfixProcessing( Node lhs, Item item, int prec ) {
 				NodeFactory finally;
 				finally.start( FINALLY );
 				finally.add( lhs );
-				Node rhs = this->readExprPrec( prec );
+				Node rhs = this->readQueryPrec( prec );
 				finally.add( rhs );
 				finally.end();
 				return finally.build();
@@ -376,7 +402,7 @@ Node ReadStateClass::postfixProcessing( Node lhs, Item item, int prec ) {
 				NodeFactory whileuntil;
 				whileuntil.start( WHILE );
 				whileuntil.add( lhs );
-				Node rhs = this->readExprPrec( prec );
+				Node rhs = this->readQueryPrec( prec );
 				if ( fnc == tokty_until ) {
 					whileuntil.start( SYSAPP );
 					whileuntil.put( SYSAPP_NAME, "not" );

@@ -871,7 +871,8 @@ bool CompileQuery::isValidQuery( Gnx query ) {
 	    ( nm == DO && N == 2 ) 				||
 	    ( nm == ZIP && N == 2 ) 			||
 	    ( nm == CROSS && N == 2 ) 			||
-	    ( nm == BIND && N == 2 )
+	    ( nm == BIND && N == 2 )			||
+	    ( nm == OK && N == 0 )
 	);
 }
 
@@ -907,6 +908,8 @@ void CompileQuery::compileQueryDecl( Gnx query ) {
 		query->putAttribute( "tmp.bind.hi", hi );
 		int tmp = this->codegen->tmpvar();
 		query->putAttribute( "tmp.bind.var", tmp );
+	} else if ( nm == OK && N == 0 ) {
+		//	Nothing to do.
 	} else {
 		throw SystemError( "Not implemented general queries" ).culprit( "Name", nm ).culprit( "N", (long)N );
 	}
@@ -991,6 +994,8 @@ void CompileQuery::compileQueryInit( Gnx query, LabelClass * contn ) {
 		this->codegen->vmiPUSHQ( SYS_TRUE );
 		this->codegen->vmiPOP_INNER_SLOT( tmp );
 		this->codegen->continueFrom( contn );
+	} else if ( nm == OK && N == 0 ) {
+		this->codegen->continueFrom( contn );
 	} else {
 		throw SystemError( "Not implemented general queries [2]" ).culprit( "Name", nm ).culprit( "N", static_cast< long >( N ) );
 	}
@@ -1045,13 +1050,19 @@ void CompileQuery::compileQueryTest( Gnx query, LabelClass * dst, LabelClass * c
 		this->codegen->compileGnx( query->child( 2 ), contn );
 		done_label.labelSet();
 	} else if ( nm == WHERE && N == 2 ) {
-		LabelClass start_label( this->codegen );
-		LabelClass done_label( this->codegen );
-		start_label.labelSet();
-		this->compileQueryTest( query->child( 0 ), CONTINUE_LABEL, done_label.jumpToJump( contn ) );
-		this->codegen->compileIfSo( query->child( 1 ), done_label.jumpToJump( dst ), CONTINUE_LABEL );
-		this->compileQueryAdvn( query->child( 0 ), &start_label );
-		done_label.labelSet();
+		Gnx lhs = query->child( 0 );
+		Gnx rhs = query->child( 1 );
+		if ( lhs->name() == OK ) {
+			this->codegen->compileIfSo( rhs, dst, contn );
+		} else {
+			LabelClass start_label( this->codegen );
+			LabelClass done_label( this->codegen );
+			start_label.labelSet();
+			this->compileQueryTest( lhs, CONTINUE_LABEL, done_label.jumpToJump( contn ) );
+			this->codegen->compileIfSo( rhs, done_label.jumpToJump( dst ), CONTINUE_LABEL );
+			this->compileQueryAdvn( lhs, &start_label );
+			done_label.labelSet();
+		}
 	} else if ( nm == FINALLY && N == 2 ) {
 		LabelClass done_label( this->codegen );
 		this->compileQueryTest( query->child( 0 ), done_label.jumpToJump( dst ), CONTINUE_LABEL );
@@ -1101,6 +1112,8 @@ void CompileQuery::compileQueryTest( Gnx query, LabelClass * dst, LabelClass * c
 		} else {
 			throw Ginger::Mishap( "BIND not fully implemented [3]" );
 		}
+	} else if ( nm == OK && N == 0 ) {
+		this->codegen->continueFrom( dst );
 	} else {
 		throw SystemError( "Not implemented general queries" );
 	}
@@ -1153,7 +1166,7 @@ void CompileQuery::compileQueryAdvn( Gnx query, LabelClass * contn ) {
 		}
 		this->codegen->vmiPOP( lv, false );
 
-	} else if ( nm == IN || nm == BIND ) {
+	} else if ( nm == IN || nm == BIND || nm == OK ) {
 		//	Nothing.
 	} else {
 		throw SystemError( "Not implemented general queries" );

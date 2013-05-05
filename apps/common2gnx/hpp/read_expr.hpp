@@ -66,8 +66,9 @@ public:
 	void reset() { this->is_postfix_allowed = true; }
 
 public:
-	Node readExpr();
 	Node readQuery();
+	Node readQueryPrec( int prec );
+	Node readExpr();
 	Node readExprPrec( int prec );
 	Node readOptExpr();
 	Node readOptEmptyExpr();

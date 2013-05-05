@@ -136,6 +136,13 @@ bool ReadStateClass::tryPeekCloser() {
 	return it->role.IsCloser();
 }
 
+void ReadStateClass::checkPeekCloser() {
+	Item it = this->item_factory->peek();
+	if ( not it->role.IsCloser() ) {
+		throw CompileTimeError( "Unexpected token" ).culprit( "Found", it->nameString() );
+	}
+}
+
 void ReadStateClass::checkPeekToken( TokType fnc ) {
 	Item it = this->item_factory->peek();
 	if ( it->tok_type != fnc ) {
@@ -279,6 +286,7 @@ Node ReadStateClass::readQueryPrec( const int prec ) {
 		name == ZIP 	||
 		name == CROSS 	||
 		name == OK 		||
+		name == FINALLY ||
 		name == DO
 	) {
 		return e;
@@ -392,7 +400,7 @@ Node ReadStateClass::postfixProcessing( Node lhs, Item item, int prec ) {
 				NodeFactory finally;
 				finally.start( FINALLY );
 				finally.add( lhs );
-				Node rhs = this->readQueryPrec( prec );
+				Node rhs = this->readExprPrec( prec );
 				finally.add( rhs );
 				finally.end();
 				return finally.build();
@@ -402,7 +410,7 @@ Node ReadStateClass::postfixProcessing( Node lhs, Item item, int prec ) {
 				NodeFactory whileuntil;
 				whileuntil.start( WHILE );
 				whileuntil.add( lhs );
-				Node rhs = this->readQueryPrec( prec );
+				Node rhs = this->readExprPrec( prec );
 				if ( fnc == tokty_until ) {
 					whileuntil.start( SYSAPP );
 					whileuntil.put( SYSAPP_NAME, "not" );
@@ -435,11 +443,8 @@ Node ReadStateClass::postfixProcessing( Node lhs, Item item, int prec ) {
 				node.start( DO );
 				node.add( lhs );
 				Node do_stmnts = this->readCompoundStmnts();
-				if ( not (
-					this->tryPeekToken( tokty_endfor ) ||
-					this->tryPeekToken( tokty_endif )
-				) ) {
-					this->checkToken( tokty_enddo );
+				if ( not this->tryToken( tokty_enddo ) ) {
+					this->checkPeekCloser();
 				}
 				node.add( do_stmnts );
 				node.end();

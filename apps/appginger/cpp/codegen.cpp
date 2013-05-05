@@ -869,6 +869,7 @@ bool CompileQuery::isValidQuery( Gnx query ) {
 	    ( nm == WHERE && N == 2 ) 			||
 	    ( nm == WHILE && N == 3 ) 			||
 	    ( nm == DO && N == 2 ) 				||
+	    ( nm == FINALLY && N == 2 ) 		||
 	    ( nm == ZIP && N == 2 ) 			||
 	    ( nm == CROSS && N == 2 ) 			||
 	    ( nm == BIND && N == 2 )			||
@@ -1219,6 +1220,7 @@ void CompileQuery::compileNakedQuery( Gnx query, LabelClass * contn ) {
 	this->compileQueryTest( query, &ok_label, CONTINUE_LABEL );
 	this->codegen->vmiFAIL();
 	ok_label.labelSet();
+	this->compileQueryBody( query, contn );
 }
 
 void CodeGenClass::compileGnxSwitch( const int offset, const int switch_slot, int tmp_slot, Gnx mnx, LabelClass * contn ) {

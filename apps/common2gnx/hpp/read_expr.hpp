@@ -80,6 +80,7 @@ public:
 	void checkPeekToken( TokType fnc );
 	bool tryToken( TokType fnc );
 	bool tryPeekCloser();
+	void checkPeekCloser();
 	bool tryPeekToken( TokType fnc );
 	bool tryName( const char * name );
 	bool isAtEndOfInput();

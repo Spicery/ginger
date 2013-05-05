@@ -177,6 +177,7 @@ public:
 	void vmiCALLS();
 	void vmiCHAIN_LITE( Ref fn, long N );
 	void vmiCHECK_COUNT( int N );
+	void vmiCHECK_MARK_ELSE( int local_N, int count_K, LabelClass * fail_label );
 	void vmiCHECK_MARK( int local_N, int count_K );
 	void vmiCHECK_MARK0( int local_N );
 	void vmiCHECK_MARK1( int local_N );
@@ -279,6 +280,7 @@ public:
 	void compileChildrenChecked( Gnx mnx, Ginger::Arity arity );
 
 	Ref detach( bool in_heap, Ref fnkey );
+	void compileNelse( Gnx mnx, int N, LabelClass * ok, LabelClass * contn );
 	void compileN( Gnx mnx, int N, LabelClass * contn );
 	void compile1( Gnx mnx, LabelClass * contn );
 	void compile0( Gnx mnx, LabelClass * contn );

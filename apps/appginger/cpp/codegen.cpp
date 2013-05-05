@@ -421,9 +421,21 @@ void CodeGenClass::vmiCHECK_COUNT( int v ) {
 }
 
 void CodeGenClass::vmiCHECK_MARK( int v, int N ) {
-	this->emitSPC( vmc_check_mark1 );
+	this->emitSPC( vmc_check_mark );
 	this->emitRef( ToRef( v ) );
 	this->emitRef( ToRef( N ) );
+}
+
+void CodeGenClass::vmiCHECK_MARK_ELSE( int v, int N, LabelClass * fail_label ) {
+	//	TODO: this is not at all good code. Opportunity to improve.
+	LabelClass cont_label( this );
+	this->emitSPC( vmc_neq_si );
+	this->emitRef( LongToRef( v ) );
+	this->emitRef( LongToSmall( N ) );
+	cont_label.labelInsert();
+	this->vmiERASE_MARK( v );
+	this->continueFrom( fail_label );
+	cont_label.labelSet();
 }
 
 void CodeGenClass::vmiCHECK_MARK1( int v ) {
@@ -848,6 +860,22 @@ void CodeGenClass::compileComparison(
 	}
 }
 
+bool CompileQuery::isValidQuery( Gnx query ) {
+	const string & nm = query->name();
+	const int N = query->size();
+	return(
+	    ( nm == IN && N == 2 ) 				||
+	    ( nm == FROM && 2 <= N && N <= 4 ) 	||
+	    ( nm == WHERE && N == 2 ) 			||
+	    ( nm == WHILE && N == 3 ) 			||
+	    ( nm == DO && N == 2 ) 				||
+	    ( nm == ZIP && N == 2 ) 			||
+	    ( nm == CROSS && N == 2 ) 			||
+	    ( nm == BIND && N == 2 )
+	);
+}
+
+
 void CompileQuery::compileQueryDecl( Gnx query ) {
 	const string & nm = query->name();
 	const int N = query->size();
@@ -864,6 +892,21 @@ void CompileQuery::compileQueryDecl( Gnx query ) {
 		int tmp_loop_var = this->newLoopVar( new VIdent( this->codegen, query->child( 0 ) ) );
 		//this->setLoopVar( new VIdent( this->codegen, query->child( 0 ) ) );
 		query->putAttribute( "tmp.loop.var", tmp_loop_var );
+	} else if ( nm == BIND && N == 2 ) {
+		int lo = -1;
+		int hi = lo;
+		std::vector< Gnx > vars;
+		if ( this->codegen->tryFlatten( query->child( 0 ), VAR, vars ) ) {
+			for ( std::vector< Gnx >::reverse_iterator it = vars.rbegin(); it != vars.rend(); ++it ) {
+				int tmp_loop_var = this->newLoopVar( new VIdent( this->codegen, *it ) );
+				if ( lo < 0 ) lo = tmp_loop_var;
+				hi = tmp_loop_var + 1;
+			}
+		}
+		query->putAttribute( "tmp.bind.lo", lo );
+		query->putAttribute( "tmp.bind.hi", hi );
+		int tmp = this->codegen->tmpvar();
+		query->putAttribute( "tmp.bind.var", tmp );
 	} else {
 		throw SystemError( "Not implemented general queries" );
 	}
@@ -941,7 +984,11 @@ void CompileQuery::compileQueryInit( Gnx query, LabelClass * contn ) {
 		this->codegen->vmiPOP_INNER_SLOT( tmp_context );
 		this->codegen->vmiPOP_INNER_SLOT( tmp_state );
 		this->codegen->continueFrom( contn );
-	
+	} else if ( nm == BIND ) {
+		const int tmp = query->attributeToInt( "tmp.bind.var" );
+		this->codegen->vmiPUSHQ( SYS_TRUE );
+		this->codegen->vmiPOP_INNER_SLOT( tmp );
+		this->codegen->continueFrom( contn );
 	} else {
 		throw SystemError( "Not implemented general queries" );
 	}
@@ -1030,6 +1077,28 @@ void CompileQuery::compileQueryTest( Gnx query, LabelClass * dst, LabelClass * c
 		VIdent id_tmp_state( tmp_state );
 		VIdent termin( SYS_TERMIN );
 		this->codegen->compileComparison( id_tmp_state, CMP_NEQ, termin, dst, contn );
+	} else if ( nm == BIND && N == 2 ) {
+		const int lo = query->attributeToInt( "tmp.bind.lo" );
+		const int hi = query->attributeToInt( "tmp.bind.hi" );
+		const int tmp = query->attributeToInt( "tmp.bind.var" );
+		Gnx lhs = query->child( 0 );
+		Gnx rhs = query->child( 1 );
+		std::vector< Gnx > vars;
+		if ( this->codegen->tryFlatten( lhs, VAR, vars ) ) {
+			this->codegen->vmiPUSH_INNER_SLOT( tmp );
+			LabelClass done_label( this->codegen );
+			this->codegen->vmiIFNOT( done_label.jumpToJump( contn ) );
+			this->codegen->vmiPUSHQ( SYS_FALSE );
+			this->codegen->vmiPOP_INNER_SLOT( tmp );
+			this->codegen->compileNelse( rhs, vars.size(), CONTINUE_LABEL, done_label.jumpToJump( contn ) );
+			for ( int i = lo; i < hi; i++ ) {
+				this->codegen->vmiPOP( this->getLoopVar( i ), false );
+			}
+			this->codegen->continueFrom( dst );
+			done_label.labelSet();
+		} else {
+			throw Ginger::Mishap( "BIND not fully implemented [3]" );
+		}
 	} else {
 		throw SystemError( "Not implemented general queries" );
 	}
@@ -1082,7 +1151,7 @@ void CompileQuery::compileQueryAdvn( Gnx query, LabelClass * contn ) {
 		}
 		this->codegen->vmiPOP( lv, false );
 
-	} else if ( nm == IN ) {
+	} else if ( nm == IN || nm == BIND ) {
 		//	Nothing.
 	} else {
 		throw SystemError( "Not implemented general queries" );
@@ -1682,18 +1751,7 @@ void CodeGenClass::compileGnx( Gnx mnx, LabelClass * contn ) {
 	}	
 }
 
-bool CompileQuery::isValidQuery( Gnx query ) {
-	const string & nm = query->name();
-	const int N = query->size();
-	if ( nm == IN && N == 2 ) return true;
-	if ( nm == FROM && 2 <= N && N <= 4 ) return true;
-	if ( nm == WHERE && N == 2 ) return true;
-	if ( nm == WHILE && N == 3 ) return true;
-	if ( nm == DO && N == 2 ) return true;
-	if ( nm == ZIP && N == 2 ) return true;
-	if ( nm == CROSS && N == 2 ) return true;
-	return false;
-}
+
 
 void CodeGenClass::compileThrow( Gnx mnx, LabelClass * contn ) {
 	//	Push the event name.
@@ -1766,6 +1824,23 @@ void CodeGenClass::compileN( Gnx mnx, int N, LabelClass * contn ) {
 		} else {
 			throw Ginger::Mishap( "Wrong number of results in context of known arity" ).culprit( "#Results", "" + a.count() );
 		}
+	}
+}
+
+void CodeGenClass::compileNelse( Gnx mnx, int N, LabelClass * ok, LabelClass * fail ) {
+	Ginger::Arity a( mnx->attribute( "arity", "+0" ) );
+	if ( a.isntExact() ) {
+		int n = this->current_slot;
+		int v = this->tmpvar();
+		this->vmiSTART_MARK( v );
+		this->compileGnx( mnx, CONTINUE_LABEL );
+		this->vmiCHECK_MARK_ELSE( v, N, fail );
+		this->current_slot = n;
+		this->continueFrom( ok );
+	} else if ( a.count() == N ) {
+		this->compileGnx( mnx, ok );
+	} else {
+		this->continueFrom( fail );
 	}
 }
 

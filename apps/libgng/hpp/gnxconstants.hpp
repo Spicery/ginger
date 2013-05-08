@@ -29,7 +29,8 @@
 #define OUTER_LEVEL		"outer.level"
 #define IS_OUTER		"is.outer"
 #define SCOPE			"scope"
-#define PROTECTED		"protected"
+#define PROTECTED       "protected"
+#define IS_TEMPORARY    "is.temporary"
 #define IS_ASSIGNED		"is.assigned"
 
 #define CONSTANT		"constant"

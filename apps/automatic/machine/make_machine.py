@@ -68,6 +68,7 @@ instructionSet = [
 	Instruction( "eq_ss", "irrr" ),
 	Instruction( "erase", "i" ),
 	Instruction( "erase_mark", "ir" ),
+	Instruction( "erase_num", "ir" ),
 	Instruction( "fail", "i" ),
 	Instruction( "field", "ir" ),
 	Instruction( "getiterator", "i" ),

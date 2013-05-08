@@ -187,6 +187,8 @@ public:
 	void vmiEND_MARK( int N );
 	void vmiEND1_CALLS( int var );
 	void vmiENTER();
+	void vmiERASE();
+	void vmiERASE_NUM( long n );
 	void vmiERASE_MARK( int var );
 	void vmiFAIL();
 	void vmiFIELD( long index );
@@ -195,6 +197,9 @@ public:
 	void vmiGOTO( LabelClass * d );
 	void vmiHALT();
 	void vmiIF( bool sense, LabelClass * d, LabelClass * contn );
+	//void vmiIFEQ( LabelClass * dst );
+	//void vmiIFEQTO( Ref ref, LabelClass * dst, LabelClass *contn );
+	//void vmiIFNEQTO( Ref ref, LabelClass * dst, LabelClass *contn );
 	void vmiIFNOT( LabelClass * d, LabelClass * contn );
 	void vmiIFNOT( LabelClass * dst );
 	void vmiIFSO( LabelClass * d, LabelClass * contn );
@@ -234,6 +239,7 @@ public:
 	void vmiSYS_CALL( SysCall * r );
 	void vmiSYS_RETURN();
 	void vmiTEST( const VIdent & vid0, CMP_OP cmp_op, const VIdent & vid1, LabelClass * dst );
+	bool vmiTRY_POP( const VIdent & id, const bool assign_vs_bind, LabelClass * dst, LabelClass * contn );
 	void vmiAND( LabelClass * dst );
 	void vmiOR( LabelClass * dst );
 	void vmiABS_AND( LabelClass * dst );
@@ -273,6 +279,7 @@ private:
 	void compileThrow( Gnx mnx, LabelClass * contn );
 
 	bool tryFlatten( Gnx expr, const char * name, std::vector< Gnx > & vars );
+	//bool tryFlattenVarOrConstant( Gnx expr, std::vector< Gnx > & vars );
 
 public:
 	void compileGnx( Gnx mnx, LabelClass * contn );

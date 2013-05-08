@@ -49,6 +49,8 @@ to it as a stream.
 	be combined with --absolute.
 	
 --tailcall: Marks tail-calls.
+
+--match: Implements the destructuring of pattern matching.
  */ 
  
 #define SIMPLIFYGNX 	"simplifygnx"
@@ -88,6 +90,7 @@ to it as a stream.
 using namespace std;
 
 #define FETCHGNX ( INSTALL_TOOL "/fetchgnx" )
+typedef shared< Ginger::Mnx > Gnx;
 
 class ProcessingOptions {
 private:
@@ -103,6 +106,7 @@ private:
 	bool val_processing;
 	bool slot_processing;
 	bool top_level_processing;
+    bool match_processing;
 	
 public:
 	static void helpOptions() {
@@ -113,12 +117,16 @@ public:
 		cout << "-1, --absolute        add def.pkg attribute to all globals" << endl;
 		cout << "-2, --arity           add arity marking to all subexpressions" << endl;
 		cout << "-3, --flatten         eliminate nested sequences" << endl;
+        cout << "-4, --lifetime        lifetime analysis" << endl;
 		cout << "-5, --lift            transform nested lambdas so that they only reference immediate locals" << endl;
 		cout << "-6, --scope           mark all variable definitions and references as local or global" << endl;
 		cout << "-7, --sysapp          replace calls to standard variable with sys-calls" << endl;
 		cout << "-8, --tailcall        marks function applications as tail-call or not" << endl;
+        cout << "-9, --val             val analysis" << endl;
 		cout << "-A, --slotalloc       assigns a frame slot to every variable" << endl;
 		cout << "-B, --toplevel        moves every lambda to top-level" << endl;
+        cout << "-C, --match           pattern match simplification" << endl;
+
 	}	
 		
 public:
@@ -134,6 +142,7 @@ public:
 	bool getValProcessing() const { return this->val_processing; }
 	bool getSlotProcessing() const { return this->slot_processing; }
 	bool getTopLevelProcessing() const { return this->top_level_processing; }
+    bool getMatchProcessing() const { return this->match_processing; }
 	
 public:
 	void setAbsoluteProcessing() { 
@@ -178,6 +187,9 @@ public:
 		this->top_level_processing = true;
 		this->setLiftProcessing();			//	Won't work unless lifted.
 	}
+    void setMatchProcessing() {
+        this->match_processing = true;       
+    }
 	
 public:
 	void setStandard() {
@@ -190,7 +202,8 @@ public:
 		this->self_processing = true;
 		this->sysapp_processing = true;
 		this->tailcall_processing = true;        		
-		this->val_processing = true;        		
+		this->val_processing = true;  
+        this->match_processing = true;      		
 	}
 
 public:
@@ -206,7 +219,8 @@ public:
 		tailcall_processing( false ),
 		val_processing( false ),
 		slot_processing( false ),
-		top_level_processing( false )
+		top_level_processing( false ),
+        match_processing( false )
 	{}
 	
 };
@@ -215,29 +229,14 @@ class Main : public ProcessingOptions {
 private:
 	vector< string > 	project_folders;
 	
-/*public:
-	bool absolute_processing;
-	bool arity_processing;
-	bool flatten_processing;
-	bool lifetime_processing;
-	bool lift_processing;
-	bool scope_processing;
-	bool self_processing;
-	bool sysapp_processing;
-	bool tailcall_processing;
-	bool val_processing;
-	bool slot_processing;
-	bool top_level_processing;
-*/
-
 public:
 	std::string package;
 	bool undefined_allowed;
 	bool retain_debug_info;
 
 private:
-	void simplify( shared< Ginger::Mnx > & g );
-	bool resimplify( shared< Ginger::Mnx > & g );
+	void simplify( Gnx & g );
+	bool resimplify( Gnx & g );
 
 
 public:
@@ -342,25 +341,19 @@ void Main::parseArgs( int argc, char **argv, char **envp ) {
         		this->setSlotProcessing();
         		break;
         	}
-        	case 'B' : {
-        		//this->top_level_processing = true;
-        		this->setTopLevelProcessing();
-        		break;
-        	}
+            case 'B' : {
+                //this->top_level_processing = true;
+                this->setTopLevelProcessing();
+                break;
+            }
+            case 'C' : {
+                this->setMatchProcessing();
+                break;
+            }
         	case 's' : {
         		//	A standard choice of options. Everything, unless it is
         		//	insanely expensive or of marginal benefit to all back-ends.
-        		//	Only slot_processing excluded at the moment.
-        		//this->absolute_processing = true;
-        		//this->arity_processing = true;
-        		//this->flatten_processing = true;
-        		//this->lifetime_processing = true;
-        		//this->lift_processing = true;
-        		//this->scope_processing = true;
-        		//this->self_processing = true;
-        		//this->sysapp_processing = true;
-        		//this->tailcall_processing = true;        		
-        		//this->val_processing = true;        		
+        		//	Only slot_processing excluded at the moment.       		
         		this->setStandard();
         		break;
         	}
@@ -432,7 +425,7 @@ void Main::parseArgs( int argc, char **argv, char **envp ) {
         }
     }
 }
-    
+
 
 void Main::printGPL( const char * start, const char * end ) {
     bool printing = false;
@@ -448,6 +441,14 @@ void Main::printGPL( const char * start, const char * end ) {
             std::cout << line << std::endl;
         }
     }
+}
+
+static string makeGUID() {  
+    uuid_t x;
+    uuid_generate( x );
+    char s[ 37 ];               //  Because Linux does not define uuid_string_t ... argh!
+    uuid_unparse( x, s );
+    return string( s ); 
 }
 
 class ResolveHandler : public Ginger::SaxHandler {
@@ -619,8 +620,8 @@ public:
 	
 private:
     // Forward declaration.
-    Ginger::Arity calcArity( shared< Ginger::Mnx > expr );
-    Ginger::Arity calcArityIfThenOptElse( shared< Ginger::Mnx > expr, int offset );
+    Ginger::Arity calcArity( Gnx expr );
+    Ginger::Arity calcArityIfThenOptElse( Gnx expr, int offset );
 
  public:
 	void startVisit( Ginger::Mnx & element ) {
@@ -651,7 +652,7 @@ public:
 	virtual ~SelfAppArityMarker() {}
 };
 
-Ginger::Arity SelfAppArityMarker::calcArityIfThenOptElse( shared< Ginger::Mnx > expr, int offset ) {
+Ginger::Arity SelfAppArityMarker::calcArityIfThenOptElse( Gnx expr, int offset ) {
     vector< Ginger::Arity > subexpr_arities;
     for ( int i = 1 + offset; i < expr->size(); i += 2 ) {
         subexpr_arities.push_back( calcArity( expr->child( i ) ) );
@@ -676,7 +677,7 @@ Ginger::Arity SelfAppArityMarker::calcArityIfThenOptElse( shared< Ginger::Mnx > 
     self.app, which helps us get much closer to the least fixed
     point. 
 */
-Ginger::Arity SelfAppArityMarker::calcArity( shared< Ginger::Mnx > expr ) {
+Ginger::Arity SelfAppArityMarker::calcArity( Gnx expr ) {
     if ( expr->hasAttribute( ARITY ) ) {
         return Ginger::Arity( expr->attribute( ARITY ) );
     } else if ( expr->name() == IF ) {
@@ -828,7 +829,7 @@ public:
 					//	As we can prove the child satisfies the condition we should 
 					//	eliminate the parent. So we simply replace the contents of the 
 					//	node with the contents of the child!
-					shared< Ginger::Mnx > c = element.child( 0 );
+					Gnx c = element.child( 0 );
 					element.copyFrom( *c );
 					//	Because we have changed something we should let the system know
 					//	in case it would synergise with other optimsations.
@@ -837,7 +838,7 @@ public:
 					element.putAttribute( ARITY, "1" );
 				}
 			} else if ( element.hasAttribute( ASSERT_TYPE ) ) {
-				shared< Ginger::Mnx > c = element.child( 0 );
+				Gnx c = element.child( 0 );
 				if ( c->hasName( CONSTANT ) && element.attribute( ASSERT_TYPE ) == c->attribute( CONSTANT_TYPE ) ) {
 					element.copyFrom( *c );
 					this->changed = true;
@@ -864,7 +865,7 @@ public:
 		const string & x = element.name();
 		element.clearAttribute( TAILCALL );	//	Throw away any previous marking.
 		if ( x == FN ) {
-			shared< Ginger::Mnx > ch( element.lastChild() );
+			Gnx ch( element.lastChild() );
 			ch->orFlags( TAIL_CALL_MASK );
 		} else if ( element.hasAllFlags( TAIL_CALL_MASK ) ) {
 			if ( x == APP ) {
@@ -887,11 +888,11 @@ public:
                 }
 			} else if ( x == SEQ || x == BLOCK ) {
 				if ( element.size() >= 1 ) {
-					shared< Ginger::Mnx > ch = element.lastChild();
+					Gnx ch = element.lastChild();
 					ch->orFlags( TAIL_CALL_MASK );
 				}
 			} else if ( x == ASSERT && element.size() == 1 && element.hasAttribute( ASSERT_TAILCALL, "true" ) ) {
-                shared< Ginger::Mnx > c = element.child( 0 );
+                Gnx c = element.child( 0 );
                 element.copyFrom( *c );
                 this->startVisit( element );
             }
@@ -1076,7 +1077,7 @@ public:
 					Ginger::MnxBuilder b;
 					b.start( SELF_CONSTANT );
 					b.end();
-					shared< Ginger::Mnx > bgnx( b.build() );
+					Gnx bgnx( b.build() );
 					element.copyFrom( *bgnx );
 				}
 			}
@@ -1150,7 +1151,8 @@ struct VarInfo {
 	const string *			name;
 	int						uid;
 	size_t					dec_level;
-	bool 					is_protected;
+    bool                    is_temporary;
+    bool                    is_protected;
 	bool					is_local;
 	long					max_diff_use_level;
 	
@@ -1168,11 +1170,12 @@ struct VarInfo {
 	{
 	}
 	
-	VarInfo( Ginger::Mnx * element, const string * name, int uid, size_t dec_level, bool is_protected, bool is_local ) : 
+	VarInfo( Ginger::Mnx * element, const string * name, int uid, size_t dec_level, bool is_temporary, bool is_protected, bool is_local ) : 
 		element( element ),
 		name( name ),
 		uid( uid ),
 		dec_level( dec_level ),
+        is_temporary( is_temporary ),
 		is_protected( is_protected ),
 		is_local( is_local ),
 		max_diff_use_level( 0 )
@@ -1233,20 +1236,21 @@ private:
 		return false;
 	}
 	
-	VarInfo * findId( const std::string & name ) {
+	VarInfo * findId( const std::string & name, const bool is_tmp ) {
 		for ( 
 			vector< VarInfo >::reverse_iterator it = this->vars.rbegin();
 			it != this->vars.rend();
 			++it
 		) {
-			if ( name == *(it->name) ) {
-				long d = this->scopes.size() - it->dec_level;
-				if ( it->is_local && d != 0 ) {
+            VarInfo & vi = *it;
+			if ( *vi.name == name && is_tmp == vi.is_temporary ) {
+				long d = this->scopes.size() - vi.dec_level;
+				if ( vi.is_local && d != 0 ) {
 					//cerr << "We have detected an outer declaration: " << name << endl;
 					//cerr << "Declared at level " << it->dec_level << " but used at level " << this->scopes.size() << endl;
-					it->max_diff_use_level = max( d, it->max_diff_use_level );
+					vi.max_diff_use_level = max( d, vi.max_diff_use_level );
 					this->outers_found = true;
-					it->element->putAttribute( IS_OUTER, "true" );
+					vi.element->putAttribute( IS_OUTER, "true" );
 				}
 				return &*it;
 			}
@@ -1254,7 +1258,7 @@ private:
 		return NULL;
 	}
 
-	void markAsAssigned( shared< Ginger::Mnx > id ) {
+	void markAsAssigned( Gnx id ) {
 		if ( id->hasAttribute( PROTECTED, "true" ) ) {
 			throw Ginger::Mishap( "Assigning to a protected variable" ).culprit( "Variable", id->attribute( VID_NAME, "<unknown>" ) );
 		} else if ( id->hasAttribute( SCOPE, "local" ) ) {
@@ -1282,7 +1286,8 @@ public:
 		element.clearAttribute( IS_ASSIGNED );	//	Throw away any previous marking.
 		if ( x == ID ) {
 			const string & name = element.attribute( VID_NAME );
-			VarInfo * v = this->findId( name );
+            const bool is_tmp = element.hasAttribute( IS_TEMPORARY, "true" );
+			VarInfo * v = this->findId( name, is_tmp );
 			if ( v != NULL ) {
 				element.putAttribute( UID, v->uid );
 				this->xrefs_to_uid[ v->uid ].push_back( &element );
@@ -1304,6 +1309,7 @@ public:
     			const int uid = this->newUid();
     			this->var_of_uid[ uid ] = &element;
     			element.putAttribute( UID, uid );
+                const bool is_temporary = element.hasAttribute( IS_TEMPORARY, "true" );
     			if ( not element.hasAttribute( PROTECTED ) ) {
     				element.putAttribute( PROTECTED, "true" );
     			}
@@ -1312,7 +1318,7 @@ public:
     			element.putAttribute( SCOPE, is_global ? "global" : "local" );
     			//cerr << "Declaring " << name << " at level " << this->vars.size() << endl;
     			//cerr << "  -- but should it be " << this->scopes.size() << endl;
-    			this->vars.push_back( VarInfo( &element, &name, uid, this->scopes.size(), is_protected, not is_global ) );
+    			this->vars.push_back( VarInfo( &element, &name, uid, this->scopes.size(), is_temporary, is_protected, not is_global ) );
             } else {
                 //  Anonymous variable - should be marked as having local scope.
                 //  It also needs a unique ID to keep the slot counting code clean.
@@ -1440,7 +1446,7 @@ public:
                         <set> EXPR <sysapp name=A> ARGS* </sysapp> </set>
                         <sysapp name=U> EXPR ARGS </sysapp>
                     */
-                    shared< Ginger::Mnx > uform( new Ginger::Mnx( SYSAPP ) );
+                    Gnx uform( new Ginger::Mnx( SYSAPP ) );
                     uform->putAttribute( SYSAPP_NAME, uname );
                     uform->addChild( element.child( 0 ) );
                     Ginger::MnxChildIterator kids( element.child(1) );
@@ -1503,8 +1509,8 @@ public:
 	}
 	
 	//	method
-	shared< Ginger::Mnx > makeLocals( const char * tag ) {
-		shared< Ginger::Mnx > locals( new Ginger::Mnx( SEQ ) );
+	Gnx makeLocals( const char * tag ) {
+		Gnx locals( new Ginger::Mnx( SEQ ) );
 		for ( 
 			set< string >::iterator it = this->capture_sets.back().begin();
 			it != this->capture_sets.back().end();
@@ -1516,7 +1522,7 @@ public:
 			//cout << "SO FAR: ";
 			/*v->render();
 			cout << endl;*/
-			shared< Ginger::Mnx > var( new Ginger::Mnx( tag ) );
+			Gnx var( new Ginger::Mnx( tag ) );
 			var->putAttribute( "name", v->attribute( "name" ) );
 			var->putAttribute( UID, uid );
 			var->putAttribute( SCOPE, "local" );
@@ -1535,8 +1541,8 @@ public:
 				//	We should extend the set of local variables with the
 				//	capture set.
 				{
-					shared< Ginger::Mnx > arg( element.child( 0 ) );
-					shared< Ginger::Mnx > newarg( new Ginger::Mnx( SEQ ) );
+					Gnx arg( element.child( 0 ) );
+					Gnx newarg( new Ginger::Mnx( SEQ ) );
 					newarg->addChild( arg );
 					newarg->addChild( this->makeLocals( VAR ) );
 					
@@ -1550,9 +1556,9 @@ public:
 				//	to partapply onto the original function and 
 				//	the capture set.
 				{
-					shared< Ginger::Mnx > fn( new Ginger::Mnx( FN ) );
+					Gnx fn( new Ginger::Mnx( FN ) );
 					fn->copyFrom( element );
-					shared< Ginger::Mnx > partapply( new Ginger::Mnx( SYSAPP ) );
+					Gnx partapply( new Ginger::Mnx( SYSAPP ) );
 					partapply->putAttribute( SYSAPP_NAME, "partApply" );
 					partapply->addChild( this->makeLocals( ID ) );
 					partapply->addChild( fn );
@@ -1571,26 +1577,17 @@ public:
 class TopLevelFunction : public Ginger::MnxVisitor {
 private:
 	vector< string > guids;
-	vector< shared< Ginger::Mnx > > fns;
+	vector< Gnx > fns;
 	int nesting;
-
-private:
-	static string makeGUID() {	
-		uuid_t x;
-		uuid_generate( x );
-		char s[ 37 ];               //  Because Linux does not define uuid_string_t ... argh!
-		uuid_unparse( x, s );
-		return string( s );	
-	}
 	
 public:
-	shared< Ginger::Mnx > finishByInsertingBindings( shared< Ginger::Mnx > element ) {
+	Gnx finishByInsertingBindings( Gnx element ) {
 		Ginger::MnxBuilder b;
 		b.start( SEQ );
 		
 		for ( size_t i = 0; i < this->guids.size(); i++ ) {
 			const string & g = this->guids[ i ];
-			shared< Ginger::Mnx > m( this->fns[ i ] );
+			Gnx m( this->fns[ i ] );
 			
 			b.start( BIND );
 			b.start( VAR );
@@ -1623,7 +1620,7 @@ public:
 				//	the top level.
 				
 				//	Copy the current element into a temporary.
-				shared< Ginger::Mnx > t( new Ginger::Mnx( "" ) );
+				Gnx t( new Ginger::Mnx( "" ) );
 				t->copyFrom( element );
 				
 				//	Create globally unique ID.
@@ -1664,9 +1661,9 @@ public:
 		const string & x = element.name();
 		if ( element.hasAttribute( IS_OUTER, "true" ) && element.hasAttribute( PROTECTED, "false" ) && ( x == VAR || x == ID ) ) {
 			element.putAttribute( IS_OUTER, "deref" );			//	Mark as processed.
-			shared< Ginger::Mnx > t( new Ginger::Mnx( x ) );
+			Gnx t( new Ginger::Mnx( x ) );
 			t->copyFrom( element );
-			shared< Ginger::Mnx > d( new Ginger::Mnx( "deref" ) );
+			Gnx d( new Ginger::Mnx( "deref" ) );
 			d->addChild( t );
 			element.copyFrom( *d );
 		}	
@@ -1682,7 +1679,7 @@ public:
 		) {
 			//	<bind><deref><var...></deref>EXPR</bind> 
 			//	<bind><var...><makeref>EXPR</makeref></bind>			
-			shared< Ginger::Mnx > makeref( new Ginger::Mnx( MAKEREF ) );
+			Gnx makeref( new Ginger::Mnx( MAKEREF ) );
 			makeref->addChild( element.child(1) );
 			element.child(0) = element.child(0)->child(0);
 			element.child(1) = makeref;
@@ -1701,6 +1698,100 @@ public:
 	
 public:
 	virtual ~AddDeref() {}
+};
+
+class Match : public Ginger::MnxVisitor {
+private:
+    bool    has_changed;
+
+public:
+    bool hasChanged() const {
+        return this->hasChanged();
+    }
+
+    static int flatten( Gnx x, vector< Gnx > & lhs ) {
+        int count = 0;
+        if ( x->hasName( SEQ ) ) {
+            count += 1;
+            for ( Ginger::MnxChildIterator chit( x ); chit.hasNext(); ) {
+                Gnx g = chit.next();
+                count += flatten( g, lhs );
+            }
+        } else {
+            lhs.push_back( x );
+        }
+        return count;
+    }
+
+public:
+    void startVisit( Ginger::Mnx & element ) {
+        if ( 
+            (
+                element.hasName( IN ) ||
+                element.hasName( FROM ) ||
+                element.hasName( BIND )
+            ) && 
+            element.size() >= 1 
+        ) {
+            Gnx target = element.child( 0 );
+            if ( target->hasName( SEQ ) ) {
+                vector< Gnx > lhs;
+                bool was_flattened = flatten( target, lhs ) > 1;
+                if ( lhs.size() == 1 ) {
+                    target->copyFrom( *lhs[ 0 ] );
+                } else if ( was_flattened ) {
+                    Ginger::MnxBuilder e;
+                    e.start( SEQ );
+                    for ( 
+                        vector< Gnx >::iterator it = lhs.begin();
+                        it != lhs.end();
+                        ++it
+                    ) {
+                        Gnx & g = *it;
+                        e.add( g );
+                    }
+                    e.end();
+                    target->copyFrom( *e.build() );
+                }
+            }
+            if ( target->hasName( CONSTANT ) ) {
+                const string uuid = makeGUID();
+                Ginger::MnxBuilder where;
+                where.start( WHERE );
+                where.start( element.name() );
+                where.start( VAR );
+                where.put( VID_NAME, uuid );
+                where.put( IS_TEMPORARY, "true" );
+                where.end();
+                bool not_first = false;
+                for ( Ginger::MnxChildIterator chit( element ); chit.hasNext(); not_first = true ) {
+                    Gnx g = chit.next();
+                    if ( not_first ) {
+                        where.add( g );
+                    }
+                }
+                //where.add( element.child( 1 ) );
+                where.end();
+                where.start( SYSAPP );
+                where.put( SYSAPP_NAME, "=" );
+                where.add( element.child( 0 ) );
+                where.start( ID );
+                where.put( VID_NAME, uuid );
+                where.put( IS_TEMPORARY, "true" );
+                where.end();
+                where.end();
+                where.end();
+                Gnx w = where.build();
+                element.copyFrom( *w );
+                this->has_changed = true;
+            }
+        }
+    }
+    void endVisit( Ginger::Mnx & element ) {
+    }
+public:
+    Match() : has_changed( false ) {}
+    virtual ~Match() {}
 };
 
 
@@ -1865,7 +1956,7 @@ public:
 	virtual ~SlotAllocation() {}
 };
 
-bool Main::resimplify( shared< Ginger::Mnx > & g ) {
+bool Main::resimplify( Gnx & g ) {
 	bool resimplify = false;
 	
 	if ( this->getSysappProcessing() ) {	
@@ -1897,7 +1988,7 @@ bool Main::resimplify( shared< Ginger::Mnx > & g ) {
 	return resimplify;
 }
 
-void Main::simplify( shared< Ginger::Mnx > & g ) {
+void Main::simplify( Gnx & g ) {
 	bool resimplify = false;
 
 	//	If we are not doing absolute_processing we should assume we
@@ -1908,6 +1999,11 @@ void Main::simplify( shared< Ginger::Mnx > & g ) {
 		SelfAnalysis self;
 		g->visit( self );
 	}
+
+    if ( this->getMatchProcessing() ) {
+        Match match;
+        g->visit( match );
+    }
 	
 	if ( this->getScopeProcessing() ) {
 		Scope scope;
@@ -1988,7 +2084,7 @@ void Main::simplify( shared< Ginger::Mnx > & g ) {
 void Main::run() {
 	Ginger::MnxReader reader;	
 	for (;;) {	
-		shared< Ginger::Mnx > g( reader.readMnx() );
+		Gnx g( reader.readMnx() );
 		if ( not g ) break;	
 		this->simplify( g );		
 		g->render();

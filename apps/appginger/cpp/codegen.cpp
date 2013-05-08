@@ -2,18 +2,18 @@
 	Copyright (c) 2010 Stephen Leach. AppGinger is distributed under the terms 
 	of the GNU General Public License. This file is part of AppGinger.
 
-    AppGinger is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+	AppGinger is free software: you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
 
-    AppGinger is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+	AppGinger is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with AppGinger.  If not, see <http://www.gnu.org/licenses/>.
+	You should have received a copy of the GNU General Public License
+	along with AppGinger.  If not, see <http://www.gnu.org/licenses/>.
 \******************************************************************************/
 
 #include "debug.hpp"
@@ -113,7 +113,7 @@ void CodeGenClass::emitVIDENT_REF( const VIdent & id ) {
 	} else if ( id.isConstant() ) {
 		this->emitRef( id.getRef() );
 	} else {
-		throw SystemError( "Internal error" );
+		throw SystemError( "Internal error (1)" );
 	}
 }
 
@@ -249,9 +249,31 @@ void CodeGenClass::vmiPOP( const VIdent & id, const bool assign_vs_bind ) {
 		this->emitSPC( vmc_pop_global );
 		this->emitValof( v );
 	} else {
-		throw SystemError( "Internal Error" );
+		throw SystemError( "Internal Error (2)" );
 	}
 }
+
+/*bool CodeGenClass::vmiTRY_POP( const VIdent & id, const bool assign_vs_bind, LabelClass * dst, LabelClass * contn ) {
+	if ( id.isLocal() ) {
+		this->vmiPOP_INNER_SLOT( id.getSlot() );
+		this->continueFrom( dst );
+		return false;
+	} else if ( id.isGlobal() ) {
+		Valof * v = id.getValof();
+		if ( assign_vs_bind && v->isProtected() ) {
+			throw Ginger::Mishap( "Assigning to a protected variable" ).culprit( "Variable", v->getNameString() );
+		}
+		this->emitSPC( vmc_pop_global );
+		this->emitValof( v );
+		this->continueFrom( dst );
+		return false;
+	} else if ( id.isConstant() ) {
+		this->vmiIFEQTO( id.getRef(), dst, contn );
+		return true;
+	} else {
+		throw SystemError( "Internal Error (2)" );
+	}
+}*/
 
 void CodeGenClass::vmiPOP( Gnx var_or_id, const bool assign_vs_bind ) {
 	#ifdef DBG_CODEGEN
@@ -282,7 +304,7 @@ void CodeGenClass::vmiPUSH( const VIdent & vid ) {
 		this->emitSPC( vmc_push_global );
 		this->emitValof( vid.getValof() );
 	} else {
-		throw SystemError( "Internal Error" );
+		throw SystemError( "Internal Error( 3 )" );
 	}
 }
 
@@ -296,7 +318,7 @@ void CodeGenClass::vmiPUSH( const VIdent & vid, LabelClass * contn ) {
 		this->emitValof( vid.getValof() );
 		this->continueFrom( contn );
 	} else {
-		throw SystemError( "Internal Error" );
+		throw SystemError( "Internal Error (4)" );
 	}
 }
 
@@ -413,6 +435,10 @@ void CodeGenClass::vmiEND_MARK( int v ) {
 void CodeGenClass::vmiERASE_MARK( int var ) {
 	this->emitSPC( vmc_erase_mark );
 	this->emitRef( ToRef( var ) );
+}
+
+void CodeGenClass::vmiERASE() {
+	this->emitSPC( vmc_erase );
 }
 
 void CodeGenClass::vmiCHECK_COUNT( int v ) {
@@ -631,6 +657,69 @@ void CodeGenClass::vmiIFNOT( LabelClass * d, LabelClass * contn ) {
 	this->vmiIFSO( contn, d );
 }
 
+/*void CodeGenClass::vmiIFEQ( LabelClass * dst ) {
+	if ( dst == CONTINUE_LABEL ) {
+		//	No branching
+		this->vmiERASE_NUM( 2 );
+	} else if ( dst->isntReturn() ) {
+		this->emitSPC( vmc_eq );
+		this->emitSPC( vmc_ifso );
+		dst->labelInsert();
+	} else {
+		this->emitSPC( vmc_eq );
+		this->emitSPC( vmc_return_ifso );
+	}
+}
+
+void CodeGenClass::vmiIFNEQTO( Ref ref, LabelClass * dst, LabelClass *contn ) {
+	if ( dst == contn ) {
+		this->vmiERASE();
+		this->continueFrom( dst );
+	} else if ( dst == CONTINUE_LABEL ) {
+		this->vmiIFEQTO( ref, contn, dst );
+	} else {
+		this->emitSPC( vmc_pushq );
+		this->emitRef( ref );
+		this->emitSPC( vmc_eq );
+		if ( dst->isntReturn() ) {
+			this->emitSPC( vmc_ifnot );
+			dst->labelInsert();
+		} else {
+			this->emitSPC( vmc_return_ifnot );
+		}
+	}
+}
+
+void CodeGenClass::vmiIFEQTO( Ref ref, LabelClass * dst, LabelClass *contn ) {
+	if ( dst == contn ) {
+		this->vmiERASE();
+		this->continueFrom( dst );
+	} else if ( dst == CONTINUE_LABEL ) {
+		this->vmiIFNEQTO( ref, contn, dst );
+	} else {
+		this->emitSPC( vmc_pushq );
+		this->emitRef( ref );
+		this->emitSPC( vmc_eq );
+		if ( dst->isntReturn() ) {
+			this->emitSPC( vmc_ifso );
+			dst->labelInsert();
+		} else {
+			this->emitSPC( vmc_return_ifso );
+		}
+	}
+}*/
+
+void CodeGenClass::vmiERASE_NUM( long n ) {
+	if ( n == 0 ) {
+		//	Do nothing
+	} else if ( n == 1 ) {
+		this->emitSPC( vmc_erase );
+	} else {
+		this->emitSPC( vmc_erase_num );
+		this->emitRef( ToRef( n ) );
+	}
+}
+
 /**
  * 	@param dst destination label if top of stack agrees with sense.
  *  @param contn continuation label if top of stack disagrees with sense.
@@ -692,9 +781,6 @@ void CodeGenClass::vmiTEST(
 		dst->labelInsert();		
 	}
 }
-
-
-
 
 
 #define REFBITS ( 8 * sizeof( Ref ) )
@@ -864,16 +950,16 @@ bool CompileQuery::isValidQuery( Gnx query ) {
 	const string & nm = query->name();
 	const int N = query->size();
 	return(
-	    ( nm == IN && N == 2 ) 				||
-	    ( nm == FROM && 2 <= N && N <= 4 ) 	||
-	    ( nm == WHERE && N == 2 ) 			||
-	    ( nm == WHILE && N == 3 ) 			||
-	    ( nm == DO && N == 2 ) 				||
-	    ( nm == FINALLY && N == 2 ) 		||
-	    ( nm == ZIP && N == 2 ) 			||
-	    ( nm == CROSS && N == 2 ) 			||
-	    ( nm == BIND && N == 2 )			||
-	    ( nm == OK && N == 0 )
+		( nm == IN && N == 2 ) 				||
+		( nm == FROM && 2 <= N && N <= 4 ) 	||
+		( nm == WHERE && N == 2 ) 			||
+		( nm == WHILE && N == 3 ) 			||
+		( nm == DO && N == 2 ) 				||
+		( nm == FINALLY && N == 2 ) 		||
+		( nm == ZIP && N == 2 ) 			||
+		( nm == CROSS && N == 2 ) 			||
+		( nm == BIND && N == 2 )			||
+		( nm == OK && N == 0 )
 	);
 }
 
@@ -891,16 +977,23 @@ void CompileQuery::compileQueryDecl( Gnx query ) {
 		int tmp_loop_var = this->newLoopVar( new VIdent( this->codegen, var ) );
 		query->putAttribute( "tmp.loop.var", tmp_loop_var );
 	} else if ( nm == IN && N >= 2 ) {
-		int tmp_loop_var = this->newLoopVar( new VIdent( this->codegen, query->child( 0 ) ) );
-		//this->setLoopVar( new VIdent( this->codegen, query->child( 0 ) ) );
-		query->putAttribute( "tmp.loop.var", tmp_loop_var );
+		std::vector< Gnx > vars;
+		Gnx var( query->child( 0 ) );	
+		if ( this->codegen->tryFlatten( var, VAR, vars ) && vars.size() == 1 ) {
+			int tmp_loop_var = this->newLoopVar( new VIdent( this->codegen, vars[0] ) );
+			query->putAttribute( "tmp.loop.var", tmp_loop_var );
+		} else {
+			throw SystemError( "Full BIND not implemented" ).culprit( "Name", var->name() );
+		}
 	} else if ( nm == BIND && N == 2 ) {
 		int lo = -1;
 		int hi = lo;
 		std::vector< Gnx > vars;
 		if ( this->codegen->tryFlatten( query->child( 0 ), VAR, vars ) ) {
-			for ( std::vector< Gnx >::reverse_iterator it = vars.rbegin(); it != vars.rend(); ++it ) {
-				int tmp_loop_var = this->newLoopVar( new VIdent( this->codegen, *it ) );
+			for ( std::vector< Gnx >::iterator it = vars.begin(); it != vars.end(); ++it ) {
+				Gnx vc = *it;
+				//cerr << "VAR added = " << vc->name() << endl;
+				int tmp_loop_var = this->newLoopVar( new VIdent( this->codegen, vc ) );
 				if ( lo < 0 ) lo = tmp_loop_var;
 				hi = tmp_loop_var + 1;
 			}
@@ -932,12 +1025,7 @@ void CompileQuery::compileQueryInit( Gnx query, LabelClass * contn ) {
 		this->compileQueryInit( query->child( 0 ), CONTINUE_LABEL );
 		this->compileQueryInit( query->child( 1 ), contn );
 	} else if ( nm == FROM && N >= 2 ) {
-
-		Gnx var( query->child( 0 ) );
-		//this->setLoopVar( new VIdent( this->codegen, var ) );
-		int tmp_loop_var = this->newLoopVar( new VIdent( this->codegen, var ) );
-		query->putAttribute( "tmp.loop.var", tmp_loop_var );
-				
+		Gnx var( query->child( 0 ) );		
 		Gnx start_expr( query->child( 1 ) );
 		this->codegen->compile1( start_expr, CONTINUE_LABEL );
 		this->codegen->vmiPOP( var, false );
@@ -973,11 +1061,6 @@ void CompileQuery::compileQueryInit( Gnx query, LabelClass * contn ) {
 		this->codegen->continueFrom( contn );
 		
 	} else if ( nm == IN && N >= 2 ) {
-
-		int tmp_loop_var = this->newLoopVar( new VIdent( this->codegen, query->child( 0 ) ) );
-		//this->setLoopVar( new VIdent( this->codegen, query->child( 0 ) ) );
-		query->putAttribute( "tmp.loop.var", tmp_loop_var );
-
 		this->codegen->compile1( query->child( 1 ), CONTINUE_LABEL );
 		this->codegen->vmiINSTRUCTION( vmc_getiterator );
 		int tmp_next_fn = this->codegen->tmpvar();
@@ -1086,8 +1169,9 @@ void CompileQuery::compileQueryTest( Gnx query, LabelClass * dst, LabelClass * c
 		this->codegen->vmiPUSH_INNER_SLOT( tmp_context );	
 		this->codegen->vmiSET_CALL_INNER_SLOT( 2, tmp_next_fn );		
 		this->codegen->vmiPOP_INNER_SLOT( tmp_state );
-		this->codegen->vmiPOP( this->getLoopVar( query->attributeToInt( "tmp.loop.var" ) ), false );
-		
+
+		VIdent & vid = this->getLoopVar( query->attributeToInt( "tmp.loop.var" ) );
+		this->codegen->vmiPOP( vid, false );
 		VIdent id_tmp_state( tmp_state );
 		VIdent termin( SYS_TERMIN );
 		this->codegen->compileComparison( id_tmp_state, CMP_NEQ, termin, dst, contn );
@@ -1101,13 +1185,17 @@ void CompileQuery::compileQueryTest( Gnx query, LabelClass * dst, LabelClass * c
 		if ( this->codegen->tryFlatten( lhs, VAR, vars ) ) {
 			this->codegen->vmiPUSH_INNER_SLOT( tmp );
 			LabelClass done_label( this->codegen );
+
 			this->codegen->vmiIFNOT( done_label.jumpToJump( contn ) );
 			this->codegen->vmiPUSHQ( SYS_FALSE );
 			this->codegen->vmiPOP_INNER_SLOT( tmp );
 			this->codegen->compileNelse( rhs, vars.size(), CONTINUE_LABEL, done_label.jumpToJump( contn ) );
-			for ( int i = lo; i < hi; i++ ) {
-				this->codegen->vmiPOP( this->getLoopVar( i ), false );
+			
+			//cerr << "NUM in vars = " << vars.size() << endl;
+			for ( int count = hi - 1; count >= lo; count-- ) {
+				this->codegen->vmiPOP( this->getLoopVar( count ), false );
 			}
+			
 			this->codegen->continueFrom( dst );
 			done_label.labelSet();
 		} else {
@@ -1609,6 +1697,22 @@ bool CodeGenClass::tryFlatten( Gnx mnx, const char * name, std::vector< Gnx > & 
 		return false;
 	}
 }
+
+/*bool CodeGenClass::tryFlattenVarOrConstant( Gnx mnx, std::vector< Gnx > & vars ) {
+	if ( mnx->hasName( VAR ) || mnx->hasName( CONSTANT ) ) {
+		vars.push_back( mnx );
+		return true;
+	} else if ( mnx->hasName( SEQ ) ) {
+		MnxChildIterator children( mnx );
+		while ( children.hasNext() ) {
+			Gnx child = children.next();
+			if ( not this->tryFlattenVarOrConstant( child, vars ) ) return false;
+		}
+		return true;
+	} else {
+		return false;
+	}
+}*/
 
 void CodeGenClass::compileGnx( Gnx mnx, LabelClass * contn ) {
 	#ifdef DBG_CODEGEN

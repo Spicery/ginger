@@ -1,0 +1,24 @@
+/*****************************************************************************\
+Definition
+	ERASE_NUM N
+	where
+		N : long
+
+Summary
+	Removes the topmost N items from the value stack.
+	
+Unchecked Precondition
+	There is at least N values on the value stack.
+	
+Exceptions (Checked Preconditions)
+	
+Result (Postcondition)
+	The value stack is N shorter.
+
+\*****************************************************************************/
+
+{
+	long n = ToLong( pc[ 1 ] );
+	VMVP -= n;					//	Decrement the value-stack pointer.
+	RETURN( pc + 2 );		//	Return the next instruction.
+}

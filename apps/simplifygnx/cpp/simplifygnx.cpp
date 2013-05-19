@@ -696,12 +696,18 @@ Ginger::Arity SelfAppArityMarker::calcArity( Gnx expr ) {
     erases with seqs if it can prove the enclosed expressions have 0
     arity. In that case it becomes advantageous to perform a round of
     flattening.
+
+    It distinguishes between arity, which is the number of values that
+    an expression will return (normally), and the pattern.arity which 
+    is the number of values that a pattern binds to. The rules for 
+    arity and pattern.arity are unsurprisingly almost identical.
  */
 class ArityMarker : public Ginger::MnxVisitor {
 private:
 	bool changed;
 	bool self_app_pass_needed;
 	bool clear_arities;
+    const char * arity_attribute;
 	
 public:
 	bool hasChanged() { return this->changed; }
@@ -711,12 +717,12 @@ private:
 	Ginger::Arity sumOverChildren( Ginger::Mnx & element ) {
 		bool all_have_arity = true;
 		for ( int i = 0; all_have_arity && i < element.size(); i++ ) {
-			all_have_arity = element.child( i )->hasAttribute( ARITY );
+			all_have_arity = element.child( i )->hasAttribute( this->arity_attribute );
 		}
 		if ( all_have_arity ) {
 			Ginger::Arity sofar( 0 );
 			for ( int i = 0; i < element.size(); i++ ) {
-				Ginger::Arity kid( element.child( i )->attribute( ARITY ) );
+				Ginger::Arity kid( element.child( i )->attribute( this->arity_attribute ) );
 				sofar = sofar.add( kid );
 			}
 			return sofar;
@@ -725,107 +731,141 @@ private:
 		}
 	}
 
-	
+    bool isEvalMode() const {
+        return this->arity_attribute == ARITY;
+    }
+
+    bool isPatternMode() const {
+        return this->arity_attribute == PATTERN_ARITY;
+    }
+
+
 public:
 	void startVisit( Ginger::Mnx & element ) {
-		if ( this->clear_arities ) element.clearAttribute( ARITY );	//	Throw away any previous marking.
+		if ( this->clear_arities ) {
+            element.clearAttribute( ARITY );            //  Throw away any previous marking.
+            element.clearAttribute( PATTERN_ARITY );    //  Throw away any previous marking.
+        }
+        if ( element.hasAttribute( ANALYSIS_TYPE ) ) {
+            //  Fetch the analysis-type we want to switch to.
+            const std::string a_type = element.attribute( ANALYSIS_TYPE );
+            //  Cache the current arity analysis-type. It is a bit
+            //  naughty to reuse the ANALYSIS_TYPE attribute.
+            element.putAttribute( ANALYSIS_TYPE, this->arity_attribute );
+            //  Now make the switch.
+            this->arity_attribute = a_type == ARITY ? ARITY : PATTERN_ARITY;
+        } else {
+            const string & nm = element.name();
+            const int N = element.size();
+            if ( 
+                ( nm == BIND && N == 2 ) ||
+                ( nm == FN && N == 2 ) ||
+                ( nm == CATCH_THEN && N == 2 ) ||
+                ( nm == CATCH_RETURN && N == 2 )
+            ) {
+                element.child( 0 )->putAttribute( ANALYSIS_TYPE, PATTERN_ARITY );
+            }
+        }
 	}
 	
 	void endVisit( Ginger::Mnx & element ) {
 		const string & x = element.name();
+        const int N = element.size();
 		if ( x == CONSTANT || x == SELF_CONSTANT ) {
-			element.putAttribute( ARITY, "1" );
+			element.putAttribute( this->arity_attribute, "1" );
 		} else if ( x == ID || x == FN ) {
-			element.putAttribute( ARITY, "1" );
+			element.putAttribute( this->arity_attribute, "1" );
         } else if ( x == AND || x == OR || x == ABSAND || x == ABSOR ) {
-            element.putAttribute( ARITY, "1" );
+            element.putAttribute( this->arity_attribute, "1" );
 		} else if ( x == LIST || x == LIST_APPEND || x == VECTOR ) {
-			element.putAttribute( ARITY, "1" );
-		} else if ( x == FOR ) {
+			element.putAttribute( this->arity_attribute, "1" );
+		} else if ( x == FOR && this->isEvalMode() ) {
             //  TODO: Check this is correct - looks wrong!
-			if ( element.hasAttribute( ARITY, "0" ) ) {
-				element.putAttribute( ARITY, "0" );
+			if ( element.hasAttribute( this->arity_attribute, "0" ) ) {
+				element.putAttribute( this->arity_attribute, "0" );
 			}
-		} else if ( x == SET || x == BIND ) {
-			element.putAttribute( ARITY, "0" );
+		} else if ( x == SET && this->isEvalMode() ) {
+			element.putAttribute( this->arity_attribute, "0" );
+        } else if ( x == BIND ) {
+            element.putAttribute( this->arity_attribute, "0" );
 		} else if ( x == SEQ ) {
-			element.putAttribute( ARITY, this->sumOverChildren( element ).toString() );
-		} else if ( x == IF ) {
+			element.putAttribute( this->arity_attribute, this->sumOverChildren( element ).toString() );
+		} else if ( x == IF && this->isEvalMode() ) {
 			bool has_else = ( element.size() % 2 ) == 1;
 			bool all_have_arity = true;
 			for ( int i = 1; all_have_arity && i < element.size(); i += 2 ) {
-				all_have_arity = element.child( i )->hasAttribute( ARITY );
+				all_have_arity = element.child( i )->hasAttribute( this->arity_attribute );
 			}
 			if ( all_have_arity && has_else ) {
-				all_have_arity = element.lastChild()->hasAttribute( ARITY );
+				all_have_arity = element.lastChild()->hasAttribute( this->arity_attribute );
 			}
 			if ( all_have_arity ) {
 				const int N = element.size();
 				if ( N == 0 ) {
                     //  Not even an else clause, equal to a <seq/>.
-					element.putAttribute( ARITY, "0" );
+					element.putAttribute( this->arity_attribute, "0" );
 				} else if ( N == 1 ) {
                     //  Consists only of an else clause.
-					element.putAttribute( ARITY, element.child( 1 )->attribute( ARITY ) );
+					element.putAttribute( this->arity_attribute, element.child( 1 )->attribute( this->arity_attribute ) );
 				} else {
                     //  Has at least one if-then pair.
-					Ginger::Arity sofar( element.child( 1 )->attribute( ARITY ) );
+					Ginger::Arity sofar( element.child( 1 )->attribute( this->arity_attribute ) );
 					for ( int i = 3; i < element.size(); i += 2 ) {
-						Ginger::Arity kid( element.child( i )->attribute( ARITY ) );
+						Ginger::Arity kid( element.child( i )->attribute( this->arity_attribute ) );
 						sofar = sofar.unify( kid );
 					}
 					if ( has_else ) {
-						sofar = sofar.unify( Ginger::Arity( element.lastChild()->attribute( ARITY ) ) );
+						sofar = sofar.unify( Ginger::Arity( element.lastChild()->attribute( this->arity_attribute ) ) );
 					} else {
                         //  Otherwise the else clause is implicitly an <seq/>.
                         sofar = sofar.unify( Ginger::Arity( 0 ) );
                     }
-					element.putAttribute( ARITY, sofar.toString() );
+					element.putAttribute( this->arity_attribute, sofar.toString() );
 				}
 			}
-        } else if ( x == SWITCH && element.size() >= 1 ) {
+        } else if ( x == SWITCH && element.size() >= 1 && this->isEvalMode() ) {
             bool has_else = ( element.size() % 2 ) == 0;
             bool all_have_arity = true;
             for ( int i = 2; all_have_arity && i < element.size(); i += 2 ) {
-                all_have_arity = element.child( i )->hasAttribute( ARITY );
+                all_have_arity = element.child( i )->hasAttribute( this->arity_attribute );
             }
             if ( all_have_arity && has_else ) {
-                all_have_arity = element.lastChild()->hasAttribute( ARITY );
+                all_have_arity = element.lastChild()->hasAttribute( this->arity_attribute );
             }
             if ( all_have_arity ) {
                 const int N = element.size();
                 if ( N == 1 ) {
-                    element.putAttribute( ARITY, "0" );
+                    element.putAttribute( this->arity_attribute, "0" );
                 } else if ( N == 2 ) {
-                    element.putAttribute( ARITY, element.child( 1 )->attribute( ARITY ) );
+                    element.putAttribute( this->arity_attribute, element.child( 1 )->attribute( this->arity_attribute ) );
                 } else {
-                    Ginger::Arity sofar( element.child( 2 )->attribute( ARITY ) );
+                    Ginger::Arity sofar( element.child( 2 )->attribute( this->arity_attribute ) );
                     for ( int i = 4; i < element.size(); i += 2 ) {
-                        Ginger::Arity kid( element.child( i )->attribute( ARITY ) );
+                        Ginger::Arity kid( element.child( i )->attribute( this->arity_attribute ) );
                         sofar = sofar.unify( kid );
                     }
                     if ( has_else ) {
-                        sofar = sofar.unify( Ginger::Arity( element.lastChild()->attribute( ARITY ) ) );
+                        sofar = sofar.unify( Ginger::Arity( element.lastChild()->attribute( this->arity_attribute ) ) );
                     } else {
                         //  Otherwise the else clause is implicitly an <seq/>.
                         sofar = sofar.unify( Ginger::Arity( 0 ) );                        
                     }
-                    element.putAttribute( ARITY, sofar.toString() );
+                    element.putAttribute( this->arity_attribute, sofar.toString() );
                 }
             }
-		} else if ( x == SYSAPP ) {
-			element.putAttribute( ARITY, Ginger::outArity( element.attribute( SYSAPP_NAME ) ).toString() );
+		} else if ( x == SYSAPP && this->isEvalMode() ) {
+			element.putAttribute( this->arity_attribute, Ginger::outArity( element.attribute( SYSAPP_NAME ) ).toString() );
 			element.putAttribute( ARGS_ARITY, this->sumOverChildren( element ).toString() );
-        } else if ( x == ERASE ) {
+        } else if ( x == ERASE && this->isEvalMode() ) {
             if ( this->sumOverChildren( element ) == 0 ) {
                 //  Replace in favour of sequence and allow subsequent stages to remove that.
                 element.name() = SEQ;
                 this->changed = true;
             }
-            element.putAttribute( ARITY, "0" );
-		} else if ( x == ASSERT && element.size() == 1 ) {
+            element.putAttribute( this->arity_attribute, "0" );
+		} else if ( x == ASSERT && element.size() == 1 && this->isEvalMode() ) {
 			if ( element.hasAttribute( ASSERT_N, "1" ) ) {
-				if ( element.child( 0 )->hasAttribute( ARITY, "1" ) ) {
+				if ( element.child( 0 )->hasAttribute( this->arity_attribute, "1" ) ) {
 					//	As we can prove the child satisfies the condition we should 
 					//	eliminate the parent. So we simply replace the contents of the 
 					//	node with the contents of the child!
@@ -835,7 +875,7 @@ public:
 					//	in case it would synergise with other optimsations.
 					this->changed = true;
 				} else {
-					element.putAttribute( ARITY, "1" );
+					element.putAttribute( this->arity_attribute, "1" );
 				}
 			} else if ( element.hasAttribute( ASSERT_TYPE ) ) {
 				Gnx c = element.child( 0 );
@@ -843,17 +883,57 @@ public:
 					element.copyFrom( *c );
 					this->changed = true;
 				} else {
-					element.putAttribute( ARITY, "1" );
+					element.putAttribute( this->arity_attribute, "1" );
 				}
 			}
-		} else if ( x == SELF_APP ) {
+		} else if ( x == SELF_APP && this->isEvalMode() ) {
 			this->self_app_pass_needed = true;
 			element.putAttribute( ARGS_ARITY, this->sumOverChildren( element ).toString() );
-		}
+		} else if ( x == VAR && this->isPatternMode() ) {
+            element.putAttribute( this->arity_attribute, "1" );
+        } else if ( x == TRY && N >= 1 ) {
+            //  The non-escape arity is either the arity of the expression
+            //  being tried or, if present, the catch.return arity.
+            //  The overall arity is the sum of the arities of the 
+            //  non-escape arity and the catch arities and the catch.else
+            //  arity (if present).
+            Ginger::Arity non_esc_arity( element.child( 0 )->attribute( this->arity_attribute, "0+" ) );
+            for ( Ginger::Mnx::Generator g( element ); !!g; ++g ) {
+                Gnx e = *g;
+                if ( e->hasName( CATCH_RETURN ) ) {
+                    non_esc_arity = e->attribute( this->arity_attribute, "0+" );
+                }
+            }
+            if ( non_esc_arity.isntExact( 0 ) ) {
+                //  This can't change, so stash now.
+                element.putAttribute( this->arity_attribute, non_esc_arity.toString() );
+            } else {
+                Ginger::Arity sofar = non_esc_arity;
+                for ( Ginger::Mnx::Generator g( element ); !!g; ++g ) {
+                    Gnx e = *g;
+                    if ( e->hasName( CATCH_THEN ) || e->hasName( CATCH_RETURN ) ) {
+                        sofar = sofar.unify( e->attribute( this->arity_attribute, "0+" ) );
+                    }
+                }               
+                element.putAttribute( this->arity_attribute, sofar.toString() );
+            }
+        } else if ( ( x == CATCH_THEN || x == CATCH_RETURN ) && N == 2 ) {
+            element.putAttribute( this->arity_attribute, element.child( 1 )->attribute( this->arity_attribute, "0+" ) );
+        }
+
+        if ( element.hasAttribute( ANALYSIS_TYPE ) ) {
+            //  Restore the cached analysis type.
+            this->arity_attribute = element.attribute( ANALYSIS_TYPE ) == ARITY ? ARITY : PATTERN_ARITY;
+            element.clearAttribute( ANALYSIS_TYPE );
+        }
 	}
 	
 public:
-	ArityMarker( const bool clear ) : changed( false ), self_app_pass_needed( false ), clear_arities( clear ) {}
+    ArityMarker( const char * arity_attribute, const bool clear ) : changed( false ), self_app_pass_needed( false ), clear_arities( clear ), arity_attribute( arity_attribute ) {}
+    
+    //  TODO: this constructor should be deprecated once we have the scaffolding in place for pattern.arities.
+    ArityMarker( const bool clear ) : changed( false ), self_app_pass_needed( false ), clear_arities( clear ), arity_attribute( ARITY ) {}
+
 	virtual ~ArityMarker() {}
 };
 

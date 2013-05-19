@@ -42,6 +42,8 @@ public:
 	bool isntZero() const;
 	bool isExact() const;
 	bool isntExact() const;
+	bool isExact( int count ) const;
+	bool isntExact( int count ) const;
 	int count() const;
 	
 public:

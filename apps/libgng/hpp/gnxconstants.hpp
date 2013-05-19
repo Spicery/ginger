@@ -22,7 +22,9 @@
 #define SPAN            "span"
 #define COMMENT         "comment"
 
-#define ARITY 			"arity"
+#define ARITY 			"arity.eval"
+#define PATTERN_ARITY   "arity.pattern"
+#define ANALYSIS_TYPE   "arity.analysis.type"
 #define ARGS_ARITY		"args.arity"
 #define TAILCALL		"is.tail.call"
 #define UID				"uid"
@@ -101,6 +103,10 @@
 #define THROW_EVENT     "event"
 #define THROW_LEVEL     "level"
 #define TRY             "try"
+#define CATCH_THEN      "catch.then"
+#define CATCH_THEN_EVENT    "event"
+#define CATCH_RETURN    "catch.return"
+#define CATCH_ELSE      "catch.else"
 
 #define PROBLEM			"problem"
 #define PROBLEM_SEVERITY		"severity"

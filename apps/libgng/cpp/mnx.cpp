@@ -129,6 +129,31 @@ const std::string & Mnx::attribute( const std::string & key ) const {
 	}
 }
 
+int Mnx::attributeToBoolHelper( const std::string & key, const bool def, const bool use_def ) const {
+	std::map< std::string, std::string >::const_iterator it = this->attributes.find( key );
+	if ( it != this->attributes.end() ) {
+		stringstream s( it->second );
+		bool n;
+		if ( s >> n ) {
+			return n;
+		} else {
+			throw Mishap( "Integer attribute value needed" ).culprit( "Attribute", key ).culprit( "Value", it->second );
+		}
+	} else if ( use_def ) {
+		return def;
+	} else {
+		throw Mishap( "No such key" ).culprit( "Key", key );
+	}
+}
+
+int Mnx::attributeToBool( const std::string & key ) const {
+	return this->attributeToBoolHelper( key, false, false );
+}
+
+int Mnx::attributeToBool( const std::string & key, const bool def ) const {
+	return this->attributeToBoolHelper( key, def, true );
+}
+
 int Mnx::attributeToIntHelper( const std::string & key, const int def, const bool use_def ) const {
 	std::map< std::string, std::string >::const_iterator it = this->attributes.find( key );
 	if ( it != this->attributes.end() ) {
@@ -355,6 +380,7 @@ void Mnx::flattenChild( int n ) {
 
 void Mnx::visit( MnxVisitor & v ) {
 	v.startVisit( *this );
+	
 	for ( 
 		vector< shared< Mnx > >::iterator it = this->children.begin();
 		it != this->children.end();

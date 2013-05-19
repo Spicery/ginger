@@ -1,8 +1,13 @@
 Note on the Design of Exceptions
+================================
 
-The objective is to be able to implement the following 4 (!) types of
+Four Types of Exception
+-----------------------
+
+The objective is to be able to implement the following 4 types of
 exception. Note that all four are implemented as exceptions that do not
-capture the stack trace.
+capture the stack trace. Capturing the stack trace is regarded as a debugging
+feature.
 
   * Escape - an escape works rather like a return, except that it
     has to be explicitly handled. The escape can pass out values
@@ -60,7 +65,7 @@ capture the stack trace.
     can pick up from where it left off.
     
     If a failover is not actually picked up by the Ginger Runtime, then
-    it escalates to a panic. (Maybe a better word is "emergency"?)
+    it escalates to a panic.
 
     Note that a virtual machine failing-over is regarded as a relatively
     normal situation. As a consequence perhaps a try/catch block in supervisor 
@@ -85,6 +90,7 @@ capture the stack trace.
         
 
 Ginger XML
+----------
 
     EVENT_LEVEL ::= "escape" | "rollback" | "failover" | "panic"
     
@@ -118,6 +124,23 @@ Ginger XML
     </try>
 
 
+Representing Events
+-------------------
+Events will be represented as symbols, at least for the moment.
+
+Implementing Escapes
+--------------------
+Escapes will be implemented with two new instructions: BYPASS and ESCAPE. The 
+BYPASS instruction is functionally identical to a goto. However the ESCAPE
+instruction will inspect the instruction that the parent procedure is 
+executing and if it is a BYPASS it will modify the return address to 
+continue past (i.e. bypass) that instruction. 
+
+In other words a normal return will execute the BYPASS instruction, which 
+will cause a jump to the normal continuation, and an escape will cause a
+skip to the immediately following code, which will be the escape handling code.
+
+
 
 Stephen Leach, 9th Dec 2011
-Revised 22nd Nov 2012
+Revised 22nd Nov 2012, May 2013

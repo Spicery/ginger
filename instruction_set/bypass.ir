@@ -1,0 +1,18 @@
+/*****************************************************************************\
+Definition
+	GOTO JUMP_D
+
+Summary
+	Unconditional transfer of control by JUMP_D words.
+	
+Unchecked Precondition
+	JUMP_D is in range of the enclosing function object.
+	
+Exceptions (Checked Preconditions)
+	
+Result (Postcondition)		
+
+\*****************************************************************************/
+
+long n = ToLong( *( ++pc ) );
+RETURN( pc + n );

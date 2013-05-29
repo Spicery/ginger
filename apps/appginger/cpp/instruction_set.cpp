@@ -18,4 +18,8 @@ void invoke_error() {
 
 #include "instruction_set.cpp.auto"
 
+bool InstructionSet::isByPassInstruction( Ref * pc ) const {
+	return *pc == spc_bypass;
+}
+
 } // namespace Ginger

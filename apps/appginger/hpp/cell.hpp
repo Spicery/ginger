@@ -24,13 +24,17 @@
 #include <ostream>
 #include <cstddef>
 
+#include "shared.hpp"
 #include "key.hpp"
 #include "stringlayout.hpp"
 #include "mishap.hpp"
-#include "sysmap.hpp"
+#include "mapcrawl.hpp"
 #include "external.hpp"
 
 namespace Ginger {
+
+class MnxBuilder;
+class Mnx;
 
 class HeapObject;
 class StringObject;
@@ -69,6 +73,7 @@ public:
 	bool isVectorObject() const { return IsVector( this->ref ); }
 
 	std::string toPrintString() const;
+	std::string toShowString() const;
 	void print( std::ostream & out, bool showing = false ) const;
 	void println( std::ostream & out, bool showing = false ) const;
 
@@ -130,6 +135,8 @@ public:
 
 class VectorObject : public HeapObject {
 public:
+	typedef class VectorObjectGenerator generator;
+public:
 	VectorObject( Ref * _p ) : HeapObject( _p ) {}
 	VectorObject( HeapObject _h ) : HeapObject( _h ) {}
 	VectorObject( Cell _c ) : HeapObject( _c ) {}
@@ -138,6 +145,18 @@ public:
 	Cell index1( ptrdiff_t n ) const;
 	long length() const;
 };
+
+class VectorObjectGenerator {
+private:
+	int idx;
+	class VectorObject vector_object;
+public:
+	VectorObjectGenerator( VectorObject v ) : idx( 1 ), vector_object( v ) {}
+	bool operator !() const;
+	Cell operator *() const;
+	VectorObjectGenerator & operator ++();
+};
+
 
 class StringObject : public HeapObject {
 public:

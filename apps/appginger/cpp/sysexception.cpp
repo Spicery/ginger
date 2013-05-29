@@ -18,6 +18,7 @@
 
 #include <sstream>
 
+#include "cell.hpp"
 #include "sysexception.hpp"
 #include "exceptionlayout.hpp"
 #include "mishap.hpp"
@@ -52,16 +53,17 @@ using namespace std;
 
 static void decorateProblem( class MachineClass * vm, Ginger::Mishap & problem ) {
 	if ( vm->count == 2 ) {
-		Ref args = vm->fastPop();
-		Ref event_name = vm->fastPeek();
-		stringstream out;
-		refPrint( out, event_name );
-		problem.setMessage( out.str() );
-		while ( IsPair( args ) ) {
-			stringstream a;
-			refPrint( a, fastPairHead( args ) );
-			problem.culprit( "Argument", a.str() );
-			args = fastPairTail( args );
+		//cerr << "Stacksize = " << vm->stackLength() << endl;
+		Cell event_name = vm->fastPeek();
+		Cell args = vm->fastPeek( 1 );
+		//cerr << "Event: " << event_name.toShowString() << endl;
+		//cerr << "Args : " << args.toShowString() << endl;
+		problem.setMessage( event_name.toPrintString() );
+		if ( args.isVectorObject() ) {
+			for ( VectorObject::generator g( args.asHeapObject().asVectorObject() ); !!g; ++g ) {
+				Cell x = *g;
+				problem.culprit( "Argument", x.toShowString() );
+			}
 		}
 	}
 }

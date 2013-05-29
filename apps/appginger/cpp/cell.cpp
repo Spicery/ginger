@@ -88,6 +88,14 @@ std::string Cell::toPrintString() const {
 	return str.str();
 }
 
+std::string Cell::toShowString() const {
+	stringstream str;
+	int column = 0;
+	RefPrint printer( str, column, RefPrint::SHOW );
+	printer.refPrint( this->ref );
+	return str.str();
+}
+
 CharacterCell Cell::asCharacterCell() const {
 	if ( IsCharacter( this->ref ) ) {
 		return CharacterCell( this->ref );
@@ -272,6 +280,21 @@ Cell VectorObject::index1( ptrdiff_t n ) const {
 long VectorObject::length() const {
 	return lengthOfVectorLayout( this->obj_K );	
 }
+
+bool VectorObjectGenerator::operator !() const {
+	return this->idx > this->vector_object.length();
+}
+
+Cell VectorObjectGenerator::operator *() const {
+	return this->vector_object.index1( this->idx );
+}
+
+VectorObjectGenerator & VectorObjectGenerator::operator ++() {
+	this->idx += 1;
+	return *this;
+}
+
+
 
 // -- StringObject -------------------------------------------------------------
 

@@ -138,7 +138,7 @@ public:
 		this->code_data->push_back( r );
 	}
 	
-	const InstructionSet & instructionSet();
+	const class InstructionSet & instructionSet();
 	
 private:
 	std::vector< LabelClass > 	label_vector;
@@ -174,8 +174,11 @@ public:
 	Ref vmiENDFUNCTION( bool in_heap, Ref fnkey );
 	Ref vmiENDFUNCTION( Ref fnkey );
 	Ref vmiENDFUNCTION();
+	void vmiBYPASS( LabelClass * contn );
 	void vmiCALLS();
+	void vmiCHECK_EXPLODE( Arity a );
 	void vmiCHAIN_LITE( Ref fn, long N );
+	void vmiCHECK_MARK( int v, Arity a );
 	void vmiCHECK_COUNT( int N );
 	void vmiCHECK_MARK_ELSE( int local_N, int count_K, LabelClass * fail_label );
 	void vmiCHECK_MARK( int local_N, int count_K );
@@ -183,6 +186,7 @@ public:
 	void vmiCHECK_MARK1( int local_N );
 	void vmiDECR( const long d );
 	void vmiDEREF();
+	void vmiDUP();
 	void vmiEND_CALL_ID( int var, const VIdent & ident );
 	void vmiEND_MARK( int N );
 	void vmiEND1_CALLS( int var );
@@ -190,6 +194,7 @@ public:
 	void vmiERASE();
 	void vmiERASE_NUM( long n );
 	void vmiERASE_MARK( int var );
+	void vmiESCAPE();
 	void vmiFAIL();
 	void vmiFIELD( long index );
 	void vmiFUNCTION( int N, int A );
@@ -197,9 +202,10 @@ public:
 	void vmiGOTO( LabelClass * d );
 	void vmiHALT();
 	void vmiIF( bool sense, LabelClass * d, LabelClass * contn );
-	//void vmiIFEQ( LabelClass * dst );
-	//void vmiIFEQTO( Ref ref, LabelClass * dst, LabelClass *contn );
-	//void vmiIFNEQTO( Ref ref, LabelClass * dst, LabelClass *contn );
+	void vmiIFEQ( LabelClass * dst );
+	void vmiIFNEQ( LabelClass * dst );
+	void vmiIFEQTO( Ref ref, LabelClass * dst, LabelClass *contn );
+	void vmiIFNEQTO( Ref ref, LabelClass * dst, LabelClass *contn );
 	void vmiIFNOT( LabelClass * d, LabelClass * contn );
 	void vmiIFNOT( LabelClass * dst );
 	void vmiIFSO( LabelClass * d, LabelClass * contn );
@@ -222,6 +228,7 @@ public:
 	void vmiPUSHQ( Ref obj );
 	void vmiPUSHQ( Ref obj, LabelClass * contn );
 	void vmiPUSHQ_STRING( const std::string & s, LabelClass * contn );
+	void vmiPUSHQ_SYMBOL( const std::string & s, LabelClass * contn );
 	void vmiRETURN();
 	void vmiSELF_CALL();
 	void vmiSELF_CALL_N( const int n );
@@ -252,12 +259,14 @@ public:
 	void continueFrom( LabelClass * contn );
 	void compileComparison( bool sense, const VIdent & vid0, CMP_OP cmp_op,	const VIdent & vid1, LabelClass * dst, LabelClass * contn );	
 	void compileComparison( const VIdent & vid0, CMP_OP cmp_op,	const VIdent & vid1, LabelClass * dst, LabelClass * contn );
-
+	void eraseToMarkIfNeeded( const bool needed, const int mark );
 
 private:
 	//void compileQueryInit( Gnx query, LabelClass * contn );
 	//void compileQueryNext( Gnx query, LabelClass * contn );
 	//void compileQueryIfSo( Gnx query, LabelClass * dst, LabelClass * contn );
+	void compileBind( Gnx lhs, Gnx rhs, LabelClass * contn );
+	void compileBindDst( Gnx lhs );
 	void compileIfTest( bool sense, Gnx mnx, LabelClass * dst, LabelClass * contn );
 	void compileGnxConstant( Gnx mnx, LabelClass * contn );
 	void compileGnxIf( Gnx mnx, LabelClass * contn );

@@ -16,31 +16,29 @@
     along with AppGinger.  If not, see <http://www.gnu.org/licenses/>.
 \******************************************************************************/
 
-#ifndef SYS_MAP_HPP
-#define SYS_MAP_HPP
-
-#include <ostream>
+#ifndef MAP_CRAWL_HPP
+#define MAP_CRAWL_HPP
 
 #include "common.hpp"
-#include "machine.hpp"
-#include "mapcrawl.hpp"
 
 namespace Ginger {
 
-extern Ref * sysNewHardEqMap( Ref * pc, MachineClass * vm );
-extern Ref * sysNewHardIdMap( Ref * pc, MachineClass * vm );
-extern Ref * sysNewWeakIdMap( Ref * pc, MachineClass * vm );
-extern Ref * sysNewCacheEqMap( Ref * pc, MachineClass * vm );
-extern Ref * sysMapExplode( Ref *pc, class MachineClass * vm );
-extern Ref * sysMapValues( Ref *pc, class MachineClass * vm );
-extern Ref * sysMapIndex( Ref *pc, class MachineClass * vm );
+class MapCrawl {
+private:
+    long size_of_data;
+    int index_of_data;
+    Ref * data;
+    Ref bucket;
 
-extern void gngPrintMapPtr( std::ostream & out, Ref * r );
-extern void gngRehashMapPtr( Ref * map_K );
-extern unsigned int gngIdHash( Ref ref );
-extern unsigned int gngIdHash( Ref ref );
+public:
+    MapCrawl( Ref * map_K );
+
+public:
+    Ref * nextBucket();
+    bool hasBeenCalled() const;
+
+};
 
 } // namespace Ginger
-
 
 #endif

@@ -96,6 +96,36 @@ void CodeGenClass::emitValof( Valof * v ) {
 	this->codegenRef( ToRef( v ) );
 }
 
+Ref * sysCheckExplodeN( Ref * pc, MachineClass * vm ) {
+	const long N = ToLong( pc[ -1 ] );
+	Ref * stack = vm->vp;
+	pc = sysExplode( pc, vm );
+	if ( N == vm->vp - stack ) return pc;
+	throw Mishap( "Wrong number of arguments from explode" ).culprit( "Expected", N ).culprit( "Actual", vm->vp - stack );
+}
+
+Ref * sysCheckExplodeGteN( Ref * pc, MachineClass * vm ) {
+	const long N = ToLong( pc[ -1 ] );
+	Ref * stack = vm->vp;
+	pc = sysExplode( pc, vm );
+	if ( N <= vm->vp - stack ) return pc;
+	throw Mishap( "Wrong number of arguments from explode" ).culprit( "Expected at least", N ).culprit( "Actual", vm->vp - stack );
+}
+
+//	Check that what is on the stack is consistent with a given arity.
+void CodeGenClass::vmiCHECK_EXPLODE( Arity arity ) {
+	const int N = arity.count();
+	if ( arity.isExact() ) {
+		this->emitSPC( vmc_syscall_arg );
+		this->emitRef( ToRef( sysCheckExplodeN ) );
+		this->emitRef( ToRef( N ) );
+	} else if ( N > 0 ) {
+		//	N.B. We only plant code if the N > 0 as N == 0 is trivially true.
+		this->emitSPC( vmc_syscall_arg );
+		this->emitRef( ToRef( sysCheckExplodeGteN ) );
+		this->emitRef( ToRef( N ) );
+	}
+}
 
 void CodeGenClass::emitVAR_REF( Gnx id ) {
 	if ( id->hasAttribute( VID_SCOPE, "local" ) ) {
@@ -441,15 +471,35 @@ void CodeGenClass::vmiERASE() {
 	this->emitSPC( vmc_erase );
 }
 
+void CodeGenClass::vmiDUP() {
+	this->emitSPC( vmc_dup );
+}
+
 void CodeGenClass::vmiCHECK_COUNT( int v ) {
 	this->emitSPC( vmc_check_count );
 	this->emitRef( ToRef( v ) );
 }
 
+void CodeGenClass::vmiCHECK_MARK( int v, Arity a ) {
+	if ( a.isExact() ) {
+		this->vmiCHECK_MARK( v, a.count() );
+	} else {
+		this->emitSPC( vmc_check_mark_gte );
+		this->emitRef( ToRef( v ) );
+		this->emitRef( ToRef( a.count() ) );		
+	}
+}
+
 void CodeGenClass::vmiCHECK_MARK( int v, int N ) {
-	this->emitSPC( vmc_check_mark );
-	this->emitRef( ToRef( v ) );
-	this->emitRef( ToRef( N ) );
+	if ( N == 0 ) {
+		this->vmiCHECK_MARK0( v );
+	} else if ( N == 1 ) {
+		this->vmiCHECK_MARK1( v );
+	} else {
+		this->emitSPC( vmc_check_mark );
+		this->emitRef( ToRef( v ) );
+		this->emitRef( ToRef( N ) );
+	}
 }
 
 void CodeGenClass::vmiCHECK_MARK_ELSE( int v, int N, LabelClass * fail_label ) {
@@ -496,7 +546,15 @@ void CodeGenClass::vmiPUSHQ( Ref obj, LabelClass * contn ) {
 
 void CodeGenClass::vmiPUSHQ_STRING( const std::string & s, LabelClass * contn ) {
 	this->vmiPUSHQ( this->vm->heap().copyString( s.c_str() ) );
+	this->continueFrom( contn );
 }
+
+void CodeGenClass::vmiPUSHQ_SYMBOL( const std::string & s, LabelClass * contn ) {
+	this->vmiPUSHQ( refMakeSymbol( s ) );
+	this->continueFrom( contn );
+}
+
+
 
 void CodeGenClass::vmiRETURN() {
 	this->emitSPC( vmc_return );
@@ -657,7 +715,7 @@ void CodeGenClass::vmiIFNOT( LabelClass * d, LabelClass * contn ) {
 	this->vmiIFSO( contn, d );
 }
 
-/*void CodeGenClass::vmiIFEQ( LabelClass * dst ) {
+void CodeGenClass::vmiIFEQ( LabelClass * dst ) {
 	if ( dst == CONTINUE_LABEL ) {
 		//	No branching
 		this->vmiERASE_NUM( 2 );
@@ -671,6 +729,20 @@ void CodeGenClass::vmiIFNOT( LabelClass * d, LabelClass * contn ) {
 	}
 }
 
+void CodeGenClass::vmiIFNEQ( LabelClass * dst ) {
+	if ( dst == CONTINUE_LABEL ) {
+		//	No branching
+		this->vmiERASE_NUM( 2 );
+	} else if ( dst->isntReturn() ) {
+		this->emitSPC( vmc_eq );
+		this->emitSPC( vmc_ifnot );
+		dst->labelInsert();
+	} else {
+		this->emitSPC( vmc_eq );
+		this->emitSPC( vmc_return_ifnot );
+	}
+}
+
 void CodeGenClass::vmiIFNEQTO( Ref ref, LabelClass * dst, LabelClass *contn ) {
 	if ( dst == contn ) {
 		this->vmiERASE();
@@ -680,13 +752,7 @@ void CodeGenClass::vmiIFNEQTO( Ref ref, LabelClass * dst, LabelClass *contn ) {
 	} else {
 		this->emitSPC( vmc_pushq );
 		this->emitRef( ref );
-		this->emitSPC( vmc_eq );
-		if ( dst->isntReturn() ) {
-			this->emitSPC( vmc_ifnot );
-			dst->labelInsert();
-		} else {
-			this->emitSPC( vmc_return_ifnot );
-		}
+		this->vmiIFNEQ( dst );
 	}
 }
 
@@ -699,15 +765,9 @@ void CodeGenClass::vmiIFEQTO( Ref ref, LabelClass * dst, LabelClass *contn ) {
 	} else {
 		this->emitSPC( vmc_pushq );
 		this->emitRef( ref );
-		this->emitSPC( vmc_eq );
-		if ( dst->isntReturn() ) {
-			this->emitSPC( vmc_ifso );
-			dst->labelInsert();
-		} else {
-			this->emitSPC( vmc_return_ifso );
-		}
+		this->vmiIFEQ( dst );
 	}
-}*/
+}
 
 void CodeGenClass::vmiERASE_NUM( long n ) {
 	if ( n == 0 ) {
@@ -742,6 +802,18 @@ void CodeGenClass::vmiGOTO( LabelClass * dst ) {
 		this->emitSPC( vmc_return );
 	} else {
 		this->emitSPC( vmc_goto );
+		dst->labelInsert();
+	}
+}
+
+/**
+ * 	@param dst A proper label (not CONTINUE_LABEL)
+ */
+void CodeGenClass::vmiBYPASS( LabelClass * dst ) {
+	if ( dst == CONTINUE_LABEL ) {
+		throw SystemError( "Trying to BYPASS a fake label" );
+	} else {
+		this->emitSPC( vmc_bypass );
 		dst->labelInsert();
 	}
 }
@@ -1714,6 +1786,39 @@ bool CodeGenClass::tryFlatten( Gnx mnx, const char * name, std::vector< Gnx > & 
 	}
 }*/
 
+void CodeGenClass::compileBindDst( Gnx lhs ) {
+	if ( lhs->hasName( VAR ) ) {
+		VIdent vid( this, lhs );
+		this->vmiPOP( vid, false );
+	} else if ( lhs->hasName( SEQ ) ) {
+		std::vector< Gnx > vars;
+		if ( this->tryFlatten( lhs, VAR, vars ) ) {
+			for ( std::vector< Gnx >::reverse_iterator it = vars.rbegin(); it != vars.rend(); ++it ) {
+				VIdent vid( this, *it );
+				this->vmiPOP( vid, false );
+			}
+		} else {
+			throw Ginger::Mishap( "BIND not fully implemented [1]" );
+		}
+	} else {
+		throw Ginger::Mishap( "BIND not fully implemented [2]" );
+	}
+}
+
+void CodeGenClass::compileBind( Gnx lhs, Gnx rhs, LabelClass * contn ) {
+	Arity a( lhs->attribute( PATTERN_ARITY, "0+" ) );
+	if ( a.isExact() ) { 
+		this->compileN( rhs, a.count(), CONTINUE_LABEL );
+	} else {
+		throw Mishap( "Pattern matching not fully implemented [3]" );
+	}
+	this->compileBindDst( lhs );
+	this->continueFrom( contn );
+}
+
+
+
+
 void CodeGenClass::compileGnx( Gnx mnx, LabelClass * contn ) {
 	#ifdef DBG_CODEGEN
 		cerr << "appginger/compileGnx" << endl;
@@ -1760,31 +1865,7 @@ void CodeGenClass::compileGnx( Gnx mnx, LabelClass * contn ) {
 		#endif
 		Gnx lhs = mnx->child( 0 );
 		Gnx rhs = mnx->child( 1 );
-		if ( lhs->hasName( VAR ) ) {
-			VIdent vid( this, mnx->child( 0 ) );
-			#ifdef DBG_CODEGEN
-				cerr << "  (VIdent::VIdent done)" << endl;
-			#endif
-			this->compile1( rhs, CONTINUE_LABEL );
-			this->vmiPOP( vid, false );
-			this->continueFrom( contn );
-		} else if ( lhs->hasName( SEQ ) ) {
-			std::vector< Gnx > vars;
-			if ( this->tryFlatten( lhs, VAR, vars ) ) {
-				this->compileN( rhs, vars.size(), CONTINUE_LABEL );
-
-				for ( std::vector< Gnx >::reverse_iterator it = vars.rbegin(); it != vars.rend(); ++it ) {
-					VIdent vid( this, *it );
-					this->vmiPOP( vid, false );
-				}
-
-				this->continueFrom( contn );
-			} else {
-				throw Ginger::Mishap( "BIND not fully implemented [1]" );
-			}
-		} else {
-			throw Ginger::Mishap( "BIND not fully implemented [2]" );
-		}
+		compileBind( lhs, rhs, contn );
 	} else if ( nm == FOR and N == 1 ) {
 		this->compileGnxFor( mnx->child( 0 ), contn );
 	} else if ( nm == LIST ) {
@@ -1894,32 +1975,165 @@ void CodeGenClass::compileGnx( Gnx mnx, LabelClass * contn ) {
 	}	
 }
 
-
+void CodeGenClass::vmiESCAPE() {
+	this->emitSPC( vmc_escape );
+}
 
 void CodeGenClass::compileThrow( Gnx mnx, LabelClass * contn ) {
-	//	Push the event name.
-	this->vmiPUSHQ_STRING( mnx->attribute( THROW_EVENT ), CONTINUE_LABEL );
 	//	TODO: Push the supplied list of arguments as a list.
 	#if 1	
 		int v = this->tmpvar();
 		this->vmiSTART_MARK( v );
 		this->compileGnx( mnx->child( 0 ), CONTINUE_LABEL );
 		this->vmiSET_COUNT_TO_MARK( v );
-		this->vmiSYS_CALL( sysNewList );			
+		this->vmiSYS_CALL( sysNewVector );			
 	#else
 		this->vmiPUSHQ( SYS_NIL );
 	#endif
+	//	Push the event name.
+	this->vmiPUSHQ_SYMBOL( mnx->attribute( THROW_EVENT ), CONTINUE_LABEL );
 	const std::string level( mnx->attribute( THROW_LEVEL ) );
-	this->vmiSET_SYS_CALL( level == "panic" ? sysPanic : sysFailover, 2 );
-	//	Don't bother with the 		
-	//		this->continueFrom( contn );
-	//	as we panic!!
+	if ( level == "escape" ) {
+		this->vmiESCAPE();
+	} else {
+		this->vmiSET_SYS_CALL( level == "panic" ? sysPanic : sysFailover, 2 );
+	}
 }
 
+static Gnx getCatchReturn( Gnx try_gnx ) {
+	for ( int i = 1; i < try_gnx->size(); i++ ) {
+		Gnx clause = try_gnx->child( i );
+		const std::string nm = clause->name();
+		const int N = clause->size();
+		if ( nm == CATCH_RETURN && N == 2 ) {
+			return clause;
+		}
+	}
+	return shared< Mnx >();
+}
 
+void CodeGenClass::eraseToMarkIfNeeded( const bool needed, const int mark ) {
+	if ( needed ) {
+		this->vmiERASE_MARK( mark );
+	}
+}
+
+//	<try> 
+//		APPLICATION
+//		<catch.return> PATTERN EXPR </catch.return> 	<-- can be any position!
+//		<catch.then> PATTERN EXPR </catch.then>* 
+//		<catch.else> EXPR </catch.else> 				<-- can be any position!
+//	</try>
 void CodeGenClass::compileTry( Gnx mnx, LabelClass * contn ) {
-	cerr << SYS_MSG_PREFIX << "Warning: exception catching not implemented" << endl;
-	this->compileGnx( mnx->child( 0 ), contn );
+	//cerr << SYS_MSG_PREFIX << "Warning: exception catching not implemented" << endl;
+	LabelClass done_label( this );
+	LabelClass * done = done_label.jumpToJump( contn );
+
+	Gnx appl = mnx->child( 0 );
+	Gnx retn = getCatchReturn( mnx );
+	const bool has_retn = !!retn;
+	Arity aretn( has_retn ? retn->child( 0 )->attribute( PATTERN_ARITY, "+0" ) : "+0" );
+	
+	//	Because we tidy the stack up on escape, we have to make a note of
+	//	where we will be tidying back to.
+	const int mark = this->tmpvar();
+	this->vmiSTART_MARK( mark );
+	
+	if ( has_retn ) {
+		if ( aretn.isExact() ) {
+			this->compileN( appl, aretn.count(), CONTINUE_LABEL );
+		} else {
+			this->vmiSTART_MARK( mark );
+			this->compileGnx( appl, CONTINUE_LABEL );
+		}
+	} else {
+		this->compileGnx( appl, CONTINUE_LABEL );
+	}
+
+	LabelClass continue_label( this );
+	this->vmiBYPASS( &continue_label );
+
+	//	The top two items are the event and escape return values.
+	const int event = this->tmpvar();
+	const int args = this->tmpvar();
+	this->vmiPOP_INNER_SLOT( event );
+	this->vmiPOP_INNER_SLOT( args );
+
+	//	If we have no catch-return then we should clean up the stack now.
+	this->eraseToMarkIfNeeded( not has_retn, mark  );
+	
+	bool seen_catch_return = false;
+	for ( int i = 1; i < mnx->size(); i++ ) {
+		Gnx clause = mnx->child( i );
+		const std::string nm = clause->name();
+		const int N = clause->size();
+		if ( nm == CATCH_THEN && N == 2 && clause->hasAttribute( CATCH_THEN_EVENT ) ) {
+			LabelClass next_label( this );
+			this->vmiPUSH_INNER_SLOT( event );
+			this->vmiIFNEQTO( refMakeSymbol( clause->attribute( CATCH_THEN_EVENT ) ), &next_label, CONTINUE_LABEL );
+			
+			//	If there is a catch-return we have to stack tidy
+			this->eraseToMarkIfNeeded( has_retn, mark );
+
+			Gnx pattern = clause->child( 0 );	//	Arguments to bind.
+			Arity p_arity( pattern->attribute( PATTERN_ARITY, "0+") ); 
+			Gnx expr = clause->child( 1 );		//	Expression to execute.
+			this->vmiPUSH_INNER_SLOT( args );
+			this->vmiCHECK_EXPLODE( p_arity );
+			this->compileBind( pattern, expr, done );
+			next_label.labelSet();
+		} else if ( nm == CATCH_ELSE && N == 1 ) {
+			
+			//	If there is a catch-return we have to stack tidy
+			this->eraseToMarkIfNeeded( has_retn, mark );
+
+			this->compileGnx( clause->child( 0 ), done );
+		} else if ( nm == CATCH_RETURN && N == 2 ) {
+			//	Skip. Handled elsewhere.
+			if ( seen_catch_return ) {
+				throw Mishap( "Too many catch-returns" );
+			}
+			seen_catch_return = true;
+		} else {
+			throw SystemError( "Invalid catch clause" ).culprit( "Name", nm );
+		}
+	}
+	
+	//	Otherwise the escape was untrapped and it must be escalated.
+	this->vmiPUSH_INNER_SLOT( event );
+	this->vmiPUSH_INNER_SLOT( args );
+	this->vmiSET_SYS_CALL( sysNewVector, 2 );
+	this->vmiPUSHQ_STRING( "Escalated escape", CONTINUE_LABEL );
+	this->vmiSET_SYS_CALL( sysFailover, 2 );
+
+	continue_label.labelSet();
+
+	if ( has_retn ) {
+		//	There was no escape attempted, so we continue with any catch-return
+		//	statements.
+		Gnx pattern = retn->child( 0 );
+		Gnx expr = retn->child( 1 );
+
+		//	The delivered values are on the stack. So the issue is whether
+		//	or not the count agrees with the arity.pattern that is inferred
+		//	by the simplifier.
+		if ( aretn.isntExact() ) {
+			//	If the pattern-arity was exact we have already discharged 
+			//	that check by use of compileN. However if it is isnt exact
+			//	we have to verify the dynamic count.
+			this->vmiCHECK_MARK( mark, aretn );
+		}
+
+		//	And now we bind to the pattern.
+		this->compileBindDst( pattern );
+
+		//	And then we can execute the catch.return code.
+		this->compileGnx( expr, contn );
+	} else {
+		this->continueFrom( contn );
+	}
+
+	done_label.labelSet();
 }
 
 void CodeGenClass::compileChildren( Gnx mnx, LabelClass * contn ) {
@@ -1931,7 +2145,7 @@ void CodeGenClass::compileChildren( Gnx mnx, LabelClass * contn ) {
 }
 
 void CodeGenClass::compile1( Gnx mnx, LabelClass * contn ) {
-	Ginger::Arity a( mnx->attribute( "arity", "+0" ) );
+	Ginger::Arity a( mnx->attribute( EVAL_ARITY, "+0" ) );
 	if ( a.isntExact() ) {
 		int n = this->current_slot;
 		int v = this->tmpvar();
@@ -1953,7 +2167,7 @@ void CodeGenClass::compileN( Gnx mnx, int N, LabelClass * contn ) {
 	} else if ( N == 1 ) {
 		this->compile1( mnx, contn );
 	} else {
-		Ginger::Arity a( mnx->attribute( "arity", "+0" ) );
+		Ginger::Arity a( mnx->attribute( EVAL_ARITY, "+0" ) );
 		if ( a.isntExact() ) {
 			int n = this->current_slot;
 			int v = this->tmpvar();
@@ -1971,7 +2185,7 @@ void CodeGenClass::compileN( Gnx mnx, int N, LabelClass * contn ) {
 }
 
 void CodeGenClass::compileNelse( Gnx mnx, int N, LabelClass * ok, LabelClass * fail ) {
-	Ginger::Arity a( mnx->attribute( "arity", "+0" ) );
+	Ginger::Arity a( mnx->attribute( EVAL_ARITY, "+0" ) );
 	if ( a.isntExact() ) {
 		int n = this->current_slot;
 		int v = this->tmpvar();
@@ -1988,7 +2202,7 @@ void CodeGenClass::compileNelse( Gnx mnx, int N, LabelClass * ok, LabelClass * f
 }
 
 void CodeGenClass::compile0( Gnx mnx, LabelClass * contn ) {
-	Ginger::Arity a( mnx->attribute( "arity", "+0" ) );
+	Ginger::Arity a( mnx->attribute( EVAL_ARITY, "+0" ) );
 	if ( a.isntExact() ) {
 		int n = this->current_slot;
 		int v = this->tmpvar();

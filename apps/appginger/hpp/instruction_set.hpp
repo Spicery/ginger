@@ -3,6 +3,7 @@
 
 #include <string>
 
+#include "cell.hpp"
 #include "common.hpp"
 #include "instruction.hpp"
 #include "listlayout.hpp"
@@ -19,6 +20,7 @@ public:
 public: 
 	Ref lookup( Instruction instr ) const;
 	Instruction findInstruction( const std::string & name  ) const;
+	bool isByPassInstruction( Ref * pc ) const;
 	const char * name( Ref spc ) const;
 	const char * signature( Ref x ) const;
 };

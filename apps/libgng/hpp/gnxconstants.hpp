@@ -22,7 +22,9 @@
 #define SPAN            "span"
 #define COMMENT         "comment"
 
-#define ARITY 			"arity.eval"
+//  deprecate ARITY in favour of EVAL_ARITY
+#define ARITY           "arity.eval"
+#define EVAL_ARITY      "arity.eval"
 #define PATTERN_ARITY   "arity.pattern"
 #define ANALYSIS_TYPE   "arity.analysis.type"
 #define ARGS_ARITY		"args.arity"

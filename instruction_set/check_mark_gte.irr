@@ -1,13 +1,13 @@
 /*****************************************************************************\
 Definition 
-	CHECK_MARK LOCAL_N COUNT
+	CHECK_MARK_GTE LOCAL_N COUNT
 	where
 		LOCAL_N : long
 		COUNT	: long
 
 Summary
-	Checks that the value of the local variable LOCAL_N is N less
-	than the address of the top of the stack.
+	Checks that the value of the local variable LOCAL_N is at least N 
+	less than the address of the top of the stack.
 	
 Unchecked Precondition
 	Pointer values are long-aligned and hence masquerade as Smalls
@@ -23,6 +23,7 @@ Result (Postcondition)
 
 long n = ToLong( *( ++pc ) );
 long K = ToLong( *( ++pc ) );
+
 #ifdef DBG_SPECIAL
 	std::cerr << 
 	"Difference between " <<
@@ -30,6 +31,7 @@ long K = ToLong( *( ++pc ) );
 	" (held in " << n ")" << 
 	std::endl;
 #endif
-if ( VMVP == ToRefRef( LOCAL(n) ) + K ) RETURN( pc + 1 );
-throw Mishap( "Wrong number of results" ).culprit( "Needed", K ).culprit( "Found", VMVP - ToRefRef( LOCAL(n) ) );
+
+if ( VMVP >= ToRefRef( LOCAL(n) ) + K ) RETURN( pc + 1 );
+throw Mishap( "Wrong number of results" ).culprit( "Needed at least", K ).culprit( "Found", VMVP - ToRefRef( LOCAL(n) ) );
 RETURN( NULL );	// stupid compiler

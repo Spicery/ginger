@@ -17,6 +17,7 @@ script:
     - autoconf
     - ./configure
     - sudo make install
+    - GUILE_AUTO_COMPILE=0 make check
 
 notifications:
   # irc:

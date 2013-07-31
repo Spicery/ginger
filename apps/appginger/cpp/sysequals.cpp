@@ -16,14 +16,17 @@
     along with AppGinger.  If not, see <http://www.gnu.org/licenses/>.
 \******************************************************************************/
 
+#include <string.h>
+
 #include "sysequals.hpp"
 #include "key.hpp"
 #include "misclayout.hpp"
 #include "vectorlayout.hpp"
 #include "stringlayout.hpp"
 #include "mishap.hpp"
+#include "sysdouble.hpp"
 
-#include <string.h>
+
 
 namespace Ginger {
 
@@ -110,14 +113,23 @@ static bool refStringEquals( Ref * rx, Ref * ry ) {
 	}
 }
 
-//	TODO: This is where comparison of doubles needs to be
-//	implemented.
+
 static bool refWRecordEquals( Ref * rx, Ref * ry ) {
-	unsigned long n = sizeAfterKeyOfRecordLayout( rx );
-	for ( unsigned long i = 1; i <= n; i++ ) {
-		if ( rx[ i ] != ry[ i ] ) return false;
+	if ( *rx == sysDoubleKey ) {
+		if ( *ry == sysDoubleKey ) {
+			double dx = gngFastDoubleValueRefPtr( rx );
+			double dy = gngFastDoubleValueRefPtr( ry );
+			return dx == dy;
+		} else {
+			return false;
+		}
+	} else {
+		unsigned long n = sizeAfterKeyOfRecordLayout( rx );
+		for ( unsigned long i = 1; i <= n; i++ ) {
+			if ( rx[ i ] != ry[ i ] ) return false;
+		}
+		return true;
 	}
-	return true;
 }
 
 static bool refMapEquals( Ref * rx, Ref * ry ) {

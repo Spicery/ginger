@@ -26,6 +26,7 @@ namespace Ginger {
 
 //extern Ref * sysNewDouble( Ref *pc, MachineClass * vm );
 extern gngdouble_t gngFastDoubleValue( Ref r );
+extern gngdouble_t gngFastDoubleValueRefPtr( Ref * r_K );
 
 } // namespace Ginger
 

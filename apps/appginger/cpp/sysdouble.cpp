@@ -24,8 +24,12 @@
 namespace Ginger {
 
 gngdouble_t gngFastDoubleValue( Ref r ) {
+    return gngFastDoubleValue( RefToPtr4( r ) );
+}
+
+gngdouble_t gngFastDoubleValueRefPtr( Ref * ref_K ) {
     gngdouble_t d;
-    char * double_bytes = reinterpret_cast< char * >( RefToPtr4( r ) + 1 );
+    char * double_bytes = reinterpret_cast< char * >( ref_K + 1 );
     memcpy( reinterpret_cast< char * >( &d ), double_bytes, sizeof( gngdouble_t ) );
     return d;
 }

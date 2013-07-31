@@ -1,1 +1,1 @@
-<assert arity="1" type="bool"><constant arity="1" type="string" value="false"/></assert>
+<assert arity.eval="1" type="bool"><constant arity.eval="1" type="string" value="false"/></assert>

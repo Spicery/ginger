@@ -1,1 +1,1 @@
-<assert arity="1" n="1"><seq arity="0"/></assert>
+<assert arity.eval="1" n="1"><seq arity.eval="0"/></assert>

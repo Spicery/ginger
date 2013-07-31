@@ -136,6 +136,13 @@ StringObject HeapObject::asStringObject() const {
 	return StringObject( this->obj_K );
 }
 
+DoubleObject HeapObject::asDoubleObject() const {
+	if ( not this->isDoubleObject() ) {
+		throw Ginger::Mishap( "Double needed" ).culprit( "Argument", this->toPrintString() );
+	}
+	return DoubleObject( this->obj_K );
+}
+
 std::string HeapObject::toPrintString() const {
 	if ( this->obj_K != NULL ) {
 		return this->deref().toPrintString();

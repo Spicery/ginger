@@ -101,6 +101,7 @@ public:	//	Checked downcasts.
 	VectorObject asVectorObject() const;
 	MapObject asMapObject() const;	
 	MapletObject asMapletObject() const;	
+	DoubleObject asDoubleObject() const;
 
 public:	//	Others
 	bool isFunctionObject() const { return IsFunctionKey( *this->obj_K ); }
@@ -115,6 +116,7 @@ public:	//	Others
 	bool isMapObject() const { return IsSimple( *this->obj_K ) && KindOfSimpleKey( *this->obj_K ) == MAP_KIND; }
 	bool isMapletObject() const { return IsMaplet( this->obj_K ); }
 	bool isWRecordObject() const { return IsSimple( *this->obj_K ) && KindOfSimpleKey( *this->obj_K ) == WRECORD_KIND; }
+	bool isDoubleObject() const { return *this->obj_K == sysDoubleKey; }
 	bool isAtomicWRecordObject() const { return IsSimple( *this->obj_K ) && KindOfSimpleKey( *this->obj_K ) == ATOMIC_WRECORD_KIND; }
 	bool isExternalObject() const { return IsSimple( *this->obj_K ) && KindOfSimpleKey( *this->obj_K ) == EXTERNAL_KIND; }
 

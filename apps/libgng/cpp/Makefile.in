@@ -18,7 +18,7 @@ CFLAGS=-Wmissing-prototypes
 
 #	TODO: mnxsax is the updated version of sax & should replace it. Fetchgnx
 #	depends on it atm.
-OBJS=xdgconfigfiles.o sax.o mishap.o facet.o fileutils.o command.o arity.o printgpl.o mnx.o mnxsax.o lnxitem.o lnxreader.o gson.o
+OBJS=xdgconfigfiles.o sax.o mishap.o facet.o fileutils.o command.o arity.o printgpl.o mnx.o mnxsax.o lnxitem.o lnxreader.o gson.o transdouble.o
 
 all: libgng.a
 

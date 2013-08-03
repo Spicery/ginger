@@ -378,3 +378,49 @@ TEST_F( TransDoubleFixture, EqualTo__TransDouble )
 
 }
 
+TEST_F( TransDoubleFixture, NotEqualTo__TransDouble )
+{
+    CHECK( not( this->n_inf != this->n_inf ) );
+    CHECK( ( this->n_inf != this->n_one ) );
+    CHECK( ( this->n_inf != this->zero ) );
+    CHECK( ( this->n_inf != this->one ) );
+    CHECK( ( this->n_inf != this->p_inf ) );
+    CHECK( ( this->n_inf != this->nullity ) );
+
+    CHECK( ( this->n_one != this->n_inf ) );
+    CHECK( not( this->n_one != this->n_one ) );
+    CHECK( ( this->n_one != this->zero ) );
+    CHECK( ( this->n_one != this->one ) );
+    CHECK( ( this->n_one != this->p_inf ) );
+    CHECK( ( this->n_one != this->nullity ) );
+
+    CHECK( ( this->zero != this->n_inf ) );
+    CHECK( ( this->zero != this->n_one ) );
+    CHECK( not( this->zero != this->zero ) );
+    CHECK( ( this->zero != this->one ) );
+    CHECK( ( this->zero != this->p_inf ) );
+    CHECK( ( this->zero != this->nullity ) );
+
+    CHECK( ( this->one != this->n_inf ) );
+    CHECK( ( this->one != this->n_one ) );
+    CHECK( ( this->one != this->zero ) );
+    CHECK( not( this->one != this->one ) );
+    CHECK( ( this->one != this->p_inf ) );
+    CHECK( ( this->one != this->nullity ) );
+
+    CHECK( ( this->p_inf != this->n_inf ) );
+    CHECK( ( this->p_inf != this->n_one ) );
+    CHECK( ( this->p_inf != this->zero ) );
+    CHECK( ( this->p_inf != this->one ) );
+    CHECK( not( this->p_inf != this->p_inf ) );
+    CHECK( ( this->p_inf != this->nullity ) );
+
+    CHECK( ( this->nullity != this->n_inf ) );
+    CHECK( ( this->nullity != this->n_one ) );
+    CHECK( ( this->nullity != this->zero ) );
+    CHECK( ( this->nullity != this->one ) );
+    CHECK( ( this->nullity != this->p_inf ) );
+    CHECK( not( this->nullity != this->nullity ) );
+
+}
+

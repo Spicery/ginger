@@ -79,7 +79,7 @@ public:
         if ( std::isnan( this->data ) ) {
             return std::isnan( t.data );
         } else {
-            return this->data < t.data;
+            return this->data <= t.data;
         }
     }
 

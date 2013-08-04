@@ -286,6 +286,52 @@ TEST_F( TransDoubleFixture, LessThan__TransDouble )
 
 }
 
+TEST_F( TransDoubleFixture, LessThanOrEqualTo__TransDouble )
+{
+    CHECK( this->n_inf <= this->n_inf );
+    CHECK( this->n_inf <= this->n_one );
+    CHECK( this->n_inf <= this->zero );
+    CHECK( this->n_inf <= this->one );
+    CHECK( this->n_inf <= this->p_inf );
+    CHECK( not( this->n_inf <= this->nullity ) );
+
+    CHECK( not( this->n_one <= this->n_inf ) );
+    CHECK( ( this->n_one <= this->n_one ) );
+    CHECK( this->n_one <= this->zero );
+    CHECK( this->n_one <= this->one );
+    CHECK( this->n_one <= this->p_inf );
+    CHECK( not( this->n_one <= this->nullity ) );
+
+    CHECK( not( this->zero <= this->n_inf ) );
+    CHECK( not( this->zero <= this->n_one ) );
+    CHECK( ( this->zero <= this->zero ) );
+    CHECK( this->zero <= this->one );
+    CHECK( this->zero <= this->p_inf );
+    CHECK( not( this->zero <= this->nullity ) );
+
+    CHECK( not( this->one <= this->n_inf ) );
+    CHECK( not( this->one <= this->n_one ) );
+    CHECK( not( this->one <= this->zero ) );
+    CHECK( ( this->one <= this->one ) );
+    CHECK( this->one <= this->p_inf );
+    CHECK( not( this->one <= this->nullity ) );
+
+    CHECK( not( this->p_inf <= this->n_inf ) );
+    CHECK( not( this->p_inf <= this->n_one ) );
+    CHECK( not( this->p_inf <= this->zero ) );
+    CHECK( not( this->p_inf <= this->one ) );
+    CHECK( ( this->p_inf <= this->p_inf ) );
+    CHECK( not( this->p_inf <= this->nullity ) );
+
+    CHECK( not( this->nullity <= this->n_inf ) );
+    CHECK( not( this->nullity <= this->n_one ) );
+    CHECK( not( this->nullity <= this->zero ) );
+    CHECK( not( this->nullity <= this->one ) );
+    CHECK( not( this->nullity <= this->p_inf ) );
+    CHECK( ( this->nullity <= this->nullity ) );
+
+}
+
 TEST_F( TransDoubleFixture, GreaterThan__TransDouble )
 {
     CHECK( not( this->n_inf > this->n_inf ) );
@@ -331,6 +377,54 @@ TEST_F( TransDoubleFixture, GreaterThan__TransDouble )
     CHECK( not( this->nullity > this->nullity ) );
 
 }
+
+TEST_F( TransDoubleFixture, GreaterThanOrEqualTo__TransDouble )
+{
+    CHECK( ( this->n_inf >= this->n_inf ) );
+    CHECK( not( this->n_inf >= this->n_one ) );
+    CHECK( not( this->n_inf >= this->zero ) );
+    CHECK( not( this->n_inf >= this->one ) );
+    CHECK( not( this->n_inf >= this->p_inf ) );
+    CHECK( not( this->n_inf >= this->nullity ) );
+
+    CHECK( this->n_one >= this->n_inf );
+    CHECK( ( this->n_one >= this->n_one ) );
+    CHECK( not( this->n_one >= this->zero ) );
+    CHECK( not( this->n_one >= this->one ) );
+    CHECK( not( this->n_one >= this->p_inf ) );
+    CHECK( not( this->n_one >= this->nullity ) );
+
+    CHECK( this->zero >= this->n_inf );
+    CHECK( this->zero >= this->n_one );
+    CHECK( ( this->zero >= this->zero ) );
+    CHECK( not( this->zero >= this->one ) );
+    CHECK( not( this->zero >= this->p_inf ) );
+    CHECK( not( this->zero >= this->nullity ) );
+
+    CHECK( ( this->one >= this->n_inf ) );
+    CHECK( ( this->one >= this->n_one ) );
+    CHECK( ( this->one >= this->zero ) );
+    CHECK( ( this->one >= this->one ) );
+    CHECK( not( this->one >= this->p_inf ) );
+    CHECK( not( this->one >= this->nullity ) );
+
+    CHECK( ( this->p_inf >= this->n_inf ) );
+    CHECK( ( this->p_inf >= this->n_one ) );
+    CHECK( ( this->p_inf >= this->zero ) );
+    CHECK( ( this->p_inf >= this->one ) );
+    CHECK( ( this->p_inf >= this->p_inf ) );
+    CHECK( not( this->p_inf >= this->nullity ) );
+
+    CHECK( not( this->nullity >= this->n_inf ) );
+    CHECK( not( this->nullity >= this->n_one ) );
+    CHECK( not( this->nullity >= this->zero ) );
+    CHECK( not( this->nullity >= this->one ) );
+    CHECK( not( this->nullity >= this->p_inf ) );
+    CHECK( ( this->nullity >= this->nullity ) );
+
+}
+
+
 
 TEST_F( TransDoubleFixture, EqualTo__TransDouble )
 {
@@ -421,6 +515,52 @@ TEST_F( TransDoubleFixture, NotEqualTo__TransDouble )
     CHECK( ( this->nullity != this->one ) );
     CHECK( ( this->nullity != this->p_inf ) );
     CHECK( not( this->nullity != this->nullity ) );
+
+}
+
+TEST_F( TransDoubleFixture, Max__TransDouble )
+{
+    CHECK_EQUAL( this->n_inf, this->n_inf.max( this->n_inf ) );
+    CHECK_EQUAL( this->n_one, this->n_inf.max( this->n_one ) );
+    CHECK_EQUAL( this->zero, this->n_inf.max( this->zero ) );
+    CHECK_EQUAL( this->one, this->n_inf.max( this->one ) );
+    CHECK_EQUAL( this->p_inf, this->n_inf.max( this->p_inf ) );
+    CHECK_EQUAL( this->n_inf, this->n_inf.max( this->nullity ) );
+
+    CHECK_EQUAL( this->n_one, this->n_one.max( this->n_inf ) );
+    CHECK_EQUAL( this->n_one, this->n_one.max( this->n_one ) );
+    CHECK_EQUAL( this->zero, this->n_one.max( this->zero ) );
+    CHECK_EQUAL( this->one, this->n_one.max( this->one ) );
+    CHECK_EQUAL( this->p_inf, this->n_one.max( this->p_inf ) );
+    CHECK_EQUAL( this->n_one, this->n_one.max( this->nullity ) );
+
+    CHECK_EQUAL( this->zero, this->zero.max( this->n_inf ) );
+    CHECK_EQUAL( this->zero, this->zero.max( this->n_one ) );
+    CHECK_EQUAL( this->zero, this->zero.max( this->zero ) );
+    CHECK_EQUAL( this->one, this->zero.max( this->one ) );
+    CHECK_EQUAL( this->p_inf, this->zero.max( this->p_inf ) );
+    CHECK_EQUAL( this->zero, this->zero.max( this->nullity ) );
+
+    CHECK_EQUAL( this->one, this->one.max( this->n_inf ) );
+    CHECK_EQUAL( this->one, this->one.max( this->n_one ) );
+    CHECK_EQUAL( this->one, this->one.max( this->zero ) );
+    CHECK_EQUAL( this->one, this->one.max( this->one ) );
+    CHECK_EQUAL( this->p_inf, this->one.max( this->p_inf ) );
+    CHECK_EQUAL( this->one, this->one.max( this->nullity ) );
+
+    CHECK_EQUAL( this->p_inf, this->p_inf.max( this->n_inf ) );
+    CHECK_EQUAL( this->p_inf, this->p_inf.max( this->n_one ) );
+    CHECK_EQUAL( this->p_inf, this->p_inf.max( this->zero ) );
+    CHECK_EQUAL( this->p_inf, this->p_inf.max( this->one ) );
+    CHECK_EQUAL( this->p_inf, this->p_inf.max( this->p_inf ) );
+    CHECK_EQUAL( this->p_inf, this->p_inf.max( this->nullity ) );
+
+    CHECK_EQUAL( this->n_inf, this->nullity.max( this->n_inf ) );
+    CHECK_EQUAL( this->n_one, this->nullity.max( this->n_one ) );
+    CHECK_EQUAL( this->zero, this->nullity.max( this->zero ) );
+    CHECK_EQUAL( this->one, this->nullity.max( this->one ) );
+    CHECK_EQUAL( this->p_inf, this->nullity.max( this->p_inf ) );
+    CHECK_EQUAL( this->nullity, this->nullity.max( this->nullity ) );
 
 }
 

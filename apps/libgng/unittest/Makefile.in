@@ -17,8 +17,8 @@ check: testlibgng
 testlibgng: $(OBJS)
 	g++ $(CXXFLAGS) -L../cpp -o $@ $^ -lcppunit -lgng
 
-maintest: maintest.o transdoubletest.o
-	g++ $(CXXFLAGS) -o $@ $^ ../../CppUnitLite2/cppunitlite.a
+maintest: maintest.o transdoubletest.o saxtestlite.o
+	g++ $(CXXFLAGS) -o $@ $^ ../../CppUnitLite2/cppunitlite.a -lgng
 	
 clean:
 	rm -f *.o

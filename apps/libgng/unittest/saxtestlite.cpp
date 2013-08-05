@@ -16,7 +16,9 @@
     along with AppGinger.  If not, see <http://www.gnu.org/licenses/>.
 \******************************************************************************/
 
+#include <iostream>
 #include <sstream>
+#include <cstdio>
 
 #include "CppUnitLite2.h"
 

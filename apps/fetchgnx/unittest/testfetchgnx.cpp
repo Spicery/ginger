@@ -16,44 +16,12 @@
     along with AppGinger.  If not, see <http://www.gnu.org/licenses/>.
 \******************************************************************************/
 
-#include <iostream>
-#include <fstream>
+#include "Failure.h"
+#include "CppUnitLite2.h"
+#include "TestResultStdErr.h"
 
-#include <cppunit/CompilerOutputter.h>
-#include <cppunit/XmlOutputter.h>
-#include <cppunit/ui/text/TestRunner.h>
-#include <cppunit/extensions/TestFactoryRegistry.h>
-
-using namespace std;
-
-
-int main( int argc, char ** argv ) {
-	CppUnit::TextUi::TestRunner runner;
-	CppUnit::TestFactoryRegistry &registry = CppUnit::TestFactoryRegistry::getRegistry();
-	runner.addTest( registry.makeTest() );
-	
-	
-	ofstream out;
-	if ( argc == 2 ) {
-		out.open( argv[ 1 ] );
-	}
-
-	
-	runner.setOutputter( 
-		new CppUnit::XmlOutputter( 
-			&runner.result(), 
-			( out.is_open() ? out : std::cerr )
-		) 
-	);
-		
-	// Run the tests.
-  	bool wasSucessful = runner.run( "", false, true, false );
-  	
-  	if ( out.is_open() ) {
-		out.close();
-	}
-
-
-  	// Return error code 1 if the one of test failed.
-  	return wasSucessful ? 0 : 1;
+int main( int argc, char ** argv ) {     
+    TestResultStdErr result;
+    TestRegistry::Instance().Run( result );
+    return result.FailedCount();
 }

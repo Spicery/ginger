@@ -1,7 +1,7 @@
 
 CC=g++
 
-CXXFLAGS=-g -I../hpp -I../../libgng/hpp -Wall -Wnon-virtual-dtor
+CXXFLAGS=-g -I../../CppUnitLite2/src -I../hpp -I../../libgng/hpp -Wall -Wnon-virtual-dtor
 CFLAGS=-Wmissing-prototypes 
 LDFLAGS=-ldl
 OBJS=testsimplifygnx.o
@@ -9,12 +9,12 @@ OBJS=testsimplifygnx.o
 all: testsimplifygnx
 
 check: testsimplifygnx
-	./testsimplifygnx 2> results.xml 
+	./testsimplifygnx
 
 # $@ is make shorthand for the target.
 # $@ is make shorthand for the dependencies
 testsimplifygnx: $(OBJS)
-	g++ $(CXXFLAGS) $(BOOST_CPPFLAGS) -o $@ $^ ../../libgng/cpp/libgng.a  -lcppunit $(LDFLAGS)
+	g++ $(CXXFLAGS) -o $@ $^ ../../libgng/cpp/libgng.a  ../../CppUnitLite2/cppunitlite.a $(LDFLAGS)
 	
 clean:
 	rm -f *.o

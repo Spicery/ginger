@@ -5,21 +5,18 @@ CXXFLAGS=-g -I../../CppUnitLite2/src  -I../hpp -L../cpp -Wall -Wnon-virtual-dtor
 
 CFLAGS=-Wmissing-prototypes 
 
-OBJS=testlibgng.o saxtest.o
+OBJS=maintest.o transdoubletest.o saxtestlite.o
 
-all: testlibgng
+all: maintest
 
-check: testlibgng
-	./testlibgng
+check: maintest
+	./maintest
 
 # $@ is make shorthand for the target.
 # $@ is make shorthand for the dependencies
-testlibgng: $(OBJS)
-	g++ $(CXXFLAGS) -L../cpp -o $@ $^ -lcppunit -lgng
-
-maintest: maintest.o transdoubletest.o saxtestlite.o
+maintest: $(OBJS)
 	g++ $(CXXFLAGS) -o $@ $^ ../../CppUnitLite2/cppunitlite.a -lgng
 	
 clean:
 	rm -f *.o
-	rm -f testlibgng
+	rm -f maintest

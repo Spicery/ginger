@@ -155,8 +155,7 @@ public:
 			action;																				\
 		} catch(const TestException& ) {														\
 			bExceptionCaught = true; 															\
-		} 																						\
-		catch (...) {																			\
+		} catch (...) {																			\
 			ExceptionHandler::Handle(result_, #action, m_name, __FILE__, __LINE__);				\
 		}																						\
 		if (!bExceptionCaught) 																	\
@@ -165,7 +164,16 @@ public:
 
 #endif
 
+#define UNITTEST_EQUAL( x, y ) \
+    if ( !( (x) == (y) ) ) \
+        throw TestException( __FILE__, __LINE__, #x " == " #y );
 
+#define UNITTEST_TRUE( x ) \
+    if ( !( x ) ) \
+        throw TestException( __FILE__, __LINE__, #x );
+
+#define UNITTEST_FAIL( x ) \
+    throw TestException( __FILE__, __LINE__, ( x ) );
 
 #endif
 

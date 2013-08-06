@@ -64,39 +64,7 @@ public:
 
 //------------------------------------------------------------------------------
 
-class AssertEqualFailure : public std::runtime_error {
-public:
-	AssertEqualFailure( const char * x, const char * y, long line, const char * file ) 
-		: std::runtime_error( "assert equal failure" )
-	{}
-};
 
-class AssertTrueFailure : public std::runtime_error
-{
-public:
-	AssertTrueFailure( const char * x, long line, const char * file )
-		: std::runtime_error( "assert true failure" )
-	{}
-};
-
-class AssertFail : public std::runtime_error
-{
-public:
-	AssertFail( const char * x, long line, const char * file )
-		: std::runtime_error( "assert fail" )
-	{}
-};
-
-#define ASSERT_EQUAL( x, y ) \
-	if ( !( (x) == (y) ) ) \
-		throw AssertEqualFailure( #x, #y, __LINE__, __FILE__ );
-
-#define ASSERT_TRUE( x ) \
-	if ( !( x ) ) \
-		throw AssertTrueFailure( #x, __LINE__, __FILE__ );
-
-#define ASSERT_FAIL( x ) \
-	throw AssertFail( x, __LINE__, __FILE__ );
 
 class StreamParseMockHandler : public MockHandler {
 private:
@@ -105,20 +73,20 @@ private:
 
 public:
 	virtual void startTag( std::string & name, std::map< std::string, std::string > & attrs ) {
-		ASSERT_EQUAL( 0, startCount++ );
-		ASSERT_EQUAL( string( "alpha" ), name );
-		ASSERT_EQUAL( attrs[ "red" ], string( "blue" ) );
-		ASSERT_EQUAL( attrs[ "yellow" ], string( "" ) );
+		UNITTEST_EQUAL( 0, startCount++ );
+		UNITTEST_EQUAL( string( "alpha" ), name );
+		UNITTEST_EQUAL( attrs[ "red" ], string( "blue" ) );
+		UNITTEST_EQUAL( attrs[ "yellow" ], string( "" ) );
 	}
 	
 	virtual void endTag( std::string & name ) {
-		ASSERT_EQUAL( 0, endCount++ );
-		ASSERT_EQUAL( "alpha", name );
+		UNITTEST_EQUAL( 0, endCount++ );
+		UNITTEST_EQUAL( "alpha", name );
 	}
 	
 	void check() {
 		//cout << "startCount = " << startCount << " & endCount = " << endCount << endl;
-		ASSERT_TRUE( startCount == endCount && startCount == 1 );
+		UNITTEST_TRUE( startCount == endCount && startCount == 1 );
 	}
 	
 	const char * testString() const {
@@ -151,22 +119,22 @@ private:
 public:
 	virtual void startTag( std::string & name, std::map< std::string, std::string > & attrs ) {
 		switch ( startCount++ ) {
-			case 0: ASSERT_EQUAL( name, "alpha" ); break;
-			case 1: ASSERT_EQUAL( name, "beta" ); break;
-			default: ASSERT_FAIL( "invalid name" );
+			case 0: UNITTEST_EQUAL( name, "alpha" ); break;
+			case 1: UNITTEST_EQUAL( name, "beta" ); break;
+			default: UNITTEST_FAIL( "invalid name" );
 		}
 	}
 	
 	virtual void endTag( std::string & name ) {
 		switch ( endCount++ ) {
-			case 1: ASSERT_EQUAL( name, "alpha" ); break;
-			case 0: ASSERT_EQUAL( name, "beta" ); break;
-			default: ASSERT_FAIL( "invalid name" );
+			case 1: UNITTEST_EQUAL( name, "alpha" ); break;
+			case 0: UNITTEST_EQUAL( name, "beta" ); break;
+			default: UNITTEST_FAIL( "invalid name" );
 		}
 	}
 	
 	void check() {
-		ASSERT_TRUE( startCount == endCount && startCount == 2 );
+		UNITTEST_TRUE( startCount == endCount && startCount == 2 );
 	}
 	
 	const char * testString() const {
@@ -202,29 +170,29 @@ public:
 	
 	virtual void startTag( std::string & name, std::map< std::string, std::string > & attrs ) {
 		switch ( startCount++ ) {
-			case 0: ASSERT_EQUAL( string( "alpha" ), name ); break;
-			case 1: ASSERT_EQUAL( string( "beta" ), name ); break;
-			case 2: ASSERT_EQUAL( string( "gamma" ), name ); break;
-			case 3: ASSERT_EQUAL( string( "delta" ), name ); {
-				ASSERT_EQUAL( attrs[ "foo" ], string( "bar" ) );
+			case 0: UNITTEST_EQUAL( string( "alpha" ), name ); break;
+			case 1: UNITTEST_EQUAL( string( "beta" ), name ); break;
+			case 2: UNITTEST_EQUAL( string( "gamma" ), name ); break;
+			case 3: UNITTEST_EQUAL( string( "delta" ), name ); {
+				UNITTEST_EQUAL( attrs[ "foo" ], string( "bar" ) );
 				break;
 			}
-			default: ASSERT_FAIL( "invalid name" );
+			default: UNITTEST_FAIL( "invalid name" );
 		}
 	}
 	
 	virtual void endTag( std::string & name ) {
 		switch ( endCount++ ) {
-			case 3: ASSERT_EQUAL( string( "alpha" ), name ); break;
-			case 0: ASSERT_EQUAL( string( "beta" ), name ); break;
-			case 2: ASSERT_EQUAL( string( "gamma" ), name ); break;
-			case 1: ASSERT_EQUAL( string( "delta" ), name  ); break;
-			default: ASSERT_FAIL( "invalid name" );
+			case 3: UNITTEST_EQUAL( string( "alpha" ), name ); break;
+			case 0: UNITTEST_EQUAL( string( "beta" ), name ); break;
+			case 2: UNITTEST_EQUAL( string( "gamma" ), name ); break;
+			case 1: UNITTEST_EQUAL( string( "delta" ), name  ); break;
+			default: UNITTEST_FAIL( "invalid name" );
 		}
 	}
 	
 	void check() {
-		ASSERT_TRUE( startCount == endCount && startCount == 4 );
+		UNITTEST_TRUE( startCount == endCount && startCount == 4 );
 	}
 	
 public:

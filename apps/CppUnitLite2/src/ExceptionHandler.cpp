@@ -27,17 +27,25 @@ void TurnOn (bool bOn)
 }
 
 
-void Handle (TestResult& result, const TestException& exception, 
-             const char* testname, const char* filename, int linenumber )
-{
+void Handle (
+    TestResult& result, 
+    const TestException& exception, 
+    const char* testname, 
+    const char* filename, 
+    int linenumber 
+) {
     char msg[4096];
     sprintf( msg, "Raised exception %s from:\n  %s(%i)", exception.message, exception.file, exception.line );
     result.AddFailure (Failure (msg, testname, filename, linenumber));
 }
 
-void Handle (TestResult& result, const char* condition, 
-             const char* testname, const char* filename, int linenumber)
-{
+void Handle(
+    TestResult& result, 
+    const char* condition, 
+    const char* testname, 
+    const char* filename, 
+    int linenumber
+) {
     if (!g_bHandleExceptions) 
         throw;
         

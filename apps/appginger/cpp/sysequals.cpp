@@ -117,8 +117,8 @@ static bool refStringEquals( Ref * rx, Ref * ry ) {
 static bool refWRecordEquals( Ref * rx, Ref * ry ) {
 	if ( *rx == sysDoubleKey ) {
 		if ( *ry == sysDoubleKey ) {
-			double dx = gngFastDoubleValueRefPtr( rx );
-			double dy = gngFastDoubleValueRefPtr( ry );
+			gngdouble_t dx = gngFastDoubleValueRefPtr( rx );
+			gngdouble_t dy = gngFastDoubleValueRefPtr( ry );
 			return dx == dy;
 		} else {
 			return false;

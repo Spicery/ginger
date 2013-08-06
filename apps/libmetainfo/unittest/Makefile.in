@@ -1,22 +1,22 @@
 
 CC=g++
 
-CXXFLAGS=-g -I../hpp -L../cpp -Wall -Wnon-virtual-dtor # -Weffc++
+CXXFLAGS=-g -I../../CppUnitLite2/src -I../hpp -L../cpp -Wall -Wnon-virtual-dtor # -Weffc++
 
 CFLAGS=-Wmissing-prototypes 
 
-OBJS=testlibgng.o
+OBJS=testlibmetainfo.o
 
-all: testlibgng
+all: testlibmetainfo
 
-check: testlibgng
-	./testlibgng
+check: testlibmetainfo
+	./testlibmetainfo
 
 # $@ is make shorthand for the target.
 # $@ is make shorthand for the dependencies
-testlibgng: $(OBJS)
-	g++ $(CXXFLAGS) $(BOOST_CPPFLAGS) -L../cpp -o $@ $^ -lcppunit -lgng
+testlibmetainfo: $(OBJS)
+	g++ $(CXXFLAGS) -o $@ $^ ../../CppUnitLite2/cppunitlite.a
 	
 clean:
 	rm -f *.o
-	rm -f testlibgng
+	rm -f testlibmetainfo

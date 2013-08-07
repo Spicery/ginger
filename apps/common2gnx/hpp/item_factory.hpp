@@ -43,7 +43,7 @@ private:
 	int trychar( int ch );
 	int eatsWhiteSpaceAndComments();
 	void readAtEndOfFile();
-	void readAtDigitOrMinus( int ch );
+	void readAtDigitOrSign( int ch );
 	void readAtAlpha( int ch );
 	void readAtUnderbar( int ch );
 	void readAtQuoteCharType( int ch );

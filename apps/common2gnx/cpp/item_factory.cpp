@@ -146,7 +146,7 @@ void ItemFactoryClass::readAtEndOfFile() {
 	it->nameString() = "<eof>";
 }
 
-void ItemFactoryClass::readAtDigitOrMinus( int ch ) {
+void ItemFactoryClass::readAtDigitOrSign( int ch ) {
 	//
 	//	Number
 	//
@@ -385,8 +385,8 @@ Item ItemFactoryClass::read() {
 
     if ( ch == EOF ) {
 		this->readAtEndOfFile();
-    } else if ( isdigit( ch ) || ( ch == '-' && isdigit( this->peekchar() ) ) ) {
-    	this->readAtDigitOrMinus( ch );
+    } else if ( isdigit( ch ) || ( ( ch == '-' || ch == '+' ) && isdigit( this->peekchar() ) ) ) {
+    	this->readAtDigitOrSign( ch );
 	} else if ( isalpha( ch ) ) {
 		this->readAtAlpha( ch );
 	} else if ( ch == '_' ) {

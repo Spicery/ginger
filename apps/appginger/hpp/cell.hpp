@@ -181,7 +181,7 @@ public:
 
 public:
 	std::string toString() const;
-	double getDouble() const;
+	gngdouble_t getDouble() const;
 };
 
 class MapObject : public HeapObject {

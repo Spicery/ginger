@@ -274,7 +274,7 @@ std::string DoubleObject::toString() const {
 	return s.str();
 }
 	
-double DoubleObject::getDouble() const {
+gngdouble_t DoubleObject::getDouble() const {
 	return gngFastDoubleValue( this->obj_K );
 }
 

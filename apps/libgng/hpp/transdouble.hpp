@@ -3,16 +3,23 @@
 
 #include <cmath>
 #include <ostream>
+#include <istream>
 
 class TransDouble {
 private:
     double data;
 
 public:
+    TransDouble() : data( 0.0 ) {}
     TransDouble( const double d ) : data( d ) {}
 
     double asDouble() const {
         return this->data;
+    }
+
+    TransDouble & operator =( const double & d ) {
+        this->data = d;
+        return *this;
     }
 
     TransDouble operator +( const TransDouble& t ) const {
@@ -114,5 +121,6 @@ public:
 };
 
 std::ostream& operator<<(std::ostream& os, const TransDouble& obj);
+std::istream& operator>>(std::istream& os, TransDouble& obj);
 
 #endif // TRANSDOUBLE_HPP

@@ -24,7 +24,7 @@
 namespace Ginger {
 
 gngdouble_t gngFastDoubleValue( Ref r ) {
-    return gngFastDoubleValue( RefToPtr4( r ) );
+    return gngFastDoubleValueRefPtr( RefToPtr4( r ) );
 }
 
 gngdouble_t gngFastDoubleValueRefPtr( Ref * ref_K ) {

@@ -1655,15 +1655,23 @@ Ref CodeGenClass::calcConstant( Gnx mnx ) {
 	} else if ( type == "double" ) {
 		gngdouble_t d;
 		const std::string& numtext( mnx->attribute( CONSTANT_VALUE ) );
-		std::istringstream i( numtext );
-		if ( not ( i >> d ) ) {
-			throw Ginger::Mishap( "Format of double precision number incorrect" ).culprit( "Number", numtext );
+		if ( numtext == "infinity" || numtext == "+infinity" || numtext == "inf" ) {
+			return this->vm->heap().copyDouble( 1.0 / 0.0 );
+		} else if ( numtext == "-infinity" || numtext == "-inf" ) {
+			return this->vm->heap().copyDouble( -1.0 / 0.0 );
+		} else if ( numtext == "nullity" || numtext == "nan" ) {
+			return this->vm->heap().copyDouble( 0.0 / 0.0 );
 		} else {
-			char c;
-			if ( i >> c && c == '%' ) {
-				d *= 0.01;
+			std::istringstream i( numtext );
+			if ( not ( i >> d ) ) {
+				throw Ginger::Mishap( "Format of double precision number incorrect" ).culprit( "Number", numtext );
+			} else {
+				char c;
+				if ( i >> c && c == '%' ) {
+					d *= 0.01;
+				}
+				return this->vm->heap().copyDouble( d );
 			}
-			return this->vm->heap().copyDouble( d );
 		}
 	} else if ( type == "symbol" ) {
 		return refMakeSymbol( mnx->attribute( CONSTANT_VALUE ) );

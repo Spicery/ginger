@@ -413,11 +413,20 @@ void RefPrint::refInstancePrint( Ref * rec_K ) {
 	this->output( ">" );
 }
 
-void RefPrint::refDoublePrint( const Ref r ) {
-	std::stringstream str;
+void RefPrint::refDoublePrint( const Ref r ) {	
 	gngdouble_t d = gngFastDoubleValue( r );
-	str << d;
-	this->output( str.str() );
+	if ( d.isFinite() ) {
+		std::stringstream str;
+		str << d;
+		this->output( str.str() );
+	} else {
+		switch ( d.quadrachotomy() ) {
+			case 'G': this->output( "+infinity" ); break;
+			case 'L': this->output( "-infinity" ); break;
+			case 'N': this->output( "nullity" ); break;
+			default: throw Ginger::Mishap( "Unknown double value" ).culprit( "Value", d.asDouble() );
+		}
+	}
 }
 
 void RefPrint::refKeyPrint( const Ref r ) {

@@ -118,6 +118,35 @@ public:
         }
     }
 
+    bool isFinite() const {
+        return std::isfinite( this->data );
+    }
+
+    bool isInfinite() const {
+        return std::isinf( this->data );
+    }
+
+    bool isNullity() const {
+        return std::isnan( this->data );
+    }
+
+    bool isPositiveInfinity() const {
+        return this->data > 0 && std::isinf( this->data );
+    }
+
+    bool isNegativeInfinity() const {
+        return this->data < 0 && std::isinf( this->data );
+    }
+
+    char quadrachotomy( const char * lzgn = "LZGN" ) const {
+        return(
+            this->data > 0.0 ? lzgn[ 2 ] :
+            this->data < 0.0 ? lzgn[ 0 ] :
+            this->data == 0.0 ? lzgn[ 1 ] :
+            lzgn[ 3 ]
+        );
+    }
+
 };
 
 std::ostream& operator<<(std::ostream& os, const TransDouble& obj);

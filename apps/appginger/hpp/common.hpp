@@ -19,6 +19,8 @@
 #ifndef COMMON_HPP
 #define COMMON_HPP
 
+#include "transdouble.hpp"
+
 namespace Ginger {
 
 /*
@@ -36,7 +38,7 @@ namespace Ginger {
 typedef long gnglong_t;             //  Should be compatible with (void *).
 typedef unsigned long gngulong_t;   //  As above.
 typedef unsigned long ulong;        //  Retire this typedef.
-typedef double gngdouble_t;         //  So that we can easily swap to long double.
+typedef TransDouble gngdouble_t;         //  So that we can easily swap to long double.
 
 typedef const char *charseq;
 class MachineClass;

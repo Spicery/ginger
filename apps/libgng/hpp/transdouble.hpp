@@ -102,6 +102,19 @@ public:
         }
     }
 
+    bool isLtGt( const TransDouble& t ) const {
+        return this->data < t.data || this->data > t.data;
+    }
+
+    bool isLtEGt( const TransDouble& t ) const {
+        return (
+            this->data < t.data || 
+            this->data > t.data || 
+            this->data == t.data ||
+            ( std::isnan( this->data ) && std::isnan( t.data ) )
+        );
+    }
+
     TransDouble max( const TransDouble& t ) const {
         if ( std::isnan( this->data ) ) {
             return t;
@@ -115,6 +128,22 @@ public:
             return t;
         } else {
             return this->data > t.data ? t.data : this->data;
+        }
+    }
+
+    bool isThisMax( const TransDouble& t ) const {
+        if ( std::isnan( this->data ) ) {
+            return false;
+        } else {
+            return not( this->data < t.data );
+        }
+    }
+
+    bool isThisMin( const TransDouble& t ) const {
+        if ( std::isnan( this->data ) ) {
+            return false;
+        } else {
+            return not( this->data > t.data );
         }
     }
 

@@ -1,0 +1,30 @@
+<vector>
+	<sysapp name="=">
+		<constant type="double" value="nullity"/>
+		<constant type="double" value="nullity"/>
+	</sysapp>
+	<sysapp name="&lt;">
+		<constant type="int" value="1"/>
+		<constant type="double" value="+infinity"/>
+	</sysapp>
+	<sysapp name="&lt;=">
+		<constant type="int" value="-1.0"/>
+		<constant type="int" value="-2"/>
+	</sysapp>
+	<sysapp name="&gt;">
+		<constant type="double" value="-infinity"/>
+		<constant type="int" value="-2"/>
+	</sysapp>
+	<sysapp name="&gt;=">
+		<constant type="double" value="-infinity"/>
+		<constant type="double" value="-infinity"/>
+	</sysapp>
+	<sysapp name="&lt;&gt;">
+		<constant type="double" value="-infinity"/>
+		<constant type="double" value="nullity"/>
+	</sysapp>
+	<sysapp name="&lt;=&gt;">
+		<constant type="double" value="-infinity"/>
+		<constant type="double" value="nullity"/>
+	</sysapp>
+</vector>

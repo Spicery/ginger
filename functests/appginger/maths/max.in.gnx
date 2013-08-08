@@ -1,0 +1,18 @@
+<vector>
+	<sysapp name="max">
+		<constant type="int" value="1"/>
+		<constant type="int" value="0"/>
+	</sysapp>
+	<sysapp name="max">
+		<constant type="int" value="-1.0"/>
+		<constant type="int" value="-2"/>
+	</sysapp>
+	<sysapp name="max">
+		<constant type="double" value="-infinity"/>
+		<constant type="int" value="-2"/>
+	</sysapp>
+	<sysapp name="max">
+		<constant type="double" value="-infinity"/>
+		<constant type="double" value="nullity"/>
+	</sysapp>
+</vector>

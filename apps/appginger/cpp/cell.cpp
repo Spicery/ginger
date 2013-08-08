@@ -52,6 +52,11 @@ HeapObject Cell::asHeapObject() const {
 	return HeapObject( RefToPtr4( this->ref ) );
 }
 
+DoubleObject Cell::asDoubleObject() const { 
+	return this->asHeapObject().asDoubleObject(); 
+}
+
+
 
 void Cell::dump( MnxBuilder & b, const bool deep ) const {
 	if ( IsSmall( this->ref ) ) {

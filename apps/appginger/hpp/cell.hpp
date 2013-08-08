@@ -61,6 +61,8 @@ public:
 
 	HeapObject asHeapObject() const;
 	Ref asRef() const { return this->ref; }
+	long getLong() const { return SmallToLong( this->ref ); }
+	DoubleObject asDoubleObject() const;
 
 	bool isTermin() const { return this->ref == SYS_TERMIN; }
 	bool isAbsent() const { return this->ref == SYS_ABSENT; }
@@ -71,11 +73,13 @@ public:
 	bool isHeapObject() const { return IsObj( this->ref ); }
 	bool isPairObject() const { return IsPair( this->ref ); }
 	bool isVectorObject() const { return IsVector( this->ref ); }
+	bool isDoubleObject() const { return IsDouble( this->ref ); }
 
 	std::string toPrintString() const;
 	std::string toShowString() const;
 	void print( std::ostream & out, bool showing = false ) const;
 	void println( std::ostream & out, bool showing = false ) const;
+
 
 private:
 	void dump( MnxBuilder & b, const bool deep ) const;

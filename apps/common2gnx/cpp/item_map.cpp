@@ -1,3 +1,21 @@
+/******************************************************************************\
+	Copyright (c) 2010 Stephen Leach. AppGinger is distributed under the terms 
+	of the GNU General Public License. This file is part of AppGinger.
+
+    AppGinger is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    AppGinger is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with AppGinger.  If not, see <http://www.gnu.org/licenses/>.
+\******************************************************************************/
+
 #include <map>
 #include <string>
 
@@ -43,6 +61,7 @@ ItemMap::ItemMap( const bool cstyle ) {
 	add( true,	 	KW_MAPLET_THIN, 	tokty_maplet, 		BSy, 		prec_arrow	);
 	add( true,	 	KW_BIND_LEFT, 		tokty_bind, 		PoF, 		prec_assign	);
 	add( true,	 	KW_BIND_RIGHT, 		tokty_bindrev, 		PoF, 		prec_assign	);
+//	@todo: we have a problem in the C-style syntax where ! is a special operator.
 	add( true,      KW_BANG,            tokty_bang,         USy,        prec_bang    );
 	add( true,	 	KW_2_BANG, 			tokty_dbang, 		SSA, 		prec_not	);
 	add( true,		KW_TRAP,			tokty_trap,			PoF,		prec_trap		);
@@ -72,10 +91,12 @@ ItemMap::ItemMap( const bool cstyle ) {
 	add( true,		KW_ADD, 			tokty_add, 			BSy,		prec_arith_add		);
 	add( true,		KW_APPEND, 			tokty_append, 		BSy, 		prec_append		);
 	add( true,		KW_END_ELEMENT,		tokty_endelement,	Clo,		0		);
-	add( true,		KW_APPEND_ALT, 		tokty_append, 		BSy, 		prec_append		);
 	add( true,		KW_LT, 				tokty_lt, 			BSy, 		prec_lt	);
 	add( true,		KW_LTE, 			tokty_lte, 			BSy, 		prec_lte	);
+	add( true,		KW_NOT_LT, 			tokty_not_lt, 		BSy, 		prec_lt	);
+	add( true,		KW_NOT_LTE, 		tokty_not_lte, 		BSy, 		prec_lte	);
 	add( !cstyle,	KW_EQUAL, 			tokty_equal, 		BSy, 		prec_equal	);
+	add( true,		KW_NOT_EQUAL, 		tokty_not_equal, 	BSy, 		prec_equal	);
 	add( cstyle,	KW_EQUAL, 			tokty_equal, 		BFo, 		prec_assign	);
 	add( true,		KW_IDENTICAL, 		tokty_identical, 	BSy, 		prec_identical	);
 	add( true,		KW_FN_ARROW, 		tokty_fnarrow, 		BSy, 		prec_arrow	);
@@ -83,6 +104,12 @@ ItemMap::ItemMap( const bool cstyle ) {
 	add( true,		KW_SYSCALL,			tokty_syscall,		PrF,		0		);		/// @todo remove??
 	add( true,		KW_GT, 				tokty_gt, 			BSy, 		prec_gt	);
 	add( true,		KW_GTE, 			tokty_gte, 			BSy, 		prec_gte	);
+	add( true,		KW_LTGT, 			tokty_ltgt, 		BSy, 		prec_lt	);
+	add( true,		KW_LTEGT, 			tokty_ltegt, 		BSy, 		prec_lte	);
+	add( true,		KW_NOT_GT, 			tokty_not_gt, 		BSy, 		prec_gt	);
+	add( true,		KW_NOT_GTE, 		tokty_not_gte, 		BSy, 		prec_gte	);
+	add( true,		KW_NOT_LTGT, 		tokty_not_ltgt, 	BSy, 		prec_lt	);
+	add( true,		KW_NOT_LTEGT, 		tokty_not_ltegt, 	BSy, 		prec_lte	);
 	add( true,		KW_LT_SLASH, 		tokty_ltslash,		Clo,		0		);
 	add( true,		KW_SLASH_GT,		tokty_slashgt,		Clo,		0		);
 	add( true,		KW_BAR,				tokty_bar,			Clo,		0		);

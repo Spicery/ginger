@@ -1,3 +1,4 @@
+#include "keywords.hpp"
 #include "toktype.hpp"
 #include "mishap.hpp"
 
@@ -47,21 +48,30 @@ const char * tok_type_as_sysapp( TokType fnc ) {
 	case tokty_bang: return "absNot";
 	case tokty_dbang: return "boolAbs";
 	case tokty_div : return "/";
-	case tokty_quo : return "quo";
-	case tokty_mod : return "mod";
 	case tokty_equal : return "=";
 	case tokty_explode: return "explode";
-	case tokty_identical: return "==";
-	case tokty_isntabsent: return "isntAbsent";
 	case tokty_gt : return ">";
 	case tokty_gte : return ">=";
+	case tokty_identical: return "==";
+	case tokty_isntabsent: return "isntAbsent";
 	case tokty_lt : return "<";
 	case tokty_lte : return "<=";
+	case tokty_ltegt: return "<=>";
+	case tokty_ltgt: return "<>";
+	case tokty_maplet : return "newMaplet";
+	case tokty_mod : return "mod";
 	case tokty_mul : return "*";
 	case tokty_not : return "not";
+	case tokty_not_equal: return "!=";
+	case tokty_not_gt: return "!>";
+	case tokty_not_gte: return "!>=";
+	case tokty_not_lt: return "!<";
+	case tokty_not_lte: return "!<=";
+	case tokty_not_ltegt: return "!<>=";
+	case tokty_not_ltgt: return "!<>";
 	case tokty_pow : return "**";
+	case tokty_quo : return "quo";
 	case tokty_sub : return "-";
-	case tokty_maplet : return "newMaplet";
 	default: throw CompileTimeError( "Internal error (tok_type_as_sysapp): missing sysapp" ).culprit( "Token type", tok_type_name( fnc ) );
 	}
 }

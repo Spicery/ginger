@@ -25,6 +25,7 @@
 #include "stringlayout.hpp"
 #include "mishap.hpp"
 #include "sysdouble.hpp"
+#include "sys.hpp"
 
 
 
@@ -76,7 +77,7 @@ static bool refVectorAndMixedEquals( Ref * vx, Ref * vy ) {
 	unsigned long ly = sizeAfterKeyOfVectorLayout( vy );
 	if ( lx == ly ) {
 		for ( unsigned long i = 1; i <= lx; i++ ) {
-			if ( ! refEquals( vx[ i ], vx[ i ] ) ) return false;
+			if ( not refEquals( vx[ i ], vy[ i ] ) ) return false;
 		}
 		return true;
 	} else {
@@ -94,7 +95,7 @@ static bool refRecordEquals( Ref * rx, Ref * ry ) {
 
 static bool refPairEquals( Ref rx, Ref ry ) {
 	do {
-		if ( ! refEquals( FastPairHead( rx ), FastPairHead( ry ) ) ) return false;
+		if ( not refEquals( FastPairHead( rx ), FastPairHead( ry ) ) ) return false;
 		rx = FastPairTail( rx );
 		ry = FastPairTail( ry );
 	} while ( IsPair( rx ) && IsPair( ry ) );
@@ -283,5 +284,27 @@ Ref * sysEquals( Ref * pc, class MachineClass * vm ) {
 		throw Ginger::Mishap( "Wrong number of arguments for =" );
 	}
 }
+SysInfo infoEquals( 
+    SysNames( "=" ), 
+    Ginger::Arity( 2 ), 
+    Ginger::Arity( 1 ), 
+    sysEquals, 
+    "Returns true if the two arguments are equal (recursively), else false."
+);
+
+Ref * sysNotEquals( Ref * pc, class MachineClass * vm ) {
+	pc = sysEquals( pc, vm );
+	vm->fastPeek() = vm->fastPeek() == SYS_FALSE ? SYS_TRUE : SYS_FALSE;
+	return pc;
+}
+SysInfo infoNotEquals( 
+    SysNames( "!=" ), 
+    Ginger::Arity( 2 ), 
+    Ginger::Arity( 1 ), 
+    sysNotEquals, 
+    "Returns true if the two arguments are not equal (recursively), else false."
+);
+
+
 
 } // namespace Ginger

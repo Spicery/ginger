@@ -480,7 +480,7 @@ SysMap & SysMap::sysMap() {
 		SysMaplet( "newMethod", SysInfo( Arity( 3 ), Arity( 1 ), sysNewMethod, "Constructs a new empty method" ) ),
 		SysMaplet( "setMethod", SysInfo( Arity( 3 ), Arity( 0 ), sysSetMethod, "Sets the function for a method on an object" ) ),
 		SysMaplet( "setSlot", SysInfo( Arity( 3 ), Arity( 0 ), sysSetSlot, "Sets a method as the Nth slot of a class" ) ),
-		SysMaplet( "=", SysInfo( Arity( 2 ), Arity( 1 ), sysEquals, "Compare any two values as equal" ) ),
+		//SysMaplet( "=", SysInfo( Arity( 2 ), Arity( 1 ), sysEquals, "Compare any two values as equal" ) ),
 		SysMaplet( "sysgarbage", SysInfo( Arity( 0 ), Arity( 0 ), sysGarbageCollect, "Forces a garbage collection - useful for tests" ) ),
 		SysMaplet( "hash", SysInfo( Arity( 1 ), Arity( 1 ), sysHash, "Computes a hash code for any value, returns a positive Small" ) ),
 		SysMaplet( "index", SysInfo( Arity( 2 ), Arity( 1 ), sysIndex, "Indexes any sequence" ) ),

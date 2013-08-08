@@ -56,14 +56,35 @@ static Node makeIndex( Node lhs, Node rhs ) {
 	return index.build();
 }
 
-#ifdef NOT_CURRENTLY_USED_BUT_KEEP
-static void pushStringConstant( NodeFactory & f, const string & s ) {
+static void pushConstant( NodeFactory & f, const char * type, const std::string & value ) {
 	f.start( CONSTANT );
-	f.put( CONSTANT_TYPE, "string" );
-	f.put( CONSTANT_VALUE, s );
+	f.put( CONSTANT_TYPE, type );
+	f.put( CONSTANT_VALUE, value );
 	f.end();
 }
 
+static void pushConstant( NodeFactory & f, const char * type, const long value ) {
+	f.start( CONSTANT );
+	f.put( CONSTANT_TYPE, type );
+	f.put( CONSTANT_VALUE, value );
+	f.end();
+}
+
+static Node makeConstant( const char * type, const std::string & value ) {
+	NodeFactory simple;
+	pushConstant( simple, type, value );
+ 	return simple.build();
+}
+
+#ifdef NOT_CURRENTLY_USED_BUT_KEEP
+static Node makeConstant( const char * type, const long value ) {
+	NodeFactory simple;
+	pushConstant( simple, type, value );
+ 	return simple.build();
+}
+static void pushStringConstant( NodeFactory & f, const string & s ) {
+	pushConstant( f, "string", s.c_str() );
+}
 static void pushAnyPattern( NodeFactory & f ) {
 	f.start( VAR );
 	f.put( VID_PROTECTED, "true" );
@@ -470,10 +491,7 @@ Node ReadStateClass::postfixProcessing( Node lhs, Item item, int prec ) {
 				if ( has_to_part && not has_by_part ) {
 					//	We should insert a default.
 					//	TODO: refactor (extract) adding a constant int.
-					node.start( CONSTANT );
-					node.put( CONSTANT_TYPE, "int" );
-					node.put( CONSTANT_VALUE, "1" );
-					node.end();
+					pushConstant( node, "int", "1" );
 				}
 				
 				if ( has_to_part ) {
@@ -534,10 +552,7 @@ Node ReadStateClass::postfixProcessing( Node lhs, Item item, int prec ) {
 				//	TODO: Bug??
 				add.start( "add" );
 				add.add( lhs );
-				add.start( CONSTANT );
-				add.put( CONSTANT_TYPE, "double" );
-				add.put( CONSTANT_VALUE, item->nameString() );
-				add.end();
+				pushConstant( add, "double", item->nameString() );
 				add.end();
 				Node t = add.build();
 				//cerr << "DEBUG arity " << term_arity( t ) << endl;
@@ -548,10 +563,7 @@ Node ReadStateClass::postfixProcessing( Node lhs, Item item, int prec ) {
 				//	TODO: Bug??
 				add.start( "add" );
 				add.add( lhs );
-				add.start( CONSTANT );
-				add.put( CONSTANT_TYPE, "int" );
-				add.put( CONSTANT_VALUE, item->nameString() );
-				add.end();
+				pushConstant( add, "int", item->nameString() );
 				add.end();
 				Node t = add.build();
 				//cerr << "DEBUG arity " << term_arity( t ) << endl;
@@ -633,12 +645,7 @@ Node ReadStateClass::readSyscall() {
 	ItemFactory ifact = this->item_factory;	
 	Item it = ifact->read();
 	if ( it->tok_type == tokty_id ) {
-		NodeFactory sc;
-		sc.start( CONSTANT );
-		sc.put( CONSTANT_TYPE, SYSFN );
-		sc.put( CONSTANT_VALUE, it->nameString() );
-		sc.end();
-		return sc.build();
+		return makeConstant( SYSFN, it->nameString() );
 	} else {
 		throw CompileTimeError( "Invalid token after >-> (syscall) arrow" ).culprit( it->nameString() );
 	}
@@ -775,12 +782,7 @@ Node ReadStateClass::readAtomicExpr( const bool only1 ) {
 	TokType fnc = item->tok_type;
 	Role role = item->role;
 	if ( role.IsLiteral() ) {
-		NodeFactory simple;
-		simple.start( CONSTANT );
-		simple.put( CONSTANT_TYPE, tok_type_as_type( fnc ) );
-		simple.put( CONSTANT_VALUE, item->nameString() );
-		simple.end();
-	 	return simple.build();
+	 	return makeConstant( tok_type_as_type( fnc ), item->nameString() ); 
 	} else if ( fnc == tokty_id ) {
 		return makeSymbol( item->nameString() );
 	} else if ( fnc == tokty_charseq ) {
@@ -1515,14 +1517,8 @@ Node ReadStateClass::readRecordClass() {
 	f.end(); // VAR
 	f.start( SYSAPP );
 	f.put( SYSAPP_NAME, "newRecordClass" );
-	f.start( CONSTANT );
-	f.put( CONSTANT_TYPE, "string" );
-	f.put( CONSTANT_VALUE, class_name );
-	f.end();	//	CONSTANT
-	f.start( CONSTANT );
-	f.put( CONSTANT_TYPE, "int" );
-	f.put( CONSTANT_VALUE, slot_names.size() );	
-	f.end(); 	// CONSTANT
+	pushConstant( f, "string", class_name );		//	CONSTANT
+	pushConstant( f, "int", slot_names.size() );	// CONSTANT
 	f.end();	//	SYSAPP
 	f.end(); // BIND
 
@@ -1592,10 +1588,7 @@ Node ReadStateClass::readRecordClass() {
 		f.start( ID );
 		f.put( VID_NAME, class_name );
 		f.end();	//	ID
-		f.start( CONSTANT );
-		f.put( CONSTANT_TYPE, "int" );
-		f.put( CONSTANT_VALUE, i + 1 );	
-		f.end(); //	CONSTANT
+		pushConstant( f, "int", i + 1 ); //	CONSTANT
 		f.end();	//	SYSAPP
 		f.end(); //	BIND
 
@@ -1736,7 +1729,6 @@ Node ReadStateClass::prefixProcessingCore() {
 			return this->readRecordClass();
 		default: 
 			{}
-
 	}
 	ifact->unread();
     return Node();

@@ -67,7 +67,7 @@ const char * tok_type_as_sysapp( TokType fnc ) {
 	case tokty_not_gte: return "!>=";
 	case tokty_not_lt: return "!<";
 	case tokty_not_lte: return "!<=";
-	case tokty_not_ltegt: return "!<>=";
+	case tokty_not_ltegt: return "!<=>";
 	case tokty_not_ltgt: return "!<>";
 	case tokty_pow : return "**";
 	case tokty_quo : return "quo";

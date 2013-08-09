@@ -1913,7 +1913,7 @@ void CodeGenClass::compileGnx( Gnx mnx, LabelClass * contn ) {
 	} else if ( nm == SET and mnx->size() == 2 ) {
 		Gnx dst = mnx->child( 1 );
 		Gnx src = mnx->child( 0 );
-		if ( dst->hasName( VAR ) ) {
+		if ( dst->hasName( ID ) ) {
 			VIdent vid( this, dst );
 			this->compile1( src, CONTINUE_LABEL );
 			this->vmiPOP( vid, true );

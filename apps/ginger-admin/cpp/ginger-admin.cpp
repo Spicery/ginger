@@ -118,7 +118,7 @@ static struct option long_options[] =
         { "license",        optional_argument,      0, 'L' },
         { "add-import",     required_argument,      0, 'M' },
         { "add-package",    required_argument,      0, 'P' },
-        { "new-project",    required_argument,      0, 'N' },
+        { "new-project",    required_argument,      0, 'J' },
         { "package",        required_argument,      0, 'p' },
         { "version",        no_argument,            0, 'V' },
         { "with-tag",       required_argument,      0, 't' },

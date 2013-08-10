@@ -22,6 +22,7 @@
 
 #include "mishap.hpp"
 #include "sysunix.hpp"
+#include "sys.hpp"
 
 namespace Ginger {
 using namespace std;
@@ -62,6 +63,13 @@ Ref * sysGetEnv( Ref * pc, class MachineClass * vm ) {
 	
 	return pc;
 }
+SysInfo infoSysGetEnv( 
+    SysNames( "sysGetEnv" ), 
+    Ginger::Arity( 1 ), 
+    Ginger::Arity( 1 ), 
+    sysGetEnv, 
+    "Returns the value of an environment variable."
+);
 
 //	Arity: 2 -> 0
 Ref * sysPutEnv( Ref * pc, class MachineClass * vm ) {
@@ -81,6 +89,13 @@ Ref * sysPutEnv( Ref * pc, class MachineClass * vm ) {
 
 	return pc;
 }
+SysInfo infoSysPutEnv( 
+    SysNames( "sysPutEnv" ), 
+    Ginger::Arity( 2 ), 
+    Ginger::Arity( 0 ), 
+    sysPutEnv, 
+    "Sets the value of an environment variable."
+);
 
 //	Arity: 0 -> 1
 Ref * sysEnvVars( Ref * pc, class MachineClass * vm ) {
@@ -101,5 +116,12 @@ Ref * sysEnvVars( Ref * pc, class MachineClass * vm ) {
 	
 	return pc;
 }
+SysInfo infoSysEnvVars( 
+    SysNames( "sysEnv" ), 
+    Ginger::Arity( 0 ), 
+    Ginger::Arity( 1 ), 
+    sysEnvVars, 
+    "Returns the environment list."
+);
 
 } // namespace Ginger

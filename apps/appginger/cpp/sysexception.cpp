@@ -49,6 +49,13 @@ using namespace std;
 		}
 		return pc;
 	}
+	SysInfo infoNewException( 
+	    SysNames( "newException" ), 
+	    Ginger::Arity( 1 ), 
+	    Ginger::Arity( 1 ), 
+	    sysNewException, 
+	    "Makes an exception."
+	);
 #endif
 
 static void decorateProblem( class MachineClass * vm, Ginger::Mishap & problem ) {

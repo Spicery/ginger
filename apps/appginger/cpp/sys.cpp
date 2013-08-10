@@ -507,8 +507,6 @@ SysMap & SysMap::sysMap() {
 		SysMaplet( "partApply", SysInfo( Arity( 1, true ), Arity( 1 ), sysPartApply, "Freezes arguments and a function together to make a new function" ) ),
 		SysMaplet( "functionInArity", SysInfo( Arity( 1  ), Arity( 1 ), sysFunctionInArity, "Input arity of a function" ) ),
 		SysMaplet( "functionOutArity", SysInfo( Arity( 1 ), Arity( 1 ), sysFunctionOutArity, "Output arity of a function" ) ),
-		#include "sysattrmap.inc"
-		#include "sysexception.inc"
 		#include "sysstring.inc"
 		#include "sysmap.inc.auto"
 	};

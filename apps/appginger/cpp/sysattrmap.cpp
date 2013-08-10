@@ -23,6 +23,7 @@
 #include "sysprint.hpp"
 #include "mishap.hpp"
 #include "key.hpp"
+#include "sys.hpp"
 
 namespace Ginger {
 
@@ -42,6 +43,14 @@ Ref * sysAttrMapExplode( Ref *pc, class MachineClass * vm ) {
 	}
 	return pc;
 }
+//SysMap::value_type( "attrMapExplode", SysInfo( Arity( 1 ), Arity( 0, true ), sysAttrMapExplode, "Explodes an attribute-map into its members" ) ),
+SysInfo infoAttrMapExplode( 
+    SysNames( "attrMapExplode" ), 
+    Ginger::Arity( 1 ), 
+    Ginger::Arity( 0, true ), 
+    sysAttrMapExplode, 
+    "Explodes an attribute-map into its members."
+);
 
 Ref * sysAttrMapIndex( Ref *pc, class MachineClass * vm ) {
 	if ( vm->count != 2 ) throw Ginger::Mishap( "ArgsMismatch" );
@@ -64,5 +73,14 @@ Ref * sysAttrMapIndex( Ref *pc, class MachineClass * vm ) {
 	vm->fastPush( SYS_ABSENT );
 	return pc;
 }
+//SysMap::value_type( "attrMapIndex", SysInfo( Arity( 2 ), Arity( 1 ), sysAttrMapIndex, "Indexes an attribute-map" ) ),
+SysInfo infoAttrMapIndex( 
+    SysNames( "attrMapIndex" ), 
+    Ginger::Arity( 2 ), 
+    Ginger::Arity( 1 ), 
+    sysAttrMapIndex, 
+    "Indexes an attribute-map."
+);
+
 
 } // namespace Ginger

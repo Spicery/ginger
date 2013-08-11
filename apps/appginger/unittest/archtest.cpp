@@ -16,17 +16,12 @@
     along with AppGinger.  If not, see <http://www.gnu.org/licenses/>.
 \******************************************************************************/
 
-#include <sstream>
-using namespace std;
-
-#include <cppunit/TestAssert.h>
-
-#include "archtest.hpp"
+#include "CppUnitLite2.h"
 #include "common.hpp"
 
-void ArchTest::testArchitectureAssumptions() {
-	CPPUNIT_ASSERT( sizeof( unsigned long ) == sizeof( Ref ) );
-	CPPUNIT_ASSERT( sizeof( SysCall * ) == sizeof( Ref ) );
-}
+using namespace Ginger;
 
-CPPUNIT_TEST_SUITE_REGISTRATION( ArchTest );
+TEST( Sanity__Architecture ) {
+    CHECK_EQUAL( sizeof( unsigned long ), sizeof( Ref ) );
+    CHECK_EQUAL( sizeof( SysCall * ), sizeof( Ref ) );
+}

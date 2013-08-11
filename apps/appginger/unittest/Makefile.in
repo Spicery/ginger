@@ -1,26 +1,20 @@
 
 CC=@CXX@
 
-CXXFLAGS=-g -I../hpp -I../../libgng/hpp -I../../automatic/machine -I../../automatic/sys -I../../automatic/simple `cppunit-config --cflags` -Wall -Wnon-virtual-dtor
+CXXFLAGS=-g -I../../CppUnitLite2/src -I../hpp -I../../libgng/hpp -I../../automatic/machine -I../../automatic/sys -I../../automatic/simple -Wall -Wnon-virtual-dtor
 CFLAGS=-Wmissing-prototypes 
-LDFLAGS=`cppunit-config --libs` 
-OBJS=example.o testrunner.o archtest.o simplekeytest.o constants.o
+OBJS=testappginger.o example.o archtest.o simplekeytest.o
 ### Disabling a test that has suffered bitrot!
 ### gctest.o gcstats.o 
 
-
-all: testrunner
-
-unitcheck:
-	./testrunner 2> results.xml 
+TESTOBJS=testappginger.o example.o archtest.o simplekeytest.o
 
 # $@ is make shorthand for the target.
 # $@ is make shorthand for the dependencies
-testrunner: $(OBJS) ../cpp/libappginger.a
-	g++ $(CXXFLAGS) -o $@ $^ ../../libgng/cpp/libgng.a $(LDFLAGS) /usr/local/lib/librudecgi.a -L../cpp -lappginger 
+testappginger: $(TESTOBJS)
+	g++ $(CXXFLAGS) -o $@ $^ ../../CppUnitLite2/cppunitlite.a /usr/local/lib/librudecgi.a -L../cpp -lappginger 
 
 clean:
 	rm -f *.o
-	rm -f testrunner
-	rm -f *.a
+	rm -f testappginger
 	rm -f results.xml

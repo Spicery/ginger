@@ -216,6 +216,7 @@ public:
 			cout << "," << endl;
 		}
 	}
+
 	void startValue( const string topic ) {
 		this->addCommaLineBreakBetweenValues();
 		this->indent();
@@ -223,6 +224,7 @@ public:
 			cout << "{ \"topic\": \"" << topic << "\"";
 		}
 	}
+
 	void addAttribute( const string key, const string val ) {
 		//	N.B. We rely on the fact that the sysfn attributes are 
 		//	emitted in the order name, docstring, <others> to get
@@ -252,10 +254,10 @@ public:
 
 class ReStructuredTextFormatter : public Formatter {
 private:
-	int section_count;
+	//	int section_count;	//	Not needed.
 
 public:
-	ReStructuredTextFormatter() : section_count( 0 ) {}
+	ReStructuredTextFormatter() {}
 
 public:
 	void startDocument() {

@@ -44,6 +44,7 @@ private:	//	Flags.
 public:
 	const std::string & getNameString() const { return this->name_data; }
 	bool isProtected() const { return this->prot; }
+	class Package * getParent() const { return this->parent; }
 	
 public:
 	Valof( class Package * parent, const std::string & nm, Ref r = SYS_UNASSIGNED ) :

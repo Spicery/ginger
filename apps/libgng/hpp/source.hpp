@@ -133,8 +133,8 @@ protected:
 
 class FileDescriptorSource : public FilePtrSource {
 private:
-    FILE * fd;
-    bool close_on_exit;
+    //FILE * fd;
+    //bool close_on_exit;
 
 public:
     FileDescriptorSource( const int fd, const bool coe = false ) :

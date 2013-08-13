@@ -261,7 +261,7 @@ private:
 	MachineClass * 			vm;
 	bool 					scan_call_stack;
 	ToSpaceCopier 			copier;
-	ptrdiff_t				pc_delta;
+	//ptrdiff_t				pc_delta;	//	Not used.
 	
 	size_t					prev_num_assoc_chains;
 	vector< Ref * >			assoc_chains;

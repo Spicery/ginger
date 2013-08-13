@@ -2165,7 +2165,7 @@ void CodeGenClass::compile1( Gnx mnx, LabelClass * contn ) {
 	} else if ( a.count() == 1 ) {
 		this->compileGnx( mnx, contn );
 	} else {
-		throw Ginger::Mishap( "Wrong number of results in single context" ).culprit( "#Results", "" + a.count() );
+		throw Ginger::Mishap( "Wrong number of results in single context" ).culprit( "#Results", a.count() );
 	}
 }
 
@@ -2187,7 +2187,7 @@ void CodeGenClass::compileN( Gnx mnx, int N, LabelClass * contn ) {
 		} else if ( a.count() == N ) {
 			this->compileGnx( mnx, contn );
 		} else {
-			throw Ginger::Mishap( "Wrong number of results in context of known arity" ).culprit( "#Results", "" + a.count() );
+			throw Ginger::Mishap( "Wrong number of results in context of known arity" ).culprit( "#Results", a.count() );
 		}
 	}
 }
@@ -2222,7 +2222,7 @@ void CodeGenClass::compile0( Gnx mnx, LabelClass * contn ) {
 	} else if ( a.count() == 0 ) {
 		this->compileGnx( mnx, contn );
 	} else {
-		throw Ginger::Mishap( "Wrong number of results in zero context" ).culprit( "#Results", "" + a.count() );
+		throw Ginger::Mishap( "Wrong number of results in zero context" ).culprit( "#Results", a.count() );
 	}
 }
 

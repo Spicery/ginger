@@ -43,6 +43,8 @@ private:
 
 public:
     Gnx simplify( Gnx x );
+    Package * getPackage() const { return this->package; }  // todo: may not be needed any more.
+    AppContext & getAppContext() { return this->context; }  // todo: may not be needed any more.
 
 public:
     Simplify( AppContext & cxt, Package * package );

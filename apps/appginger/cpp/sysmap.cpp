@@ -178,7 +178,7 @@ class AddArgument {
 private:
 	XfrClass & xfr;
 	Ref * data_refref;
-	long data_size;
+	//long data_size;
 	bool eq;
 	long width;
 	long num_buckets;
@@ -246,7 +246,7 @@ public:
 	AddArgument( XfrClass & xfr, Ref * data_refref, long data_size, bool eq, long width ) :
 		xfr( xfr ),
 		data_refref( data_refref ),
-		data_size( data_size ),
+		//data_size( data_size ),
 		eq( eq ),
 		width( width ),
 		num_buckets( 0 )

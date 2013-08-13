@@ -41,6 +41,7 @@ private:
 	
 public:
 	PackageCache * fetchPackageCache( const std::string & pkg );
+	Search * getParent() { return this->parent; }	//	Not needed.
 
 
 public:

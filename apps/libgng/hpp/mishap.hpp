@@ -63,6 +63,7 @@ public:
 	Mishap & culprit( const std::string reason, const std::string arg );
 	Mishap & culprit( const std::string arg );
 	Mishap & culprit( const std::string reason, const long N );
+	Mishap & culprit( const std::string reason, const int N );
 	Mishap & culprit( const std::string reason, const double N );
 	Mishap & culprit( const std::string reason, const char N );
 

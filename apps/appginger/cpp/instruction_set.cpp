@@ -4,7 +4,7 @@
 namespace Ginger {
 
 void enter_error( int B, int A ) {
-	throw Ginger::Mishap( "Wrong number of arguments" ).culprit( "Found", "" + B ).culprit( "Wanted", "" + A );
+	throw Ginger::Mishap( "Wrong number of arguments" ).culprit( "Found", B ).culprit( "Wanted", A );
 }
 
 void call_error( Ref r ) {

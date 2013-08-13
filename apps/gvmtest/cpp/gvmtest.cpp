@@ -107,6 +107,8 @@ private:
     TextReporter reporter;
     const bool allow_zeros;
     const bool dump_needed;
+public:
+    bool isDumpNeeded() const { return this->dump_needed; }
 private:
     struct Counts {
     private:

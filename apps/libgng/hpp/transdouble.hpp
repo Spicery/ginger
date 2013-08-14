@@ -176,6 +176,18 @@ public:
         );
     }
 
+    TransDouble sin() const {
+        return TransDouble( std::sin( this->data ) );
+    }
+
+    TransDouble cos() const {
+        return TransDouble( std::cos( this->data ) );
+    }
+
+    TransDouble tan() const {
+        return TransDouble( std::tan( this->data ) );
+    }
+
 };
 
 std::ostream& operator<<(std::ostream& os, const TransDouble& obj);

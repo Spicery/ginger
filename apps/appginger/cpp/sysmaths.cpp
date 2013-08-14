@@ -460,6 +460,64 @@ SysInfo infoNotGtE(
     "Returns false if the first argument is greater than or equal to the second, else true."
 );
 
+Ref * sysSin( Ref * pc, class MachineClass * vm ) {
+    if ( vm->count != 1 ) throw Ginger::Mishap( "ArgsMismatch" );
+    Cell angle( vm->fastPeek() );
+    if ( angle.isSmall() ) {
+        vm->fastPeek() = vm->heap().copyDouble( pc, TransDouble( static_cast< double >( angle.getLong() ) ).sin().asDouble() );
+    } else if ( angle.isDoubleObject() ) {
+        vm->fastPeek() = vm->heap().copyDouble( pc, angle.asDoubleObject().getDouble().sin().asDouble() );
+    } else {
+        throw Ginger::Mishap( "Number needed" ).culprit( "Value", angle.toShowString() );
+    }
+    return pc;
+}
+SysInfo infoSin( 
+    SysNames( "sin" ), 
+    Ginger::Arity( 1 ), 
+    Ginger::Arity( 1 ), 
+    sysSin, 
+    "Returns sine of an angle in radians."
+);
 
+Ref * sysCos( Ref * pc, class MachineClass * vm ) {
+    if ( vm->count != 1 ) throw Ginger::Mishap( "ArgsMismatch" );
+    Cell angle( vm->fastPeek() );
+    if ( angle.isSmall() ) {
+        vm->fastPeek() = vm->heap().copyDouble( pc, TransDouble( static_cast< double >( angle.getLong() ) ).cos().asDouble() );
+    } else if ( angle.isDoubleObject() ) {
+        vm->fastPeek() = vm->heap().copyDouble( pc, angle.asDoubleObject().getDouble().cos().asDouble() );
+    } else {
+        throw Ginger::Mishap( "Number needed" ).culprit( "Value", angle.toShowString() );
+    }
+    return pc;
+}
+SysInfo infoCos( 
+    SysNames( "cos" ), 
+    Ginger::Arity( 1 ), 
+    Ginger::Arity( 1 ), 
+    sysCos, 
+    "Returns cosine of an angle in radians."
+);
+
+Ref * sysTan( Ref * pc, class MachineClass * vm ) {
+    if ( vm->count != 1 ) throw Ginger::Mishap( "ArgsMismatch" );
+    Cell angle( vm->fastPeek() );
+    if ( angle.isSmall() ) {
+        vm->fastPeek() = vm->heap().copyDouble( pc, TransDouble( static_cast< double >( angle.getLong() ) ).tan().asDouble() );
+    } else if ( angle.isDoubleObject() ) {
+        vm->fastPeek() = vm->heap().copyDouble( pc, angle.asDoubleObject().getDouble().tan().asDouble() );
+    } else {
+        throw Ginger::Mishap( "Number needed" ).culprit( "Value", angle.toShowString() );
+    }
+    return pc;
+}
+SysInfo infoTan( 
+    SysNames( "tan" ), 
+    Ginger::Arity( 1 ), 
+    Ginger::Arity( 1 ), 
+    sysTan, 
+    "Returns the tangent of an angle in radians."
+);
 
 } // namespace Ginger

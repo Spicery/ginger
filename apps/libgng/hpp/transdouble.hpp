@@ -188,6 +188,10 @@ public:
         return TransDouble( std::tan( this->data ) );
     }
 
+    TransDouble exp() const {
+        return TransDouble( std::exp( this->data ) );
+    }
+
 };
 
 std::ostream& operator<<(std::ostream& os, const TransDouble& obj);

@@ -101,6 +101,7 @@ instructionSet = [
 	Instruction( "not", "i" ),
 	Instruction( "pop_global", "iv" ),
 	Instruction( "pop_local", "ir"),
+	Instruction( "pos", "i" ),
 	Instruction( "push_global", "iv" ),
 	Instruction( "push_local", "ir" ),
 	Instruction( "push_local0", "i" ),

@@ -41,7 +41,9 @@
 #define InL InLineRole
 
 void ItemMap::add( const bool mode_check, const char *n, TokType f, Role r, int p  ) {
-	if ( mode_check ) this->table[ n ] = new ItemClass( n, f, r, p );
+	if ( mode_check ) {
+		this->table[ n ] = new ItemClass( n, f, r, p );
+	}
 }
 
 //	Declare syntactic properties.

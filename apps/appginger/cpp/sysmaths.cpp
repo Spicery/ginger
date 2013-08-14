@@ -520,4 +520,24 @@ SysInfo infoTan(
     "Returns the tangent of an angle in radians."
 );
 
+Ref * sysExp( Ref * pc, class MachineClass * vm ) {
+    if ( vm->count != 1 ) throw Ginger::Mishap( "ArgsMismatch" );
+    Cell value( vm->fastPeek() );
+    if ( value.isSmall() ) {
+        vm->fastPeek() = vm->heap().copyDouble( pc, TransDouble( static_cast< double >( value.getLong() ) ).exp().asDouble() );
+    } else if ( value.isDoubleObject() ) {
+        vm->fastPeek() = vm->heap().copyDouble( pc, value.asDoubleObject().getDouble().exp().asDouble() );
+    } else {
+        throw Ginger::Mishap( "Number needed" ).culprit( "Value", value.toShowString() );
+    }
+    return pc;
+}
+SysInfo infoExp( 
+    SysNames( "exp" ), 
+    Ginger::Arity( 1 ), 
+    Ginger::Arity( 1 ), 
+    sysExp, 
+    "Returns the exponential of a real value (e**x)."
+);
+
 } // namespace Ginger

@@ -1668,6 +1668,15 @@ Node ReadStateClass::prefixProcessingCore() {
 			neg.end();
 			return neg.build();
 		}
+		case tokty_add: {
+			Node e = this->readExprPrec( prec_negate );
+			NodeFactory pos;
+			pos.start( SYSAPP );
+			pos.put( SYSAPP_NAME, "positivate" );
+			pos.add( e );
+			pos.end();
+			return pos.build();			
+		}
 		case tokty_id: 
 			return this->readId( item->nameString() );
 		case tokty_anon:

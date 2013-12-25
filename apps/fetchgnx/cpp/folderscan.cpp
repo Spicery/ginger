@@ -26,7 +26,7 @@ using namespace Ginger;
 
 FolderScan::FolderScan( string pathname ) : pathname( pathname ) {
 	this->dp = NULL;
-	this->dirp = opendir( pathname .c_str() );
+	this->dirp = opendir( pathname.c_str() );
 	if ( this->dirp == NULL ) throw Mishap( "Cannot open directory" ).culprit( "Pathname", pathname );
 }
 

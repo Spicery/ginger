@@ -47,6 +47,7 @@ public:
 	Ginger::Mishap *			mishap;
 	
 public:
+	const std::string & name() const;
 	const std::string & getPathName() const;
 	void init( const std::string & vname, const std::string & pathname );
 	void init( VarInfo * v );

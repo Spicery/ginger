@@ -35,11 +35,15 @@ private:
 	std::map< std::string, PackageCache * > 	cache;
 	
 private:
-	void putPackageCache( const std::string & pkg_name, PackageCache * cache );
+	PackageCache * putPackageCache( const std::string & pkg_name, PackageCache * cache );
 	PackageCache * getPackageCache( const std::string & pkg_name );
 	PackageCache * cachePackage( const std::string & pkg );
+	PackageCache * createRawPackageCache( const std::string & pkg_path, const std::string & pkg_name );
+	PackageCache * createRegisteredPackageCache( const std::string & pkg_path, const std::string & pkg_name );
+	PackageCache * registerPackageCache( PackageCache * );
 	
 public:
+	std::vector< PackageCache * > allPackageCaches();
 	PackageCache * fetchPackageCache( const std::string & pkg );
 	Search * getParent() { return this->parent; }	//	Not needed.
 

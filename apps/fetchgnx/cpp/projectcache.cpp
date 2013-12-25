@@ -33,6 +33,7 @@ using namespace std;
 #define LOAD					"load"
 #define LOAD_SIZE				sizeof( LOAD )
 
+//#define DBG_SEARCH
 
 ProjectCache::ProjectCache( Search * parent, vector< string > & project_paths ) :
 	parent( parent ),
@@ -54,8 +55,8 @@ PackageCache * ProjectCache::getPackageCache( const string & pkg_name ) {
 	return this->cache[ pkg_name ];
 }
 
-void ProjectCache::putPackageCache( const string & pkg_name, PackageCache * pkg ) {
-	this->cache[ pkg_name ] = pkg;
+PackageCache * ProjectCache::putPackageCache( const string & pkg_name, PackageCache * pkg ) {
+	return this->cache[ pkg_name ] = pkg;
 }
 
 enum STATE { NORMAL, PERCENT1, PERCENT2 };
@@ -119,6 +120,79 @@ static string URLdecode( string name ) {
 	return sofar.str();
 }
 
+PackageCache * ProjectCache::createRawPackageCache( const string & pkg_folder, const string & pkg_name ) {
+	PackageCache * newc = new PackageCache( this, pkg_name );
+
+	#ifdef DBG_SEARCH
+		cerr << "package: " << pkg_name << endl;
+	#endif
+
+	newc->readImports( pkg_folder + "/imports.gnx" );
+	//newc->printImports();
+
+	FolderScan fscan( pkg_folder );
+	while ( fscan.nextFolder() ) {
+		string entry = fscan.entryName();
+		
+		#ifdef DBG_SEARCH
+			cerr << "subfolder: " << entry << endl;
+		#endif
+
+
+		//	Check that -entry- matches *.auto
+		if ( entry.find( AUTO_SUFFIX, entry.size() - AUTO_SUFFIX_SIZE ) != string::npos ) {
+		
+			const string default_tag = entry.substr( 0, entry.size() + 1 - AUTO_SUFFIX_SIZE );
+			//cout << "TAG = " << default_tag << endl;
+		
+			#ifdef DBG_SEARCH
+				cerr << "*.auto: " << entry << endl;
+			#endif
+			
+			FolderScan files( fscan.folderName() + "/" + entry );
+			while ( files.nextFile() ) {
+				string fname = files.entryName();
+				#ifdef DBG_SEARCH
+					cerr << "Entry : " << fname << endl;
+				#endif
+				
+				size_t n = fname.rfind( '.' );
+				if ( n == string::npos ) continue;
+				
+				const string root = URLdecode( fname.substr( 0, n ) );
+				const string extn = fname.substr( n + 1 );
+				
+				#ifdef DBG_SEARCH
+					cerr << "Adding " << root << " -> " << ( files.folderName() + "/" + fname ) <<  endl;
+				#endif
+				
+				
+				VarInfo & v = newc->varInfoRef( root );
+				v.init( root, files.folderName() + "/" + fname );
+				v.addTag( default_tag );
+				//cout << "old path name " << v->getPathName() << endl;
+				v.freeze();					
+				//cout << "new path name 1 = " << newc->varInfo( root )->getPathName() << endl;
+				//cout << "new path name 2 = " << v->getPathName() << endl;
+				//newc->putPathName( root, files.folderName() + "/" + fname );		
+			}	
+		} else if ( entry == "load" ) {
+			//	It doesn't match *.auto but it is a load folder though.
+			const string p( fscan.folderName() + "/" + entry );
+			newc->setLoadFolder( p );
+		}
+	}	
+	return newc;
+}
+
+PackageCache * ProjectCache::registerPackageCache( PackageCache * pkgc ) {
+	return this->putPackageCache( pkgc->getPackageName(), pkgc );
+}
+
+PackageCache * ProjectCache::createRegisteredPackageCache( const string & prj_folder, const string & pkg_name ) {
+	return this->registerPackageCache( this->createRawPackageCache( prj_folder, pkg_name ) );
+}
+
 PackageCache * ProjectCache::cachePackage( const string & pkg ) {
 	for (
 		vector< string >::iterator it = this->project_folders.begin();
@@ -129,64 +203,7 @@ PackageCache * ProjectCache::cachePackage( const string & pkg ) {
 		string pkg_folder = *it + "/" + pkg;
 		
 		if ( Ginger::fileExists( pkg_folder ) ) {
-		
-			PackageCache * newc = new PackageCache( this, pkg );
-			
-			
-			newc->readImports( pkg_folder + "/imports.gnx" );
-			//newc->printImports();
-			
-			FolderScan fscan( pkg_folder );
-			while ( fscan.nextFolder() ) {
-				string entry = fscan.entryName();
-		
-				//	Check that -entry- matches *.auto
-				if ( entry.find( AUTO_SUFFIX, entry.size() - AUTO_SUFFIX_SIZE ) != string::npos ) {
-				
-					const string default_tag = entry.substr( 0, entry.size() + 1 - AUTO_SUFFIX_SIZE );
-					//cout << "TAG = " << default_tag << endl;
-				
-					#ifdef DBG_SEARCH
-						cout << "*.auto: " << entry << endl;
-					#endif
-					
-					FolderScan files( fscan.folderName() + "/" + entry );
-					while ( files.nextFile() ) {
-						string fname = files.entryName();
-						#ifdef DBG_SEARCH
-							cout << "Entry : " << fname << endl;
-						#endif
-						
-						size_t n = fname.rfind( '.' );
-						if ( n == string::npos ) continue;
-						
-						const string root = URLdecode( fname.substr( 0, n ) );
-						const string extn = fname.substr( n + 1 );
-						
-						#ifdef DBG_SEARCH
-							cout << "Adding " << root << " -> " << ( files.folderName() + "/" + fname ) <<  endl;
-						#endif
-						
-						
-						VarInfo & v = newc->varInfoRef( root );
-						v.init( root, files.folderName() + "/" + fname );
-						v.addTag( default_tag );
-						//cout << "old path name " << v->getPathName() << endl;
-						v.freeze();					
-						//cout << "new path name 1 = " << newc->varInfo( root )->getPathName() << endl;
-						//cout << "new path name 2 = " << v->getPathName() << endl;
-						//newc->putPathName( root, files.folderName() + "/" + fname );		
-					}	
-				} else if ( entry == "load" ) {
-					//	It doesn't match *.auto but it is a load folder though.
-					const string p( fscan.folderName() + "/" + entry );
-					newc->setLoadFolder( p );
-				}
-			}	
-			
-			this->putPackageCache( pkg, newc );
-			
-			return newc;
+			return this->createRegisteredPackageCache( pkg_folder, pkg );
 		}
 	}
 	throw Mishap( "Cannot find package" ).culprit( "Package", pkg );
@@ -198,3 +215,21 @@ PackageCache * ProjectCache::fetchPackageCache( const string & pkg ) {
 	return this->cachePackage( pkg );
 }
 
+std::vector< PackageCache * > ProjectCache::allPackageCaches() {
+	std::vector< PackageCache * > pkgs;
+	for (
+		vector< string >::iterator it = this->project_folders.begin();
+		it != this->project_folders.end();
+		++it
+	) {
+		const string prj_folder = *it;
+		FolderScan prjscan( prj_folder );
+		while ( prjscan.nextFolder() ) {
+			const string pkg_name = prjscan.entryName();
+			const string pkg_folder = prj_folder + "/" + pkg_name;
+			if ( pkg_name == "." || pkg_name == ".." ) continue;
+			pkgs.push_back( this->createRegisteredPackageCache( pkg_folder, pkg_name ) ); 
+		}
+	}	
+	return pkgs;
+}

@@ -37,6 +37,16 @@
 #include "mishap.hpp"
 #include "folderscan.hpp"
 #include "packagecache.hpp"
+#include "mnx.hpp"
+
+#define BROWSE_INFO 	"browse.info"
+#define VAR 			"var.info"
+#define VAR_NAME 		"var.name"
+#define PKG 			"pkg.info"
+#define PKG_NAME 		"pkg.name"
+#define ENC_PKG 		"enc.pkg"
+#define DEF_PKG 		"def.pkg"
+#define PATH_SEPARATOR 	"/"
 
 using namespace std;
 
@@ -121,7 +131,7 @@ static void run( string command, string pathname, ostream & out ) {
 
 void Search::cacheDefinitionFile( PackageCache * c, const string & name, const string & pathname ) {
 	ostringstream out;
-	run( INSTALL_TOOL "/" FILE2GNX, pathname, out );
+	run( INSTALL_TOOL PATH_SEPARATOR FILE2GNX, pathname, out );
 	cout << out.str();
 }
 
@@ -155,34 +165,28 @@ static ImportInfo * importWithAlias( PackageCache * x, const string alias ) {
 	return NULL;
 }
 
+
+
 static void outputUnqualified( const string & enc_pkg_name, const string & name, const string & def_pkg ) {
-	cout << "<resolve enc.pkg=\"";
+	cout << "<resolve " ENC_PKG "=\"";
 	renderText( enc_pkg_name );
 	cout << "\" name=\"";
 	renderText( name );
-	cout << "\" def.pkg=\"";
+	cout << "\" " DEF_PKG "=\"";
 	renderText( def_pkg );
 	cout << "\" />" << endl;
-	
-	/*cerr << "...... <resolve enc.pkg=\"";
-	renderText( cerr, enc_pkg_name );
-	cerr << "\" name=\"";
-	renderText( cerr, name );
-	cerr << "\" def.pkg=\"";
-	renderText( cerr, def_pkg );
-	cerr << "\" />" << endl;*/
-	
-	
 }
 
+
+
 static void outputQualified( const string & enc_pkg_name, const string & alias_name, const string & var_name, const string & def_pkg ) {
-	cout << "<resolve enc.pkg=\"";
+	cout << "<resolve " ENC_PKG "=\"";
 	renderText( enc_pkg_name );
 	cout << "\" alias=\"";
 	renderText( alias_name );
 	cout << "\" name=\"";
 	renderText( var_name );
-	cout << "\" def.pkg=\"";
+	cout << "\" " DEF_PKG "=\"";
 	renderText( def_pkg );
 	cout << "\" />" << endl;	
 }
@@ -281,7 +285,7 @@ void Search::loadPackage( const string & pkg ) {
 	PackageCache * c = this->project_cache.fetchPackageCache( pkg );
 	string pathname = c->getInitLoadPath();
 	if ( pathname.size() > 0 ) {
-		run( INSTALL_TOOL "/" FILE2GNX, pathname, cout );
+		run( INSTALL_TOOL PATH_SEPARATOR FILE2GNX, pathname, cout );
 	} else {
 		//cout << "<seq><!-- load path was not defined --></seq>" << endl;
 	}
@@ -293,10 +297,34 @@ void Search::loadFileFromPackage( const string & pkg, const string & load_file )
 	if ( pathname.size() <= 0 ) {
 		throw Mishap( "No load folder for this package" ).culprit( "Package", pkg );
 	}
-	const string file_name( pathname + "/" + load_file );
+	const string file_name( pathname + PATH_SEPARATOR + load_file );
 	if ( access( file_name.c_str(), R_OK ) == 0 ) {
-		run( INSTALL_TOOL "/" FILE2GNX, file_name, cout );
+		run( INSTALL_TOOL PATH_SEPARATOR FILE2GNX, file_name, cout );
 	} else {
 		throw Mishap( "Cannot find load file for this package" ).culprit( "Load file", load_file ).culprit( "Package", pkg );
 	}	
+}
+
+
+
+void Search::browsePackages() {
+	vector< PackageCache * > pkgs = this->project_cache.allPackageCaches();
+	Ginger::MnxBuilder all;
+	all.start( BROWSE_INFO );
+	for ( vector< PackageCache * >::iterator it = pkgs.begin(); it != pkgs.end(); ++it ) {
+		PackageCache * pkgc = *it;
+		all.start( PKG );
+		all.put( PKG_NAME, pkgc->getPackageName() );
+		vector< VarInfo * > vars = pkgc->allVarInfo();
+		for ( vector< VarInfo * >::iterator it = vars.begin(); it != vars.end(); ++it ) {
+			VarInfo * vi = *it;
+			all.start( VAR );
+			all.put( VAR_NAME, vi->name() );
+			all.end();
+		}
+		all.end();
+	}
+	all.end();
+	all.build()->render();
+	cout << endl;
 }

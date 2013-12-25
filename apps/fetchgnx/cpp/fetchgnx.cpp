@@ -394,6 +394,10 @@ void Main::run() {
 				mnx->hasAttribute( "load.file" )
 			) {
 				search.loadFileFromPackage( mnx->attribute( "pkg.name" ), mnx->attribute( "load.file" ) );
+			} else if (
+				mnx->hasName( "browse.packages" )
+			) {
+				search.browsePackages();
 			} else {
 				throw Ginger::Mishap( "Invalid request" ).culprit( mnx->toString() );
 			}

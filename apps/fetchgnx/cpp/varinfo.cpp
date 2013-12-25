@@ -59,6 +59,14 @@ const std::string & VarInfo::getPathName() const {
 	}
 }
 
+const std::string & VarInfo::name() const {
+	if ( this->frozen) {
+		return this->var_name;
+	} else {
+		throw Mishap( "Internal error" );
+	}
+}
+
 void VarInfo::init( const std::string & vname, const std::string & pname  ) {
 	//cout << "init " << pname << endl;
 	if ( ! this->frozen ) {

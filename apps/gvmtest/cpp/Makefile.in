@@ -17,7 +17,7 @@ CXX=@CXX@
 INSTALLDIRS=-DINSTALL_BIN='"$(INSTALL_BIN)"' -DINSTALL_LIB='"$(INSTALL_LIB)"' -DINSTALL_TOOL='"$(INSTALL_TOOL)"'
 
 CFLAGS=-Wall -Wmissing-prototypes -Wnon-virtual-dtor
-CXXFLAGS=$(CFLAGS) -DRUDECGI $(INSTALLDIRS) -g -I../hpp -I../../appginger/hpp -I../../libgng/hpp -I../../automatic/machine -I../../automatic/simple
+CXXFLAGS=$(CFLAGS) -DRUDECGI $(INSTALLDIRS) -g -std=c++0x -I../hpp -I../../appginger/hpp -I../../libgng/hpp -I../../automatic/machine -I../../automatic/simple
 
 OBJS=gvmtest.o gvm.o
 

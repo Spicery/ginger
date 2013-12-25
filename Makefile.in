@@ -1,13 +1,13 @@
 all:
-	$(MAKE) -C apps $@
-	$(MAKE) -C autodocs $@
-	$(MAKE) -C projects $@
+	make -C apps $@
+	make -C autodocs $@
+	make -C projects $@
 
 clean:
 	rm -rf _build/
-	$(MAKE) -C apps $@
-	$(MAKE) -C autodocs $@
-	$(MAKE) -C projects $@
+	make -C apps $@
+	make -C autodocs $@
+	make -C projects $@
 
 distclean: clean
 	rm -f Makefile

@@ -67,6 +67,14 @@ bool PackageCache::hasVariable( std::string var_name ) {
 	return this->cache.find( var_name ) != this->cache.end();
 }
 
+vector< VarInfo * > PackageCache::allVarInfo() {
+	vector< VarInfo * > info;
+	for ( std::map< std::string, VarInfo >::iterator it = this->cache.begin(); it != this->cache.end(); ++it ) {
+		info.push_back( &it->second );
+	}
+	return info;
+}
+
 std::string PackageCache::getPathName( std::string var_name ) {
 	return this->cache[ var_name ].getPathName();
 }

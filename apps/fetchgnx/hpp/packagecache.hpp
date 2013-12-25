@@ -43,6 +43,7 @@ private:
 	
 public:
 	std::string getPackageName();
+	std::vector< VarInfo * > allVarInfo();
 	bool hasVariable( std::string var_name );
 	std::string getPathName( std::string name );
 	VarInfo * absoluteVarInfo( const std::string & var_name );	//	Any facet.

@@ -26,8 +26,6 @@
 #include <sys/errno.h>
 
 
-#include <ext/stdio_filebuf.h> // __gnu_cxx::stdio_filebuf
-
 #include "mnx.hpp"
 #include "mishap.hpp"
 #include "command.hpp"

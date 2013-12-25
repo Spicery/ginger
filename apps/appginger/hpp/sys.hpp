@@ -51,10 +51,31 @@ enum InfoFlavour {
 	SYS_CALL_FLAVOUR
 };
 
+/*
+SysNames( NAME )
+	This basic form asks for NAME to be registered as a system-function
+	*and* by default to be added to ginger.library which is the basic 
+	set of bindings.
+
+SysNames( NAME, SysSynonym( NAME' ) )
+	In addition to registering a system-function and adding an entry to the 
+	ginger.library, this creates an additional synonym in the ginger 
+	library.
+*/
 
 /**
  * 	SysNames is anticipating the need for language-specific bindings
- * 	for built-in functions. At the moment it is simply a name.
+ * 	for built-in functions. At the moment it is simply a base-name and
+ * 	synonyms for it.
+ *
+ *	In general we need
+ *		- base-name: the global system function name used in GNX.
+ *		- for each entry in a standard library
+ *			+ name of package (currently only ginger.library)
+ *			+ variable name
+ *	
+ * 	The next feature I want to accomodate is a system function
+ *	that isn't exposed in a library but only as a <sysapp name=NAME/>.
  */
 class SysNames {
 public:
@@ -68,29 +89,21 @@ public:
 		std::string name() const { return this->alias_name; }
 	};
 
-	template< typename T >
-	class Iterator {
-	public:
-		virtual bool isValid() = 0;
-		virtual T & current() = 0;
-		virtual void advance() = 0;
-		virtual ~Iterator() {}
-	};
-
-	class IteratorSysSynonym : public Iterator< SysSynonym > {
+	class Generator {
 	private:
 		std::list< SysSynonym >::iterator start_it;
 		std::list< SysSynonym >::iterator end_it;
 	public:
-		IteratorSysSynonym( std::list< SysSynonym > & _list ) : start_it( _list.begin() ), end_it( _list.end() ) {}
-		virtual ~IteratorSysSynonym() {}
+		Generator( std::list< SysSynonym > & _list ) : start_it( _list.begin() ), end_it( _list.end() ) {}
+		~Generator() {}
 	public:
-		bool isValid() { return this->start_it != this->end_it; }
-		SysSynonym & current() { 
+		bool operator ! () const { return this->start_it == this->end_it; }
+		SysSynonym & operator *() {
 			return *this->start_it;
 		}
-		void advance() { 
-			++this->start_it; 
+		Generator & operator ++() {
+			++this->start_it;
+			return *this;
 		}
 	};
 
@@ -112,8 +125,8 @@ public:
 		return this->def_name;
 	}
 
-	IteratorSysSynonym synonymIterator() {
-		return IteratorSysSynonym( this->synonyms );
+	Generator synonymIterator() {
+		return Generator( this->synonyms );
 	}
 
 };

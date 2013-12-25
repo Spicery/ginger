@@ -428,14 +428,12 @@ private:
 			it != SysMap::sysMap().end();
 			++it
 		) {
-
-
 			for (
-				SysNames::IteratorSysSynonym synonyms( it->second.sysNames().synonymIterator() );
-				synonyms.isValid();
-				synonyms.advance()
+				SysNames::Generator synonyms = it->second.sysNames().synonymIterator();
+				!!synonyms;
+				++synonyms
 			) {
-				SysNames::SysSynonym & ss = synonyms.current();
+				SysNames::SysSynonym & ss = *synonyms;
 				this->formatter->startValue( "synonym" );
 				this->formatter->addAttribute( "base.name", it->first );
 				this->formatter->addAttribute( "alt.name", ss.name() );

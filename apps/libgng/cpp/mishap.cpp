@@ -71,7 +71,23 @@ Mishap & Mishap::culprit( const std::string reason, const long N ) {
 	return *this;
 }
 
+Mishap & Mishap::culprit( const std::string reason, const unsigned long N ) {
+	std::ostringstream s;
+	s << N;
+	const std::string result( s.str() );
+	this->culprits.push_back( pair< const string, const string >( reason, result ) );
+	return *this;
+}
+
 Mishap & Mishap::culprit( const std::string reason, const int N ) {
+	std::ostringstream s;
+	s << N;
+	const std::string result( s.str() );
+	this->culprits.push_back( pair< const string, const string >( reason, result ) );
+	return *this;
+}
+
+Mishap & Mishap::culprit( const std::string reason, const unsigned int N ) {
 	std::ostringstream s;
 	s << N;
 	const std::string result( s.str() );

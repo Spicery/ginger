@@ -1,13 +1,13 @@
 all:
-	$(MAKE) -C cpp $@
+	make -C cpp $@
 
 dox:
 	doxygen Doxyfile
 
 clean:
-	$(MAKE) -C cpp $@
-	$(MAKE) -C unittest $@
+	make -C cpp $@
+	make -C unittest $@
 	/bin/rm -rf _dox/
 
 check:
-	$(MAKE) -C unittest $@
+	make -C unittest $@

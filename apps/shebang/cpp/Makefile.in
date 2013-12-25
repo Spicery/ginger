@@ -15,6 +15,8 @@ INSTALL_DOC=@docdir@
 
 
 CC=@CXX@
+CXX=@CXX@
+
 
 INSTALLDIRS=-DINSTALL_BIN='"$(INSTALL_BIN)"' -DINSTALL_LIB='"$(INSTALL_LIB)"' -DINSTALL_TOOL='"$(INSTALL_TOOL)"'
 
@@ -29,7 +31,7 @@ all: shebang
 # $@ is make shorthand for the target.
 # $@ is make shorthand for the dependencies
 shebang: $(OBJS)
-	@CXX@ $(CXXFLAGS) $(BOOST_CPPFLAGS) -o $@ $^
+	$(CC) $(CXXFLAGS) $(BOOST_CPPFLAGS) -o $@ $^
 	
 clean:
 	rm -f *.o

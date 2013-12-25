@@ -108,15 +108,15 @@ void Mnx::addChild( shared< Mnx > child ) {
 	this->children.push_back( child );
 }
 	
-shared< Mnx > & Mnx::child( int n ) {
+shared< Mnx > Mnx::child( int n ) {
 	return this->children.at( n );
 }
 
-shared< Mnx > & Mnx::lastChild() {
+shared< Mnx > Mnx::lastChild() {
 	return this->children.back();
 }
 
-shared< Mnx > & Mnx::firstChild() {
+shared< Mnx > Mnx::firstChild() {
 	return this->children.front();
 }
 
@@ -281,7 +281,6 @@ std::string Mnx::toString() {
 }
 
 
-
 class MnxHandler : public MnxSaxHandler {
 private:
 	shared< Mnx > answer;
@@ -443,29 +442,32 @@ MnxBuilder::MnxBuilder()
 	this->stack.push_back( shared< Mnx >( new Mnx( "dummy" ) ) );
 }
 
-void MnxBuilder::start( const std::string & name ) {
+MnxBuilder& MnxBuilder::start( const std::string & name ) {
 	#ifdef DEBUG
 		cerr << "*** START " << name << endl;
 	#endif
-	this->stack.push_back( shared< Mnx >( new Mnx( name ) ) );
+	this->stack.push_back( shared< Mnx >( new Mnx( name ) ) );\
+	return *this;
 }
 
-void MnxBuilder::put( const std::string & key, const std::string & value ) {
+MnxBuilder& MnxBuilder::put( const std::string & key, const std::string & value ) {
 	#ifdef DEBUG
 		cerr << "*** PUT " << key << "=" << value << endl;
 	#endif
 	this->stack.back()->putAttribute( key, value );
+	return *this;
 }
 
-void MnxBuilder::put( const std::string & key, const long & value ) {
+MnxBuilder& MnxBuilder::put( const std::string & key, const long & value ) {
 	this->stack.back()->putAttribute( key, value );
+	return *this;
 }
 
 bool MnxBuilder::remove( const std::string & key ) {
 	return this->stack.back()->removeAttribute( key );
 }
 
-void MnxBuilder::end() {
+MnxBuilder& MnxBuilder::end() {
 	#ifdef DEBUG
 		cerr << "*** END" << endl;
 	#endif
@@ -475,6 +477,7 @@ void MnxBuilder::end() {
 	shared< Mnx > prev( this->stack.back() );
 	this->stack.pop_back();
 	this->stack.back()->addChild( prev );
+	return *this;
 }
 
 shared< Mnx > MnxBuilder::build() {
@@ -496,11 +499,12 @@ shared< Mnx > MnxBuilder::build() {
 	return answer;
 }
 
-void MnxBuilder::add( shared< Mnx > & child ) {
+MnxBuilder& MnxBuilder::add( shared< Mnx > child ) {
 	#ifdef DEBUG
 		cerr << "*** ADD" << endl;
 	#endif
 	this->stack.back()->addChild( child );
+	return *this;
 }
 
 void MnxBuilder::save() {
@@ -523,7 +527,7 @@ void MnxBuilder::restore() {
 
 
 
-class PrettyPrint {
+/*class PrettyPrint {
 private:
 	std::ostream & out;
 	std::string indentation;
@@ -569,10 +573,10 @@ public:
 			out << "</" << mnx.name() << ">" << endl;
 		}	
 	}
-};
+};*/
 
 void Mnx::prettyPrint( std::ostream & out, const std::string & indentation ) {
-	PrettyPrint pp( out, indentation );
+	PrettyPrint pp( out, indentation.c_str() );
 	pp.pretty( *this, 0 );
 }
 
@@ -637,5 +641,105 @@ bool MnxEntryIterator::hasNext() {
 MnxEntry & MnxEntryIterator::next() {
 	return *this->it++;
 }
+
+MnxRenderer::MnxRenderer( const char * ind ) : indentation( ind ) {
+	//	Nothing.
+}
+
+MnxRenderer::~MnxRenderer() {
+	//	Nothing.
+}
+
+void MnxRenderer::endl() {
+	if ( this->indentation != NULL ) {
+		this->out( '\n' );
+	}
+}
+
+void MnxRenderer::indent( const int level ) {
+	if ( this->indentation != NULL ) {
+		for ( int n = 0; n < level; n++ ) {
+			this->out( this->indentation );
+		}
+	}
+}
+
+void MnxRenderer::renderText( const std::string & str ) {
+	for ( std::string::const_iterator it = str.begin(); it != str.end(); ++it ) {
+		this->renderChar( *it );
+	}
+}
+
+void MnxRenderer::renderChar( const char ch ) {
+	if ( ch == '<' ) {
+		this->out( "&lt;" );
+	} else if ( ch == '>' ) {
+		this->out( "&gt;" );
+	} else if ( ch == '&' ) {
+		this->out( "&amp;" );
+	} else if ( ch == '"' ) {
+		this->out( "&quot;" );
+	} else if ( ch == '\'' ) {
+		this->out( "&apos;" );
+	} else if ( 32 <= ch && ch < 127 ) {
+		this->out( ch );
+	} else {
+		stringstream s;
+		s << (int)ch;
+		this->out( "&#" );
+		this->out( s.str().c_str() );
+		this->out( ';' );
+	}
+}
+
+//	Default that can be overridden.
+void MnxRenderer::out( const char * text ) {
+	char ch;
+	while ( ( ch = *text++ ) != 0 ) {
+		this->out( ch );
+	}
+}
+
+void MnxRenderer::out( const std::string & text ) {
+	this->out( text.c_str() );
+}
+
+
+void MnxRenderer::renderMnx( Mnx & mnx, const int level ) {
+	this->indent( level );
+	this->out( '<' );
+	this->out( mnx.name() );
+	
+	MnxEntryIterator keys( mnx );
+	while ( keys.hasNext() ) {
+		MnxEntry & it = keys.next();
+		this->out( ' ' );
+		this->out( it.first );
+		this->out( "=\"" );
+		this->renderText( it.second );
+		this->out( "\"" );
+	}
+	
+	if ( mnx.isEmpty() ) {
+		this->out( "/>" );
+		this->endl();
+	} else {
+		this->out( '>' );
+		this->endl();
+		
+		MnxChildIterator kids( mnx );
+		while ( kids.hasNext() ) {
+			SharedMnx & g = kids.next();
+			this->pretty( *g, level + 1 );
+		}
+
+		this->indent( level );
+		this->out( "</" );
+		this->out( mnx.name() );
+		this->out( '>' );
+		this->endl();
+	}		
+}
+
 
 } 	//	namespace

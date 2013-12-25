@@ -21,7 +21,6 @@
 #include <map>
 #include <fstream>
 #include <sstream>
-#include <tr1/memory>
 
 #include <string.h>
 #include <errno.h>

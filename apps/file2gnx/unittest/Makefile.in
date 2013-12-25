@@ -1,5 +1,7 @@
 
-CC=g++
+CC=@CXX@
+CXX=@CXX@
+
 
 CXXFLAGS=-g -I ../../CppUnitLite2/src -I../hpp -L../cpp -Wall -Wnon-virtual-dtor # -Weffc++
 
@@ -15,7 +17,7 @@ check: testfile2gnx
 # $@ is make shorthand for the target.
 # $@ is make shorthand for the dependencies
 testfile2gnx: $(OBJS)
-	g++ $(CXXFLAGS) -o $@ $^ ../../CppUnitLite2/cppunitlite.a
+	$(CC) $(CXXFLAGS) -o $@ $^ ../../CppUnitLite2/cppunitlite.a
 	
 clean:
 	rm -f *.o

@@ -1,5 +1,7 @@
 
 CC=@CXX@
+CXX=@CXX@
+
 
 CXXFLAGS=-g -I../../CppUnitLite2/src -I../hpp -I../../libgng/hpp -I../../automatic/machine -I../../automatic/sys -I../../automatic/simple -Wall -Wnon-virtual-dtor
 CFLAGS=-Wmissing-prototypes 
@@ -12,7 +14,7 @@ TESTOBJS=testappginger.o example.o archtest.o simplekeytest.o
 # $@ is make shorthand for the target.
 # $@ is make shorthand for the dependencies
 testappginger: $(TESTOBJS)
-	g++ $(CXXFLAGS) -o $@ $^ ../../CppUnitLite2/cppunitlite.a /usr/local/lib/librudecgi.a -L../cpp -lappginger 
+	$(CC)+ $(CXXFLAGS) -o $@ $^ ../../CppUnitLite2/cppunitlite.a /usr/local/lib/librudecgi.a -L../cpp -lappginger 
 
 clean:
 	rm -f *.o

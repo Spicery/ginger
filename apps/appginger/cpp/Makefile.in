@@ -11,10 +11,12 @@ INSTALL_DOC=@docdir@
 #LICENSE_FILE="$(INSTALL_LIB)/COPYING"
 
 CC=@CXX@
+CXX=@CXX@
+
 
 INSTALLDIRS=-DINSTALL_BIN='"$(INSTALL_BIN)"' -DINSTALL_LIB='"$(INSTALL_LIB)"' -DINSTALL_TOOL='"$(INSTALL_TOOL)"'
 
-CXXFLAGS=-DRUDECGI $(INSTALLDIRS) -g -I../hpp -I../../libgng/hpp -I../../automatic/machine -I../../automatic/sys -I../../automatic/simple -Wall -Wnon-virtual-dtor
+CXXFLAGS=-DRUDECGI $(INSTALLDIRS) -g -I/usr/local/include -I../hpp -I../../libgng/hpp -I../../automatic/machine -I../../automatic/sys -I../../automatic/simple -Wall -Wnon-virtual-dtor
 CFLAGS=-Wmissing-prototypes
 
 # In order to exclude machine implementations, uncomment one or more of
@@ -62,10 +64,10 @@ all: $(USEREXECUTABLES)
 ################################################################################
 
 machine%.o: machine%.cpp
-	g++ $(CXXFLAGS) -fwrapv -c $<
+	$(CC) $(CXXFLAGS) -fwrapv -c $<
 
 instruction_set%.o: instruction_set%.cpp
-	g++ $(CXXFLAGS) -fwrapv -c $<
+	$(CC) $(CXXFLAGS) -fwrapv -c $<
 
 
 ################################################################################
@@ -83,25 +85,26 @@ endif
 # $@ is make shorthand for the dependencies
 appginger: libappginger.a main.o
 	ranlib libappginger.a ../../libgng/cpp/libgng.a
-	@CXX@ $(CXXFLAGS) $(BOOST_CPPFLAGS) -o $@ main.o $(LIBAPPGINGER) ../../libgng/cpp/libgng.a /usr/local/lib/librudecgi.a
+	$(CC) $(CXXFLAGS) $(BOOST_CPPFLAGS) -o $@ main.o $(LIBAPPGINGER) ../../libgng/cpp/libgng.a /usr/local/lib/librudecgi.a
+	
 
 ginger-info: libappginger.a infomain.o
 	ranlib libappginger.a ../../libgng/cpp/libgng.a
-	@CXX@ $(CXXFLAGS) $(BOOST_CPPFLAGS) -o $@ infomain.o $(LIBAPPGINGER) ../../libgng/cpp/libgng.a /usr/local/lib/librudecgi.a
+	$(CC) $(CXXFLAGS) $(BOOST_CPPFLAGS) -o $@ infomain.o $(LIBAPPGINGER) ../../libgng/cpp/libgng.a /usr/local/lib/librudecgi.a
 	./ginger-info -H > info-debug.hlp
 	./ginger-info -r > info-debug.rst
 
 ginger-cli: libappginger.a climain.o
 	ranlib libappginger.a ../../libgng/cpp/libgng.a
-	@CXX@ $(CXXFLAGS) $(BOOST_CPPFLAGS) -o $@ climain.o $(LIBAPPGINGER) ../../libgng/cpp/libgng.a /usr/local/lib/librudecgi.a
+	$(CC) $(CXXFLAGS) $(BOOST_CPPFLAGS) -o $@ climain.o $(LIBAPPGINGER) ../../libgng/cpp/libgng.a /usr/local/lib/librudecgi.a
 
 ginger-cgi: libappginger.a cgimain.o
 	ranlib libappginger.a ../../libgng/cpp/libgng.a
-	@CXX@ $(CXXFLAGS) $(BOOST_CPPFLAGS) -o $@ cgimain.o $(LIBAPPGINGER) ../../libgng/cpp/libgng.a /usr/local/lib/librudecgi.a
+	$(CC) $(CXXFLAGS) $(BOOST_CPPFLAGS) -o $@ cgimain.o $(LIBAPPGINGER) ../../libgng/cpp/libgng.a /usr/local/lib/librudecgi.a
 
 ginger-script: libappginger.a scriptmain.o
 	ranlib libappginger.a ../../libgng/cpp/libgng.a
-	@CXX@ $(CXXFLAGS) $(BOOST_CPPFLAGS) -o $@ scriptmain.o $(LIBAPPGINGER) ../../libgng/cpp/libgng.a /usr/local/lib/librudecgi.a
+	$(CC) $(CXXFLAGS) $(BOOST_CPPFLAGS) -o $@ scriptmain.o $(LIBAPPGINGER) ../../libgng/cpp/libgng.a /usr/local/lib/librudecgi.a
 
 ginger:
 	echo "#!/bin/sh" > ginger-tmp

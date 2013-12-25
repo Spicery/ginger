@@ -1,9 +1,9 @@
 all:
-	$(MAKE) -C cpp $@
+	make -C cpp $@
 
 clean:
-	$(MAKE) -C cpp $@
-	#$(MAKE) -C unittest $@
+	make -C cpp $@
+	#make -C unittest $@
 
 check:
-	$(MAKE) -C unittest $@
+	make -C unittest $@

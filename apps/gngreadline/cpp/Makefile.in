@@ -9,6 +9,8 @@ INSTALL_DOC=@docdir@
 VERSION=@PACKAGE_VERSION@
 
 CC=@CXX@
+CXX=@CXX@
+
 
 INSTALLDIRS=-DINSTALL_BIN='"$(INSTALL_BIN)"' -DINSTALL_LIB='"$(INSTALL_LIB)"' -DINSTALL_TOOL='"$(INSTALL_TOOL)"'
 
@@ -23,7 +25,7 @@ all: gngreadline
 # $@ is make shorthand for the target.
 # $@ is make shorthand for the dependencies
 gngreadline: $(OBJS)
-	@CXX@ $(CXXFLAGS) -o $@ $(OBJS) ../../libgng/cpp/libgng.a -lreadline
+	$(CC) $(CXXFLAGS) -o $@ $(OBJS) ../../libgng/cpp/libgng.a -lreadline
 
 clean:
 	rm -f *.o

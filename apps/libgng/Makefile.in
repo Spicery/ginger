@@ -1,14 +1,14 @@
 all:
-	$(MAKE) -C cpp $@
+	make -C cpp $@
 
 # Creates and refreshes the _dox folder.
 dox:
 	doxygen Doxyfile
 
 clean:
-	$(MAKE) -C cpp $@
-	$(MAKE) -C unittest $@
+	make -C cpp $@
+	make -C unittest $@
 	/bin/rm -rf _dox/
 
 check:
-	$(MAKE) -C unittest $@
+	make -C unittest $@

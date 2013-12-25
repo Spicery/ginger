@@ -148,9 +148,9 @@ public:
 	long attributeToLong( const std::string & key, const long def ) const;
 	bool hasAttribute( const std::string & key ) const;
 	bool hasAttribute( const std::string & key, const std::string & eqval ) const;
-	shared< Mnx > & child( int n );
-	shared< Mnx > & firstChild();
-	shared< Mnx > & lastChild();
+	shared< Mnx > child( int n );
+	shared< Mnx > firstChild();
+	shared< Mnx > lastChild();
 	int size() const;
 	bool isEmpty() const;
 	std::string & name();
@@ -196,12 +196,12 @@ private:
 	std::vector< shared< Mnx > > put_aside;
 public:
 	MnxBuilder();
-	void start( const std::string & name );
-	void put( const std::string & key, const std::string & value );
-	void put( const std::string & key, const long & value );
+	MnxBuilder& start( const std::string & name );
+	MnxBuilder& put( const std::string & key, const std::string & value );
+	MnxBuilder& put( const std::string & key, const long & value );
 	bool remove( const std::string & key );
-	void add( shared< Mnx > & child );
-	void end();
+	MnxBuilder& add( shared< Mnx > child );
+	MnxBuilder& end();
 	void save();
 	void restore();
 	shared< Mnx > build();
@@ -218,6 +218,102 @@ public:
 	MnxReader( std::istream & in ) : in( in ) {}
 	MnxReader() : in( std::cin ) {}
 };
+
+class MnxRenderer {
+private:
+	const char * indentation;
+public:
+	MnxRenderer( const char * indentation = "    " );
+	virtual ~MnxRenderer();
+public:
+	void renderMnx( Mnx & mnx, const int level );
+	void renderText( const std::string & string );
+	void renderChar( const char ch );
+	void indent( const int level );
+	void endl();
+public:
+	virtual void pretty( Mnx & mnx, const int level = 0 ) = 0;
+	virtual void out( const std::string & text );
+	virtual void out( const char * text );
+	virtual void out( const char ch ) = 0;
+};
+
+class PrettyPrint : public MnxRenderer {
+private:
+	std::ostream & output;
+	
+public:
+	PrettyPrint( std::ostream & out, const char * ind ) : 
+		MnxRenderer( ind ),
+		output( out )
+	{}
+
+public:
+	void pretty( Mnx & mnx, int level ) {
+		this->renderMnx( mnx, level );
+	}
+
+	void out( const char ch ) {
+		this->output << ch;
+	} 
+
+	void out( const std::string & s ) {
+		this->output << s;
+	} 
+
+	void out( const char * text ) {
+		this->output << text;
+	}
+
+};
+
+/*class PrettyPrint {
+private:
+	std::ostream & out;
+	std::string indentation;
+	
+public:
+	PrettyPrint( std::ostream & out, const std::string & ind ) : 
+		out( out ), 
+		indentation( ind ) 
+	{}
+
+private:
+	void indent( int level ) {
+		for ( int n = 0; n < level; n++ ) {
+			out << this->indentation;
+		}
+	}
+	
+public:
+	void pretty( Mnx & mnx, int level ) {
+		indent( level );
+		out << "<" << mnx.name();
+		
+		MnxEntryIterator keys( mnx );
+		while ( keys.hasNext() ) {
+			MnxEntry & it = keys.next();
+			out << " " << it.first << "=\"";
+			mnxRenderText( out, it.second );
+			out << "\"";
+		}
+		
+		if ( mnx.isEmpty() ) {
+			out << "/>" << endl;
+		} else {
+			out << ">" << endl;
+			
+			MnxChildIterator kids( mnx );
+			while ( kids.hasNext() ) {
+				SharedMnx & g = kids.next();
+				this->pretty( *g, level + 1 );
+			}
+
+			indent( level );
+			out << "</" << mnx.name() << ">" << endl;
+		}	
+	}
+};*/
 
 }	//	namespace
 

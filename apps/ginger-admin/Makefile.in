@@ -1,5 +1,5 @@
 all:
-	$(MAKE) -C cpp $@
+	make -C cpp $@
 
 clean:
-	$(MAKE) -C cpp $@
+	make -C cpp $@

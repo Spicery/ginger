@@ -17,7 +17,12 @@
 \******************************************************************************/
 
 #include <sys/errno.h>
-#include <ext/stdio_filebuf.h> // __gnu_cxx::stdio_filebuf
+
+#ifdef GNU_FD_TO_IFSTREAM
+    #include <ext/stdio_filebuf.h> // __gnu_cxx::stdio_filebuf
+#else
+    #include "fdifstream.hpp"
+#endif
 
 
 #include <iostream>
@@ -83,8 +88,13 @@ Gnx Simplify::simplify( Gnx x ) {
     x->frender( fout );
     fflush( fout );
 
+
+#ifdef GNU_FD_TO_IFSTREAM
     __gnu_cxx::stdio_filebuf<char> buf( command.getInputFD(), ios_base::in );
     istream input( &buf );
+#else
+    FileDescriptorIFStream input( command.getInputFD() );
+#endif
 
     MnxReader reader( input );
     Gnx r = reader.readMnx();

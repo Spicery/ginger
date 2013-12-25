@@ -226,7 +226,7 @@ void RuleParser::parseFromState( const std::string & state ) {
 			
 void RuleParser::processChildren( SharedMnx & rule ) {
 	for ( int i = 0; i < rule->size(); i++ ) {
-		SharedMnx & action = rule->child( i );
+		SharedMnx action = rule->child( i );
 		this->processAction( action );
 	}
 }
@@ -378,8 +378,8 @@ void RuleParser::parseListAction( SharedMnx & action, const bool readVsPeek ) {
 	}
 	
 	std::string state = action->attribute( STATE );
-	SharedMnx & separator = action->child( 0 );
-	SharedMnx & closer = action->child( 1 );
+	SharedMnx separator = action->child( 0 );
+	SharedMnx closer = action->child( 1 );
 	
 	if ( this->peek() == NULL ) {
 		throw Mishap( "Unexpected end of input" );

@@ -26,13 +26,17 @@
 #include <cstdlib>
 #include <sstream>
 
-#include <ext/stdio_filebuf.h> // __gnu_cxx::stdio_filebuf
-
 #include <stddef.h>
 #include <unistd.h>
 #include <getopt.h>
 #include <syslog.h>
 #include <sys/errno.h>
+
+#ifdef GNU_FD_TO_IFSTREAM
+    #include <ext/stdio_filebuf.h> // __gnu_cxx::stdio_filebuf
+#else
+    #include "fdifstream.hpp"
+#endif
 
 #include "fileutils.hpp"
 #include "gngversion.hpp"
@@ -364,6 +368,7 @@ private:
 
 public:
     FILE * get() const { return this->file; }
+    int getFD() const { return fileno( this->file ); }
     void noteTidyExit() { this->tidy_exit = true; }
 
 public:
@@ -394,12 +399,17 @@ void ToolMain::executeCommand( RCEP & rcep, Ginger::Command command ) {
 
     FileMgr gnxfp( command );
     
+#ifdef GNU_FD_TO_IFSTREAM
     // ... open the file, with whatever, pipes or who-knows ...
     // let's build a buffer from the FILE* descriptor ...
     __gnu_cxx::stdio_filebuf<char> pipe_buf( gnxfp.get(), ios_base::in );
-
-    // there we are, a regular istream is build upon the buffer.
+   // there we are, a regular istream is build upon the buffer.
     istream stream_pipe_in( &pipe_buf );
+ #else
+    FileDescriptorIFStream stream_pipe_in( gnxfp.getFD() );
+#endif
+   
+
     
     while ( rcep.unsafe_read_comp_exec_print( stream_pipe_in, std::cout ) ) {}
     gnxfp.noteTidyExit();    

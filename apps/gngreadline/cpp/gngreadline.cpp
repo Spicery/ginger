@@ -22,7 +22,6 @@
 #include <map>
 #include <fstream>
 #include <sstream>
-#include <tr1/memory>
 
 #include <string.h>
 #include <errno.h>
@@ -34,8 +33,15 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 
-#include <readline/readline.h>
-#include <readline/history.h>
+#include <stdio.h>
+#include <unistd.h>
+#include <sys/select.h>
+
+//#define USE_GNU_READLINE
+#ifdef USE_GNU_READLINE
+    #include <readline/readline.h>
+    #include <readline/history.h>
+#endif
 
 #define PACKAGE_NAME "ginger-admin"
 
@@ -70,9 +76,40 @@ static void sendStdoutToTerminal() {
     }    
 }
 
-#include <stdio.h>
-#include <unistd.h>
-#include <sys/select.h>
+
+
+// -- An interface to GNU READLINE ---------------------------------------------
+
+#ifdef USE_GNU_READLINE
+
+/* A static variable for holding the line. */
+static char *line_read = (char *)NULL;
+
+/* Read a string, and return a pointer to it.
+   Returns NULL on EOF. */
+char * gnu_readline() {
+    /* 
+        If the buffer has already been allocated,
+        return the memory to the free pool. */
+    if ( line_read ) {
+        free( line_read );
+        line_read = (char *)NULL;
+    }
+
+    /* Get a line from the user. */
+    line_read = readline( "*** " );
+
+    /* If the line has any text in it,
+     save it on the history. */
+    if ( line_read && *line_read ) {
+        add_history( line_read );
+    }
+
+    return line_read;
+}
+
+#else
+#endif
 
 class MainLoop {
 private:
@@ -99,12 +136,22 @@ public:
     bool getLine() {
         std::string line;
         
-        if ( getline( std::cin, line ).eof() ) {
-            #ifdef DEBUG
-                cerr << "End of terminal input" << endl;
-            #endif
-            return false;
-        }
+        #ifdef USE_GNU_READLINE
+            {
+                char * ln = gnu_readline();
+                if ( not ln ) {
+                    return false;
+                }
+                line = ln;
+            }
+        #else
+            if ( getline( std::cin, line ).eof() ) {
+                #ifdef DEBUG
+                    cerr << "End of terminal input" << endl;
+                #endif
+                return false;
+            }
+        #endif
 
         if ( !line.empty() && line[0] == '!' ) {
             pid_t pid = fork();
@@ -199,9 +246,18 @@ public:
     }
 
     void mainLoop() {
-        while ( doSelect() ) {
-            //  Continue.
-        }
+        #ifdef USE_GNU_READLINE
+            do {
+                cout << "*** ";
+                cout << flush;
+                rl_set_prompt( "*** " );
+                rl_on_new_line_with_prompt();
+            } while ( doSelect() );
+        #else
+            while ( doSelect() ) {
+                //  Continue.
+            }
+        #endif
     }
 
 };

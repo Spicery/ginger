@@ -20,7 +20,7 @@
 #include <string>
 #include <fstream>
 #include <sstream>
-#include <tr1/memory>
+#include <memory>
 
 #include <string.h>
 #include <errno.h>
@@ -139,7 +139,7 @@ private:
     const string message() { return this->msg; }
 
 public:
-    std::tr1::shared_ptr< Task > check( std::tr1::shared_ptr< Task > t );
+    std::shared_ptr< Task > check( std::shared_ptr< Task > t );
 
 public:
     Status() : ok( true ) {}
@@ -183,7 +183,7 @@ public:
     virtual ~Task() {}
 };
 
-typedef std::tr1::shared_ptr< Task > TaskPtr;
+typedef std::shared_ptr< Task > TaskPtr;
 
 class EndTask : public Task {
 public:

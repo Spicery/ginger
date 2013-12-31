@@ -119,7 +119,7 @@ static long estimateMapSize( MachineClass * vm ) {
 	return total;
 }
 
-static const char LogTable256[256] = 
+static const signed char LogTable256[256] = 
 {
 #define LT(n) n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n
     -1, 0, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3,

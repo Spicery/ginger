@@ -354,7 +354,7 @@ void ItemFactoryClass::readAtSelfGlueCharType( int ch ) {
 	//
 	this->text.push_back( ch );
 	for (;;) {
-		const char nextch = this->nextchar();
+		const int nextch = this->nextchar();
 		if ( nextch == ch ) {
 			this->text.push_back( ch );
 		} else {

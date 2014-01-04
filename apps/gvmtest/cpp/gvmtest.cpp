@@ -252,7 +252,7 @@ public:
 
     void doCompile() {
         for ( int i = 0; i < this->command->size(); i++ ) {
-            this->vm->execGnx( this->command->child( i ) );
+            this->vm->execGnx( this->command->getChild( i ) );
         }
     }
 

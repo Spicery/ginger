@@ -143,7 +143,7 @@ void Parser::loadRules( SharedMnx g ) {
 		this->load1Rule( g );
 	} else if ( g->hasName( GROUP ) || g->hasName( GRAMMAR ) ) {
 		for ( int n = 0; n < g->size(); n++ ) {
-			this->loadRules( g->child( n ) );
+			this->loadRules( g->getChild( n ) );
 		}
 	} else if ( g->hasName( MISHAP ) ) {
 		this->mishapDesc = g;		
@@ -226,7 +226,7 @@ void RuleParser::parseFromState( const std::string & state ) {
 			
 void RuleParser::processChildren( SharedMnx & rule ) {
 	for ( int i = 0; i < rule->size(); i++ ) {
-		SharedMnx action = rule->child( i );
+		SharedMnx action = rule->getChild( i );
 		this->processAction( action );
 	}
 }
@@ -378,8 +378,8 @@ void RuleParser::parseListAction( SharedMnx & action, const bool readVsPeek ) {
 	}
 	
 	std::string state = action->attribute( STATE );
-	SharedMnx separator = action->child( 0 );
-	SharedMnx closer = action->child( 1 );
+	SharedMnx separator = action->getChild( 0 );
+	SharedMnx closer = action->getChild( 1 );
 	
 	if ( this->peek() == NULL ) {
 		throw Mishap( "Unexpected end of input" );

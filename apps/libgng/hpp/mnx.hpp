@@ -148,9 +148,12 @@ public:
 	long attributeToLong( const std::string & key, const long def ) const;
 	bool hasAttribute( const std::string & key ) const;
 	bool hasAttribute( const std::string & key, const std::string & eqval ) const;
-	shared< Mnx > child( int n );
-	shared< Mnx > firstChild();
-	shared< Mnx > lastChild();
+	shared< Mnx > getChild( int n );
+	void setChild( int n, shared< Mnx > mnx );
+	shared< Mnx > getFirstChild();
+	void setFirstChild( shared< Mnx > mnx );
+	shared< Mnx > getLastChild();
+	void setLastChild( shared< Mnx > mnx );
 	int size() const;
 	bool isEmpty() const;
 	std::string & name();

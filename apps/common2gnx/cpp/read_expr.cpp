@@ -855,7 +855,7 @@ private:
 		if ( name == SEQ ) {
 			int n = rhs->size();
 			for ( int i = 0; i < n; i++ ) {
-				squash( acc, rhs->child( i ) );
+				squash( acc, rhs->getChild( i ) );
 			}
 		} else {
 			acc.add( rhs );
@@ -890,10 +890,10 @@ private:
 		} else if ( fn->hasName( APP ) && fn->size() == 2 ) {
 			NodeFactory b;
 			b.start( APP );
-			Node n = this->canonise( level + 1, fn->child( 0 ) );
+			Node n = this->canonise( level + 1, fn->getChild( 0 ) );
 			b.add( n );
 			b.start( SEQ );
-			squash( b, fn->child( 1 ) );
+			squash( b, fn->getChild( 1 ) );
 			b.end();
 			b.end();
 			return b.build();					
@@ -933,7 +933,7 @@ public:
 		while ( this->isCurryd() ) {
 			NodeFactory b;
 			b.start( FN );
-			Node arg = this->lhs->child( 1 );
+			Node arg = this->lhs->getChild( 1 );
 			if ( arg->hasName( SEQ ) ) {
 				b.add( arg );
 			} else {
@@ -944,7 +944,7 @@ public:
 			b.add( this->rhs );
 			b.end();
 			this->rhs = b.build();
-			this->lhs = this->lhs->child( 0 );
+			this->lhs = this->lhs->getChild( 0 );
 			#ifdef DBG_COMMON2GNX
 				cerr << "Uncurried" << endl;
 				cerr << "  LHS: ";
@@ -958,11 +958,11 @@ public:
 	}
 
 	Node getFun() const {
-		return this->lhs->child( 0 );
+		return this->lhs->getChild( 0 );
 	}
 
 	Node getArgs() const {
-		Node args = this->lhs->child( 1 );
+		Node args = this->lhs->getChild( 1 );
 		if ( args->hasName( SEQ ) ) return args;
 		NodeFactory b;
 		b.start( SEQ );
@@ -976,7 +976,7 @@ public:
 	}
 private:
 	bool isCurryd() const {
-		return isApp( this->lhs ) && isApp( this->lhs->child( 0 ) );
+		return isApp( this->lhs ) && isApp( this->lhs->getChild( 0 ) );
 	}
 	static bool isApp( const Node & n ) {
 		return n->hasName( APP ) && n->size() == 2;
@@ -1200,7 +1200,7 @@ Node ReadStateClass::readElement() {
 	}			
 	element.end();
 	Node answer = element.build();
-	return answer->size() == 1 ? answer->child( 0 ) : answer;
+	return answer->size() == 1 ? answer->getChild( 0 ) : answer;
 }
 
 Node ReadStateClass::prefixProcessing() {

@@ -108,16 +108,28 @@ void Mnx::addChild( shared< Mnx > child ) {
 	this->children.push_back( child );
 }
 	
-shared< Mnx > Mnx::child( int n ) {
+shared< Mnx > Mnx::getChild( int n ) {
 	return this->children.at( n );
 }
 
-shared< Mnx > Mnx::lastChild() {
+void Mnx::setChild( int n, shared< Mnx > x ) {
+	this->children.at( n ) = x;
+}
+
+shared< Mnx > Mnx::getFirstChild() {
+	return this->children.front();
+}
+
+void Mnx::setFirstChild( shared< Mnx > x ) {
+	this->children.front() = x;
+}
+
+shared< Mnx > Mnx::getLastChild() {
 	return this->children.back();
 }
 
-shared< Mnx > Mnx::firstChild() {
-	return this->children.front();
+void Mnx::setLastChild( shared< Mnx > x ) {
+	this->children.back() = x;
 }
 
 const std::string & Mnx::attribute( const std::string & key ) const {
@@ -494,7 +506,7 @@ shared< Mnx > MnxBuilder::build() {
 		throw Mishap( "MinX construction failed (too many builds?)" );
 	}
 	
-	shared< Mnx > answer = in_progress->lastChild();
+	shared< Mnx > answer = in_progress->getLastChild();
 	in_progress->popLastChild();
 	return answer;
 }

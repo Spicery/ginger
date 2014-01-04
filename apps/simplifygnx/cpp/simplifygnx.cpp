@@ -628,7 +628,7 @@ private:
 		const string & nm = element.name();
 		if ( nm == FN ) {
 			//cerr << "#1" << endl;
-			this->body_arities.push_back( calcArity( element.child( 1 ) ) );
+			this->body_arities.push_back( calcArity( element.getChild( 1 ) ) );
 		} else if ( nm == SELF_APP && this->body_arities.size() > 0 ) {
 			//cerr << "#2" << endl;
 			Ginger::Arity arity( this->body_arities[ this->body_arities.size() - 1 ] );
@@ -655,11 +655,11 @@ public:
 Ginger::Arity SelfAppArityMarker::calcArityIfThenOptElse( Gnx expr, int offset ) {
     vector< Ginger::Arity > subexpr_arities;
     for ( int i = 1 + offset; i < expr->size(); i += 2 ) {
-        subexpr_arities.push_back( calcArity( expr->child( i ) ) );
+        subexpr_arities.push_back( calcArity( expr->getChild( i ) ) );
     }
     const bool has_else = ( ( expr->size() - offset ) & 0x1 ) == 1;
     if ( has_else ) {
-        subexpr_arities.push_back( calcArity( expr->lastChild() ) );
+        subexpr_arities.push_back( calcArity( expr->getLastChild() ) );
     }
     if ( subexpr_arities.size() == 0 ) {
         return Ginger::Arity( 0, true );
@@ -717,12 +717,12 @@ private:
 	Ginger::Arity sumOverChildren( Ginger::Mnx & element ) {
 		bool all_have_arity = true;
 		for ( int i = 0; all_have_arity && i < element.size(); i++ ) {
-			all_have_arity = element.child( i )->hasAttribute( this->arity_attribute );
+			all_have_arity = element.getChild( i )->hasAttribute( this->arity_attribute );
 		}
 		if ( all_have_arity ) {
 			Ginger::Arity sofar( 0 );
 			for ( int i = 0; i < element.size(); i++ ) {
-				Ginger::Arity kid( element.child( i )->attribute( this->arity_attribute ) );
+				Ginger::Arity kid( element.getChild( i )->attribute( this->arity_attribute ) );
 				sofar = sofar.add( kid );
 			}
 			return sofar;
@@ -763,7 +763,7 @@ public:
                 ( nm == CATCH_THEN && N == 2 ) ||
                 ( nm == CATCH_RETURN && N == 2 )
             ) {
-                element.child( 0 )->putAttribute( ANALYSIS_TYPE, PATTERN_ARITY );
+                element.getChild( 0 )->putAttribute( ANALYSIS_TYPE, PATTERN_ARITY );
             }
         }
 	}
@@ -794,10 +794,10 @@ public:
 			bool has_else = ( element.size() % 2 ) == 1;
 			bool all_have_arity = true;
 			for ( int i = 1; all_have_arity && i < element.size(); i += 2 ) {
-				all_have_arity = element.child( i )->hasAttribute( this->arity_attribute );
+				all_have_arity = element.getChild( i )->hasAttribute( this->arity_attribute );
 			}
 			if ( all_have_arity && has_else ) {
-				all_have_arity = element.lastChild()->hasAttribute( this->arity_attribute );
+				all_have_arity = element.getLastChild()->hasAttribute( this->arity_attribute );
 			}
 			if ( all_have_arity ) {
 				const int N = element.size();
@@ -806,16 +806,16 @@ public:
 					element.putAttribute( this->arity_attribute, "0" );
 				} else if ( N == 1 ) {
                     //  Consists only of an else clause.
-					element.putAttribute( this->arity_attribute, element.child( 1 )->attribute( this->arity_attribute ) );
+					element.putAttribute( this->arity_attribute, element.getChild( 1 )->attribute( this->arity_attribute ) );
 				} else {
                     //  Has at least one if-then pair.
-					Ginger::Arity sofar( element.child( 1 )->attribute( this->arity_attribute ) );
+					Ginger::Arity sofar( element.getChild( 1 )->attribute( this->arity_attribute ) );
 					for ( int i = 3; i < element.size(); i += 2 ) {
-						Ginger::Arity kid( element.child( i )->attribute( this->arity_attribute ) );
+						Ginger::Arity kid( element.getChild( i )->attribute( this->arity_attribute ) );
 						sofar = sofar.unify( kid );
 					}
 					if ( has_else ) {
-						sofar = sofar.unify( Ginger::Arity( element.lastChild()->attribute( this->arity_attribute ) ) );
+						sofar = sofar.unify( Ginger::Arity( element.getLastChild()->attribute( this->arity_attribute ) ) );
 					} else {
                         //  Otherwise the else clause is implicitly an <seq/>.
                         sofar = sofar.unify( Ginger::Arity( 0 ) );
@@ -827,25 +827,25 @@ public:
             bool has_else = ( element.size() % 2 ) == 0;
             bool all_have_arity = true;
             for ( int i = 2; all_have_arity && i < element.size(); i += 2 ) {
-                all_have_arity = element.child( i )->hasAttribute( this->arity_attribute );
+                all_have_arity = element.getChild( i )->hasAttribute( this->arity_attribute );
             }
             if ( all_have_arity && has_else ) {
-                all_have_arity = element.lastChild()->hasAttribute( this->arity_attribute );
+                all_have_arity = element.getLastChild()->hasAttribute( this->arity_attribute );
             }
             if ( all_have_arity ) {
                 const int N = element.size();
                 if ( N == 1 ) {
                     element.putAttribute( this->arity_attribute, "0" );
                 } else if ( N == 2 ) {
-                    element.putAttribute( this->arity_attribute, element.child( 1 )->attribute( this->arity_attribute ) );
+                    element.putAttribute( this->arity_attribute, element.getChild( 1 )->attribute( this->arity_attribute ) );
                 } else {
-                    Ginger::Arity sofar( element.child( 2 )->attribute( this->arity_attribute ) );
+                    Ginger::Arity sofar( element.getChild( 2 )->attribute( this->arity_attribute ) );
                     for ( int i = 4; i < element.size(); i += 2 ) {
-                        Ginger::Arity kid( element.child( i )->attribute( this->arity_attribute ) );
+                        Ginger::Arity kid( element.getChild( i )->attribute( this->arity_attribute ) );
                         sofar = sofar.unify( kid );
                     }
                     if ( has_else ) {
-                        sofar = sofar.unify( Ginger::Arity( element.lastChild()->attribute( this->arity_attribute ) ) );
+                        sofar = sofar.unify( Ginger::Arity( element.getLastChild()->attribute( this->arity_attribute ) ) );
                     } else {
                         //  Otherwise the else clause is implicitly an <seq/>.
                         sofar = sofar.unify( Ginger::Arity( 0 ) );                        
@@ -865,11 +865,11 @@ public:
             element.putAttribute( this->arity_attribute, "0" );
 		} else if ( x == ASSERT && element.size() == 1 && this->isEvalMode() ) {
 			if ( element.hasAttribute( ASSERT_N, "1" ) ) {
-				if ( element.child( 0 )->hasAttribute( this->arity_attribute, "1" ) ) {
+				if ( element.getChild( 0 )->hasAttribute( this->arity_attribute, "1" ) ) {
 					//	As we can prove the child satisfies the condition we should 
 					//	eliminate the parent. So we simply replace the contents of the 
 					//	node with the contents of the child!
-					Gnx c = element.child( 0 );
+					Gnx c = element.getChild( 0 );
 					element.copyFrom( *c );
 					//	Because we have changed something we should let the system know
 					//	in case it would synergise with other optimsations.
@@ -878,7 +878,7 @@ public:
 					element.putAttribute( this->arity_attribute, "1" );
 				}
 			} else if ( element.hasAttribute( ASSERT_TYPE ) ) {
-				Gnx c = element.child( 0 );
+				Gnx c = element.getChild( 0 );
 				if ( c->hasName( CONSTANT ) && element.attribute( ASSERT_TYPE ) == c->attribute( CONSTANT_TYPE ) ) {
 					element.copyFrom( *c );
 					this->changed = true;
@@ -897,7 +897,7 @@ public:
             //  The overall arity is the sum of the arities of the 
             //  non-escape arity and the catch arities and the catch.else
             //  arity (if present).
-            Ginger::Arity non_esc_arity( element.child( 0 )->attribute( this->arity_attribute, "0+" ) );
+            Ginger::Arity non_esc_arity( element.getChild( 0 )->attribute( this->arity_attribute, "0+" ) );
             for ( Ginger::Mnx::Generator g( element ); !!g; ++g ) {
                 Gnx e = *g;
                 if ( e->hasName( CATCH_RETURN ) ) {
@@ -918,7 +918,7 @@ public:
                 element.putAttribute( this->arity_attribute, sofar.toString() );
             }
         } else if ( ( x == CATCH_THEN || x == CATCH_RETURN ) && N == 2 ) {
-            element.putAttribute( this->arity_attribute, element.child( 1 )->attribute( this->arity_attribute, "0+" ) );
+            element.putAttribute( this->arity_attribute, element.getChild( 1 )->attribute( this->arity_attribute, "0+" ) );
         }
 
         if ( element.hasAttribute( ANALYSIS_TYPE ) ) {
@@ -945,7 +945,7 @@ public:
 		const string & x = element.name();
 		element.clearAttribute( TAILCALL );	//	Throw away any previous marking.
 		if ( x == FN ) {
-			Gnx ch( element.lastChild() );
+			Gnx ch( element.getLastChild() );
 			ch->orFlags( TAIL_CALL_MASK );
 		} else if ( element.hasAllFlags( TAIL_CALL_MASK ) ) {
 			if ( x == APP ) {
@@ -953,26 +953,26 @@ public:
 			} else if ( x == IF ) {
 				bool has_odd_kids = ( x.size() % 2 ) == 1;
 				for ( int i = 1; i < element.size(); i += 2 ) {
-					element.child( i )->orFlags( TAIL_CALL_MASK );
+					element.getChild( i )->orFlags( TAIL_CALL_MASK );
 				}
 				if ( has_odd_kids ) {
-					element.lastChild()->orFlags( TAIL_CALL_MASK );
+					element.getLastChild()->orFlags( TAIL_CALL_MASK );
 				}
             } else if ( x == SWITCH && element.size() >= 1 ) {
                 bool has_else = ( x.size() % 2 ) == 0;
                 for ( int i = 2; i < element.size(); i += 2 ) {
-                    element.child( i )->orFlags( TAIL_CALL_MASK );
+                    element.getChild( i )->orFlags( TAIL_CALL_MASK );
                 }
                 if ( has_else ) {
-                    element.lastChild()->orFlags( TAIL_CALL_MASK );
+                    element.getLastChild()->orFlags( TAIL_CALL_MASK );
                 }
 			} else if ( x == SEQ || x == BLOCK ) {
 				if ( element.size() >= 1 ) {
-					Gnx ch = element.lastChild();
+					Gnx ch = element.getLastChild();
 					ch->orFlags( TAIL_CALL_MASK );
 				}
 			} else if ( x == ASSERT && element.size() == 1 && element.hasAttribute( ASSERT_TAILCALL, "true" ) ) {
-                Gnx c = element.child( 0 );
+                Gnx c = element.getChild( 0 );
                 element.copyFrom( *c );
                 this->startVisit( element );
             }
@@ -1191,7 +1191,7 @@ public:
 		if ( 
 			nm == APP &&
 			element.size() >= 1 &&
-			element.child( 0 )->name() == "self.constant"
+			element.getChild( 0 )->name() == "self.constant"
 		) {
 			element.name() = "self.app";
 			element.popFrontChild();
@@ -1210,9 +1210,9 @@ public:
 				mnx.start( SELF_CONSTANT );
 				mnx.end();
 				mnx.end();
-				mnx.add( element.child( 1 ) );
+				mnx.add( element.getChild( 1 ) );
 				mnx.end();
-				element.child( 1 ) = mnx.build();
+				element.setChild( 1, mnx.build() );
 			}
 		}
 	}
@@ -1420,9 +1420,9 @@ public:
 		} else if ( 
 			x == SET && 
 			element.size() == 2 &&
-			element.child( 1 )->name() == ID 
+			element.getChild( 1 )->name() == ID 
 		) {
-			this->markAsAssigned( element.child( 1 ) );
+			this->markAsAssigned( element.getChild( 1 ) );
 		}
 	}
 	
@@ -1501,9 +1501,9 @@ public:
 				//cout<<"OUT 1" << endl;
 			}
 		} else if ( x == APP && element.size() == 2 ) {
-			if ( element.child( 0 )->hasName( CONSTANT ) && element.child( 0 )->hasAttribute( CONSTANT_TYPE, "sysfn" ) && element.child( 0 )->hasAttribute( CONSTANT_VALUE ) ) {
+			if ( element.getChild( 0 )->hasName( CONSTANT ) && element.getChild( 0 )->hasAttribute( CONSTANT_TYPE, "sysfn" ) && element.getChild( 0 )->hasAttribute( CONSTANT_VALUE ) ) {
 				//cout<<"IN 2" << endl;
-				const string value( element.child( 0 )->attribute( CONSTANT_VALUE ) );
+				const string value( element.getChild( 0 )->attribute( CONSTANT_VALUE ) );
 				element.name() = SYSAPP;
 				element.clearAllAttributes();
 				element.putAttribute( SYSAPP_NAME, value );
@@ -1514,8 +1514,8 @@ public:
 				//cout << endl;
 			}
 		} else if ( x == SET && element.size() == 2 ) {
-            if ( element.child( 1 )->hasName( SYSAPP ) && element.child( 1 )->hasAttribute( SYSAPP_NAME ) ) {
-                const string & sysfn_name = element.child( 1 )->attribute( SYSAPP_NAME );
+            if ( element.getChild( 1 )->hasName( SYSAPP ) && element.getChild( 1 )->hasAttribute( SYSAPP_NAME ) ) {
+                const string & sysfn_name = element.getChild( 1 )->attribute( SYSAPP_NAME );
                 const char * uname = (
                     sysfn_name == "index" ? "updaterOfIndex" :
                     sysfn_name == "explode" ? "updaterOfExplode" :
@@ -1528,8 +1528,8 @@ public:
                     */
                     Gnx uform( new Ginger::Mnx( SYSAPP ) );
                     uform->putAttribute( SYSAPP_NAME, uname );
-                    uform->addChild( element.child( 0 ) );
-                    Ginger::MnxChildIterator kids( element.child(1) );
+                    uform->addChild( element.getChild( 0 ) );
+                    Ginger::MnxChildIterator kids( element.getChild(1) );
                     while ( kids.hasNext() ) {
                         uform->addChild( kids.next() );
                     }
@@ -1621,7 +1621,7 @@ public:
 				//	We should extend the set of local variables with the
 				//	capture set.
 				{
-					Gnx arg( element.child( 0 ) );
+					Gnx arg( element.getChild( 0 ) );
 					Gnx newarg( new Ginger::Mnx( SEQ ) );
 					newarg->addChild( arg );
 					newarg->addChild( this->makeLocals( VAR ) );
@@ -1629,7 +1629,7 @@ public:
 					/*newarg->render();
 					cout << endl;*/
 					
-					element.child( 0 ) = newarg;
+					element.setChild( 0, newarg );
 				}
 				
 				//	Then we should transform the function into a call
@@ -1754,25 +1754,25 @@ public:
 		if ( 
 			x == BIND && 
 			element.size() == 2 &&
-			element.child(0)->name() == DEREF &&
-			element.child(0)->size() == 1
+			element.getChild(0)->name() == DEREF &&
+			element.getChild(0)->size() == 1
 		) {
 			//	<bind><deref><var...></deref>EXPR</bind> 
 			//	<bind><var...><makeref>EXPR</makeref></bind>			
 			Gnx makeref( new Ginger::Mnx( MAKEREF ) );
-			makeref->addChild( element.child(1) );
-			element.child(0) = element.child(0)->child(0);
-			element.child(1) = makeref;
+			makeref->addChild( element.getChild(1) );
+			element.setChild( 0, element.getChild(0)->getChild(0) );
+			element.setChild( 1, makeref );
 		} else if (
 			x == SET &&
 			element.size() == 2 &&
-			element.child(1)->name() == DEREF &&
-			element.child(1)->size() == 1
+			element.getChild(1)->name() == DEREF &&
+			element.getChild(1)->size() == 1
 		) {
 			//	<set> EXPR <deref><var...></deref> </bind> 
 			//	<setcont> EXPR <var...> </bind>		
 			element.name() = SETCONT;
-			element.child(1) = element.child(1)->child(0);
+			element.setChild( 1, element.getChild(1)->getChild(0) );
 		} 
 	}
 	
@@ -1813,7 +1813,7 @@ public:
             ) && 
             element.size() >= 1 
         ) {
-            Gnx target = element.child( 0 );
+            Gnx target = element.getChild( 0 );
             if ( target->hasName( SEQ ) ) {
                 vector< Gnx > lhs;
                 bool was_flattened = flatten( target, lhs ) > 1;
@@ -1850,11 +1850,11 @@ public:
                         where.add( g );
                     }
                 }
-                //where.add( element.child( 1 ) );
+                //where.add( element.getChild( 1 ) );
                 where.end();
                 where.start( SYSAPP );
                 where.put( SYSAPP_NAME, "=" );
-                where.add( element.child( 0 ) );
+                where.add( element.getChild( 0 ) );
                 where.start( ID );
                 where.put( VID_NAME, uuid );
                 where.put( IS_TEMPORARY, "true" );
@@ -1879,7 +1879,7 @@ class Flatten : public Ginger::MnxVisitor {
 private:
 	void flattenSubSeqs( Ginger::Mnx & element ) {
 		for ( int i = 0; i < element.size(); i++ ) {
-			if ( element.child( i )->name() == SEQ ) {
+			if ( element.getChild( i )->name() == SEQ ) {
 				element.flattenChild( i );
 				i -= 1;
 			}
@@ -1901,16 +1901,16 @@ public:
 			nm == LIST_APPEND and 
 			element.size() == 2 
 		) {
-			if ( element.child( 0 )->name() == LIST and element.child( 0 )->isEmpty() ) {
-				element.copyFrom( *element.child( 1 ) );
-			} else if ( element.child( 1  )->name() == LIST and element.child( 1 )->isEmpty() ) {
-				element.copyFrom( *element.child( 0 ) );
-			} else if ( element.child( 0 )->name() == LIST and element.child( 1 )->name() == LIST ) {
+			if ( element.getChild( 0 )->name() == LIST and element.getChild( 0 )->isEmpty() ) {
+				element.copyFrom( *element.getChild( 1 ) );
+			} else if ( element.getChild( 1  )->name() == LIST and element.getChild( 1 )->isEmpty() ) {
+				element.copyFrom( *element.getChild( 0 ) );
+			} else if ( element.getChild( 0 )->name() == LIST and element.getChild( 1 )->name() == LIST ) {
 				// 	Does LIST/VECTOR introduce a lexical block? In this optimisation
 				//	we assume it does not.
 				element.name() = LIST;
-				element.child(0)->name() = SEQ;
-				element.child(1)->name() = SEQ;
+				element.getChild(0)->name() = SEQ;
+				element.getChild(1)->name() = SEQ;
 				this->flattenSubSeqs( element );
 			}
 		}

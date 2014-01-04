@@ -1,7 +1,7 @@
+#include "Failure.h"
 #include "Test.h"
 #include "TestRegistry.h"
 #include "TestResult.h"
-#include "Failure.h"
 #include "TestException.h"
 
 #ifdef LINUX

@@ -6,6 +6,7 @@
     #pragma warning (disable : 4267 4389 4018)
 #endif
 
+#include "Failure.h"
 #include "TestResult.h"
 #include <sstream>
 

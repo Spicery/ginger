@@ -3,7 +3,7 @@ CC=@CXX@
 CXX=@CXX@
 
 
-CXXFLAGS=-g -I../../CppUnitLite2/src -I../hpp -I../../libgng/hpp -Wall -Wnon-virtual-dtor
+CXXFLAGS=-g -std=c++0x -I../../CppUnitLite2/src -I../hpp -I../../libgng/hpp -Wall -Wnon-virtual-dtor
 CFLAGS=-Wmissing-prototypes 
 LDFLAGS=-ldl
 OBJS=testsimplifygnx.o

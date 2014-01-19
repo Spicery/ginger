@@ -122,6 +122,8 @@
 			`(if () ,@(map sexp2expr args)))
 		((eq? f 'let)
 			(let2gnx f args))
+		((eq? f 'lambda)
+			(lambda2gnx f args))
 		((eq? f 'for)
 			(for2gnx f args))
 		((eq? f 'sysapp)
@@ -230,6 +232,13 @@
 			,@(map binding2gnx bindings)
 			,@(map sexp2expr body))))
 
+(define (lambda2gnx f args)
+	(let
+		(
+			(params (gnx-seq (map gnx-var (car args))))
+			(body (gnx-seq (map sexp2expr (cdr args)))))
+		(gnx-lambda-fn params body)))
+
 (define (binding2gnx b)
 	`(bind () ,(sexp2pattern (car b)) ,(sexp2expr (cadr b))))
 
@@ -318,3 +327,5 @@
 (define (gnx-id name)
 	`(id ((name ,name))))
 	
+(define (gnx-lambda-fn args body)
+	`(fn () ,args ,body))

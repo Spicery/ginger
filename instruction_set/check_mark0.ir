@@ -27,5 +27,5 @@ long n = ToLong( *( ++pc ) );
 	std::endl;
 #endif
 if ( VMVP == LOCAL(n) ) RETURN( pc + 1 );
-throw Mishap( "Wrong number of results (needed 0)" ).culprit( "#Results", "" + ( VMVP - ToRefRef( LOCAL(n) ) ) );
+throw Mishap( "Wrong number of results (needed 0)" ).culprit( "#Results", VMVP - ToRefRef( LOCAL(n) ) );
 RETURN( NULL );	// stupid compiler

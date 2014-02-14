@@ -50,7 +50,7 @@ void DestinationClass::destinationSet() {
 		#ifdef DBG_DESTINATION
 			clog << "Pending update of [" << there << "] with jump " << ( here - there ) << endl;
 		#endif
-		this->codegen->codeUpdate( there, ( Ref )( here - there ) );
+		this->codegen->codeUpdate( there, IntToRef( here - there ) );
 	}
 }
 
@@ -60,7 +60,7 @@ void DestinationClass::destinationInsert() {
 		#ifdef DBG_DESTINATION
 			clog << "Backward goto at [" << where << "] with jump " << where - this->location << endl;
 		#endif
-		this->codegen->codegenRef( ( Ref )( this->location - where ) );
+		this->codegen->codegenRef( IntToRef( this->location - where ) );
 	} else {
 		#ifdef DBG_DESTINATION
 			clog << "Forward goto at [" << where << "]" << endl;

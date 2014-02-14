@@ -92,6 +92,7 @@ public:
 #define SystemError( Message ) Ginger::Mishap( (Message), Ginger::Mishap::SYSTEM_ERROR_SEVERITY )
 #define CompileTimeError( Message ) Ginger::Mishap( (Message), Ginger::Mishap::COMPILE_TIME_SEVERITY )
 #define Unreachable() Ginger::Mishap( "Internal error", Ginger::Mishap::SYSTEM_ERROR_SEVERITY ).culprit( "FILE", __FILE__ ).culprit( "LINE", (long)__LINE__ )
+#define ToBeDone() Ginger::Mishap( "To be implemented", Ginger::Mishap::SYSTEM_ERROR_SEVERITY ).culprit( "FILE", __FILE__ ).culprit( "LINE", (long)__LINE__ )
 
 } // namespace Ginger
 

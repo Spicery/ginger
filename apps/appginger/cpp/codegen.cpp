@@ -27,7 +27,7 @@
 #include <stddef.h>
 #include <string.h>
 
-
+#include "numbers.hpp"
 #include "gnxconstants.hpp"
 #include "mnx.hpp"
 #include "mishap.hpp"
@@ -47,6 +47,7 @@
 #include "sysexception.hpp"
 #include "syslist.hpp"
 #include "sysindirection.hpp"
+#include "maybe.hpp"
 
 namespace Ginger {
 using namespace std;
@@ -118,18 +119,18 @@ void CodeGenClass::vmiCHECK_EXPLODE( Arity arity ) {
 	if ( arity.isExact() ) {
 		this->emitSPC( vmc_syscall_arg );
 		this->emitRef( ToRef( sysCheckExplodeN ) );
-		this->emitRef( ToRef( N ) );
+		this->emitRef( IntToRef( N ) );
 	} else if ( N > 0 ) {
 		//	N.B. We only plant code if the N > 0 as N == 0 is trivially true.
 		this->emitSPC( vmc_syscall_arg );
 		this->emitRef( ToRef( sysCheckExplodeGteN ) );
-		this->emitRef( ToRef( N ) );
+		this->emitRef( IntToRef( N ) );
 	}
 }
 
 void CodeGenClass::emitVAR_REF( Gnx id ) {
 	if ( id->hasAttribute( VID_SCOPE, "local" ) ) {
-		this->emitRef( ToRef( id->attributeToInt( VID_SLOT ) ) );
+		this->emitRef( IntToRef( id->attributeToInt( VID_SLOT ) ) );
 	} else {
 		this->emitValof( resolveGlobal( id ) );
 	}
@@ -137,7 +138,7 @@ void CodeGenClass::emitVAR_REF( Gnx id ) {
 
 void CodeGenClass::emitVIDENT_REF( const VIdent & id ) {
 	if ( id.isLocal() ) {
-		this->emitRef( ToRef( id.getSlot() ) );
+		this->emitRef( IntToRef( id.getSlot() ) );
 	} else if ( id.isGlobal() ) {
 		this->emitValof( id.getValof() );
 	} else if ( id.isConstant() ) {
@@ -173,7 +174,7 @@ void CodeGenClass::vmiSELF_CALL() {
 
 void CodeGenClass::vmiSELF_CALL_N( const int n ) {
 	this->emitSPC( vmc_self_call_n );
-	this->emitRef( ToRef( n ) );
+	this->emitRef( IntToRef( n ) );
 }
 
 void CodeGenClass::vmiSYS_CALL( SysCall * r ) {
@@ -210,7 +211,7 @@ void CodeGenClass::vmiSYS_CALL_ARGDAT( SysCall * sys, Ref ref, unsigned long dat
 
 void CodeGenClass::vmiSET_SYS_CALL( SysCall * r, int A ) {
 	this->emitSPC( vmc_set_count_syscall );
-	this->emitRef( ToRef( A ) );
+	this->emitRef( IntToRef( A ) );
 	this->emitRef( ToRef( r ) );
 }
 
@@ -242,7 +243,7 @@ void CodeGenClass::vmiINCR( long n ) {
 			//	We have to be a little careful here because we only support
 			//	Smalls and not the entire range of Long.
 			this->emitSPC( vmc_incr_by );
-			if ( Numbers::MIN_SMALL <= n && n <= Numbers::MAX_SMALL ) {
+			if ( canFitInSmall( n ) ) {
 				this->emitRef( LongToSmall( n ) );
 			} else {
 				throw Mishap( "Increment is out of range" ).culprit( "Increment", n );
@@ -265,7 +266,7 @@ Valof * CodeGenClass::resolveGlobal( Gnx id ) {
 
 void CodeGenClass::vmiPOP_INNER_SLOT( int slot ) {
 	this->emitSPC( vmc_pop_local );
-	this->emitRef( ToRef( slot ) );	
+	this->emitRef( IntToRef( slot ) );	
 }
 
 void CodeGenClass::vmiPOP( const VIdent & id, const bool assign_vs_bind ) {
@@ -362,7 +363,7 @@ void CodeGenClass::vmiPUSH_INNER_SLOT( int slot ) {
 		return;
 	default:	
 		this->emitSPC( vmc_push_local );
-		this->emitRef( ToRef( slot ) );
+		this->emitRef( IntToRef( slot ) );
 	}
 }
 
@@ -377,7 +378,7 @@ void CodeGenClass::vmiPUSH_INNER_SLOT( int slot, LabelClass * contn ) {
 			return;
 		default:	
 			this->emitSPC( is_ret ? vmc_push_local_ret : vmc_push_local );
-			this->emitRef( ToRef( slot ) );
+			this->emitRef( IntToRef( slot ) );
 	}
 }
 
@@ -395,7 +396,7 @@ void CodeGenClass::vmiSETCONT() {
 
 void CodeGenClass::vmiSET_COUNT_TO_MARK( int A ) {
 	this->emitSPC( vmc_set );
-	this->emitRef( ToRef( A ) );
+	this->emitRef( IntToRef( A ) );
 }
 
 void CodeGenClass::vmiINVOKE() {
@@ -415,7 +416,7 @@ void CodeGenClass::vmiEND_CALL_ID( int var, const VIdent & ident ) {
 		this->emitSPC( vmc_calls );
 	} else if ( ident.isGlobal() ) {
 		this->emitSPC( vmc_end_call_global );
-		this->emitRef( ToRef( var ) );
+		this->emitRef( IntToRef( var ) );
 		this->emitVIDENT_REF( ident );
 	} else {
 		throw Unreachable();
@@ -430,7 +431,7 @@ void CodeGenClass::vmiSET_CALL_ID( int in_arity, const VIdent & ident ) {
 	} else {
 		throw Unreachable();
 	}
-	this->emitRef( ToRef( in_arity ) );
+	this->emitRef( IntToRef( in_arity ) );
 	this->emitVIDENT_REF( ident );
 }
 
@@ -444,27 +445,27 @@ void CodeGenClass::vmiSET_CALL_INNER_SLOT( int in_arity, int slot ) {
 
 void CodeGenClass::vmiEND1_CALLS( int var ) {
 	this->emitSPC( vmc_end1_calls );
-	this->emitRef( ToRef( var ) );
+	this->emitRef( IntToRef( var ) );
 }
 
 void CodeGenClass::vmiSET_CALLS( int in_arity ) {
 	this->emitSPC( vmc_set_count_calls );
-	this->emitRef( ToRef( in_arity ) );
+	this->emitRef( IntToRef( in_arity ) );
 }
 
 void CodeGenClass::vmiSTART_MARK( int v ) {
 	this->emitSPC( vmc_start_mark );
-	this->emitRef( ToRef( v ) );
+	this->emitRef( IntToRef( v ) );
 }
 
 void CodeGenClass::vmiEND_MARK( int v ) {
 	this->emitSPC( vmc_end_mark );
-	this->emitRef( ToRef( v ) );
+	this->emitRef( IntToRef( v ) );
 }
 
 void CodeGenClass::vmiERASE_MARK( int var ) {
 	this->emitSPC( vmc_erase_mark );
-	this->emitRef( ToRef( var ) );
+	this->emitRef( IntToRef( var ) );
 }
 
 void CodeGenClass::vmiERASE() {
@@ -477,7 +478,7 @@ void CodeGenClass::vmiDUP() {
 
 void CodeGenClass::vmiCHECK_COUNT( int v ) {
 	this->emitSPC( vmc_check_count );
-	this->emitRef( ToRef( v ) );
+	this->emitRef( IntToRef( v ) );
 }
 
 void CodeGenClass::vmiCHECK_MARK( int v, Arity a ) {
@@ -485,8 +486,8 @@ void CodeGenClass::vmiCHECK_MARK( int v, Arity a ) {
 		this->vmiCHECK_MARK( v, a.count() );
 	} else {
 		this->emitSPC( vmc_check_mark_gte );
-		this->emitRef( ToRef( v ) );
-		this->emitRef( ToRef( a.count() ) );		
+		this->emitRef( IntToRef( v ) );
+		this->emitRef( IntToRef( a.count() ) );		
 	}
 }
 
@@ -497,8 +498,8 @@ void CodeGenClass::vmiCHECK_MARK( int v, int N ) {
 		this->vmiCHECK_MARK1( v );
 	} else {
 		this->emitSPC( vmc_check_mark );
-		this->emitRef( ToRef( v ) );
-		this->emitRef( ToRef( N ) );
+		this->emitRef( IntToRef( v ) );
+		this->emitRef( IntToRef( N ) );
 	}
 }
 
@@ -506,7 +507,7 @@ void CodeGenClass::vmiCHECK_MARK_ELSE( int v, int N, LabelClass * fail_label ) {
 	//	TODO: this is not at all good code. Opportunity to improve.
 	LabelClass cont_label( this );
 	this->emitSPC( vmc_neq_si );
-	this->emitRef( LongToRef( v ) );
+	this->emitRef( IntToRef( v ) );
 	this->emitRef( LongToSmall( N ) );
 	cont_label.labelInsert();
 	this->vmiERASE_MARK( v );
@@ -516,13 +517,13 @@ void CodeGenClass::vmiCHECK_MARK_ELSE( int v, int N, LabelClass * fail_label ) {
 
 void CodeGenClass::vmiCHECK_MARK1( int v ) {
 	this->emitSPC( vmc_check_mark1 );
-	this->emitRef( ToRef( v ) );
+	this->emitRef( IntToRef( v ) );
 }
 
 //	Do we ever generate this?
 void CodeGenClass::vmiCHECK_MARK0( int v ) {
 	this->emitSPC( vmc_check_mark0 );
-	this->emitRef( ToRef( v ) );
+	this->emitRef( IntToRef( v ) );
 }
 
 void CodeGenClass::vmiPUSHQ( Ref obj ) {
@@ -881,9 +882,9 @@ Ref CodeGenClass::detach( const bool in_heap, Ref fnkey ) {
 		//
 		xfr.xfrRef( ToRef( ( L << TAGGG ) | FUNC_LEN_TAGGG ) );  //	tagged for heap scanning
 		xfr.xfrRef( SYS_ABSENT );					//	placeholder for Data Pool.
-		xfr.xfrRef( ToRef( this->nresults ) );		//	raw R
-		xfr.xfrRef( ToRef( this->nlocals ) );		//	raw N
-		xfr.xfrRef( ToRef( this->ninputs ) );		//	raw A
+		xfr.xfrRef( IntToRef( this->nresults ) );		//	raw R
+		xfr.xfrRef( IntToRef( this->nlocals ) );		//	raw N
+		xfr.xfrRef( IntToRef( this->ninputs ) );		//	raw A
 		
 	
 		xfr.setOrigin();
@@ -900,9 +901,9 @@ Ref CodeGenClass::detach( const bool in_heap, Ref fnkey ) {
 		Ref * p = permanentStore;
 		*p++ = ToRef( ( L << TAGGG ) | FUNC_LEN_TAGGG );
 		*p++ = SYS_ABSENT;										// 	Data Pool NOT allowed out of heap.
-		*p++ = ToRef( this->nresults );
-		*p++ = ToRef( this->nlocals );
-		*p++ = ToRef( this->ninputs );
+		*p++ = IntToRef( this->nresults );
+		*p++ = IntToRef( this->nlocals );
+		*p++ = IntToRef( this->ninputs );
 		Ref * func = p;
 		if ( fnkey != sysCoreFunctionKey ) throw Unreachable();
 		*p++ = sysCoreFunctionKey;
@@ -933,8 +934,11 @@ static bool isVIdentable( Gnx gnx ) {
 	return nm == VAR or nm == ID or nm == CONSTANT;
 }
 
-static bool isConstantIntGnx( Gnx gnx ) {
-	return gnx->name() == CONSTANT and gnx->hasAttribute( CONSTANT_TYPE, "int" );
+static bool isConstantSmallIntGnx( Gnx gnx ) {
+	if ( gnx->name() != CONSTANT || not gnx->hasAttribute( CONSTANT_TYPE, "int" ) ) return false;
+	Maybe< long > v = gnx->maybeAttributeToLong( CONSTANT_VALUE );
+	if ( not v.isValid() ) return false;
+	return canFitInSmall( v.fastValue() );
 }
 
 void CodeGenClass::compileIfTest( bool sense, Gnx mnx, LabelClass * dst, LabelClass * contn ) {
@@ -1064,7 +1068,6 @@ void CompileQuery::compileQueryDecl( Gnx query ) {
 		if ( this->codegen->tryFlatten( query->getChild( 0 ), VAR, vars ) ) {
 			for ( std::vector< Gnx >::iterator it = vars.begin(); it != vars.end(); ++it ) {
 				Gnx vc = *it;
-				//cerr << "VAR added = " << vc->name() << endl;
 				int tmp_loop_var = this->newLoopVar( new VIdent( this->codegen, vc ) );
 				if ( lo < 0 ) lo = tmp_loop_var;
 				hi = tmp_loop_var + 1;
@@ -1263,7 +1266,6 @@ void CompileQuery::compileQueryTest( Gnx query, LabelClass * dst, LabelClass * c
 			this->codegen->vmiPOP_INNER_SLOT( tmp );
 			this->codegen->compileNelse( rhs, vars.size(), CONTINUE_LABEL, done_label.jumpToJump( contn ) );
 			
-			//cerr << "NUM in vars = " << vars.size() << endl;
 			for ( int count = hi - 1; count >= lo; count-- ) {
 				this->codegen->vmiPOP( this->getLoopVar( count ), false );
 			}
@@ -1527,18 +1529,16 @@ void CodeGenClass::compileGnxSysApp( Gnx mnx, LabelClass * contn ) {
 			bool c1 = false;
 			//cerr << "nm == +? " << nm << "? " << ( nm == "+" ) << endl;
 			//cerr << "mnx->size() == 2? " << ( mnx->size() == 2 ) << endl;
-			//cerr << "isConstantIntGnx( mnx->getChild( 0 ) )? " << ( isConstantIntGnx( mnx->getChild( 0 ) ) ) << endl;
-			//cerr << "isConstantIntGnx( mnx->getChild( 1 ) )? " << ( isConstantIntGnx( mnx->getChild( 1 ) ) ) << endl;
 			if ( 
 				nm == "+" and mnx->size() == 2 and 
-				( ( c0 = isConstantIntGnx( mnx->getChild( 0 ) ) ) or ( c1 = isConstantIntGnx( mnx->getChild( 1 ) ) ) )
+				( ( c0 = isConstantSmallIntGnx( mnx->getChild( 0 ) ) ) or ( c1 = isConstantSmallIntGnx( mnx->getChild( 1 ) ) ) )
 			) {			
 				//	TODO: We should shift the operator into being an incr/decr.
 				//	Check which one gets optimised.
 				this->compile1( mnx->getChild( c0 ? 1 : 0 ), CONTINUE_LABEL );
 				this->vmiINCR( mnx->getChild( c0 ? 0 : 1 )->attributeToLong( CONSTANT_VALUE ) );
 			} else if ( 
-				nm == "-" and mnx->size() == 2 and isConstantIntGnx( mnx->getChild( 1 ) )
+				nm == "-" and mnx->size() == 2 and isConstantSmallIntGnx( mnx->getChild( 1 ) )
 			) {				
 				//	TODO: We should shift the operator into being an incr/decr.
 				this->compile1( mnx->getChild( 0 ), CONTINUE_LABEL );
@@ -1632,7 +1632,12 @@ Ref CodeGenClass::calcConstant( Gnx mnx ) {
 	#endif
 	const string & type = mnx->attribute( CONSTANT_TYPE );
 	if ( type == "int" ) {
-		return LongToRef( mnx->attributeToLong( CONSTANT_VALUE ) );
+		Maybe< long > v( mnx->maybeAttributeToLong( CONSTANT_VALUE ) );
+		if ( v.isValid() && canFitInSmall( v.fastValue() ) ) {
+			return LongToRef( v.fastValue() );
+		} else {
+			return this->vm->heap().copyBigInt( mnx->attribute( CONSTANT_VALUE ).c_str() );
+		}
 	} else if ( type == "bool" ) {
 		return mnx->hasAttribute( CONSTANT_VALUE, "false" ) ? SYS_FALSE : SYS_TRUE;
 	} else if ( type == "absent" ) {
@@ -2033,7 +2038,6 @@ void CodeGenClass::eraseToMarkIfNeeded( const bool needed, const int mark ) {
 //		<catch.else> EXPR </catch.else> 				<-- can be any position!
 //	</try>
 void CodeGenClass::compileTry( Gnx mnx, LabelClass * contn ) {
-	//cerr << SYS_MSG_PREFIX << "Warning: exception catching not implemented" << endl;
 	LabelClass done_label( this );
 	LabelClass * done = done_label.jumpToJump( contn );
 

@@ -463,6 +463,7 @@ SysMap & SysMap::sysMap() {
 		SysMaplet( "/", SysInfo( vmc_div, Arity( 2 ), Arity( 1 ), "Divides two numbers, result is a float" ) ),
 		SysMaplet( "quo", SysInfo( vmc_quo, Arity( 2 ), Arity( 1 ), "Integer quotient" ) ),
 		SysMaplet( "mod", SysInfo( vmc_mod, Arity( 2 ), Arity( 1 ), "Integer modulus" ) ),
+		//SysMaplet( "rem", SysInfo( vmc_rem, Arity( 2 ), Arity( 1 ), "Integer remainder" ) ),	//	Disabled in favour of floored mod.
 		//SysMaplet( "**", SysInfo( VM_OP_FLAVOUR, vmc_pow, fnc_pow, Arity( 2 ), Arity( 1 ), 0, "Exponentiates two numbers, result is float" ) ),
 		SysMaplet( "<", SysInfo( CMP_LT, Arity( 2 ), Arity( 1 ), "Less than, compares two real numbers" ) ),
 		SysMaplet( "<=", SysInfo( CMP_LTE, Arity( 2 ), Arity( 1 ), "Less than or equal to, compares two real number" ) ),

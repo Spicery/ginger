@@ -23,7 +23,7 @@ Postcondition
 \*****************************************************************************/
 
 Ref rx = *( VMVP );
-if ( not( IsSmall( rx ) || IsDouble( rx ) ) ) {
+if ( not( IsSmall( rx ) || IsDouble( rx ) || IsBigInt( rx ) ) ) {
 	throw Mishap( "Number needed (for +x)" ).culprit( "Value", refToShowString( rx ) );
 }
 RETURN( pc + 1 );

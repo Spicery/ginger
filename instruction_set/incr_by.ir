@@ -29,23 +29,12 @@ if ( IsSmall( rx ) ) {
 	long sum = x + y;
 	if ( x < 0 ? sum < y : sum >= y ) {
 		*VMVP = ToRef( sum );
-	} else {
-		*VMVP = (
-			vm->heap().copyDouble( 
-				static_cast< gngdouble_t >( SmallToLong( x ) ) + 
-				static_cast< gngdouble_t >( SmallToLong( y ) )
-			)
-		);
-	}
-} else if ( IsDouble( rx ) ) {
-	*VMVP = (
-		vm->heap().copyDouble( 
-			gngFastDoubleValue( rx ) +
-			static_cast< gngdouble_t >( SmallToLong( ry ) )
-		)
-	);	
-} else {
-	throw Mishap( "INCR_BY instruction: Number needed" ).culprit( "Value", refToShowString( rx ) );
-} 
+		RETURN( pc + 2 );
+	} 
+}
+pc += 2;
+FREEZE;
+pc = sysAddHelper( pc, vm, ry );
+MELT;
+RETURN( pc );
 
-RETURN( pc + 2 );

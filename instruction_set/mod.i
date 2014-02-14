@@ -4,8 +4,9 @@ Definition
 	* VPC += 1
 
 Summary
-	Computes the integer modulus R of X and Y. X and Y are removed from
-	the stack and R is pushed.
+	Computes the integer modulus R of X and Y, such that R is in the
+	half open interval [0,Y). X and Y are removed from the stack and 
+	R is pushed.
 	
 Unchecked Precondition
 	* There are two items on the stack.
@@ -24,16 +25,19 @@ Tags
 
 Ref ry = *( VMVP-- );
 Ref rx = *( VMVP );
-if ( IsSmall( rx ) && IsSmall( ry ) ) {
-	if ( IsZeroSmall( ry ) ) {
-		throw Mishap( "MOD Instruction: Dividing by zero" ).culprit( "Numerator", refToShowString( rx ) );
-	} else {
-		long b = ToLong( ry );
-		long a = ToLong( rx );
-		*( VMVP ) = ToRef( a % b );
-		RETURN( pc + 1 );
-	}
-} else {
-	throw Mishap( "MOD Instruction: Integers only" ).culprit( "First", refToShowString( rx ) ).culprit( "Second", refToShowString( ry ) );
-}
+if ( IsSmall( rx ) && IsSmall( ry ) and not( IsZeroSmall( ry ) ) ) {
+    const long a = ToLong( rx );
+    const bool sa = a >= 0;
+    const long pa = sa ? a : -a;
 
+    const long b = ToLong( ry );
+    const bool sb = b > 0;
+    const long pb = sb ? b : -b;
+
+    *( VMVP ) = sa ? ToRef( pa % pb ) : ToRef( ToLong( ry ) - ( pa % pb ) );
+	RETURN( pc + 1 );
+}
+FREEZE;
+pc = sysFlooredRemainderHelper( ++pc, vm, ry );
+MELT;
+RETURN( pc );

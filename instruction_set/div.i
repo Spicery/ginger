@@ -42,22 +42,22 @@ if ( IsSmall( rx ) ) {
 		x = static_cast< gngdouble_t >( SmallToLong( rx ) );
 		*( VMVP ) = vm->heap().copyDouble( x / y );
 		RETURN( pc + 1 );
-	} else {
-		throw Mishap( "Bad arguments for / operator" ).culprit( "First", refToShowString( rx ) ).culprit( "Second", refToShowString( ry ) );
 	}
 } else if ( IsDouble( rx ) ) {
 	gngdouble_t x, y;
 	x = gngFastDoubleValue( rx );
 	if ( IsSmall( ry ) ) {
 		y = static_cast< gngdouble_t >( SmallToLong( ry ) );
+		*( VMVP ) = vm->heap().copyDouble( x / y );
+		RETURN( pc + 1 );
 	} else if ( IsDouble( ry ) ) {
 		y = gngFastDoubleValue( ry );
-	} else {
-		throw Mishap( "Bad arguments for / operator" ).culprit( "First", refToShowString( rx ) ).culprit( "Second", refToShowString( ry ) );
-	}
-	*( VMVP ) = vm->heap().copyDouble( x / y );
-	RETURN( pc + 1 );
-} else {
-	throw Mishap( "Bad arguments for / operator" ).culprit( "First", refToShowString( rx ) ).culprit( "Second", refToShowString( ry ) );
-} 
+		*( VMVP ) = vm->heap().copyDouble( x / y );
+		RETURN( pc + 1 );
+	} 
+}
+FREEZE;
+pc = sysDivHelper( ++pc, vm, ry );
+MELT;
+RETURN( pc );
 

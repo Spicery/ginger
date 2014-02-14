@@ -22,6 +22,7 @@
 #include <map>
 
 #include "cage.hpp"
+#include "bigint.hpp"
 
 namespace Ginger {
 
@@ -37,10 +38,14 @@ public:
 	bool wouldGC( int size );
 	CageClass * preflight( Ref * & pc, int size );
 	CageClass * preflight( int size );
-	Ref copyString( const char *s );				//	Copy string, possibly causing GC
+	Ref copyString( const char *s );				//	Copy string, vetoing GC
 	Ref copyString( Ref * & pc, const char *s );	//	Copy string, possibly causing GC
-	Ref copyDouble( gngdouble_t d );				//	Copy double, possibly causing GC
+	Ref copyDouble( gngdouble_t d );				//	Copy double, vetoing GC
 	Ref copyDouble( Ref * & pc, gngdouble_t d );	//	Copy double, possibly causing GC
+	Ref copyBigInt( const char * s );				//	Copy big int, vetoing GC
+	Ref copyBigInt( Ref * & pc, const char * s );	//	Copy big int, possibly causing GC
+	//Ref copyBigIntExternal( Ref * & pc, BigIntExternal * e );				//	Copy big int, possibly causing GC
+	Ref copyBigIntExternal( Ref * & pc, const BigIntExternal & e );				//	Copy big int, possibly causing GC
 
 public:
 	void selectCurrent();

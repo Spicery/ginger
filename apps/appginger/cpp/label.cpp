@@ -45,7 +45,7 @@ void LabelClass::labelSet() {
 		#ifdef DBG_LABEL
 			clog << "Pending update of [" << there << "] with jump " << ( here - there ) << endl;
 		#endif
-		this->codegen->codeUpdate( there, ( Ref )( here - there ) );
+		this->codegen->codeUpdate( there, IntToRef( here - there ) );
 	}
 }
 
@@ -58,7 +58,7 @@ void LabelClass::labelInsert() {
 		#ifdef DBG_LABEL
 			clog << "Backward goto at [" << where << "] with jump " << where - this->the_location << endl;
 		#endif
-		this->codegen->codegenRef( ( Ref )( this->the_location - where ) );
+		this->codegen->codegenRef( IntToRef( this->the_location - where ) );
 	} else {
 		#ifdef DBG_LABEL
 			clog << "Forward goto at [" << where << "]" << endl;

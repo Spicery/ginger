@@ -45,10 +45,13 @@ class MachineClass;
 
 typedef void * Ref;
 typedef void ** RefRef;
+typedef signed long long_t;     //  Has to be compatible in size with void *.
+typedef unsigned long ulong_t;  //  Has to be compatible in size with void *.
 
 typedef Ref * SysCall( Ref * pc, MachineClass * );
 
 #define ToRef( x )  	( ( Ref )( x ) )
+#define IntToRef( x )   ToRef( static_cast< long >( x ) )
 #define ToRefRef( x )	( ( RefRef )( x ) )
 #define ToULong( x ) 	( ( gngulong_t )( x ) )
 #define ToLong( x )		( ( gnglong_t )( x ) )

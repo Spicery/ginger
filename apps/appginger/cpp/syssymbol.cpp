@@ -107,7 +107,7 @@ Ref refMakeSymbol( const std::string & s ) {
 	} else {
 		serial = it->second;
 	}
-	return ToRef( ( serial << TAGGG ) | SYMBOL_TAGGG );
+	return IntToRef( ( serial << TAGGG ) | SYMBOL_TAGGG );
 }
 
 /*

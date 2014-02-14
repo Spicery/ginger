@@ -34,36 +34,29 @@ if ( IsSmall( rx ) ) {
 		long diff = x - y;
 		if ( y < 0L ? diff > x : diff <= x ) {
 			*VMVP = ToRef( diff );
-		} else {
-			*( VMVP ) = (
-				vm->heap().copyDouble( 
-					static_cast< gngdouble_t >( x >> TAG ) - 
-					static_cast< gngdouble_t >( y >> TAG )
-				)
-			);
-		}
-		RETURN( pc + 1 );
+			RETURN( pc + 1 );
+		} 
 	} else if ( IsDouble( ry ) ) {
 		gngdouble_t x, y;
 		y = gngFastDoubleValue( ry );
 		x = static_cast< gngdouble_t >( SmallToLong( rx ) );
 		*( VMVP ) = vm->heap().copyDouble( x - y );
 		RETURN( pc + 1 );
-	} else {
-		throw Mishap( "Bad arguments for - operation" ).culprit( "First", refToShowString( rx ) ).culprit( "Second", refToShowString( ry ) );
 	}
 } else if ( IsDouble( rx ) ) {
 	gngdouble_t x, y;
 	x = gngFastDoubleValue( rx );
 	if ( IsSmall( ry ) ) {
 		y = static_cast< gngdouble_t >( SmallToLong( ry ) );
+		*( VMVP ) = vm->heap().copyDouble( x - y );
+		RETURN( pc + 1 );
 	} else if ( IsDouble( ry ) ) {
 		y = gngFastDoubleValue( ry );
-	} else {
-		throw Mishap( "Bad arguments for - operation" ).culprit( "First", refToShowString( rx ) ).culprit( "Second", refToShowString( ry ) );
-	}
-	*( VMVP ) = vm->heap().copyDouble( x - y );
-	RETURN( pc + 1 );
-} else {
-	throw Mishap( "Bad arguments for - operation" ).culprit( "First", refToShowString( rx ) ).culprit( "Second", refToShowString( ry ) );
+		*( VMVP ) = vm->heap().copyDouble( x - y );
+		RETURN( pc + 1 );
+	} 
 } 
+FREEZE;
+pc = sysSubHelper( ++pc, vm, ry );
+MELT;
+RETURN( pc );

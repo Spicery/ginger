@@ -27,7 +27,8 @@ CFLAGS=-Wmissing-prototypes
 #CXXFLAGS += -DMACHINE4_EXCLUDED
 
 
-OBJS=inputstreamexternal.o outputstreamexternal.o \
+OBJS= bigint.o \
+	inputstreamexternal.o outputstreamexternal.o \
 	cagefinder.o cell.o refprint.o vident.o codegen.o \
 	simplify.o cage.o registers.o roots.o cmp.o \
 	rcep.o label.o package.o \
@@ -81,30 +82,32 @@ else
 	LIBAPPGINGER=-Wl,-force_load libappginger.a
 endif
 
+LIBRARIES=../../libgng/cpp/libgng.a /usr/local/lib/librudecgi.a -lgmp -lgmpxx
+
 # $@ is make shorthand for the target.
 # $@ is make shorthand for the dependencies
 appginger: libappginger.a main.o
 	ranlib libappginger.a ../../libgng/cpp/libgng.a
-	$(CC) $(CXXFLAGS) $(BOOST_CPPFLAGS) -o $@ main.o $(LIBAPPGINGER) ../../libgng/cpp/libgng.a /usr/local/lib/librudecgi.a
+	$(CC) $(CXXFLAGS) $(BOOST_CPPFLAGS) -o $@ main.o $(LIBAPPGINGER) $(LIBRARIES)
 	
 
 ginger-info: libappginger.a infomain.o
 	ranlib libappginger.a ../../libgng/cpp/libgng.a
-	$(CC) $(CXXFLAGS) $(BOOST_CPPFLAGS) -o $@ infomain.o $(LIBAPPGINGER) ../../libgng/cpp/libgng.a /usr/local/lib/librudecgi.a
+	$(CC) $(CXXFLAGS) $(BOOST_CPPFLAGS) -o $@ infomain.o $(LIBAPPGINGER) $(LIBRARIES)
 	./ginger-info -H > info-debug.hlp
 	./ginger-info -r > info-debug.rst
 
 ginger-cli: libappginger.a climain.o
 	ranlib libappginger.a ../../libgng/cpp/libgng.a
-	$(CC) $(CXXFLAGS) $(BOOST_CPPFLAGS) -o $@ climain.o $(LIBAPPGINGER) ../../libgng/cpp/libgng.a /usr/local/lib/librudecgi.a
+	$(CC) $(CXXFLAGS) $(BOOST_CPPFLAGS) -o $@ climain.o $(LIBAPPGINGER) $(LIBRARIES)
 
 ginger-cgi: libappginger.a cgimain.o
 	ranlib libappginger.a ../../libgng/cpp/libgng.a
-	$(CC) $(CXXFLAGS) $(BOOST_CPPFLAGS) -o $@ cgimain.o $(LIBAPPGINGER) ../../libgng/cpp/libgng.a /usr/local/lib/librudecgi.a
+	$(CC) $(CXXFLAGS) $(BOOST_CPPFLAGS) -o $@ cgimain.o $(LIBAPPGINGER) $(LIBRARIES)
 
 ginger-script: libappginger.a scriptmain.o
 	ranlib libappginger.a ../../libgng/cpp/libgng.a
-	$(CC) $(CXXFLAGS) $(BOOST_CPPFLAGS) -o $@ scriptmain.o $(LIBAPPGINGER) ../../libgng/cpp/libgng.a /usr/local/lib/librudecgi.a
+	$(CC) $(CXXFLAGS) $(BOOST_CPPFLAGS) -o $@ scriptmain.o $(LIBAPPGINGER) $(LIBRARIES)
 
 ginger:
 	echo "#!/bin/sh" > ginger-tmp

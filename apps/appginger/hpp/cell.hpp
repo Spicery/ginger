@@ -30,6 +30,7 @@
 #include "mishap.hpp"
 #include "mapcrawl.hpp"
 #include "external.hpp"
+#include "bigint.hpp"
 
 namespace Ginger {
 
@@ -40,6 +41,7 @@ class HeapObject;
 class StringObject;
 class VectorObject;
 class DoubleObject;
+class BigIntObject;
 class PairObject;
 class MapObject;
 class MapletObject;
@@ -63,6 +65,7 @@ public:
 	Ref asRef() const { return this->ref; }
 	long getLong() const { return SmallToLong( this->ref ); }
 	DoubleObject asDoubleObject() const;
+	BigIntObject asBigIntObject() const;
 
 	bool isTermin() const { return this->ref == SYS_TERMIN; }
 	bool isAbsent() const { return this->ref == SYS_ABSENT; }
@@ -74,6 +77,7 @@ public:
 	bool isPairObject() const { return IsPair( this->ref ); }
 	bool isVectorObject() const { return IsVector( this->ref ); }
 	bool isDoubleObject() const { return IsDouble( this->ref ); }
+	bool isBigIntObject() const { return IsBigInt( this->ref ); }
 
 	std::string toPrintString() const;
 	std::string toShowString() const;
@@ -106,6 +110,7 @@ public:	//	Checked downcasts.
 	MapObject asMapObject() const;	
 	MapletObject asMapletObject() const;	
 	DoubleObject asDoubleObject() const;
+	BigIntObject asBigIntObject() const;
 
 public:	//	Others
 	bool isFunctionObject() const { return IsFunctionKey( *this->obj_K ); }
@@ -121,6 +126,7 @@ public:	//	Others
 	bool isMapletObject() const { return IsMaplet( this->obj_K ); }
 	bool isWRecordObject() const { return IsSimple( *this->obj_K ) && KindOfSimpleKey( *this->obj_K ) == WRECORD_KIND; }
 	bool isDoubleObject() const { return *this->obj_K == sysDoubleKey; }
+	bool isBigIntObject() const { return *this->obj_K == sysBigIntKey; }
 	bool isAtomicWRecordObject() const { return IsSimple( *this->obj_K ) && KindOfSimpleKey( *this->obj_K ) == ATOMIC_WRECORD_KIND; }
 	bool isExternalObject() const { return IsSimple( *this->obj_K ) && KindOfSimpleKey( *this->obj_K ) == EXTERNAL_KIND; }
 
@@ -186,6 +192,17 @@ public:
 public:
 	std::string toString() const;
 	gngdouble_t getDouble() const;
+};
+
+class BigIntObject : public HeapObject {
+public:
+	BigIntObject( Ref * _p ) : HeapObject( _p ) {}
+	BigIntObject( HeapObject _h ) : HeapObject( _h ) {}
+	BigIntObject( Cell _c ) : HeapObject( _c ) {}
+
+public:
+	std::string toString() const;
+	BigIntExternal * getBigIntExternal() const;
 };
 
 class MapObject : public HeapObject {

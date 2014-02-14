@@ -741,6 +741,10 @@ ref = FullRecordClassGenerator( sysconsts, "OutputStream", [] )
 ref.options = MethodOptions( "r" )
 ref.generateFilesWithPrefix( "outputstream" )
 
+ref = FullRecordClassGenerator( sysconsts, "BigInt", [] )
+ref.options = MethodOptions( "r" )
+ref.generateFilesWithPrefix( "bigint" )
+
 #	Create the insert for the sysMap table.
 inc = open( "sysmap.inc.auto", 'w' )
 sysconsts.generateSysMapInclude( inc )

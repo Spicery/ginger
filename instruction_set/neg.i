@@ -19,9 +19,8 @@ Postcondition
 
 Ref rx = *( VMVP );
 if ( IsSmall( rx ) ) {
-	long x = (long)rx;
-	long negx = -x;
-
+	const long x = (long)rx;
+	const long negx = -x;
 	if ( x != negx ) {
 		*VMVP = ToRef( negx );
 	} else {
@@ -35,8 +34,10 @@ if ( IsSmall( rx ) ) {
 } else if ( IsDouble( rx ) ) {
 	gngdouble_t x;
 	x = gngFastDoubleValue( rx );
-	*( VMVP ) = vm->heap().copyDouble( -x );
+	*( VMVP ) = vm->heap().copyDouble( pc, -x );
 	RETURN( pc + 1 );
-} else {
-	throw Mishap( "Trying to negate a non-number" ).culprit( "First", refToShowString( rx ) );
 } 
+FREEZE;
+pc = sysNegHelper( ++pc, vm );
+MELT;
+RETURN( pc );

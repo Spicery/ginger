@@ -25,10 +25,12 @@
 namespace Ginger {
 namespace Numbers {
 
-	const gnglong_t MIN_SMALL = -( 1 << ( sizeof( Ref ) * 4 - TAG ) );
-	const gnglong_t MAX_SMALL = 1 << ( sizeof( Ref ) * 4 - TAG ) - 1;
+    const int BITS_PER_BYTE = 8;
+	const gnglong_t MIN_SMALL = -( 1L << ( sizeof( Ref ) * BITS_PER_BYTE - 1 - TAG ) );
+	const gnglong_t MAX_SMALL = ( 1L << ( sizeof( Ref ) * BITS_PER_BYTE - 1 - TAG ) ) - 1L;
 
-}
-}
+
+} // end-namespace.
+} // end-namespace.
 
 #endif

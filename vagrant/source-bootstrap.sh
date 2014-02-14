@@ -3,7 +3,7 @@
 ###############################################################################
 
 sudo apt-get update
-sudo apt-get install -y make git python g++ autoconf uuid-dev libreadline-dev
+sudo apt-get install -y make git python g++ autoconf uuid-dev libreadline-dev libgmp-dev
 
 # RudeCGI is part of the Ginger dependencies that needs separate download.
 # It is only needed for the relatively basic CGI mode.

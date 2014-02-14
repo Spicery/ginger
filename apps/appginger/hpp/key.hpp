@@ -64,8 +64,9 @@ Ref nameToKey( const std::string & name );
 #define IsSimple( r )		( ( TAG_MASK & ToULong( r ) ) == SIM_TAG )
 #define IsPrimitive( r )	( IsSimple( r ) || IsSmall( r ) )
 #define IsDouble( r )       ( IsObj( r ) && *RefToPtr4( r ) == sysDoubleKey )
+#define IsBigInt( r )       ( IsObj( r ) && *RefToPtr4( r ) == sysBigIntKey )
 #define IsCharacter( r )    ( ( TAGGG_MASK & ToULong( r ) ) == CHAR_TAGGG )
-#define IntToChar( i )		( (Ref)( ( i ) << TAGGG | CHAR_TAGGG ) )
+#define IntToChar( i )		( (Ref)( static_cast< long_t >( ( i ) << TAGGG | CHAR_TAGGG ) ) )
 
 #define AddSmall( a, b )	ToRef( ToLong( a ) + ToLong( b ) )
 
@@ -211,7 +212,7 @@ KEYLESS_KIND
 #define UNUSED7_TAGGG   ( 7 << TAGG | ESC_TAGG )
 
 #define CharToCharacter( c ) \
-	ToRef( (c) << TAGGG | CHAR_TAGGG )
+	ToRef( static_cast< unsigned long >(c) << TAGGG | CHAR_TAGGG )
 
 #define CharacterToChar( r ) \
 	( (char)( ToULong(r) >> TAGGG ) )

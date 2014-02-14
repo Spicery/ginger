@@ -29,13 +29,10 @@ if ( IsSmall( rx ) ) {
 				static_cast< gngdouble_t >( x >> TAG ) - 1.0
 			)
 		);
-	} else {
-		*( VMVP ) = ToRef( sum );
+		RETURN( pc + 1 );
 	}
-	RETURN( pc + 1 );
-} else if ( IsDouble( rx ) ) {
-	*( VMVP ) = vm->heap().copyDouble( gngFastDoubleValue( rx ) - 1.0 );
-	RETURN( pc + 1 );
-} else {
-	throw Mishap( "DECR instruction: Number needed" ).culprit( "Value", refToShowString( rx ) );
 }
+FREEZE;
+pc = sysSubHelper( ++pc, vm, LongToSmall( 1 ) );
+MELT;
+RETURN( pc );

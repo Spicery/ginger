@@ -11,6 +11,9 @@
 #include "methodlayout.hpp"
 #include "maplayout.hpp"
 #include "sysapply.hpp"
+#include "bigint.hpp"
+#include "externalkind.hpp"
+#include "sysmaths.hpp"
 
 namespace Ginger {
 

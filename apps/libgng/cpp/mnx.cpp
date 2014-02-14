@@ -191,20 +191,29 @@ int Mnx::attributeToInt( const std::string & key, const int def ) const {
 	return this->attributeToIntHelper( key, def, true );
 }
 
-long Mnx::attributeToLongHelper( const std::string & key, const long def, const bool use_def ) const {
+Maybe< long > Mnx::maybeAttributeToLongHelper( const std::string & key, const long def, const bool use_def ) const {
 	std::map< std::string, std::string >::const_iterator it = this->attributes.find( key );
 	if ( it != this->attributes.end() ) {
 		stringstream s( it->second );
 		long n;
 		if ( s >> n ) {
-			return n;
+			return Maybe< long >( n );
 		} else {
-			throw Mishap( "Integer attribute value needed" ).culprit( "Attribute", key ).culprit( "Value", it->second );
+			return Maybe< long >();
 		}
 	} else if ( use_def ) {
-		return def;
+		return Maybe< long >( def );
 	} else {
 		throw Mishap( "No such key" ).culprit( "Key", key );
+	}
+}
+
+long Mnx::attributeToLongHelper( const std::string & key, const long def, const bool use_def ) const {
+	Maybe< long >m( maybeAttributeToLongHelper( key, def, use_def ) );
+	if ( m.isValid() ) {
+		return m.fastValue();
+	} else {
+		throw Mishap( "Cannot parse attibute as long value" ).culprit( "Attribute", key ).culprit( "Value", this->attribute( key ) );
 	}
 }
 
@@ -214,6 +223,14 @@ long Mnx::attributeToLong( const std::string & key ) const {
 
 long Mnx::attributeToLong( const std::string & key, const long def  ) const {
 	return this->attributeToLongHelper( key, def, true );
+}
+
+Maybe< long > Mnx::maybeAttributeToLong( const std::string & key, const long def ) const {
+	return this->maybeAttributeToLongHelper( key, def, true );
+}
+
+Maybe< long > Mnx::maybeAttributeToLong( const std::string & key ) const {
+	return this->maybeAttributeToLongHelper( key, 0, false );
 }
 
 const std::string & Mnx::attribute( const std::string & key, const std::string & def  ) const {

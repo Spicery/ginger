@@ -56,7 +56,9 @@ DoubleObject Cell::asDoubleObject() const {
 	return this->asHeapObject().asDoubleObject(); 
 }
 
-
+BigIntObject Cell::asBigIntObject() const { 
+	return this->asHeapObject().asBigIntObject(); 
+}
 
 void Cell::dump( MnxBuilder & b, const bool deep ) const {
 	if ( IsSmall( this->ref ) ) {
@@ -146,6 +148,13 @@ DoubleObject HeapObject::asDoubleObject() const {
 		throw Ginger::Mishap( "Double needed" ).culprit( "Argument", this->toPrintString() );
 	}
 	return DoubleObject( this->obj_K );
+}
+
+BigIntObject HeapObject::asBigIntObject() const {
+	if ( not this->isBigIntObject() ) {
+		throw Ginger::Mishap( "BigInt needed" ).culprit( "Argument", this->toPrintString() );
+	}
+	return BigIntObject( this->obj_K );
 }
 
 std::string HeapObject::toPrintString() const {
@@ -281,6 +290,18 @@ std::string DoubleObject::toString() const {
 	
 gngdouble_t DoubleObject::getDouble() const {
 	return gngFastDoubleValue( this->obj_K );
+}
+
+// -- BigIntObject -------------------------------------------------------------
+
+std::string BigIntObject::toString() const {
+	stringstream s;
+	this->getBigIntExternal()->print( s );
+	return s.str();
+}
+	
+BigIntExternal * BigIntObject::getBigIntExternal() const {
+	return reinterpret_cast< BigIntExternal * >( this->obj_K[ EXTERNAL_KIND_OFFSET_VALUE ] );
 }
 
 // -- VectorObject -------------------------------------------------------------

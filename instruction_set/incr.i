@@ -21,22 +21,15 @@ Tags
 
 Ref rx = *VMVP;
 if ( IsSmall( rx ) ) {
-	long x = (long)rx;
-	long sum = x + (long)LongToSmall( 1 );
+	const long x = (long)rx;
+	const long sum = x + (long)LongToSmall( 1 );
 	if ( sum > x ) {
 		*( VMVP ) = ToRef( sum );
-	} else {
-		*( VMVP ) = (
-			vm->heap().copyDouble( 
-				static_cast< gngdouble_t >( x >> TAG ) + 1.0
-			)
-		);
-	}
-	RETURN( pc + 1 );
-} else if ( IsDouble( rx ) ) {
-	*( VMVP ) = vm->heap().copyDouble( gngFastDoubleValue( rx ) + 1.0 );
-	RETURN( pc + 1 );
-} else {
-	throw Mishap( "INCR instruction: Number needed" ).culprit( "Value", refToShowString( rx ) );
-}
-
+		RETURN( pc + 1 );
+	} 
+} 
+pc += 1;
+FREEZE;
+pc = sysAddHelper( pc, vm, LongToSmall( 1 ) );
+MELT;
+RETURN( pc );

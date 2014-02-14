@@ -26,7 +26,7 @@
 #include <map>
 
 #include "shared.hpp"
-
+#include "maybe.hpp"
 
 namespace Ginger {
 
@@ -133,6 +133,7 @@ private:
 
 private:
 	long attributeToLongHelper( const std::string & key, const long def, const bool use_def ) const;
+	Maybe< long > maybeAttributeToLongHelper( const std::string & key, const long def, const bool use_def ) const;
 	int attributeToIntHelper( const std::string & key, const int def, const bool use_def ) const;
 	int attributeToBoolHelper( const std::string & key, const bool def, const bool use_def ) const;
 
@@ -146,6 +147,8 @@ public:
 	int attributeToInt( const std::string & key, const int def ) const;
 	long attributeToLong( const std::string & key ) const;
 	long attributeToLong( const std::string & key, const long def ) const;
+	Maybe< long > maybeAttributeToLong( const std::string & key ) const;
+	Maybe< long > maybeAttributeToLong( const std::string & key, const long def ) const;
 	bool hasAttribute( const std::string & key ) const;
 	bool hasAttribute( const std::string & key, const std::string & eqval ) const;
 	shared< Mnx > getChild( int n );

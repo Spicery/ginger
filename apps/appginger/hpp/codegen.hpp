@@ -46,9 +46,9 @@ typedef class shared< Ginger::Mnx > Gnx;
 
 struct CodeGenState {
 	std::string 	props;
-	int				nlocals;
-	int 			ninputs;
-	int 			nresults;				//	Unsure about this.
+	long			nlocals;
+	long 			ninputs;
+	long			nresults;				//	Unsure about this.
 	int 			current_slot;
 	shared< std::vector< Ref > >	code_data;
 };

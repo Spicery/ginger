@@ -23,6 +23,8 @@
 #include "heap.hpp"
 #include "garbagecollect.hpp"
 #include "doublelayout.hpp"
+#include "bigint.hpp"
+#include "externalkind.hpp"
 
 #include <cstring>
 
@@ -100,7 +102,7 @@ Ref HeapClass::copyString( Ref * & pc, const char * s ) {
  * Copy string into a cage of the heap, possibly incurring a GC.
  * We add a null-termination byte too.
  */
-Ref HeapClass::copyString( const char *s ) {
+Ref HeapClass::copyString( const char * s ) {
 	Ref * fake_pc = static_cast< Ref * >( 0 );
 	return this->copyString( fake_pc, s );
 }
@@ -116,6 +118,28 @@ Ref HeapClass::copyDouble( Ref * & pc, gngdouble_t d ) {
 Ref HeapClass::copyDouble( gngdouble_t d ) {
 	Ref * fake_pc = static_cast< Ref * >( 0 );
 	return this->copyDouble( fake_pc, d );
+}
+
+Ref HeapClass::copyBigInt( const char * s ) {
+	Ref * fake_pc = static_cast< Ref * >( 0 );
+	return this->copyBigInt( fake_pc, s );
+}
+
+Ref HeapClass::copyBigInt( Ref * & pc, const char * s ) {
+	const BigIntExternal e( s );
+	return this->copyBigIntExternal( pc, e );
+}
+
+Ref HeapClass::copyBigIntExternal( Ref * & pc, const BigIntExternal & e ) {
+	if ( e.isInSmallRange() ) {
+		return e.toSmall();
+	} else {
+		XfrClass xfr( pc, *this, EXTERNAL_KIND_SIZE );
+		xfr.setOrigin();
+		xfr.xfrRef( sysBigIntKey );
+		xfr.xfrCopy( new BigIntExternal( e ) );
+		return xfr.makeRef();
+	}
 }
 
 

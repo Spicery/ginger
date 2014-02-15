@@ -274,21 +274,172 @@ Ref * sysHash( Ref *pc, class MachineClass * vm ) {
 	}
 }
 
+class RefEquals {
+private:
+	bool allow_inexact_equality;
+public:
+	RefEquals( const bool _allow_inexact_equality ) : 
+		allow_inexact_equality( _allow_inexact_equality )
+	{}
+private:
+	bool refVectorAndMixedEquals( Ref * vx, Ref * vy ) {
+		unsigned long lx = sizeAfterKeyOfVectorLayout( vx );
+		unsigned long ly = sizeAfterKeyOfVectorLayout( vy );
+		if ( lx == ly ) {
+			for ( unsigned long i = 1; i <= lx; i++ ) {
+				if ( not this->refEquals( vx[ i ], vy[ i ] ) ) return false;
+			}
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	bool refRecordEquals( Ref * rx, Ref * ry ) {
+		unsigned long n = sizeAfterKeyOfRecordLayout( rx );
+		for ( unsigned long i = 1; i <= n; i++ ) {
+			if ( not this->refEquals( rx[ i ], ry[ i ] ) ) return false;
+		}
+		return true;
+	}
+
+	bool refPairEquals( Ref rx, Ref ry ) {
+		do {
+			if ( not this->refEquals( FastPairHead( rx ), FastPairHead( ry ) ) ) return false;
+			rx = FastPairTail( rx );
+			ry = FastPairTail( ry );
+		} while ( IsPair( rx ) && IsPair( ry ) );
+		return rx == ry;
+	}
+
+	bool refStringEquals( Ref * rx, Ref * ry ) {
+		unsigned long lx = lengthOfStringLayout( rx );
+		unsigned long ly = lengthOfStringLayout( ry );
+		if ( lx == ly ) {
+			char * cx = reinterpret_cast< char * >( &rx[1] );
+			char * cy = reinterpret_cast< char * >( &ry[1] );
+			return memcmp( cx, cy, lx ) == 0;
+		} else {
+			return false;
+		}
+	}
+
+	bool refWRecordEquals( Ref * rx, Ref * ry ) {
+		if ( *rx == sysDoubleKey ) {
+			if ( *ry == sysDoubleKey ) {
+				gngdouble_t dx = gngFastDoubleValueRefPtr( rx );
+				gngdouble_t dy = gngFastDoubleValueRefPtr( ry );
+				return dx == dy;
+			} else {
+				return false;
+			}
+		} else {
+			unsigned long n = sizeAfterKeyOfRecordLayout( rx );
+			for ( unsigned long i = 1; i <= n; i++ ) {
+				if ( rx[ i ] != ry[ i ] ) return false;
+			}
+			return true;
+		}
+	}
+
+	bool refMapEquals( Ref * rx, Ref * ry ) {
+		throw Ginger::Mishap( "ToBeDone" );
+	}
+
+	bool cmpPutativeSmallAndPutativeFloat( Ref x, Ref y ) {
+		return IsSmall( x ) && IsDouble( y ) && static_cast< gngdouble_t >( SmallToLong( x ) ) == gngFastDoubleValue( y );
+	}
+
+public:
+	bool refEquals( Ref x, Ref y ) {
+		if ( x == y ) {
+			return true;
+		} else if ( IsObj( x ) ) {
+			if ( not IsObj( y ) ) {
+				if ( this->allow_inexact_equality ) {
+					return this->cmpPutativeSmallAndPutativeFloat( y, x );
+				} else {
+					return false;
+				}
+			} else {
+				Ref * x_K = RefToPtr4( x );
+				Ref * y_K = RefToPtr4( y );
+				Ref xkey = *x_K;
+				Ref ykey = *y_K;
+				
+				if ( IsFunctionKey( xkey ) ) {
+					//	Functions must be identical to be equal.
+					return false;
+				} else if ( IsSimpleKey( xkey ) ) {
+					if ( xkey == ykey ) {
+						switch ( KindOfSimpleKey( xkey ) ) {
+							case MIXED_KIND:	//	Shares implementation with Vector.
+							case VECTOR_KIND: 	return this->refVectorAndMixedEquals( x_K, y_K );
+							case PAIR_KIND: 	return this->refPairEquals( x, y );
+							case MAP_KIND:		return this->refMapEquals( x_K, y_K );
+							case RECORD_KIND: 	return this->refRecordEquals( x_K, y_K );
+							case EXTERNAL_KIND:	//	fallthru.
+							case WRECORD_KIND: 	return this->refWRecordEquals( x_K, y_K );
+							case STRING_KIND: 	return this->refStringEquals( x_K, y_K );
+							default: {
+								throw Ginger::Mishap( "ToBeDone" );
+							}
+						}
+					} else {
+						return false;	//	At least for now.
+					}
+				} else if ( IsObj( xkey ) ) {
+					throw Ginger::Mishap( "ToBeDone" );
+				} else {
+					throw Ginger::Mishap( "ToBeDone" );
+				}			
+			}
+		} else {
+			//	Simple values must be identical to be equal.
+			if ( this->allow_inexact_equality ) {
+				return this->cmpPutativeSmallAndPutativeFloat( x, y );
+			} else {
+				return false;
+			}
+		}
+	}
+};
+
 Ref * sysEquals( Ref * pc, class MachineClass * vm ) {
 	if ( vm->count == 2 ) {
 		Ref y = vm->fastPop();
 		Ref x = vm->fastPeek();
-		vm->fastPeek() = refEquals( x, y ) ? SYS_TRUE : SYS_FALSE;
+		RefEquals eq( false );
+		vm->fastPeek() = eq.refEquals( x, y ) ? SYS_TRUE : SYS_FALSE;
 		return pc;
 	} else {
 		throw Ginger::Mishap( "Wrong number of arguments for =" );
 	}
 }
 SysInfo infoEquals( 
-    SysNames( "=" ), 
+    SysNames( "==" ), 
     Ginger::Arity( 2 ), 
     Ginger::Arity( 1 ), 
     sysEquals, 
+    "Returns true if the two arguments are equal (recursively), else false."
+);
+
+Ref * sysInexactlyEquals( Ref * pc, class MachineClass * vm ) {
+	if ( vm->count == 2 ) {
+		Ref y = vm->fastPop();
+		Ref x = vm->fastPeek();
+		RefEquals eq( true );
+		vm->fastPeek() = eq.refEquals( x, y ) ? SYS_TRUE : SYS_FALSE;
+		return pc;
+	} else {
+		throw Ginger::Mishap( "Wrong number of arguments for =" );
+	}
+}
+SysInfo infoInexactlyEquals( 
+    SysNames( "=" ), 
+    Ginger::Arity( 2 ), 
+    Ginger::Arity( 1 ), 
+    sysInexactlyEquals, 
     "Returns true if the two arguments are equal (recursively), else false."
 );
 

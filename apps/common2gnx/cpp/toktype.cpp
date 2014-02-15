@@ -49,10 +49,12 @@ const char * tok_type_as_sysapp( TokType fnc ) {
 	case tokty_dbang: return "boolAbs";
 	case tokty_div : return "/";
 	case tokty_equal : return "=";
+	case tokty_exact_equal : return "==";
 	case tokty_explode: return "explode";
 	case tokty_gt : return ">";
 	case tokty_gte : return ">=";
-	case tokty_identical: return "==";
+	case tokty_identical: return "=^=";
+	case tokty_not_identical: return "!=^=";
 	case tokty_isntabsent: return "isntAbsent";
 	case tokty_lt : return "<";
 	case tokty_lte : return "<=";

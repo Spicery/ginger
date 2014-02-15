@@ -98,9 +98,12 @@ ItemMap::ItemMap( const bool cstyle ) {
 	add( true,		KW_NOT_LT, 			tokty_not_lt, 		BSy, 		prec_lt	);
 	add( true,		KW_NOT_LTE, 		tokty_not_lte, 		BSy, 		prec_lte	);
 	add( !cstyle,	KW_EQUAL, 			tokty_equal, 		BSy, 		prec_equal	);
-	add( true,		KW_NOT_EQUAL, 		tokty_not_equal, 	BSy, 		prec_equal	);
 	add( cstyle,	KW_EQUAL, 			tokty_equal, 		BFo, 		prec_assign	);
-	add( true,		KW_IDENTICAL, 		tokty_identical, 	BSy, 		prec_identical	);
+	add( true,		KW_NOT_EQUAL, 		tokty_not_equal, 	BSy, 		prec_equal	);
+	add( !cstyle,	KW_EXACT_EQUAL, 	tokty_exact_equal, 	BSy, 		prec_equal	);
+	add( cstyle,	KW_EXACT_EQUAL, 	tokty_identical, 	BSy, 		prec_equal	);
+	add( !cstyle,	KW_IDENTICAL, 		tokty_identical, 	BSy, 		prec_identical	);
+	add( !cstyle,	KW_NOT_IDENTICAL, 	tokty_not_identical, 	BSy, 		prec_identical	);
 	add( true,		KW_FN_ARROW, 		tokty_fnarrow, 		BSy, 		prec_arrow	);
 	add( true,		KW_MAPLET, 			tokty_maplet, 		BSy, 		prec_arrow	);
 	add( true,		KW_SYSCALL,			tokty_syscall,		PrF,		0		);		/// @todo remove??

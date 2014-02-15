@@ -40,6 +40,5 @@ if ( IsSmall( a ) ) {
 		RETURN( pc + 1 );
 	} 
 } 
-
-throw Mishap( "LTE: Numbers needed" ).culprit( "First", refToShowString( a ) ).culprit( "Second", refToShowString( b ) );
-RETURN( NULL ); // sop for compiler.
+*( VMVP ) = sysCompareNumbers( a, b, true, true, false ) ? SYS_TRUE : SYS_FALSE;
+RETURN( pc + 1 );

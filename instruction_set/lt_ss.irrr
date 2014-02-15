@@ -44,6 +44,4 @@ if ( IsSmall( a ) ) {
 		RETURN( gngFastDoubleValue( a ) < gngFastDoubleValue( b ) ? pc + ToLong( pc[3] ) + 3 : pc + 4 );
 	} 
 } 
-
-throw Mishap( "LT_SS: Numbers needed" ).culprit( "First", refToShowString( a ) ).culprit( "Second", refToShowString( b ) );
-RETURN( NULL ); // sop for compiler.
+RETURN( sysCompareNumbers( a, b, true, false, false ) ? pc + ToLong( pc[3] ) + 3 : pc + 4 );

@@ -38,6 +38,5 @@ if ( IsSmall( a ) ) {
 		RETURN( pc + 1 );
 	} 
 } 
-
-throw Mishap( "GTE: Numbers needed" ).culprit( "First", refToShowString( a ) ).culprit( "Second", refToShowString( b ) );
-RETURN( NULL ); // sop for compiler.
+*( VMVP ) = sysCompareNumbers( a, b, false, true, true ) ? SYS_TRUE : SYS_FALSE;
+RETURN( pc + 1 );

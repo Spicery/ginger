@@ -42,6 +42,78 @@ bool canFitInSmall( const long n ) {
 }
 
 /**
+ * Compares two references x & y that must be numbers. It returns true if
+ *  lt AND x < y OR
+ *  eq AND x = y OR
+ *  gt AND x > y
+ */
+bool sysCompareNumbers( Ref rx, Ref ry, const bool lt, const bool eq, const bool gt ) {
+    Cell cx( rx );
+    Cell cy( ry );
+    try {
+        if ( cx.isSmall() ) {
+            if ( cy.isSmall() ) {
+                return (
+                    ( lt and ( ToLong( rx ) < ToLong( ry ) ) ) or 
+                    ( gt and ( ToLong( rx ) > ToLong( ry ) ) ) or 
+                    ( eq and ( ToLong( rx ) == ToLong( ry ) ) )
+                );
+            } else if ( cy.isDoubleObject() ) {
+                gngdouble_t dx = static_cast< gngdouble_t >( cx.getLong() );
+                gngdouble_t dy = cy.asDoubleObject().getDouble();
+                return ( lt and dx < dy ) or ( gt and dx > dy ) or ( eq and dx == dy );
+            } else if ( cy.isBigIntObject() ) {
+                BigIntExternal bx( cx.getLong() );
+                BigIntExternal * by = cy.asBigIntObject().getBigIntExternal();
+                return (
+                    ( lt and bx.lt( *by ) ) or 
+                    ( gt and by->lt( bx ) )
+                );
+            } else {
+                throw Mishap( "CMP" );
+            }
+        } else if ( cx.isDoubleObject() ) {
+            gngdouble_t dx = cx.asDoubleObject().getDouble();
+            gngdouble_t dy;
+            if ( cy.isSmall() ) {
+                dy = static_cast< gngdouble_t >( cy.getLong() );
+            } else if ( cy.isDoubleObject() ) {
+                dy = cy.asDoubleObject().getDouble();
+            } else if ( cy.isBigIntObject() ) {
+                dy = cy.asBigIntObject().getBigIntExternal()->toFloat();
+            } else {
+                throw Mishap( "CMP" );                
+            }
+            return ( lt and dx < dy ) or ( gt and dx > dy ) or ( eq and dx == dy );
+        } else if ( cx.isBigIntObject() ) {
+            BigIntExternal * bx = cx.asBigIntObject().getBigIntExternal();
+            if ( cy.isSmall() ) {
+                BigIntExternal by( cy.getLong() );
+                return ( lt and bx->lt( by ) ) or ( gt and by.lt( *bx ) );
+            } else if ( cy.isDoubleObject() ) {
+                gngdouble_t dx = cx.asBigIntObject().getBigIntExternal()->toFloat();
+                gngdouble_t dy = cy.asDoubleObject().getDouble();
+                return ( lt and dx < dy ) or ( gt and dx > dy ) or ( eq and dx == dy );
+            } else if ( cy.isBigIntObject() ) {
+                BigIntExternal * bx = cx.asBigIntObject().getBigIntExternal();
+                BigIntExternal * by = cy.asBigIntObject().getBigIntExternal();
+                return (
+                    ( lt and bx->lt( *by ) ) or 
+                    ( gt and by->lt( *bx ) ) or
+                    ( eq and bx->eq( *by ) )
+                );                
+            } else { 
+                throw Mishap( "CMP" );
+            }
+        } else {
+            throw Mishap( "CMP" );
+        }
+    } catch ( Mishap & e ) {
+        throw Mishap( "Invalid values for numerical comparison" ).culprit( "First value", cx.toShowString() ).culprit( "Second value", cy.toShowString() );
+    }
+}
+
+/**
  * Returns a value in the half-open range [0, Y).
  */
 Ref * sysFlooredRemainderHelper( Ref * pc, class MachineClass * vm, Ref ry ) {

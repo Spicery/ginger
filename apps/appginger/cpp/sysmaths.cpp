@@ -911,16 +911,22 @@ SysInfo infoNotGtE(
     "Returns false if the first argument is greater than or equal to the second, else true."
 );
 
+gngdouble_t refToDouble( Ref rx ) {
+    Cell cx( rx );
+    if ( cx.isSmall() ) {
+        return TransDouble( static_cast< double >( cx.getLong() ) );
+    } else if ( cx.isDoubleObject() ) {
+        return cx.asDoubleObject().getDouble();
+    } else if ( cx.isBigIntObject() ) {
+        return TransDouble( cx.asBigIntObject().getBigIntExternal()->toFloat() );
+    } else {
+        throw Ginger::Mishap( "Number needed" ).culprit( "Value", cx.toShowString() );
+    }
+}
+
 Ref * sysSin( Ref * pc, class MachineClass * vm ) {
     if ( vm->count != 1 ) throw Ginger::Mishap( "ArgsMismatch" );
-    Cell angle( vm->fastPeek() );
-    if ( angle.isSmall() ) {
-        vm->fastPeek() = vm->heap().copyDouble( pc, TransDouble( static_cast< double >( angle.getLong() ) ).sin().asDouble() );
-    } else if ( angle.isDoubleObject() ) {
-        vm->fastPeek() = vm->heap().copyDouble( pc, angle.asDoubleObject().getDouble().sin().asDouble() );
-    } else {
-        throw Ginger::Mishap( "Number needed" ).culprit( "Value", angle.toShowString() );
-    }
+    vm->fastPeek() = vm->heap().copyDouble( pc, refToDouble( vm->fastPeek() ).sin().asDouble() );
     return pc;
 }
 SysInfo infoSin( 
@@ -933,14 +939,7 @@ SysInfo infoSin(
 
 Ref * sysCos( Ref * pc, class MachineClass * vm ) {
     if ( vm->count != 1 ) throw Ginger::Mishap( "ArgsMismatch" );
-    Cell angle( vm->fastPeek() );
-    if ( angle.isSmall() ) {
-        vm->fastPeek() = vm->heap().copyDouble( pc, TransDouble( static_cast< double >( angle.getLong() ) ).cos().asDouble() );
-    } else if ( angle.isDoubleObject() ) {
-        vm->fastPeek() = vm->heap().copyDouble( pc, angle.asDoubleObject().getDouble().cos().asDouble() );
-    } else {
-        throw Ginger::Mishap( "Number needed" ).culprit( "Value", angle.toShowString() );
-    }
+    vm->fastPeek() = vm->heap().copyDouble( pc, refToDouble( vm->fastPeek() ).cos().asDouble() );
     return pc;
 }
 SysInfo infoCos( 
@@ -953,14 +952,7 @@ SysInfo infoCos(
 
 Ref * sysTan( Ref * pc, class MachineClass * vm ) {
     if ( vm->count != 1 ) throw Ginger::Mishap( "ArgsMismatch" );
-    Cell angle( vm->fastPeek() );
-    if ( angle.isSmall() ) {
-        vm->fastPeek() = vm->heap().copyDouble( pc, TransDouble( static_cast< double >( angle.getLong() ) ).tan().asDouble() );
-    } else if ( angle.isDoubleObject() ) {
-        vm->fastPeek() = vm->heap().copyDouble( pc, angle.asDoubleObject().getDouble().tan().asDouble() );
-    } else {
-        throw Ginger::Mishap( "Number needed" ).culprit( "Value", angle.toShowString() );
-    }
+    vm->fastPeek() = vm->heap().copyDouble( pc, refToDouble( vm->fastPeek() ).tan().asDouble() );
     return pc;
 }
 SysInfo infoTan( 
@@ -973,14 +965,7 @@ SysInfo infoTan(
 
 Ref * sysExp( Ref * pc, class MachineClass * vm ) {
     if ( vm->count != 1 ) throw Ginger::Mishap( "ArgsMismatch" );
-    Cell value( vm->fastPeek() );
-    if ( value.isSmall() ) {
-        vm->fastPeek() = vm->heap().copyDouble( pc, TransDouble( static_cast< double >( value.getLong() ) ).exp().asDouble() );
-    } else if ( value.isDoubleObject() ) {
-        vm->fastPeek() = vm->heap().copyDouble( pc, value.asDoubleObject().getDouble().exp().asDouble() );
-    } else {
-        throw Ginger::Mishap( "Number needed" ).culprit( "Value", value.toShowString() );
-    }
+    vm->fastPeek() = vm->heap().copyDouble( pc, refToDouble( vm->fastPeek() ).exp().asDouble() );
     return pc;
 }
 SysInfo infoExp( 

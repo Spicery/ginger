@@ -1,4 +1,4 @@
-sysma/******************************************************************************\
+/******************************************************************************\
 	Copyright (c) 2010 Stephen Leach. AppGinger is distributed under the terms 
 	of the GNU General Public License. This file is part of AppGinger.
 

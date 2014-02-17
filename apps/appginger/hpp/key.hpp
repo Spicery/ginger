@@ -65,6 +65,7 @@ Ref nameToKey( const std::string & name );
 #define IsPrimitive( r )	( IsSimple( r ) || IsSmall( r ) )
 #define IsDouble( r )       ( IsObj( r ) && *RefToPtr4( r ) == sysDoubleKey )
 #define IsBigInt( r )       ( IsObj( r ) && *RefToPtr4( r ) == sysBigIntKey )
+#define IsRational( r )     ( IsObj( r ) && *RefToPtr4( r ) == sysRationalKey )
 #define IsCharacter( r )    ( ( TAGGG_MASK & ToULong( r ) ) == CHAR_TAGGG )
 #define IntToChar( i )		( (Ref)( static_cast< long_t >( ( i ) << TAGGG | CHAR_TAGGG ) ) )
 

@@ -60,6 +60,10 @@ BigIntObject Cell::asBigIntObject() const {
 	return this->asHeapObject().asBigIntObject(); 
 }
 
+RationalObject Cell::asRationalObject() const { 
+	return this->asHeapObject().asRationalObject(); 
+}
+
 void Cell::dump( MnxBuilder & b, const bool deep ) const {
 	if ( IsSmall( this->ref ) ) {
 		b.start( "constant" );
@@ -155,6 +159,13 @@ BigIntObject HeapObject::asBigIntObject() const {
 		throw Ginger::Mishap( "BigInt needed" ).culprit( "Argument", this->toPrintString() );
 	}
 	return BigIntObject( this->obj_K );
+}
+
+RationalObject HeapObject::asRationalObject() const {
+	if ( not this->isRationalObject() ) {
+		throw Ginger::Mishap( "BigInt needed" ).culprit( "Argument", this->toPrintString() );
+	}
+	return RationalObject( this->obj_K );
 }
 
 std::string HeapObject::toPrintString() const {
@@ -302,6 +313,18 @@ std::string BigIntObject::toString() const {
 	
 BigIntExternal * BigIntObject::getBigIntExternal() const {
 	return reinterpret_cast< BigIntExternal * >( this->obj_K[ EXTERNAL_KIND_OFFSET_VALUE ] );
+}
+
+// -- RationalObject -------------------------------------------------------------
+
+std::string RationalObject::toString() const {
+	stringstream s;
+	this->getRationalExternal()->print( s );
+	return s.str();
+}
+	
+RationalExternal * RationalObject::getRationalExternal() const {
+	return reinterpret_cast< RationalExternal * >( this->obj_K[ EXTERNAL_KIND_OFFSET_VALUE ] );
 }
 
 // -- VectorObject -------------------------------------------------------------

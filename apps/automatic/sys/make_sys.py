@@ -745,6 +745,10 @@ ref = FullRecordClassGenerator( sysconsts, "BigInt", [] )
 ref.options = MethodOptions( "r" )
 ref.generateFilesWithPrefix( "bigint" )
 
+ref = FullRecordClassGenerator( sysconsts, "Rational", [] )
+ref.options = MethodOptions( "r" )
+ref.generateFilesWithPrefix( "rational" )
+
 #	Create the insert for the sysMap table.
 inc = open( "sysmap.inc.auto", 'w' )
 sysconsts.generateSysMapInclude( inc )

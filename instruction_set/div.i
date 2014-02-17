@@ -31,12 +31,7 @@ Tags
 Ref ry = *( VMVP-- );
 Ref rx = *( VMVP );
 if ( IsSmall( rx ) ) {
-	if ( IsSmall( ry ) ) {
-		gngdouble_t y = static_cast< gngdouble_t >( SmallToLong( ry ) );
-		gngdouble_t x = static_cast< gngdouble_t >( SmallToLong( rx ) );
-		*VMVP = vm->heap().copyDouble( x / y );
-		RETURN( pc + 1 );
-	} else if ( IsDouble( ry ) ) {
+	if ( IsDouble( ry ) ) {
 		gngdouble_t x, y;
 		y = gngFastDoubleValue( ry );
 		x = static_cast< gngdouble_t >( SmallToLong( rx ) );

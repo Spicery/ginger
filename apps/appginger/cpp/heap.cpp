@@ -24,6 +24,7 @@
 #include "garbagecollect.hpp"
 #include "doublelayout.hpp"
 #include "bigint.hpp"
+#include "rational.hpp"
 #include "externalkind.hpp"
 
 #include <cstring>
@@ -138,6 +139,27 @@ Ref HeapClass::copyBigIntExternal( Ref * & pc, const BigIntExternal & e ) {
 		xfr.setOrigin();
 		xfr.xfrRef( sysBigIntKey );
 		xfr.xfrCopy( new BigIntExternal( e ) );
+		return xfr.makeRef();
+	}
+}
+
+Ref HeapClass::copyRationalExternal( Ref * & pc, const RationalExternal & q ) {
+	if ( q.isIntegral() ) {
+		BigIntExternal z( q.numerator() );
+		if ( z.isInSmallRange() ) {
+			return z.toSmall();
+		} else {
+			XfrClass xfr( pc, *this, EXTERNAL_KIND_SIZE );
+			xfr.setOrigin();
+			xfr.xfrRef( sysBigIntKey );
+			xfr.xfrCopy( new BigIntExternal( z ) );
+			return xfr.makeRef();
+		}
+	} else {
+		XfrClass xfr( pc, *this, EXTERNAL_KIND_SIZE );
+		xfr.setOrigin();
+		xfr.xfrRef( sysRationalKey );
+		xfr.xfrCopy( new RationalExternal( q ) );
 		return xfr.makeRef();
 	}
 }

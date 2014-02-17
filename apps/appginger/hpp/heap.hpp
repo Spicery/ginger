@@ -23,6 +23,8 @@
 
 #include "cage.hpp"
 #include "bigint.hpp"
+#include "rational.hpp"
+
 
 namespace Ginger {
 
@@ -44,8 +46,8 @@ public:
 	Ref copyDouble( Ref * & pc, gngdouble_t d );	//	Copy double, possibly causing GC
 	Ref copyBigInt( const char * s );				//	Copy big int, vetoing GC
 	Ref copyBigInt( Ref * & pc, const char * s );	//	Copy big int, possibly causing GC
-	//Ref copyBigIntExternal( Ref * & pc, BigIntExternal * e );				//	Copy big int, possibly causing GC
-	Ref copyBigIntExternal( Ref * & pc, const BigIntExternal & e );				//	Copy big int, possibly causing GC
+	Ref copyBigIntExternal( Ref * & pc, const BigIntExternal & e );			//	Copy big int, possibly causing GC
+	Ref copyRationalExternal( Ref * & pc, const RationalExternal & e );		//	Copy big int, possibly causing GC
 
 public:
 	void selectCurrent();

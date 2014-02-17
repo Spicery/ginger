@@ -33,10 +33,6 @@
 namespace Ginger {
 using namespace std;
 
-static void need_numbers( Cell lhs, Cell rhs ) {
-    throw Mishap( "Numbers needed" ).culprit( "LHS", lhs.toShowString() ).culprit( "RHS", rhs.toShowString() );  
-}
-
 bool canFitInSmall( const long n ) { 
     return Numbers::MIN_SMALL <= n && n <= Numbers::MAX_SMALL; 
 }
@@ -69,6 +65,13 @@ bool sysCompareNumbers( Ref rx, Ref ry, const bool lt, const bool eq, const bool
                     ( lt and bx.lt( *by ) ) or 
                     ( gt and by->lt( bx ) )
                 );
+            } else if ( cy.isRationalObject() ) {
+                RationalExternal qx( cx.getLong() );
+                RationalExternal * qy = cy.asRationalObject().getRationalExternal();
+                return (
+                    ( lt and qx.lt( *qy ) ) or 
+                    ( gt and qy->lt( qx ) )
+                );                
             } else {
                 throw Mishap( "CMP" );
             }
@@ -81,6 +84,8 @@ bool sysCompareNumbers( Ref rx, Ref ry, const bool lt, const bool eq, const bool
                 dy = cy.asDoubleObject().getDouble();
             } else if ( cy.isBigIntObject() ) {
                 dy = cy.asBigIntObject().getBigIntExternal()->toFloat();
+            } else if ( cy.isRationalObject() ) {
+                dy = cy.asRationalObject().getRationalExternal()->toFloat();
             } else {
                 throw Mishap( "CMP" );                
             }
@@ -95,16 +100,52 @@ bool sysCompareNumbers( Ref rx, Ref ry, const bool lt, const bool eq, const bool
                 gngdouble_t dy = cy.asDoubleObject().getDouble();
                 return ( lt and dx < dy ) or ( gt and dx > dy ) or ( eq and dx == dy );
             } else if ( cy.isBigIntObject() ) {
-                BigIntExternal * bx = cx.asBigIntObject().getBigIntExternal();
                 BigIntExternal * by = cy.asBigIntObject().getBigIntExternal();
                 return (
                     ( lt and bx->lt( *by ) ) or 
                     ( gt and by->lt( *bx ) ) or
                     ( eq and bx->eq( *by ) )
-                );                
+                );
+            } else if ( cy.isRationalObject() ) {
+                RationalExternal * qy = cy.asRationalObject().getRationalExternal();
+                RationalExternal qx( *bx );
+                return (
+                    ( lt and qx.lt( *qy ) ) or 
+                    ( gt and qy->lt( qx ) ) or
+                    ( eq and qx.eq( *qy ) )
+                );
             } else { 
                 throw Mishap( "CMP" );
             }
+        } else if ( cx.isRationalObject() ) {
+            RationalExternal * qx = cx.asRationalObject().getRationalExternal();
+            if ( cy.isSmall() ) {
+                RationalExternal qy( cy.getLong() );
+                return (
+                    ( lt and qx->lt( qy ) ) or 
+                    ( gt and qy.lt( *qx ) )
+                );                
+            } else if ( cy.isDoubleObject() ) {
+                gngdouble_t dx = qx->toFloat();
+                gngdouble_t dy = cy.asDoubleObject().getDouble();
+                return ( lt and dx < dy ) or ( gt and dx > dy ) or ( eq and dx == dy );
+            } else if ( cy.isBigIntObject() ) {
+                RationalExternal qy( *cy.asBigIntObject().getBigIntExternal() );
+                return (
+                    ( lt and qx->lt( qy ) ) or 
+                    ( gt and qy.lt( *qx ) ) or
+                    ( eq and qx->eq( qy ) )
+                );
+            } else if ( cy.isRationalObject() ) {
+                RationalExternal * qy = cy.asRationalObject().getRationalExternal();
+                return (
+                    ( lt and qx->lt( *qy ) ) or 
+                    ( gt and qy->lt( *qx ) ) or
+                    ( eq and qx->eq( *qy ) )
+                );                
+            } else {
+                throw Mishap( "CMP" );
+            }      
         } else {
             throw Mishap( "CMP" );
         }
@@ -222,29 +263,91 @@ Ref * sysDivHelper( Ref * pc, class MachineClass * vm, Ref ry ) {
     Cell cy( ry );
 
     try {
-        gngdouble_t x, y;
         if ( cx.isSmall() ) {
-            x = static_cast< gngdouble_t >( cx.getLong() );
+            if ( cy.isSmall() ) {
+                RationalExternal q( cx.getLong() );
+                q.divBy( cy.getLong() );
+                vm->fastPeek() = vm->heap().copyRationalExternal( pc, q );
+            } else if ( cy.isDoubleObject() ) {
+                const gngdouble_t x = static_cast< gngdouble_t >( cx.getLong() );
+                const gngdouble_t y = cy.asDoubleObject().getDouble();
+                vm->fastPeek() = vm->heap().copyDouble( pc, x / y );
+            } else if ( cy.isBigIntObject() ) {
+                RationalExternal q( cx.getLong() );
+                q.divBy( *cy.asBigIntObject().getBigIntExternal() );
+                vm->fastPeek() = vm->heap().copyRationalExternal( pc, q );
+            } else if ( cy.isRationalObject() ) {
+                RationalExternal q( cx.getLong() );
+                q.divBy( *cy.asRationalObject().getRationalExternal() );
+                vm->fastPeek() = vm->heap().copyRationalExternal( pc, q );
+            } else {
+                throw Mishap( "Bad arguments for / operator" );
+            }
         } else if ( cx.isDoubleObject() ) {
-            x = cx.asDoubleObject().getDouble();
-        } else if ( cx.isBigIntObject() ) {
-            x = cx.asBigIntObject().getBigIntExternal()->toFloat();
+            const gngdouble_t x = cx.asDoubleObject().getDouble();
+            gngdouble_t y;
+            if ( cy.isSmall() ) {
+                y = static_cast< gngdouble_t >( cy.getLong() );
+            } else if ( cy.isDoubleObject() ) {
+                y = cy.asDoubleObject().getDouble();
+            } else if ( cy.isBigIntObject() ) {
+                y = cy.asBigIntObject().getBigIntExternal()->toFloat();
+            } else if ( cy.isRationalObject() ) {
+                y = cy.asRationalObject().getRationalExternal()->toFloat();
+            } else {
+                throw Mishap( "Bad arguments for / operator" );
+            }
+            vm->fastPeek() = vm->heap().copyDouble( pc, x / y );
+       } else if ( cx.isBigIntObject() ) {
+            BigIntExternal * bx = cx.asBigIntObject().getBigIntExternal();
+            if ( cy.isSmall() ) {
+                RationalExternal q( *bx );
+                q.divBy( cy.getLong() );
+                vm->fastPeek() = vm->heap().copyRationalExternal( pc, q );
+            } else if ( cy.isDoubleObject() ) {
+                gngdouble_t dx = bx->toFloat();
+                gngdouble_t dy = cy.asDoubleObject().getDouble();
+                vm->fastPeek() = vm->heap().copyDouble( pc, dx / dy );
+            } else if ( cy.isBigIntObject() ) {
+                RationalExternal q( *bx );
+                q.divBy( *cy.asBigIntObject().getBigIntExternal() );
+                vm->fastPeek() = vm->heap().copyRationalExternal( pc, q );
+            } else if ( cy.isRationalObject() ) {
+                RationalExternal q( *bx );
+                q.divBy( *cy.asRationalObject().getRationalExternal() );
+                vm->fastPeek() = vm->heap().copyRationalExternal( pc, q );
+            } else {
+                throw Mishap( "Bad arguments for / operator" );
+            }
+        } else if ( cx.isRationalObject() ) {
+            RationalExternal * qx = cx.asRationalObject().getRationalExternal();
+            if ( cy.isSmall() ) {
+                RationalExternal q( *qx );
+                q.divBy( cy.getLong() );
+                vm->fastPeek() = vm->heap().copyRationalExternal( pc, q );
+            } else if ( cy.isDoubleObject() ) {
+                gngdouble_t dx = qx->toFloat();
+                gngdouble_t dy = cy.asDoubleObject().getDouble();
+                vm->fastPeek() = vm->heap().copyDouble( pc, dx / dy );  
+            } else if ( cy.isBigIntObject() ) {
+                RationalExternal q( *qx );
+                q.divBy( *cy.asBigIntObject().getBigIntExternal() );
+                vm->fastPeek() = vm->heap().copyRationalExternal( pc, q );
+            } else if ( cy.isRationalObject() ) {
+                RationalExternal q( *qx );
+                q.divBy( *cy.asRationalObject().getRationalExternal() );
+                vm->fastPeek() = vm->heap().copyRationalExternal( pc, q );
+            } else {
+                throw Mishap( "Bad arguments for / operator" );
+            }
         } else {
             throw Mishap( "Bad arguments for / operator" );
         }
-        if ( cy.isSmall() ) {
-            y = static_cast< gngdouble_t >( cy.getLong() );
-        } else if ( cy.isDoubleObject() ) {
-            y = cy.asDoubleObject().getDouble();
-        } else if ( cy.isBigIntObject() ) {
-            y = cy.asBigIntObject().getBigIntExternal()->toFloat();
-        } else {
-            throw Mishap( "Bad arguments for / operator" );
-        }
-        vm->fastPeek() = vm->heap().copyDouble( pc, x / y );
+        //vm->fastPeek() = vm->heap().copyDouble( pc, x / y );
     } catch ( Mishap & e ) {
         throw Mishap( "Bad arguments for / operation" ).culprit( "First", cx.toShowString() ).culprit( "Second", cy.toShowString() );        
     }
+
     return pc;
 }
 
@@ -292,9 +395,13 @@ Ref * sysMulHelper( Ref *pc, class MachineClass * vm, Ref ry ) {
             } else if ( cy.isBigIntObject() ) {
                 BigIntExternal * by = cy.asBigIntObject().getBigIntExternal();
                 BigIntExternal product( by->mul( cx.getLong() ) );
-                vm->fastPeek() = vm->heap().copyBigIntExternal( pc, product );                
+                vm->fastPeek() = vm->heap().copyBigIntExternal( pc, product );
+            } else if ( cy.isRationalObject() ) {
+                RationalExternal q( *cy.asRationalObject().getRationalExternal() );
+                q.mulBy( cx.getLong() );
+                vm->fastPeek() = vm->heap().copyRationalExternal( pc, q );
             } else {
-                throw Mishap( "Bad arguments for * operation" );
+                throw Mishap( "MUL" );
             }
         } else if ( cx.isDoubleObject() ) {
             gngdouble_t x, y;
@@ -305,8 +412,10 @@ Ref * sysMulHelper( Ref *pc, class MachineClass * vm, Ref ry ) {
                 y = cy.asDoubleObject().getDouble();
             } else if ( cy.isBigIntObject() ) {
                 y = cy.asBigIntObject().getBigIntExternal()->toFloat();
+            } else if ( cy.isRationalObject() ) {
+                y = cy.asRationalObject().getRationalExternal()->toFloat();
             } else {
-                throw Mishap( "Invalid arguments for *" );
+                throw Mishap( "MUL" );
             }
             vm->fastPeek() = vm->heap().copyDouble( x * y );
         } else if ( cx.isBigIntObject() ) {
@@ -320,11 +429,34 @@ Ref * sysMulHelper( Ref *pc, class MachineClass * vm, Ref ry ) {
                 BigIntExternal product( *cy.asBigIntObject().getBigIntExternal() );
                 product.mulBy( *bx );
                 vm->fastPeek() = vm->heap().copyBigIntExternal( pc, product ); 
+            } else if ( cy.isRationalObject() ) {
+                RationalExternal q( *cy.asRationalObject().getRationalExternal() );
+                q.mulBy( *cx.asBigIntObject().getBigIntExternal() );
+                vm->fastPeek() = vm->heap().copyRationalExternal( pc, q );
             } else {
-                throw Mishap( "Bad arguments for - operator" );
+                throw Mishap( "MUL" );
+            }
+        } else if ( cx.isRationalObject() ) {
+            RationalExternal * qx = cx.asRationalObject().getRationalExternal();
+            if ( cy.isSmall() ) {
+                RationalExternal q( *qx );
+                q.mulBy( cy.getLong() );
+                vm->fastPeek() = vm->heap().copyRationalExternal( pc, q );
+            } else if ( cy.isDoubleObject() ) {
+                vm->fastPeek() = vm->heap().copyDouble( pc, qx->toFloat() * cy.asDoubleObject().getDouble() );
+            } else if ( cy.isBigIntObject() ) {
+                RationalExternal q( *qx );
+                q.mulBy( *cy.asBigIntObject().getBigIntExternal() );
+                vm->fastPeek() = vm->heap().copyRationalExternal( pc, q ); 
+            } else if ( cy.isRationalObject() ) {
+                RationalExternal q( *cx.asRationalObject().getRationalExternal() );
+                q.mulBy( *cy.asBigIntObject().getBigIntExternal() );
+                vm->fastPeek() = vm->heap().copyRationalExternal( pc, q );
+            } else {
+                throw Mishap( "MUL" );
             }
         } else {
-            throw Mishap( "Bad arguments for * operation" );
+            throw Mishap( "MUL" );
         }
     } catch ( Mishap & e ) {
         throw Mishap( "Bad arguments for * operation" ).culprit( "First", cx.toShowString() ).culprit( "Second", cy.toShowString() );
@@ -358,8 +490,12 @@ Ref * sysSubHelper( Ref *pc, class MachineClass * vm, Ref ry ) {
                 BigIntExternal * by = cy.asBigIntObject().getBigIntExternal();
                 const BigIntExternal diff( by->sub( cx.getLong() ) );
                 vm->fastPeek() = vm->heap().copyBigIntExternal( pc, diff );
+            } else if ( cy.isRationalObject() ) {
+                RationalExternal q( *cy.asRationalObject().getRationalExternal() );
+                q.subBy( cx.getLong() );
+                vm->fastPeek() = vm->heap().copyRationalExternal( pc, q );
             } else {
-                throw Mishap( "Bad arguments for - operation" );
+                throw Mishap( "SUB" );
             }
         } else if ( cx.isDoubleObject() ) {
             gngdouble_t x, y;
@@ -370,8 +506,10 @@ Ref * sysSubHelper( Ref *pc, class MachineClass * vm, Ref ry ) {
                 y = cy.asDoubleObject().getDouble();
             } else if ( cy.isBigIntObject() ) {
                 y = cy.asBigIntObject().getBigIntExternal()->toFloat();
+            } else if ( cy.isRationalObject() ) {
+                y = cy.asRationalObject().getRationalExternal()->toFloat();
             } else {
-                throw Mishap( "Bad arguments for + operator" );
+                throw Mishap( "SUB" );
             }
             //std::cout << "two doubles: " << x << ", " << y << std::endl;
             vm->fastPeek() = vm->heap().copyDouble( pc, x - y );
@@ -386,16 +524,38 @@ Ref * sysSubHelper( Ref *pc, class MachineClass * vm, Ref ry ) {
                 BigIntExternal * by = cy.asBigIntObject().getBigIntExternal();
                 BigIntExternal diff( bx->sub( *by ) );
                 vm->fastPeek() = vm->heap().copyBigIntExternal( pc, diff ); 
+            } else if ( cy.isRationalObject() ) {
+                RationalExternal q( *cy.asRationalObject().getRationalExternal() );
+                q.subBy( *cx.asBigIntObject().getBigIntExternal() );
+                vm->fastPeek() = vm->heap().copyRationalExternal( pc, q );
             } else {
-                throw Mishap( "Bad arguments for - operator" );
+                throw Mishap( "SUB" );
+            }
+        } else if ( cx.isRationalObject() ) {
+            RationalExternal * qx = cx.asRationalObject().getRationalExternal();
+            if ( cy.isSmall() ) {
+                RationalExternal q( *qx );
+                q.subBy( cy.getLong() );
+                vm->fastPeek() = vm->heap().copyRationalExternal( pc, q );
+            } else if ( cy.isDoubleObject() ) {
+                vm->fastPeek() = vm->heap().copyDouble( pc, qx->toFloat() - cy.asDoubleObject().getDouble() );
+            } else if ( cy.isBigIntObject() ) {
+                RationalExternal q( *qx );
+                q.subBy( *cy.asBigIntObject().getBigIntExternal() );
+                vm->fastPeek() = vm->heap().copyRationalExternal( pc, q ); 
+            } else if ( cy.isRationalObject() ) {
+                RationalExternal q( *cx.asRationalObject().getRationalExternal() );
+                q.subBy( *cy.asRationalObject().getRationalExternal() );
+                vm->fastPeek() = vm->heap().copyRationalExternal( pc, q );
+            } else {
+                throw Mishap( "SUB" );
             }
         } else {
-            throw Mishap( "Bad arguments for - operation" );
+            throw Mishap( "SUB" );
         }
     } catch ( Mishap & m ) {
         throw Mishap( "Bad arguments for - operator" ).culprit( "First", cx.toShowString() ).culprit( "Second", cy.toShowString() );
     }
-    //cerr << "Returning" << endl;
     return pc;
 }
 
@@ -404,7 +564,6 @@ Ref * sysAddHelper( Ref * pc, class MachineClass * vm, Ref ry ) {
     Cell cx( rx );
     Cell cy( ry );
     try {
-        //cerr << "try" << endl;
         if ( cx.isSmall() ) {
             if ( cy.isSmall() ) {
                 const long y = reinterpret_cast< long >( ry );
@@ -430,6 +589,10 @@ Ref * sysAddHelper( Ref * pc, class MachineClass * vm, Ref ry ) {
                 BigIntExternal * by = cy.asBigIntObject().getBigIntExternal();
                 const BigIntExternal sum( by->add( cx.getLong() ) );
                 vm->fastPeek() = vm->heap().copyBigIntExternal( pc, sum );
+            } else if ( cy.isRationalObject() ) {
+                RationalExternal q( *cy.asRationalObject().getRationalExternal() );
+                q.addBy( cx.getLong() );
+                vm->fastPeek() = vm->heap().copyRationalExternal( pc, q );
             } else {
                 throw Mishap( "Bad arguments for + operator" );
             }
@@ -442,13 +605,14 @@ Ref * sysAddHelper( Ref * pc, class MachineClass * vm, Ref ry ) {
                 y = cy.asDoubleObject().getDouble();
             } else if ( cy.isBigIntObject() ) {
                 y = cy.asBigIntObject().getBigIntExternal()->toFloat();
+            } else if ( cy.isRationalObject() ) {
+                y = cy.asRationalObject().getRationalExternal()->toFloat();
             } else {
                 throw Mishap( "Bad arguments for + operator" );
             }
             //std::cout << "two doubles: " << x << ", " << y << std::endl;
             vm->fastPeek() = vm->heap().copyDouble( pc, x + y );
         } else if ( cx.isBigIntObject() ) {
-            //cerr << "bigint" << endl;
             BigIntExternal * bx = cx.asBigIntObject().getBigIntExternal();
             if ( cy.isSmall() ) {
                 const BigIntExternal sum( bx->add( cy.getLong() ) );
@@ -456,12 +620,33 @@ Ref * sysAddHelper( Ref * pc, class MachineClass * vm, Ref ry ) {
             } else if ( cy.isDoubleObject() ) {
                 vm->fastPeek() = vm->heap().copyDouble( pc, bx->toFloat() + cy.asDoubleObject().getDouble() );
             } else if ( cy.isBigIntObject() ) {
-                //cerr << "bigint2" << endl;
                 BigIntExternal * by = cy.asBigIntObject().getBigIntExternal();
                 BigIntExternal sum( bx->add( *by ) );
-                //cerr << "bigint2 sum" << endl;
                 vm->fastPeek() = vm->heap().copyBigIntExternal( pc, sum );
-                //cerr << "OK" << endl;
+            } else if ( cy.isRationalObject() ) {
+                RationalExternal q( *cy.asRationalObject().getRationalExternal() );
+                q.addBy( *cx.asBigIntObject().getBigIntExternal() );
+                vm->fastPeek() = vm->heap().copyRationalExternal( pc, q );
+            } else {
+                throw Mishap( "Bad arguments for + operator" );
+            }
+        } else if ( cx.isRationalObject() ) {
+            RationalExternal * bx = cx.asRationalObject().getRationalExternal();
+            if ( cy.isSmall() ) {
+                RationalExternal sum( *bx );
+                sum.addBy( cy.getLong() );
+                vm->fastPeek() = vm->heap().copyRationalExternal( pc, sum );
+            } else if ( cy.isDoubleObject() ) {
+                vm->fastPeek() = vm->heap().copyDouble( pc, bx->toFloat() + cy.asDoubleObject().getDouble() );
+            } else if ( cy.isBigIntObject() ) {
+                BigIntExternal * by = cy.asBigIntObject().getBigIntExternal();
+                RationalExternal sum( *bx );
+                sum.addBy( *by );
+                vm->fastPeek() = vm->heap().copyRationalExternal( pc, sum );
+            } else if ( cy.isRationalObject() ) {
+                RationalExternal sum( *bx );
+                sum.addBy( *cy.asRationalObject().getRationalExternal() );
+                vm->fastPeek() = vm->heap().copyRationalExternal( pc, sum );
             } else {
                 throw Mishap( "Bad arguments for + operator" );
             }
@@ -471,12 +656,10 @@ Ref * sysAddHelper( Ref * pc, class MachineClass * vm, Ref ry ) {
     } catch ( Mishap & m ) {
         throw Mishap( "Bad arguments for + operator" ).culprit( "First", cx.toShowString() ).culprit( "Second", cy.toShowString() );
     }
-    //cerr << "Returning" << endl;
     return pc;
 }
 
 Ref * sysAdd( Ref * pc, class MachineClass * vm ) {
-    //cerr << "sysAdd" << endl;
     if ( vm->count != 2 ) throw Ginger::Mishap( "ArgsMismatch" );
     return sysAddHelper( pc, vm, vm->fastPop() );
 }
@@ -484,31 +667,9 @@ Ref * sysAdd( Ref * pc, class MachineClass * vm ) {
 
 Ref * sysMax( Ref * pc, class MachineClass * vm ) {
     if ( vm->count != 2 ) throw Ginger::Mishap( "ArgsMismatch" );
-    Cell rhs( vm->fastPop() );
-    Cell lhs( vm->fastPeek() );
-
-    if ( lhs.isSmall() ) {
-        if ( rhs.isSmall() ) {
-            const long llhs = lhs.getLong();
-            const long lrhs = rhs.getLong();
-            vm->fastPeek() = llhs < lrhs ? rhs.asRef() : lhs.asRef();
-        } else if ( rhs.isDoubleObject() ) {
-            vm->fastPeek() = rhs.asDoubleObject().getDouble().isThisMax( gngdouble_t( lhs.getLong() ) ) ? rhs.asRef() : lhs.asRef();
-        } else {
-            need_numbers( lhs, rhs );
-        }
-    } else if ( lhs.isDoubleObject() ) {
-        if ( rhs.isSmall() ) {
-            vm->fastPeek() = lhs.asDoubleObject().getDouble().isThisMax( gngdouble_t( rhs.getLong() ) ) ? lhs.asRef() : rhs.asRef();
-        } else if ( rhs.isDoubleObject() ) {
-            vm->fastPeek() = lhs.asDoubleObject().getDouble().isThisMax( rhs.asDoubleObject().getDouble() ) ? lhs.asRef() : rhs.asRef();
-        } else {
-            need_numbers( lhs, rhs );
-        }
-    } else {
-        need_numbers( lhs, rhs );
-    }
-
+    Ref rhs = vm->fastPop();
+    Ref lhs = vm->fastPeek();
+    vm->fastPeek() = sysCompareNumbers( lhs, rhs, false, false, true ) ? lhs : rhs;
     return pc;
 }
 SysInfo infoMax( 
@@ -521,30 +682,9 @@ SysInfo infoMax(
 
 Ref * sysMin( Ref * pc, class MachineClass * vm ) {
     if ( vm->count != 2 ) throw Ginger::Mishap( "ArgsMismatch" );
-    Cell rhs( vm->fastPop() );
-    Cell lhs( vm->fastPeek() );
-
-    if ( lhs.isSmall() ) {
-        if ( rhs.isSmall() ) {
-            const long llhs = lhs.getLong();
-            const long lrhs = rhs.getLong();
-            vm->fastPeek() = llhs < lrhs ? rhs.asRef() : lhs.asRef();
-        } else if ( rhs.isDoubleObject() ) {
-            vm->fastPeek() = rhs.asDoubleObject().getDouble().isThisMin( gngdouble_t( lhs.getLong() ) ) ? rhs.asRef() : lhs.asRef();
-        } else {
-            need_numbers( lhs, rhs );
-        }
-    } else if ( lhs.isDoubleObject() ) {
-        if ( rhs.isSmall() ) {
-            vm->fastPeek() = lhs.asDoubleObject().getDouble().isThisMin( gngdouble_t( rhs.getLong() ) ) ? lhs.asRef() : rhs.asRef();
-        } else if ( rhs.isDoubleObject() ) {
-            vm->fastPeek() = lhs.asDoubleObject().getDouble().isThisMin( rhs.asDoubleObject().getDouble() ) ? lhs.asRef() : rhs.asRef();
-        } else {
-            need_numbers( lhs, rhs );
-        }
-    } else {
-        need_numbers( lhs, rhs );
-    }
+    Ref rhs = vm->fastPop();
+    Ref lhs = vm->fastPeek();
+    vm->fastPeek() = sysCompareNumbers( lhs, rhs, true, false, false ) ? lhs : rhs;
     return pc;
 }
 SysInfo infoMin( 
@@ -560,44 +700,14 @@ Ref * sysMaxAll( Ref * pc, class MachineClass * vm ) {
         vm->checkStackRoom( 1 );
         vm->fastPush( vm->heap().copyDouble( 0.0/0.0 ) );
     } else {
-
-        Cell sofar( vm->fastPop() );
+        Ref sofar = vm->fastPop();
         for ( int i = 1; i < vm->count; i++ ) {
-            Cell next( vm->fastPop() );
-
-            if ( sofar.isSmall() ) {
-                if ( next.isSmall() ) {
-                    const long llhs = sofar.getLong();
-                    const long lrhs = next.getLong();
-                    if ( llhs < lrhs ) {
-                        sofar = next;
-                    }
-                } else if ( next.isDoubleObject() ) {
-                    if ( next.asDoubleObject().getDouble().isThisMax( gngdouble_t( sofar.getLong() ) ) ) {
-                        sofar = next;
-                    }
-                } else {
-                    need_numbers( sofar, next );
-                }
-            } else if ( sofar.isDoubleObject() ) {
-                if ( next.isSmall() ) {
-                    if ( not sofar.asDoubleObject().getDouble().isThisMax( gngdouble_t( next.getLong() ) ) ) {
-                        sofar = next;
-                    }
-                } else if ( next.isDoubleObject() ) {
-                    if( not sofar.asDoubleObject().getDouble().isThisMax( next.asDoubleObject().getDouble() ) ) {
-                        sofar = next;
-                    }
-                } else {
-                    need_numbers( sofar, next );
-                }
-            } else {
-                need_numbers( sofar, next );
+            Ref next = vm->fastPop();
+            if ( sysCompareNumbers( sofar, next, true, false, false ) ) {
+                sofar = next;
             }
-
         }
-        
-        vm->fastPush( sofar.asRef() );
+        vm->fastPush( sofar );
     }
     return pc;
 }
@@ -614,44 +724,14 @@ Ref * sysMinAll( Ref * pc, class MachineClass * vm ) {
         vm->checkStackRoom( 1 );
         vm->fastPush( vm->heap().copyDouble( 0.0/0.0 ) );
     } else {
-
-        Cell sofar( vm->fastPop() );
+        Ref sofar = vm->fastPop();
         for ( int i = 1; i < vm->count; i++ ) {
-            Cell next( vm->fastPop() );
-
-            if ( sofar.isSmall() ) {
-                if ( next.isSmall() ) {
-                    const long llhs = sofar.getLong();
-                    const long lrhs = next.getLong();
-                    if ( llhs < lrhs ) {
-                        sofar = next;
-                    }
-                } else if ( next.isDoubleObject() ) {
-                    if ( next.asDoubleObject().getDouble().isThisMin( gngdouble_t( sofar.getLong() ) ) ) {
-                        sofar = next;
-                    }
-                } else {
-                    need_numbers( sofar, next );
-                }
-            } else if ( sofar.isDoubleObject() ) {
-                if ( next.isSmall() ) {
-                    if ( not sofar.asDoubleObject().getDouble().isThisMin( gngdouble_t( next.getLong() ) ) ) {
-                        sofar = next;
-                    }
-                } else if ( next.isDoubleObject() ) {
-                    if( not sofar.asDoubleObject().getDouble().isThisMin( next.asDoubleObject().getDouble() ) ) {
-                        sofar = next;
-                    }
-                } else {
-                    need_numbers( sofar, next );
-                }
-            } else {
-                need_numbers( sofar, next );
+            Ref next = vm->fastPop();
+            if ( sysCompareNumbers( sofar, next, true, false, false ) ) {
+                sofar = next;
             }
-
         }
-        
-        vm->fastPush( sofar.asRef() );
+        vm->fastPush( sofar );
     }
     return pc;
 }
@@ -665,31 +745,9 @@ SysInfo infoMinAll(
 
 Ref * sysLtGt( Ref * pc, class MachineClass * vm ) {
     if ( vm->count != 2 ) throw Ginger::Mishap( "ArgsMismatch" );
-    Cell rhs( vm->fastPop() );
-    Cell lhs( vm->fastPeek() );
-   
-    if ( lhs.isSmall() ) {
-        if ( rhs.isSmall() ) {
-            const long llhs = lhs.getLong();
-            const long lrhs = rhs.getLong();
-            vm->fastPeek() = llhs == lrhs ? SYS_FALSE : SYS_TRUE;
-        } else if ( rhs.isDoubleObject() ) {
-            vm->fastPeek() = rhs.asDoubleObject().getDouble().isLtGt( gngdouble_t( lhs.getLong() ) ) ? SYS_TRUE : SYS_FALSE;
-        } else {
-            need_numbers( lhs, rhs );
-        }
-    } else if ( lhs.isDoubleObject() ) {
-        if ( rhs.isSmall() ) {
-            vm->fastPeek() = lhs.asDoubleObject().getDouble().isLtGt( gngdouble_t( rhs.getLong() ) ) ? SYS_TRUE : SYS_FALSE;
-        } else if ( rhs.isDoubleObject() ) {
-            vm->fastPeek() = lhs.asDoubleObject().getDouble().isLtGt( rhs.asDoubleObject().getDouble() ) ? SYS_TRUE : SYS_FALSE;
-        } else {
-            need_numbers( lhs, rhs );
-        }
-    } else {
-        need_numbers( lhs, rhs );
-    }
-
+    Ref rhs = vm->fastPop();
+    Ref lhs = vm->fastPeek();
+    vm->fastPeek() = sysCompareNumbers( lhs, rhs, true, false, true ) ? SYS_TRUE : SYS_FALSE;
     return pc;
 }
 SysInfo infoLtGt( 
@@ -713,33 +771,11 @@ SysInfo infoNotLtGt(
     "Returns true if the two arguments are neither less than nor greater than each other."
 );
 
-
-
 Ref * sysLtEGt( Ref * pc, class MachineClass * vm ) {
     if ( vm->count != 2 ) throw Ginger::Mishap( "ArgsMismatch" );
-    Cell rhs( vm->fastPop() );
-    Cell lhs( vm->fastPeek() );
-   
-    if ( lhs.isSmall() ) {
-        if ( rhs.isSmall() ) {
-            vm->fastPeek() = SYS_TRUE;
-        } else if ( rhs.isDoubleObject() ) {
-            vm->fastPeek() = rhs.asDoubleObject().getDouble().isLtEGt( gngdouble_t( lhs.getLong() ) ) ? SYS_TRUE : SYS_FALSE;
-        } else {
-            need_numbers( lhs, rhs );
-        }
-    } else if ( lhs.isDoubleObject() ) {
-        if ( rhs.isSmall() ) {
-            vm->fastPeek() = lhs.asDoubleObject().getDouble().isLtEGt( gngdouble_t( rhs.getLong() ) ) ? SYS_TRUE : SYS_FALSE;
-        } else if ( rhs.isDoubleObject() ) {
-            vm->fastPeek() = lhs.asDoubleObject().getDouble().isLtEGt( rhs.asDoubleObject().getDouble() ) ? SYS_TRUE : SYS_FALSE;
-        } else {
-            need_numbers( lhs, rhs );
-        }
-    } else {
-        need_numbers( lhs, rhs );
-    }
-
+    Ref rhs = vm->fastPop();
+    Ref lhs = vm->fastPeek();
+    vm->fastPeek() = sysCompareNumbers( lhs, rhs, true, true, true ) ? SYS_TRUE : SYS_FALSE;
     return pc;
 }
 SysInfo infoLtEGt( 
@@ -765,31 +801,9 @@ SysInfo infoNotLtEGt(
 
 Ref * sysNotLt( Ref * pc, class MachineClass * vm ) {
     if ( vm->count != 2 ) throw Ginger::Mishap( "ArgsMismatch" );
-    Cell rhs( vm->fastPop() );
-    Cell lhs( vm->fastPeek() );
-   
-    if ( lhs.isSmall() ) {
-        if ( rhs.isSmall() ) {
-            const long llhs = lhs.getLong();
-            const long lrhs = rhs.getLong();
-            vm->fastPeek() = llhs < lrhs ? SYS_FALSE : SYS_TRUE;
-        } else if ( rhs.isDoubleObject() ) {
-            vm->fastPeek() = gngdouble_t( lhs.getLong() ) < rhs.asDoubleObject().getDouble() ? SYS_FALSE : SYS_TRUE;
-        } else {
-            need_numbers( lhs, rhs );
-        }
-    } else if ( lhs.isDoubleObject() ) {
-        if ( rhs.isSmall() ) {
-            vm->fastPeek() = lhs.asDoubleObject().getDouble() < gngdouble_t( rhs.getLong() ) ? SYS_FALSE : SYS_TRUE;
-        } else if ( rhs.isDoubleObject() ) {
-            vm->fastPeek() = lhs.asDoubleObject().getDouble() < rhs.asDoubleObject().getDouble() ? SYS_FALSE : SYS_TRUE;
-        } else {
-            need_numbers( lhs, rhs );
-        }
-    } else {
-        need_numbers( lhs, rhs );
-    }
-
+    Ref rhs = vm->fastPop();
+    Ref lhs = vm->fastPeek();
+    vm->fastPeek() = sysCompareNumbers( lhs, rhs, true, false, false ) ? SYS_FALSE : SYS_TRUE;
     return pc;
 }
 SysInfo infoNotLt( 
@@ -802,31 +816,9 @@ SysInfo infoNotLt(
 
 Ref * sysNotLtE( Ref * pc, class MachineClass * vm ) {
     if ( vm->count != 2 ) throw Ginger::Mishap( "ArgsMismatch" );
-    Cell rhs( vm->fastPop() );
-    Cell lhs( vm->fastPeek() );
-   
-    if ( lhs.isSmall() ) {
-        if ( rhs.isSmall() ) {
-            const long llhs = lhs.getLong();
-            const long lrhs = rhs.getLong();
-            vm->fastPeek() = llhs <= lrhs ? SYS_FALSE : SYS_TRUE;
-        } else if ( rhs.isDoubleObject() ) {
-            vm->fastPeek() = gngdouble_t( lhs.getLong() ) <= rhs.asDoubleObject().getDouble() ? SYS_FALSE : SYS_TRUE;
-        } else {
-            need_numbers( lhs, rhs );
-        }
-    } else if ( lhs.isDoubleObject() ) {
-        if ( rhs.isSmall() ) {
-            vm->fastPeek() = lhs.asDoubleObject().getDouble() <= gngdouble_t( rhs.getLong() ) ? SYS_FALSE : SYS_TRUE;
-        } else if ( rhs.isDoubleObject() ) {
-            vm->fastPeek() = lhs.asDoubleObject().getDouble() <= rhs.asDoubleObject().getDouble() ? SYS_FALSE : SYS_TRUE;
-        } else {
-            need_numbers( lhs, rhs );
-        }
-    } else {
-        need_numbers( lhs, rhs );
-    }
-
+    Ref rhs = vm->fastPop();
+    Ref lhs = vm->fastPeek();
+    vm->fastPeek() = sysCompareNumbers( lhs, rhs, true, true, false ) ? SYS_FALSE : SYS_TRUE;
     return pc;
 }
 SysInfo infoNotLtE( 
@@ -839,31 +831,9 @@ SysInfo infoNotLtE(
 
 Ref * sysNotGt( Ref * pc, class MachineClass * vm ) {
     if ( vm->count != 2 ) throw Ginger::Mishap( "ArgsMismatch" );
-    Cell rhs( vm->fastPop() );
-    Cell lhs( vm->fastPeek() );
-   
-    if ( lhs.isSmall() ) {
-        if ( rhs.isSmall() ) {
-            const long llhs = lhs.getLong();
-            const long lrhs = rhs.getLong();
-            vm->fastPeek() = llhs > lrhs ? SYS_FALSE : SYS_TRUE;
-        } else if ( rhs.isDoubleObject() ) {
-            vm->fastPeek() = gngdouble_t( lhs.getLong() ) > rhs.asDoubleObject().getDouble() ? SYS_FALSE : SYS_TRUE;
-        } else {
-            need_numbers( lhs, rhs );
-        }
-    } else if ( lhs.isDoubleObject() ) {
-        if ( rhs.isSmall() ) {
-            vm->fastPeek() = lhs.asDoubleObject().getDouble() > gngdouble_t( rhs.getLong() ) ? SYS_FALSE : SYS_TRUE;
-        } else if ( rhs.isDoubleObject() ) {
-            vm->fastPeek() = lhs.asDoubleObject().getDouble() > rhs.asDoubleObject().getDouble() ? SYS_FALSE : SYS_TRUE;
-        } else {
-            need_numbers( lhs, rhs );
-        }
-    } else {
-        need_numbers( lhs, rhs );
-    }
-
+    Ref rhs = vm->fastPop();
+    Ref lhs = vm->fastPeek();
+    vm->fastPeek() = sysCompareNumbers( lhs, rhs, false, false, true ) ? SYS_FALSE : SYS_TRUE;
     return pc;
 }
 SysInfo infoNotGt( 
@@ -876,31 +846,9 @@ SysInfo infoNotGt(
 
 Ref * sysNotGtE( Ref * pc, class MachineClass * vm ) {
     if ( vm->count != 2 ) throw Ginger::Mishap( "ArgsMismatch" );
-    Cell rhs( vm->fastPop() );
-    Cell lhs( vm->fastPeek() );
-   
-    if ( lhs.isSmall() ) {
-        if ( rhs.isSmall() ) {
-            const long llhs = lhs.getLong();
-            const long lrhs = rhs.getLong();
-            vm->fastPeek() = llhs >= lrhs ? SYS_FALSE : SYS_TRUE;
-        } else if ( rhs.isDoubleObject() ) {
-            vm->fastPeek() = gngdouble_t( lhs.getLong() ) >= rhs.asDoubleObject().getDouble() ? SYS_FALSE : SYS_TRUE;
-        } else {
-            need_numbers( lhs, rhs );
-        }
-    } else if ( lhs.isDoubleObject() ) {
-        if ( rhs.isSmall() ) {
-            vm->fastPeek() = lhs.asDoubleObject().getDouble() >= gngdouble_t( rhs.getLong() ) ? SYS_FALSE : SYS_TRUE;
-        } else if ( rhs.isDoubleObject() ) {
-            vm->fastPeek() = lhs.asDoubleObject().getDouble() >= rhs.asDoubleObject().getDouble() ? SYS_FALSE : SYS_TRUE;
-        } else {
-            need_numbers( lhs, rhs );
-        }
-    } else {
-        need_numbers( lhs, rhs );
-    }
-
+    Ref rhs = vm->fastPop();
+    Ref lhs = vm->fastPeek();
+    vm->fastPeek() = sysCompareNumbers( lhs, rhs, false, true, true ) ? SYS_FALSE : SYS_TRUE;
     return pc;
 }
 SysInfo infoNotGtE( 
@@ -919,6 +867,8 @@ gngdouble_t refToDouble( Ref rx ) {
         return cx.asDoubleObject().getDouble();
     } else if ( cx.isBigIntObject() ) {
         return TransDouble( cx.asBigIntObject().getBigIntExternal()->toFloat() );
+    } else if ( cx.isRationalObject() ) {
+        return TransDouble( cx.asRationalObject().getRationalExternal()->toFloat() );
     } else {
         throw Ginger::Mishap( "Number needed" ).culprit( "Value", cx.toShowString() );
     }

@@ -27,7 +27,7 @@ CFLAGS=-Wmissing-prototypes
 #CXXFLAGS += -DMACHINE4_EXCLUDED
 
 
-OBJS= bigint.o \
+OBJS= bigint.o rational.o \
 	inputstreamexternal.o outputstreamexternal.o \
 	cagefinder.o cell.o refprint.o vident.o codegen.o \
 	simplify.o cage.o registers.o roots.o cmp.o \

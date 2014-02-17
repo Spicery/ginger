@@ -16,8 +16,8 @@
     along with AppGinger.  If not, see <http://www.gnu.org/licenses/>.
 \******************************************************************************/
 
-#ifndef CELL_HPP
-#define CELL_HPP
+#ifndef GINGER_CELL_HPP
+#define GINGER_CELL_HPP
 
 #include <algorithm>
 #include <string>
@@ -31,6 +31,7 @@
 #include "mapcrawl.hpp"
 #include "external.hpp"
 #include "bigint.hpp"
+#include "rational.hpp"
 
 namespace Ginger {
 
@@ -42,6 +43,7 @@ class StringObject;
 class VectorObject;
 class DoubleObject;
 class BigIntObject;
+class RationalObject;
 class PairObject;
 class MapObject;
 class MapletObject;
@@ -66,6 +68,7 @@ public:
 	long getLong() const { return SmallToLong( this->ref ); }
 	DoubleObject asDoubleObject() const;
 	BigIntObject asBigIntObject() const;
+	RationalObject asRationalObject() const;
 
 	bool isTermin() const { return this->ref == SYS_TERMIN; }
 	bool isAbsent() const { return this->ref == SYS_ABSENT; }
@@ -78,6 +81,7 @@ public:
 	bool isVectorObject() const { return IsVector( this->ref ); }
 	bool isDoubleObject() const { return IsDouble( this->ref ); }
 	bool isBigIntObject() const { return IsBigInt( this->ref ); }
+	bool isRationalObject() const { return IsRational( this->ref ); }
 
 	std::string toPrintString() const;
 	std::string toShowString() const;
@@ -111,6 +115,7 @@ public:	//	Checked downcasts.
 	MapletObject asMapletObject() const;	
 	DoubleObject asDoubleObject() const;
 	BigIntObject asBigIntObject() const;
+	RationalObject asRationalObject() const;
 
 public:	//	Others
 	bool isFunctionObject() const { return IsFunctionKey( *this->obj_K ); }
@@ -127,6 +132,7 @@ public:	//	Others
 	bool isWRecordObject() const { return IsSimple( *this->obj_K ) && KindOfSimpleKey( *this->obj_K ) == WRECORD_KIND; }
 	bool isDoubleObject() const { return *this->obj_K == sysDoubleKey; }
 	bool isBigIntObject() const { return *this->obj_K == sysBigIntKey; }
+	bool isRationalObject() const { return *this->obj_K == sysRationalKey; }
 	bool isAtomicWRecordObject() const { return IsSimple( *this->obj_K ) && KindOfSimpleKey( *this->obj_K ) == ATOMIC_WRECORD_KIND; }
 	bool isExternalObject() const { return IsSimple( *this->obj_K ) && KindOfSimpleKey( *this->obj_K ) == EXTERNAL_KIND; }
 
@@ -203,6 +209,17 @@ public:
 public:
 	std::string toString() const;
 	BigIntExternal * getBigIntExternal() const;
+};
+
+class RationalObject : public HeapObject {
+public:
+	RationalObject( Ref * _p ) : HeapObject( _p ) {}
+	RationalObject( HeapObject _h ) : HeapObject( _h ) {}
+	RationalObject( Cell _c ) : HeapObject( _c ) {}
+
+public:
+	std::string toString() const;
+	RationalExternal * getRationalExternal() const;
 };
 
 class MapObject : public HeapObject {

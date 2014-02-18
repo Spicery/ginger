@@ -1,0 +1,15 @@
+# Ginger style comment
+settings = 
+	[ true, false, "\"", "foo", 99, { "alp\u0020ha": 1, "beta": 2 } ]
+
+//	This is an end-of-line comment.
+simple =
+	{ 
+		alpha = [];
+	 	beta = 2;
+	}
+/*
+	Mary had a little lamb
+	Its fleece was white as snow
+*/
+prompt = ">>>\t"

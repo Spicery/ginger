@@ -1,0 +1,5 @@
+define f( x ) =>>
+if x < 1 then 0
+else x * f( x )
+endif
+enddefine;

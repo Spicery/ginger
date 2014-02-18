@@ -1,0 +1,3 @@
+define K( x ) =>>
+	fn y =>> x endfn
+enddefine;

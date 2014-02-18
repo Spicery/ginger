@@ -1,0 +1,5 @@
+var s := newInputStream( "/tmp/foo.txt" );
+var t := newInputStream( "/tmp/foo.txt" );
+s ::= _;
+sysgarbage();
+sysgarbage();

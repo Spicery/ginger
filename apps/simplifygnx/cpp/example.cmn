@@ -1,0 +1,1 @@
+define f(n) =>> var x := absent; 3 -> x; x + n + n enddefine;

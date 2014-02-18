@@ -1,0 +1,7 @@
+<block>
+	<bind>
+		<var protected="true" name="x"/>
+		<constant type="int" value="0"/>
+	</bind>
+	<set><id name="x"/><constant type="int" value="1"/></set>
+</block>

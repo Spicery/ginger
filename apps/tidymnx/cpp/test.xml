@@ -1,0 +1,50 @@
+<lexis start="start">
+	<property name="R" default="word"/>
+	<property name="T" default=""/>
+	<state name="start">
+		<!--
+			eof=""
+			any=""
+			include="CHARS, ORDER INDEPENDENT"
+			
+			isalpha=""
+			isdigit=""
+			isalnum=""
+			ispunc=""
+			isgraph=""
+			isctrl=""
+			islower=""
+			isupper=""
+			isspace=""
+			isprint=""
+		-->
+		<arc include="a">
+			<accept/>
+			<add tag="word"/>
+			<go to="grab_a"/>
+		</arc>
+		<arc any="">
+			<erase/> 
+			<go to="start"/>
+		</arc>
+		<arc eof="">
+			<pushback/>
+			<add tag="word"/>
+			<stop/>
+		</arc>
+	</state>
+	<state name="grab_a">
+		<arc include="a">
+			<accept/>
+			<go to="grab_a"/>
+		</arc>
+		<arc any="">
+			<erase/>
+			<stop/>
+		</arc>
+		<arc eof="">
+			<pushback/>
+			<stop/>
+		</arc>
+	</state>
+</lexis>

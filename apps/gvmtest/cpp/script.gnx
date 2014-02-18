@@ -1,0 +1,9 @@
+<compile>
+	<bind arity="0" span="1"><var def.pkg="" name="s" protected="false" scope="global" span="1" uid="0"/><sysapp args.arity="1" arity="1" name="newInputStream"><constant arity="1" span="1" type="string" value="/tmp/foo.txt"/></sysapp></bind>
+	<bind arity="0" span="2"><var def.pkg="" name="t" protected="false" scope="global" span="2" uid="0"/><sysapp args.arity="1" arity="1" name="newInputStream"><constant arity="1" span="2" type="string" value="/tmp/foo.txt"/></sysapp></bind>
+	<set arity="0"><constant arity="1" comment="_" span="3" type="absent" value="absent" was.anon="_"/><id arity="1" def.pkg="" name="s" scope="global" span="3"/></set>
+</compile>
+<heap.crawl/>
+<gc/>
+<heap.crawl/>
+<gc/>

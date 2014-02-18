@@ -1,0 +1,63 @@
+<lexis start="white">
+	<property name="T" default=""/>
+	<property name="E" default=""/>
+	<node name="white">
+		<arc isspace="">
+		</arc>
+		<arc any="">
+			<push property="T"/>
+			<go to="word"/>
+		</arc>
+	</node>
+	<node name="word">
+		<!--
+			eof=""
+			any=""
+			include="CHARS, ORDER INDEPENDENT"
+			
+			isalpha=""
+			isdigit=""
+			isalnum=""
+			ispunc=""
+			isgraph=""
+			iscntrl=""
+			islower=""
+			isupper=""
+			isspace=""
+			isprint=""
+		-->
+		<arc isspace="">
+			<emit/>
+			<go to="white"/>
+		</arc>
+		<arc include="\">
+			<go to="escape0"/>
+		</arc>
+		<arc any="">
+			<push property="T"/>
+		</arc>
+		<arc eof="">
+			<emit/>
+		</arc>
+	</node>
+	<node name="escape0">
+		<arc include="x">
+			<go to="escape1"/>
+		</arc>
+	</node>
+	<node name="escape1">
+		<arc include="0123456789ABCDEF">
+			<push property="E"/>
+			<go to="escape2"/>
+		</arc>
+	</node>
+	<node name="escape2">
+		<arc include="0123456789ABCDEF">
+			<push property="E"/>
+			<dehex property="E"/>
+			<push from.property="E" property="T"/>
+			<reset property="E"/>
+			<go to="word"/>
+		</arc>
+	</node>
+</lexis>

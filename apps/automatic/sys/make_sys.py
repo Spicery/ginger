@@ -749,6 +749,10 @@ ref = FullRecordClassGenerator( sysconsts, "Rational", [] )
 ref.options = MethodOptions( "r" )
 ref.generateFilesWithPrefix( "rational" )
 
+ref = FullRecordClassGenerator( sysconsts, "VirtualMachine", [] )
+ref.options = MethodOptions( "r" )
+ref.generateFilesWithPrefix( "virtualmachine" )
+
 #	Create the insert for the sysMap table.
 inc = open( "sysmap.inc.auto", 'w' )
 sysconsts.generateSysMapInclude( inc )

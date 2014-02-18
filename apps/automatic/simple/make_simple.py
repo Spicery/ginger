@@ -230,6 +230,7 @@ keys = [
 	KeyData( "OutputStream",	35, 1, 	Kind.EXTERNAL_KIND  ),
 	KeyData( "BigInt",	        36, 1, 	Kind.EXTERNAL_KIND  ),
 	KeyData( "Rational",	    37, 1, 	Kind.EXTERNAL_KIND  ),
+	KeyData( "VirtualMachine",	38, 1,  Kind.EXTERNAL_KIND ),
 ]
 
 

@@ -40,6 +40,7 @@ public:
 
 public:
 	bool item_is_neg_num();
+	bool item_is_signed_num();
 	int item_int();
 	bool item_is_prefix();
 	bool item_is_postfix();

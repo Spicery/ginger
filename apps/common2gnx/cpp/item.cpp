@@ -23,3 +23,10 @@ bool ItemClass::item_is_neg_num() {
 	bool b = ( ss >> i ).fail();
 	return not( b ) && i < 0;
 }
+
+bool ItemClass::item_is_signed_num() {
+	if ( not ( this->tok_type == tokty_int or this->tok_type == tokty_double ) ) return false;
+	if ( this->nameString().empty() ) return false;
+	const char ch = this->nameString()[ 0 ];
+	return ch == '+' or ch == '-';
+}

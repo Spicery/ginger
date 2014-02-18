@@ -1776,7 +1776,7 @@ Node ReadStateClass::readOptExprPrec( int prec ) {
 	    int q;
 	    //cerr << "peeking" << endl;
 		Item it = ifact->peek();
-		if ( it->item_is_neg_num() ) {
+		if ( it->item_is_signed_num() ) {
 			NodeFactory t;
 			t.start( SYSAPP );
 			t.put( "name", "+" );

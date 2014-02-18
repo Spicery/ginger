@@ -79,7 +79,7 @@ public:
 	void cleanUpAfterGarbageCollection();
 };
 
-class MachineClass {
+class MachineClass : public External {
 friend class GarbageCollect;
 
 private:
@@ -109,7 +109,6 @@ public:
 
 public:
 	void 			check_call_stack_integrity();	//	debug
-
 		
 public:
 	long			count;			//	Args count
@@ -120,8 +119,7 @@ public:
 	Ref	*			sp_end;
 	Ref	*			vp;
 	Ref	*			vp_base;
-	Ref	*			vp_end;
-	
+	Ref	*			vp_end;	
 	
 public:
 	Ref	&			fastPeek() { return *vp; }
@@ -135,7 +133,6 @@ public:
 	void			checkStackRoom( long n );
 	
 public:
-
 	void 			printResults( std::ostream & out, float time_taken );
 	void 			printResults( float time_taken );
 
@@ -147,7 +144,6 @@ public:
 	CodeGenClass *	codegen();		
 	HeapClass &		heap();
 	AppContext &	getAppContext();
-
 	
 public:
 	virtual Ref sysFastListIterator();
@@ -174,7 +170,6 @@ private:
 	int veto_count;
 	
 public:
-	//	TO BE IMPLEMENTED.
 	void gcLiftAllVetoes();				//	Makes decision to grow/shrink, level = 0.
 	void gcVeto();  					//	Inhibit moving, bump +1 for nesting.
 	void gcLiftVeto();					//	bump -1, moving allowed if level = 0.
@@ -186,6 +181,12 @@ public:
 	void postGCManageExternalObjects() {
 		this->external_objects.cleanUpAfterGarbageCollection();
 	}
+
+public:
+	//	Part of the External interface.
+	void print( std::ostream & out );
+    Ref * sysApply( Ref * pc, MachineClass * vm );
+
 
 public:
 	MachineClass( AppContext * appg );

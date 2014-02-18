@@ -257,6 +257,16 @@ Ref * sysFlooredQuotientHelper( Ref * pc, class MachineClass * vm, Ref ry ) {
     return pc;
 }
 
+static gngdouble_t byZero( const bool lt, const bool gt ) {
+    if ( gt ) {
+        return 1.0/0.0;
+    } else if ( lt ) {
+        return -1.0/0.0;
+    } else {
+        return 0.0/0.0;
+    }
+}
+
 Ref * sysDivHelper( Ref * pc, class MachineClass * vm, Ref ry ) {
     Ref rx = vm->fastPeek();
     Cell cx( rx );
@@ -265,21 +275,37 @@ Ref * sysDivHelper( Ref * pc, class MachineClass * vm, Ref ry ) {
     try {
         if ( cx.isSmall() ) {
             if ( cy.isSmall() ) {
-                RationalExternal q( cx.getLong() );
-                q.divBy( cy.getLong() );
-                vm->fastPeek() = vm->heap().copyRationalExternal( pc, q );
+                const long lx = cx.getLong();
+                const long ly = cy.getLong();
+                RationalExternal q( lx );
+                if ( ly == 0 ) {
+                    vm->fastPeek() = vm->heap().copyDouble( pc, byZero( lx < 0, lx > 0 ) );
+                } else {
+                    q.divBy( ly );
+                    vm->fastPeek() = vm->heap().copyRationalExternal( pc, q );
+                }
             } else if ( cy.isDoubleObject() ) {
                 const gngdouble_t x = static_cast< gngdouble_t >( cx.getLong() );
                 const gngdouble_t y = cy.asDoubleObject().getDouble();
                 vm->fastPeek() = vm->heap().copyDouble( pc, x / y );
             } else if ( cy.isBigIntObject() ) {
-                RationalExternal q( cx.getLong() );
-                q.divBy( *cy.asBigIntObject().getBigIntExternal() );
-                vm->fastPeek() = vm->heap().copyRationalExternal( pc, q );
+                const long lx = cx.getLong();
+                if ( cy.asBigIntObject().getBigIntExternal()->isZero() ) {
+                    vm->fastPeek() = vm->heap().copyDouble( pc, byZero( lx < 0, lx > 0 ) );
+                } else {
+                    RationalExternal q( lx );
+                    q.divBy( *cy.asBigIntObject().getBigIntExternal() );
+                    vm->fastPeek() = vm->heap().copyRationalExternal( pc, q );
+                }
             } else if ( cy.isRationalObject() ) {
-                RationalExternal q( cx.getLong() );
-                q.divBy( *cy.asRationalObject().getRationalExternal() );
-                vm->fastPeek() = vm->heap().copyRationalExternal( pc, q );
+                const long lx = cx.getLong();
+                if ( cy.asRationalObject().getRationalExternal()->isZero() ) {
+                    vm->fastPeek() = vm->heap().copyDouble( pc, byZero( lx < 0, lx > 0 ) );
+                } else {
+                    RationalExternal q( lx );
+                    q.divBy( *cy.asRationalObject().getRationalExternal() );
+                    vm->fastPeek() = vm->heap().copyRationalExternal( pc, q );
+                }
             } else {
                 throw Mishap( "Bad arguments for / operator" );
             }
@@ -301,42 +327,68 @@ Ref * sysDivHelper( Ref * pc, class MachineClass * vm, Ref ry ) {
        } else if ( cx.isBigIntObject() ) {
             BigIntExternal * bx = cx.asBigIntObject().getBigIntExternal();
             if ( cy.isSmall() ) {
-                RationalExternal q( *bx );
-                q.divBy( cy.getLong() );
-                vm->fastPeek() = vm->heap().copyRationalExternal( pc, q );
+                const long ly = cy.getLong();
+                if ( ly == 0 ) {
+                    vm->fastPeek() = vm->heap().copyDouble( byZero( bx->isNegative(), bx->isPositive() ) );
+                } else {
+                    RationalExternal q( *bx );
+                    q.divBy( cy.getLong() );
+                    vm->fastPeek() = vm->heap().copyRationalExternal( pc, q );
+                }
             } else if ( cy.isDoubleObject() ) {
                 gngdouble_t dx = bx->toFloat();
                 gngdouble_t dy = cy.asDoubleObject().getDouble();
                 vm->fastPeek() = vm->heap().copyDouble( pc, dx / dy );
             } else if ( cy.isBigIntObject() ) {
-                RationalExternal q( *bx );
-                q.divBy( *cy.asBigIntObject().getBigIntExternal() );
-                vm->fastPeek() = vm->heap().copyRationalExternal( pc, q );
+                if ( cy.asBigIntObject().getBigIntExternal()->isZero() ) {
+                    vm->fastPeek() = vm->heap().copyDouble( pc, byZero( bx->isNegative(), bx->isPositive() ) );
+                } else {
+                    RationalExternal q( *bx );
+                    q.divBy( *cy.asBigIntObject().getBigIntExternal() );
+                    vm->fastPeek() = vm->heap().copyRationalExternal( pc, q );
+                }
             } else if ( cy.isRationalObject() ) {
-                RationalExternal q( *bx );
-                q.divBy( *cy.asRationalObject().getRationalExternal() );
-                vm->fastPeek() = vm->heap().copyRationalExternal( pc, q );
+                if ( cy.asRationalObject().getRationalExternal()->isZero() ) {
+                    vm->fastPeek() = vm->heap().copyDouble( pc, byZero( bx->isNegative(), bx->isPositive() ) );
+                } else {
+                    RationalExternal q( *bx );
+                    q.divBy( *cy.asRationalObject().getRationalExternal() );
+                    vm->fastPeek() = vm->heap().copyRationalExternal( pc, q );
+                }
             } else {
                 throw Mishap( "Bad arguments for / operator" );
             }
         } else if ( cx.isRationalObject() ) {
             RationalExternal * qx = cx.asRationalObject().getRationalExternal();
             if ( cy.isSmall() ) {
-                RationalExternal q( *qx );
-                q.divBy( cy.getLong() );
-                vm->fastPeek() = vm->heap().copyRationalExternal( pc, q );
+                const long ly = cy.getLong();
+                if ( ly == 0 ) {
+                    vm->fastPeek() = vm->heap().copyDouble( pc, byZero( qx->isNegative(), qx->isPositive() ) );
+                } else {
+                    RationalExternal q( *qx );
+                    q.divBy( ly );
+                    vm->fastPeek() = vm->heap().copyRationalExternal( pc, q );
+                }
             } else if ( cy.isDoubleObject() ) {
                 gngdouble_t dx = qx->toFloat();
                 gngdouble_t dy = cy.asDoubleObject().getDouble();
                 vm->fastPeek() = vm->heap().copyDouble( pc, dx / dy );  
             } else if ( cy.isBigIntObject() ) {
-                RationalExternal q( *qx );
-                q.divBy( *cy.asBigIntObject().getBigIntExternal() );
-                vm->fastPeek() = vm->heap().copyRationalExternal( pc, q );
+                if ( cy.asRationalObject().getRationalExternal()->isZero() ) {
+                    vm->fastPeek() = vm->heap().copyDouble( pc, byZero( qx->isNegative(), qx->isPositive() ) );
+                } else {
+                    RationalExternal q( *qx );
+                    q.divBy( *cy.asBigIntObject().getBigIntExternal() );
+                    vm->fastPeek() = vm->heap().copyRationalExternal( pc, q );
+                }
             } else if ( cy.isRationalObject() ) {
-                RationalExternal q( *qx );
-                q.divBy( *cy.asRationalObject().getRationalExternal() );
-                vm->fastPeek() = vm->heap().copyRationalExternal( pc, q );
+                if ( cy.asRationalObject().getRationalExternal()->isZero() ) {
+                    vm->fastPeek() = vm->heap().copyDouble( pc, byZero( qx->isNegative(), qx->isPositive() ) );                    
+                } else {
+                    RationalExternal q( *qx );
+                    q.divBy( *cy.asRationalObject().getRationalExternal() );
+                    vm->fastPeek() = vm->heap().copyRationalExternal( pc, q );
+                }
             } else {
                 throw Mishap( "Bad arguments for / operator" );
             }

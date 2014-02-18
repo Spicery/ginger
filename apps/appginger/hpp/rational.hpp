@@ -90,6 +90,9 @@ public:
     RationalExternal neg() const;
     bool lt( const RationalExternal & n ) const;
     bool eq( const RationalExternal & n ) const;
+    bool isZero() const;
+    bool isPositive() const;
+    bool isNegative() const;
 };
 
 } // namespace Ginger

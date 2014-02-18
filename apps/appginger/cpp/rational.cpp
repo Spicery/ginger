@@ -179,5 +179,17 @@ bool RationalExternal::eq( const RationalExternal & n ) const {
     return this->value == n.value;
 }
 
+bool RationalExternal::isZero() const {
+    return this->value == 0;
+}
+
+bool RationalExternal::isPositive() const {
+    return this->value > 0;
+}
+
+bool RationalExternal::isNegative() const {
+    return this->value < 0;
+}
+
 
 } // namespace.

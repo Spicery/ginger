@@ -407,6 +407,15 @@ Pressure & MachineClass::getPressure() {
 	return this->pressure; 
 }
 
+void MachineClass::print( std::ostream & out ) {
+	out << "<VirtualMachine>";
+}
+
+Ref * MachineClass::sysApply( Ref * pc, MachineClass * vm ) {
+	throw Mishap( "Cannot apply a virtual machine" );
+}
+
+
 void ExternalTracker::cleanUpAfterGarbageCollection() {
 	std::deque< Ginger::External * > for_deletion;
 	

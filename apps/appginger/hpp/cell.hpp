@@ -66,6 +66,9 @@ public:
 	HeapObject asHeapObject() const;
 	Ref asRef() const { return this->ref; }
 	long getLong() const { return SmallToLong( this->ref ); }
+	bool isPositive() const { return ToLong( this->ref ) > 0; }
+	bool isNegative() const { return ToLong( this->ref ) < 0; }
+	bool isZero() const { return ToLong( this->ref ) == 0; }
 	DoubleObject asDoubleObject() const;
 	BigIntObject asBigIntObject() const;
 	RationalObject asRationalObject() const;

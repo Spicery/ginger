@@ -73,6 +73,7 @@ const char * tok_type_as_sysapp( TokType fnc ) {
 	case tokty_not_ltgt: return "!<>";
 	case tokty_pow : return "**";
 	case tokty_quo : return "quo";
+	case tokty_quomod : return "divmod";
 	case tokty_sub : return "-";
 	default: throw CompileTimeError( "Internal error (tok_type_as_sysapp): missing sysapp" ).culprit( "Token type", tok_type_name( fnc ) );
 	}

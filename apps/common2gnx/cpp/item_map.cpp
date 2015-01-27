@@ -86,6 +86,7 @@ ItemMap::ItemMap( const bool cstyle ) {
 	add( true,		KW_MUL, 			tokty_mul, 			BSy, 		prec_arith_mul		);
 	add( true,		KW_POW, 			tokty_pow, 			BSy, 		prec_pow		);
 	add( true,		KW_DIV, 			tokty_div, 			BSy, 		prec_div		);
+	add( !cstyle,	KW_QUOMOD, 			tokty_quomod, 		BSy, 		prec_div		);
 	add( true,		KW_ABS_AND, 		tokty_absand, 		BFo, 		prec_abs_and	);
 	add( true,		KW_FAT_PAREN_CLOSE, tokty_fat_cparen, 	Clo, 		0		);
 	add( true,		KW_FAT_BRACKET_CLOSE, tokty_fat_cbracket, Clo, 		0		);

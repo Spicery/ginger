@@ -1,12 +1,14 @@
 /*****************************************************************************\
+DISABLED IN FAVOUR OF MOD =^= FLOORED REMAINDER
+
 Definition
-	* MOD_I ( X : Small, Y : Small ) -> ( R ), where R = X mod Y
+	* REM_I ( X : Small, Y : Small ) -> ( R ), where R = X mod Y
 	* VPC += 1
 
 Summary
-	Computes the integer modulus R of X and Y, such that R is in the
-	half open interval [0,Y). X and Y are removed from the stack and 
-	R is pushed.
+	Computes the integer remainder R of X / Y, such that R is in the
+	open interval (-Y,Y). R has the sign of X. X and Y are removed from the 
+	stack and R is pushed.
 	
 Unchecked Precondition
 	* There are two items on the stack.
@@ -28,27 +30,16 @@ Ref rx = *( VMVP );
 if ( IsSmall( rx ) && IsSmall( ry ) and not( IsZeroSmall( ry ) ) ) {
     const long a = ToLong( rx );
     const bool sa = a >= 0;
-    const long pa = sa ? a : -a;
+    const bool pa = sa ? a : -a;
 
     const long b = ToLong( ry );
     const bool sb = b > 0;
     const long pb = sb ? b : -b;
 
-    const long m4 = pa % pb;
-
-    if ( sa && sb ) {
-        *( VMVP ) = ToRef( m4 );
-    } else if ( sa and not sb ) {
-        *( VMVP ) = ToRef( b + m4 );
-    } else if ( not sa and sb ) {
-        *( VMVP ) = ToRef( b - m4 );
-    } else {
-        *( VMVP ) = ToRef( -m4 );
-    }
-
-    RETURN( pc + 1 );
+    *( VMVP ) = sa ? ToRef( pa % pb ) : ToRef( -( pa % pb ) );
+	RETURN( pc + 1 );
 }
 FREEZE;
-pc = sysFlooredRemainderHelper( ++pc, vm, ry );
+pc = sysRemHelper( ++pc, vm, ry );
 MELT;
 RETURN( pc );

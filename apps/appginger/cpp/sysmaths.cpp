@@ -175,10 +175,34 @@ Ref * sysFlooredRemainderHelper( Ref * pc, class MachineClass * vm, Ref ry ) {
                     const bool sb = b > 0;
                     const long pb = sb ? b : -b;
 
-                    vm->fastPeek() = sa ? ToRef( pa % pb ) : ToRef( ToLong( ry ) - ( pa % pb ) );
+                    const long m4 = pa % pb;
+
+                    if ( sa && sb ) {
+                        vm->fastPeek() = ToRef( m4 );
+                    } else if ( sa and not sb ) {
+                        vm->fastPeek() = ToRef( b + m4 );
+                    } else if ( not sa and sb ) {
+                        vm->fastPeek() = ToRef( b - m4 );
+                    } else {
+                        vm->fastPeek() = ToRef( -m4 );
+                    }
                 }
             } else if ( cy.isBigIntObject() ) {
-                vm->fastPeek() = rx;
+                if ( cy.isZero() ) {
+                    throw Mishap( "MOD" );
+                } else {
+                    BigIntExternal * by = cy.asBigIntObject().getBigIntExternal();
+                    if ( 
+                        ( cx.isPositive() and by->isPositive() ) or 
+                        ( cx.isNegative() and by->isNegative() )
+                    ) {
+                        vm->fastPeek() = rx;   
+                    } else {
+                        BigIntExternal r( *by );
+                        r.addBy( cx.getLong() );
+                        vm->fastPeek() = vm->heap().copyBigIntExternal( pc, r );
+                    }
+                }
             } else {
                 throw Mishap( "MOD" );                
             }
@@ -228,7 +252,19 @@ Ref * sysFlooredQuotientHelper( Ref * pc, class MachineClass * vm, Ref ry ) {
                     vm->fastPeek() = LongToSmall( ( sa == sb ) ? pa / pb : ( -1 - pa / pb ) );
                 }
             } else if ( cy.isBigIntObject() ) {
-                vm->fastPeek() = LongToSmall( 0 );
+                if ( cy.isZero() ) {
+                    throw Mishap( "QUO" );
+                } else {
+                    BigIntExternal * by = cy.asBigIntObject().getBigIntExternal();
+                    if ( 
+                        ( cx.isPositive() and by->isPositive() ) or 
+                        ( cx.isNegative() and by->isNegative() )
+                    ) {
+                        vm->fastPeek() = LongToSmall( 0 );   
+                    } else {
+                        vm->fastPeek() = LongToSmall( -1 );
+                    }
+                }
             } else {
                 throw Mishap( "QUO" );
             }
@@ -976,6 +1012,102 @@ SysInfo infoExp(
     Ginger::Arity( 1 ), 
     sysExp, 
     "Returns the exponential of a real value (e**x)."
+);
+
+Ref * sysDivMod( Ref * pc, class MachineClass * vm ) {
+    if ( vm->count != 2 ) throw Ginger::Mishap( "ArgsMismatch" ).culprit( "Args received", vm->count ).culprit( "Args needed", 2 );
+    Ref ry = vm->fastPeek();
+    Ref rx = vm->fastPeek( 1 );
+    Cell cx( rx );
+    Cell cy( ry );
+    try {
+        if ( cx.isSmall() ) {
+            if ( cy.isSmall() ) {
+                if ( cy.getLong() == 0 ) {
+                    throw Mishap( "MOD" );
+                } else {
+                    const long a = ToLong( rx );
+                    const bool sa = a >= 0;
+                    const long pa = sa ? a : -a;
+
+                    const long b = ToLong( ry );
+                    const bool sb = b > 0;
+                    const long pb = sb ? b : -b;
+
+                    const long m4 = pa % pb;
+
+                    vm->fastPeek( 1 ) = LongToSmall( ( sa == sb ) ? pa / pb : ( -1 - pa / pb ) );
+                    if ( sa && sb ) {
+                        vm->fastPeek() = ToRef( m4 );
+                    } else if ( sa and not sb ) {
+                        vm->fastPeek() = ToRef( b + m4 );
+                    } else if ( not sa and sb ) {
+                        vm->fastPeek() = ToRef( b - m4 );
+                    } else {
+                        vm->fastPeek() = ToRef( -m4 );
+                    }
+                }
+            } else if ( cy.isBigIntObject() ) {
+                if ( cy.isZero() ) {
+                    throw Mishap( "QUO" );
+                } else {
+                    BigIntExternal * by = cy.asBigIntObject().getBigIntExternal();
+                    if ( 
+                        ( cx.isPositive() and by->isPositive() ) or 
+                        ( cx.isNegative() and by->isNegative() )
+                    ) {
+                        vm->fastPeek( 1 ) = LongToSmall( 0 );   
+                        vm->fastPeek() = rx;   
+                    } else {
+                        vm->fastPeek( 1 ) = LongToSmall( -1 );
+                        BigIntExternal r( *by );
+                        r.addBy( cx.getLong() );
+                        vm->fastPeek() = vm->heap().copyBigIntExternal( pc, r );
+                    }
+                }
+            } else {
+                throw Mishap( "MOD" );                
+            }
+        } else if ( cx.isBigIntObject() ) {
+             if ( cy.isSmall() ) {
+                if ( cy.getLong() == 0L ) {
+                    throw Mishap( "MOD" );
+                } else {
+                    BigIntExternal modulus( *cx.asBigIntObject().getBigIntExternal() );
+                    modulus.flooredRemainderBy( cy.getLong() );
+
+                    BigIntExternal quotient( *cx.asBigIntObject().getBigIntExternal() );
+                    quotient.flooredQuotientBy( cy.getLong() );
+
+                    vm->fastPeek( 1 ) = vm->heap().copyBigIntExternal( pc, quotient );
+                    vm->fastPeek() = vm->heap().copyBigIntExternal( pc, modulus );
+                }
+            } else if ( cy.isBigIntObject() ) {
+                BigIntExternal modulus( *cx.asBigIntObject().getBigIntExternal() );
+                modulus.flooredRemainderBy( *cy.asBigIntObject().getBigIntExternal() );
+
+                BigIntExternal quotient( *cx.asBigIntObject().getBigIntExternal() );
+                quotient.flooredQuotientBy( *cy.asBigIntObject().getBigIntExternal() );
+
+                vm->fastPeek( 1 ) = vm->heap().copyBigIntExternal( pc, quotient );
+                vm->fastPeek() = vm->heap().copyBigIntExternal( pc, modulus );
+            } else {
+                throw Mishap( "MOD" );
+            }                    
+        } else {
+            throw Mishap( "MOD" );
+        }
+    } catch ( Mishap & e ) {
+         throw Mishap( "Bad arguments for mod operation" ).culprit( "First", cx.toShowString() ).culprit( "Second", cy.toShowString() );        
+    }
+    return pc;    return pc;
+}
+SysInfo infoDivMod( 
+    SysNames( "divmod" ), 
+    Ginger::Arity( 2 ), 
+    Ginger::Arity( 2 ), 
+    sysDivMod, 
+    "Returns integer quotient and remainder (floored)."
 );
 
 } // namespace Ginger

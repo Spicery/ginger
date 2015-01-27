@@ -116,6 +116,7 @@
 #define KW_PAREN_OPEN				"("
 #define KW_POW						"**"
 #define KW_QUO 						"div"
+#define KW_QUOMOD                   "divmod"
 #define KW_RECORDCLASS  			"recordclass"
 #define KW_RETURN 					"return"
 #define KW_SEMICOLON				";"

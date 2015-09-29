@@ -32,8 +32,9 @@ private:
 	int count;
 	
 public:
-	Ref & ref( Ref r );
-	
+	Ref & reserveRegister( Ref r );
+	Cell & reserveRootCell( Ref r = SYS_ABSENT ) { return reinterpret_cast< Cell & >( this->reserveRegister( r ) ); }
+
 public:
 	Roots( MachineClass * vm );
 	~Roots();

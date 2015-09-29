@@ -31,7 +31,7 @@ Roots::~Roots() {
 	this->registers.release( this->count, this->mask );
 }
 
-Ref & Roots::ref( Ref r ) {
+Ref & Roots::reserveRegister( Ref r ) {
 	this->count += 1;
 	return this->registers.reserve( this->mask ) = r;
 }

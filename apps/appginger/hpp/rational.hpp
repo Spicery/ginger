@@ -77,6 +77,11 @@ public:
     void flooredRemainderBy( const long n );
     void flooredRemainderBy( const RationalExternal & n );
     
+    void truncatedQuotientBy( const long n );
+    void truncatedQuotientBy( const RationalExternal & n );
+    void truncatedRemainderBy( const long n );
+    void truncatedRemainderBy( const RationalExternal & n );
+    
     RationalExternal mul( const long n );
     
     RationalExternal add( const long n );

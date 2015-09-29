@@ -30,8 +30,8 @@ extern Ref * sysSubHelper( Ref * pc, class MachineClass * vm, Ref ry );
 extern Ref * sysMulHelper( Ref * pc, class MachineClass * vm, Ref ry );
 extern Ref * sysNegHelper( Ref * pc, class MachineClass * vm );
 extern Ref * sysDivHelper( Ref * pc, class MachineClass * vm, Ref ry );
-extern Ref * sysFlooredQuotientHelper( Ref * pc, class MachineClass * vm, Ref ry );
-extern Ref * sysFlooredRemainderHelper( Ref * pc, class MachineClass * vm, Ref ry );
+extern Ref * sysQuoHelper( Ref * pc, class MachineClass * vm, Ref ry );
+extern Ref * sysModHelper( Ref * pc, class MachineClass * vm, Ref ry );
 extern bool sysCompareNumbers( Ref x, Ref y, const bool lt, const bool eq, const bool gt );
 
 } // namespace

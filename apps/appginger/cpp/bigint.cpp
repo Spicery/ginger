@@ -92,10 +92,26 @@ void BigIntExternal::flooredQuotientBy( const long _d ) {
     this->value = static_cast< mpz_class >( q );
 }
 
+void BigIntExternal::truncatedQuotientBy( const long _d ) {
+    mpz_t d;
+    mpz_init_set_si( d, _d );
+    mpz_t q;
+    mpz_init( q );
+    mpz_tdiv_q( q, this->value.get_mpz_t(), d );
+    this->value = static_cast< mpz_class >( q );
+}
+
 void BigIntExternal::flooredQuotientBy( const BigIntExternal & d ) {
     mpz_t q;
     mpz_init( q );
     mpz_fdiv_q( q, this->value.get_mpz_t(), d.value.get_mpz_t() );
+    this->value = static_cast< mpz_class >( q );
+}
+
+void BigIntExternal::truncatedQuotientBy( const BigIntExternal & d ) {
+    mpz_t q;
+    mpz_init( q );
+    mpz_tdiv_q( q, this->value.get_mpz_t(), d.value.get_mpz_t() );
     this->value = static_cast< mpz_class >( q );
 }
 
@@ -108,10 +124,26 @@ void BigIntExternal::flooredRemainderBy( const long _d ) {
     this->value = static_cast< mpz_class >( q );
 }
 
+void BigIntExternal::truncatedRemainderBy( const long _d ) {
+    mpz_t d;
+    mpz_init_set_si( d, _d );
+    mpz_t q;
+    mpz_init( q );
+    mpz_tdiv_r( q, this->value.get_mpz_t(), d );
+    this->value = static_cast< mpz_class >( q );
+}
+
 void BigIntExternal::flooredRemainderBy( const BigIntExternal & d ) {
     mpz_t q;
     mpz_init( q );
     mpz_fdiv_r( q, this->value.get_mpz_t(), d.value.get_mpz_t() );
+    this->value = static_cast< mpz_class >( q );
+}
+
+void BigIntExternal::truncatedRemainderBy( const BigIntExternal & d ) {
+    mpz_t q;
+    mpz_init( q );
+    mpz_tdiv_r( q, this->value.get_mpz_t(), d.value.get_mpz_t() );
     this->value = static_cast< mpz_class >( q );
 }
 

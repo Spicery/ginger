@@ -27,28 +27,11 @@ Ref ry = *( VMVP-- );
 Ref rx = *( VMVP );
 if ( IsSmall( rx ) && IsSmall( ry ) and not( IsZeroSmall( ry ) ) ) {
     const long a = ToLong( rx );
-    const bool sa = a >= 0;
-    const long pa = sa ? a : -a;
-
     const long b = ToLong( ry );
-    const bool sb = b > 0;
-    const long pb = sb ? b : -b;
-
-    const long m4 = pa % pb;
-
-    if ( sa && sb ) {
-        *( VMVP ) = ToRef( m4 );
-    } else if ( sa and not sb ) {
-        *( VMVP ) = ToRef( b + m4 );
-    } else if ( not sa and sb ) {
-        *( VMVP ) = ToRef( b - m4 );
-    } else {
-        *( VMVP ) = ToRef( -m4 );
-    }
-
+    *( VMVP ) = ToRef( a % b );
     RETURN( pc + 1 );
 }
 FREEZE;
-pc = sysFlooredRemainderHelper( ++pc, vm, ry );
+pc = sysModHelper( ++pc, vm, ry );
 MELT;
 RETURN( pc );

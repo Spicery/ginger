@@ -21,7 +21,7 @@
 #include <gmp.h>
 
 #include "mishap.hpp"
-#include "Rational.hpp"
+#include "rational.hpp"
 #include "numbers.hpp"
 #include "bigint.hpp"
 

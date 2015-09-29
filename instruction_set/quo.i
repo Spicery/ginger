@@ -26,19 +26,13 @@ Ref rx = *( VMVP );
 if ( IsSmall( rx ) && IsSmall( ry ) ) {
 	if ( not IsZeroSmall( ry ) ) {
 	    const long a = ToLong( rx );
-	    const bool sa = a >= 0;
-	    const long pa = sa ? a : -a;
-
 	    const long b = ToLong( ry );
-	    const bool sb = b > 0;
-	    const long pb = sb ? b : -b;
-
-	    *( VMVP ) = LongToSmall( ( sa == sb ) ? pa / pb : ( -1 - pa / pb ) );
+	    *( VMVP ) = LongToSmall( a / b );
 		RETURN( pc + 1 );
 	}
 }
 FREEZE;
-pc = sysFlooredQuotientHelper( ++pc, vm, ry );
+pc = sysQuoHelper( ++pc, vm, ry );
 MELT;
 RETURN( pc );
 

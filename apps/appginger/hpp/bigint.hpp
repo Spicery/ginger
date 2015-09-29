@@ -51,6 +51,10 @@ public:
     void flooredQuotientBy( const BigIntExternal & n );
     void flooredRemainderBy( const long n );
     void flooredRemainderBy( const BigIntExternal & n );
+    void truncatedQuotientBy( const long n );
+    void truncatedQuotientBy( const BigIntExternal & n );
+    void truncatedRemainderBy( const long n );
+    void truncatedRemainderBy( const BigIntExternal & n );
     Ref toSmall() const;
 
 public:

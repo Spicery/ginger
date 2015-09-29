@@ -17,6 +17,7 @@ public:
     TokType 				tok_type;		//	mandatory
     Role 					role;			//	mandatory
     int 					precedence;
+  	bool					is_name;
     
 public:
 	std::string & 	nameString() { return this->name; }
@@ -26,7 +27,8 @@ public:
 		name( n ),
 		tok_type( f ),
 		role( r ),
-		precedence( p )
+		precedence( p ),
+		is_name( false )
 	{
 	}
 	
@@ -46,6 +48,7 @@ public:
 	bool item_is_postfix();
 	bool item_is_anyfix();
 	bool item_is_binary();
+	bool item_is_name();
 
 };
 

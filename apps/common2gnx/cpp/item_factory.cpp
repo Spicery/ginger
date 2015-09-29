@@ -225,6 +225,7 @@ void ItemFactoryClass::readAtAlpha( int ch ) {
 		it->role = PrefixRole;
 		it->nameString() = this->text;
 	}
+	this->item->is_name = true;
 }
 
 void ItemFactoryClass::readAtUnderbar( int ch ) {

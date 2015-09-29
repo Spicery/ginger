@@ -24,6 +24,10 @@ bool ItemClass::item_is_neg_num() {
 	return not( b ) && i < 0;
 }
 
+bool ItemClass::item_is_name() {
+	return this->is_name;
+}
+
 bool ItemClass::item_is_signed_num() {
 	if ( not ( this->tok_type == tokty_int or this->tok_type == tokty_double ) ) return false;
 	if ( this->nameString().empty() ) return false;

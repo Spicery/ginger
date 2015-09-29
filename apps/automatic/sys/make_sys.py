@@ -94,7 +94,7 @@ class LogCreated:
 		for ginger_name in self.order:
 			p = self.mapping[ ginger_name ]
 			inc.write(
-				"SysMap::value_type( \"{}\", SysInfo( {}, {}, {}, NULL ) ),\n".format(
+				"SysMap::value_type( \"{}\", SysInfo( {}, {}, {}, nullptr ) ),\n".format(
 					ginger_name,
 					p.getInArity(),
 					p.getOutArity(),
@@ -749,7 +749,7 @@ ref = FullRecordClassGenerator( sysconsts, "Rational", [] )
 ref.options = MethodOptions( "r" )
 ref.generateFilesWithPrefix( "rational" )
 
-ref = FullRecordClassGenerator( sysconsts, "VirtualMachine", [] )
+ref = WordRecordClassGenerator( sysconsts, "VirtualMachine", [] )
 ref.options = MethodOptions( "r" )
 ref.generateFilesWithPrefix( "virtualmachine" )
 

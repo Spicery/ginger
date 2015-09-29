@@ -27,8 +27,8 @@ class Registers {
 friend class GarbageCollect;
 friend class Roots;
 private:
-	static const int NREG = 8;
-	static const int NREG_MASK = 0x7;
+	static const int NREG = 8;			//	Must be a power of 2.
+	static const int NREG_MASK = 0x7;	//	Must be the bitmask for that power of 2.
 	int				free_hint;
 	unsigned long	in_use;
 	Ref				regs[ NREG ];

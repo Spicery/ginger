@@ -143,13 +143,13 @@ Ref * sysNewClass( Ref * pc, MachineClass * vm ) {
 	
 	//	Save the slots list and compute a new class object.
 	Roots roots( vm );
-	Ref & slots = roots.ref( vm->fastPeek() );
+	Ref & slots = roots.reserveRegister( vm->fastPeek() );
 	vm->fastPeek() = RefToPtr4( slots )[ VECTOR_LAYOUT_OFFSET_LENGTH ];
 	
 	//	Compute the new class object.
 	vm->count = 2;
 	pc = sysNewRecordClass( pc, vm );
-	Ref & gclass = roots.ref( vm->fastPop() );
+	Ref & gclass = roots.reserveRegister( vm->fastPop() );
 	
 	//	For each position, set up the slot.
 	const long nslots = lengthOfVectorLayout( RefToPtr4( slots ) );

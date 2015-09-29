@@ -801,7 +801,7 @@ Node ReadStateClass::readAtomicExpr( const bool only1 ) {
 	Role role = item->role;
 	if ( role.IsLiteral() ) {
 	 	return makeConstant( tok_type_as_type( fnc ), item->nameString() ); 
-	} else if ( fnc == tokty_id ) {
+	} else if ( item->item_is_name() ) {
 		return makeSymbol( item->nameString() );
 	} else if ( fnc == tokty_charseq ) {
 		//	TODO: Could give a better error message here.

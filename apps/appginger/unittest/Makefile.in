@@ -14,7 +14,7 @@ TESTOBJS=testappginger.o example.o archtest.o simplekeytest.o
 # $@ is make shorthand for the target.
 # $@ is make shorthand for the dependencies
 testappginger: $(TESTOBJS)
-	$(CC)+ $(CXXFLAGS) -o $@ $^ ../../CppUnitLite2/cppunitlite.a /usr/local/lib/librudecgi.a -L../cpp -lappginger 
+	$(CC) $(CXXFLAGS) -o $@ $^ ../../CppUnitLite2/cppunitlite.a /usr/local/lib/librudecgi.a -L../cpp -lappginger 
 
 clean:
 	rm -f *.o

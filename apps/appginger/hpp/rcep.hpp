@@ -64,9 +64,9 @@ public:
 	void execGnx( shared< Ginger::Mnx > gnx, std::ostream & output );
 
 public:
-	RCEP( Package * current_package ) :
+	RCEP( Package * current_package, bool _printing = true ) :
 		current_package( current_package ),
-		printing( true )
+		printing( _printing )
 	{
 		level += 1;
 	}

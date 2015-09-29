@@ -29,7 +29,7 @@
 #include "heap.hpp"
 #include "appcontext.hpp"
 #include "package.hpp"
-#include "registers.hpp"
+#include "registers.hpp" 	//	To be deleted.
 
 namespace Ginger {
 
@@ -79,8 +79,11 @@ public:
 	void cleanUpAfterGarbageCollection();
 };
 
+class RootCell;
+
 class MachineClass : public External {
 friend class GarbageCollect;
+friend class RootCell;
 
 private:
 	Ginger::AppContext *			appg;
@@ -93,12 +96,14 @@ public:
 	ExternalTracker					external_objects;
 	Registers						registers;
 	bool							sigint_flag;
+
 	
 private:
 	std::auto_ptr<PackageManager>	package_mgr_aptr;
 	
 public:
 	Package * 		getPackage( std::string name );
+	Package * 		getInteractivePackage();
 	Pressure &		getPressure();
 	
 public:
@@ -131,6 +136,19 @@ public:
 	void 			fastDrop( int n ) { vp -= n; }
 	ptrdiff_t		stackLength() { return this->vp - this->vp_base; }
 	void			checkStackRoom( long n );
+
+public:
+	void			pushAbsent();
+	void			pushNil();
+	void			pushTermin();
+	void			pushUndef();
+	void 			pushCharacter( char c );
+	void			pushSmall( long n );
+	void 			pushBool( bool b );
+
+public:
+	void			pushSimple( Cell c );
+	void			sysCall( SysCall & s );
 	
 public:
 	void 			printResults( std::ostream & out, float time_taken );

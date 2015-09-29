@@ -35,7 +35,7 @@ protected:
 
 protected:
 	void executeLoadFileList( RCEP & rcep );
-	void loadFileFromPackage( RCEP & rcep, Package * pkg, const std::string filename );
+	static void loadFileFromPackage( RCEP & rcep, Package * pkg, const std::string filename );
 	void executeFileArguments( RCEP & rcep );
 	void executeStdin( const bool interactively, RCEP & rcep );
 	void executeFile( RCEP & rcep, const std::string filename );

@@ -44,6 +44,14 @@ void Registers::clearUnusedRegisters() {
 	}
 }
 
+//
+//	Start searching for the next free register from
+//	free_hint but don't rely on it being accurate.
+//	Always check against the in_use bit-mask, which
+//	is guaranteed to be accurate. After this operation
+//	has completed, if there are any free registers, 
+//	-free_hint- will be accurate.
+//
 Ref & Registers::reserve( unsigned long & mask ) {
 	for ( int i = this->free_hint; i < NREG; i++ ) {
 		if ( ( ( this->in_use >> i ) & 0x1 ) == 0 ) {
@@ -63,7 +71,11 @@ Ref & Registers::reserve( unsigned long & mask ) {
 }
 
 void Registers::release( int count, unsigned long mask ) {
+	//	This is a way of safely subtracting -count- from -free_hint-.
+	//	If it isn't accurate it doesn't matter. It gets fixed at the
+	//	next -reserve-.
 	this->free_hint = ( this->free_hint + NREG - count ) & NREG_MASK;
+	//	
 	this->in_use &= ~mask;
 }
 

@@ -48,6 +48,7 @@ class PairObject;
 class MapObject;
 class MapletObject;
 class ExternalObject;
+class VirtualMachineObject;
 class CharacterCell;
 
 class Cell {
@@ -66,12 +67,16 @@ public:
 	HeapObject asHeapObject() const;
 	Ref asRef() const { return this->ref; }
 	long getLong() const { return SmallToLong( this->ref ); }
+	bool isSimple() const { return IsSimple( this->ref ); }
 	bool isPositive() const { return ToLong( this->ref ) > 0; }
 	bool isNegative() const { return ToLong( this->ref ) < 0; }
 	bool isZero() const { return ToLong( this->ref ) == 0; }
 	DoubleObject asDoubleObject() const;
 	BigIntObject asBigIntObject() const;
 	RationalObject asRationalObject() const;
+	ExternalObject asExternalObject() const;
+	StringObject asStringObject() const;
+
 
 	bool isTermin() const { return this->ref == SYS_TERMIN; }
 	bool isAbsent() const { return this->ref == SYS_ABSENT; }
@@ -119,6 +124,8 @@ public:	//	Checked downcasts.
 	DoubleObject asDoubleObject() const;
 	BigIntObject asBigIntObject() const;
 	RationalObject asRationalObject() const;
+	ExternalObject asExternalObject() const;
+	VirtualMachineObject asVirtualMachineObject() const;
 
 public:	//	Others
 	bool isFunctionObject() const { return IsFunctionKey( *this->obj_K ); }
@@ -138,6 +145,7 @@ public:	//	Others
 	bool isRationalObject() const { return *this->obj_K == sysRationalKey; }
 	bool isAtomicWRecordObject() const { return IsSimple( *this->obj_K ) && KindOfSimpleKey( *this->obj_K ) == ATOMIC_WRECORD_KIND; }
 	bool isExternalObject() const { return IsSimple( *this->obj_K ) && KindOfSimpleKey( *this->obj_K ) == EXTERNAL_KIND; }
+	bool isVirtualMachineObject() const { return *this->obj_K == sysVirtualMachineKey; }
 
 private:
 	void dump( MnxBuilder & b, const bool deep = false ) const;
@@ -268,6 +276,16 @@ public:
 
 public:
 	External * getExternal() const;
+};
+
+class VirtualMachineObject : public ExternalObject {
+public:
+	VirtualMachineObject( Ref * _p ) : ExternalObject( _p ) {}
+	VirtualMachineObject( HeapObject _h ) : ExternalObject( _h ) {}
+	VirtualMachineObject( Cell _c ) : ExternalObject( _c ) {}
+
+public:
+	class MachineClass * getExternal() const;
 };
 
 class CharacterCell : public Cell {

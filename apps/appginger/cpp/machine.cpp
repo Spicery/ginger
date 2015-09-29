@@ -370,6 +370,10 @@ Package * MachineClass::getPackage( std::string title ) {
 	return this->package_mgr_aptr->getPackage( title );
 }
 
+Package * MachineClass::getInteractivePackage() {
+	return this->appg->initInteractivePackage( this );
+}
+
 AppContext & MachineClass::getAppContext() {
 	return *this->appg;
 }
@@ -447,5 +451,56 @@ void ExternalTracker::cleanUpAfterGarbageCollection() {
 		for_deletion.pop_front();
 	}
 }
+
+
+void MachineClass::pushAbsent() {
+	this->checkStackRoom( 1 );
+	this->fastPush( SYS_ABSENT );
+}
+
+void MachineClass::pushNil() {
+	this->checkStackRoom( 1 );
+	this->fastPush( SYS_NIL );
+}
+
+void MachineClass::pushTermin() {
+	this->checkStackRoom( 1 );
+	this->fastPush( SYS_TERMIN );
+}
+
+void MachineClass::pushUndef() {
+	this->checkStackRoom( 1 );
+	this->fastPush( SYS_UNDEFINED );
+}
+
+void MachineClass::pushCharacter( const char c ) {
+	this->checkStackRoom( 1 );
+	this->fastPush( CharToCharacter( c ) );
+}
+
+void MachineClass::pushSmall( const long n ) {
+	this->checkStackRoom( 1 );
+	this->fastPush( LongToSmall( n ) );
+}
+	
+void MachineClass::pushBool( const bool b ) {
+	this->checkStackRoom( 1 );
+	this->fastPush( b ? SYS_TRUE : SYS_FALSE );
+}
+
+void MachineClass::pushSimple( const Cell c ) {
+	if ( c.isSimple() ) {
+		this->fastPush( c.asRef() );
+	} else {
+		throw Mishap( "Simple value needed" ).culprit( "Value", c.toPrintString() );
+	}
+}
+
+void MachineClass::sysCall( SysCall & s ) {
+	//	Note that this machine must be frozen!!
+	this->program_counter = s( this->program_counter, this );
+}
+
+
 
 } // namespace Ginger

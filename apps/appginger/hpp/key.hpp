@@ -182,12 +182,16 @@ KEYLESS_KIND
 #define IsMap( x ) 				( IsObj( x ) && IsMapKey( *RefToPtr4( x ) ) )
 #define IsAttrMap( x ) 			( IsObj( x ) && IsAttrMapKey( *RefToPtr4( x ) ) )
 #define IsElement( x )			( IsObj( x ) && ( *RefToPtr4( x ) == sysElementKey ) )
-#define IsException( x )		( IsObj( x ) && ( *RefToPtr4( x ) == sysExceptionKey ) )
+#define IsException( x )        ( IsObj( x ) && ( *RefToPtr4( x ) == sysExceptionKey ) )
+#define IsExternal( x )         ( IsObj( x ) && ( *RefToPtr4( x ) == sysExternalKey ) )
 
-#define IsVectorKind( x )		( IsObj( x ) && KindOfSimpleKey( *RefToPtr4( x ) ) == VECTOR_KIND )
-#define IsMixedKind( x )		( IsObj( x ) && KindOfSimpleKey( *RefToPtr4( x ) ) == MIXED_KIND )
-#define IsRecordKind( x )		( IsObj( x ) && KindOfSimpleKey( *RefToPtr4( x ) ) == RECORD_KIND )
-#define IsStringKind( x )		( IsObj( x ) && KindOfSimpleKey( *RefToPtr4( x ) ) == STRING_KIND )
+#define IsSimpleObj( x )        ( IsObj( x ) && IsSimpleKey( *RefToPtr4( x ) ) )
+
+#define IsVectorKind( x )		( IsSimpleObj( x ) && KindOfSimpleKey( *RefToPtr4( x ) ) == VECTOR_KIND )
+#define IsMixedKind( x )		( IsSimpleObj( x ) && KindOfSimpleKey( *RefToPtr4( x ) ) == MIXED_KIND )
+#define IsRecordKind( x )		( IsSimpleObj( x ) && KindOfSimpleKey( *RefToPtr4( x ) ) == RECORD_KIND )
+#define IsStringKind( x )		( IsSimpleObj( x ) && KindOfSimpleKey( *RefToPtr4( x ) ) == STRING_KIND )
+#define IsExternalKind( x )     ( IsSimpleObj( x ) && KindOfSimpleKey( *RefToPtr4( x ) ) == EXTERNAL_KIND )
 
 #define IsClassKind( ref )		IsInstance( ref )
 #define IsInstance( ref )		( IsObj( ref ) && IsObj( *RefToPtr4( ref ) ) )

@@ -64,6 +64,14 @@ RationalObject Cell::asRationalObject() const {
 	return this->asHeapObject().asRationalObject(); 
 }
 
+ExternalObject Cell::asExternalObject() const { 
+	return this->asHeapObject().asExternalObject(); 
+}
+
+StringObject Cell::asStringObject() const { 
+	return this->asHeapObject().asStringObject(); 
+}
+
 void Cell::dump( MnxBuilder & b, const bool deep ) const {
 	if ( IsSmall( this->ref ) ) {
 		b.start( "constant" );
@@ -166,6 +174,20 @@ RationalObject HeapObject::asRationalObject() const {
 		throw Ginger::Mishap( "BigInt needed" ).culprit( "Argument", this->toPrintString() );
 	}
 	return RationalObject( this->obj_K );
+}
+
+ExternalObject HeapObject::asExternalObject() const {
+	if ( not this->isExternalObject() ) {
+		throw Ginger::Mishap( "External object needed" ).culprit( "Argument", this->toPrintString() );
+	}
+	return ExternalObject( this->obj_K );
+}
+
+VirtualMachineObject HeapObject::asVirtualMachineObject() const {
+	if ( not this->isVirtualMachineObject() ) {
+		throw Ginger::Mishap( "Virtual machine object needed" ).culprit( "Argument", this->toPrintString() );
+	}
+	return VirtualMachineObject( this->obj_K );
 }
 
 std::string HeapObject::toPrintString() const {
@@ -376,6 +398,10 @@ const char * StringObject::getCharPtr() const {
 
 External * ExternalObject::getExternal() const {
 	return reinterpret_cast< External * >( this->obj_K[ EXTERNAL_KIND_OFFSET_VALUE ] );
+}
+
+class MachineClass * VirtualMachineObject::getExternal() const {
+	return reinterpret_cast< class MachineClass * >( this->obj_K[ EXTERNAL_KIND_OFFSET_VALUE ] );
 }
 
 // -- MapletObject -------------------------------------------------------------

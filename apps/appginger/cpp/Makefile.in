@@ -79,7 +79,7 @@ LIBAPPGINGER:=
 ifneq ($(shell uname),Darwin)
 	LIBAPPGINGER=-Wl,--whole-archive libappginger.a -Wl,--no-whole-archive
 else
-	LIBAPPGINGER=-Wl,-force_load libappginger.a
+	LIBAPPGINGER=-Wl,-force_load libappginger.a -L/usr/local/lib -I/usr/local/include
 endif
 
 LIBRARIES=../../libgng/cpp/libgng.a /usr/local/lib/librudecgi.a -lgmp -lgmpxx

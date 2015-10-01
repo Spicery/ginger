@@ -936,6 +936,115 @@ SysInfo infoExp(
     "Returns the exponential of a real value (e**x)."
 );
 
+Ref * sysExp2( Ref * pc, class MachineClass * vm ) {
+    if ( vm->count != 1 ) throw Ginger::Mishap( "ArgsMismatch" );
+    vm->fastPeek() = vm->heap().copyDouble( pc, refToDouble( vm->fastPeek() ).exp2().asDouble() );
+    return pc;
+}
+SysInfo infoExp2( 
+    SysNames( "exp2" ), 
+    Ginger::Arity( 1 ), 
+    Ginger::Arity( 1 ), 
+    sysExp2, 
+    "Returns the two to the power of a real value (2**x)."
+);
+
+Ref * sysExp10( Ref * pc, class MachineClass * vm ) {
+    if ( vm->count != 1 ) throw Ginger::Mishap( "ArgsMismatch" );
+    vm->fastPeek() = vm->heap().copyDouble( pc, refToDouble( vm->fastPeek() ).exp10().asDouble() );
+    return pc;
+}
+SysInfo infoExp10( 
+    SysNames( "exp10" ), 
+    Ginger::Arity( 1 ), 
+    Ginger::Arity( 1 ), 
+    sysExp10, 
+    "Returns the 10 to the power of a real value (10**x)."
+);
+
+Ref * sysSqrt( Ref * pc, class MachineClass * vm ) {
+    if ( vm->count != 1 ) throw Ginger::Mishap( "ArgsMismatch" );
+    vm->fastPeek() = vm->heap().copyDouble( pc, refToDouble( vm->fastPeek() ).sqrt().asDouble() );
+    return pc;
+}
+SysInfo infoSqrt( 
+    SysNames( "sqrt" ), 
+    Ginger::Arity( 1 ), 
+    Ginger::Arity( 1 ), 
+    sysSqrt, 
+    "Returns the square root of a real value."
+);
+
+Ref * sysCbrt( Ref * pc, class MachineClass * vm ) {
+    if ( vm->count != 1 ) throw Ginger::Mishap( "ArgsMismatch" );
+    vm->fastPeek() = vm->heap().copyDouble( pc, refToDouble( vm->fastPeek() ).cbrt().asDouble() );
+    return pc;
+}
+SysInfo infoCbrt( 
+    SysNames( "cbrt" ), 
+    Ginger::Arity( 1 ), 
+    Ginger::Arity( 1 ), 
+    sysCbrt, 
+    "Returns the cube root of a real value."
+);
+
+Ref * sysLog( Ref * pc, class MachineClass * vm ) {
+    if ( vm->count != 1 ) throw Ginger::Mishap( "ArgsMismatch" );
+    vm->fastPeek() = vm->heap().copyDouble( pc, refToDouble( vm->fastPeek() ).log().asDouble() );
+    return pc;
+}
+SysInfo infoLog( 
+    SysNames( "log" ), 
+    Ginger::Arity( 1 ), 
+    Ginger::Arity( 1 ), 
+    sysLog, 
+    "Returns the natural logarithm of a real value."
+);
+
+Ref * sysLog2( Ref * pc, class MachineClass * vm ) {
+    if ( vm->count != 1 ) throw Ginger::Mishap( "ArgsMismatch" );
+    vm->fastPeek() = vm->heap().copyDouble( pc, refToDouble( vm->fastPeek() ).log2().asDouble() );
+    return pc;
+}
+SysInfo infoLog2( 
+    SysNames( "log2" ), 
+    Ginger::Arity( 1 ), 
+    Ginger::Arity( 1 ), 
+    sysLog2, 
+    "Returns the logarithm to base 2 of a real value."
+);
+
+Ref * sysLog10( Ref * pc, class MachineClass * vm ) {
+    if ( vm->count != 1 ) throw Ginger::Mishap( "ArgsMismatch" );
+    vm->fastPeek() = vm->heap().copyDouble( pc, refToDouble( vm->fastPeek() ).log10().asDouble() );
+    return pc;
+}
+SysInfo infoLog10( 
+    SysNames( "log10" ), 
+    Ginger::Arity( 1 ), 
+    Ginger::Arity( 1 ), 
+    sysLog10, 
+    "Returns the logarithm to base 10 of a real value."
+);
+
+
+Ref * sysHypot( Ref * pc, class MachineClass * vm ) {
+    if ( vm->count != 2 ) throw Ginger::Mishap( "ArgsMismatch" );
+    gngdouble_t rhs = refToDouble( vm->fastPop() );
+    gngdouble_t lhs = refToDouble( vm->fastPeek() );
+    vm->fastPeek() = vm->heap().copyDouble( pc, lhs.hypot( rhs ).asDouble() );
+    return pc;
+}
+SysInfo infoHypot( 
+    SysNames( "hypot" ), 
+    Ginger::Arity( 2 ), 
+    Ginger::Arity( 1 ), 
+    sysHypot, 
+    "hypot(x, y) returns sqrt(x*x + y*y)."
+);
+
+
+
 Ref * sysQuoHelper( Ref * pc, class MachineClass * vm, Ref ry ) {
     Ref rx = vm->fastPeek();
     Cell cx( rx );

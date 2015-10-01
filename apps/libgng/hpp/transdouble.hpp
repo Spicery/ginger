@@ -192,6 +192,40 @@ public:
         return TransDouble( std::exp( this->data ) );
     }
 
+    TransDouble exp2() const {
+        return TransDouble( std::exp2( this->data ) );
+    }
+
+    TransDouble exp10() const {
+        return TransDouble( __exp10( this->data ) );
+    }
+
+    TransDouble log() const {
+        return TransDouble( std::log( this->data ) );
+    }
+
+    TransDouble log2() const {
+        return TransDouble( std::log2( this->data ) );
+    }
+
+    TransDouble log10() const {
+        return TransDouble( std::log10( this->data ) );
+    }
+
+    TransDouble sqrt() const {
+        return TransDouble( std::sqrt( this->data ) );
+    }
+
+    TransDouble cbrt() const {
+        return TransDouble( std::cbrt( this->data ) );
+    }
+
+    TransDouble hypot( const TransDouble& t ) const {
+        return std::hypot( this->data, t.data );
+    }
+
+
+
 };
 
 std::ostream& operator<<(std::ostream& os, const TransDouble& obj);

@@ -126,7 +126,7 @@ static void printUsage() {
 	cout << "-p, --package=NAME    sets the package name" << endl;
 	cout << "-a, --alias=NAME      sets the alias name, optional" << endl;
 	cout << "-v, --variable=NAME   sets the variable name" << endl;
-	cout << "-U, --undefined       allow undefined variables" << endl;
+	cout << "-u, --undefined       allow undefined variables" << endl;
 	cout << endl;
 }
 

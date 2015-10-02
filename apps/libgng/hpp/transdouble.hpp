@@ -224,8 +224,6 @@ public:
         return std::hypot( this->data, t.data );
     }
 
-
-
 };
 
 std::ostream& operator<<(std::ostream& os, const TransDouble& obj);

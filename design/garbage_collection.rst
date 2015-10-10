@@ -6,7 +6,7 @@ explains what a garbage collector is and why the Ginger garbage collector
 is special. Here's some reasons:
 
 Feature: The Ginger garbage collection is unexpectedly lightweight 
-because the Ginger VM uses garbage collector friendly structures. For example: here's the Ginger heap when ginger starts up ....
+because the Ginger VM uses garbage collector friendly structures. For example: here's the Ginger heap when ginger starts up::
 
 	(As revealed by gvmtest ….)
 	rlwrap -S '%% ' -p Green ./gvmtest

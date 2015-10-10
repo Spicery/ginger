@@ -4,7 +4,7 @@ How to Compile Queries
 Intro
 -----
 Each query has these parts: INIT (initialise), TEST (fused test-next-fini), 
-BODY and ADVN (advance). These must be called in a specific order.
+BODY and ADVN (advance). These must be called in a specific order::
 
 	INIT is called first
 	TEST follows INIT or ADVN
@@ -18,25 +18,27 @@ fallthru allows jumps to be eliminated.)
 PATTERN in EXPR
 ~~~~~~~~~~~~~~~
 
-INIT
-	Allocates three variable:
-		next.fn
-		context
-		state	
-	
-TEST
-	Equivalent to
+::
 
-		label again:
-			next.fn( state, context ) -> ( loop.var, state )
-			if state == termin then goto FAIL endif
-			BIND( PATTERN, loop.var )( PASS, again )
+	INIT
+		Allocates three variable:
+			next.fn
+			context
+			state	
+		
+	TEST
+		Equivalent to
+
+			label again:
+				next.fn( state, context ) -> ( loop.var, state )
+				if state == termin then goto FAIL endif
+				BIND( PATTERN, loop.var )( PASS, again )
 
 
-	The iteration halts if state is TERMIN.
+		The iteration halts if state is TERMIN.
 
-ADVN
-	Skip
+	ADVN
+		Skip
 
 PATTERN from A by B to C
 ~~~~~~~~~~~~~~~~~~~~~~~~
@@ -46,7 +48,7 @@ TODO:
 Setup for Loops, Conditionals and Naked Queries
 -----------------------------------------------
 
-A loop for query Q with body B is therefore compiled like this:
+A loop for query Q with body B is therefore compiled like this::
 
 		INIT[ Q ]
 		goto label test
@@ -60,7 +62,7 @@ A loop for query Q with body B is therefore compiled like this:
 		TEST[ Q ]( label body, label done )
 	done:
 
-Conditionals have three parts IFQ, THEN, ELSE and are compiled like this:
+Conditionals have three parts IFQ, THEN, ELSE and are compiled like this::
 
 		INIT[ IFQ ]
 		TEST[ IFQ ]( label pass, label fail )
@@ -70,7 +72,7 @@ Conditionals have three parts IFQ, THEN, ELSE and are compiled like this:
 		ELSE
 	done:
 
-Naked queries are even simpler
+Naked queries are even simpler::
 
 		INIT[ IFQ ]
 		TEST[ IFQ ]( label pass, label fail )
@@ -81,6 +83,8 @@ Naked queries are even simpler
 
 Parallel Loops P // Q
 ---------------------
+
+::
 
 	INIT[ P // Q ] --> INIT[ P ]; INIT[ Q ]
 
@@ -95,6 +99,7 @@ Parallel Loops P // Q
 
 Q where C
 ---------
+::
 
 	INIT[ Q where C ] --> INIT[ Q ]
 
@@ -111,7 +116,7 @@ Q where C
 
 Q do S
 ------
-
+::
 	INIT[ Q do S ] --> INIT[ Q ]
 	TEST[ Q do S ] --> TEST[ Q ]
 	ADVN[ Q do S ] --> ADV[ Q ]
@@ -119,6 +124,7 @@ Q do S
 
 Q finally S
 -----------
+::
 
 	INIT[ Q finally S ] --> INIT[ Q ]
 	
@@ -132,6 +138,7 @@ Q finally S
 
 Q while C then S else T
 -----------------------
+::
 
 	INIT[ Q while C then S ] --> INIT[ Q ]
 
@@ -149,6 +156,7 @@ Q while C then S else T
 	
 Q until C then S else T
 -----------------------
+::
 
 	INIT[ Q until C then S ] --> INIT[ Q ]
 
@@ -168,7 +176,7 @@ Q until C then S else T
 
 Nested Loops P & Q
 ------------------
-
+::
 
 	INIT( P & Q ) -->
 		need_testp := true

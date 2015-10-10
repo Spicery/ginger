@@ -1,49 +1,54 @@
-Trigonometric functions
-cos 				Compute cosine (function )
-sin 				Compute sine (function )
-tan 				Compute tangent (function )
+Maths Functions
+===============
 
-acos 				Compute arc cosine (function )
-asin 				Compute arc sine (function )
-atan 				Compute arc tangent (function )
+Trigonometric functions::
 
-atan2 				Compute arc tangent with two parameters (function )
+	cos 				Compute cosine (function )
+	sin 				Compute sine (function )
+	tan 				Compute tangent (function )
 
-Hyperbolic functions
-cosh 				Compute hyperbolic cosine (function )
-sinh 				Compute hyperbolic sine (function )
-tanh 				Compute hyperbolic tangent (function )
-acosh  				Compute arc hyperbolic cosine (function )
-asinh  				Compute arc hyperbolic sine (function )
-atanh  				Compute arc hyperbolic tangent (function )
+	acos 				Compute arc cosine (function )
+	asin 				Compute arc sine (function )
+	atan 				Compute arc tangent (function )
 
-Exponential and logarithmic functions
-exp 				Compute exponential function (function )
-frexp 				Get significand and exponent (function )
-ldexp 				Generate value from significand and exponent (function )
-log 				Compute natural logarithm (function )
-log10 				Compute common logarithm (function )
-modf 				Break into fractional and integral parts (function )
-exp2  				Compute binary exponential function (function )
-expm1  				Compute exponential minus one (function )
-ilogb  				Integer binary logarithm (function )
-log1p  				Compute logarithm plus one (function )
-log2 				Compute binary logarithm (function )
-logb 				Compute floating-point base logarithm (function )
-scalbn 				Scale significand using floating-point base exponent (function )
-scalbln 			Scale significand using floating-point base exponent (long) (function )
+	atan2 				Compute arc tangent with two parameters (function )
 
-Power functions
-pow 				Raise to power (function )
-sqrt 				Compute square root (function )
-cbrt  				Compute cubic root (function )
-hypot  				Compute hypotenuse (function )
+Hyperbolic functions::
 
-Error and gamma functions
-erf  				Compute error function (function )
-erfc  				Compute complementary error function (function )
-tgamma  			Compute gamma function (function )
-lgamma 				Compute log-gamma function (function )
+	cosh 				Compute hyperbolic cosine (function )
+	sinh 				Compute hyperbolic sine (function )
+	tanh 				Compute hyperbolic tangent (function )
+	acosh  				Compute arc hyperbolic cosine (function )
+	asinh  				Compute arc hyperbolic sine (function )
+	atanh  				Compute arc hyperbolic tangent (function )
+
+Exponential and logarithmic functions::
+	exp 				Compute exponential function (function )
+	frexp 				Get significand and exponent (function )
+	ldexp 				Generate value from significand and exponent (function )
+	log 				Compute natural logarithm (function )
+	log10 				Compute common logarithm (function )
+	modf 				Break into fractional and integral parts (function )
+	exp2  				Compute binary exponential function (function )
+	expm1  				Compute exponential minus one (function )
+	ilogb  				Integer binary logarithm (function )
+	log1p  				Compute logarithm plus one (function )
+	log2 				Compute binary logarithm (function )
+	logb 				Compute floating-point base logarithm (function )
+	scalbn 				Scale significand using floating-point base exponent (function )
+	scalbln 			Scale significand using floating-point base exponent (long) (function )
+
+Power functions::
+	pow 				Raise to power (function )
+	sqrt 				Compute square root (function )
+	cbrt  				Compute cubic root (function )
+	hypot  				Compute hypotenuse (function )
+
+Error and gamma functions::
+	erf  				Compute error function (function )
+	erfc  				Compute complementary error function (function )
+	tgamma  			Compute gamma function (function )
+	lgamma 				Compute log-gamma function (function )
 
 Rounding and remainder functions
 ceil 				Round up value (function )

@@ -29,7 +29,7 @@ file is [XDG base directory specification][xdg] compliant.
 [xdg]: http://standards.freedesktop.org/basedir~spec/basedir~spec~latest.html
 
 file2gnx searches the below path for 'parser~mapping.mnx' files. The
-first matching entry wins.
+first matching entry wins::
 
     [1] $XDG_CONFIG_HOME/ginger
     [2] if $XDG_CONFIG_HOME does not exist fall back to $HOME/.config/ginger
@@ -45,7 +45,7 @@ added to ginger~script, ginger~cgi and ginger. This was added
 due to the widesperad limitation of only being able to support passing a
 single option to #! scripts.
 
-e.g.
+e.g::
     #!/usr/local/bin/ginger~script ~O~ggnx,~m1
 
 
@@ -56,6 +56,6 @@ This is automatically generated from the comments contained within the
 instructions.
 
 In later versions this will be integrated fully into the Ginger Documentation
-project. For this release the documentation is stored by default at:
+project. For this release the documentation is stored by default at::
 
 	/usr/local/share/ginger/html/instruction_set.html

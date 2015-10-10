@@ -24,7 +24,7 @@ TRY
 
 Problem
 ~~~~~~~
-Similarly, when handling an escape we have this situation
+Similarly, when handling an escape we have this situation::
 
 	try 
 		<expr>

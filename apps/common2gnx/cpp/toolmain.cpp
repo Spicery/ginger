@@ -27,6 +27,7 @@
 
 #include "gngversion.hpp"
 
+#include "printgpl.hpp"
 #include "mishap.hpp"
 #include "item_factory.hpp"
 #include "read_expr.hpp"
@@ -48,22 +49,6 @@ static struct option long_options[] =
         { 0, 0, 0, 0 }
     };
 
-
-void ToolMain::printGPL( const char * start, const char * end ) {
-	bool printing = false;
-	ifstream license( INSTALL_LIB "/LICENSE.TXT" );
-	std::string line;
-	while ( getline( license, line ) )  {
-		if ( !printing && ( start == NULL || line.find( start ) != string::npos ) ) {
-			printing = true;
-		} else if ( printing && end != NULL && line.find( end ) != string::npos ) {
-			printing = false;
-		}
-		if ( printing ) {
-			std::cout << line << std::endl;
-		}
-	}
-}
 
 
 void ToolMain::parseArgs( int argc, char **argv, char **envp ) {
@@ -105,17 +90,7 @@ void ToolMain::parseArgs( int argc, char **argv, char **envp ) {
 				exit( EXIT_SUCCESS );   //  Is that right?
 			}
 			case 'L': {
-				if ( optarg == NULL || std::string( optarg ) == std::string( "all" ) ) {
-					this->printGPL( NULL, NULL );
-				} else if ( std::string( optarg ) == std::string( "warranty" ) ) {
-					this->printGPL( "Disclaimer of Warranty.", "Limitation of Liability." );                 
-				} else if ( std::string( optarg ) == std::string( "conditions" ) ) {
-					this->printGPL( "TERMS AND CONDITIONS", "END OF TERMS AND CONDITIONS" );
-				} else {
-					std::cerr << "Unknown license option: " << optarg << std::endl;
-					exit( EXIT_FAILURE );
-				}
-				exit( EXIT_SUCCESS );   //  Is that right?              
+				exit( Ginger::optionPrintGPL( optarg ) );              
 			}
 			case 's': {
 				this->no_span = true;

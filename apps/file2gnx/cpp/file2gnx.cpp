@@ -29,13 +29,11 @@
 
 #include "config.h"
 
+#include "printgpl.hpp"
 #include "xdgconfigfiles.hpp"
 #include "mnx.hpp"
 #include "sax.hpp"
 #include "mishap.hpp"
-
-#define LICENSE_FILE	INSTALL_LIB "/COPYING"
-
 
 using namespace std;
 using namespace Ginger;
@@ -187,22 +185,6 @@ public:
 };
 
 
-void printGPL( const char * start, const char * end ) {
-    bool printing = false;
-    ifstream license( LICENSE_FILE );
-    std::string line;
-    while ( getline( license, line ) )  {
-        if ( !printing && ( start == NULL || line.find( start ) != string::npos ) ) {
-            printing = true;
-        } else if ( printing && end != NULL && line.find( end ) != string::npos ) {
-            printing = false;
-        }
-        if ( printing ) {
-            std::cout << line << std::endl;
-        }
-    }
-}
-
 static void printUsage() {
 	cout << "Usage :  " << APP_TITLE << " [OPTIONS] [FILE]" << endl << endl;
 	cout << "OPTION                SUMMARY" << endl;
@@ -223,20 +205,6 @@ static void printHelpLicense() {
 	cout << "Displays key sections of the GNU Public License." << endl;
 	cout << "--license=warranty    Shows warranty." << endl;
 	cout << "--license=conditions  Shows terms and conditions." << endl;
-}
-
-int printLicense( const char * arg ) {
-	if ( arg == NULL || std::string( arg ) == std::string( "all" ) ) {
-		printGPL( NULL, NULL );
-	} else if ( std::string( arg ) == std::string( "warranty" ) ) {
-		printGPL( "Disclaimer of Warranty.", "Limitation of Liability." );                 
-	} else if ( std::string( arg ) == std::string( "conditions" ) ) {
-		printGPL( "TERMS AND CONDITIONS", "END OF TERMS AND CONDITIONS" );
-	} else {
-		std::cerr << "Unknown license option: " << arg << std::endl;
-		return EXIT_FAILURE;
-	}
-	return EXIT_SUCCESS;
 }
 
 
@@ -318,8 +286,7 @@ public:
 	            	break;
 	            }
 	            case 'L': {
-	            	printLicense( optarg );
-	            	return false;
+	            	exit( Ginger::optionPrintGPL( optarg ) );
 	            }
 				case 'V': {
 	                cout << APP_TITLE << ": version " << PACKAGE_VERSION << " (" << __DATE__ << " " << __TIME__ << ")" << endl;

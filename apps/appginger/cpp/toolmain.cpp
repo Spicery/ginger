@@ -38,6 +38,7 @@
     #include "fdifstream.hpp"
 #endif
 
+#include "printgpl.hpp"
 #include "fileutils.hpp"
 #include "gngversion.hpp"
 #include "mnx.hpp"
@@ -145,15 +146,7 @@ static void printHelpLicense() {
 
 
 void ToolMain::printLicense( const char * arg ) const {
-	if ( arg == NULL || std::string( arg ) == std::string( "all" ) ) {
-		this->printGPL( NULL, NULL );
-	} else if ( std::string( arg ) == std::string( "warranty" ) ) {
-		this->printGPL( "Disclaimer of Warranty.", "Limitation of Liability." );                 
-	} else if ( std::string( arg ) == std::string( "conditions" ) ) {
-		this->printGPL( "TERMS AND CONDITIONS", "END OF TERMS AND CONDITIONS" );
-	} else {
-		std::cerr << "Unknown license option: " << arg << std::endl;
-	}
+    Ginger::optionPrintGPL( arg );
 }
 
 template < class ContainerT >

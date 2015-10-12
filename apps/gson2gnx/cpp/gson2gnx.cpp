@@ -25,7 +25,7 @@
 #include <getopt.h>
 #include <stddef.h>
 
-
+#include "printGPL.hpp"
 #include "mishap.hpp"
 #include "gngversion.hpp"
 
@@ -316,23 +316,6 @@ public:
 		return "0.1";
 	}
 
-	void printGPL( const char * start, const char * end ) {
-		bool printing = false;
-		ifstream license( INSTALL_LIB "/LICENSE.TXT" );
-		std::string line;
-		while ( getline( license, line ) )  {
-			if ( !printing && ( start == NULL || line.find( start ) != string::npos ) ) {
-				printing = true;
-			} else if ( printing && end != NULL && line.find( end ) != string::npos ) {
-				printing = false;
-			}
-			if ( printing ) {
-				std::cout << line << std::endl;
-			}
-		}
-	}
-
-
 	void parseArgs( int argc, char **argv, char **envp ) {
 		this->use_stdin = true;
 		
@@ -365,17 +348,7 @@ public:
 					exit( EXIT_SUCCESS );   //  Is that right?
 				}
 				case 'L': {
-					if ( optarg == NULL || std::string( optarg ) == std::string( "all" ) ) {
-						this->printGPL( NULL, NULL );
-					} else if ( std::string( optarg ) == std::string( "warranty" ) ) {
-						this->printGPL( "Disclaimer of Warranty.", "Limitation of Liability." );                 
-					} else if ( std::string( optarg ) == std::string( "conditions" ) ) {
-						this->printGPL( "TERMS AND CONDITIONS", "END OF TERMS AND CONDITIONS" );
-					} else {
-						std::cerr << "Unknown license option: " << optarg << std::endl;
-						exit( EXIT_FAILURE );
-					}
-					exit( EXIT_SUCCESS );   //  Is that right?              
+					exit( Ginger::optionPrintGPL( optarg ) );              
 				}
 				case 'V': {
 					cout << GSON2GNX << ": version " << this->version() << " (" << __DATE__ << " " << __TIME__ << ") part of " << PACKAGE_NAME << " version " << PACKAGE_VERSION << endl;

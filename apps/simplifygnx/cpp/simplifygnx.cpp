@@ -86,6 +86,7 @@ to it as a stream.
 #include "mnx.hpp"
 #include "command.hpp"
 #include "metainfo.hpp"
+#include "printgpl.hpp"
 
 using namespace std;
 
@@ -242,7 +243,6 @@ private:
 public:
 	void parseArgs( int argc, char **argv, char **envp );
 	void run();
-	void printGPL( const char * start, const char * end );
 	std::string version() { return "0.1"; }
 	
 public:
@@ -393,16 +393,7 @@ void Main::parseArgs( int argc, char **argv, char **envp ) {
                 exit( EXIT_SUCCESS );   //  Is that right?
             }
             case 'L': {
-                if ( optarg == NULL || std::string( optarg ) == std::string( "all" ) ) {
-                    this->printGPL( NULL, NULL );
-                } else if ( std::string( optarg ) == std::string( "warranty" ) ) {
-                    this->printGPL( "Disclaimer of Warranty.", "Limitation of Liability." );                 
-                } else if ( std::string( optarg ) == std::string( "conditions" ) ) {
-                    this->printGPL( "TERMS AND CONDITIONS", "END OF TERMS AND CONDITIONS" );
-                } else {
-                	throw Ginger::Mishap( "Unknown license option" ).culprit( "Option", optarg );
-                }
-                exit( EXIT_SUCCESS );   //  Is that right?              
+                exit( Ginger::optionPrintGPL( optarg ) );   //  Is that right?              
             }
             case 'p': {
             	this->package = optarg;
@@ -422,23 +413,6 @@ void Main::parseArgs( int argc, char **argv, char **envp ) {
             default: {
                 cout << "?? getopt returned character code 0x" << hex << static_cast< int >( c ) << dec << endl;
             }
-        }
-    }
-}
-
-
-void Main::printGPL( const char * start, const char * end ) {
-    bool printing = false;
-    ifstream license( INSTALL_LIB "/LICENSE.TXT" );
-    std::string line;
-    while ( getline( license, line ) )  {
-        if ( !printing && ( start == NULL || line.find( start ) != string::npos ) ) {
-            printing = true;
-        } else if ( printing && end != NULL && line.find( end ) != string::npos ) {
-            printing = false;
-        }
-        if ( printing ) {
-            std::cout << line << std::endl;
         }
     }
 }

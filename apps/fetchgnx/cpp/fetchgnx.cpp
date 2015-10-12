@@ -42,7 +42,7 @@
 #include <getopt.h>
 #include <syslog.h>
 
-
+#include "printgpl.hpp"
 #include "mnx.hpp"
 #include "mishap.hpp"
 #include "defn.hpp"
@@ -80,7 +80,6 @@ public:
 	void summary();
 	void init();
 	void run();
-	void printGPL( const char * start, const char * end );
 	std::string version();
 	
 public:
@@ -183,17 +182,7 @@ void Main::parseArgs( int argc, char **argv, char **envp ) {
             	break;
             }
             case 'L': {
-                if ( optarg == NULL || std::string( optarg ) == std::string( "all" ) ) {
-                    this->printGPL( NULL, NULL );
-                } else if ( std::string( optarg ) == std::string( "warranty" ) ) {
-                    this->printGPL( "Disclaimer of Warranty.", "Limitation of Liability." );                 
-                } else if ( std::string( optarg ) == std::string( "conditions" ) ) {
-                    this->printGPL( "TERMS AND CONDITIONS", "END OF TERMS AND CONDITIONS" );
-                } else {
-                    std::cerr << "Unknown license option: " << optarg << std::endl;
-                    exit( EXIT_FAILURE );
-                }
-                exit( EXIT_SUCCESS );   //  Is that right?              
+            	exit( Ginger::optionPrintGPL( optarg ) );
             }
             case 'l': {
             	task = LOAD_FILE;
@@ -237,22 +226,6 @@ void Main::parseArgs( int argc, char **argv, char **envp ) {
 	}
 }
     
-
-void Main::printGPL( const char * start, const char * end ) {
-    bool printing = false;
-    ifstream license( "LICENSE.TXT" );
-    std::string line;
-    while ( getline( license, line ) )  {
-        if ( !printing && ( start == NULL || line.find( start ) != string::npos ) ) {
-            printing = true;
-        } else if ( printing && end != NULL && line.find( end ) != string::npos ) {
-            printing = false;
-        }
-        if ( printing ) {
-            std::cout << line << std::endl;
-        }
-    }
-}
 
 #ifdef DBG_FETCHGNX
 void Main::summary() {

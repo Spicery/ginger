@@ -1,0 +1,34 @@
+prefix=@prefix@
+exec_prefix=@prefix@
+datarootdir=@datarootdir@
+PACKAGE_TARNAME=@PACKAGE_TARNAME@
+INSTALL_BIN=@bindir@
+INSTALL_TOOL=@libexecdir@/@PACKAGE_TARNAME@
+INSTALL_LIB=@datarootdir@/@PACKAGE_TARNAME@
+INSTALL_DOC=@docdir@
+
+CC=@CXX@
+CXX=@CXX@
+
+
+INSTALLDIRS=-DINSTALL_BIN='"$(INSTALL_BIN)"' -DINSTALL_LIB='"$(INSTALL_LIB)"' -DINSTALL_TOOL='"$(INSTALL_TOOL)"'
+
+# -Weffc++
+CXXFLAGS=$(INSTALLDIRS) -g -std=c++0x -I../hpp -I../../libgng/hpp -Wall -Wnon-virtual-dtor
+CFLAGS=-Wmissing-prototypes 
+
+OBJS=gprojlibtool.o
+
+all: gprojlibtool
+
+# $@ is make shorthand for the target.
+# $@ is make shorthand for the dependencies
+gprojlibtool: $(OBJS)
+	$(CC) $(CXXFLAGS) $(BOOST_CPPFLAGS) -o $@ $(OBJS) ../../libgng/cpp/libgng.a
+
+clean:
+	rm -f *.o
+	rm -f gprojlibtool
+
+#	Nothing needs doing.
+check:

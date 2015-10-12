@@ -10,9 +10,11 @@ all clean:
 	make -C ginger-admin $@
 	make -C ginger-help $@
 	make -C gngreadline $@
+	make -C gprojlibtool $@
 	make -C gson2gnx $@
 	make -C gvmtest $@
 	make -C automatic/metainfo $@
+	make -C ivylibtool $@
 	make -C libmetainfo $@
 	make -C lisp2gnx $@
 	make -C lnx2csv $@

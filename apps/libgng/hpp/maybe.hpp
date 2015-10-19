@@ -19,6 +19,8 @@
 #ifndef GINGER_MAYBE_HPP
 #define GINGER_MAYBE_HPP
 
+#include "mishap.hpp"
+
 namespace Ginger {
 
 template< typename T > 
@@ -35,7 +37,23 @@ public:
 
     T& fastValue() { return this->a_value; }
 
-    T& value();
+    T& value() {
+        if ( not this->is_valid ) {
+            throw Mishap( "Trying to take value from an invalid Maybe" );
+        }
+        return this->a_value;
+    }
+
+    const T& setValue( const T& v ) {
+        this->a_value = v;
+        this->is_valid = true;
+        return v;
+    }
+
+    void invalidate() {
+        this->a_value = T();
+        this->is_valid = false;
+    }
 
 };
 

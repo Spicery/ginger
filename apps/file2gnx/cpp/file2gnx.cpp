@@ -29,11 +29,14 @@
 
 #include "config.h"
 
+#include "maybe.hpp"
 #include "printgpl.hpp"
 #include "xdgconfigfiles.hpp"
 #include "mnx.hpp"
 #include "sax.hpp"
 #include "mishap.hpp"
+
+#include "pathparser.hpp"
 
 using namespace std;
 using namespace Ginger;
@@ -57,36 +60,15 @@ using namespace Ginger;
 #define PARSER "parser"
 #define PARSER_EXT "ext"
 #define PARSER_EXE "exe"
+#define PARSER_TYPE "type"
+#define PARSER_TYPE_SINGLE "value"
+#define PARSER_TYPE_BINDING "binding"
 
-
-class ExtnFinder {
-private:
-	list< string > extns;
-
+struct Command {
+	string command;
+	bool single_valued_expr;
 public:
-	void addGrammar( const string & grammar ) {
-		this->extns.push_back( grammar );
-	}
-
-	void tryAddExtnOfPathName( const string & pathname ) {
-		const size_t n = pathname.rfind( '.' );
-		if ( n != string::npos ) {
-			//cerr << "Pushing back: " << n << endl;
-			this->extns.push_back( pathname.substr( n + 1, pathname.size() ) );
-		}
-	}
-
-	bool hasNext() {
-		//cerr << "Size of extensions list = " << this->extns.size() << endl;
-		return not( this->extns.empty() );
-	}
-
-	string next() {
-		string s = this->extns.back();
-		this->extns.pop_back();
-		return s;
-	}
-
+	Command() : single_valued_expr( false ) {}
 };
 
 class ExtnLookup : public Ginger::SaxHandler {
@@ -94,13 +76,15 @@ private:
 	const string mnx_file_name;
 	string extn;
 	bool found;
-	string parser;
+	bool done;
+	Command cmd;
 
 public:
 	ExtnLookup( const string & _extn, const string & _config_file ) :
 		mnx_file_name( _config_file ),
 		extn( _extn ),
-		found( false )
+		found( false ),
+		done( false )
 	{
 	}
 	
@@ -111,9 +95,11 @@ public:
 		if ( name != PARSER ) return;
 		Dict::iterator it = attrs.find( PARSER_EXT );
 		Dict::iterator jt = attrs.find( PARSER_EXE );
+		Dict::iterator kt = attrs.find( PARSER_TYPE );
 		if ( it != attrs.end() && extn == it->second && jt != attrs.end() ) {
 			this->found = true;
-			this->parser = jt->second;
+			cmd.command = jt->second;
+			cmd.single_valued_expr = ( kt->second == PARSER_TYPE_SINGLE );
 		} 
 	}
 
@@ -136,13 +122,15 @@ private:
 	
 public:
 	bool hasNext() {
-		if ( this->found ) return false;
+		if ( this->done ) return false;
+		if ( this->found ) return true;
 		this->lookup();
 		return this->found;
 	}
 
-	string next() {
-		return this->parser;
+	Command next() {
+		this->done = true;
+		return this->cmd;
 	}
 
 };
@@ -151,13 +139,13 @@ class StdExtnLookup {
 private:
 	const string & extn;
 	bool done;
-	const char * found;
+	Command cmd;
 
 public:
 	StdExtnLookup( const string & _extn ) : extn( _extn ), done( false ) {}
 
 private:
-	static const char * defaultCommand( const string & ex ) {
+	static string defaultCommand( const string & ex ) {
 		if ( ex == "cmn" || ex == "common" ) {
 			return COMMON2GNX;
 		} else if ( ex == "cst" || ex == "cstyle" ) {
@@ -165,34 +153,45 @@ private:
 		} else if ( ex == "lsp" || ex == "lisp" ) {
 			return LISP2GNX;
 		} else if ( ex == "gnx" ) {
-			return GNX2GNX;
+			return GNX2GNX;			
 		} else {
-			return NULL;
+			return "";
 		}	
 	}
 
 public:
 	bool hasNext() {
 		if ( this->done ) return false;
-		this->found = defaultCommand( this->extn );
-		this->done = true;
-		return this->found != NULL;
+		this->cmd.single_valued_expr = not this->extn.empty() and this->extn[0] == '1';
+		if ( not this->cmd.single_valued_expr ) {
+			this->cmd.command = defaultCommand( this->extn );
+		} else {
+			//cerr << "Process " << this->extn.substr( 1 ) << endl;
+			this->cmd.command = defaultCommand( this->extn.substr( 1 ) );
+		}
+		return not this->cmd.command.empty();
 	}
 
-	string next() {
-		return this->found;
+	Command next() {
+		this->done = true;
+		return this->cmd;
 	}
+
 };
 
 
+/*	USAGE:
+	file2gnx [--using-name FILENAME] FILE
+	file2gnx --using-name FILENAME < FILE
+*/
+
 static void printUsage() {
 	cout << "Usage :  " << APP_TITLE << " [OPTIONS] [FILE]" << endl << endl;
-	cout << "OPTION                SUMMARY" << endl;
-	cout << "-g, --grammar=LANG    default front-end syntax" << endl;
-	cout << "-H, --help            print out this help info (see --help=help)" << endl;
-	cout << "-i, --stdin           compile from stdin" << endl;
-	cout << "-L, --license         print out license information and exit" << endl;
-    cout << "-V, --version         print out version information and exit" << endl;
+	cout << "OPTION                    SUMMARY" << endl;
+	cout << "-u, --using-name FILE     use FILE to determine the grammar and variable name" << endl;
+	cout << "-H, --help                print out this help info (see --help=help)" << endl;
+	cout << "-L, --license             print out license information and exit" << endl;
+    cout << "-V, --version             print out version information and exit" << endl;
 	cout << endl;
 }	
 
@@ -206,16 +205,6 @@ static void printHelpLicense() {
 	cout << "--license=warranty    Shows warranty." << endl;
 	cout << "--license=conditions  Shows terms and conditions." << endl;
 }
-
-
-/*	USAGE:
-	file2gnx FILE
-	file2gnx < FILE
-	file2gnx -g grammar < FILE
-	file2gnx -i < FILE 
-	file2gnx -g GRAMMAR FILE
-	file2gnx -i -g GRAMMAR < FILE
-*/
 
 
 /*
@@ -232,27 +221,21 @@ static void printHelpLicense() {
 extern char * optarg;
 static struct option long_options[] =
     {
+        { "using-name",		required_argument,		0, 'u' },
         { "help",           optional_argument,      0, 'H' },
-        { "grammar",		required_argument,		0, 'g' },
         { "license",        optional_argument,      0, 'L' },
-        { "stdin",			no_argument,			0, 'i' },
         { "version",        no_argument,            0, 'V' },
         { 0, 0, 0, 0 }
     };
 
 class Main {
 private:
-	bool use_grammar;
-	bool use_stdin;
+	Maybe< string > using_name;
+	Maybe< string > file;
+	string var_name;
 	string grammar;
-   	vector< string > files;
 	    
 public:
-
-	Main() :
-		use_grammar( false ),
-		use_stdin( false )
-	{}
 
 	bool parse( int argc, char ** argv ) {
 		openlog( APP_TITLE, 0, LOG_FACILITY );
@@ -260,13 +243,12 @@ public:
 
 		for(;;) {
 	        int option_index = 0;
-	        int c = getopt_long( argc, argv, "g:H::iL::V", long_options, &option_index );
+	        int c = getopt_long( argc, argv, "u:H::L::V", long_options, &option_index );
 	        //cerr << "Got c = " << c << endl;
 	        if ( c == -1 ) break;
 	        switch ( c ) {
-	            case 'g': {
-	            	this->use_grammar = true;
-	            	this->grammar = optarg;
+	            case 'u': {
+	            	this->using_name.setValue( string( optarg ) );
 	            	break;
 	            }
 	        	case 'H': {
@@ -281,10 +263,6 @@ public:
 	                }
 	                return false;
 	          	}
-	            case 'i': {
-	            	this->use_stdin = true;
-	            	break;
-	            }
 	            case 'L': {
 	            	exit( Ginger::optionPrintGPL( optarg ) );
 	            }
@@ -302,22 +280,34 @@ public:
 
 
 	    //	Aggregate the remaining arguments, which are effectively filenames (paths).
+	   	vector< string > files;
 		if ( optind < argc ) {
-			 while ( optind < argc ) {
-			   	this->files.push_back( argv[ optind++ ] );
-			 }
+			while ( optind < argc ) {
+			   	 files.push_back( argv[ optind++ ] );
+			}
 		}
 
 		//	Now rationalise the options.
 		{
 			int nfiles = files.size();
-			if ( nfiles == 0 ) {
-				this->use_stdin = true;
-				this->use_grammar = true;
+			if ( nfiles == 1 ) {
+				this->file.setValue( files[ 0 ] );
 			} else if ( nfiles > 1 ) {
 				printUsage();
 				exit( EXIT_FAILURE );
 			}
+		}
+
+		if ( this->using_name.isValid() ) {
+			PathParser pp( this->using_name.fastValue() );
+			this->var_name = pp.stem();
+			this->grammar = pp.extension();
+		} else if ( this->file.isValid() ) {
+			PathParser pp( this->file.fastValue() );
+			this->var_name = pp.stem();
+			this->grammar = pp.extension();
+		} else {
+			throw Ginger::Mishap( "Cannot determine effective file-name" ).culprit( "Hint", "Missing --using-name option?" );
 		}
 
 		return true;
@@ -325,58 +315,62 @@ public:
 
 private:
 
-	void run( const string & command, const vector< const char * > & args ) {
-		if ( args.size() > 1 ) {
-			throw Unreachable();
-		}
+	void runExec( const string & command ) {
 		const char * cmd = command.c_str();
-		if ( args.empty() ) {
-			execl( cmd, cmd, (char)0 );
+		if ( this->file.isValid() ) {
+			execl( cmd, cmd, this->file.fastValue().c_str(), (char)0 );
 		} else {
-			execl( cmd, cmd, args[ 0 ], (char)0 );
+			execl( cmd, cmd, (char)0 );
 		}
 	}
 
-	void useExtnFinder( ExtnFinder & efinder, const vector< const char * > & args ) {
-		while ( efinder.hasNext() ) {
-			const string extn( efinder.next() );
-			//cerr << "EXTENSION " << extn << endl;
-			StdExtnLookup stdlookup( extn );
-			while ( stdlookup.hasNext() ) {
-				//cerr << "Doing std lookup for " << extn << endl;
-				string cmdpath( stdlookup.next() );
-				run( cmdpath, args );
-			}
-			XDGConfigFiles cfiles( FILE2GNX_CONFIG_BASE );
-			while ( cfiles.hasNext() ) {
-				const string cfile( cfiles.next() );
-				ExtnLookup elookup( extn, cfile );
-				//cerr << "Doing config lookup for " << extn << " in " << cfile << endl;
-				while ( elookup.hasNext() ) {
-					string cmdpath( elookup.next() );
-					run( cmdpath, args );
-				}
-			}
+	void runWrap( const string & command ) {
+		cout << "<bind><var name=\"";
+		Ginger::mnxRenderText( cout, this->var_name );
+		cout << "\" protected=\"true\"/>" << endl;
+		vector< string > strargs;
+		strargs.push_back( command );
+		if ( this->file.isValid() ) {
+			strargs.push_back( this->file.fastValue() );
 		}
+		const pid_t pid = fork();
+		if ( pid != 0 ) {
+			//	Parent.
+			int retval;
+			waitpid( pid, &retval, 0 );
+		} else {
+			runExec( command );
+		}
+		cout << "</bind>" << endl;
+		exit( EXIT_SUCCESS );
 	}
 
+	void run( const Command & cmd ) {
+		if ( cmd.single_valued_expr ) {
+			runWrap( cmd.command );
+		} else {
+			runExec( cmd.command );
+		}
+	}
 
 public:
-	
 	void main() {
-		vector< const char * > args;
-		ExtnFinder efinder;
-		if ( this->use_grammar ) {
-			efinder.addGrammar( this->grammar );
+		StdExtnLookup stdlookup( this->grammar );
+		while ( stdlookup.hasNext() ) {
+			run( stdlookup.next() );
 		}
-		if ( not this->use_stdin ) {
-			const string & pathname( this->files[ 0 ] );
-			args.push_back( pathname.c_str() );
-			efinder.tryAddExtnOfPathName( pathname );
-		}		
-		this->useExtnFinder( efinder, args );
-		throw SystemError( "Cannot detect syntax, giving up" ).culprit( "Source", this->use_stdin ? string( "<stdin>" ) : this->files[ 0 ] );
+		XDGConfigFiles cfiles( FILE2GNX_CONFIG_BASE );
+		while ( cfiles.hasNext() ) {
+			const string cfile( cfiles.next() );
+			ExtnLookup elookup( this->grammar, cfile );
+			//cerr << "Doing config lookup for " << extn << " in " << cfile << endl;
+			while ( elookup.hasNext() ) {
+				run( elookup.next() );
+			}
+		}
+		throw SystemError( "Cannot detect syntax, giving up" ).culprit( "Source", this->file.isValid() ? this->file.fastValue() : string( "<stdin>" ) );
 	}
+
 
 };
 

@@ -21,6 +21,8 @@
 #include "folderscan.hpp"
 #include "mishap.hpp"
 
+#define PATH_SEPARATOR "/"
+
 using namespace std;
 using namespace Ginger;
 
@@ -54,12 +56,16 @@ bool FolderScan::nextFolderOrFile() {
 	return this->nextFilteredByType( DT_DIR | DT_REG );
 }
 
-std::string FolderScan::entryName() {
+std::string FolderScan::entryName() const {
 	//std::string ans;
 	//ans.append( dp->d_name, dp->d_namlen );
 	return std::string( dp->d_name );
 }
 
-std::string FolderScan::folderName() {
+std::string FolderScan::folderName() const {
 	return this->pathname;
+}
+
+std::string FolderScan::fullPath() const {
+	return this->pathname + PATH_SEPARATOR + this->entryName();
 }

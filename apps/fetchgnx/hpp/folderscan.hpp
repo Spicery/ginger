@@ -37,8 +37,9 @@ public:
 	bool nextFolder();
 	bool nextFolderOrFile();
 	
-	std::string entryName();
-	std::string folderName();
+	std::string entryName() const;
+	std::string folderName() const;
+	std::string fullPath() const;
 
 public:
 	FolderScan( std::string );

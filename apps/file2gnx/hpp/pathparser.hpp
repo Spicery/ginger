@@ -25,6 +25,7 @@ class PathParser {
 private:
 	size_t stem_start;
 	size_t stem_finish;
+	size_t extn_start;
 	std::string path;
 public:
 	PathParser( const std::string & path );

@@ -128,7 +128,11 @@ public:
 	void run( std::istream & in ) {
 		MnxReader reader( in );
 		SharedMnx g( reader.readMnx() );
-		g->prettyPrint( this->indent );
+		if ( g ) {
+			g->prettyPrint( this->indent );
+		} else {
+			throw Ginger::Mishap( "No MNX on input" );
+		}
 	}
 
 	int run() {

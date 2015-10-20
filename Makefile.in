@@ -34,6 +34,8 @@ distclean: clean
 	rm -f apps/ginger-help/cpp/Makefile
 	rm -f apps/gngreadline/Makefile
 	rm -f apps/gngreadline/cpp/Makefile
+	rm -f apps/gprojlibtool/Makefile
+	rm -f apps/gprojlibtool/cpp/Makefile
 	rm -f apps/gvmtest/Makefile
 	rm -f apps/gvmtest/cpp/Makefile
 	rm -f apps/libgng/Makefile
@@ -101,6 +103,8 @@ LIBEXECUTABLES=\
 	apps/appginger/cpp/ginger-cli \
 	apps/ginger-help/cpp/ginger-help \
 	apps/gngreadline/cpp/gngreadline \
+	apps/gprojlibtool/cpp/gprojlibtool \
+	apps/ivylibtool/cpp/ivylibtool \
 	apps/lisp2gnx/lsp/lisp2gnx \
 	apps/shebang/cpp/shebang \
 	apps/simplifygnx/cpp/simplifygnx \

@@ -1,0 +1,5 @@
+all:
+	make -C cpp $@
+
+clean:
+	make -C cpp $@

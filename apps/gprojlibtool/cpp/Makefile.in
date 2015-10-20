@@ -17,7 +17,7 @@ INSTALLDIRS=-DINSTALL_BIN='"$(INSTALL_BIN)"' -DINSTALL_LIB='"$(INSTALL_LIB)"' -D
 CXXFLAGS=$(INSTALLDIRS) -g -std=c++0x -I../hpp -I../../libgng/hpp -Wall -Wnon-virtual-dtor
 CFLAGS=-Wmissing-prototypes 
 
-OBJS=gprojlibtool.o
+OBJS=gprojlibtool.o folderscan.o
 
 all: gprojlibtool
 

@@ -36,7 +36,7 @@ using namespace std;
 //#define DBG_SEARCH
 
 ProjectCache::ProjectCache( Search * parent, vector< string > & project_paths ) :
-	parent( parent ),
+	//parent( parent ),
 	project_folders( project_paths )
 {
 }

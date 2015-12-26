@@ -22,6 +22,8 @@
 #include <string>
 #include <vector>
 
+#include "mnx.hpp"
+
 namespace Ginger {
 
 class Command {
@@ -49,6 +51,7 @@ public:
 	void runWithInputAndOutput();
 	void runSilent();
 	void interrupt();
+	Ginger::SharedMnx sendMnx( Ginger::SharedMnx );
 	
 public:
 	Command( const std::string command = "" );

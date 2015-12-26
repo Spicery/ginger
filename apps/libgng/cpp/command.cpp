@@ -279,4 +279,41 @@ void Command::runWithInputAndOutput() {
 	throw Unreachable();
 }
 
+Ginger::SharedMnx Command::sendMnx( Ginger::SharedMnx mnx ) {
+	this->runWithInputAndOutput();
+
+	FILE * f_out = fdopen( this->getOutputFD(), "w" );
+
+	
+	mnx->frender( f_out );
+	fprintf( f_out, "\n" );
+	fflush( f_out );
+	
+	const int fd_in = this->getInputFD();
+
+    stringstream prog;
+    for (;;) {
+        static char buffer[ 1024 ];
+        //  TODO: protect close with finally.
+        int n = read( fd_in, buffer, sizeof( buffer ) );
+        if ( n == 0 ) break;
+        if ( n == -1 ) {
+            if ( errno != EINTR ) {
+                perror( "" );
+                throw Ginger::Mishap( "Failed to read" );
+            }
+        } else if ( n > 0 ) {
+            prog.write( buffer, n );
+        }
+    }
+
+    Ginger::MnxReader reader( prog );
+    Ginger::SharedMnx m = reader.readMnx();
+
+	close( fd_in );
+	fclose( f_out );
+
+    return m;
+}
+
 } // namespace

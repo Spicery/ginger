@@ -44,6 +44,8 @@ class MnxVisitor {
 public:
 	virtual void startVisit( Mnx & element ) = 0;
 	virtual void endVisit( Mnx & element ) = 0;
+	virtual void initialiseVisit( Mnx & element ) {}
+	virtual void finaliseVisit( Mnx & element ) {}
 public:
 	MnxVisitor() {}
 	virtual ~MnxVisitor();
@@ -191,7 +193,13 @@ public:
 	void prettyPrint();
 	void visit( MnxVisitor & v );
 	void walk( MnxWalker & w, MnxWalkPath * p = 0 );
-	
+
+private:
+	//	This is a helper method for visit, so the initialisation and
+	//	finalisation stages can be distinguished from the recursive
+	//	descent.
+	void subVisit( MnxVisitor & v );
+
 public:
 	Mnx( const std::string & name );
 };

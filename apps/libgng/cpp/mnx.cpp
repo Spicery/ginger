@@ -405,8 +405,13 @@ void Mnx::flattenChild( int n ) {
 	this->children.insert( after_child, kids.begin(), kids.end() );
 }
 
-
 void Mnx::visit( MnxVisitor & v ) {
+	v.initialiseVisit( *this );
+	this->subVisit( v );
+	v.finaliseVisit( *this );
+}
+
+void Mnx::subVisit( MnxVisitor & v ) {
 	v.startVisit( *this );
 	
 	for ( 
@@ -414,8 +419,9 @@ void Mnx::visit( MnxVisitor & v ) {
 		it != this->children.end();
 		++it
 	) {
-		(*it)->visit( v );
+		(*it)->subVisit( v );
 	}
+
 	v.endVisit( *this );
 }
 

@@ -335,6 +335,11 @@ void Main::run() {
 					cerr << "Nothing read" << endl;
 				#endif
 			} else if ( 
+				mnx->hasName( "resolve.gnx" ) &&
+				mnx->size() == 1
+			) {
+				search.resolveGnxInPlace( mnx->getFirstChild() );
+			} else if ( 
 				mnx->hasName( "resolve.qualified" ) && 
 				mnx->hasAttribute( "pkg.name" ) &&
 				mnx->hasAttribute( "alias.name" ) &&

@@ -23,8 +23,6 @@
 #include <syslog.h>
 #include <signal.h>
 
-#include <ext/stdio_filebuf.h> // __gnu_cxx::stdio_filebuf
-
 #include "mishap.hpp"
 #include "gngversion.hpp"
 #include "command.hpp"

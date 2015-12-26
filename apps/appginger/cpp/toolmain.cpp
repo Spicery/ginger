@@ -26,14 +26,19 @@
 #include <cstdlib>
 #include <sstream>
 
-#include <ext/stdio_filebuf.h> // __gnu_cxx::stdio_filebuf
-
 #include <stddef.h>
 #include <unistd.h>
 #include <getopt.h>
 #include <syslog.h>
 #include <sys/errno.h>
 
+#ifdef GNU_FD_TO_IFSTREAM
+    #include <ext/stdio_filebuf.h> // __gnu_cxx::stdio_filebuf
+#else
+    #include "fdifstream.hpp"
+#endif
+
+#include "printgpl.hpp"
 #include "fileutils.hpp"
 #include "gngversion.hpp"
 #include "mnx.hpp"
@@ -141,15 +146,7 @@ static void printHelpLicense() {
 
 
 void ToolMain::printLicense( const char * arg ) const {
-	if ( arg == NULL || std::string( arg ) == std::string( "all" ) ) {
-		this->printGPL( NULL, NULL );
-	} else if ( std::string( arg ) == std::string( "warranty" ) ) {
-		this->printGPL( "Disclaimer of Warranty.", "Limitation of Liability." );                 
-	} else if ( std::string( arg ) == std::string( "conditions" ) ) {
-		this->printGPL( "TERMS AND CONDITIONS", "END OF TERMS AND CONDITIONS" );
-	} else {
-		std::cerr << "Unknown license option: " << arg << std::endl;
-	}
+    Ginger::optionPrintGPL( arg );
 }
 
 template < class ContainerT >
@@ -364,6 +361,7 @@ private:
 
 public:
     FILE * get() const { return this->file; }
+    int getFD() const { return fileno( this->file ); }
     void noteTidyExit() { this->tidy_exit = true; }
 
 public:
@@ -394,12 +392,17 @@ void ToolMain::executeCommand( RCEP & rcep, Ginger::Command command ) {
 
     FileMgr gnxfp( command );
     
+#ifdef GNU_FD_TO_IFSTREAM
     // ... open the file, with whatever, pipes or who-knows ...
     // let's build a buffer from the FILE* descriptor ...
     __gnu_cxx::stdio_filebuf<char> pipe_buf( gnxfp.get(), ios_base::in );
-
-    // there we are, a regular istream is build upon the buffer.
+   // there we are, a regular istream is build upon the buffer.
     istream stream_pipe_in( &pipe_buf );
+ #else
+    FileDescriptorIFStream stream_pipe_in( gnxfp.getFD() );
+#endif
+   
+
     
     while ( rcep.unsafe_read_comp_exec_print( stream_pipe_in, std::cout ) ) {}
     gnxfp.noteTidyExit();    

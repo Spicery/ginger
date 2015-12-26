@@ -30,8 +30,8 @@
 	#include <boost/shared_ptr.hpp>
 	#define shared boost::shared_ptr
 #else
-	#include <tr1/memory>
-	#define shared std::tr1::shared_ptr
+	#include <memory>
+	#define shared std::shared_ptr
 #endif
 
 

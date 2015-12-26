@@ -28,5 +28,5 @@ unsigned long d;
 #endif
 d = VMVP - ToRefRef( LOCAL(n) );
 if ( d == 1 ) RETURN( pc + 1 );
-throw Mishap( "Wrong number of results (needed 1)" ).culprit( "#results", "" + d );
+throw Mishap( "Wrong number of results (needed 1)" ).culprit( "#results", (long)d );
 RETURN( NULL );	// stupid compiler

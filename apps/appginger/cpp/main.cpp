@@ -25,8 +25,11 @@
 #include <stddef.h>
 #include <syslog.h>
 
-#include <ext/stdio_filebuf.h> // __gnu_cxx::stdio_filebuf
-
+#ifdef GNU_FD_TO_IFSTREAM
+    #include <ext/stdio_filebuf.h> // __gnu_cxx::stdio_filebuf
+#else
+    #include "fdifstream.hpp"
+#endif
 
 #include "mishap.hpp"
 

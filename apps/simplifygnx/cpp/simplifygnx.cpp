@@ -556,7 +556,7 @@ std::string resolveQualified(
         cerr << "simplifygnx resolving qualified, reply from fetchgnx -R" << endl;
 		cerr << "  [[" << prog.str() << "]]" << endl;
 	#endif
-
+GOT TO HERE
 	ResolveHandler resolve;
 	Ginger::SaxParser parser( prog, resolve );
 	parser.readElement();
@@ -989,28 +989,28 @@ public:
 		const string & x = element.name();
 		if ( x == ID ) {
 			if ( element.hasAttribute( SCOPE, "global" ) ) {
-				if ( not element.hasAttribute( "def.pkg" ) ) {
-					const string & name = element.attribute( VID_NAME );
-					const string & enc_pkg = element.hasAttribute( "enc.pkg" ) ? element.attribute( "enc.pkg" ) : this->package;
+				if ( not element.hasAttribute( GNX_VID_DEF_PKG ) ) {
+					const string & name = element.attribute( GNX_VID_NAME );
+					const string & enc_pkg = element.hasAttribute( GNX_VID_ENC_PKG ) ? element.attribute( GNX_VID_ENC_PKG ) : this->package;
 					if ( element.hasAttribute( "alias" ) ) {
 						const string & alias = element.attribute( "alias" );
 						//cout << "RESOLVE (QUALIFIED): name=" << name << ", alias=" << alias << ", enc.pkg=" << enc_pkg << endl;
 						const string def_pkg( resolveQualified( this->project_folders, enc_pkg, alias, name, this->undefined_allowed ) );
 						//cout << "   def = " << def_pkg << endl;
-						element.putAttribute( "def.pkg", def_pkg );
+						element.putAttribute( GNX_VID_DEF_PKG, def_pkg );
 					} else {
 						//cerr << "RESOLVE (UNQUALIFIED): name=" << name << ", enc.pkg=" << enc_pkg << endl;
 						const string def_pkg( resolveUnqualified( this->project_folders, enc_pkg, name, this->undefined_allowed ) );
 						//cerr << "   def = " << def_pkg << endl;
-						element.putAttribute( "def.pkg", def_pkg );						
+						element.putAttribute( GNX_VID_DEF_PKG, def_pkg );						
 					}
 				}
 			}
 		} else if ( x == "var" ) {
 			if ( element.hasAttribute( SCOPE, "global" ) ) {
-				if ( not element.hasAttribute( "def.pkg" ) ) {
-					const string & enc_pkg = element.hasAttribute( "enc.pkg" ) ? element.attribute( "enc.pkg" ) : this->package;
-					element.putAttribute( "def.pkg", enc_pkg );						
+				if ( not element.hasAttribute( GNX_VID_DEF_PKG ) ) {
+					const string & enc_pkg = element.hasAttribute( GNX_VID_ENC_PKG ) ? element.attribute( GNX_VID_ENC_PKG ) : this->package;
+					element.putAttribute( GNX_VID_DEF_PKG, enc_pkg );						
 				}
 			}
 		}
@@ -1028,6 +1028,122 @@ public:
 	}
 
 	virtual ~Absolute() {}
+};
+
+/*
+	This pass does the following: 
+	
+	[1] It finds all references global variables and find their
+		originating package. It caches this using the def.pkg attribute.
+
+*/
+class AltAbsolute : public Ginger::MnxVisitor {
+private:
+	vector< string > & project_folders;
+	std::string package;
+	const bool undefined_allowed;
+		
+public:
+	void finaliseVisit( Ginger::Mnx & element ) {
+		//	Now we route through fetchgnx -X with <fetch.resolve>... </>.
+
+		TO BE DONE§
+
+	    Ginger::Command cmd( FETCHGNX );
+	    cmd.addArg( "-X" );
+	   	{
+			for ( 
+				vector< string >::iterator it = this->project_folders.begin();
+				it != this->project_folders.end();
+				++it
+			) {
+				cmd.addArg( "-j" );
+				cmd.addArg( *it );
+			}
+		}
+
+	    Ginger::MnxBuilder qb;
+	    qb.start( "fetch.resolve" );
+	    qb.add( element );
+	    qb.end();
+	    shared< Ginger::Mnx > query( qb.build() );
+
+	    cmd.runWithInputAndOutput();
+	    const int fd = cmd.getInputFD();   
+	    FILE * foutd = fdopen( cmd.getOutputFD(), "w" );
+	    query->frender( foutd );
+	    fflush( foutd );
+
+	    stringstream prog;
+	    for (;;) {
+	        static char buffer[ 1024 ];
+	        //  TODO: protect close with finally.
+	        int n = read( fd, buffer, sizeof( buffer ) );
+	        if ( n == 0 ) break;
+	        if ( n == -1 ) {
+	            if ( errno != EINTR ) {
+	                perror( "" );
+	                throw Ginger::Mishap( "Failed to read" );
+	            }
+	        } else if ( n > 0 ) {
+	            prog.write( buffer, n );
+	        }
+	    }
+
+	    //  TODO: protect close with finally.
+	    fclose( foutd );
+	
+		Ginger::SaxParser parser( prog, resolve );
+		parser.readElement();
+	}
+
+	void startVisit( Ginger::Mnx & element ) {
+		const string & x = element.name();
+		if ( x == ID ) {
+			if ( element.hasAttribute( SCOPE, "global" ) ) {
+				if ( not element.hasAttribute( GNX_VID_DEF_PKG ) ) {
+					const string & name = element.attribute( GNX_VID_NAME );
+					const string & enc_pkg = element.hasAttribute( GNX_VID_ENC_PKG ) ? element.attribute( GNX_VID_ENC_PKG ) : this->package;
+					element.putAttribute( GNX_VID_ENC_PKG, enc_pkg );
+					element.putAttribute( "fetchgnx", "resolve" );
+					/*
+					if ( element.hasAttribute( "alias" ) ) {
+						const string & alias = element.attribute( "alias" );
+						//cout << "RESOLVE (QUALIFIED): name=" << name << ", alias=" << alias << ", enc.pkg=" << enc_pkg << endl;
+						const string def_pkg( resolveQualified( this->project_folders, enc_pkg, alias, name, this->undefined_allowed ) );
+						//cout << "   def = " << def_pkg << endl;
+						element.putAttribute( GNX_VID_DEF_PKG, def_pkg );
+					} else {
+						//cerr << "RESOLVE (UNQUALIFIED): name=" << name << ", enc.pkg=" << enc_pkg << endl;
+						const string def_pkg( resolveUnqualified( this->project_folders, enc_pkg, name, this->undefined_allowed ) );
+						//cerr << "   def = " << def_pkg << endl;
+						element.putAttribute( GNX_VID_DEF_PKG, def_pkg );						
+					}
+					*/
+				}
+			}
+		} else if ( x == "var" ) {
+			if ( element.hasAttribute( SCOPE, "global" ) ) {
+				if ( not element.hasAttribute( GNX_VID_DEF_PKG ) ) {
+					const string & enc_pkg = element.hasAttribute( GNX_VID_ENC_PKG ) ? element.attribute( GNX_VID_ENC_PKG ) : this->package;
+					element.putAttribute( GNX_VID_DEF_PKG, enc_pkg );	
+				}
+			}
+		}
+	}
+	
+	void endVisit( Ginger::Mnx & element ) {
+	}
+	
+public:
+	AltAbsolute( vector< string > & folders, const std::string & enc_pkg, const bool undefined_allowed ) : 
+		project_folders( folders ),
+		package( enc_pkg ),
+		undefined_allowed( undefined_allowed )
+	{
+	}
+
+	virtual ~AltAbsolute() {}
 };
 
 
@@ -1124,7 +1240,7 @@ public:
 		const string & nm = element.name();
 		if ( nm == ID ) {
 			SelfInfoFinder finder( self_info );
-			if ( finder.find( element.attribute( VID_NAME ) ) && finder.wasFn() ) {
+			if ( finder.find( element.attribute( GNX_VID_NAME ) ) && finder.wasFn() ) {
 				if ( finder.wasNested() ) {
 					finder.element()->orFlags( SELF_BIND_MASK );
 				} else {
@@ -1136,11 +1252,11 @@ public:
 				}
 			}
 		} else if ( nm == VAR ) {
-            if ( element.hasAttribute( VID_NAME ) ) {
+            if ( element.hasAttribute( GNX_VID_NAME ) ) {
     			//	Efficiency hack - only push the variable if it masks a 
     			//	function name! This keeps the length of the stack low which
     			//	is what pushes this to be an O(N^2) algorithm. 
-    			const string & name = element.attribute( VID_NAME );
+    			const string & name = element.attribute( GNX_VID_NAME );
     			SelfInfoFinder finder( self_info );
     			if ( finder.find( name ) ) {
     				this->self_info.push_back( SelfInfo( &element, &name ) );
@@ -1178,8 +1294,8 @@ public:
 				mnx.start( SEQ );
 				mnx.start( BIND );
 				mnx.start( VAR );
-				mnx.put( VID_PROTECTED, "true" );
-				mnx.put( VID_NAME, element.attribute( FN_NAME ) );
+				mnx.put( GNX_VID_PROTECTED, "true" );
+				mnx.put( GNX_VID_NAME, element.attribute( FN_NAME ) );
 				mnx.end();
 				mnx.start( SELF_CONSTANT );
 				mnx.end();
@@ -1314,7 +1430,7 @@ private:
 
 	void markAsAssigned( Gnx id ) {
 		if ( id->hasAttribute( PROTECTED, "true" ) ) {
-			throw Ginger::Mishap( "Assigning to a protected variable" ).culprit( "Variable", id->attribute( VID_NAME, "<unknown>" ) );
+			throw Ginger::Mishap( "Assigning to a protected variable" ).culprit( "Variable", id->attribute( GNX_VID_NAME, "<unknown>" ) );
 		} else if ( id->hasAttribute( SCOPE, "local" ) ) {
 			stringstream uidstream( id->attribute( UID, "" ) );
 			int uid;
@@ -1339,7 +1455,7 @@ public:
 		element.clearAttribute( IS_OUTER );		//	Throw away any previous marking.
 		element.clearAttribute( IS_ASSIGNED );	//	Throw away any previous marking.
 		if ( x == ID ) {
-			const string & name = element.attribute( VID_NAME );
+			const string & name = element.attribute( GNX_VID_NAME );
             const bool is_tmp = element.hasAttribute( IS_TEMPORARY, "true" );
 			VarInfo * v = this->findId( name, is_tmp );
 			if ( v != NULL ) {
@@ -1358,8 +1474,8 @@ public:
 				element.putAttribute( PROTECTED, v->is_protected ? "true" : "false" );
 			}
 		} else if ( x == VAR ) {
-            if ( element.hasAttribute( VID_NAME ) ) {
-    			const string & name = element.attribute( VID_NAME );
+            if ( element.hasAttribute( GNX_VID_NAME ) ) {
+    			const string & name = element.attribute( GNX_VID_NAME );
     			const int uid = this->newUid();
     			this->var_of_uid[ uid ] = &element;
     			element.putAttribute( UID, uid );
@@ -1416,7 +1532,7 @@ public:
 			++it
 		) {
 			//cerr << endl;
-			//cerr << "VAR[" << this->var_of_uid[ *it ]->attribute( VID_NAME ) << "] has " << xrefs.size() << " references" << endl;
+			//cerr << "VAR[" << this->var_of_uid[ *it ]->attribute( GNX_VID_NAME ) << "] has " << xrefs.size() << " references" << endl;
 			//	Mark the var declaration as IS_ASSIGNED.
 			this->var_of_uid[ *it ]->putAttribute( IS_ASSIGNED, "true" );
 			//	And now mark all the id cross-refs to that declaration the same.
@@ -1464,9 +1580,9 @@ public:
 	void endVisit( Ginger::Mnx & element ) {
 		const string & x = element.name();
 		if ( x == ID ) {
-			if ( element.hasAttribute( VID_DEF_PKG, "ginger.library" ) ) {
+			if ( element.hasAttribute( GNX_VID_DEF_PKG, "ginger.library" ) ) {
 				//cout<<"IN 1" << endl;
-				const string name( element.attribute( VID_NAME ) );
+				const string name( element.attribute( GNX_VID_NAME ) );
 				element.clearAllAttributes();
 				element.putAttribute( CONSTANT_VALUE, Ginger::baseName( name ) );
 				element.putAttribute( CONSTANT_TYPE, "sysfn" );
@@ -1645,10 +1761,10 @@ public:
 			
 			b.start( BIND );
 			b.start( VAR );
-			b.put( VID_PROTECTED, "true" );
-			b.put( VID_NAME, g );						
-			b.put( VID_DEF_PKG, "ginger.temporaries" );
-			b.put( VID_SCOPE, "global" );			
+			b.put( GNX_VID_PROTECTED, "true" );
+			b.put( GNX_VID_NAME, g );						
+			b.put( GNX_VID_DEF_PKG, "ginger.temporaries" );
+			b.put( GNX_VID_SCOPE, "global" );			
             b.end();
 			b.add( m );
 			b.end();
@@ -1687,10 +1803,10 @@ public:
 				{
 					Ginger::MnxBuilder b;
 					b.start( ID );
-					b.put( VID_PROTECTED, "true" );
-					b.put( VID_NAME, name );						
-					b.put( VID_DEF_PKG, "ginger.temporaries" );
-					b.put( VID_SCOPE, "global" );
+					b.put( GNX_VID_PROTECTED, "true" );
+					b.put( GNX_VID_NAME, name );						
+					b.put( GNX_VID_DEF_PKG, "ginger.temporaries" );
+					b.put( GNX_VID_SCOPE, "global" );
 					b.end();
 					element.copyFrom( *b.build() );					
 				}
@@ -1814,7 +1930,7 @@ public:
                 where.start( WHERE );
                 where.start( element.name() );
                 where.start( VAR );
-                where.put( VID_NAME, uuid );
+                where.put( GNX_VID_NAME, uuid );
                 where.put( IS_TEMPORARY, "true" );
                 where.end();
                 bool not_first = false;
@@ -1830,7 +1946,7 @@ public:
                 where.put( SYSAPP_NAME, "=" );
                 where.add( element.getChild( 0 ) );
                 where.start( ID );
-                where.put( VID_NAME, uuid );
+                where.put( GNX_VID_NAME, uuid );
                 where.put( IS_TEMPORARY, "true" );
                 where.end();
                 where.end();

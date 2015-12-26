@@ -1,0 +1,14 @@
+BUILDDIR=_build
+INSTRUCTIONSDIR=../instruction_set
+
+all: $(BUILDDIR)/instruction_set.rst $(BUILDDIR)/sysfns.rst
+
+clean:
+	rm -f $(BUILDDIR)/*.rst
+
+$(BUILDDIR)/instruction_set.rst: *.i*
+	mkdir -p $(BUILDDIR)
+	python make_instrsetdocs.py $(INSTRUCTIONSDIR) > $(BUILDDIR)/instruction_set.rst
+
+$(BUILDDIR)/sysfns.rst:
+	../apps/appginger/cpp/ginger-info --rst > $(BUILDDIR)/sysfns.rst

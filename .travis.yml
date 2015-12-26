@@ -7,6 +7,8 @@ branches:
 before_install:
     - sudo apt-get -qq update
     - sudo apt-get -qq install uuid-dev
+    - sudo apt-get -qq install python-nose
+    - sudo apt-get -qq install guile-2.0
     - wget http://www.rudeserver.com/cgiparser/download/rudecgi-5.0.0.tar.bz2
     - tar jxf rudecgi-5.0.0.tar.bz2
     - pushd rudecgi-5.0.0
@@ -17,6 +19,7 @@ script:
     - autoconf
     - ./configure
     - sudo make install
+    - GUILE_AUTO_COMPILE=0 make check
 
 notifications:
   # irc:

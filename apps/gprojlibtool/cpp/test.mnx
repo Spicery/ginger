@@ -1,0 +1,1 @@
+<project name="standard_library"><package name="."/><package name=".."/><package name="ginger.constants"/><package name="ginger.interactive"/><package name="ginger.library"/></project>

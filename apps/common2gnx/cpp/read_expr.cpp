@@ -46,10 +46,10 @@ using namespace std;
 typedef Ginger::MnxBuilder NodeFactory;
 
 static Node makeApp( Node lhs, Node rhs ) {
-	if ( lhs->name() == SYSFN ) {
+	if ( lhs->name() == GNX_SYSFN ) {
 		NodeFactory sysapp;
 		sysapp.start( SYSAPP );
-		std::string name = lhs->attribute( SYSFN_VALUE );
+		std::string name = lhs->attribute( GNX_SYSFN_VALUE );
 		sysapp.put( SYSAPP_NAME, name );
 		sysapp.add( rhs );
 		sysapp.end();
@@ -105,7 +105,7 @@ static void pushStringConstant( NodeFactory & f, const string & s ) {
 }
 static void pushAnyPattern( NodeFactory & f ) {
 	f.start( VAR );
-	f.put( VID_PROTECTED, "true" );
+	f.put( GNX_VID_PROTECTED, "true" );
 	f.end();
 }
 #endif
@@ -118,7 +118,7 @@ static Node makeEmpty() {
 static void updateAsPattern( Node node, const bool val_vs_var ) {
 	if ( node->hasName( ID ) ) {
 		node->name() = VAR;
-		node->putAttribute( VID_PROTECTED, val_vs_var ? "true" : "false" );
+		node->putAttribute( GNX_VID_PROTECTED, val_vs_var ? "true" : "false" );
 	} else if ( node->hasName( CONSTANT ) && node->hasAttribute( CONSTANT_WAS_ANON ) ) {
 		node->name() = VAR;
 		node->removeAttribute( CONSTANT_TYPE );
@@ -663,7 +663,7 @@ Node ReadStateClass::readSyscall() {
 	ItemFactory ifact = this->item_factory;	
 	Item it = ifact->read();
 	if ( it->tok_type == tokty_id ) {
-		return makeConstant( SYSFN, it->nameString() );
+		return makeConstant( GNX_SYSFN, it->nameString() );
 	} else {
 		throw CompileTimeError( "Invalid token after >-> (syscall) arrow" ).culprit( it->nameString() );
 	}
@@ -1065,12 +1065,12 @@ Node ReadStateClass::readDefinition() {
 	Node args = components.getArgs();
 	Node body = components.getBody();
 
-	const std::string name( fn->attribute( VID_NAME ) );
+	const std::string name( fn->attribute( GNX_VID_NAME ) );
 	NodeFactory def;
 	def.start( BIND );
 	def.start( VAR );
-	def.put( VID_NAME, name );
-	def.put( VID_PROTECTED, "true" );
+	def.put( GNX_VID_NAME, name );
+	def.put( GNX_VID_PROTECTED, "true" );
 	def.end();
 	def.start( FN );
 	def.put( FN_NAME, name );
@@ -1531,7 +1531,7 @@ Node ReadStateClass::readRecordClass() {
 	//	Datakey.
 	f.start( BIND );
 	f.start( VAR ); 
-	f.put( VID_NAME, class_name );
+	f.put( GNX_VID_NAME, class_name );
 	f.end(); // VAR
 	f.start( SYSAPP );
 	f.put( SYSAPP_NAME, "newRecordClass" );
@@ -1547,13 +1547,13 @@ Node ReadStateClass::readRecordClass() {
 		stringstream s;
 		s << "new";
 		s << class_name;
-		f.put( VID_NAME, s.str() );
+		f.put( GNX_VID_NAME, s.str() );
 	}
 	f.end(); // VAR
 	f.start( SYSAPP );
 	f.put( SYSAPP_NAME, "newClassConstructor" );
 	f.start( ID );
-	f.put( VID_NAME, class_name );
+	f.put( GNX_VID_NAME, class_name );
 	f.end();	//	ID
 	f.end();	//	SYSAPP
 	f.end(); //	BIND
@@ -1565,13 +1565,13 @@ Node ReadStateClass::readRecordClass() {
 		stringstream s;
 		s << "explode";
 		s << class_name;
-		f.put( VID_NAME, s.str() );		
+		f.put( GNX_VID_NAME, s.str() );		
 	}
 	f.end();		//	VAR
 	f.start( SYSAPP );
 	f.put( SYSAPP_NAME, "newClassExploder" );
 	f.start( ID );
-	f.put( VID_NAME, class_name );
+	f.put( GNX_VID_NAME, class_name );
 	f.end();		// 	ID
 	f.end();		//	SYAPP
 	f.end();		//	BIND
@@ -1583,13 +1583,13 @@ Node ReadStateClass::readRecordClass() {
 		stringstream s;
 		s << "is";
 		s << class_name;
-		f.put( VID_NAME, s.str() );
+		f.put( GNX_VID_NAME, s.str() );
 	}
 	f.end(); // VAR
 	f.start( SYSAPP );
 	f.put( SYSAPP_NAME, "newClassRecogniser" );
 	f.start( ID );
-	f.put( VID_NAME, class_name );
+	f.put( GNX_VID_NAME, class_name );
 	f.end();	//	ID
 	f.end();	//	SYSAPP
 	f.end(); //	BIND
@@ -1599,12 +1599,12 @@ Node ReadStateClass::readRecordClass() {
 
 		f.start( BIND );
 		f.start( VAR ); 
-		f.put( VID_NAME, ith_name );
+		f.put( GNX_VID_NAME, ith_name );
 		f.end(); // VAR
 		f.start( SYSAPP );
 		f.put( SYSAPP_NAME, "newClassAccessor" );
 		f.start( ID );
-		f.put( VID_NAME, class_name );
+		f.put( GNX_VID_NAME, class_name );
 		f.end();	//	ID
 		pushConstant( f, "int", i + 1 ); //	CONSTANT
 		f.end();	//	SYSAPP

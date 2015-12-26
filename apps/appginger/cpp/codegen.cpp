@@ -129,8 +129,8 @@ void CodeGenClass::vmiCHECK_EXPLODE( Arity arity ) {
 }
 
 void CodeGenClass::emitVAR_REF( Gnx id ) {
-	if ( id->hasAttribute( VID_SCOPE, "local" ) ) {
-		this->emitRef( IntToRef( id->attributeToInt( VID_SLOT ) ) );
+	if ( id->hasAttribute( GNX_VID_SCOPE, "local" ) ) {
+		this->emitRef( IntToRef( id->attributeToInt( GNX_VID_SLOT ) ) );
 	} else {
 		this->emitValof( resolveGlobal( id ) );
 	}
@@ -260,8 +260,8 @@ void CodeGenClass::vmiCHAIN_LITE( Ref fn, long N ) {
 
 
 Valof * CodeGenClass::resolveGlobal( Gnx id ) {
-	Package * def_pkg = this->vm->getPackage( id->attribute( VID_DEF_PKG ) );
-	return def_pkg->fetchAbsoluteValof( id->attribute( VID_NAME ) );
+	Package * def_pkg = this->vm->getPackage( id->attribute( GNX_VID_DEF_PKG ) );
+	return def_pkg->fetchAbsoluteValof( id->attribute( GNX_VID_NAME ) );
 }
 
 void CodeGenClass::vmiPOP_INNER_SLOT( int slot ) {
@@ -1680,10 +1680,10 @@ Ref CodeGenClass::calcConstant( Gnx mnx ) {
 		}
 	} else if ( type == "symbol" ) {
 		return refMakeSymbol( mnx->attribute( CONSTANT_VALUE ) );
-	} else if ( type == SYSFN and mnx->hasAttribute( SYSFN_VALUE ) ) {
-		Ref r = makeSysFn( this, mnx->attribute( SYSFN_VALUE ), SYS_UNDEFINED );
+	} else if ( type == GNX_SYSFN and mnx->hasAttribute( GNX_SYSFN_VALUE ) ) {
+		Ref r = makeSysFn( this, mnx->attribute( GNX_SYSFN_VALUE ), SYS_UNDEFINED );
 		if ( r == SYS_UNDEFINED ) {
-			throw Ginger::Mishap( "No such system function" ).culprit( "Function", mnx->attribute( SYSFN_VALUE ) );
+			throw Ginger::Mishap( "No such system function" ).culprit( "Function", mnx->attribute( GNX_SYSFN_VALUE ) );
 		}
 		return r;
 	} else if ( type == "sysclass" ) {

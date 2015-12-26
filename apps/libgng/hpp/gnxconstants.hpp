@@ -44,11 +44,13 @@
 #define	ID				"id"
 #define VAR				"var"
 
-#define VID_NAME		"name"
-#define VID_DEF_PKG		"def.pkg"
-#define VID_SCOPE		"scope"
-#define VID_PROTECTED	"protected"
-#define VID_SLOT		"slot"
+#define GNX_VID_NAME		"name"
+#define GNX_VID_DEF_PKG		"def.pkg"
+#define GNX_VID_ENC_PKG     "enc.pkg"
+#define GNX_VID_SCOPE		"scope"
+#define GNX_VID_PROTECTED	"protected"
+#define GNX_VID_SLOT        "slot"
+#define GNX_VID_ALIAS       "alias"
 
 #define MAKEREF			"makeref"
 #define DEREF			"deref"
@@ -87,8 +89,8 @@
 
 #define APP				"app"
 
-#define SYSFN			"sysfn"
-#define SYSFN_VALUE		"value"
+#define GNX_SYSFN			"sysfn"
+#define GNX_SYSFN_VALUE		"value"
 
 #define SYSAPP			"sysapp"
 #define SYSAPP_NAME		"name"

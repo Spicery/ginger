@@ -32,12 +32,14 @@
 #include <dirent.h>
 #include <sys/stat.h>
 
+#include "mnx.hpp"
+
 #include "importinfo.hpp"
 #include "search.hpp"
 #include "mishap.hpp"
 #include "folderscan.hpp"
 #include "packagecache.hpp"
-#include "mnx.hpp"
+#include "resolvervisitor.hpp"
 
 #define BROWSE_INFO 	"browse.info"
 #define VAR 			"var.info"
@@ -191,12 +193,12 @@ static void outputQualified( const string & enc_pkg_name, const string & alias_n
 	cout << "\" />" << endl;	
 }
 
-void Search::resolveUnqualified( const string & enc_pkg_name, const string & name ) {
+string Search::findDefPkgUnqualified( const string & enc_pkg_name, const string & name ) {
 	//cerr << "UNQUALIFIED" << endl;
 	PackageCache * x = this->project_cache.fetchPackageCache( enc_pkg_name );
 	VarInfo * vfile = x->absoluteVarInfo( name );
 	if ( vfile != NULL ) {
-		outputUnqualified( enc_pkg_name, name, enc_pkg_name );
+		return enc_pkg_name;
 		//this->cacheDefinitionFile( x, name, vfile->getPathName() );
 	} else {
 		vector< ImportInfo > & imports = x->importVector();
@@ -221,12 +223,12 @@ void Search::resolveUnqualified( const string & enc_pkg_name, const string & nam
 			}
 		}
 		if ( vfile != NULL ) {
-			outputUnqualified( enc_pkg_name, name, def_pkg->getPackageName() );
+			return def_pkg->getPackageName();
 			//this->cacheUnqualifiedLookup( x->getPackageName(), name, def_pkg->getPackageName(), name );
 			//this->cacheDefinitionFile( def_pkg, name, vfile->getPathName() );
 		} else {
 			if ( this->undefined_allowed ) {
-				outputUnqualified( enc_pkg_name, name, enc_pkg_name );
+				return enc_pkg_name;
 			} else {	
 				throw  (
 					Mishap( "Cannot find variable" ).
@@ -238,7 +240,12 @@ void Search::resolveUnqualified( const string & enc_pkg_name, const string & nam
 	}
 }
 
-void Search::resolveQualified( const string & enc_pkg_name, const string & alias_name, const string & var_name ) {
+
+void Search::resolveUnqualified( const string & enc_pkg_name, const string & name ) {
+	outputUnqualified( enc_pkg_name, name, findDefPkgUnqualified( enc_pkg_name, name ) );
+}
+
+string Search::findDefPkgQualified( const string & enc_pkg_name, const string & alias_name, const string & var_name ) {
 	//cerr << "QUALIFIED" << endl;
 	PackageCache * x = this->project_cache.fetchPackageCache( enc_pkg_name );
 	VarInfo * vfile = NULL;
@@ -259,12 +266,12 @@ void Search::resolveQualified( const string & enc_pkg_name, const string & alias
 		}
 	}
 	if ( vfile != NULL ) {
-		outputQualified( enc_pkg_name, alias_name, var_name, def_pkg->getPackageName() );
+		return def_pkg->getPackageName();
 		//this->cacheUnqualifiedLookup( x->getPackageName(), name, def_pkg->getPackageName(), name );
 		//this->cacheDefinitionFile( def_pkg, name, vfile->getPathName() );
 	} else {
 		if ( this->undefined_allowed ) {
-			outputQualified( enc_pkg_name, alias_name, var_name, enc_pkg_name );
+			return enc_pkg_name;
 		} else {
 			throw  (
 				Mishap( "Cannot find variable" ).
@@ -273,6 +280,10 @@ void Search::resolveQualified( const string & enc_pkg_name, const string & alias
 			);
 		}
 	}
+}
+
+void Search::resolveQualified( const string & enc_pkg_name, const string & alias_name, const string & var_name ) {
+	outputQualified( enc_pkg_name, alias_name, var_name, findDefPkgQualified( enc_pkg_name, alias_name, var_name ) );	
 }
 
 void Search::fetchDefinition( const string & pkg_name, const string & var_name ) {
@@ -326,5 +337,12 @@ void Search::browsePackages() {
 	}
 	all.end();
 	all.build()->render();
+	cout << endl;
+}
+
+void Search::resolveGnxInPlace( Ginger::SharedMnx gnx ) {
+	ResolverVisitor resolver( this );
+	gnx->visit( resolver );
+	gnx->render();
 	cout << endl;
 }

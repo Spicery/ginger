@@ -22,6 +22,7 @@
 #include <string>
 
 //#include "database.hpp"
+#include "mnx.hpp"
 
 #include "projectcache.hpp"
 #include "packagecache.hpp"
@@ -38,8 +39,11 @@ private:
 	void cacheDefinitionFile( PackageCache * c, const std::string & name, const std::string & pathname );
 
 public:
+	void resolveGnxInPlace( Ginger::SharedMnx gnx );
 	void resolveQualified( const std::string & pkg, const std::string & alias, const std::string & vname );
+	std::string findDefPkgQualified( const std::string & pkg, const std::string & alias, const std::string & vname );
 	void resolveUnqualified( const std::string & pkg, const std::string & vname );
+	std::string findDefPkgUnqualified( const std::string & pkg, const std::string & vname );
 	void fetchDefinition( const std::string & pkg, const std::string & vname );
 	void loadPackage( const std::string & pkg );
 	void loadFileFromPackage( const std::string & pkg, const std::string & load_file );

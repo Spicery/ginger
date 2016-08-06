@@ -62,10 +62,10 @@ all: $(USEREXECUTABLES)
 ################################################################################
 
 machine%.o: machine%.cpp
-	g++ $(CXXFLAGS) -fwrapv -c $<
+	$(CC) $(CXXFLAGS) -fwrapv -c $<
 
 instruction_set%.o: instruction_set%.cpp
-	g++ $(CXXFLAGS) -fwrapv -c $<
+	$(CC) $(CXXFLAGS) -fwrapv -c $<
 
 
 ################################################################################

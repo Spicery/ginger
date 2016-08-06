@@ -17,7 +17,7 @@ unitcheck:
 # $@ is make shorthand for the target.
 # $@ is make shorthand for the dependencies
 testrunner: $(OBJS) ../cpp/libappginger.a
-	g++ $(CXXFLAGS) -o $@ $^ ../../libgng/cpp/libgng.a $(LDFLAGS) /usr/local/lib/librudecgi.a -L../cpp -lappginger 
+	$(CC) $(CXXFLAGS) -o $@ $^ ../../libgng/cpp/libgng.a $(LDFLAGS) /usr/local/lib/librudecgi.a -L../cpp -lappginger 
 
 clean:
 	rm -f *.o

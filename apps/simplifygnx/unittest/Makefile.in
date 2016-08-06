@@ -1,5 +1,5 @@
 
-CC=g++
+CC=@CXX@
 
 CXXFLAGS=-g -I../hpp -I../../libgng/hpp -Wall -Wnon-virtual-dtor -std=c++11
 CFLAGS=-Wmissing-prototypes 
@@ -14,7 +14,7 @@ check: testsimplifygnx
 # $@ is make shorthand for the target.
 # $@ is make shorthand for the dependencies
 testsimplifygnx: $(OBJS)
-	g++ $(CXXFLAGS) $(BOOST_CPPFLAGS) -o $@ $^ ../../libgng/cpp/libgng.a  -lcppunit $(LDFLAGS)
+	$(CC) $(CXXFLAGS) $(BOOST_CPPFLAGS) -o $@ $^ ../../libgng/cpp/libgng.a  -lcppunit $(LDFLAGS)
 	
 clean:
 	rm -f *.o

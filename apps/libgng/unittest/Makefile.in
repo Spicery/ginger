@@ -1,5 +1,5 @@
 
-CC=g++
+CC=@CXX@
 
 CXXFLAGS=-g -I../hpp -L../cpp -Wall -Wnon-virtual-dtor -std=c++11 # -Weffc++
 
@@ -15,7 +15,7 @@ check: testlibgng
 # $@ is make shorthand for the target.
 # $@ is make shorthand for the dependencies
 testlibgng: $(OBJS)
-	g++ $(CXXFLAGS) $(BOOST_CPPFLAGS) -L../cpp -o $@ $^ -lcppunit -lgng
+	$(CC) $(CXXFLAGS) $(BOOST_CPPFLAGS) -L../cpp -o $@ $^ -lcppunit -lgng
 	
 clean:
 	rm -f *.o

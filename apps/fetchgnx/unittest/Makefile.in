@@ -1,5 +1,5 @@
 
-CC=g++
+CC=@CXX@
 
 CXXFLAGS=-g -std=c++11 -I../hpp -L../cpp -Wall -Wnon-virtual-dtor # -Weffc++
 
@@ -15,7 +15,7 @@ check: testfetchgnx
 # $@ is make shorthand for the target.
 # $@ is make shorthand for the dependencies
 testfetchgnx: $(OBJS)
-	g++ $(CXXFLAGS) $(BOOST_CPPFLAGS) -o $@ $^ -lcppunit
+	$(CC) $(CXXFLAGS) $(BOOST_CPPFLAGS) -o $@ $^ -lcppunit
 	
 clean:
 	rm -f *.o

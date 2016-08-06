@@ -20,6 +20,16 @@ script:
     - ./configure
     - sudo make install
     - GUILE_AUTO_COMPILE=0 make check
+# Use C++11. From http://stackoverflow.com/questions/22111549/travis-ci-with-clang-3-4-and-c11
+install:
+    - if [ "$CXX" = "g++" ]; then export CXX="g++-5" CC="gcc-5"; fi
+addons:
+  apt:
+    sources:
+    - ubuntu-toolchain-r-test
+    packages:
+    - gcc-5
+    - g++-5
 
 notifications:
   # irc:

@@ -1,5 +1,5 @@
 # http://travis-ci.org/#!/ghiggins/ginger
-language: c
+language: C++
 # whitelist
 branches:
   only:

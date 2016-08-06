@@ -860,6 +860,7 @@ public:
     };
 private:
     std::ostream & out;
+    int indent;
     enum MODE mode;
 public:
     Renderer( std::ostream & _out = std::cout, const enum MODE _mode = SHOW_MODE ) : out( _out ), indent( 0 ), mode( _mode ) {}

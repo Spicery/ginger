@@ -30,7 +30,7 @@ class Search;
 
 class ProjectCache {
 private:
-	//Search * 									parent;
+	Search * 									parent;
 	std::vector< std::string > 					project_folders;
 	std::map< std::string, PackageCache * > 	cache;
 	

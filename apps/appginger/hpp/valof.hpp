@@ -35,7 +35,7 @@ public:
 	Ref					valof;
 	
 private:
-	//class Package * 	parent;
+	class Package * 	parent;
 	const std::string	name_data;
 
 private:	//	Flags.

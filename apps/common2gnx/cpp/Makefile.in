@@ -11,7 +11,7 @@ CC=@CXX@
 
 INSTALLDIRS=-DINSTALL_BIN='"$(INSTALL_BIN)"' -DINSTALL_LIB='"$(INSTALL_LIB)"' -DINSTALL_TOOL='"$(INSTALL_TOOL)"'
 
-CXXFLAGS=$(INSTALLDIRS) -I../hpp -I../../libgng/hpp -I../../automatic/machine -I../../automatic/sys -I../../appginger/hpp -Wall -g
+CXXFLAGS=$(INSTALLDIRS) -I../hpp -I../../libgng/hpp -I../../automatic/machine -I../../automatic/sys -I../../appginger/hpp -Wall -g -std=c++11
 CFLAGS=-Wmissing-prototypes 
 
 OBJS=read_expr.o item.o item_map.o item_factory.o toktype.o role.o sysconst.o toolmain.o

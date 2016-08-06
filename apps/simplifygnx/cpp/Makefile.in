@@ -23,7 +23,7 @@ ifneq ($(shell uname),Darwin)
 	NONDARWINCXXFLAGS=-Wl,-Bstatic -luuid -Wl,-Bdynamic
 endif
 
-CXXFLAGS=$(INSTALLDIRS) -g -I../hpp -I../../libgng/hpp -I../../libmetainfo/hpp -Wall -Wnon-virtual-dtor
+CXXFLAGS=$(INSTALLDIRS) -g -I../hpp -I../../libgng/hpp -I../../libmetainfo/hpp -Wall -Wnon-virtual-dtor -std=c++11
 CFLAGS=-Wmissing-prototypes
 
 OBJS= simplifygnx.o

@@ -1,7 +1,7 @@
 
 CC=g++
 
-CXXFLAGS=-g -I../hpp -L../cpp -Wall -Wnon-virtual-dtor # -Weffc++
+CXXFLAGS=-g -I../hpp -L../cpp -Wall -Wnon-virtual-dtor -std=c++11 # -Weffc++
 
 CFLAGS=-Wmissing-prototypes 
 

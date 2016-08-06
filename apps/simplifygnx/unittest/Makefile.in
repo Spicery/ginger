@@ -1,7 +1,7 @@
 
 CC=g++
 
-CXXFLAGS=-g -I../hpp -I../../libgng/hpp -Wall -Wnon-virtual-dtor
+CXXFLAGS=-g -I../hpp -I../../libgng/hpp -Wall -Wnon-virtual-dtor -std=c++11
 CFLAGS=-Wmissing-prototypes 
 LDFLAGS=-ldl
 OBJS=testsimplifygnx.o

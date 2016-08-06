@@ -1,7 +1,7 @@
 
 CC=@CXX@
 
-CXXFLAGS=-g -I../hpp -I../../libgng/hpp -I../../automatic/machine -I../../automatic/sys -I../../automatic/simple `cppunit-config --cflags` -Wall -Wnon-virtual-dtor
+CXXFLAGS=-g -std=c++11 -I../hpp -I../../libgng/hpp -I../../automatic/machine -I../../automatic/sys -I../../automatic/simple `cppunit-config --cflags` -Wall -Wnon-virtual-dtor
 CFLAGS=-Wmissing-prototypes 
 LDFLAGS=`cppunit-config --libs` 
 OBJS=example.o testrunner.o archtest.o simplekeytest.o constants.o

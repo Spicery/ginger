@@ -14,7 +14,7 @@ CXX=@CXX@
 INSTALLDIRS=-DINSTALL_BIN='"$(INSTALL_BIN)"' -DINSTALL_LIB='"$(INSTALL_LIB)"' -DINSTALL_TOOL='"$(INSTALL_TOOL)"'
 
 
-CXXFLAGS=$(INSTALLDIRS) -std=c++0x -g -I../hpp -I../../libgng/hpp -Wall
+CXXFLAGS=$(INSTALLDIRS) -std=c++11 -g -I../hpp -I../../libgng/hpp -Wall
 CFLAGS=-Wmissing-prototypes 
 
 OBJS=src2lnx.o state.o action.o node.o match.o grammar.o arc.o mapping.o

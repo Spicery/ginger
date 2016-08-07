@@ -15,7 +15,7 @@ lisp2gnx:
 	touch lisp2gnx.tmp
 	echo '#!/bin/sh' >> lisp2gnx.tmp
 	echo 'GUILE_LOAD_PATH=""' >> lisp2gnx.tmp
-	echo "exec guile -l $(INSTALL_LIB)/lisp2gnx/lisp2gnx.lsp -e lisp2gnx -- "'$$@' >> lisp2gnx.tmp
+	echo "exec guile --no-debug -q -l $(INSTALL_LIB)/lisp2gnx/lisp2gnx.lsp -e lisp2gnx -- "'$$@ 2> /dev/null' >> lisp2gnx.tmp
 	chmod a=rx lisp2gnx.tmp
 	mv lisp2gnx.tmp lisp2gnx
 	

@@ -64,8 +64,37 @@
 	(display " ")
 	(display (car attr))
 	(display "=\"")
-	(display (cadr attr))
+	(mnxRender (cadr attr))
 	(display "\""))
+
+(define (mnxRender x)
+	(cond 
+		((string? x) (string-for-each mnxRenderChar x))
+		((char? x) (mnxRenderChar x))
+		(else (display x))))
+
+(define (mnxRenderChar ch)
+	(case ch
+		((#\<) (display "&lt;"))
+		((#\>) (display "&gt;"))
+		((#\&) (display "&amp;"))
+		((#\") (display "&quot;"))
+		((#\') (display "&apos;"))
+		(else 
+			(if 
+				(and 
+					(char<=? #\space ch) 
+					(char<? ch #\del) 
+				)
+				(display ch)
+				(begin
+					(display "&#")
+					(display (char->integer ch))
+					(display ";")
+				)
+			)
+		)
+	))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; ( sexp2gnx x mode )

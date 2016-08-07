@@ -19,8 +19,9 @@ script:
     - autoconf
     - ./configure
     - sudo make install
-    #Temporarily disabled check while getting Travis working - GUILE_AUTO_COMPILE=0 make check
+    - make check
 # Use C++11. From http://stackoverflow.com/questions/22111549/travis-ci-with-clang-3-4-and-c11
+# The option is only recognised if you're using a reasonably up-to-date C++.
 install:
     - if [ "$CXX" = "g++" ]; then export CXX="g++-5" CC="gcc-5"; fi
 addons:

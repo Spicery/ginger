@@ -318,7 +318,7 @@ public:
 
 	void printGPL( const char * start, const char * end ) {
 		bool printing = false;
-		ifstream license( INSTALL_LIB "/LICENSE.TXT" );
+		ifstream license( INSTALL_LIB "/COPYING" );
 		std::string line;
 		while ( getline( license, line ) )  {
 			if ( !printing && ( start == NULL || line.find( start ) != string::npos ) ) {

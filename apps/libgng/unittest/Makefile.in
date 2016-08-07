@@ -1,22 +1,25 @@
 
 CC=@CXX@
+CXX=@CXX@
 
-CXXFLAGS=-g -I../hpp -L../cpp -Wall -Wnon-virtual-dtor -std=c++11 # -Weffc++
+CXXFLAGS=-g -std=c++11 -I../../CppUnitLite2/src  -I../hpp -Wall -Wnon-virtual-dtor # -Weffc++
 
 CFLAGS=-Wmissing-prototypes 
 
-OBJS=testlibgng.o saxtest.o
+OBJS=maintest.o transdoubletest.o saxtestlite.o
 
-all: testlibgng
+.PHONEY: all
+all: maintest
 
-check: testlibgng
-	./testlibgng
+.PHONEY: check
+check: maintest
+	./maintest
 
 # $@ is make shorthand for the target.
 # $@ is make shorthand for the dependencies
-testlibgng: $(OBJS)
-	$(CC) $(CXXFLAGS) $(BOOST_CPPFLAGS) -L../cpp -o $@ $^ -lcppunit -lgng
+maintest: $(OBJS)
+	$(CC) $(CXXFLAGS) -o $@ $^ ../../CppUnitLite2/cppunitlite.a ../cpp/libgng.a
 	
 clean:
 	rm -f *.o
-	rm -f testlibgng
+	rm -f maintest

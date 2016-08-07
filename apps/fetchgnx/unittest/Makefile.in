@@ -1,7 +1,7 @@
 
 CC=@CXX@
 
-CXXFLAGS=-g -std=c++11 -I../hpp -L../cpp -Wall -Wnon-virtual-dtor # -Weffc++
+CXXFLAGS=-g -std=c++11 -I../../CppUnitLite2/src -I../hpp -Wall -Wnon-virtual-dtor # -Weffc++
 
 CFLAGS=-Wmissing-prototypes 
 
@@ -15,7 +15,7 @@ check: testfetchgnx
 # $@ is make shorthand for the target.
 # $@ is make shorthand for the dependencies
 testfetchgnx: $(OBJS)
-	$(CC) $(CXXFLAGS) $(BOOST_CPPFLAGS) -o $@ $^ -lcppunit
+	$(CC) $(CXXFLAGS) $(BOOST_CPPFLAGS) -o $@ $^ ../../CppUnitLite2/cppunitlite.a
 	
 clean:
 	rm -f *.o

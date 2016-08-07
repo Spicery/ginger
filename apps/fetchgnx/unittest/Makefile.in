@@ -1,7 +1,7 @@
 
 CC=@CXX@
 
-CXXFLAGS=-g -std=c++11 -I../../CppUnitLite2/src -I../hpp -L../cpp -Wall -Wnon-virtual-dtor # -Weffc++
+CXXFLAGS=-g -std=c++11 -I../../CppUnitLite2/src -I../hpp -Wall -Wnon-virtual-dtor # -Weffc++
 
 CFLAGS=-Wmissing-prototypes 
 

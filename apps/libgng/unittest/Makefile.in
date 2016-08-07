@@ -2,22 +2,23 @@
 CC=@CXX@
 CXX=@CXX@
 
-
-CXXFLAGS=-g -std=c++11 -I../../CppUnitLite2/src  -I../hpp -L../cpp -Wall -Wnon-virtual-dtor # -Weffc++
+CXXFLAGS=-g -std=c++11 -I../../CppUnitLite2/src  -I../hpp -Wall -Wnon-virtual-dtor # -Weffc++
 
 CFLAGS=-Wmissing-prototypes 
 
 OBJS=maintest.o transdoubletest.o saxtestlite.o
 
+.PHONEY: all
 all: maintest
 
+.PHONEY: check
 check: maintest
 	./maintest
 
 # $@ is make shorthand for the target.
 # $@ is make shorthand for the dependencies
 maintest: $(OBJS)
-	$(CC) $(CXXFLAGS) -o $@ $^ ../../CppUnitLite2/cppunitlite.a -lgng
+	$(CC) $(CXXFLAGS) -o $@ $^ ../../CppUnitLite2/cppunitlite.a ../cpp/libgng.a
 	
 clean:
 	rm -f *.o

@@ -10,13 +10,10 @@ Development:
   	Graham Higgins <gjh@bel-epa.com>      
     	Continuous integration, autoconf & RPM packaging
   
-Design Team:
-  	Stephen Leach <sfkleach@gmail.com>
-  	Chris Dollin <eh@electric-hedgehog.com> 
-
-Testing and Review:
-  	Phil Allen <phil.allen.gm@gmail.com>
-
 Documentation:
   	Stephen Leach <sfkleach@gmail.com>   
   	Graham Higgins <gjh@bel-epa.com>
+
+Original Design:
+    Stephen Leach <sfkleach@gmail.com>
+    Chris Dollin <eh@electric-hedgehog.com> 

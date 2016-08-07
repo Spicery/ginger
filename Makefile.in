@@ -123,7 +123,7 @@ install-as-is:
 	( cd projects; tar cf - standard_library ) | ( cd $(INSTALL_LIB); tar xf - )
 	#echo Installing docs into $(INSTALL_DOC)
 	mkdir -p $(INSTALL_LIB)
-	/usr/bin/install -m a=r AUTHORS BUGS COPYING NEWS THANKS build_template/LICENSE.txt $(INSTALL_LIB)
+	/usr/bin/install -m a=r AUTHORS BUGS COPYING NEWS THANKS $(INSTALL_LIB)
 	mkdir -p $(INSTALL_LIB)/lisp2gnx
 	/usr/bin/install -m a=r apps/lisp2gnx/lsp/lisp2gnx.lsp $(INSTALL_LIB)/lisp2gnx
 	mkdir -p $(INSTALL_LIB)/gvmtest

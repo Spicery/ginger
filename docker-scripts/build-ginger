@@ -1,0 +1,5 @@
+#!/bin/sh
+SPICERY_HOME=/tmp
+cd $SPICERY_HOME/ginger
+autoconf; ./configure; make
+sudo make install-as-is

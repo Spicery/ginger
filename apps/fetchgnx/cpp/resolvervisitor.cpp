@@ -17,6 +17,7 @@
 \******************************************************************************/
 
 #include <iostream>
+#include <string>
 
 
 #include "search.hpp"
@@ -24,11 +25,11 @@
 
 #include "resolvervisitor.hpp"
 
-//#define DBG_FETCHGNX_RESOLVER_VISITOR
+#define DBG_FETCHGNX_RESOLVER_VISITOR
 
 using namespace std;
 
-ResolverVisitor::ResolverVisitor( Search * search ) :
+ResolverVisitor::ResolverVisitor( Search * search, const string &  ) :
     search( search )
 {
     //  Nothing.
@@ -42,8 +43,11 @@ ResolverVisitor::ResolverVisitor( Search * search ) :
 //  required, otherwise an unqualified resolution.
 //
 void ResolverVisitor::startVisit( Ginger::Mnx & element ) {
+    #ifdef DBG_FETCHGNX_RESOLVER_VISITOR
+        cerr << "Resolving " << element.name() << endl;
+    #endif
     if ( 
-        element.hasAttribute( "fetchgnx", "resolve" ) &&
+        //element.hasAttribute( "fetchgnx", "resolve" ) &&
         element.hasAttribute( GNX_VID_ENC_PKG ) &&
         element.hasAttribute( GNX_VID_NAME )
     ) {

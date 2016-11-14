@@ -17,7 +17,7 @@
 \******************************************************************************/
 
 //	Local debugging switch for conditional code compilation.
-//#define DBG_FETCHGNX 1
+// #define DBG_FETCHGNX 1
 
 /**
 	The fetchgnx command is used to fetch the Ginger XML (GNX) contents of a 
@@ -47,6 +47,7 @@
 #include "mishap.hpp"
 #include "defn.hpp"
 #include "search.hpp"
+#include "fetchconstants.hpp"
 
 using namespace std;
 
@@ -229,7 +230,7 @@ void Main::parseArgs( int argc, char **argv, char **envp ) {
 
 #ifdef DBG_FETCHGNX
 void Main::summary() {
-	cerr << FETCHGNX << " Summary" << endl;
+	cerr << FETCHGNX << " Summary ..." << endl;
 	cerr << "  Mode: ";
 	switch ( this->task ) {
 		case RESOLVE_QUALIFIED: {
@@ -300,6 +301,7 @@ void Main::init() {
 
 void Main::run() {
 	Search search( this->project_folders, this->undefined_allowed );
+	// cerr << "FETCHGNX task " << this->task << endl;
 	switch ( this->task ) {
 		case RESOLVE_QUALIFIED: {
 			search.resolveQualified( this->package_name, this->alias_name, this->variable_name );
@@ -336,8 +338,12 @@ void Main::run() {
 				#endif
 			} else if ( 
 				mnx->hasName( "resolve.gnx" ) &&
+				mnx->hasAttribute( ENC_PKG ) &&
 				mnx->size() == 1
 			) {
+				#ifdef DBG_FETCHGNX
+					cerr << "Resolving in place" << endl;
+				#endif
 				search.resolveGnxInPlace( mnx->getFirstChild() );
 			} else if ( 
 				mnx->hasName( "resolve.qualified" ) && 
@@ -395,7 +401,10 @@ int main( int argc, char ** argv, char **envp ) {
 			main.summary();
 		#endif
 		main.run();
-	    return EXIT_SUCCESS;
+	    #ifdef DBG_FETCHGNX
+	    	cerr << "FETCHGNX completed" << endl;
+		#endif
+		return EXIT_SUCCESS;
 	} catch ( Ginger::Mishap & p ) {
 		p.culprit( "Detected by", FETCHGNX );
 		p.gnxReport();

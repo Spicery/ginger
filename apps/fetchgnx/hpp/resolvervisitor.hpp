@@ -19,13 +19,14 @@
 #ifndef FETCHGNX_RESOLVER_VISITOR_HPP
 #define FETCHGNX_RESOLVER_VISITOR_HPP
 
+#include <string>
 #include "mnx.hpp"
 
 class ResolverVisitor : public Ginger::MnxVisitor {
 private:
     Search * search;
 public:
-    ResolverVisitor( Search * search );
+    ResolverVisitor( Search * search, const std::string & enc_pkg );
     void startVisit( Ginger::Mnx & element );
     void endVisit( Ginger::Mnx & element );
 };

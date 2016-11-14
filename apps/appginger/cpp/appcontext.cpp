@@ -161,10 +161,11 @@ const char* AppContext::cgiValue( const char * fieldname ) {
 #endif
 
 Ginger::Command AppContext::syntaxCommand( const bool interactively ) { 
+    // cerr << "INTERACTIVELY" << endl;
     Ginger::Command cmd( FILE2GNX );
     if ( not this->initial_syntax.empty() ) {
-        cmd.addArg( "-g" );
-        cmd.addArg( this->initial_syntax );
+        cmd.addArg( "-u" );
+        cmd.addArg( string( "." ) + this->initial_syntax );
     }
     if ( interactively ) {
         cmd.wrap( GNGREADLINE );
@@ -173,6 +174,7 @@ Ginger::Command AppContext::syntaxCommand( const bool interactively ) {
 }
 
 Ginger::Command AppContext::syntaxCommand( const std::string & filename ) { 
+    // cerr << "NON-INTERACTIVELY" << endl;
     Ginger::Command cmd( FILE2GNX );
     if ( not this->initial_syntax.empty() ) {
         cmd.addArg( "-g" );

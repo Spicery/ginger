@@ -40,19 +40,12 @@
 #include "folderscan.hpp"
 #include "packagecache.hpp"
 #include "resolvervisitor.hpp"
-
-#define BROWSE_INFO 	"browse.info"
-#define VAR 			"var.info"
-#define VAR_NAME 		"var.name"
-#define PKG 			"pkg.info"
-#define PKG_NAME 		"pkg.name"
-#define ENC_PKG 		"enc.pkg"
-#define DEF_PKG 		"def.pkg"
-#define PATH_SEPARATOR 	"/"
+#include "gnxconstants.hpp"
+#include "fetchconstants.hpp"
 
 using namespace std;
 
-//#define DBG_SEARCH
+// #define DBG_SEARCH 1
 
 #define FILE2GNX "file2gnx"
 
@@ -92,7 +85,9 @@ Search::~Search() {
 //	would be both more secure and efficient.
 //
 static void run( string command, string pathname, ostream & out ) {
-	//cout << "running " << command << " " << pathname << endl;
+	#ifdef DBG_SEARCH 
+		cerr << "FETCHGNX: running " << command << " " << pathname << endl;
+	#endif
 	int pipe_fd[ 2 ];
 	const char * cmd = command.c_str();
 	pipe( pipe_fd );
@@ -293,9 +288,18 @@ void Search::fetchDefinition( const string & pkg_name, const string & var_name )
 }
 
 void Search::loadPackage( const string & pkg ) {
+	#ifdef DBG_SEARCH
+		cerr << "FETCHGNX loadPackage" << endl;
+	#endif
 	PackageCache * c = this->project_cache.fetchPackageCache( pkg );
 	string pathname = c->getInitLoadPath();
+	#ifdef DBG_SEARCH
+		cerr << "FETCHGNX pathname size = " << pathname.size() << endl;
+	#endif
 	if ( pathname.size() > 0 ) {
+		#ifdef DBG_SEARCH
+			cerr << "FETCHGNX running file2gnx" << endl;
+		#endif
 		run( INSTALL_TOOL PATH_SEPARATOR FILE2GNX, pathname, cout );
 	} else {
 		//cout << "<seq><!-- load path was not defined --></seq>" << endl;
@@ -329,7 +333,7 @@ void Search::browsePackages() {
 		vector< VarInfo * > vars = pkgc->allVarInfo();
 		for ( vector< VarInfo * >::iterator it = vars.begin(); it != vars.end(); ++it ) {
 			VarInfo * vi = *it;
-			all.start( VAR );
+			all.start( VAR_INFO );
 			all.put( VAR_NAME, vi->name() );
 			all.end();
 		}
@@ -341,7 +345,7 @@ void Search::browsePackages() {
 }
 
 void Search::resolveGnxInPlace( Ginger::SharedMnx gnx ) {
-	ResolverVisitor resolver( this );
+	ResolverVisitor resolver( this, gnx->attribute( ENC_PKG ) );
 	gnx->visit( resolver );
 	gnx->render();
 	cout << endl;

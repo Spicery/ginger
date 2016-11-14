@@ -343,8 +343,6 @@ void OrdinaryPackage::loadIfNeeded() {
 		cerr << "  Command  : " << cmd.asPrintString() << endl;
 	#endif
 
-
-
 	int fd = cmd.runWithOutput();		
 	stringstream prog;
 	for (;;) {

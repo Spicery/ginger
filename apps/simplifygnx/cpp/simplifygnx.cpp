@@ -556,7 +556,6 @@ std::string resolveQualified(
         cerr << "simplifygnx resolving qualified, reply from fetchgnx -R" << endl;
 		cerr << "  [[" << prog.str() << "]]" << endl;
 	#endif
-GOT TO HERE
 	ResolveHandler resolve;
 	Ginger::SaxParser parser( prog, resolve );
 	parser.readElement();
@@ -974,8 +973,8 @@ public:
 /*
 	This pass does the following: 
 	
-	[1] It finds all references global variables and find their
-		originating package. It caches this using the def.pkg attribute.
+	[1] It finds all references to global variables and finds their
+		originating package. It annotates this using the def.pkg attribute.
 
 */
 class Absolute : public Ginger::MnxVisitor {
@@ -1006,7 +1005,7 @@ public:
 					}
 				}
 			}
-		} else if ( x == "var" ) {
+		} else if ( x == VAR ) {
 			if ( element.hasAttribute( SCOPE, "global" ) ) {
 				if ( not element.hasAttribute( GNX_VID_DEF_PKG ) ) {
 					const string & enc_pkg = element.hasAttribute( GNX_VID_ENC_PKG ) ? element.attribute( GNX_VID_ENC_PKG ) : this->package;
@@ -1033,21 +1032,19 @@ public:
 /*
 	This pass does the following: 
 	
-	[1] It finds all references global variables and find their
-		originating package. It caches this using the def.pkg attribute.
+	[1] It finds all references to global variables and finds their
+		originating package. It annotates this using the def.pkg attribute.
 
 */
 class AltAbsolute : public Ginger::MnxVisitor {
 private:
 	vector< string > & project_folders;
 	std::string package;
-	const bool undefined_allowed;
 		
 public:
 	void finaliseVisit( Ginger::Mnx & element ) {
-		//	Now we route through fetchgnx -X with <fetch.resolve>... </>.
-
-		TO BE DONE§
+		//	Having marked the relevant nodes, we route through fetchgnx -X with 
+		//	<fetch.resolve>... </>.
 
 	    Ginger::Command cmd( FETCHGNX );
 	    cmd.addArg( "-X" );
@@ -1064,7 +1061,7 @@ public:
 
 	    Ginger::MnxBuilder qb;
 	    qb.start( "fetch.resolve" );
-	    qb.add( element );
+	    qb.add( make_shared< Ginger::Mnx >( element ) );
 	    qb.end();
 	    shared< Ginger::Mnx > query( qb.build() );
 
@@ -1093,8 +1090,9 @@ public:
 	    //  TODO: protect close with finally.
 	    fclose( foutd );
 	
-		Ginger::SaxParser parser( prog, resolve );
-		parser.readElement();
+		Ginger::MnxReader read_mnx( prog );
+		shared_ptr< Ginger::Mnx > r = read_mnx.readMnx();
+		element.copyFrom( *r );
 	}
 
 	void startVisit( Ginger::Mnx & element ) {
@@ -1102,27 +1100,12 @@ public:
 		if ( x == ID ) {
 			if ( element.hasAttribute( SCOPE, "global" ) ) {
 				if ( not element.hasAttribute( GNX_VID_DEF_PKG ) ) {
-					const string & name = element.attribute( GNX_VID_NAME );
 					const string & enc_pkg = element.hasAttribute( GNX_VID_ENC_PKG ) ? element.attribute( GNX_VID_ENC_PKG ) : this->package;
 					element.putAttribute( GNX_VID_ENC_PKG, enc_pkg );
 					element.putAttribute( "fetchgnx", "resolve" );
-					/*
-					if ( element.hasAttribute( "alias" ) ) {
-						const string & alias = element.attribute( "alias" );
-						//cout << "RESOLVE (QUALIFIED): name=" << name << ", alias=" << alias << ", enc.pkg=" << enc_pkg << endl;
-						const string def_pkg( resolveQualified( this->project_folders, enc_pkg, alias, name, this->undefined_allowed ) );
-						//cout << "   def = " << def_pkg << endl;
-						element.putAttribute( GNX_VID_DEF_PKG, def_pkg );
-					} else {
-						//cerr << "RESOLVE (UNQUALIFIED): name=" << name << ", enc.pkg=" << enc_pkg << endl;
-						const string def_pkg( resolveUnqualified( this->project_folders, enc_pkg, name, this->undefined_allowed ) );
-						//cerr << "   def = " << def_pkg << endl;
-						element.putAttribute( GNX_VID_DEF_PKG, def_pkg );						
-					}
-					*/
 				}
 			}
-		} else if ( x == "var" ) {
+		} else if ( x == VAR ) {
 			if ( element.hasAttribute( SCOPE, "global" ) ) {
 				if ( not element.hasAttribute( GNX_VID_DEF_PKG ) ) {
 					const string & enc_pkg = element.hasAttribute( GNX_VID_ENC_PKG ) ? element.attribute( GNX_VID_ENC_PKG ) : this->package;
@@ -1138,8 +1121,7 @@ public:
 public:
 	AltAbsolute( vector< string > & folders, const std::string & enc_pkg, const bool undefined_allowed ) : 
 		project_folders( folders ),
-		package( enc_pkg ),
-		undefined_allowed( undefined_allowed )
+		package( enc_pkg )
 	{
 	}
 
@@ -1876,7 +1858,7 @@ private:
 
 public:
     bool hasChanged() const {
-        return this->hasChanged();
+        return this->has_changed;
     }
 
     static int flatten( Gnx x, vector< Gnx > & lhs ) {

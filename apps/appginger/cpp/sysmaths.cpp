@@ -679,7 +679,7 @@ Ref * sysMax( Ref * pc, class MachineClass * vm ) {
     if ( vm->count != 2 ) throw Ginger::Mishap( "ArgsMismatch" );
     Ref rhs = vm->fastPop();
     Ref lhs = vm->fastPeek();
-    vm->fastPeek() = sysCompareNumbers( lhs, rhs, false, false, true ) ? lhs : rhs;
+    vm->fastPeek() = sysCompareNumbers( lhs, rhs, true, false, false ) ? rhs : lhs;
     return pc;
 }
 SysInfo infoMax( 
@@ -694,7 +694,7 @@ Ref * sysMin( Ref * pc, class MachineClass * vm ) {
     if ( vm->count != 2 ) throw Ginger::Mishap( "ArgsMismatch" );
     Ref rhs = vm->fastPop();
     Ref lhs = vm->fastPeek();
-    vm->fastPeek() = sysCompareNumbers( lhs, rhs, true, false, false ) ? lhs : rhs;
+    vm->fastPeek() = sysCompareNumbers( lhs, rhs, false, false, true ) ? rhs : lhs;
     return pc;
 }
 SysInfo infoMin( 

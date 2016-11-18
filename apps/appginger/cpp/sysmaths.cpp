@@ -737,7 +737,7 @@ Ref * sysMinAll( Ref * pc, class MachineClass * vm ) {
         Ref sofar = vm->fastPop();
         for ( int i = 1; i < vm->count; i++ ) {
             Ref next = vm->fastPop();
-            if ( sysCompareNumbers( sofar, next, true, false, false ) ) {
+            if ( sysCompareNumbers( sofar, next, false, false, true ) ) {
                 sofar = next;
             }
         }

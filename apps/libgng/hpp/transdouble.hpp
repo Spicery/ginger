@@ -196,10 +196,6 @@ public:
         return TransDouble( std::exp2( this->data ) );
     }
 
-    TransDouble exp10() const {
-        return TransDouble( __exp10( this->data ) );
-    }
-
     TransDouble log() const {
         return TransDouble( std::log( this->data ) );
     }

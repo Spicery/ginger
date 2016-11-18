@@ -949,19 +949,6 @@ SysInfo infoExp2(
     "Returns the two to the power of a real value (2**x)."
 );
 
-Ref * sysExp10( Ref * pc, class MachineClass * vm ) {
-    if ( vm->count != 1 ) throw Ginger::Mishap( "ArgsMismatch" );
-    vm->fastPeek() = vm->heap().copyDouble( pc, refToDouble( vm->fastPeek() ).exp10().asDouble() );
-    return pc;
-}
-SysInfo infoExp10( 
-    SysNames( "exp10" ), 
-    Ginger::Arity( 1 ), 
-    Ginger::Arity( 1 ), 
-    sysExp10, 
-    "Returns the 10 to the power of a real value (10**x)."
-);
-
 Ref * sysSqrt( Ref * pc, class MachineClass * vm ) {
     if ( vm->count != 1 ) throw Ginger::Mishap( "ArgsMismatch" );
     vm->fastPeek() = vm->heap().copyDouble( pc, refToDouble( vm->fastPeek() ).sqrt().asDouble() );

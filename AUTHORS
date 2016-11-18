@@ -5,14 +5,14 @@ of the GNU General Public License. This file is part of Ginger.
 
 Development:
   	Stephen Leach <sfkleach@gmail.com>   
-    	ginger, ginger-cli, ginger-script, ginger-info, ginger-cgi, 
-    	fetchgnx, file2gnx, lisp2gnx, common2gnx and gvmtest development
+        ginger, ginger-cli, ginger-script, ginger-info, ginger-cgi, 
+        fetchgnx, file2gnx, lisp2gnx, common2gnx and gvmtest development
   	Graham Higgins <gjh@bel-epa.com>      
-    	Continuous integration, autoconf & RPM packaging
-  
+        Continuous integration, autoconf & RPM packaging
+
 Documentation:
-  	Stephen Leach <sfkleach@gmail.com>   
-  	Graham Higgins <gjh@bel-epa.com>
+    Stephen Leach <sfkleach@gmail.com>   
+    Graham Higgins <gjh@bel-epa.com>
 
 Original Design:
     Stephen Leach <sfkleach@gmail.com>

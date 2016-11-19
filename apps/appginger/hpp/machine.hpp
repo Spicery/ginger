@@ -87,8 +87,8 @@ friend class RootCell;
 
 private:
 	Ginger::AppContext *			appg;
-	std::auto_ptr<CodeGenClass>		codegen_aptr;
-	std::auto_ptr<HeapClass>		heap_aptr;
+	std::unique_ptr<CodeGenClass>		codegen_aptr;
+	std::unique_ptr<HeapClass>		heap_aptr;
 	Pressure						pressure;
 	std::vector< Ref >				queue;
 
@@ -99,7 +99,7 @@ public:
 
 	
 private:
-	std::auto_ptr<PackageManager>	package_mgr_aptr;
+	std::unique_ptr<PackageManager>	package_mgr_aptr;
 	
 public:
 	Package * 		getPackage( std::string name );

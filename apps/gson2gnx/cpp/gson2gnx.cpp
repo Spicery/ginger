@@ -25,7 +25,7 @@
 #include <getopt.h>
 #include <stddef.h>
 
-#include "printGPL.hpp"
+#include "printgpl.hpp"
 #include "mishap.hpp"
 #include "gngversion.hpp"
 

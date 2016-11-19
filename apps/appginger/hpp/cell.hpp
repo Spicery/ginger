@@ -19,10 +19,10 @@
 #ifndef GINGER_CELL_HPP
 #define GINGER_CELL_HPP
 
+#include <cstddef>
 #include <algorithm>
 #include <string>
 #include <ostream>
-#include <cstddef>
 
 #include "shared.hpp"
 #include "key.hpp"

@@ -30,7 +30,6 @@
 #define PATH_SEPARATOR "/"
 #define FILE2GNX "file2gnx"
 
-
 #include <iostream>
 #include <string>
 #include <utility>
@@ -40,6 +39,7 @@
 #include <regex>
 #include <sstream>
 
+#include <unistd.h>
 #include <sys/stat.h>
 #include <stddef.h>
 #include <getopt.h>

@@ -16,6 +16,17 @@
     along with AppGinger.  If not, see <http://www.gnu.org/licenses/>.
 \******************************************************************************/
 
+//  Until GMP is updated, we must include the cstddef header in the CPP file
+//  as the first include. See https://gcc.gnu.org/gcc-4.9/porting_to.html
+/*  Header <cstddef> changes
+
+The <cstddef> header was updated for C++11 support and this breaks some libraries which misuse macros meant for internal use by GCC only. For instance with GMP versions up to 5.1.3, you may see:
+
+/usr/include/c++/4.9.0/cstddef:51:11: error: ‘::max_align_t’ has not been declared
+   using ::max_align_t;
+*/
+#include <cstddef>
+
 #include <iostream>
 #include <sstream>
 #include <gmp.h>

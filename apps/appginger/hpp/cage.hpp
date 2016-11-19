@@ -19,10 +19,9 @@
 #ifndef CAGE_HPP
 #define CAGE_HPP
 
+#include <cstddef>
 #include <vector>
 #include <string>
-
-#include <cstddef>
 
 #include "common.hpp"
 #include "external.hpp"

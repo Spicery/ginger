@@ -80,7 +80,7 @@ else
 	LIBAPPGINGER=-Wl,-force_load libappginger.a -L/usr/local/lib -I/usr/local/include
 endif
 
-LIBRARIES=../../libgng/cpp/libgng.a /usr/local/lib/librudecgi.a -lgmp -lgmpxx
+LIBRARIES=../../libgng/cpp/libgng.a /usr/local/lib/librudecgi.a -lgmp -lgmpxx -lcrypto -lssl
 
 # $@ is make shorthand for the target.
 # $@ is make shorthand for the dependencies

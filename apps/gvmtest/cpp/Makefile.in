@@ -32,7 +32,7 @@ else
 	LIBAPPGINGER=-Wl,-force_load ../../appginger/cpp/libappginger.a
 endif
 
-LIBRARIES=$(LIBAPPGINGER) ../../libgng/cpp/libgng.a /usr/local/lib/librudecgi.a -lgmp -lgmpxx
+LIBRARIES=$(LIBAPPGINGER) ../../libgng/cpp/libgng.a /usr/local/lib/librudecgi.a -lgmp -lgmpxx -lcrypto
 
 # $@ is make shorthand for the target.
 # $@ is make shorthand for the dependencies

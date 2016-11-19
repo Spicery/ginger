@@ -63,7 +63,7 @@ using namespace std;
 
 class Task {
 protected:
-    vector< const string > arguments;
+    vector< string > arguments;
 public:
     virtual void run() = 0;
 private:

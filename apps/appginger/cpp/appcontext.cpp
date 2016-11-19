@@ -141,7 +141,7 @@ const char* AppContext::cgiValue( const char * fieldname ) {
         }
         cmd += FILE2GNX " ";
         if ( not this->initial_syntax.empty() ) {
-            cmd += "-g ";
+            cmd += "-u.";  // NOTE: we add the period to make this an extension.
             cmd += Ginger::shellSafeName( this->initial_syntax );
         }
         return cmd;
@@ -150,7 +150,7 @@ const char* AppContext::cgiValue( const char * fieldname ) {
     const string AppContext::syntax( const std::string & filename ) { 
         string cmd( FILE2GNX " " );
         if ( not this->initial_syntax.empty() ) {
-            cmd += "-g ";
+            cmd += "-u.";  // NOTE: we add the period to make this an extension.
             cmd += Ginger::shellSafeName( this->initial_syntax );
             cmd += " ";
         }
@@ -177,8 +177,8 @@ Ginger::Command AppContext::syntaxCommand( const std::string & filename ) {
     // cerr << "NON-INTERACTIVELY" << endl;
     Ginger::Command cmd( FILE2GNX );
     if ( not this->initial_syntax.empty() ) {
-        cmd.addArg( "-g" );
-        cmd.addArg( this->initial_syntax );
+        cmd.addArg( "-u" );
+        cmd.addArg( string( "." ) + this->initial_syntax );
     }
     cmd.addArg( filename );
     return cmd;

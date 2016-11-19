@@ -83,7 +83,7 @@ public:
 
 class SaxParser {
 private:
-	std::auto_ptr< SaxInput > input;
+	std::unique_ptr< SaxInput > input;
 	//std::istream & input;
 	SaxHandler & parent;
 	int level;

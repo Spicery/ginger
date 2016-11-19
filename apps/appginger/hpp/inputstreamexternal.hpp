@@ -31,7 +31,7 @@ namespace Ginger {
 class InputStreamExternal : public External {
 private:
     std::string file_name; 
-    std::auto_ptr< std::ifstream > input;
+    std::unique_ptr< std::ifstream > input;
 
 public:
     InputStreamExternal( std::string & _fname );

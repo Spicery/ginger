@@ -27,6 +27,8 @@
 #include <stddef.h>
 #include <getopt.h>
 
+#include <sys/wait.h>
+
 #include "config.h"
 
 #include "maybe.hpp"

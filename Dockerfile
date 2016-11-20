@@ -2,7 +2,7 @@ FROM ubuntu:14.04
 MAINTAINER Stephen Leach "sfkleach@gmail.com"
 ENV REFRESHED_AT 2015-03-15
 RUN apt-get update
-RUN DEBIAN_FRONTEND=noninteractive apt-get install -y make git python g++ autoconf uuid-dev libreadline-dev wget rlwrap libpcap-dev libssl-dev
+RUN DEBIAN_FRONTEND=noninteractive apt-get install -y make git python g++ autoconf uuid-dev libreadline-dev wget rlwrap libpcap-dev libssl-dev libgmp-dev
 COPY apps/ /tmp/ginger/apps/
 COPY projects/ /tmp/ginger/projects/
 COPY instruction_set/ /tmp/ginger/instruction_set/

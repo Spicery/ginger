@@ -1,23 +1,17 @@
 FROM ubuntu:14.04
 MAINTAINER Stephen Leach "sfkleach@gmail.com"
-ENV REFRESHED_AT 2016-08-08,07:48
+ENV REFRESHED_AT 2015-03-15
 RUN apt-get update
-RUN DEBIAN_FRONTEND=noninteractive apt-get install -y make git python3 g++ autoconf uuid-dev libreadline-dev wget rlwrap python-nose guile-2.0
-RUN mkdir -p /tmp/rudecgi
-WORKDIR /tmp/rudecgi
-RUN wget -q http://www.rudeserver.com/cgiparser/download/rudecgi-5.0.0.tar.gz
-RUN tar zxf rudecgi-5.0.0.tar.gz
-WORKDIR rudecgi-5.0.0
-RUN ./configure
-RUN make
-RUN sudo make install
-WORKDIR /tmp
-RUN git clone https://github.com/Spicery/ginger.git
-WORKDIR /tmp/ginger
-RUN autoconf
-RUN ./configure
-RUN make all
-RUN make install-as-is
-WORKDIR /
-RUN rm -rf /tmp/rudecgi /tmp/ginger
+RUN DEBIAN_FRONTEND=noninteractive apt-get install -y make git python g++ autoconf uuid-dev libreadline-dev wget rlwrap libpcap-dev libssl-dev
+COPY apps/ /tmp/ginger/apps/
+COPY projects/ /tmp/ginger/projects/
+COPY instruction_set/ /tmp/ginger/instruction_set/
+COPY config* /tmp/ginger/
+COPY docker-scripts/ /tmp/ginger/docker-scripts/
+COPY appginger.png /tmp/ginger/
+COPY Makefile.in /tmp/ginger/
+COPY autodocs/ /tmp/ginger/autodocs/
+COPY COPYING /tmp/ginger/
+RUN [ "/bin/dash", "/tmp/ginger/docker-scripts/install-rudecgi" ]
+RUN [ "/bin/dash", "/tmp/ginger/docker-scripts/build-ginger" ]
 CMD /usr/local/bin/ginger

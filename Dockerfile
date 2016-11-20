@@ -11,7 +11,7 @@ COPY docker-scripts/ /tmp/ginger/docker-scripts/
 COPY appginger.png /tmp/ginger/
 COPY Makefile.in /tmp/ginger/
 COPY autodocs/ /tmp/ginger/autodocs/
-COPY COPYING /tmp/ginger/
+COPY AUTHORS BUGS THANKS COPYING /tmp/ginger/
 RUN [ "/bin/dash", "/tmp/ginger/docker-scripts/install-rudecgi" ]
 RUN [ "/bin/dash", "/tmp/ginger/docker-scripts/build-ginger" ]
 CMD /usr/local/bin/ginger

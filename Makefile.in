@@ -38,6 +38,7 @@ distclean: clean
 	rm -f apps/gprojlibtool/cpp/Makefile
 	rm -f apps/gvmtest/Makefile
 	rm -f apps/gvmtest/cpp/Makefile
+	rm -f apps/ivylibtool/cpp/Makefile
 	rm -f apps/libgng/Makefile
 	rm -f apps/libgng/cpp/Makefile
 	rm -f apps/libgng/unittest/Makefile
@@ -61,7 +62,7 @@ distclean: clean
 	rm -f apps/src2lnx/cpp/Makefile
 	rm -f apps/lnx2csv/Makefile
 	rm -f apps/lnx2csv/cpp/Makefile
-	rm -f apps/autodocs/Makefile
+	rm -f autodocs/Makefile
 	rm -f projects/Makefile
 	rm -f config.h
 	rm -f config.status

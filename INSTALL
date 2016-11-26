@@ -12,7 +12,7 @@ Installing on Ubuntu or Mac OS X
 *	Pre-requisites: you'll need some basic developer tools 
 		git, python, g++, autoconf, uuid, readline, make
 	You can ensure you have these in one step with
-		% sudo apt-get install make git python g++ autoconf uuid-dev libreadline-dev
+		% sudo apt-get install make git python g++ autoconf uuid-dev libreadline-dev wget libpcap-dev libssl-dev libgmp-dev
 
 *	We also need the RudeCGI library
 		% mkdir /tmp/rudecgi

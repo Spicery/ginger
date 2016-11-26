@@ -50,6 +50,7 @@ class MapletObject;
 class ExternalObject;
 class VirtualMachineObject;
 class CharacterCell;
+class SmallCell;
 
 class Cell {
 friend class HeapObject;
@@ -83,6 +84,7 @@ public:
 	bool isSmall() const { return IsSmall( this->ref ); }
 	bool isCharacter() const { return IsCharacter( this->ref ); }
 	CharacterCell asCharacterCell() const;
+	SmallCell asSmallCell() const;
 	bool isStringObject() const { return IsString( this->ref ); }
 	bool isHeapObject() const { return IsObj( this->ref ); }
 	bool isPairObject() const { return IsPair( this->ref ); }
@@ -296,6 +298,15 @@ public:
 
 public:
 	char getChar() const { return CharacterToChar( this->ref ); }
+};
+
+class SmallCell : public Cell {
+public:
+	SmallCell() : Cell() {}
+	SmallCell( Ref _r ) : Cell( _r ) {}
+
+public:
+	char getLong() const { return SmallToLong( this->ref ); }
 };
 
 

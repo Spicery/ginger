@@ -2,6 +2,7 @@ all clean:
 	make -C automatic/simple $@
 	make -C automatic/machine $@
 	make -C automatic/sys $@
+	make -C automatic/sysfn $@
 	make -C libgng $@
 	make -C appginger $@
 	make -C common2gnx $@

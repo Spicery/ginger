@@ -37,6 +37,37 @@ bool canFitInSmall( const long n ) {
     return Numbers::MIN_SMALL <= n && n <= Numbers::MAX_SMALL; 
 }
 
+
+static gngdouble_t toDouble( const Cell & x ) {
+    if ( x.isSmall() ) {
+        return static_cast< gngdouble_t >( x.getLong() );
+    } else if ( x.isDoubleObject() ) {
+        return x.asDoubleObject().getDouble();
+    } else if ( x.isBigIntObject() ) {
+        return x.asBigIntObject().getBigIntExternal()->toFloat();
+    } else if ( x.isRationalObject() ) {
+        return x.asRationalObject().getRationalExternal()->toFloat();
+    } else {
+        throw Mishap( "Cannot convert to transdouble" ).culprit( "Value", x.toShowString() );
+    }
+}
+
+/* TODO: Remove relic code if it is not useful.
+static bool isZero( const Cell & x ) {
+    if ( x.isSmall() ) {
+        return x.getLong() == 0;
+    } else if ( x.isDoubleObject() ) {
+        return x.asDoubleObject().getDouble().isZero();
+    } else if ( x.isBigIntObject() ) {
+        return x.asBigIntObject().getBigIntExternal()->isZero();
+    } else if ( x.isRationalObject() ) {
+        return x.asRationalObject().getRationalExternal()->isZero();
+    } else {
+        throw Mishap( "Cannot convert to transdouble" ).culprit( "Value", x.toShowString() );
+    }
+}
+*/
+
 /**
  * Compares two references x & y that must be numbers. It returns true if
  *  lt AND x < y OR
@@ -77,18 +108,18 @@ bool sysCompareNumbers( Ref rx, Ref ry, const bool lt, const bool eq, const bool
             }
         } else if ( cx.isDoubleObject() ) {
             gngdouble_t dx = cx.asDoubleObject().getDouble();
-            gngdouble_t dy;
-            if ( cy.isSmall() ) {
-                dy = static_cast< gngdouble_t >( cy.getLong() );
-            } else if ( cy.isDoubleObject() ) {
-                dy = cy.asDoubleObject().getDouble();
-            } else if ( cy.isBigIntObject() ) {
-                dy = cy.asBigIntObject().getBigIntExternal()->toFloat();
-            } else if ( cy.isRationalObject() ) {
-                dy = cy.asRationalObject().getRationalExternal()->toFloat();
-            } else {
-                throw Mishap( "CMP" );                
-            }
+            gngdouble_t dy = toDouble( cy );
+            // if ( cy.isSmall() ) {
+            //     dy = static_cast< gngdouble_t >( cy.getLong() );
+            // } else if ( cy.isDoubleObject() ) {
+            //     dy = cy.asDoubleObject().getDouble();
+            // } else if ( cy.isBigIntObject() ) {
+            //     dy = cy.asBigIntObject().getBigIntExternal()->toFloat();
+            // } else if ( cy.isRationalObject() ) {
+            //     dy = cy.asRationalObject().getRationalExternal()->toFloat();
+            // } else {
+            //     throw Mishap( "CMP" );                
+            // }
             return ( lt and dx < dy ) or ( gt and dx > dy ) or ( eq and dx == dy );
         } else if ( cx.isBigIntObject() ) {
             BigIntExternal * bx = cx.asBigIntObject().getBigIntExternal();
@@ -269,18 +300,18 @@ Ref * sysDivHelper( Ref * pc, class MachineClass * vm, Ref ry ) {
             }
         } else if ( cx.isDoubleObject() ) {
             const gngdouble_t x = cx.asDoubleObject().getDouble();
-            gngdouble_t y;
-            if ( cy.isSmall() ) {
-                y = static_cast< gngdouble_t >( cy.getLong() );
-            } else if ( cy.isDoubleObject() ) {
-                y = cy.asDoubleObject().getDouble();
-            } else if ( cy.isBigIntObject() ) {
-                y = cy.asBigIntObject().getBigIntExternal()->toFloat();
-            } else if ( cy.isRationalObject() ) {
-                y = cy.asRationalObject().getRationalExternal()->toFloat();
-            } else {
-                throw Mishap( "Bad arguments for / operator" );
-            }
+            gngdouble_t y = toDouble( cy );
+            // if ( cy.isSmall() ) {
+            //     y = static_cast< gngdouble_t >( cy.getLong() );
+            // } else if ( cy.isDoubleObject() ) {
+            //     y = cy.asDoubleObject().getDouble();
+            // } else if ( cy.isBigIntObject() ) {
+            //     y = cy.asBigIntObject().getBigIntExternal()->toFloat();
+            // } else if ( cy.isRationalObject() ) {
+            //     y = cy.asRationalObject().getRationalExternal()->toFloat();
+            // } else {
+            //     throw Mishap( "Bad arguments for / operator" );
+            // }
             vm->fastPeek() = vm->heap().copyDouble( pc, x / y );
        } else if ( cx.isBigIntObject() ) {
             BigIntExternal * bx = cx.asBigIntObject().getBigIntExternal();
@@ -361,7 +392,6 @@ Ref * sysDivHelper( Ref * pc, class MachineClass * vm, Ref ry ) {
     return pc;
 }
 
-
 Ref * sysNegHelper( Ref *pc, class MachineClass * vm ) {
     Ref rx = vm->fastPeek();
     Cell cx( rx );
@@ -416,17 +446,18 @@ Ref * sysMulHelper( Ref *pc, class MachineClass * vm, Ref ry ) {
         } else if ( cx.isDoubleObject() ) {
             gngdouble_t x, y;
             x = cx.asDoubleObject().getDouble();
-            if ( cy.isSmall() ) {
-                y = static_cast< gngdouble_t >( cy.getLong() );
-            } else if ( cy.isDoubleObject() ) {
-                y = cy.asDoubleObject().getDouble();
-            } else if ( cy.isBigIntObject() ) {
-                y = cy.asBigIntObject().getBigIntExternal()->toFloat();
-            } else if ( cy.isRationalObject() ) {
-                y = cy.asRationalObject().getRationalExternal()->toFloat();
-            } else {
-                throw Mishap( "MUL" );
-            }
+            y = toDouble( cy );
+            // if ( cy.isSmall() ) {
+            //     y = static_cast< gngdouble_t >( cy.getLong() );
+            // } else if ( cy.isDoubleObject() ) {
+            //     y = cy.asDoubleObject().getDouble();
+            // } else if ( cy.isBigIntObject() ) {
+            //     y = cy.asBigIntObject().getBigIntExternal()->toFloat();
+            // } else if ( cy.isRationalObject() ) {
+            //     y = cy.asRationalObject().getRationalExternal()->toFloat();
+            // } else {
+            //     throw Mishap( "MUL" );
+            // }
             vm->fastPeek() = vm->heap().copyDouble( x * y );
         } else if ( cx.isBigIntObject() ) {
             BigIntExternal * bx = cx.asBigIntObject().getBigIntExternal();
@@ -510,17 +541,18 @@ Ref * sysSubHelper( Ref *pc, class MachineClass * vm, Ref ry ) {
         } else if ( cx.isDoubleObject() ) {
             gngdouble_t x, y;
             x = cx.asDoubleObject().getDouble();
-            if ( cy.isSmall() ) {
-                y = static_cast< gngdouble_t >( cy.getLong() );
-            } else if ( cy.isDoubleObject() ) {
-                y = cy.asDoubleObject().getDouble();
-            } else if ( cy.isBigIntObject() ) {
-                y = cy.asBigIntObject().getBigIntExternal()->toFloat();
-            } else if ( cy.isRationalObject() ) {
-                y = cy.asRationalObject().getRationalExternal()->toFloat();
-            } else {
-                throw Mishap( "SUB" );
-            }
+            y = toDouble( cy );
+            // if ( cy.isSmall() ) {
+            //     y = static_cast< gngdouble_t >( cy.getLong() );
+            // } else if ( cy.isDoubleObject() ) {
+            //     y = cy.asDoubleObject().getDouble();
+            // } else if ( cy.isBigIntObject() ) {
+            //     y = cy.asBigIntObject().getBigIntExternal()->toFloat();
+            // } else if ( cy.isRationalObject() ) {
+            //     y = cy.asRationalObject().getRationalExternal()->toFloat();
+            // } else {
+            //     throw Mishap( "SUB" );
+            // }
             //std::cout << "two doubles: " << x << ", " << y << std::endl;
             vm->fastPeek() = vm->heap().copyDouble( pc, x - y );
         } else if ( cx.isBigIntObject() ) {
@@ -673,6 +705,89 @@ Ref * sysAdd( Ref * pc, class MachineClass * vm ) {
     if ( vm->count != 2 ) throw Ginger::Mishap( "ArgsMismatch" );
     return sysAddHelper( pc, vm, vm->fastPop() );
 }
+
+
+
+Ref * sysPowHelper( Ref * pc, class MachineClass * vm, Ref ry ) {
+    Ref rx = vm->fastPeek();
+    Cell cx( rx );
+    Cell cy( ry );
+    try {
+        if ( cy.isSmall() ) {
+            throw Mishap( "TO BE DEIFNED " );
+        } else {
+            gngdouble_t x = toDouble( cx );
+            gngdouble_t y = toDouble( cy );
+            vm->fastPeek() = vm->heap().copyDouble( pc, x.pow( y ) );
+        }
+    } catch ( Mishap & m ) {
+        throw Mishap( "Bad arguments for pow operator" ).culprit( "First", cx.toShowString() ).culprit( "Second", cy.toShowString() );
+    }
+    return pc;
+}
+
+Ref * sysPow( Ref * pc, class MachineClass * vm ) {
+    if ( vm->count != 2 ) throw Ginger::Mishap( "ArgsMismatch" );
+    Ref ry = vm->fastPop();
+    Ref rx = vm->fastPeek();
+    Cell cx( rx );
+    Cell cy( ry );
+    try {
+        /*
+        TODO: Small, BigInt, and Rational cases need breaking out for 
+            small exponents. But working through all the cases in this file 
+            isn't effective. Instead I should develop a Calculator class
+            and utilise that. So the code should read...
+
+            Calculator calc;
+            calc.push( cx );
+            calc.push( cy );
+            calc.pow();
+            vm->fastPeek() = calc.pop( vm->heap() ).getRef();
+        */  
+        gngdouble_t x = toDouble( cx );
+        gngdouble_t y = toDouble( cy );
+        vm->fastPeek() = vm->heap().copyDouble( pc, x.pow( y ) );
+    } catch ( Mishap & m ) {
+        throw Mishap( "Bad arguments for pow operator" ).culprit( "First", cx.toShowString() ).culprit( "Second", cy.toShowString() );
+    }
+    return pc;
+}
+
+SysInfo infoPow(
+    SysNames( "**" ),
+    Ginger::Arity( 2 ), 
+    Ginger::Arity( 1 ),  
+    sysPow,
+    "Returns x raised to the power of y."
+);
+
+
+
+Ref * sysAbs( Ref *pc, class MachineClass * vm ) {
+    Ref rx = vm->fastPeek();
+    Cell cx( rx );
+    if ( cx.isSmall() ) {
+        //  The abs of x CANNOT overflow because of the tagging scheme.
+        //  N.B. This is subtle!
+        vm->fastPeek() = ToRef( abs( reinterpret_cast< long >( rx ) ) );
+    } else if ( cx.isDoubleObject() ) {
+        vm->fastPeek() = vm->heap().copyDouble( pc, cx.asDoubleObject().getDouble().abs() );
+    } else if ( cx.isBigIntObject() ) {
+        BigIntExternal absval( cx.asBigIntObject().getBigIntExternal()->abs() );
+        vm->fastPeek() = vm->heap().copyBigIntExternal( pc, absval );
+    } else {
+        throw Mishap( "Bad argument for abs operation" ).culprit( "Value", cx.toShowString() );
+    } 
+    return pc;
+}
+SysInfo infoAbs(
+    SysNames( "abs" ),
+    Ginger::Arity( 1 ), 
+    Ginger::Arity( 1 ),  
+    sysAbs,
+    "Returns the absolute value of a number."  
+);
 
 
 Ref * sysMax( Ref * pc, class MachineClass * vm ) {
@@ -884,153 +999,10 @@ gngdouble_t refToDouble( Ref rx ) {
     }
 }
 
-Ref * sysSin( Ref * pc, class MachineClass * vm ) {
-    if ( vm->count != 1 ) throw Ginger::Mishap( "ArgsMismatch" );
-    vm->fastPeek() = vm->heap().copyDouble( pc, refToDouble( vm->fastPeek() ).sin().asDouble() );
-    return pc;
-}
-SysInfo infoSin( 
-    SysNames( "sin" ), 
-    Ginger::Arity( 1 ), 
-    Ginger::Arity( 1 ), 
-    sysSin, 
-    "Returns sine of an angle in radians."
-);
-
-Ref * sysCos( Ref * pc, class MachineClass * vm ) {
-    if ( vm->count != 1 ) throw Ginger::Mishap( "ArgsMismatch" );
-    vm->fastPeek() = vm->heap().copyDouble( pc, refToDouble( vm->fastPeek() ).cos().asDouble() );
-    return pc;
-}
-SysInfo infoCos( 
-    SysNames( "cos" ), 
-    Ginger::Arity( 1 ), 
-    Ginger::Arity( 1 ), 
-    sysCos, 
-    "Returns cosine of an angle in radians."
-);
-
-Ref * sysTan( Ref * pc, class MachineClass * vm ) {
-    if ( vm->count != 1 ) throw Ginger::Mishap( "ArgsMismatch" );
-    vm->fastPeek() = vm->heap().copyDouble( pc, refToDouble( vm->fastPeek() ).tan().asDouble() );
-    return pc;
-}
-SysInfo infoTan( 
-    SysNames( "tan" ), 
-    Ginger::Arity( 1 ), 
-    Ginger::Arity( 1 ), 
-    sysTan, 
-    "Returns the tangent of an angle in radians."
-);
-
-Ref * sysExp( Ref * pc, class MachineClass * vm ) {
-    if ( vm->count != 1 ) throw Ginger::Mishap( "ArgsMismatch" );
-    vm->fastPeek() = vm->heap().copyDouble( pc, refToDouble( vm->fastPeek() ).exp().asDouble() );
-    return pc;
-}
-SysInfo infoExp( 
-    SysNames( "exp" ), 
-    Ginger::Arity( 1 ), 
-    Ginger::Arity( 1 ), 
-    sysExp, 
-    "Returns the exponential of a real value (e**x)."
-);
-
-Ref * sysExp2( Ref * pc, class MachineClass * vm ) {
-    if ( vm->count != 1 ) throw Ginger::Mishap( "ArgsMismatch" );
-    vm->fastPeek() = vm->heap().copyDouble( pc, refToDouble( vm->fastPeek() ).exp2().asDouble() );
-    return pc;
-}
-SysInfo infoExp2( 
-    SysNames( "exp2" ), 
-    Ginger::Arity( 1 ), 
-    Ginger::Arity( 1 ), 
-    sysExp2, 
-    "Returns the two to the power of a real value (2**x)."
-);
-
-Ref * sysSqrt( Ref * pc, class MachineClass * vm ) {
-    if ( vm->count != 1 ) throw Ginger::Mishap( "ArgsMismatch" );
-    vm->fastPeek() = vm->heap().copyDouble( pc, refToDouble( vm->fastPeek() ).sqrt().asDouble() );
-    return pc;
-}
-SysInfo infoSqrt( 
-    SysNames( "sqrt" ), 
-    Ginger::Arity( 1 ), 
-    Ginger::Arity( 1 ), 
-    sysSqrt, 
-    "Returns the square root of a real value."
-);
-
-Ref * sysCbrt( Ref * pc, class MachineClass * vm ) {
-    if ( vm->count != 1 ) throw Ginger::Mishap( "ArgsMismatch" );
-    vm->fastPeek() = vm->heap().copyDouble( pc, refToDouble( vm->fastPeek() ).cbrt().asDouble() );
-    return pc;
-}
-SysInfo infoCbrt( 
-    SysNames( "cbrt" ), 
-    Ginger::Arity( 1 ), 
-    Ginger::Arity( 1 ), 
-    sysCbrt, 
-    "Returns the cube root of a real value."
-);
-
-Ref * sysLog( Ref * pc, class MachineClass * vm ) {
-    if ( vm->count != 1 ) throw Ginger::Mishap( "ArgsMismatch" );
-    vm->fastPeek() = vm->heap().copyDouble( pc, refToDouble( vm->fastPeek() ).log().asDouble() );
-    return pc;
-}
-SysInfo infoLog( 
-    SysNames( "log" ), 
-    Ginger::Arity( 1 ), 
-    Ginger::Arity( 1 ), 
-    sysLog, 
-    "Returns the natural logarithm of a real value."
-);
-
-Ref * sysLog2( Ref * pc, class MachineClass * vm ) {
-    if ( vm->count != 1 ) throw Ginger::Mishap( "ArgsMismatch" );
-    vm->fastPeek() = vm->heap().copyDouble( pc, refToDouble( vm->fastPeek() ).log2().asDouble() );
-    return pc;
-}
-SysInfo infoLog2( 
-    SysNames( "log2" ), 
-    Ginger::Arity( 1 ), 
-    Ginger::Arity( 1 ), 
-    sysLog2, 
-    "Returns the logarithm to base 2 of a real value."
-);
-
-Ref * sysLog10( Ref * pc, class MachineClass * vm ) {
-    if ( vm->count != 1 ) throw Ginger::Mishap( "ArgsMismatch" );
-    vm->fastPeek() = vm->heap().copyDouble( pc, refToDouble( vm->fastPeek() ).log10().asDouble() );
-    return pc;
-}
-SysInfo infoLog10( 
-    SysNames( "log10" ), 
-    Ginger::Arity( 1 ), 
-    Ginger::Arity( 1 ), 
-    sysLog10, 
-    "Returns the logarithm to base 10 of a real value."
-);
-
-
-Ref * sysHypot( Ref * pc, class MachineClass * vm ) {
-    if ( vm->count != 2 ) throw Ginger::Mishap( "ArgsMismatch" );
-    gngdouble_t rhs = refToDouble( vm->fastPop() );
-    gngdouble_t lhs = refToDouble( vm->fastPeek() );
-    vm->fastPeek() = vm->heap().copyDouble( pc, lhs.hypot( rhs ).asDouble() );
-    return pc;
-}
-SysInfo infoHypot( 
-    SysNames( "hypot" ), 
-    Ginger::Arity( 2 ), 
-    Ginger::Arity( 1 ), 
-    sysHypot, 
-    "hypot(x, y) returns sqrt(x*x + y*y)."
-);
-
-
+////////////////////////////////////////////////////////////////////////////////
+//  Include the automatically generated sysfns for math.h
+#include "sysmaths.cpp.auto"
+////////////////////////////////////////////////////////////////////////////////
 
 Ref * sysQuoHelper( Ref * pc, class MachineClass * vm, Ref ry ) {
     Ref rx = vm->fastPeek();

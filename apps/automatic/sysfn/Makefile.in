@@ -1,5 +1,5 @@
 all:
-	python3 make_sys.py
+	python3 make_sysfn.py
 
 clean:
 	rm -f *.auto

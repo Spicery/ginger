@@ -1124,8 +1124,8 @@ void GSON::print( std::ostream & out ) {
 void GSON::formatUsing( std::ostream & out, const std::string & control_string ) {
     //  Iterate over the control string character by character but with the
     //  ability to skip ahead.
-    int index = 0;
-    for ( int i = 0; i < control_string.size(); i++ ) {
+    size_t index = 0;
+    for ( size_t i = 0; i < control_string.size(); i++ ) {
         const char ch = control_string[ i ];
         if ( ch != '%' ) {
             out << ch;

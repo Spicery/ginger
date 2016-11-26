@@ -55,7 +55,7 @@ const std::string nameOfFn( Ref * fn_K ) {
 
     char * bytes = reinterpret_cast< char * >( name_P + 1 );
     std::string sofar;
-    for ( int i = 0; i < d; i++ ) {
+    for ( size_t i = 0; i < d; i++ ) {
         sofar.push_back( bytes[ i ] );
     }
     return sofar;

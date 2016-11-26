@@ -220,7 +220,12 @@ BigIntExternal BigIntExternal::neg() const {
 }
 
 BigIntExternal BigIntExternal::abs() const {
-    return BigIntExternal( this->value >= 0 ? this->value : -this->value );
+    //  Coded un-naturally to avoid type-inference issues in g++-5.
+    if ( this->value >= 0 ) {
+        return BigIntExternal( this->value );
+    } else {
+        return BigIntExternal( -this->value );
+    }
 }
 
 bool BigIntExternal::lt( const BigIntExternal & n ) const {

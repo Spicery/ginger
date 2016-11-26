@@ -191,7 +191,7 @@ void gngPrintf( ostream & out, Ref * pc, class MachineClass * vm ) {
 	//	Iterate over the control string.
 	int index = vm->count - 2;
 	for ( 
-		int i = 0;
+		size_t i = 0;
 		i < control.size();
 		i++
 	) {

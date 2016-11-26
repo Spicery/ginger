@@ -219,6 +219,10 @@ BigIntExternal BigIntExternal::neg() const {
     return BigIntExternal( -this->value );
 }
 
+BigIntExternal BigIntExternal::abs() const {
+    return BigIntExternal( this->value >= 0 ? this->value : -this->value );
+}
+
 bool BigIntExternal::lt( const BigIntExternal & n ) const {
     return this->value < n.value;
 }

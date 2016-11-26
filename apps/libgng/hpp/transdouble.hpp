@@ -147,6 +147,10 @@ public:
         }
     }
 
+    bool isZero() const {
+        return this->data == 0.0;
+    }
+
     bool isFinite() const {
         return std::isfinite( this->data );
     }
@@ -188,6 +192,46 @@ public:
         return TransDouble( std::tan( this->data ) );
     }
 
+    TransDouble asin() const {
+        return TransDouble( std::asin( this->data ) );
+    }
+
+    TransDouble acos() const {
+        return TransDouble( std::acos( this->data ) );
+    }
+
+    TransDouble atan() const {
+        return TransDouble( std::atan( this->data ) );
+    }
+
+    TransDouble atan2( const TransDouble & x ) const {
+        return TransDouble( std::atan2( this->data, x.data ) );
+    }
+
+    TransDouble sinh() const {
+        return TransDouble( std::sinh( this->data ) );
+    }
+
+    TransDouble cosh() const {
+        return TransDouble( std::cosh( this->data ) );
+    }
+
+    TransDouble tanh() const {
+        return TransDouble( std::tanh( this->data ) );
+    }
+
+    TransDouble asinh() const {
+        return TransDouble( std::asinh( this->data ) );
+    }
+
+    TransDouble acosh() const {
+        return TransDouble( std::acosh( this->data ) );
+    }
+
+    TransDouble atanh() const {
+        return TransDouble( std::atanh( this->data ) );
+    }
+
     TransDouble exp() const {
         return TransDouble( std::exp( this->data ) );
     }
@@ -218,6 +262,46 @@ public:
 
     TransDouble hypot( const TransDouble& t ) const {
         return std::hypot( this->data, t.data );
+    }
+
+    TransDouble tgamma() const {
+        return std::tgamma( this->data );
+    }
+
+    TransDouble lgamma() const {
+        return std::lgamma( this->data );
+    }
+
+    TransDouble erf() const {
+        return std::erf( this->data );
+    }
+
+    TransDouble erfc() const {
+        return std::erfc( this->data );
+    }
+
+    TransDouble floor() const {
+        return std::floor( this->data );
+    }
+
+    TransDouble ceiling() const {
+        return std::ceil( this->data );
+    }
+
+    TransDouble truncate() const {
+        return std::trunc( this->data );
+    }
+
+    TransDouble round() const {
+        return std::round( this->data );
+    }
+
+    TransDouble abs() const {
+        return std::abs( this->data );
+    }
+
+    TransDouble pow( const TransDouble& t ) const {
+        return std::pow( this->data, t.data );
     }
 
 };

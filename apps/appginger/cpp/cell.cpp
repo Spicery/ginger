@@ -123,6 +123,14 @@ CharacterCell Cell::asCharacterCell() const {
 	}
 }
 
+SmallCell Cell::asSmallCell() const {
+	if ( IsSmall( this->ref ) ) {
+		return SmallCell( this->ref );
+	} else {
+		throw Ginger::Mishap( "Small needed" ).culprit( "Argument", this->toPrintString() );
+	}
+}
+
 
 
 // -- HeapObjects --------------------------------------------------------------

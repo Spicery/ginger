@@ -76,6 +76,7 @@ public:
     bool isZero() const;
     bool isPositive() const;
     bool isNegative() const;
+    BigIntExternal abs() const;
 };
 
 } // namespace Ginger

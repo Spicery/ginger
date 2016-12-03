@@ -52,7 +52,7 @@ OBJS= syscrypto.o bigint.o rational.o sysvm.o \
 	makesysfn.o \
 	toolmain.o
 
-USEREXECUTABLES=appginger ginger-cgi ginger-script ginger-cli ginger ginger-info
+USEREXECUTABLES=appginger ginger-cgi ginger-script ginger-cli ginger-info
 
 all: $(USEREXECUTABLES)
 
@@ -107,32 +107,32 @@ ginger-script: libappginger.a scriptmain.o
 	ranlib libappginger.a ../../libgng/cpp/libgng.a
 	$(CC) $(CXXFLAGS) $(BOOST_CPPFLAGS) -o $@ scriptmain.o $(LIBAPPGINGER) $(LIBRARIES)
 
-ginger:
-	echo "#!/bin/sh" > ginger-tmp
-	echo 'QUIET=false' >> ginger-tmp
-	echo 'while getopts "q-:" arg; do' >> ginger-tmp
-	echo '    case $$arg in' >> ginger-tmp
-	echo '        q)' >> ginger-tmp
-	echo '            QUIET=true;;' >> ginger-tmp
-	echo '        -)' >> ginger-tmp
-	echo '            case $$OPTARG in' >> ginger-tmp
-	echo '                quiet) ' >> ginger-tmp
-	echo '                    QUIET=true;;' >> ginger-tmp
-	echo '            esac;;' >> ginger-tmp
-	echo '    esac' >> ginger-tmp
-	echo 'done' >> ginger-tmp
-	echo 'if [ $$QUIET = false ]' >> ginger-tmp
-	echo 'then' >> ginger-tmp
-	echo '    echo "Ginger: @PACKAGE_VERSION@, "'`date +%Y-%m-%d`'", Copyright (c) 2010  Stephen Leach"' >> ginger-tmp
-	echo '    echo "+----------------------------------------------------------------------+"'  >> ginger-tmp
-	echo '    echo "| This program comes with ABSOLUTELY NO WARRANTY. It is free software, |"' >> ginger-tmp
-	echo '    echo "| and you are welcome to redistribute it under certain conditions.     |"' >> ginger-tmp
-	echo '    echo "| Use option --help=license for details.                               |"' >> ginger-tmp
-	echo '    echo "+----------------------------------------------------------------------+"' >> ginger-tmp
-	echo 'fi' >> ginger-tmp
-	echo `which rlwrap`\ -pGreen\ -S\'\>\>\>\ \'\ $(INSTALL_TOOL)/ginger-cli -gcmn -q $$\@ >> ginger-tmp
-	chmod a-w,a+x ginger-tmp
-	mv ginger-tmp ginger
+# ginger:
+# 	echo "#!/bin/sh" > ginger-tmp
+# 	echo 'QUIET=false' >> ginger-tmp
+# 	echo 'while getopts "q-:" arg; do' >> ginger-tmp
+# 	echo '    case $$arg in' >> ginger-tmp
+# 	echo '        q)' >> ginger-tmp
+# 	echo '            QUIET=true;;' >> ginger-tmp
+# 	echo '        -)' >> ginger-tmp
+# 	echo '            case $$OPTARG in' >> ginger-tmp
+# 	echo '                quiet) ' >> ginger-tmp
+# 	echo '                    QUIET=true;;' >> ginger-tmp
+# 	echo '            esac;;' >> ginger-tmp
+# 	echo '    esac' >> ginger-tmp
+# 	echo 'done' >> ginger-tmp
+# 	echo 'if [ $$QUIET = false ]' >> ginger-tmp
+# 	echo 'then' >> ginger-tmp
+# 	echo '    echo "Ginger: @PACKAGE_VERSION@, "'`date +%Y-%m-%d`'", Copyright (c) 2010  Stephen Leach"' >> ginger-tmp
+# 	echo '    echo "+----------------------------------------------------------------------+"'  >> ginger-tmp
+# 	echo '    echo "| This program comes with ABSOLUTELY NO WARRANTY. It is free software, |"' >> ginger-tmp
+# 	echo '    echo "| and you are welcome to redistribute it under certain conditions.     |"' >> ginger-tmp
+# 	echo '    echo "| Use option --help=license for details.                               |"' >> ginger-tmp
+# 	echo '    echo "+----------------------------------------------------------------------+"' >> ginger-tmp
+# 	echo 'fi' >> ginger-tmp
+# 	echo `which rlwrap`\ -pGreen\ -S\'\>\>\>\ \'\ $(INSTALL_TOOL)/ginger-cli -gcmn -q $$\@ >> ginger-tmp
+# 	chmod a-w,a+x ginger-tmp
+# 	mv ginger-tmp ginger
 
 clean:
 	rm -f *.o

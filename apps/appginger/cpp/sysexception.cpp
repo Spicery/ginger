@@ -94,7 +94,7 @@ Ref * sysFailover( Ref * pc, class MachineClass * vm ) {
 */
 Ref * sysPanic( Ref * pc, class MachineClass * vm ) {
 	//	Initialise message with default.
-	Ginger::Mishap syserror( "Internal error: throw called with invalid arguments", Ginger::Mishap::SYSTEM_ERROR_SEVERITY ); 
+	Ginger::Mishap syserror( "Internal error: throw called with invalid arguments", "S" ); 
 	decorateProblem( vm, syserror );
 	throw syserror;
 }

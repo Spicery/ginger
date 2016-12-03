@@ -34,7 +34,7 @@ void LabelClass::labelSet() {
 		clog << "Setting label at [" << here << "]" << endl;
 	#endif
 	if ( this->is_set ) {
-		throw Unreachable();
+		throw UnreachableError();
 	}
 	this->the_location = here;
 	this->is_set = true;

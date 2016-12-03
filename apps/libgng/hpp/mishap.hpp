@@ -35,24 +35,20 @@ public:
 };
 
 class Mishap : public std::exception {
-public:
-	enum SEVERITY {
-		EXECUTION_TIME_SEVERITY,
-		SYSTEM_ERROR_SEVERITY,
-		COMPILE_TIME_SEVERITY
-	};
-	static enum SEVERITY codeToSeverity( char s ) { return s == 'r' ? EXECUTION_TIME_SEVERITY : s == 'c' ? COMPILE_TIME_SEVERITY : SYSTEM_ERROR_SEVERITY; }
-	static enum SEVERITY codeToSeverity( const char * s ) { return s == NULL ? SYSTEM_ERROR_SEVERITY : s[ 0 ] == 'r' ? EXECUTION_TIME_SEVERITY : s[0] == 'c' ? COMPILE_TIME_SEVERITY : SYSTEM_ERROR_SEVERITY; }
-	static char severityToCode( enum SEVERITY s ) { return s == EXECUTION_TIME_SEVERITY ? 'r' : s == COMPILE_TIME_SEVERITY ? 'c' : 's'; }
 private:
 	std::string message;
 	std::vector< std::pair< std::string, std::string > > culprits;
-	enum SEVERITY mishap_severity;
+	std::string mishap_category;
 
 public:
-	Mishap( const std::string & msg, enum SEVERITY severity = EXECUTION_TIME_SEVERITY ) : 
+	static constexpr const char * const SystemCategory = "S";
+	static constexpr const char * const RunTimeCategory = "R";
+	static constexpr const char * const CompileTimeCategory = "C";
+	static constexpr const char * const UnexpectedEndOfInputCategory = "CE";
+	
+	Mishap( const std::string & msg, const std::string & category = RunTimeCategory ) : 
 		message( msg ),
-		mishap_severity( severity )
+		mishap_category( category )
 	{}
 	virtual ~Mishap() throw() {}
 
@@ -70,14 +66,15 @@ public:
 	Mishap & culprit( const std::string reason, const signed char N );
 	Mishap & culprit( const std::string reason, const unsigned char N );
 
+	Mishap & hint( const std::string & hint );
 	Mishap & cause( Mishap & problem );
 	
 public:
 	void setMessage( const std::string & msg ) { this->message = msg; }
-	virtual std::string severity() const; 
-	bool isCompileTimeError() { return this->mishap_severity == COMPILE_TIME_SEVERITY; }
-	bool isExecutionTimeError() { return this->mishap_severity == EXECUTION_TIME_SEVERITY; }
-	bool isSystemError() { return this->mishap_severity == SYSTEM_ERROR_SEVERITY; }
+	virtual std::string category() const; 
+	bool isCompileTimeError() { return this->mishap_category[0] == 'C'; }
+	bool isExecutionTimeError() { return this->mishap_category[0] == 'R'; }
+	bool isSystemError() { return this->mishap_category[0] == 'S'; }
 
 	void report();
 	void gnxReport();
@@ -89,10 +86,11 @@ public:
 	const char * what() const throw() { return this->message.c_str(); }
 };
 
-#define SystemError( Message ) Ginger::Mishap( (Message), Ginger::Mishap::SYSTEM_ERROR_SEVERITY )
-#define CompileTimeError( Message ) Ginger::Mishap( (Message), Ginger::Mishap::COMPILE_TIME_SEVERITY )
-#define Unreachable() Ginger::Mishap( "Internal error", Ginger::Mishap::SYSTEM_ERROR_SEVERITY ).culprit( "FILE", __FILE__ ).culprit( "LINE", (long)__LINE__ )
-#define ToBeDone() Ginger::Mishap( "To be implemented", Ginger::Mishap::SYSTEM_ERROR_SEVERITY ).culprit( "FILE", __FILE__ ).culprit( "LINE", (long)__LINE__ )
+#define SystemError( Message ) Ginger::Mishap( (Message), Ginger::Mishap::SystemCategory ).culprit( "FILE", __FILE__ ).culprit( "LINE", (long)__LINE__ )
+#define CompileTimeError( Message ) Ginger::Mishap( (Message), Ginger::Mishap::CompileTimeCategory )
+#define UnexpectedEndOfInputError() Ginger::Mishap( "Unexpected end of input", Ginger::Mishap::UnexpectedEndOfInputCategory )
+#define UnreachableError() Ginger::Mishap( "Internal error", Ginger::Mishap::SystemCategory  ).culprit( "FILE", __FILE__ ).culprit( "LINE", (long)__LINE__ )
+#define ToBeDoneError() Ginger::Mishap( "To be implemented", Ginger::Mishap::SystemCategory  ).culprit( "FILE", __FILE__ ).culprit( "LINE", (long)__LINE__ )
 
 } // namespace Ginger
 

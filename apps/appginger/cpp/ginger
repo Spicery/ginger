@@ -1,0 +1,23 @@
+#!/bin/sh
+QUIET=false
+while getopts "q-:" arg; do
+    case $arg in
+        q)
+            QUIET=true;;
+        -)
+            case $OPTARG in
+                quiet) 
+                    QUIET=true;;
+            esac;;
+    esac
+done
+if [ $QUIET = false ]
+then
+    echo "Ginger: 0.9.2-dev, "2016-12-03", Copyright (c) 2010  Stephen Leach"
+    echo "+----------------------------------------------------------------------+"
+    echo "| This program comes with ABSOLUTELY NO WARRANTY. It is free software, |"
+    echo "| and you are welcome to redistribute it under certain conditions.     |"
+    echo "| Use option --help=license for details.                               |"
+    echo "+----------------------------------------------------------------------+"
+fi
+/usr/local/bin/rlwrap -pGreen -S'>>> ' /usr/local/libexec/ginger/ginger-cli -gcmn -q $@

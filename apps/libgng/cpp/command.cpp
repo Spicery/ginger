@@ -158,8 +158,7 @@ void Command::runSilent() {
 			return;
 		}
 	}
-	throw Unreachable();
-	
+	throw UnreachableError();
 }
 
 /*
@@ -215,7 +214,7 @@ int Command::runWithOutput() {
 			return this->input_fd;
 		}
 	}
-	throw Unreachable();
+	throw UnreachableError();
 }
 
 void Command::runWithInputAndOutput() {
@@ -276,7 +275,7 @@ void Command::runWithInputAndOutput() {
 			return;
 		}
 	}
-	throw Unreachable();
+	throw UnreachableError();
 }
 
 Ginger::SharedMnx Command::sendMnx( Ginger::SharedMnx mnx ) {

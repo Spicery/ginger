@@ -455,7 +455,7 @@ private:
 		Ref key = *obj_K;
 		if ( IsFunctionKey( key ) ) {
 			if ( IsCoreFunctionKey( key ) ) {
-				throw Unreachable();
+				throw UnreachableError();
 			}
 			if ( this->tracker ) this->tracker->startFnObj();
 			if ( IsMethodKey( key ) ) {
@@ -608,7 +608,7 @@ private:
 					this->forwardTarget( assoc_K[ ASSOC_OFFSET_VALUE ] );
 					if ( isntTargetForwarded( assoc_K[ ASSOC_OFFSET_VALUE ] ) ) {
 						cerr << "Target[1] not forwarded!" << endl;
-						throw Unreachable();
+						throw UnreachableError();
 					}
 				} else {
 					//	This is a candidate for GC.
@@ -639,7 +639,7 @@ private:
 				this->forwardTarget( wroot_K[ ASSOC_OFFSET_VALUE ] );
 				if ( isntTargetForwarded( wroot_K[ ASSOC_OFFSET_VALUE ] ) ) {
 					cerr << "Target[2] not forwarded!" << endl;
-					throw Unreachable();
+					throw UnreachableError();
 				}
 				cout << "Nudge" << endl;
 				

@@ -4,6 +4,7 @@ all clean:
 	make -C automatic/sys $@
 	make -C automatic/sysfn $@
 	make -C libgng $@
+	make -C ginger $@
 	make -C appginger $@
 	make -C common2gnx $@
 	make -C fetchgnx $@

@@ -49,7 +49,7 @@ public:
 	bool item_is_anyfix();
 	bool item_is_binary();
 	bool item_is_name();
-
+	bool item_is_eof() { return this->tok_type == tokty_eof; }
 };
 
 typedef ItemClass * Item;

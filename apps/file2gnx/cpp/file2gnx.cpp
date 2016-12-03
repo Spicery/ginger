@@ -191,6 +191,7 @@ static void printUsage() {
 	cout << "Usage :  " << APP_TITLE << " [OPTIONS] [FILE]" << endl << endl;
 	cout << "OPTION                    SUMMARY" << endl;
 	cout << "-u, --using-name FILE     use FILE to determine the grammar and variable name" << endl;
+	cout << "-g, --grammar=NAME        specify the grammar by name" << endl;
 	cout << "-H, --help                print out this help info (see --help=help)" << endl;
 	cout << "-L, --license             print out license information and exit" << endl;
     cout << "-V, --version             print out version information and exit" << endl;
@@ -223,7 +224,8 @@ static void printHelpLicense() {
 extern char * optarg;
 static struct option long_options[] =
     {
-        { "using-name",		required_argument,		0, 'u' },
+        { "using-name",		optional_argument,		0, 'u' },
+        { "grammar",        optional_argument,      0, 'g' },
         { "help",           optional_argument,      0, 'H' },
         { "license",        optional_argument,      0, 'L' },
         { "version",        no_argument,            0, 'V' },
@@ -251,6 +253,10 @@ public:
 	        switch ( c ) {
 	            case 'u': {
 	            	this->using_name.setValue( string( optarg ) );
+	            	break;
+	            }
+	            case 'g': {
+	            	this->using_name.setValue( string( "." ) + optarg );
 	            	break;
 	            }
 	        	case 'H': {

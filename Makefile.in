@@ -29,6 +29,8 @@ distclean: clean
 	rm -f apps/file2gnx/Makefile
 	rm -f apps/file2gnx/cpp/Makefile
 	rm -f apps/file2gnx/unittest/Makefile
+	rm -f apps/ginger/Makefile
+	rm -f apps/ginger/cpp/Makefile
 	rm -f apps/ginger-admin/Makefile
 	rm -f apps/ginger-admin/cpp/Makefile
 	rm -f apps/ginger-help/Makefile
@@ -90,10 +92,11 @@ SAVED_INSTALLATION_DIR=~/.config/ginger/saved-installation
 USEREXECUTABLES=\
 	apps/appginger/cpp/ginger-cgi \
 	apps/appginger/cpp/ginger-script \
-	apps/appginger/cpp/ginger \
-	apps/ginger-admin/cpp/ginger-admin \
-	apps/appginger/cpp/ginger-info
-
+	apps/appginger/cpp/ginger-info \
+	apps/appginger/cpp/ginger-cli \
+	apps/ginger/cpp/ginger \
+	apps/ginger-admin/cpp/ginger-admin
+	
 # These will be installed in /usr/local/libexec/ginger and will not be
 # available on the programmer's path. They are helper functions.
 LIBEXECUTABLES=\
@@ -102,7 +105,6 @@ LIBEXECUTABLES=\
 	apps/common2gnx/cpp/cstyle2gnx \
 	apps/fetchgnx/cpp/fetchgnx \
 	apps/file2gnx/cpp/file2gnx \
-	apps/appginger/cpp/ginger-cli \
 	apps/ginger-help/cpp/ginger-help \
 	apps/gngreadline/cpp/gngreadline \
 	apps/gprojlibtool/cpp/gprojlibtool \
@@ -125,6 +127,7 @@ install-as-is:
 	# Installing support files $(INSTALL_LIB)
 	mkdir -p $(INSTALL_LIB)
 	mkdir -p $(INSTALL_TOOL)
+	cp -r apps/ginger/usage $(INSTALL_LIB)/ginger/
 	cp -r apps/ginger-admin/admin-templates $(INSTALL_LIB)
 	( cd projects; tar cf - standard_library ) | ( cd $(INSTALL_LIB); tar xf - )
 	#echo Installing docs into $(INSTALL_DOC)

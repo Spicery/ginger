@@ -220,7 +220,7 @@ int ToolMain::run() {
 	
 	try {
 		if ( this->use_stdin ) {
-			run( stdin );
+			this->run( stdin );
 		} else {
 			const char * fname = input_file_name.c_str();
 			FILE * in = fopen( fname, "r" ); 

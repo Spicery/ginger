@@ -213,7 +213,7 @@ Ref * findObjectKey( Ref * obj_A ) {
 				return x;
 			}
 		}
-		throw Unreachable();
+		throw UnreachableError();
 	}
 }
 
@@ -260,7 +260,7 @@ unsigned long lengthAfterObjectKey( Ref * obj_K ) {
 				break;
 			}
 			default: 
-				throw Unreachable();
+				throw UnreachableError();
 		}
 	} else if ( IsFunctionKey( key ) ) {
 		return sizeAfterKeyOfFn( obj_K );

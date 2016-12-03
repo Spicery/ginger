@@ -1,6 +1,6 @@
 /******************************************************************************\
-	Copyright (c) 2010 Stephen Leach. AppGinger is distributed under the terms 
-	of the GNU General Public License. This file is part of AppGinger.
+    Copyright (c) 2010 Stephen Leach. AppGinger is distributed under the terms 
+    of the GNU General Public License. This file is part of AppGinger.
 
     AppGinger is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -55,15 +55,17 @@
 #include "wellknownpaths.hpp"
 
 /*
-	This is the structure of struct option, which does not seem to be
-	especially well documented. Included for handy reference.
-	struct option {
-		const char *name;   // option name
-		int has_arg;        // 0 = no arg, 1 = mandatory arg, 2 = optional arg
-		int *flag;          // variable to return result or NULL
-		int val;            // code to return (when flag is null)
-							//  typically short option code
+    This is the structure of struct option, which does not seem to be
+    especially well documented. Included for handy reference.
+    struct option {
+        const char *name;   // option name
+        int has_arg;        // 0 = no arg, 1 = mandatory arg, 2 = optional arg
+        int *flag;          // variable to return result or NULL
+        int val;            // code to return (when flag is null)
+                            //  typically short option code
 */
+
+#define USAGE_FILE INSTALL_LIB "/ginger/usage/usage.txt"
 
 extern char * optarg;
 static struct option long_options[] =
@@ -73,14 +75,14 @@ static struct option long_options[] =
         { "machine",        required_argument,      0, 'm' },
         { "version",        no_argument,            0, 'V' },
         { "debug",          required_argument,      0, 'd' },
-        { "grammar",		required_argument,		0, 'g' },
+        { "grammar",        required_argument,      0, 'g' },
         { "license",        optional_argument,      0, 'L' },
         { "load",           required_argument,      0, 'l' },
         { "package",        required_argument,      0, 'p' },
-        { "project",		required_argument,		0, 'j' },
-        { "stdin",			no_argument,			0, 'i' },
+        { "project",        required_argument,      0, 'j' },
+        { "stdin",          no_argument,            0, 'i' },
         { "quiet",          no_argument,            0, 'q' },
-        { "level",		    required_argument,		0, 'v' },
+        { "level",          required_argument,      0, 'v' },
         { 0, 0, 0, 0 }
     };
 
@@ -108,40 +110,37 @@ void ToolMain::printGPL( const char * start, const char * end ) const {
     }
 }
 
+static void printFile( const char * filename ) {
+    ifstream print_file( filename );
+    if ( print_file.good() ) {
+        std::string line;
+        while ( getline( print_file, line ) )  {
+            std::cout << line << std::endl;
+        }
+    } else {
+        std::cerr << "File not found: " << filename << endl;
+    }
+}
+
 static void printUsage() {
-	cout << "Usage :  " << PACKAGE_NAME << " [options] [files]" << endl << endl;
-	cout << "OPTION                SUMMARY" << endl;
-	cout << "-d, --debug=OPTION    add debug option (see --help=debug)" << endl;
-	cout << "-e, --engine=<N>      run using engine #n" << endl;
-	cout << "-g, --grammar=LANG    select front-end syntax" << endl;
-	cout << "-H, --help            print out this help info (see --help=help)" << endl;
-	cout << "-i, --stdin           compile from stdin" << endl;
-	cout << "-j, --project=PATH    add a project folder to the search path" << endl;
-	cout << "-L, --license         print out license information and exit" << endl;
-    cout << "-l, --load=FILE       load a file from the load-folder of the current package" << endl;
-    cout << "-O, --options         compact multiple options as one option (for #! scripts)" << endl;
-    cout << "-p, --package=PKG     initial interactive package" << endl;
-	cout << "-q, --quiet           no welcome banner" << endl;
-	cout << "-v, --level=LEVEL     set results level to 1 or 2" << endl;
-	cout << "-V, --version         print out version information and exit" << endl;
-	cout << endl;
-}	
+    printFile( USAGE_FILE );
+}   
 
 static void printHelpOptions() {
-	cout << "--help=debug          help on the debugging options available" << endl;
-	cout << "--help=help           this short help" << endl;
-	cout << "--help=licence        help on displaying license information" << endl;
+    cout << "--help=debug          help on the debugging options available" << endl;
+    cout << "--help=help           this short help" << endl;
+    cout << "--help=licence        help on displaying license information" << endl;
 }
 
 static void printHelpDebug() {
-	cout << "--debug=showcode      Causes the generated instructions to be displayed." << endl;
-	cout << "--debug=gctrace       Causes the garbage collector to emit debugging statistics." << endl;
+    cout << "--debug=showcode      Causes the generated instructions to be displayed." << endl;
+    cout << "--debug=gctrace       Causes the garbage collector to emit debugging statistics." << endl;
 }
 
 static void printHelpLicense() {
-	cout << "Displays key sections of the GNU Public License." << endl;
-	cout << "--license=warranty    Shows warranty." << endl;
-	cout << "--license=conditions  Shows terms and conditions." << endl;
+    cout << "Displays key sections of the GNU Public License." << endl;
+    cout << "--license=warranty    Shows warranty." << endl;
+    cout << "--license=conditions  Shows terms and conditions." << endl;
 }
 
 
@@ -163,11 +162,11 @@ void tokenize(
             pos = str.length();
             if ( pos != lastPos || not trimEmpty ) {
                 tokens.push_back(
-                	typename ContainerT::value_type(
-                		str.data() + lastPos,
-                  		pos - lastPos 
-                  	)
-            	);
+                    typename ContainerT::value_type(
+                        str.data() + lastPos,
+                        pos - lastPos 
+                    )
+                );
             }
 
             break;
@@ -175,11 +174,11 @@ void tokenize(
 
         if ( pos != lastPos || not trimEmpty ) {
             tokens.push_back(
-            	typename ContainerT::value_type(
-            		str.data() + lastPos,
-              		pos - lastPos 
-              	)
-        	);
+                typename ContainerT::value_type(
+                    str.data() + lastPos,
+                    pos - lastPos 
+                )
+            );
         }
 
         lastPos = pos + 1;
@@ -201,7 +200,7 @@ void ToolMain::integrityChecks() {
 // Return true for an early exit, false to continue processing.
 bool ToolMain::parseArgs( int argc, char **argv, char **envp ) {
     this->integrityChecks();
-	if ( envp != NULL ) this->context.setEnvironmentVariables( envp );
+    if ( envp != NULL ) this->context.setEnvironmentVariables( envp );
     return this->parseArgcArgv( argc, argv );
 }
 
@@ -230,36 +229,36 @@ bool ToolMain::parseArgcArgv( int argc, char **argv ) {
                 break;
             }
             case 'g': {
-            	this->context.setSyntax( optarg );
-            	break;
+                this->context.setSyntax( optarg );
+                break;
             }
             case 'H': {
                 //  Eventually we will have a "home" for our auxillary
                 //  files and this will simply go there. Or run a web
                 //  browser pointed there.
                 if ( optarg == NULL ) {
-                	printUsage();
+                    printUsage();
                 } else if ( std::string( optarg ) == "help" ) {
-                	printHelpOptions();
+                    printHelpOptions();
                 } else if ( std::string( optarg ) == "debug" ) {
-                	printHelpDebug();
+                    printHelpDebug();
                 } else if ( std::string( optarg ) == "license" ) {
-                	printHelpLicense();
+                    printHelpLicense();
                 } else {
                     cout << "Unknown help topic %s" << optarg << endl;
                 }
-				return false;
+                return false;
             }
             case 'i': {
-            	this->context.useStdin() = true;
-            	break;
+                this->context.useStdin() = true;
+                break;
             }
             case 'j': {
-            	this->context.addProjectFolder( optarg );
-            	break;
+                this->context.addProjectFolder( optarg );
+                break;
             }
             case 'L': {
-            	printLicense( optarg );
+                printLicense( optarg );
                 return false;
             }
             case 'l': {
@@ -310,38 +309,38 @@ bool ToolMain::parseArgcArgv( int argc, char **argv ) {
                 break;
             }
             case 'q': {
-            	this->context.welcomeBanner() = false;
-            	break;
+                this->context.welcomeBanner() = false;
+                break;
             }
             case 'v': {
-            	int level = atoi( optarg );
-            	this->context.printDetailLevel().level() = level;
-            	break;
+                int level = atoi( optarg );
+                this->context.printDetailLevel().level() = level;
+                break;
             }
             case 'V': {
                 cout << this->appName() << ": version " << this->context.version() << " (" << __DATE__ << " " << __TIME__ << ")" << endl;
                 return false;
             }
             case '?': {
-            	//	Invalid option: exit.
+                //  Invalid option: exit.
                 return false;
             }
             default: {
-            	//	This should not happen. It indicates that the option string 
-            	//	does not conform to the cases of this switch statement.
-            	throw SystemError( "Unrecognised option" ).culprit( "Option code", static_cast< long >( c ) );
+                //  This should not happen. It indicates that the option string 
+                //  does not conform to the cases of this switch statement.
+                throw SystemError( "Unrecognised option" ).culprit( "Option code", static_cast< long >( c ) );
             }
         }
     }
 
-	//	Aggregate the remaining arguments, which are effectively filenames (paths).
-	if ( optind < argc ) {
-		 while ( optind < argc ) {
-		   	this->context.addArgument( argv[ optind++ ] );
-		 }
-	}
-	
-	return true;
+    //  Aggregate the remaining arguments, which are effectively filenames (paths).
+    if ( optind < argc ) {
+         while ( optind < argc ) {
+            this->context.addArgument( argv[ optind++ ] );
+         }
+    }
+    
+    return true;
 }
 
 void ToolMain::runFrom( RCEP & rcep, Ginger::MnxReader & gnx_read ) {
@@ -388,22 +387,18 @@ public:
 };
 
 void ToolMain::executeCommand( RCEP & rcep, Ginger::Command command ) {
-    //cerr << "Command so far: " << command << endl;
-
     FileMgr gnxfp( command );
     
-#ifdef GNU_FD_TO_IFSTREAM
-    // ... open the file, with whatever, pipes or who-knows ...
-    // let's build a buffer from the FILE* descriptor ...
-    __gnu_cxx::stdio_filebuf<char> pipe_buf( gnxfp.get(), ios_base::in );
-   // there we are, a regular istream is build upon the buffer.
-    istream stream_pipe_in( &pipe_buf );
- #else
-    FileDescriptorIFStream stream_pipe_in( gnxfp.getFD() );
-#endif
+    #ifdef GNU_FD_TO_IFSTREAM
+        // ... open the file, with whatever, pipes or who-knows ...
+        // let's build a buffer from the FILE* descriptor ...
+        __gnu_cxx::stdio_filebuf<char> pipe_buf( gnxfp.get(), ios_base::in );
+        // there we are, a regular istream is build upon the buffer.
+        istream stream_pipe_in( &pipe_buf );
+    #else
+        FileDescriptorIFStream stream_pipe_in( gnxfp.getFD() );
+    #endif
    
-
-    
     while ( rcep.unsafe_read_comp_exec_print( stream_pipe_in, std::cout ) ) {}
     gnxfp.noteTidyExit();    
 }

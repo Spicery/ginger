@@ -39,7 +39,7 @@ void DestinationClass::destinationSet() {
 		clog << "Setting destination at [" << here << "]" << endl;
 	#endif
 	if ( this->is_set ) {
-		throw Unreachable();
+		throw UnreachableError();
 	}
 	this->location = here;
 	this->is_set = true;

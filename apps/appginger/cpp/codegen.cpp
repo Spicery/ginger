@@ -419,7 +419,7 @@ void CodeGenClass::vmiEND_CALL_ID( int var, const VIdent & ident ) {
 		this->emitRef( IntToRef( var ) );
 		this->emitVIDENT_REF( ident );
 	} else {
-		throw Unreachable();
+		throw UnreachableError();
 	}
 }
 
@@ -429,7 +429,7 @@ void CodeGenClass::vmiSET_CALL_ID( int in_arity, const VIdent & ident ) {
 	} else if ( ident.isGlobal() ) {
 		this->emitSPC( vmc_set_count_call_global );
 	} else {
-		throw Unreachable();
+		throw UnreachableError();
 	}
 	this->emitRef( IntToRef( in_arity ) );
 	this->emitVIDENT_REF( ident );
@@ -905,7 +905,7 @@ Ref CodeGenClass::detach( const bool in_heap, Ref fnkey ) {
 		*p++ = IntToRef( this->nlocals );
 		*p++ = IntToRef( this->ninputs );
 		Ref * func = p;
-		if ( fnkey != sysCoreFunctionKey ) throw Unreachable();
+		if ( fnkey != sysCoreFunctionKey ) throw UnreachableError();
 		*p++ = sysCoreFunctionKey;
 		for ( std::vector< Ref >::iterator it = this->code_data->begin(); it != this->code_data->end(); ++it ) {
 			*p++ = *it;
@@ -1508,7 +1508,7 @@ void CodeGenClass::compileChildrenChecked( Gnx mnx, Arity arity ) {
 		this->vmiSET_COUNT_TO_MARK( v );
 		this->vmiCHECK_COUNT( arity.count() );
 	} else {	
-		throw Unreachable();
+		throw UnreachableError();
 	}
 }
 
@@ -1719,8 +1719,7 @@ void CodeGenClass::compileGnxConstant( Gnx mnx, LabelClass * contn ) {
 }
 
 static void throwProblem( Gnx mnx ) {
-	Ginger::Mishap::SEVERITY severity = Ginger::Mishap::codeToSeverity( mnx->attribute( PROBLEM_SEVERITY, "system" ).c_str() );
-	Ginger::Mishap mishap( mnx->attribute( PROBLEM_MESSAGE ), severity );
+	Ginger::Mishap mishap( mnx->attribute( PROBLEM_MESSAGE ), mnx->attribute( PROBLEM_CATEGORY, "S" ) );
 	MnxChildIterator mnxit( mnx );
 	while ( mnxit.hasNext() ) {
 		Gnx & culprit = mnxit.next();

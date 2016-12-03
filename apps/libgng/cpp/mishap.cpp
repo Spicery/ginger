@@ -31,6 +31,8 @@
 namespace Ginger {
 using namespace std;
 
+static constexpr const char * const HINT = "hint";
+
 #define PREFIX "    "
 #define ORIGIN ( PREFIX "Cause" )
 
@@ -45,6 +47,11 @@ Mishap & Mishap::cause( Mishap & problem ) {
 		key.append( it->first );
 		this->culprit( key, it->second );
 	}
+	return *this;
+}
+
+Mishap & Mishap::hint( const std::string & hint_string ) {
+	this->culprit( HINT, hint_string );
 	return *this;
 }
 
@@ -124,16 +131,16 @@ Mishap & Mishap::culprit( const std::string arg ) {
 	return *this;
 }
 
-std::string Mishap::severity() const {
-	switch ( this->mishap_severity ) {
-		case EXECUTION_TIME_SEVERITY:
+std::string Mishap::category() const {
+	switch ( this->mishap_category[0] ) {
+		case 'R':
 			return "Mishap";
-		case SYSTEM_ERROR_SEVERITY:
+		case 'S':
 			return "Panic";
-		case COMPILE_TIME_SEVERITY:
+		case 'C':
 			return "Compilation Error";
 		default:
-			return "(Unknown)";
+			return "Error";
 	}
 }
 
@@ -143,7 +150,7 @@ std::string Mishap::severity() const {
 
 void Mishap::report() {
 
-	size_t width = this->severity().size();
+	size_t width = this->category().size();
 	for ( 	
 		vector< pair< string, string > >::iterator it = this->culprits.begin();
 		it != this->culprits.end();
@@ -155,7 +162,7 @@ void Mishap::report() {
 	
 
 	cerr << endl;
-	cerr << SYS_MSG_PREFIX << left << setw( width ) << this->severity() << " : " << this->message << endl;
+	cerr << SYS_MSG_PREFIX << left << setw( width ) << this->category() << " : " << this->message << endl;
 	for ( 	
 		vector< pair< string, string > >::iterator it = this->culprits.begin();
 		it != this->culprits.end();
@@ -169,8 +176,8 @@ void Mishap::report() {
 void Mishap::gnxReport() {
 	cout << "<problem message=\"";
 	mnxRenderText( cout, this->message );
-	cout << "\" severity=\"";
-	cout << severityToCode( this->mishap_severity );
+	cout << "\" category=\"";
+	mnxRenderText( cout, this->mishap_category );
 	cout << "\"" << ">";
 	for ( 	
 		vector< pair< string, string > >::iterator it = this->culprits.begin();

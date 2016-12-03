@@ -1,0 +1,25 @@
+Usage :  ginger [command] [options] [files]
+    
+The ginger command does different things depending on the
+optional <command>. By default it invokes the command line interpreter.
+(command: cli). These are the options for ginger-cli.
+
+OPTION                SUMMARY
+-d, --debug=OPTION    add debug option (see --help=debug)
+-e, --engine=<N>      run using engine #n
+-g, --grammar=LANG    select front-end syntax
+-H, --help            print out this help info (see --help=help)
+-i, --stdin           compile from stdin
+-j, --project=PATH    add a project folder to the search path
+-L, --license         print out license information and exit
+-l, --load=FILE       load a file from the load-folder of the current package
+-O, --options         compact multiple options as one option (for #! scripts)
+-p, --package=PKG     initial interactive package
+-q, --quiet           no welcome banner
+-v, --level=LEVEL     set results level to 1 or 2
+-V, --version         print out version information and exit
+    
+'ginger help commands' will list the available command and 
+'ginger help <command>' will give help on the specific command and 
+'ginger <command> --help' will provide a usage summary.
+    

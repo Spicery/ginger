@@ -121,7 +121,7 @@ public:
 
 public:
 	const char * name() {
-		if ( this->def_name == NULL ) throw Unreachable();
+		if ( this->def_name == NULL ) throw UnreachableError();
 		return this->def_name;
 	}
 

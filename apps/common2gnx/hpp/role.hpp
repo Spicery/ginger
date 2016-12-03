@@ -56,6 +56,7 @@ public:
 	bool IsLiteral() 	{ return this->compile_code == LiteralCode; }
 	bool IsForm() 		{ return this->compile_code == FormCode; }
 	bool IsSys() 		{ return this->compile_code == SysCode; }
+	bool IsEof()		{ return this->compile_code == EofCode; }
 };
 
 

@@ -1,0 +1,45 @@
+prefix=@prefix@
+exec_prefix=@prefix@
+datarootdir=@datarootdir@
+PACKAGE_TARNAME=@PACKAGE_TARNAME@
+INSTALL_BIN=@bindir@
+INSTALL_TOOL=@libexecdir@/@PACKAGE_TARNAME@
+INSTALL_LIB=@datarootdir@/@PACKAGE_TARNAME@
+INSTALL_DOC=@docdir@
+
+#LICENSE_FILE="$(INSTALL_LIB)/COPYING"
+#LICENSE_FILE="$(INSTALL_LIB)/COPYING"
+
+INSTALLDIRS=-DINSTALL_BIN='"$(INSTALL_BIN)"' -DINSTALL_LIB='"$(INSTALL_LIB)"' -DINSTALL_TOOL='"$(INSTALL_TOOL)"'
+
+CXXFLAGS=-DRUDECGI $(INSTALLDIRS) -g -std=c++11 -I../hpp -I../../libgng/hpp -I../../automatic/machine -I../../automatic/sys -I../../automatic/sysfn -I../../automatic/simple -Wall -Wnon-virtual-dtor
+CFLAGS=-Wmissing-prototypes
+
+# In order to exclude machine implementations, uncomment one or more of
+# the following lines.
+#CXXFLAGS += -DMACHINE1_EXCLUDED
+#CXXFLAGS += -DMACHINE2_EXCLUDED
+#CXXFLAGS += -DMACHINE3_EXCLUDED
+#CXXFLAGS += -DMACHINE4_EXCLUDED
+
+
+OBJS=ginger.o
+
+USEREXECUTABLES=ginger
+
+all: $(USEREXECUTABLES)
+
+
+# $@ is make shorthand for the target.
+# $@ is make shorthand for the dependencies
+ginger: $(OBJS)
+	$(CXX) $(CXXFLAGS) -o $@ $(OBJS)
+
+clean:
+	rm -f *.o
+	rm -f $(USEREXECUTABLES)
+	rm -f *.a
+
+#	Nothing needs doing.
+check:
+	

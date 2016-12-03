@@ -37,7 +37,8 @@
 #include <unistd.h>
 #include <sys/select.h>
 
-//#define USE_GNU_READLINE
+// #define DEBUG 1
+#define USE_GNU_READLINE 1
 #ifdef USE_GNU_READLINE
     #include <readline/readline.h>
     #include <readline/history.h>
@@ -136,7 +137,7 @@ public:
     bool getLine() {
         std::string line;
         
-        #ifdef USE_GNU_READLINE
+        // #ifdef USE_GNU_READLINE
             {
                 char * ln = gnu_readline();
                 if ( not ln ) {
@@ -144,14 +145,14 @@ public:
                 }
                 line = ln;
             }
-        #else
-            if ( getline( std::cin, line ).eof() ) {
-                #ifdef DEBUG
-                    cerr << "End of terminal input" << endl;
-                #endif
-                return false;
-            }
-        #endif
+        // #else
+        //     if ( getline( std::cin, line ).eof() ) {
+        //         #ifdef DEBUG
+        //             cerr << "End of terminal input" << endl;
+        //         #endif
+        //         return false;
+        //     }
+        // #endif
 
         if ( !line.empty() && line[0] == '!' ) {
             pid_t pid = fork();
@@ -246,18 +247,18 @@ public:
     }
 
     void mainLoop() {
-        #ifdef USE_GNU_READLINE
-            do {
-                cout << "*** ";
-                cout << flush;
-                rl_set_prompt( "*** " );
-                rl_on_new_line_with_prompt();
-            } while ( doSelect() );
-        #else
+        // #ifdef USE_GNU_READLINE
+        //     do {
+        //         cout << "*** ";
+        //         cout << flush;
+        //         rl_set_prompt( "*** " );
+        //         rl_on_new_line_with_prompt();
+        //     } while ( doSelect() );
+        // #else
             while ( doSelect() ) {
                 //  Continue.
             }
-        #endif
+        // #endif
     }
 
 };

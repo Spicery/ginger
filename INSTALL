@@ -24,10 +24,6 @@ Installing on Ubuntu or Mac OS X
 		% make
 		% sudo make install
 
-* 	The ginger interepreter makes use of rlwrap. Fortunately that's just
-	another agt-get
-		% sudo apt-get install rlwrap
-
 *	Create a Spicery folder for ginger and any sister projects. e.g.
 		% SPICERY_HOME=~/Spicery
 		% mkdir $SPICERY_HOME

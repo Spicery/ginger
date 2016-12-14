@@ -14,4 +14,3 @@ Development Programming Languages
 Runtime Dependencies
 	Strive to keep to a minimum.
 	Bash /bin/bash
-	rlwrap (I would prefer to eliminate this)

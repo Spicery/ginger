@@ -20,7 +20,7 @@ sudo make install
 # Now install the pre-requisites for the Ginger runtime. At the moment
 # this only consists of rlwrap.
 
-sudo apt-get install -y rlwrap
+#sudo apt-get install -y rlwrap
 
 ###############################################################################
 # And then build Ginger from the GitHub repo.

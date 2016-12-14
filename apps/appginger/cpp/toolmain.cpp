@@ -405,7 +405,7 @@ void ToolMain::executeCommand( RCEP & rcep, Ginger::Command command ) {
 }
 
 void ToolMain::executeFile( RCEP & rcep, const string filename ) {
-    this->executeCommand( rcep, this->context.syntaxCommand( filename ) );
+    this->executeCommand( rcep, this->context.fileSyntaxCommand( filename ) );
 }
 
 /**
@@ -414,8 +414,12 @@ void ToolMain::executeFile( RCEP & rcep, const string filename ) {
  *       to invoke gngreplay.
  */
 void ToolMain::executeStdin( const bool use_gnu_readline, RCEP & rcep ) {
-    UserInput user_input( this->context.userInputSyntaxCommand( use_gnu_readline ) );
-    while ( rcep.mainloop( user_input, std::cout ) ) {}
+    if ( use_gnu_readline ) {
+        UserInput user_input( this->context.stdinSyntaxCommand() );
+        while ( rcep.mainloop( user_input, std::cout ) ) {}
+    } else {
+        this->executeCommand( rcep, this->context.stdinSyntaxCommand() );
+    }
 }
 
 void ToolMain::executeFileArguments( RCEP & rcep ) {

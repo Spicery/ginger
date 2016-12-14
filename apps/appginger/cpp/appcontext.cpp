@@ -91,7 +91,7 @@ const char* AppContext::cgiValue( const char * fieldname ) {
 /*
  * This is the command that is run to acquire and parse user input into GNX.
  */
-Ginger::Command AppContext::userInputSyntaxCommand( const bool use_gnu_readline ) { 
+Ginger::Command AppContext::stdinSyntaxCommand() { 
     Ginger::Command cmd( FILE2GNX );
     if ( not this->initial_syntax.empty() ) {
         cmd.addArg( "-g" );
@@ -103,16 +103,18 @@ Ginger::Command AppContext::userInputSyntaxCommand( const bool use_gnu_readline 
 /*
  * This is the command that is run to read and parse files into GNX.
  */
-Ginger::Command AppContext::syntaxCommand( const std::string & filename ) { 
+Ginger::Command AppContext::fileSyntaxCommand( const std::string & filename ) { 
     // cerr << "NON-INTERACTIVELY" << endl;
     Ginger::Command cmd( FILE2GNX );
     if ( not this->initial_syntax.empty() ) {
-        cmd.addArg( "-u" );
-        cmd.addArg( string( "." ) + this->initial_syntax );
+        cmd.addArg( "-g" );
+        cmd.addArg( this->initial_syntax );
     }
     cmd.addArg( filename );
     return cmd;
 }
+
+
 
 class ReSTRuntimeInfoDriver {
 public:

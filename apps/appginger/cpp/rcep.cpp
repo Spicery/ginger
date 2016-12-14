@@ -107,21 +107,20 @@ void RCEP::execGnx( shared< Ginger::Mnx > mnx, std::ostream & output ) {
     output.flush();
 }
 
-bool RCEP::unsafe_read_comp_exec_print( istream & input, std::ostream & output ) {
+bool RCEP::mainloop( MnxRepeater & mnxrep, std::ostream & output ) {
 	Machine vm = this->getMachine();
     CodeGen codegen;
     Ref r;
     //Term term;
 	volatile clock_t start, finish;
 	//ReadXmlClass read_xml( input );
-	Ginger::MnxReader read_xml( input );
 
 	try {
 		//	TODO: Fix the freezing in of the package!
 		//	NOTE: If the current package changes then it is vital to
 		//	replace the simplifier. Really this is frozen into the wrong place!!
 		Simplify simplifier( vm->getAppContext(), this->currentPackage() );
-		shared< Ginger::Mnx > mnx( read_xml.readMnx() );
+		shared< Ginger::Mnx > mnx( mnxrep.nextMnx() );
 		if ( not mnx ) return false;
 		mnx = simplifier.simplify( mnx );
 
@@ -181,10 +180,16 @@ bool RCEP::unsafe_read_comp_exec_print( istream & input, std::ostream & output )
 	return true;
 }
 
+bool RCEP::unsafe_read_comp_exec_print( istream & input, std::ostream & output ) {
+	Ginger::MnxReader read_xml( input );
+	return this->mainloop( read_xml, output );
+}
+
 bool RCEP::read_comp_exec_print( istream & input, std::ostream & output ) {
+	Ginger::MnxReader read_xml( input );
 	for (;;) {
 		try {
-			return unsafe_read_comp_exec_print( input, output );
+			return this->mainloop( read_xml, output );
 		} catch ( Ginger::Mishap & m ) {
 			m.report();
 			Machine vm = this->getMachine();

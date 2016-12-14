@@ -56,6 +56,9 @@ public:
 	void printResults( std::ostream & output, float time_taken );
 	
 	//	Does not trap mishap.
+	bool mainloop( MnxRepeater & mnx, std::ostream & output );
+
+	//	Does not trap mishap.
 	bool unsafe_read_comp_exec_print( std::istream & input, std::ostream & output );
 	
 	//	Traps mishap.

@@ -54,50 +54,6 @@ Package * AppContext::initInteractivePackage( MachineClass * vm ) {
     return interactive_pkg;
 }
 
-/*
-static MachineClass * makeMachine1( AppContext * appcxt ) {
-    #ifndef MACHINE1_EXCLUDED
-        return new Machine1( appcxt );
-    #else
-        return NULL;
-    #endif
-}
-
-static MachineClass * makeMachine2( AppContext * appcxt ) {
-    #ifndef MACHINE2_EXCLUDED
-        return new Machine2( appcxt );
-    #else
-        return NULL;
-    #endif
-}
-
-static MachineClass * makeMachine3( AppContext * appcxt ) {
-    #ifndef MACHINE3_EXCLUDED
-        return new Machine3( appcxt );
-    #else
-        return NULL;
-    #endif
-}
-
-static MachineClass * makeMachine4( AppContext * appcxt ) {
-    #ifndef MACHINE4_EXCLUDED
-        return new Machine4( appcxt );
-    #else
-        return NULL;
-    #endif
-}
-
-static MachineClass * makeNewMachine( int machine_impl_num, AppContext * appcxt ) {
-    switch ( machine_impl_num ) {
-        case 1: return makeMachine1( appcxt );
-        case 2: return makeMachine2( appcxt );
-        case 3: return makeMachine3( appcxt );
-        case 4: return makeMachine4( appcxt );
-        default: return NULL;
-    }   
-}
-*/
-
 MachineClass * AppContext::newMachine() {
     Ginger::EngineFactory * e = Ginger::EngineFactoryRegistration::findMatch( this->machine_impl_name );
     if ( e == NULL ) throw Ginger::Mishap( "Unavailable implementation" ).culprit( "Implementation#", this->machine_impl_name );
@@ -132,47 +88,21 @@ const char* AppContext::cgiValue( const char * fieldname ) {
     #endif
 }
 
-#ifdef OLD_SHELL_ESCAPES_REQUIRED
-
-    const string AppContext::syntax( const bool interactively ) { 
-        string cmd;
-        if ( interactively ) {
-            cmd += GNGREADLINE " ";
-        }
-        cmd += FILE2GNX " ";
-        if ( not this->initial_syntax.empty() ) {
-            cmd += "-u.";  // NOTE: we add the period to make this an extension.
-            cmd += Ginger::shellSafeName( this->initial_syntax );
-        }
-        return cmd;
-    }
-
-    const string AppContext::syntax( const std::string & filename ) { 
-        string cmd( FILE2GNX " " );
-        if ( not this->initial_syntax.empty() ) {
-            cmd += "-u.";  // NOTE: we add the period to make this an extension.
-            cmd += Ginger::shellSafeName( this->initial_syntax );
-            cmd += " ";
-        }
-        cmd += Ginger::shellSafeName( filename );
-        return cmd;
-    }
-
-#endif
-
-Ginger::Command AppContext::syntaxCommand( const bool interactively ) { 
-    // cerr << "INTERACTIVELY" << endl;
+/*
+ * This is the command that is run to acquire and parse user input into GNX.
+ */
+Ginger::Command AppContext::userInputSyntaxCommand( const bool use_gnu_readline ) { 
     Ginger::Command cmd( FILE2GNX );
     if ( not this->initial_syntax.empty() ) {
-        cmd.addArg( "-u" );
-        cmd.addArg( string( "." ) + this->initial_syntax );
-    }
-    if ( interactively ) {
-        cmd.wrap( GNGREADLINE );
+        cmd.addArg( "-g" );
+        cmd.addArg( this->initial_syntax );
     }
     return cmd;
 }
 
+/*
+ * This is the command that is run to read and parse files into GNX.
+ */
 Ginger::Command AppContext::syntaxCommand( const std::string & filename ) { 
     // cerr << "NON-INTERACTIVELY" << endl;
     Ginger::Command cmd( FILE2GNX );

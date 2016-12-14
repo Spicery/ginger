@@ -50,9 +50,9 @@ OBJS= syscrypto.o bigint.o rational.o sysvm.o \
 	machine4.o instruction_set4.o \
 	appcontext.o \
 	makesysfn.o \
-	toolmain.o
+	toolmain.o userinput.o
 
-USEREXECUTABLES=appginger ginger-cgi ginger-script ginger-cli ginger-info
+USEREXECUTABLES=ginger-cgi ginger-script ginger-cli ginger-info
 
 all: $(USEREXECUTABLES)
 
@@ -80,15 +80,10 @@ else
 	LIBAPPGINGER=-Wl,-force_load libappginger.a -L/usr/local/lib -I/usr/local/include
 endif
 
-LIBRARIES=../../libgng/cpp/libgng.a /usr/local/lib/librudecgi.a -lgmp -lgmpxx -lcrypto -lssl
+LIBRARIES=../../libgng/cpp/libgng.a /usr/local/lib/librudecgi.a -lgmp -lgmpxx -lcrypto -lssl -lreadline
 
 # $@ is make shorthand for the target.
 # $@ is make shorthand for the dependencies
-appginger: libappginger.a main.o
-	ranlib libappginger.a ../../libgng/cpp/libgng.a
-	$(CC) $(CXXFLAGS) $(BOOST_CPPFLAGS) -o $@ main.o $(LIBAPPGINGER) $(LIBRARIES)
-	
-
 ginger-info: libappginger.a infomain.o
 	ranlib libappginger.a ../../libgng/cpp/libgng.a
 	$(CC) $(CXXFLAGS) $(BOOST_CPPFLAGS) -o $@ infomain.o $(LIBAPPGINGER) $(LIBRARIES)

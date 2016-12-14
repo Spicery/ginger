@@ -53,6 +53,7 @@
 
 #include "toolmain.hpp"
 #include "wellknownpaths.hpp"
+#include "userinput.hpp"
 
 /*
     This is the structure of struct option, which does not seem to be
@@ -407,8 +408,14 @@ void ToolMain::executeFile( RCEP & rcep, const string filename ) {
     this->executeCommand( rcep, this->context.syntaxCommand( filename ) );
 }
 
-void ToolMain::executeStdin( const bool interactively, RCEP & rcep ) {
-    this->executeCommand( rcep, this->context.syntaxCommand( interactively ) );
+/**
+ * This is the command for acquiring and parsing user input to XML.
+ * TODO: need to fix the way we invoke GNU readline. We may well prefer
+ *       to invoke gngreplay.
+ */
+void ToolMain::executeStdin( const bool use_gnu_readline, RCEP & rcep ) {
+    UserInput user_input( this->context.userInputSyntaxCommand( use_gnu_readline ) );
+    while ( rcep.mainloop( user_input, std::cout ) ) {}
 }
 
 void ToolMain::executeFileArguments( RCEP & rcep ) {

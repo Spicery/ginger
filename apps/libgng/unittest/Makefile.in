@@ -9,7 +9,7 @@ CFLAGS=-Wmissing-prototypes
 OBJS=maintest.o transdoubletest.o saxtestlite.o
 
 .PHONEY: all
-all: maintest
+all: maintest readlinetest readstdin
 
 .PHONEY: check
 check: maintest
@@ -18,8 +18,16 @@ check: maintest
 # $@ is make shorthand for the target.
 # $@ is make shorthand for the dependencies
 maintest: $(OBJS)
-	$(CC) $(CXXFLAGS) -o $@ $^ ../../CppUnitLite2/cppunitlite.a ../cpp/libgng.a
+	$(CXX) $(CXXFLAGS) -o $@ $^ ../../CppUnitLite2/cppunitlite.a ../cpp/libgng.a
 	
+readlinetest: readlinetest.o
+	$(CXX) $(CXXFLAGS) -o $@ $^ ../cpp/libgng.a	-lreadline
+
+readstdin: readstdin.o
+	$(CXX) $(CXXFLAGS) -o $@ $^ ../cpp/libgng.a
+
 clean:
 	rm -f *.o
 	rm -f maintest
+	rm -f readlinetest
+	rm -f readstdin

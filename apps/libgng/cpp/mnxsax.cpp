@@ -25,9 +25,6 @@
 #include "mnxsax.hpp"
 #include "mishap.hpp"
 
-//#include "sys.hpp"
-#include "mishap.hpp"
-//#include "facet.hpp"
 
 
 //- SAX Parser -----------------------------------------------------------------
@@ -38,40 +35,40 @@ using namespace std;
 
 char MnxSaxParser::nextChar() {
 	char c;
-	if ( not input.get( c ) ) throw Mishap( "Cannot read from file (unexpected end?)" );
+	const bool good = input->get( c );
+	if ( not good ) throw Mishap( "Cannot read from file (unexpected end?)" );
 	return c;
 }
 
 char MnxSaxParser::peekChar() {
-	char c = input.peek();
-	if ( not input ) throw Mishap( "Cannot read from file (unexpected end?)" );
+	char c;
+	if ( not input->peek( c ) ) throw Mishap( "Cannot read from file (unexpected end?)" );
 	return c;
 }
 
 void MnxSaxParser::mustReadChar( const char ch_want ) {
-	char c_got;
-	if ( not ( input.get( c_got ) ) ) throw Mishap( "Cannot read from file (unexpected end?)" );
+	const char c_got = this->nextChar();
 	if ( c_got != ch_want ) throw Mishap( "Unexpected character" ).culprit( "Wanted", ch_want ).culprit( "Received", c_got );
 }
 
 void MnxSaxParser::eatWhiteSpace() {
-	while ( input.good() ) {
+	for (;;) {
 		char ch;
-		if ( not input.get( ch ) ) break;
+		if ( not input->get( ch ) ) break;
 		if ( isspace( ch ) ) continue;
 		//cerr << "ch = " << ch << " level = " << level << endl;
 		if ( ch == '#' && this->level == 0 ) {
 			//	EOL comment.
-			while ( input.good() ) {
+			while ( input->hasNext() ) {
 				char x;
-				if ( not input.get( x ) ) break;
+				if ( not input->get( x ) ) break;
 				if ( x == '\n' ) break;
 			}
 			continue;
 		}
 		
 		//	Otherwise we should stop.
-		input.putback( ch );
+		this->input->unget();
 		break;
 	}
 }
@@ -82,12 +79,12 @@ static bool is_name_char( const char ch ) {
 
 void MnxSaxParser::readName( std::string & name ) {
 	char ch;
-	while ( (ch = nextChar()) && is_name_char( ch ) ) {
+	while ( (ch = this->nextChar()) && is_name_char( ch ) ) {
 		//std::cout << "pushing '" << ch << "'"<< endl;
 		name.push_back( ch );
 		//std::cout << "name so far '" << name << "'" << endl;
 	}
-	input.putback( ch );
+	input->unget();
 }
 
 void MnxSaxParser::readAttributeValue( std::string & attr ) {
@@ -143,13 +140,11 @@ void MnxSaxParser::readAttributeValue( std::string & attr ) {
 }	
 
 
-void MnxSaxParser::processAttributes(
-	//std::map< std::string, std::string > & attrs
-) {
+void MnxSaxParser::processAttributes() {
 	//	Process attributes
 	for (;;) {
 		this->eatWhiteSpace();
-		char c = peekChar();
+		const char c = peekChar();
 		if ( c == '/' || c == '>' ) {
 			break;
 		}
@@ -172,17 +167,8 @@ void MnxSaxParser::read() {
 		this->level -= 1;
 		return;
 	}
-	
-	this->input >> noskipws;
-	
+		
 	this->eatWhiteSpace();
-	if ( not this->input.good() ) {
-		if ( this->finished ) {
-			throw Mishap( "Unexpected end of file" );
-		}
-		this->finished = true;
-		return;
-	}
 	this->mustReadChar( '<' );
 		
 	char ch = nextChar();
@@ -215,7 +201,7 @@ void MnxSaxParser::read() {
 		return;
 	} else {
 		//cout << "Ungetting '" << ch << "'" << endl;
-		input.putback( ch );
+		input->unget();
 	}
 	
 	this->tag_name.resize( 0 );
@@ -245,12 +231,13 @@ void MnxSaxParser::read() {
 			
 }
 
-void MnxSaxParser::readElement() { 
-	do {
-		this->read();
-	} while ( this->level != 0 );
+bool MnxSaxParser::readElement() { 
+	this->eatWhiteSpace();
+	if ( not input->hasNext() ) return false;
+    do {
+        this->read();
+    } while ( this->level != 0 );
+    return true;
 }
-
-
 
 } // namespace

@@ -22,6 +22,10 @@
 #include <istream>
 #include <vector>
 #include <map>
+#include <memory>
+
+#include "mnxsrc.hpp"
+#include "rdlmnxsrc.hpp"
 
 namespace Ginger {
 
@@ -38,12 +42,11 @@ public:
 
 class MnxSaxParser {
 private:
-	std::istream & input;
+	std::shared_ptr< MnxSource > input;
 	MnxSaxHandler & parent;
 	std::string tag_name;
 	bool pending_end_tag;
 	int level;
-	bool finished;
 	
 private:
 	void readName( std::string & name );
@@ -63,17 +66,47 @@ public:
 	void read();
 
 public:
-	void readElement();
+	/**
+		Returns true if an element was read off the input. Returns false
+		if the end of input was encountered before non-whitespace characters.
+		Otherwise mishaps.
+	*/
+	bool readElement();
 	
 public:
 	MnxSaxParser( std::istream & in, MnxSaxHandler & p ) :
+		input( new InputStreamMnxSource( in ) ),
+		parent( p ),
+		pending_end_tag( false ),
+		level( 0 )
+	{
+	}
+
+	MnxSaxParser( std::shared_ptr< MnxSource > in, MnxSaxHandler & p ) :
 		input( in ),
 		parent( p ),
 		pending_end_tag( false ),
-		level( 0 ),
-		finished( false )
+		level( 0 )
 	{
 	}
+
+	MnxSaxParser( MnxSource & in, MnxSaxHandler & p ) :
+		input( new ProxyMnxSource( in ) ),
+		parent( p ),
+		pending_end_tag( false ),
+		level( 0 )
+	{
+	}
+
+	MnxSaxParser( MnxSaxHandler & p ) :
+		input( new ReadlineMnxSource() ),
+		parent( p ),
+		pending_end_tag( false ),
+		level( 0 )
+	{
+	}
+
+
 };
 
 

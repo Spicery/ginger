@@ -35,8 +35,6 @@ distclean: clean
 	rm -f apps/ginger-admin/cpp/Makefile
 	rm -f apps/ginger-help/Makefile
 	rm -f apps/ginger-help/cpp/Makefile
-	rm -f apps/gngreadline/Makefile
-	rm -f apps/gngreadline/cpp/Makefile
 	rm -f apps/gprojlibtool/Makefile
 	rm -f apps/gprojlibtool/cpp/Makefile
 	rm -f apps/gvmtest/Makefile
@@ -100,7 +98,6 @@ USEREXECUTABLES=\
 # These will be installed in /usr/local/libexec/ginger and will not be
 # available on the programmer's path. They are helper functions.
 LIBEXECUTABLES=\
-	apps/appginger/cpp/appginger \
 	apps/common2gnx/cpp/common2gnx \
 	apps/common2gnx/cpp/cstyle2gnx \
 	apps/fetchgnx/cpp/fetchgnx \

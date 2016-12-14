@@ -21,6 +21,7 @@
 
 #include <string>
 #include <vector>
+#include <sstream>
 
 #include "mnx.hpp"
 
@@ -37,6 +38,7 @@ protected:
 	
 private:
 	void fill( std::vector< char * > & argv );
+	void readIntoStringStream( std::stringstream & prog );
 	
 public:
 	void addArg( const std::string arg );
@@ -52,6 +54,7 @@ public:
 	void runSilent();
 	void interrupt();
 	Ginger::SharedMnx sendMnx( Ginger::SharedMnx );
+	void sendString( std::string, std::stringstream & );
 	
 public:
 	Command( const std::string command = "" );

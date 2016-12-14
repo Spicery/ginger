@@ -236,6 +236,7 @@ public:
 	#endif
 
 	Ginger::Command syntaxCommand( const bool interactively ); 
+	Ginger::Command userInputSyntaxCommand( const bool interactively ); 
 	Ginger::Command syntaxCommand( const std::string & filename ); 
 	void setSyntax( const std::string s ) { this->initial_syntax = s; }
 	const std::string getInteractivePackage() { return this->interactive_package; }

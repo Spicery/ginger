@@ -278,20 +278,9 @@ void Command::runWithInputAndOutput() {
 	throw UnreachableError();
 }
 
-Ginger::SharedMnx Command::sendMnx( Ginger::SharedMnx mnx ) {
-	this->runWithInputAndOutput();
-
-	FILE * f_out = fdopen( this->getOutputFD(), "w" );
-
-	
-	mnx->frender( f_out );
-	fprintf( f_out, "\n" );
-	fflush( f_out );
-	
+void Command::readIntoStringStream( stringstream & prog ) {
 	const int fd_in = this->getInputFD();
-
-    stringstream prog;
-    for (;;) {
+	for (;;) {
         static char buffer[ 1024 ];
         //  TODO: protect close with finally.
         int n = read( fd_in, buffer, sizeof( buffer ) );
@@ -305,11 +294,37 @@ Ginger::SharedMnx Command::sendMnx( Ginger::SharedMnx mnx ) {
             prog.write( buffer, n );
         }
     }
+}
+
+void Command::sendString( std::string input, std::stringstream & output ) {
+	this->runWithInputAndOutput();
+
+	FILE * f_out = fdopen( this->getOutputFD(), "w" );
+	fputs( input.c_str(), f_out );
+	fflush( f_out );
+	fclose( f_out );
+	
+    this->readIntoStringStream( output );
+
+	close( this->getInputFD() );
+}
+
+Ginger::SharedMnx Command::sendMnx( Ginger::SharedMnx mnx ) {
+	this->runWithInputAndOutput();
+
+	FILE * f_out = fdopen( this->getOutputFD(), "w" );
+	
+	mnx->frender( f_out );
+	fprintf( f_out, "\n" );
+	fflush( f_out );
+	
+    stringstream prog;
+    this->readIntoStringStream( prog );
 
     Ginger::MnxReader reader( prog );
     Ginger::SharedMnx m = reader.readMnx();
 
-	close( fd_in );
+	close( this->getInputFD() );
 	fclose( f_out );
 
     return m;

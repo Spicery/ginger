@@ -221,13 +221,27 @@ public:
 	shared< Mnx > build();
 };
 
-class MnxReader {
+class MnxRepeater {
+public:
+	virtual ~MnxRepeater() {}
+public:
+	virtual shared< Mnx > nextMnx() = 0;
+};
+
+class MnxReader : public MnxRepeater {
 private:
 	std::istream & in;
-	
+
+public:
+	virtual ~MnxReader() {}
+
 public:
 	shared< Mnx > readMnx();
 	
+	virtual shared< Mnx > nextMnx() {
+		return this->readMnx();
+	}
+
 public:
 	MnxReader( std::istream & in ) : in( in ) {}
 	MnxReader() : in( std::cin ) {}

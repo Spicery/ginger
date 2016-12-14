@@ -103,7 +103,6 @@ LIBEXECUTABLES=\
 	apps/fetchgnx/cpp/fetchgnx \
 	apps/file2gnx/cpp/file2gnx \
 	apps/ginger-help/cpp/ginger-help \
-	apps/gngreadline/cpp/gngreadline \
 	apps/gprojlibtool/cpp/gprojlibtool \
 	apps/ivylibtool/cpp/ivylibtool \
 	apps/lisp2gnx/lsp/lisp2gnx \

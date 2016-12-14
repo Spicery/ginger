@@ -247,7 +247,7 @@ public:
 
 		for(;;) {
 	        int option_index = 0;
-	        int c = getopt_long( argc, argv, "u:H::L::V", long_options, &option_index );
+	        int c = getopt_long( argc, argv, "g:u:H::L::V", long_options, &option_index );
 	        //cerr << "Got c = " << c << endl;
 	        if ( c == -1 ) break;
 	        switch ( c ) {

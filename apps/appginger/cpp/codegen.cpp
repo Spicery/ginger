@@ -931,12 +931,12 @@ int CodeGenClass::tmpvar() {
 
 static bool isVIdentable( Gnx gnx ) {
 	const string & nm = gnx->name();
-	return nm == VAR or nm == ID or nm == CONSTANT;
+	return nm == GNX_VAR or nm == GNX_ID or nm == GNX_CONSTANT;
 }
 
 static bool isConstantSmallIntGnx( Gnx gnx ) {
-	if ( gnx->name() != CONSTANT || not gnx->hasAttribute( CONSTANT_TYPE, "int" ) ) return false;
-	Maybe< long > v = gnx->maybeAttributeToLong( CONSTANT_VALUE );
+	if ( gnx->name() != GNX_CONSTANT || not gnx->hasAttribute( GNX_CONSTANT_TYPE, "int" ) ) return false;
+	Maybe< long > v = gnx->maybeAttributeToLong( GNX_CONSTANT_VALUE );
 	if ( not v.isValid() ) return false;
 	return canFitInSmall( v.fastValue() );
 }
@@ -945,8 +945,8 @@ void CodeGenClass::compileIfTest( bool sense, Gnx mnx, LabelClass * dst, LabelCl
 	bool done = false;
 
 	//	This next section should be refactored.
-	if ( mnx->name() == SYSAPP ) {
-		SysMap::iterator it = SysMap::sysMap().find( mnx->attribute( SYSAPP_NAME ) );
+	if ( mnx->name() == GNX_SYSAPP ) {
+		SysMap::iterator it = SysMap::sysMap().find( mnx->attribute( GNX_SYSAPP_NAME ) );
 		if ( it != SysMap::sysMap().end() ) {
 			const SysInfo & info = it->second;
 			if ( 
@@ -963,12 +963,12 @@ void CodeGenClass::compileIfTest( bool sense, Gnx mnx, LabelClass * dst, LabelCl
 	}
 
 	if ( not done ) {
-		if ( mnx->name() == OR && mnx->size() == 2 ) {
+		if ( mnx->name() == GNX_OR && mnx->size() == 2 ) {
 			LabelClass e( this );
 			this->compileIfTest( sense, mnx->getChild( 0 ), e.jumpToJump( dst ), CONTINUE_LABEL );
 			this->compileIfTest( sense, mnx->getChild( 1 ), e.jumpToJump( dst ), e.jumpToJump( contn ) );
 			e.labelSet();
-		} else if ( mnx->name() == AND && mnx->size() == 2 ) {
+		} else if ( mnx->name() == GNX_AND && mnx->size() == 2 ) {
 			LabelClass e( this );
 			this->compileIfTest( sense, mnx->getChild( 0 ), CONTINUE_LABEL, e.jumpToJump( contn ) );
 			this->compileIfTest( sense, mnx->getChild( 1 ), e.jumpToJump( dst ), e.jumpToJump( contn ) );
@@ -1026,16 +1026,16 @@ bool CompileQuery::isValidQuery( Gnx query ) {
 	const string & nm = query->name();
 	const int N = query->size();
 	return(
-		( nm == IN && N == 2 ) 				||
-		( nm == FROM && 2 <= N && N <= 4 ) 	||
-		( nm == WHERE && N == 2 ) 			||
-		( nm == WHILE && N == 3 ) 			||
-		( nm == DO && N == 2 ) 				||
-		( nm == FINALLY && N == 2 ) 		||
-		( nm == ZIP && N == 2 ) 			||
-		( nm == CROSS && N == 2 ) 			||
-		( nm == BIND && N == 2 )			||
-		( nm == OK && N == 0 )
+		( nm == GNX_IN && N == 2 ) 				||
+		( nm == GNX_FROM && 2 <= N && N <= 4 ) 	||
+		( nm == GNX_WHERE && N == 2 ) 			||
+		( nm == GNX_WHILE && N == 3 ) 			||
+		( nm == GNX_DO && N == 2 ) 				||
+		( nm == GNX_FINALLY && N == 2 ) 		||
+		( nm == GNX_ZIP && N == 2 ) 			||
+		( nm == GNX_CROSS && N == 2 ) 			||
+		( nm == GNX_BIND && N == 2 )			||
+		( nm == GNX_OK && N == 0 )
 	);
 }
 
@@ -1043,29 +1043,29 @@ bool CompileQuery::isValidQuery( Gnx query ) {
 void CompileQuery::compileQueryDecl( Gnx query ) {
 	const string & nm = query->name();
 	const int N = query->size();
-	if ( ( ( nm == DO || nm == WHERE || nm == FINALLY ) && N == 2 ) || ( nm == WHILE && N == 3 ) ) {
+	if ( ( ( nm == GNX_DO || nm == GNX_WHERE || nm == GNX_FINALLY ) && N == 2 ) || ( nm == GNX_WHILE && N == 3 ) ) {
 		this->compileQueryDecl( query->getChild( 0 )  );
-	} else if ( ( nm == CROSS || nm == ZIP ) && N == 2 ) {
+	} else if ( ( nm == GNX_CROSS || nm == GNX_ZIP ) && N == 2 ) {
 		this->compileQueryDecl( query->getChild( 0 ) );
 		this->compileQueryDecl( query->getChild( 1 ) );
-	} else if ( nm == FROM && N >= 2 ) {
+	} else if ( nm == GNX_FROM && N >= 2 ) {
 		Gnx var( query->getChild( 0 ) );
 		int tmp_loop_var = this->newLoopVar( new VIdent( this->codegen, var ) );
 		query->putAttribute( "tmp.loop.var", tmp_loop_var );
-	} else if ( nm == IN && N >= 2 ) {
+	} else if ( nm == GNX_IN && N >= 2 ) {
 		std::vector< Gnx > vars;
 		Gnx var( query->getChild( 0 ) );	
-		if ( this->codegen->tryFlatten( var, VAR, vars ) && vars.size() == 1 ) {
+		if ( this->codegen->tryFlatten( var, GNX_VAR, vars ) && vars.size() == 1 ) {
 			int tmp_loop_var = this->newLoopVar( new VIdent( this->codegen, vars[0] ) );
 			query->putAttribute( "tmp.loop.var", tmp_loop_var );
 		} else {
 			throw SystemError( "Full BIND not implemented" ).culprit( "Name", var->name() );
 		}
-	} else if ( nm == BIND && N == 2 ) {
+	} else if ( nm == GNX_BIND && N == 2 ) {
 		int lo = -1;
 		int hi = lo;
 		std::vector< Gnx > vars;
-		if ( this->codegen->tryFlatten( query->getChild( 0 ), VAR, vars ) ) {
+		if ( this->codegen->tryFlatten( query->getChild( 0 ), GNX_VAR, vars ) ) {
 			for ( std::vector< Gnx >::iterator it = vars.begin(); it != vars.end(); ++it ) {
 				Gnx vc = *it;
 				int tmp_loop_var = this->newLoopVar( new VIdent( this->codegen, vc ) );
@@ -1077,7 +1077,7 @@ void CompileQuery::compileQueryDecl( Gnx query ) {
 		query->putAttribute( "tmp.bind.hi", hi );
 		int tmp = this->codegen->tmpvar();
 		query->putAttribute( "tmp.bind.var", tmp );
-	} else if ( nm == OK && N == 0 ) {
+	} else if ( nm == GNX_OK && N == 0 ) {
 		//	Nothing to do.
 	} else {
 		throw SystemError( "Not implemented general queries" ).culprit( "Name", nm ).culprit( "N", (long)N );
@@ -1088,18 +1088,18 @@ void CompileQuery::compileQueryDecl( Gnx query ) {
 void CompileQuery::compileQueryInit( Gnx query, LabelClass * contn ) {
 	const string & nm = query->name();
 	const int N = query->size();
-	if ( ( ( nm == DO || nm == WHERE || nm == FINALLY ) && N == 2 ) || ( nm == WHILE && N == 3 ) ) {
+	if ( ( ( nm == GNX_DO || nm == GNX_WHERE || nm == GNX_FINALLY ) && N == 2 ) || ( nm == GNX_WHILE && N == 3 ) ) {
 		this->compileQueryInit( query->getChild( 0 ), contn );
-	} else if ( nm == CROSS && N == 2 ) {
+	} else if ( nm == GNX_CROSS && N == 2 ) {
 		int tmp_cross_needs_test_lhs = this->codegen->tmpvar();
 		query->putAttribute( "tmp.cross.needs.test.lhs", tmp_cross_needs_test_lhs );
 		this->codegen->vmiPUSHQ( SYS_TRUE );
 		this->codegen->vmiPOP_INNER_SLOT( tmp_cross_needs_test_lhs );
 		this->compileQueryInit( query->getChild( 0 ), contn );
-	} else if ( nm == ZIP && N == 2 ) {
+	} else if ( nm == GNX_ZIP && N == 2 ) {
 		this->compileQueryInit( query->getChild( 0 ), CONTINUE_LABEL );
 		this->compileQueryInit( query->getChild( 1 ), contn );
-	} else if ( nm == FROM && N >= 2 ) {
+	} else if ( nm == GNX_FROM && N >= 2 ) {
 		Gnx var( query->getChild( 0 ) );		
 		Gnx start_expr( query->getChild( 1 ) );
 		this->codegen->compile1( start_expr, CONTINUE_LABEL );
@@ -1112,9 +1112,9 @@ void CompileQuery::compileQueryInit( Gnx query, LabelClass * contn ) {
 			if ( 
 				//	TODO: refactor this into a simple call.
 				not( 
-					by_expr->hasName( CONSTANT ) &&
-					by_expr->hasAttribute( CONSTANT_TYPE, "int" ) &&
-					by_expr->hasAttribute( CONSTANT_VALUE, "1" )
+					by_expr->hasName( GNX_CONSTANT ) &&
+					by_expr->hasAttribute( GNX_CONSTANT_TYPE, "int" ) &&
+					by_expr->hasAttribute( GNX_CONSTANT_VALUE, "1" )
 				)
 			) {
 				int tmp_by_expr = this->codegen->tmpvar();
@@ -1135,7 +1135,7 @@ void CompileQuery::compileQueryInit( Gnx query, LabelClass * contn ) {
 
 		this->codegen->continueFrom( contn );
 		
-	} else if ( nm == IN && N >= 2 ) {
+	} else if ( nm == GNX_IN && N >= 2 ) {
 		this->codegen->compile1( query->getChild( 1 ), CONTINUE_LABEL );
 		this->codegen->vmiINSTRUCTION( vmc_getiterator );
 		int tmp_next_fn = this->codegen->tmpvar();
@@ -1148,12 +1148,12 @@ void CompileQuery::compileQueryInit( Gnx query, LabelClass * contn ) {
 		this->codegen->vmiPOP_INNER_SLOT( tmp_context );
 		this->codegen->vmiPOP_INNER_SLOT( tmp_state );
 		this->codegen->continueFrom( contn );
-	} else if ( nm == BIND && N == 2 ) {
+	} else if ( nm == GNX_BIND && N == 2 ) {
 		const int tmp = query->attributeToInt( "tmp.bind.var" );
 		this->codegen->vmiPUSHQ( SYS_TRUE );
 		this->codegen->vmiPOP_INNER_SLOT( tmp );
 		this->codegen->continueFrom( contn );
-	} else if ( nm == OK && N == 0 ) {
+	} else if ( nm == GNX_OK && N == 0 ) {
 		this->codegen->continueFrom( contn );
 	} else {
 		throw SystemError( "Not implemented general queries [2]" ).culprit( "Name", nm ).culprit( "N", static_cast< long >( N ) );
@@ -1166,9 +1166,9 @@ void CompileQuery::compileQueryInit( Gnx query, LabelClass * contn ) {
 void CompileQuery::compileQueryTest( Gnx query, LabelClass * dst, LabelClass * contn ) {
 	const string & nm = query->name();
 	const int N = query->size();
-	if ( nm == DO && N == 2 ) {
+	if ( nm == GNX_DO && N == 2 ) {
 		this->compileQueryTest( query->getChild( 0 ), dst, contn );
-	} else if ( nm == CROSS && N == 2 ) {
+	} else if ( nm == GNX_CROSS && N == 2 ) {
 		
 		int tmp_cross_needs_test_lhs = query->attributeToInt( "tmp.cross.needs.test.lhs" );
 		
@@ -1197,21 +1197,21 @@ void CompileQuery::compileQueryTest( Gnx query, LabelClass * dst, LabelClass * c
 
 		done_label.labelSet();
 
-	} else if ( nm == ZIP && N == 2 ) {
+	} else if ( nm == GNX_ZIP && N == 2 ) {
 		LabelClass done_label( this->codegen );
 		this->compileQueryTest( query->getChild( 0 ), CONTINUE_LABEL, done_label.jumpToJump( contn ) );
 		this->compileQueryTest( query->getChild( 1 ), dst, contn );
 		done_label.labelSet();
-	} else if ( nm == WHILE && N == 3 ) {
+	} else if ( nm == GNX_WHILE && N == 3 ) {
 		LabelClass done_label( this->codegen );
 		this->compileQueryTest( query->getChild( 0 ), CONTINUE_LABEL, & done_label );
 		this->codegen->compileIfSo( query->getChild( 1 ), done_label.jumpToJump( dst ), CONTINUE_LABEL );
 		this->codegen->compileGnx( query->getChild( 2 ), contn );
 		done_label.labelSet();
-	} else if ( nm == WHERE && N == 2 ) {
+	} else if ( nm == GNX_WHERE && N == 2 ) {
 		Gnx lhs = query->getChild( 0 );
 		Gnx rhs = query->getChild( 1 );
-		if ( lhs->name() == OK ) {
+		if ( lhs->name() == GNX_OK ) {
 			this->codegen->compileIfSo( rhs, dst, contn );
 		} else {
 			LabelClass start_label( this->codegen );
@@ -1222,12 +1222,12 @@ void CompileQuery::compileQueryTest( Gnx query, LabelClass * dst, LabelClass * c
 			this->compileQueryAdvn( lhs, &start_label );
 			done_label.labelSet();
 		}
-	} else if ( nm == FINALLY && N == 2 ) {
+	} else if ( nm == GNX_FINALLY && N == 2 ) {
 		LabelClass done_label( this->codegen );
 		this->compileQueryTest( query->getChild( 0 ), done_label.jumpToJump( dst ), CONTINUE_LABEL );
 		this->codegen->compileGnx( query->getChild( 1 ), contn );
 		done_label.labelSet();
-	} else if ( nm == FROM ) {
+	} else if ( nm == GNX_FROM ) {
 		const int N = query->size();
 		if ( N >= 3 ) {
 			VIdent end_expr( query->attributeToInt( "tmp.end.expr" ) );
@@ -1235,7 +1235,7 @@ void CompileQuery::compileQueryTest( Gnx query, LabelClass * dst, LabelClass * c
 		} else if ( dst != CONTINUE_LABEL ) {
 			this->codegen->vmiGOTO( dst );
 		}
-	} else if ( nm == IN ) {
+	} else if ( nm == GNX_IN ) {
 		int tmp_state = query->attributeToInt( "tmp.state" );
 		int tmp_context = query->attributeToInt( "tmp.context" );
 		int tmp_next_fn = query->attributeToInt( "tmp.next.fn" );
@@ -1250,14 +1250,14 @@ void CompileQuery::compileQueryTest( Gnx query, LabelClass * dst, LabelClass * c
 		VIdent id_tmp_state( tmp_state );
 		VIdent termin( SYS_TERMIN );
 		this->codegen->compileComparison( id_tmp_state, CMP_NEQ, termin, dst, contn );
-	} else if ( nm == BIND && N == 2 ) {
+	} else if ( nm == GNX_BIND && N == 2 ) {
 		const int lo = query->attributeToInt( "tmp.bind.lo" );
 		const int hi = query->attributeToInt( "tmp.bind.hi" );
 		const int tmp = query->attributeToInt( "tmp.bind.var" );
 		Gnx lhs = query->getChild( 0 );
 		Gnx rhs = query->getChild( 1 );
 		std::vector< Gnx > vars;
-		if ( this->codegen->tryFlatten( lhs, VAR, vars ) ) {
+		if ( this->codegen->tryFlatten( lhs, GNX_VAR, vars ) ) {
 			this->codegen->vmiPUSH_INNER_SLOT( tmp );
 			LabelClass done_label( this->codegen );
 
@@ -1275,7 +1275,7 @@ void CompileQuery::compileQueryTest( Gnx query, LabelClass * dst, LabelClass * c
 		} else {
 			throw Ginger::Mishap( "BIND not fully implemented [3]" );
 		}
-	} else if ( nm == OK && N == 0 ) {
+	} else if ( nm == GNX_OK && N == 0 ) {
 		this->codegen->continueFrom( dst );
 	} else {
 		throw SystemError( "Not implemented general queries" );
@@ -1285,18 +1285,18 @@ void CompileQuery::compileQueryTest( Gnx query, LabelClass * dst, LabelClass * c
 void CompileQuery::compileQueryBody( Gnx query, LabelClass * contn ) {
 	const string & nm = query->name();
 	const int N = query->size();
-	if ( nm == DO && N == 2 ) {
+	if ( nm == GNX_DO && N == 2 ) {
 		this->compileQueryBody( query->getChild( 0 ), CONTINUE_LABEL );
 		this->codegen->compileGnx( query->getChild( 1 ), contn );
-	} else if ( nm == CROSS && N == 2 ) {
+	} else if ( nm == GNX_CROSS && N == 2 ) {
 		this->compileQueryBody( query->getChild( 1 ), contn );
 	} else if (
-		( nm == WHERE && N == 2 ) || 
-		( nm == WHILE && N == 3 ) ||
-		( nm == FINALLY && N == 2 )
+		( nm == GNX_WHERE && N == 2 ) || 
+		( nm == GNX_WHILE && N == 3 ) ||
+		( nm == GNX_FINALLY && N == 2 )
 	) {
 		this->compileQueryBody( query->getChild( 0 ), contn );
-	} else if ( nm == ZIP && N == 2 ) {
+	} else if ( nm == GNX_ZIP && N == 2 ) {
 		this->compileQueryBody( query->getChild( 0 ), CONTINUE_LABEL );
 		this->compileQueryBody( query->getChild( 1 ), contn );
 	}
@@ -1306,16 +1306,16 @@ void CompileQuery::compileQueryAdvn( Gnx query, LabelClass * contn ) {
 	const string & nm = query->name();
 	const int N = query->size();
 	if ( 
-		( ( nm == DO || nm == WHERE || nm == FINALLY ) && N == 2 ) || 
-		( nm == WHILE && N == 3 )
+		( ( nm == GNX_DO || nm == GNX_WHERE || nm == GNX_FINALLY ) && N == 2 ) || 
+		( nm == GNX_WHILE && N == 3 )
 	) {
 		this->compileQueryAdvn( query->getChild( 0 ), contn );
-	} else if ( nm == ZIP && N == 2 ) {
+	} else if ( nm == GNX_ZIP && N == 2 ) {
 		this->compileQueryAdvn( query->getChild( 0 ), CONTINUE_LABEL );
 		this->compileQueryAdvn( query->getChild( 1 ), contn );
-	} else if ( nm == CROSS && N == 2 ) {
+	} else if ( nm == GNX_CROSS && N == 2 ) {
 		this->compileQueryAdvn( query->getChild( 1 ), contn );
-	} else if ( nm == FROM ) {
+	} else if ( nm == GNX_FROM ) {
 
 		//	Obvious candidate for a merged instruction.
 		VIdent & lv = this->getLoopVar( query->attributeToInt( "tmp.loop.var" ) );
@@ -1329,7 +1329,7 @@ void CompileQuery::compileQueryAdvn( Gnx query, LabelClass * contn ) {
 		}
 		this->codegen->vmiPOP( lv, false );
 
-	} else if ( nm == IN || nm == BIND || nm == OK ) {
+	} else if ( nm == GNX_IN || nm == GNX_BIND || nm == GNX_OK ) {
 		//	Nothing.
 	} else {
 		throw SystemError( "Not implemented general queries" );
@@ -1340,7 +1340,7 @@ void CompileQuery::compileQueryAdvn( Gnx query, LabelClass * contn ) {
 void CompileQuery::compileQueryFini( Gnx query, LabelClass * contn ) {
 	const string & nm = query->name();
 	const int N = query->size();
-	if ( nm == DO && N == 2 ) {
+	if ( nm == GNX_DO && N == 2 ) {
 		this->compileQueryFini( query->getChild( 0 ), contn );
 	} else {
 		this->codegen->continueFrom( contn );
@@ -1443,7 +1443,7 @@ void CodeGenClass::compileGnxIf( int offset, Gnx mnx, LabelClass * contn ) {
 		Gnx then_part = mnx->getChild( offset + 1 );
 		if ( CompileQuery::isValidQuery( if_part ) ) {
 			MnxBuilder ifthen;
-			ifthen.start( DO );
+			ifthen.start( GNX_DO );
 			ifthen.add( if_part );
 			ifthen.add( then_part );
 			ifthen.end();
@@ -1485,9 +1485,9 @@ void CodeGenClass::compileGnxIf( Gnx mnx, LabelClass * contn ) {
 }
 
 void CodeGenClass::compileGnxFn( Gnx mnx, LabelClass * contn ) {
-	int args_count = mnx->attributeToInt( FN_ARGS_COUNT );
-	int locals_count = mnx->attributeToInt( FN_LOCALS_COUNT );
-	this->vmiFUNCTION( mnx->attribute( FN_NAME, EMPTY_FN_NAME ), locals_count, args_count );
+	int args_count = mnx->attributeToInt( GNX_FN_ARGS_COUNT );
+	int locals_count = mnx->attributeToInt( GNX_FN_LOCALS_COUNT );
+	this->vmiFUNCTION( mnx->attribute( GNX_FN_NAME, GNX_EMPTY_FN_NAME ), locals_count, args_count );
 	this->vmiENTER();
 	LabelClass retn( this, true );
 	this->compileGnx( mnx->getChild( 1 ), &retn );
@@ -1498,7 +1498,7 @@ void CodeGenClass::compileGnxFn( Gnx mnx, LabelClass * contn ) {
 }
 
 void CodeGenClass::compileChildrenChecked( Gnx mnx, Arity arity ) {
-	Ginger::Arity args_arity( mnx->attribute( ARGS_ARITY, "+0" ) );
+	Ginger::Arity args_arity( mnx->attribute( GNX_ARGS_ARITY, "+0" ) );
 	if ( arity == args_arity ) {
 		this->compileChildren( mnx, CONTINUE_LABEL );
 	} else if ( arity.isExact() ) {
@@ -1513,7 +1513,7 @@ void CodeGenClass::compileChildrenChecked( Gnx mnx, Arity arity ) {
 }
 
 void CodeGenClass::compileGnxSysApp( Gnx mnx, LabelClass * contn ) {
-	const string & nm = mnx->attribute( SYSAPP_NAME );
+	const string & nm = mnx->attribute( GNX_SYSAPP_NAME );
 	SysMap::iterator it = SysMap::sysMap().find( nm );
 	if ( it != SysMap::sysMap().end() ) {
 		const SysInfo & info = it->second;
@@ -1536,13 +1536,13 @@ void CodeGenClass::compileGnxSysApp( Gnx mnx, LabelClass * contn ) {
 				//	TODO: We should shift the operator into being an incr/decr.
 				//	Check which one gets optimised.
 				this->compile1( mnx->getChild( c0 ? 1 : 0 ), CONTINUE_LABEL );
-				this->vmiINCR( mnx->getChild( c0 ? 0 : 1 )->attributeToLong( CONSTANT_VALUE ) );
+				this->vmiINCR( mnx->getChild( c0 ? 0 : 1 )->attributeToLong( GNX_CONSTANT_VALUE ) );
 			} else if ( 
 				nm == "-" and mnx->size() == 2 and isConstantSmallIntGnx( mnx->getChild( 1 ) )
 			) {				
 				//	TODO: We should shift the operator into being an incr/decr.
 				this->compile1( mnx->getChild( 0 ), CONTINUE_LABEL );
-				this->vmiDECR( mnx->getChild( 1 )->attributeToLong( CONSTANT_VALUE ) );
+				this->vmiDECR( mnx->getChild( 1 )->attributeToLong( GNX_CONSTANT_VALUE ) );
 			} else {
 				this->compileChildrenChecked( mnx, info.in_arity );
 				this->vmiINSTRUCTION( info.instruction );
@@ -1552,7 +1552,7 @@ void CodeGenClass::compileGnxSysApp( Gnx mnx, LabelClass * contn ) {
 			this->vmiINSTRUCTION( cmpOpInstruction( info.cmp_op ) );
 		}
 	} else {
-		throw SystemError( "Unknown system call" ).culprit( "Name", mnx->attribute( SYSAPP_NAME ) );
+		throw SystemError( "Unknown system call" ).culprit( "Name", mnx->attribute( GNX_SYSAPP_NAME ) );
 	}
 	this->continueFrom( contn );
 }
@@ -1560,9 +1560,9 @@ void CodeGenClass::compileGnxSysApp( Gnx mnx, LabelClass * contn ) {
 void CodeGenClass::compileGnxApp( Gnx mnx, LabelClass * contn ) {
 	Gnx fn( mnx->getChild( 0 ) );
 	Gnx args( mnx->getChild( 1 ) );
-	Ginger::Arity aargs( args->attribute( ARITY, "+0" ) );
+	Ginger::Arity aargs( args->attribute( GNX_ARITY, "+0" ) );
 	
-	if ( fn->name() == ID ) {
+	if ( fn->name() == GNX_ID ) {
 		VIdent vid( this, fn );
 		if ( aargs.isntExact() ) { 
 			int v = this->tmpvar();
@@ -1612,7 +1612,7 @@ void CodeGenClass::compileGnxSetCont( Gnx mnx, LabelClass * contn ) {
 }
 
 void CodeGenClass::compileGnxSelfCall( Gnx mnx, LabelClass * contn ) {
-	Ginger::Arity args_arity( mnx->attribute( ARGS_ARITY, "+0" ) );
+	Ginger::Arity args_arity( mnx->attribute( GNX_ARGS_ARITY, "+0" ) );
 	if ( args_arity.isExact() ) {
 		this->compileChildren( mnx, CONTINUE_LABEL );
 		this->vmiSELF_CALL_N( args_arity.count() ); 
@@ -1630,16 +1630,16 @@ Ref CodeGenClass::calcConstant( Gnx mnx ) {
 	#ifdef DBG_CODEGEN
 		std::cout << "calcConstant: " << mnx->toString() << std::endl;
 	#endif
-	const string & type = mnx->attribute( CONSTANT_TYPE );
+	const string & type = mnx->attribute( GNX_CONSTANT_TYPE );
 	if ( type == "int" ) {
-		Maybe< long > v( mnx->maybeAttributeToLong( CONSTANT_VALUE ) );
+		Maybe< long > v( mnx->maybeAttributeToLong( GNX_CONSTANT_VALUE ) );
 		if ( v.isValid() && canFitInSmall( v.fastValue() ) ) {
 			return LongToRef( v.fastValue() );
 		} else {
-			return this->vm->heap().copyBigInt( mnx->attribute( CONSTANT_VALUE ).c_str() );
+			return this->vm->heap().copyBigInt( mnx->attribute( GNX_CONSTANT_VALUE ).c_str() );
 		}
 	} else if ( type == "bool" ) {
-		return mnx->hasAttribute( CONSTANT_VALUE, "false" ) ? SYS_FALSE : SYS_TRUE;
+		return mnx->hasAttribute( GNX_CONSTANT_VALUE, "false" ) ? SYS_FALSE : SYS_TRUE;
 	} else if ( type == "absent" ) {
 		return SYS_ABSENT;
 	} else if ( type == "termin" ) {
@@ -1649,17 +1649,17 @@ Ref CodeGenClass::calcConstant( Gnx mnx ) {
 	} else if ( type == "indeterminate" ) {
 		return SYS_INDETERMINATE;
 	} else if ( type == "char" ) {
-		const string & s = mnx->attribute( CONSTANT_VALUE );
+		const string & s = mnx->attribute( GNX_CONSTANT_VALUE );
 		if ( not s.empty() ) {
 			return CharToCharacter( s[ 0 ] );
 		} else {
 			throw SystemError( "Invalid character string" );
 		}
 	} else if ( type == "string" ) {
-		return this->vm->heap().copyString( mnx->attribute( CONSTANT_VALUE ).c_str() );
+		return this->vm->heap().copyString( mnx->attribute( GNX_CONSTANT_VALUE ).c_str() );
 	} else if ( type == "double" ) {
 		gngdouble_t d;
-		const std::string& numtext( mnx->attribute( CONSTANT_VALUE ) );
+		const std::string& numtext( mnx->attribute( GNX_CONSTANT_VALUE ) );
 		if ( numtext == "infinity" || numtext == "+infinity" || numtext == "inf" ) {
 			return this->vm->heap().copyDouble( 1.0 / 0.0 );
 		} else if ( numtext == "-infinity" || numtext == "-inf" ) {
@@ -1679,7 +1679,7 @@ Ref CodeGenClass::calcConstant( Gnx mnx ) {
 			}
 		}
 	} else if ( type == "symbol" ) {
-		return refMakeSymbol( mnx->attribute( CONSTANT_VALUE ) );
+		return refMakeSymbol( mnx->attribute( GNX_CONSTANT_VALUE ) );
 	} else if ( type == GNX_SYSFN and mnx->hasAttribute( GNX_SYSFN_VALUE ) ) {
 		Ref r = makeSysFn( this, mnx->attribute( GNX_SYSFN_VALUE ), SYS_UNDEFINED );
 		if ( r == SYS_UNDEFINED ) {
@@ -1699,7 +1699,7 @@ Ref CodeGenClass::calcConstant( Gnx mnx ) {
 		<constant type="sysclass" value="Vector"/>          ### class for vectors
 		<constant type="sysclass" value="Class"/>           ### class for classes
 		*/
-		const std::string cname( mnx->attribute( CONSTANT_VALUE ) );
+		const std::string cname( mnx->attribute( GNX_CONSTANT_VALUE ) );
 		Ref r = nameToKey( cname );
 		if ( r != SYS_ABSENT ) {
 			return r;
@@ -1719,12 +1719,12 @@ void CodeGenClass::compileGnxConstant( Gnx mnx, LabelClass * contn ) {
 }
 
 static void throwProblem( Gnx mnx ) {
-	Ginger::Mishap mishap( mnx->attribute( PROBLEM_MESSAGE ), mnx->attribute( PROBLEM_CATEGORY, "S" ) );
+	Ginger::Mishap mishap( mnx->attribute( GNX_PROBLEM_MESSAGE ), mnx->attribute( GNX_PROBLEM_CATEGORY, "S" ) );
 	MnxChildIterator mnxit( mnx );
 	while ( mnxit.hasNext() ) {
 		Gnx & culprit = mnxit.next();
-		if ( culprit->hasName( CULPRIT ) && culprit->hasAttribute( CULPRIT_NAME ) && culprit->hasAttribute( CULPRIT_VALUE ) ) {
-			mishap.culprit( culprit->attribute( CULPRIT_NAME ), culprit->attribute( CULPRIT_VALUE ) );
+		if ( culprit->hasName( GNX_CULPRIT ) && culprit->hasAttribute( GNX_CULPRIT_NAME ) && culprit->hasAttribute( GNX_CULPRIT_VALUE ) ) {
+			mishap.culprit( culprit->attribute( GNX_CULPRIT_NAME ), culprit->attribute( GNX_CULPRIT_VALUE ) );
 		}
 	}
 	throw mishap;
@@ -1770,7 +1770,7 @@ bool CodeGenClass::tryFlatten( Gnx mnx, const char * name, std::vector< Gnx > & 
 	if ( mnx->hasName( name ) ) {
 		vars.push_back( mnx );
 		return true;
-	} else if ( mnx->hasName( SEQ ) ) {
+	} else if ( mnx->hasName( GNX_SEQ ) ) {
 		MnxChildIterator children( mnx );
 		while ( children.hasNext() ) {
 			Gnx child = children.next();
@@ -1799,12 +1799,12 @@ bool CodeGenClass::tryFlatten( Gnx mnx, const char * name, std::vector< Gnx > & 
 }*/
 
 void CodeGenClass::compileBindDst( Gnx lhs ) {
-	if ( lhs->hasName( VAR ) ) {
+	if ( lhs->hasName( GNX_VAR ) ) {
 		VIdent vid( this, lhs );
 		this->vmiPOP( vid, false );
-	} else if ( lhs->hasName( SEQ ) ) {
+	} else if ( lhs->hasName( GNX_SEQ ) ) {
 		std::vector< Gnx > vars;
-		if ( this->tryFlatten( lhs, VAR, vars ) ) {
+		if ( this->tryFlatten( lhs, GNX_VAR, vars ) ) {
 			for ( std::vector< Gnx >::reverse_iterator it = vars.rbegin(); it != vars.rend(); ++it ) {
 				VIdent vid( this, *it );
 				this->vmiPOP( vid, false );
@@ -1818,7 +1818,7 @@ void CodeGenClass::compileBindDst( Gnx lhs ) {
 }
 
 void CodeGenClass::compileBind( Gnx lhs, Gnx rhs, LabelClass * contn ) {
-	Arity a( lhs->attribute( PATTERN_ARITY, "0+" ) );
+	Arity a( lhs->attribute( GNX_PATTERN_ARITY, "0+" ) );
 	if ( a.isExact() ) { 
 		this->compileN( rhs, a.count(), CONTINUE_LABEL );
 	} else {
@@ -1840,32 +1840,32 @@ void CodeGenClass::compileGnx( Gnx mnx, LabelClass * contn ) {
 	#endif
 	const string & nm = mnx->name();
 	const int N = mnx->size();
-	if ( nm == CONSTANT ) {
+	if ( nm == GNX_CONSTANT ) {
 		this->compileGnxConstant( mnx, contn );
-	} else if ( nm == ID ) {
+	} else if ( nm == GNX_ID ) {
 		VIdent vid( this, mnx );
 		this->vmiPUSH( vid, contn );
-	} else if ( nm == IF ) {
+	} else if ( nm == GNX_IF ) {
 		this->compileGnxIf( mnx, contn );
-	} else if ( nm == SWITCH && mnx->size() >= 1 ) {
+	} else if ( nm == GNX_SWITCH && mnx->size() >= 1 ) {
 		this->compileGnxSwitch( mnx, contn );
-	} else if ( nm == OR && mnx->size() == 2 ) {
+	} else if ( nm == GNX_OR && mnx->size() == 2 ) {
 		this->compileBoolAbsAndOr( true, false, mnx, contn );
-	} else if ( nm == AND && mnx->size() == 2 ) {
+	} else if ( nm == GNX_AND && mnx->size() == 2 ) {
 		this->compileBoolAbsAndOr( true, true, mnx, contn );
-	} else if ( nm == ABSOR && mnx->size() == 2 ) {
+	} else if ( nm == GNX_ABSOR && mnx->size() == 2 ) {
 		this->compileBoolAbsAndOr( false, false, mnx, contn );
-	} else if ( nm == ABSAND && mnx->size() == 2 ) {
+	} else if ( nm == GNX_ABSAND && mnx->size() == 2 ) {
 		this->compileBoolAbsAndOr( false, true, mnx, contn );
-	} else if ( nm == SYSAPP ) {
+	} else if ( nm == GNX_SYSAPP ) {
 		this->compileGnxSysApp( mnx, contn );
-	} else if ( nm == APP ) {
+	} else if ( nm == GNX_APP ) {
 		this->compileGnxApp( mnx, contn );
-	} else if ( nm == SEQ ) {
+	} else if ( nm == GNX_SEQ ) {
 		this->compileChildren( mnx, contn );
-	} else if ( nm == ERASE ) {
+	} else if ( nm == GNX_ERASE ) {
 		this->compileErase( mnx, contn );
-	} else if ( nm == BIND and N == 2 ) {
+	} else if ( nm == GNX_BIND and N == 2 ) {
 		#ifdef DBG_CODEGEN
 			cerr << "appginger/compileGnx/BIND" << endl;
 			cerr << "  [[";
@@ -1878,9 +1878,9 @@ void CodeGenClass::compileGnx( Gnx mnx, LabelClass * contn ) {
 		Gnx lhs = mnx->getChild( 0 );
 		Gnx rhs = mnx->getChild( 1 );
 		compileBind( lhs, rhs, contn );
-	} else if ( nm == FOR and N == 1 ) {
+	} else if ( nm == GNX_FOR and N == 1 ) {
 		this->compileGnxFor( mnx->getChild( 0 ), contn );
-	} else if ( nm == LIST ) {
+	} else if ( nm == GNX_LIST ) {
 		if ( mnx->size() == 0 ) {
 			this->vmiPUSHQ( SYS_NIL, contn );
 		} else {
@@ -1891,8 +1891,8 @@ void CodeGenClass::compileGnx( Gnx mnx, LabelClass * contn ) {
 			this->vmiSYS_CALL( sysNewList );			
 			this->continueFrom( contn );
 		}
-	} else if ( nm == LIST_APPEND && mnx->size() == 2 ) {
-		if ( mnx->getChild( 0 )->name() == LIST ) {
+	} else if ( nm == GNX_LIST_APPEND && mnx->size() == 2 ) {
+		if ( mnx->getChild( 0 )->name() == GNX_LIST ) {
 			int v = this->tmpvar();
 			this->vmiSTART_MARK( v );
 			this->compileChildren( mnx->getChild( 0 ), CONTINUE_LABEL );
@@ -1907,24 +1907,24 @@ void CodeGenClass::compileGnx( Gnx mnx, LabelClass * contn ) {
 			this->vmiSYS_CALL( sysListAppend );			
 		}
 		this->continueFrom( contn );
-	} else if ( nm == VECTOR ) {
+	} else if ( nm == GNX_VECTOR ) {
 		int v = this->tmpvar();
 		this->vmiSTART_MARK( v );
 		this->compileChildren( mnx, CONTINUE_LABEL );
 		this->vmiSET_COUNT_TO_MARK( v );
 		this->vmiSYS_CALL( sysNewVector );
 		this->continueFrom( contn );
-	} else if ( nm == SET and mnx->size() == 2 ) {
+	} else if ( nm == GNX_SET and mnx->size() == 2 ) {
 		Gnx dst = mnx->getChild( 1 );
 		Gnx src = mnx->getChild( 0 );
-		if ( dst->hasName( ID ) ) {
+		if ( dst->hasName( GNX_ID ) ) {
 			VIdent vid( this, dst );
 			this->compile1( src, CONTINUE_LABEL );
 			this->vmiPOP( vid, true );
 			this->continueFrom( contn );
-		} else if ( dst->hasName( SEQ ) ) {
+		} else if ( dst->hasName( GNX_SEQ ) ) {
 			std::vector< Gnx > vars;
-			if ( this->tryFlatten( dst, ID, vars ) ) {
+			if ( this->tryFlatten( dst, GNX_ID, vars ) ) {
 				this->compileN( src, vars.size(), CONTINUE_LABEL );
 
 				for ( std::vector< Gnx >::reverse_iterator it = vars.rbegin(); it != vars.rend(); ++it ) {
@@ -1940,42 +1940,42 @@ void CodeGenClass::compileGnx( Gnx mnx, LabelClass * contn ) {
 		} else {
 			throw Ginger::Mishap( "SET not fully implemented yet" );
 		}
-	} else if ( nm == FN ) {
+	} else if ( nm == GNX_FN ) {
 		this->compileGnxFn( mnx, contn );
-	} else if ( nm == DEREF and mnx->size() == 1 ) {
+	} else if ( nm == GNX_DEREF and mnx->size() == 1 ) {
 		this->compileGnxDeref( mnx, contn );
-	} else if ( nm == MAKEREF and mnx->size() == 1 ) {
+	} else if ( nm == GNX_MAKEREF and mnx->size() == 1 ) {
 		this->compileGnxMakeRef( mnx, contn );
-	} else if ( nm == SETCONT and mnx->size() == 2 ) {
+	} else if ( nm == GNX_SETCONT and mnx->size() == 2 ) {
 		this->compileGnxSetCont( mnx, contn );
 	} else if ( 
-		nm == THROW and 
+		nm == GNX_THROW and 
 		mnx->size() == 1 and 
-		mnx->hasAttribute( THROW_EVENT ) and 
-		mnx->hasAttribute( THROW_LEVEL )
+		mnx->hasAttribute( GNX_THROW_EVENT ) and 
+		mnx->hasAttribute( GNX_THROW_LEVEL )
 	) {
 		this->compileThrow( mnx, contn );
-	} else if ( nm == ASSERT and mnx->size() == 1 ) {
-		if ( mnx->hasAttribute( ASSERT_N, "1" ) ) {
+	} else if ( nm == GNX_ASSERT and mnx->size() == 1 ) {
+		if ( mnx->hasAttribute( GNX_ASSERT_N, "1" ) ) {
 			//	case-study: Adding New Element Type.
 			this->compile1( mnx->getChild( 0 ), contn );
-		} else if ( mnx->hasAttribute( ASSERT_TYPE, "bool" ) ) {
+		} else if ( mnx->hasAttribute( GNX_ASSERT_TYPE, "bool" ) ) {
 			//	case-study: Adding New Element Type.
 			this->compile1( mnx->getChild( 0 ), CONTINUE_LABEL );
 			this->vmiSET_SYS_CALL( sysCheckBool, 1 );
 			this->continueFrom( contn );
-		} else if ( mnx->hasAttribute( ASSERT_TAILCALL, "true" ) ) {			
+		} else if ( mnx->hasAttribute( GNX_ASSERT_TAILCALL, "true" ) ) {			
 			throw Ginger::Mishap( "Return found in non-tailcall position" );
 		} else {
 			throw SystemError( "Unimplemented assertion" );
 		}
-	} else if ( nm == SELF_APP ) {
+	} else if ( nm == GNX_SELF_APP ) {
 		this->compileGnxSelfCall( mnx, contn );
-	} else if ( nm == SELF_CONSTANT ) {
+	} else if ( nm == GNX_SELF_CONSTANT ) {
 		this->vmiSELF_CONSTANT();
-	} else if ( nm == TRY && mnx->size() >= 1 ) {
+	} else if ( nm == GNX_TRY && mnx->size() >= 1 ) {
 		this->compileTry( mnx, contn );
-	} else if ( nm == PROBLEM ) {
+	} else if ( nm == GNX_PROBLEM ) {
 		throwProblem( mnx );
 	} else {
 		CompileQuery cq( this );
@@ -2003,8 +2003,8 @@ void CodeGenClass::compileThrow( Gnx mnx, LabelClass * contn ) {
 		this->vmiPUSHQ( SYS_NIL );
 	#endif
 	//	Push the event name.
-	this->vmiPUSHQ_SYMBOL( mnx->attribute( THROW_EVENT ), CONTINUE_LABEL );
-	const std::string level( mnx->attribute( THROW_LEVEL ) );
+	this->vmiPUSHQ_SYMBOL( mnx->attribute( GNX_THROW_EVENT ), CONTINUE_LABEL );
+	const std::string level( mnx->attribute( GNX_THROW_LEVEL ) );
 	if ( level == "escape" ) {
 		this->vmiESCAPE();
 	} else {
@@ -2017,7 +2017,7 @@ static Gnx getCatchReturn( Gnx try_gnx ) {
 		Gnx clause = try_gnx->getChild( i );
 		const std::string nm = clause->name();
 		const int N = clause->size();
-		if ( nm == CATCH_RETURN && N == 2 ) {
+		if ( nm == GNX_CATCH_RETURN && N == 2 ) {
 			return clause;
 		}
 	}
@@ -2043,7 +2043,7 @@ void CodeGenClass::compileTry( Gnx mnx, LabelClass * contn ) {
 	Gnx appl = mnx->getChild( 0 );
 	Gnx retn = getCatchReturn( mnx );
 	const bool has_retn = !!retn;
-	Arity aretn( has_retn ? retn->getChild( 0 )->attribute( PATTERN_ARITY, "+0" ) : "+0" );
+	Arity aretn( has_retn ? retn->getChild( 0 )->attribute( GNX_PATTERN_ARITY, "+0" ) : "+0" );
 	
 	//	Because we tidy the stack up on escape, we have to make a note of
 	//	where we will be tidying back to.
@@ -2078,28 +2078,28 @@ void CodeGenClass::compileTry( Gnx mnx, LabelClass * contn ) {
 		Gnx clause = mnx->getChild( i );
 		const std::string nm = clause->name();
 		const int N = clause->size();
-		if ( nm == CATCH_THEN && N == 2 && clause->hasAttribute( CATCH_THEN_EVENT ) ) {
+		if ( nm == GNX_CATCH_THEN && N == 2 && clause->hasAttribute( GNX_CATCH_THEN_EVENT ) ) {
 			LabelClass next_label( this );
 			this->vmiPUSH_INNER_SLOT( event );
-			this->vmiIFNEQTO( refMakeSymbol( clause->attribute( CATCH_THEN_EVENT ) ), &next_label, CONTINUE_LABEL );
+			this->vmiIFNEQTO( refMakeSymbol( clause->attribute( GNX_CATCH_THEN_EVENT ) ), &next_label, CONTINUE_LABEL );
 			
 			//	If there is a catch-return we have to stack tidy
 			this->eraseToMarkIfNeeded( has_retn, mark );
 
 			Gnx pattern = clause->getChild( 0 );	//	Arguments to bind.
-			Arity p_arity( pattern->attribute( PATTERN_ARITY, "0+") ); 
+			Arity p_arity( pattern->attribute( GNX_PATTERN_ARITY, "0+") ); 
 			Gnx expr = clause->getChild( 1 );		//	Expression to execute.
 			this->vmiPUSH_INNER_SLOT( args );
 			this->vmiCHECK_EXPLODE( p_arity );
 			this->compileBind( pattern, expr, done );
 			next_label.labelSet();
-		} else if ( nm == CATCH_ELSE && N == 1 ) {
+		} else if ( nm == GNX_CATCH_ELSE && N == 1 ) {
 			
 			//	If there is a catch-return we have to stack tidy
 			this->eraseToMarkIfNeeded( has_retn, mark );
 
 			this->compileGnx( clause->getChild( 0 ), done );
-		} else if ( nm == CATCH_RETURN && N == 2 ) {
+		} else if ( nm == GNX_CATCH_RETURN && N == 2 ) {
 			//	Skip. Handled elsewhere.
 			if ( seen_catch_return ) {
 				throw Mishap( "Too many catch-returns" );
@@ -2156,7 +2156,7 @@ void CodeGenClass::compileChildren( Gnx mnx, LabelClass * contn ) {
 }
 
 void CodeGenClass::compile1( Gnx mnx, LabelClass * contn ) {
-	Ginger::Arity a( mnx->attribute( EVAL_ARITY, "+0" ) );
+	Ginger::Arity a( mnx->attribute( GNX_EVAL_ARITY, "+0" ) );
 	if ( a.isntExact() ) {
 		int n = this->current_slot;
 		int v = this->tmpvar();
@@ -2178,7 +2178,7 @@ void CodeGenClass::compileN( Gnx mnx, int N, LabelClass * contn ) {
 	} else if ( N == 1 ) {
 		this->compile1( mnx, contn );
 	} else {
-		Ginger::Arity a( mnx->attribute( EVAL_ARITY, "+0" ) );
+		Ginger::Arity a( mnx->attribute( GNX_EVAL_ARITY, "+0" ) );
 		if ( a.isntExact() ) {
 			int n = this->current_slot;
 			int v = this->tmpvar();
@@ -2196,7 +2196,7 @@ void CodeGenClass::compileN( Gnx mnx, int N, LabelClass * contn ) {
 }
 
 void CodeGenClass::compileNelse( Gnx mnx, int N, LabelClass * ok, LabelClass * fail ) {
-	Ginger::Arity a( mnx->attribute( EVAL_ARITY, "+0" ) );
+	Ginger::Arity a( mnx->attribute( GNX_EVAL_ARITY, "+0" ) );
 	if ( a.isntExact() ) {
 		int n = this->current_slot;
 		int v = this->tmpvar();
@@ -2213,7 +2213,7 @@ void CodeGenClass::compileNelse( Gnx mnx, int N, LabelClass * ok, LabelClass * f
 }
 
 void CodeGenClass::compile0( Gnx mnx, LabelClass * contn ) {
-	Ginger::Arity a( mnx->attribute( EVAL_ARITY, "+0" ) );
+	Ginger::Arity a( mnx->attribute( GNX_EVAL_ARITY, "+0" ) );
 	if ( a.isntExact() ) {
 		int n = this->current_slot;
 		int v = this->tmpvar();

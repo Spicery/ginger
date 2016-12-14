@@ -18,8 +18,8 @@
 
 //	Local debugging switch for conditional code compilation.
 
-//#define DBG_SIMPLIFYGNX
-//#define DBG_PACKAGE_AUTOLOAD
+// #define DBG_SIMPLIFYGNX
+// #define DBG_PACKAGE_AUTOLOAD
 
 /**
 The simplifygnx command is used to simplify the Ginger XML (GNX) fed
@@ -370,7 +370,7 @@ void Main::parseArgs( int argc, char **argv, char **envp ) {
                 //  files and this will simply go there. Or run a web
                 //  browser pointed there.
                 if ( optarg == NULL ) {
-                    cout << "Usage:  simplifygnx -p PACKAGE OPTIONS < GNX_IN > GNX_OUT" << endl;
+                    cout << "Usage:  simplifygnx -p PACKAGE OPTIONS < Ginger::GNX_IN > Ginger::GNX_OUT" << endl;
                     cout << "GENERAL OPTIONS" << endl;
                     cout << "-d, --debug           retain debugging information" << endl;
                     cout << "-H, --help[=TOPIC]    help info on optional topic (see --help=help)" << endl;
@@ -437,17 +437,17 @@ public:
 			//this->enc_pkg_name = attrs[ "enc.pkg" ];
 			//this->alias_name = attrs[ "alias" ];
 			this->def_pkg_name = attrs[ "def.pkg" ];
-		} else if ( name == PROBLEM ) {
+		} else if ( name == Ginger::GNX_PROBLEM ) {
 			this->mishap.setMessage( attrs[ "message" ] );
-		} else if ( name == CULPRIT ) {
-			mishap.culprit( attrs[ CULPRIT_NAME ], attrs[ CULPRIT_VALUE ] );
+		} else if ( name == Ginger::GNX_CULPRIT ) {
+			mishap.culprit( attrs[ Ginger::GNX_CULPRIT_NAME ], attrs[ Ginger::GNX_CULPRIT_VALUE ] );
 		} else {
 			throw Ginger::Mishap( "Unexpected element in response" ).culprit( "Element name", name );
 		}
 	}
 	
 	void endTag( std::string & name ) {
-		if ( name == PROBLEM ) {
+		if ( name == Ginger::GNX_PROBLEM ) {
 			throw mishap;
 		}
 	}
@@ -599,19 +599,19 @@ private:
  public:
 	void startVisit( Ginger::Mnx & element ) {
 		const string & nm = element.name();
-		if ( nm == FN ) {
+		if ( nm == Ginger::GNX_FN ) {
 			//cerr << "#1" << endl;
 			this->body_arities.push_back( calcArity( element.getChild( 1 ) ) );
-		} else if ( nm == SELF_APP && this->body_arities.size() > 0 ) {
+		} else if ( nm == Ginger::GNX_SELF_APP && this->body_arities.size() > 0 ) {
 			//cerr << "#2" << endl;
 			Ginger::Arity arity( this->body_arities[ this->body_arities.size() - 1 ] );
-			element.putAttribute( ARITY, arity.toString() );
+			element.putAttribute( Ginger::GNX_ARITY, arity.toString() );
 		}
 	}
 	
 	void endVisit( Ginger::Mnx & element ) {
 		const string & nm = element.name();
-		if ( nm == FN ) {
+		if ( nm == Ginger::GNX_FN ) {
 			//cerr << "#3" << endl;
 			this->body_arities.pop_back();
 		}
@@ -651,11 +651,11 @@ Ginger::Arity SelfAppArityMarker::calcArityIfThenOptElse( Gnx expr, int offset )
     point. 
 */
 Ginger::Arity SelfAppArityMarker::calcArity( Gnx expr ) {
-    if ( expr->hasAttribute( ARITY ) ) {
-        return Ginger::Arity( expr->attribute( ARITY ) );
-    } else if ( expr->name() == IF ) {
+    if ( expr->hasAttribute( Ginger::GNX_ARITY ) ) {
+        return Ginger::Arity( expr->attribute( Ginger::GNX_ARITY ) );
+    } else if ( expr->name() == Ginger::GNX_IF ) {
         return calcArityIfThenOptElse( expr, 0 );
-    } else if ( expr->name() == SWITCH ) {
+    } else if ( expr->name() == Ginger::GNX_SWITCH ) {
         return calcArityIfThenOptElse( expr, 1 );
     } else {
         return Ginger::Arity( 0, true );
@@ -705,38 +705,38 @@ private:
 	}
 
     bool isEvalMode() const {
-        return this->arity_attribute == ARITY;
+        return this->arity_attribute == Ginger::GNX_ARITY;
     }
 
     bool isPatternMode() const {
-        return this->arity_attribute == PATTERN_ARITY;
+        return this->arity_attribute == Ginger::GNX_PATTERN_ARITY;
     }
 
 
 public:
 	void startVisit( Ginger::Mnx & element ) {
 		if ( this->clear_arities ) {
-            element.clearAttribute( ARITY );            //  Throw away any previous marking.
-            element.clearAttribute( PATTERN_ARITY );    //  Throw away any previous marking.
+            element.clearAttribute( Ginger::GNX_ARITY );            //  Throw away any previous marking.
+            element.clearAttribute( Ginger::GNX_PATTERN_ARITY );    //  Throw away any previous marking.
         }
-        if ( element.hasAttribute( ANALYSIS_TYPE ) ) {
+        if ( element.hasAttribute( Ginger::GNX_ANALYSIS_TYPE ) ) {
             //  Fetch the analysis-type we want to switch to.
-            const std::string a_type = element.attribute( ANALYSIS_TYPE );
+            const std::string a_type = element.attribute( Ginger::GNX_ANALYSIS_TYPE );
             //  Cache the current arity analysis-type. It is a bit
             //  naughty to reuse the ANALYSIS_TYPE attribute.
-            element.putAttribute( ANALYSIS_TYPE, this->arity_attribute );
+            element.putAttribute( Ginger::GNX_ANALYSIS_TYPE, this->arity_attribute );
             //  Now make the switch.
-            this->arity_attribute = a_type == ARITY ? ARITY : PATTERN_ARITY;
+            this->arity_attribute = a_type == Ginger::GNX_ARITY ? Ginger::GNX_ARITY : Ginger::GNX_PATTERN_ARITY;
         } else {
             const string & nm = element.name();
             const int N = element.size();
             if ( 
-                ( nm == BIND && N == 2 ) ||
-                ( nm == FN && N == 2 ) ||
-                ( nm == CATCH_THEN && N == 2 ) ||
-                ( nm == CATCH_RETURN && N == 2 )
+                ( nm == Ginger::GNX_BIND && N == 2 ) ||
+                ( nm == Ginger::GNX_FN && N == 2 ) ||
+                ( nm == Ginger::GNX_CATCH_THEN && N == 2 ) ||
+                ( nm == Ginger::GNX_CATCH_RETURN && N == 2 )
             ) {
-                element.getChild( 0 )->putAttribute( ANALYSIS_TYPE, PATTERN_ARITY );
+                element.getChild( 0 )->putAttribute( Ginger::GNX_ANALYSIS_TYPE, Ginger::GNX_PATTERN_ARITY );
             }
         }
 	}
@@ -744,26 +744,26 @@ public:
 	void endVisit( Ginger::Mnx & element ) {
 		const string & x = element.name();
         const int N = element.size();
-		if ( x == CONSTANT || x == SELF_CONSTANT ) {
+		if ( x == Ginger::GNX_CONSTANT || x == Ginger::GNX_SELF_CONSTANT ) {
 			element.putAttribute( this->arity_attribute, "1" );
-		} else if ( x == ID || x == FN ) {
+		} else if ( x == Ginger::GNX_ID || x == Ginger::GNX_FN ) {
 			element.putAttribute( this->arity_attribute, "1" );
-        } else if ( x == AND || x == OR || x == ABSAND || x == ABSOR ) {
+        } else if ( x == Ginger::GNX_AND || x == Ginger::GNX_OR || x == Ginger::GNX_ABSAND || x == Ginger::GNX_ABSOR ) {
             element.putAttribute( this->arity_attribute, "1" );
-		} else if ( x == LIST || x == LIST_APPEND || x == VECTOR ) {
+		} else if ( x == Ginger::GNX_LIST || x == Ginger::GNX_LIST_APPEND || x == Ginger::GNX_VECTOR ) {
 			element.putAttribute( this->arity_attribute, "1" );
-		} else if ( x == FOR && this->isEvalMode() ) {
+		} else if ( x == Ginger::GNX_FOR && this->isEvalMode() ) {
             //  TODO: Check this is correct - looks wrong!
 			if ( element.hasAttribute( this->arity_attribute, "0" ) ) {
 				element.putAttribute( this->arity_attribute, "0" );
 			}
-		} else if ( x == SET && this->isEvalMode() ) {
+		} else if ( x == Ginger::GNX_SET && this->isEvalMode() ) {
 			element.putAttribute( this->arity_attribute, "0" );
-        } else if ( x == BIND ) {
+        } else if ( x == Ginger::GNX_BIND ) {
             element.putAttribute( this->arity_attribute, "0" );
-		} else if ( x == SEQ ) {
+		} else if ( x == Ginger::GNX_SEQ ) {
 			element.putAttribute( this->arity_attribute, this->sumOverChildren( element ).toString() );
-		} else if ( x == IF && this->isEvalMode() ) {
+		} else if ( x == Ginger::GNX_IF && this->isEvalMode() ) {
 			bool has_else = ( element.size() % 2 ) == 1;
 			bool all_have_arity = true;
 			for ( int i = 1; all_have_arity && i < element.size(); i += 2 ) {
@@ -796,7 +796,7 @@ public:
 					element.putAttribute( this->arity_attribute, sofar.toString() );
 				}
 			}
-        } else if ( x == SWITCH && element.size() >= 1 && this->isEvalMode() ) {
+        } else if ( x == Ginger::GNX_SWITCH && element.size() >= 1 && this->isEvalMode() ) {
             bool has_else = ( element.size() % 2 ) == 0;
             bool all_have_arity = true;
             for ( int i = 2; all_have_arity && i < element.size(); i += 2 ) {
@@ -826,18 +826,18 @@ public:
                     element.putAttribute( this->arity_attribute, sofar.toString() );
                 }
             }
-		} else if ( x == SYSAPP && this->isEvalMode() ) {
-			element.putAttribute( this->arity_attribute, Ginger::outArity( element.attribute( SYSAPP_NAME ) ).toString() );
-			element.putAttribute( ARGS_ARITY, this->sumOverChildren( element ).toString() );
-        } else if ( x == ERASE && this->isEvalMode() ) {
+		} else if ( x == Ginger::GNX_SYSAPP && this->isEvalMode() ) {
+			element.putAttribute( this->arity_attribute, Ginger::outArity( element.attribute( Ginger::GNX_SYSAPP_NAME ) ).toString() );
+			element.putAttribute( Ginger::GNX_ARGS_ARITY, this->sumOverChildren( element ).toString() );
+        } else if ( x == Ginger::GNX_ERASE && this->isEvalMode() ) {
             if ( this->sumOverChildren( element ) == 0 ) {
                 //  Replace in favour of sequence and allow subsequent stages to remove that.
-                element.name() = SEQ;
+                element.name() = Ginger::GNX_SEQ;
                 this->changed = true;
             }
             element.putAttribute( this->arity_attribute, "0" );
-		} else if ( x == ASSERT && element.size() == 1 && this->isEvalMode() ) {
-			if ( element.hasAttribute( ASSERT_N, "1" ) ) {
+		} else if ( x == Ginger::GNX_ASSERT && element.size() == 1 && this->isEvalMode() ) {
+			if ( element.hasAttribute( Ginger::GNX_ASSERT_N, "1" ) ) {
 				if ( element.getChild( 0 )->hasAttribute( this->arity_attribute, "1" ) ) {
 					//	As we can prove the child satisfies the condition we should 
 					//	eliminate the parent. So we simply replace the contents of the 
@@ -850,21 +850,21 @@ public:
 				} else {
 					element.putAttribute( this->arity_attribute, "1" );
 				}
-			} else if ( element.hasAttribute( ASSERT_TYPE ) ) {
+			} else if ( element.hasAttribute( Ginger::GNX_ASSERT_TYPE ) ) {
 				Gnx c = element.getChild( 0 );
-				if ( c->hasName( CONSTANT ) && element.attribute( ASSERT_TYPE ) == c->attribute( CONSTANT_TYPE ) ) {
+				if ( c->hasName( Ginger::GNX_CONSTANT ) && element.attribute( Ginger::GNX_ASSERT_TYPE ) == c->attribute( Ginger::GNX_CONSTANT_TYPE ) ) {
 					element.copyFrom( *c );
 					this->changed = true;
 				} else {
 					element.putAttribute( this->arity_attribute, "1" );
 				}
 			}
-		} else if ( x == SELF_APP && this->isEvalMode() ) {
+		} else if ( x == Ginger::GNX_SELF_APP && this->isEvalMode() ) {
 			this->self_app_pass_needed = true;
-			element.putAttribute( ARGS_ARITY, this->sumOverChildren( element ).toString() );
-		} else if ( x == VAR && this->isPatternMode() ) {
+			element.putAttribute( Ginger::GNX_ARGS_ARITY, this->sumOverChildren( element ).toString() );
+		} else if ( x == Ginger::GNX_VAR && this->isPatternMode() ) {
             element.putAttribute( this->arity_attribute, "1" );
-        } else if ( x == TRY && N >= 1 ) {
+        } else if ( x == Ginger::GNX_TRY && N >= 1 ) {
             //  The non-escape arity is either the arity of the expression
             //  being tried or, if present, the catch.return arity.
             //  The overall arity is the sum of the arities of the 
@@ -873,7 +873,7 @@ public:
             Ginger::Arity non_esc_arity( element.getChild( 0 )->attribute( this->arity_attribute, "0+" ) );
             for ( Ginger::Mnx::Generator g( element ); !!g; ++g ) {
                 Gnx e = *g;
-                if ( e->hasName( CATCH_RETURN ) ) {
+                if ( e->hasName( Ginger::GNX_CATCH_RETURN ) ) {
                     non_esc_arity = e->attribute( this->arity_attribute, "0+" );
                 }
             }
@@ -884,20 +884,20 @@ public:
                 Ginger::Arity sofar = non_esc_arity;
                 for ( Ginger::Mnx::Generator g( element ); !!g; ++g ) {
                     Gnx e = *g;
-                    if ( e->hasName( CATCH_THEN ) || e->hasName( CATCH_RETURN ) ) {
+                    if ( e->hasName( Ginger::GNX_CATCH_THEN ) || e->hasName( Ginger::GNX_CATCH_RETURN ) ) {
                         sofar = sofar.unify( e->attribute( this->arity_attribute, "0+" ) );
                     }
                 }               
                 element.putAttribute( this->arity_attribute, sofar.toString() );
             }
-        } else if ( ( x == CATCH_THEN || x == CATCH_RETURN ) && N == 2 ) {
+        } else if ( ( x == Ginger::GNX_CATCH_THEN || x == Ginger::GNX_CATCH_RETURN ) && N == 2 ) {
             element.putAttribute( this->arity_attribute, element.getChild( 1 )->attribute( this->arity_attribute, "0+" ) );
         }
 
-        if ( element.hasAttribute( ANALYSIS_TYPE ) ) {
+        if ( element.hasAttribute( Ginger::GNX_ANALYSIS_TYPE ) ) {
             //  Restore the cached analysis type.
-            this->arity_attribute = element.attribute( ANALYSIS_TYPE ) == ARITY ? ARITY : PATTERN_ARITY;
-            element.clearAttribute( ANALYSIS_TYPE );
+            this->arity_attribute = element.attribute( Ginger::GNX_ANALYSIS_TYPE ) == Ginger::GNX_ARITY ? Ginger::GNX_ARITY : Ginger::GNX_PATTERN_ARITY;
+            element.clearAttribute( Ginger::GNX_ANALYSIS_TYPE );
         }
 	}
 	
@@ -905,7 +905,7 @@ public:
     ArityMarker( const char * arity_attribute, const bool clear ) : changed( false ), self_app_pass_needed( false ), clear_arities( clear ), arity_attribute( arity_attribute ) {}
     
     //  TODO: this constructor should be deprecated once we have the scaffolding in place for pattern.arities.
-    ArityMarker( const bool clear ) : changed( false ), self_app_pass_needed( false ), clear_arities( clear ), arity_attribute( ARITY ) {}
+    ArityMarker( const bool clear ) : changed( false ), self_app_pass_needed( false ), clear_arities( clear ), arity_attribute( Ginger::GNX_ARITY ) {}
 
 	virtual ~ArityMarker() {}
 };
@@ -916,14 +916,14 @@ class TailCall : public Ginger::MnxVisitor {
 public:
 	void startVisit( Ginger::Mnx & element ) {
 		const string & x = element.name();
-		element.clearAttribute( TAILCALL );	//	Throw away any previous marking.
-		if ( x == FN ) {
+		element.clearAttribute( Ginger::GNX_TAILCALL );	//	Throw away any previous marking.
+		if ( x == Ginger::GNX_FN ) {
 			Gnx ch( element.getLastChild() );
 			ch->orFlags( TAIL_CALL_MASK );
 		} else if ( element.hasAllFlags( TAIL_CALL_MASK ) ) {
-			if ( x == APP ) {
-				element.putAttribute( TAILCALL, "true" );
-			} else if ( x == IF ) {
+			if ( x == Ginger::GNX_APP ) {
+				element.putAttribute( Ginger::GNX_TAILCALL, "true" );
+			} else if ( x == Ginger::GNX_IF ) {
 				bool has_odd_kids = ( x.size() % 2 ) == 1;
 				for ( int i = 1; i < element.size(); i += 2 ) {
 					element.getChild( i )->orFlags( TAIL_CALL_MASK );
@@ -931,7 +931,7 @@ public:
 				if ( has_odd_kids ) {
 					element.getLastChild()->orFlags( TAIL_CALL_MASK );
 				}
-            } else if ( x == SWITCH && element.size() >= 1 ) {
+            } else if ( x == Ginger::GNX_SWITCH && element.size() >= 1 ) {
                 bool has_else = ( x.size() % 2 ) == 0;
                 for ( int i = 2; i < element.size(); i += 2 ) {
                     element.getChild( i )->orFlags( TAIL_CALL_MASK );
@@ -939,12 +939,12 @@ public:
                 if ( has_else ) {
                     element.getLastChild()->orFlags( TAIL_CALL_MASK );
                 }
-			} else if ( x == SEQ || x == BLOCK ) {
+			} else if ( x == Ginger::GNX_SEQ || x == Ginger::GNX_BLOCK ) {
 				if ( element.size() >= 1 ) {
 					Gnx ch = element.getLastChild();
 					ch->orFlags( TAIL_CALL_MASK );
 				}
-			} else if ( x == ASSERT && element.size() == 1 && element.hasAttribute( ASSERT_TAILCALL, "true" ) ) {
+			} else if ( x == Ginger::GNX_ASSERT && element.size() == 1 && element.hasAttribute( Ginger::GNX_ASSERT_TAILCALL, "true" ) ) {
                 Gnx c = element.getChild( 0 );
                 element.copyFrom( *c );
                 this->startVisit( element );
@@ -986,30 +986,30 @@ private:
 public:
 	void startVisit( Ginger::Mnx & element ) {
 		const string & x = element.name();
-		if ( x == ID ) {
-			if ( element.hasAttribute( SCOPE, "global" ) ) {
-				if ( not element.hasAttribute( GNX_VID_DEF_PKG ) ) {
-					const string & name = element.attribute( GNX_VID_NAME );
-					const string & enc_pkg = element.hasAttribute( GNX_VID_ENC_PKG ) ? element.attribute( GNX_VID_ENC_PKG ) : this->package;
+		if ( x == Ginger::GNX_ID ) {
+			if ( element.hasAttribute( Ginger::GNX_SCOPE, "global" ) ) {
+				if ( not element.hasAttribute( Ginger::GNX_VID_DEF_PKG ) ) {
+					const string & name = element.attribute( Ginger::GNX_VID_NAME );
+					const string & enc_pkg = element.hasAttribute( Ginger::GNX_VID_ENC_PKG ) ? element.attribute( Ginger::GNX_VID_ENC_PKG ) : this->package;
 					if ( element.hasAttribute( "alias" ) ) {
 						const string & alias = element.attribute( "alias" );
 						//cout << "RESOLVE (QUALIFIED): name=" << name << ", alias=" << alias << ", enc.pkg=" << enc_pkg << endl;
 						const string def_pkg( resolveQualified( this->project_folders, enc_pkg, alias, name, this->undefined_allowed ) );
 						//cout << "   def = " << def_pkg << endl;
-						element.putAttribute( GNX_VID_DEF_PKG, def_pkg );
+						element.putAttribute( Ginger::GNX_VID_DEF_PKG, def_pkg );
 					} else {
 						//cerr << "RESOLVE (UNQUALIFIED): name=" << name << ", enc.pkg=" << enc_pkg << endl;
 						const string def_pkg( resolveUnqualified( this->project_folders, enc_pkg, name, this->undefined_allowed ) );
 						//cerr << "   def = " << def_pkg << endl;
-						element.putAttribute( GNX_VID_DEF_PKG, def_pkg );						
+						element.putAttribute( Ginger::GNX_VID_DEF_PKG, def_pkg );						
 					}
 				}
 			}
-		} else if ( x == VAR ) {
-			if ( element.hasAttribute( SCOPE, "global" ) ) {
-				if ( not element.hasAttribute( GNX_VID_DEF_PKG ) ) {
-					const string & enc_pkg = element.hasAttribute( GNX_VID_ENC_PKG ) ? element.attribute( GNX_VID_ENC_PKG ) : this->package;
-					element.putAttribute( GNX_VID_DEF_PKG, enc_pkg );						
+		} else if ( x == Ginger::GNX_VAR ) {
+			if ( element.hasAttribute( Ginger::GNX_SCOPE, "global" ) ) {
+				if ( not element.hasAttribute( Ginger::GNX_VID_DEF_PKG ) ) {
+					const string & enc_pkg = element.hasAttribute( Ginger::GNX_VID_ENC_PKG ) ? element.attribute( Ginger::GNX_VID_ENC_PKG ) : this->package;
+					element.putAttribute( Ginger::GNX_VID_DEF_PKG, enc_pkg );						
 				}
 			}
 		}
@@ -1097,19 +1097,19 @@ public:
 
 	void startVisit( Ginger::Mnx & element ) {
 		const string & x = element.name();
-		if ( x == ID ) {
-			if ( element.hasAttribute( SCOPE, "global" ) ) {
-				if ( not element.hasAttribute( GNX_VID_DEF_PKG ) ) {
-					const string & enc_pkg = element.hasAttribute( GNX_VID_ENC_PKG ) ? element.attribute( GNX_VID_ENC_PKG ) : this->package;
-					element.putAttribute( GNX_VID_ENC_PKG, enc_pkg );
+		if ( x == Ginger::GNX_ID ) {
+			if ( element.hasAttribute( Ginger::GNX_SCOPE, "global" ) ) {
+				if ( not element.hasAttribute( Ginger::GNX_VID_DEF_PKG ) ) {
+					const string & enc_pkg = element.hasAttribute( Ginger::GNX_VID_ENC_PKG ) ? element.attribute( Ginger::GNX_VID_ENC_PKG ) : this->package;
+					element.putAttribute( Ginger::GNX_VID_ENC_PKG, enc_pkg );
 					element.putAttribute( "fetchgnx", "resolve" );
 				}
 			}
-		} else if ( x == VAR ) {
-			if ( element.hasAttribute( SCOPE, "global" ) ) {
-				if ( not element.hasAttribute( GNX_VID_DEF_PKG ) ) {
-					const string & enc_pkg = element.hasAttribute( GNX_VID_ENC_PKG ) ? element.attribute( GNX_VID_ENC_PKG ) : this->package;
-					element.putAttribute( GNX_VID_DEF_PKG, enc_pkg );	
+		} else if ( x == Ginger::GNX_VAR ) {
+			if ( element.hasAttribute( Ginger::GNX_SCOPE, "global" ) ) {
+				if ( not element.hasAttribute( Ginger::GNX_VID_DEF_PKG ) ) {
+					const string & enc_pkg = element.hasAttribute( Ginger::GNX_VID_ENC_PKG ) ? element.attribute( Ginger::GNX_VID_ENC_PKG ) : this->package;
+					element.putAttribute( Ginger::GNX_VID_DEF_PKG, enc_pkg );	
 				}
 			}
 		}
@@ -1171,7 +1171,7 @@ private:
 public:
 	//	Returns true if the name is bound to a named-lambda.
 	bool wasFn() {
-		return this->found != NULL && this->found->element->name() == FN;
+		return this->found != NULL && this->found->element->name() == Ginger::GNX_FN;
 	}
 	
 	bool wasNested() {
@@ -1192,7 +1192,7 @@ public:
 				this->found = &*it;
 				//cerr << "Found " << name << ": nested = " << this->nested << ", element = " << it->element->name() << endl;
 				return true;
-			} else if ( it->element->name() == FN ) {
+			} else if ( it->element->name() == Ginger::GNX_FN ) {
 				//cerr << "Chaining out:" << it->element->name() << endl;
 				this->nested = true;
 			} else {
@@ -1220,25 +1220,25 @@ public:
 	void startVisit( Ginger::Mnx & element ) {
 		element.clearFlags( SELF_BIND_MASK );
 		const string & nm = element.name();
-		if ( nm == ID ) {
+		if ( nm == Ginger::GNX_ID ) {
 			SelfInfoFinder finder( self_info );
-			if ( finder.find( element.attribute( GNX_VID_NAME ) ) && finder.wasFn() ) {
+			if ( finder.find( element.attribute( Ginger::GNX_VID_NAME ) ) && finder.wasFn() ) {
 				if ( finder.wasNested() ) {
 					finder.element()->orFlags( SELF_BIND_MASK );
 				} else {
 					Ginger::MnxBuilder b;
-					b.start( SELF_CONSTANT );
+					b.start( Ginger::GNX_SELF_CONSTANT );
 					b.end();
 					Gnx bgnx( b.build() );
 					element.copyFrom( *bgnx );
 				}
 			}
-		} else if ( nm == VAR ) {
-            if ( element.hasAttribute( GNX_VID_NAME ) ) {
+		} else if ( nm == Ginger::GNX_VAR ) {
+            if ( element.hasAttribute( Ginger::GNX_VID_NAME ) ) {
     			//	Efficiency hack - only push the variable if it masks a 
     			//	function name! This keeps the length of the stack low which
     			//	is what pushes this to be an O(N^2) algorithm. 
-    			const string & name = element.attribute( GNX_VID_NAME );
+    			const string & name = element.attribute( Ginger::GNX_VID_NAME );
     			SelfInfoFinder finder( self_info );
     			if ( finder.find( name ) ) {
     				this->self_info.push_back( SelfInfo( &element, &name ) );
@@ -1247,12 +1247,12 @@ public:
                 //  Anonymous variable - cannot mask a function name.
                 //  No action needed.
             }
-		} else if ( nm == FN ) {
+		} else if ( nm == Ginger::GNX_FN ) {
 			this->scopes.push_back( this->self_info.size() );
 			this->self_info.push_back( 
 				SelfInfo( 
 					&element, 
-					element.hasAttribute( FN_NAME ) ? &element.attribute( FN_NAME ) : NULL
+					element.hasAttribute( Ginger::GNX_FN_NAME ) ? &element.attribute( Ginger::GNX_FN_NAME ) : NULL
 				)
 			);
 		}
@@ -1261,25 +1261,25 @@ public:
 	void endVisit( Ginger::Mnx & element ) {
 		const string & nm = element.name();
 		if ( 
-			nm == APP &&
+			nm == Ginger::GNX_APP &&
 			element.size() >= 1 &&
 			element.getChild( 0 )->name() == "self.constant"
 		) {
 			element.name() = "self.app";
 			element.popFrontChild();
-		} else if ( nm == FN ) {
+		} else if ( nm == Ginger::GNX_FN ) {
 			int n = this->scopes.back();
 			this->scopes.pop_back();
 			this->self_info.resize( n );
 			if ( element.hasAllFlags( SELF_BIND_MASK ) ) {
 				Ginger::MnxBuilder mnx;
-				mnx.start( SEQ );
-				mnx.start( BIND );
-				mnx.start( VAR );
-				mnx.put( GNX_VID_PROTECTED, "true" );
-				mnx.put( GNX_VID_NAME, element.attribute( FN_NAME ) );
+				mnx.start( Ginger::GNX_SEQ );
+				mnx.start( Ginger::GNX_BIND );
+				mnx.start( Ginger::GNX_VAR );
+				mnx.put( Ginger::GNX_VID_PROTECTED, "true" );
+				mnx.put( Ginger::GNX_VID_NAME, element.attribute( Ginger::GNX_FN_NAME ) );
 				mnx.end();
-				mnx.start( SELF_CONSTANT );
+				mnx.start( Ginger::GNX_SELF_CONSTANT );
 				mnx.end();
 				mnx.end();
 				mnx.add( element.getChild( 1 ) );
@@ -1402,7 +1402,7 @@ private:
 					//cerr << "Declared at level " << it->dec_level << " but used at level " << this->scopes.size() << endl;
 					vi.max_diff_use_level = max( d, vi.max_diff_use_level );
 					this->outers_found = true;
-					vi.element->putAttribute( IS_OUTER, "true" );
+					vi.element->putAttribute( Ginger::GNX_IS_OUTER, "true" );
 				}
 				return &*it;
 			}
@@ -1411,10 +1411,10 @@ private:
 	}
 
 	void markAsAssigned( Gnx id ) {
-		if ( id->hasAttribute( PROTECTED, "true" ) ) {
-			throw Ginger::Mishap( "Assigning to a protected variable" ).culprit( "Variable", id->attribute( GNX_VID_NAME, "<unknown>" ) );
-		} else if ( id->hasAttribute( SCOPE, "local" ) ) {
-			stringstream uidstream( id->attribute( UID, "" ) );
+		if ( id->hasAttribute( Ginger::GNX_PROTECTED, "true" ) ) {
+			throw Ginger::Mishap( "Assigning to a protected variable" ).culprit( "Variable", id->attribute( Ginger::GNX_VID_NAME, "<unknown>" ) );
+		} else if ( id->hasAttribute( Ginger::GNX_SCOPE, "local" ) ) {
+			stringstream uidstream( id->attribute( Ginger::GNX_UID, "" ) );
 			int uid;
 			if ( uidstream >> uid ) {
 				this->is_assigned_to.insert( uid );
@@ -1431,68 +1431,68 @@ public:
 	
 	void startVisit( Ginger::Mnx & element ) {
 		const string & x = element.name();
-		element.clearAttribute( UID );			//	Throw away any previous marking.
-		element.clearAttribute( SCOPE );		//	Throw away any previous marking.
-		element.clearAttribute( OUTER_LEVEL );	//	Throw away any previous marking.
-		element.clearAttribute( IS_OUTER );		//	Throw away any previous marking.
-		element.clearAttribute( IS_ASSIGNED );	//	Throw away any previous marking.
-		if ( x == ID ) {
-			const string & name = element.attribute( GNX_VID_NAME );
-            const bool is_tmp = element.hasAttribute( IS_TEMPORARY, "true" );
+		element.clearAttribute( Ginger::GNX_UID );			//	Throw away any previous marking.
+		element.clearAttribute( Ginger::GNX_SCOPE );		//	Throw away any previous marking.
+		element.clearAttribute( Ginger::GNX_OUTER_LEVEL );	//	Throw away any previous marking.
+		element.clearAttribute( Ginger::GNX_IS_OUTER );		//	Throw away any previous marking.
+		element.clearAttribute( Ginger::GNX_IS_ASSIGNED );	//	Throw away any previous marking.
+		if ( x == Ginger::GNX_ID ) {
+			const string & name = element.attribute( Ginger::GNX_VID_NAME );
+            const bool is_tmp = element.hasAttribute( Ginger::GNX_IS_TEMPORARY, "true" );
 			VarInfo * v = this->findId( name, is_tmp );
 			if ( v != NULL ) {
-				element.putAttribute( UID, v->uid );
+				element.putAttribute( Ginger::GNX_UID, v->uid );
 				this->xrefs_to_uid[ v->uid ].push_back( &element );
 			}
 			if ( v == NULL || v->isGlobal() ) {
-				element.putAttribute( SCOPE, "global" );
+				element.putAttribute( Ginger::GNX_SCOPE, "global" );
 			} else {
-				element.putAttribute( SCOPE, "local" );
+				element.putAttribute( Ginger::GNX_SCOPE, "local" );
 				if ( v->max_diff_use_level > 0 ) {
-					element.putAttribute( OUTER_LEVEL, v->max_diff_use_level );
+					element.putAttribute( Ginger::GNX_OUTER_LEVEL, v->max_diff_use_level );
 				}
 			}
 			if ( v != NULL ) {
-				element.putAttribute( PROTECTED, v->is_protected ? "true" : "false" );
+				element.putAttribute( Ginger::GNX_PROTECTED, v->is_protected ? "true" : "false" );
 			}
-		} else if ( x == VAR ) {
-            if ( element.hasAttribute( GNX_VID_NAME ) ) {
-    			const string & name = element.attribute( GNX_VID_NAME );
+		} else if ( x == Ginger::GNX_VAR ) {
+            if ( element.hasAttribute( Ginger::GNX_VID_NAME ) ) {
+    			const string & name = element.attribute( Ginger::GNX_VID_NAME );
     			const int uid = this->newUid();
     			this->var_of_uid[ uid ] = &element;
-    			element.putAttribute( UID, uid );
-                const bool is_temporary = element.hasAttribute( IS_TEMPORARY, "true" );
-    			if ( not element.hasAttribute( PROTECTED ) ) {
-    				element.putAttribute( PROTECTED, "true" );
+    			element.putAttribute( Ginger::GNX_UID, uid );
+                const bool is_temporary = element.hasAttribute( Ginger::GNX_IS_TEMPORARY, "true" );
+    			if ( not element.hasAttribute( Ginger::GNX_PROTECTED ) ) {
+    				element.putAttribute( Ginger::GNX_PROTECTED, "true" );
     			}
-    			const bool is_protected = element.attribute( PROTECTED ) == "true";
+    			const bool is_protected = element.attribute( Ginger::GNX_PROTECTED ) == "true";
     			const bool is_global = this->isGlobalScope();
-    			element.putAttribute( SCOPE, is_global ? "global" : "local" );
+    			element.putAttribute( Ginger::GNX_SCOPE, is_global ? "global" : "local" );
     			//cerr << "Declaring " << name << " at level " << this->vars.size() << endl;
     			//cerr << "  -- but should it be " << this->scopes.size() << endl;
     			this->vars.push_back( VarInfo( &element, &name, uid, this->scopes.size(), is_temporary, is_protected, not is_global ) );
             } else {
                 //  Anonymous variable - should be marked as having local scope.
                 //  It also needs a unique ID to keep the slot counting code clean.
-                element.putAttribute( SCOPE, "local" );
-                element.putAttribute( UID, this->newUid() );
-                element.putAttribute( PROTECTED, "true" );      //  Not strictly required but correct & future-proofing.
+                element.putAttribute( Ginger::GNX_SCOPE, "local" );
+                element.putAttribute( Ginger::GNX_UID, this->newUid() );
+                element.putAttribute( Ginger::GNX_PROTECTED, "true" );      //  Not strictly required but correct & future-proofing.
             }
-		} else if ( x == FN ) {
+		} else if ( x == Ginger::GNX_FN ) {
 			this->scopes.push_back( this->vars.size() );
 		}
 	}
 	
 	void endVisit( Ginger::Mnx & element ) {
 		const string & x = element.name();
-		if ( x == FN ) {
+		if ( x == Ginger::GNX_FN ) {
 			int n = this->scopes.back();
 			this->scopes.pop_back();
 			this->vars.resize( n );
 		} else if ( 
-			x == SET && 
+			x == Ginger::GNX_SET && 
 			element.size() == 2 &&
-			element.getChild( 1 )->name() == ID 
+			element.getChild( 1 )->name() == Ginger::GNX_ID 
 		) {
 			this->markAsAssigned( element.getChild( 1 ) );
 		}
@@ -1514,9 +1514,9 @@ public:
 			++it
 		) {
 			//cerr << endl;
-			//cerr << "VAR[" << this->var_of_uid[ *it ]->attribute( GNX_VID_NAME ) << "] has " << xrefs.size() << " references" << endl;
+			//cerr << "VAR[" << this->var_of_uid[ *it ]->attribute( Ginger::GNX_VID_NAME ) << "] has " << xrefs.size() << " references" << endl;
 			//	Mark the var declaration as IS_ASSIGNED.
-			this->var_of_uid[ *it ]->putAttribute( IS_ASSIGNED, "true" );
+			this->var_of_uid[ *it ]->putAttribute( Ginger::GNX_IS_ASSIGNED, "true" );
 			//	And now mark all the id cross-refs to that declaration the same.
 			list< Ginger::Mnx * > & xrefs = this->xrefs_to_uid[ *it ];		
 			for (
@@ -1524,7 +1524,7 @@ public:
 				xt != xrefs.end();
 				++xt
 			) {
-				(*xt)->putAttribute( IS_ASSIGNED, "true" );
+				(*xt)->putAttribute( Ginger::GNX_IS_ASSIGNED, "true" );
 			}
 		}
 	}
@@ -1561,33 +1561,33 @@ public:
 
 	void endVisit( Ginger::Mnx & element ) {
 		const string & x = element.name();
-		if ( x == ID ) {
-			if ( element.hasAttribute( GNX_VID_DEF_PKG, "ginger.library" ) ) {
+		if ( x == Ginger::GNX_ID ) {
+			if ( element.hasAttribute( Ginger::GNX_VID_DEF_PKG, "ginger.library" ) ) {
 				//cout<<"IN 1" << endl;
-				const string name( element.attribute( GNX_VID_NAME ) );
+				const string name( element.attribute( Ginger::GNX_VID_NAME ) );
 				element.clearAllAttributes();
-				element.putAttribute( CONSTANT_VALUE, Ginger::baseName( name ) );
-				element.putAttribute( CONSTANT_TYPE, "sysfn" );
-				element.name() = CONSTANT;
+				element.putAttribute( Ginger::GNX_CONSTANT_VALUE, Ginger::baseName( name ) );
+				element.putAttribute( Ginger::GNX_CONSTANT_TYPE, "sysfn" );
+				element.name() = Ginger::GNX_CONSTANT;
 				this->changed = true;
 				//cout<<"OUT 1" << endl;
 			}
-		} else if ( x == APP && element.size() == 2 ) {
-			if ( element.getChild( 0 )->hasName( CONSTANT ) && element.getChild( 0 )->hasAttribute( CONSTANT_TYPE, "sysfn" ) && element.getChild( 0 )->hasAttribute( CONSTANT_VALUE ) ) {
+		} else if ( x == Ginger::GNX_APP && element.size() == 2 ) {
+			if ( element.getChild( 0 )->hasName( Ginger::GNX_CONSTANT ) && element.getChild( 0 )->hasAttribute( Ginger::GNX_CONSTANT_TYPE, "sysfn" ) && element.getChild( 0 )->hasAttribute( Ginger::GNX_CONSTANT_VALUE ) ) {
 				//cout<<"IN 2" << endl;
-				const string value( element.getChild( 0 )->attribute( CONSTANT_VALUE ) );
-				element.name() = SYSAPP;
+				const string value( element.getChild( 0 )->attribute( Ginger::GNX_CONSTANT_VALUE ) );
+				element.name() = Ginger::GNX_SYSAPP;
 				element.clearAllAttributes();
-				element.putAttribute( SYSAPP_NAME, value );
+				element.putAttribute( Ginger::GNX_SYSAPP_NAME, value );
 				element.popFrontChild();
 				this->changed = true;
 				//cout<<"OUT 2" << endl;
 				//element.render();
 				//cout << endl;
 			}
-		} else if ( x == SET && element.size() == 2 ) {
-            if ( element.getChild( 1 )->hasName( SYSAPP ) && element.getChild( 1 )->hasAttribute( SYSAPP_NAME ) ) {
-                const string & sysfn_name = element.getChild( 1 )->attribute( SYSAPP_NAME );
+		} else if ( x == Ginger::GNX_SET && element.size() == 2 ) {
+            if ( element.getChild( 1 )->hasName( Ginger::GNX_SYSAPP ) && element.getChild( 1 )->hasAttribute( Ginger::GNX_SYSAPP_NAME ) ) {
+                const string & sysfn_name = element.getChild( 1 )->attribute( Ginger::GNX_SYSAPP_NAME );
                 const char * uname = (
                     sysfn_name == "index" ? "updaterOfIndex" :
                     sysfn_name == "explode" ? "updaterOfExplode" :
@@ -1598,8 +1598,8 @@ public:
                         <set> EXPR <sysapp name=A> ARGS* </sysapp> </set>
                         <sysapp name=U> EXPR ARGS </sysapp>
                     */
-                    Gnx uform( new Ginger::Mnx( SYSAPP ) );
-                    uform->putAttribute( SYSAPP_NAME, uname );
+                    Gnx uform( new Ginger::Mnx( Ginger::GNX_SYSAPP ) );
+                    uform->putAttribute( Ginger::GNX_SYSAPP_NAME, uname );
                     uform->addChild( element.getChild( 0 ) );
                     Ginger::MnxChildIterator kids( element.getChild(1) );
                     while ( kids.hasNext() ) {
@@ -1625,20 +1625,20 @@ private:
 public:
 	void startVisit( Ginger::Mnx & element ) {
 		const string & x = element.name();
-		if ( x == VAR && element.hasAttribute( IS_OUTER ) && element.hasAttribute( UID ) ) {
-			this->dec_outer[ element.attribute( UID ) ] = &element;
-		} else if ( x == ID && element.hasAttribute( UID ) ) {
-			map< string, Ginger::Mnx * >::iterator m = this->dec_outer.find( element.attribute( UID ) );
+		if ( x == Ginger::GNX_VAR && element.hasAttribute( Ginger::GNX_IS_OUTER ) && element.hasAttribute( Ginger::GNX_UID ) ) {
+			this->dec_outer[ element.attribute( Ginger::GNX_UID ) ] = &element;
+		} else if ( x == Ginger::GNX_ID && element.hasAttribute( Ginger::GNX_UID ) ) {
+			map< string, Ginger::Mnx * >::iterator m = this->dec_outer.find( element.attribute( Ginger::GNX_UID ) );
 			if ( m != this->dec_outer.end() ) {
-				element.putAttribute( IS_OUTER, "true" );
-				if ( element.hasAttribute( OUTER_LEVEL ) ) {
+				element.putAttribute( Ginger::GNX_IS_OUTER, "true" );
+				if ( element.hasAttribute( Ginger::GNX_OUTER_LEVEL ) ) {
 					size_t level;
-					stringstream s( element.attribute( OUTER_LEVEL ) );
+					stringstream s( element.attribute( Ginger::GNX_OUTER_LEVEL ) );
 					s >> level;
 					const size_t n = this->capture_sets.size();
 					for ( size_t i = 1; i <= level; i++ ) {
 						//cout << "INSERT " << i << "/" << n << " uid=" << element.attribute( UID ) << endl;
-						this->capture_sets[ n - i ].insert( element.attribute( UID ) );
+						this->capture_sets[ n - i ].insert( element.attribute( Ginger::GNX_UID ) );
 						//cout << "  #capture set[" << ( n - i ) << "] = " << this->capture_sets[ n - 1 ].size() << endl;
 					}
 					
@@ -1655,14 +1655,14 @@ public:
 					#endif
 				}
 			}
-		} else if ( x == FN ) {
+		} else if ( x == Ginger::GNX_FN ) {
 			this->capture_sets.push_back( set< string >() );
 		}
 	}
 	
 	//	method
 	Gnx makeLocals( const char * tag ) {
-		Gnx locals( new Ginger::Mnx( SEQ ) );
+		Gnx locals( new Ginger::Mnx( Ginger::GNX_SEQ ) );
 		for ( 
 			set< string >::iterator it = this->capture_sets.back().begin();
 			it != this->capture_sets.back().end();
@@ -1676,8 +1676,8 @@ public:
 			cout << endl;*/
 			Gnx var( new Ginger::Mnx( tag ) );
 			var->putAttribute( "name", v->attribute( "name" ) );
-			var->putAttribute( UID, uid );
-			var->putAttribute( SCOPE, "local" );
+			var->putAttribute( Ginger::GNX_UID, uid );
+			var->putAttribute( Ginger::GNX_SCOPE, "local" );
 			locals->addChild( var );
 		}
 		return locals;
@@ -1685,8 +1685,7 @@ public:
 	
 	void endVisit( Ginger::Mnx & element ) {
 		const string & x = element.name();
-		if ( x == FN ) {
-
+		if ( x == Ginger::GNX_FN ) {
 			
 			if ( not this->capture_sets.back().empty() ) {
 				
@@ -1694,9 +1693,9 @@ public:
 				//	capture set.
 				{
 					Gnx arg( element.getChild( 0 ) );
-					Gnx newarg( new Ginger::Mnx( SEQ ) );
+					Gnx newarg( new Ginger::Mnx( Ginger::GNX_SEQ ) );
 					newarg->addChild( arg );
-					newarg->addChild( this->makeLocals( VAR ) );
+					newarg->addChild( this->makeLocals( Ginger::GNX_VAR ) );
 					
 					/*newarg->render();
 					cout << endl;*/
@@ -1708,11 +1707,11 @@ public:
 				//	to partapply onto the original function and 
 				//	the capture set.
 				{
-					Gnx fn( new Ginger::Mnx( FN ) );
+					Gnx fn( new Ginger::Mnx( Ginger::GNX_FN ) );
 					fn->copyFrom( element );
-					Gnx partapply( new Ginger::Mnx( SYSAPP ) );
-					partapply->putAttribute( SYSAPP_NAME, "partApply" );
-					partapply->addChild( this->makeLocals( ID ) );
+					Gnx partapply( new Ginger::Mnx( Ginger::GNX_SYSAPP ) );
+					partapply->putAttribute( Ginger::GNX_SYSAPP_NAME, "partApply" );
+					partapply->addChild( this->makeLocals( Ginger::GNX_ID ) );
 					partapply->addChild( fn );
 					element.copyFrom( *partapply );
 				}
@@ -1735,18 +1734,18 @@ private:
 public:
 	Gnx finishByInsertingBindings( Gnx element ) {
 		Ginger::MnxBuilder b;
-		b.start( SEQ );
+		b.start( Ginger::GNX_SEQ );
 		
 		for ( size_t i = 0; i < this->guids.size(); i++ ) {
 			const string & g = this->guids[ i ];
 			Gnx m( this->fns[ i ] );
 			
-			b.start( BIND );
-			b.start( VAR );
-			b.put( GNX_VID_PROTECTED, "true" );
-			b.put( GNX_VID_NAME, g );						
-			b.put( GNX_VID_DEF_PKG, "ginger.temporaries" );
-			b.put( GNX_VID_SCOPE, "global" );			
+			b.start( Ginger::GNX_BIND );
+			b.start( Ginger::GNX_VAR );
+			b.put( Ginger::GNX_VID_PROTECTED, "true" );
+			b.put( Ginger::GNX_VID_NAME, g );						
+			b.put( Ginger::GNX_VID_DEF_PKG, "ginger.temporaries" );
+			b.put( Ginger::GNX_VID_SCOPE, "global" );			
             b.end();
 			b.add( m );
 			b.end();
@@ -1759,13 +1758,13 @@ public:
 	}
 
 	void startVisit( Ginger::Mnx & element ) {
-		if ( element.name() == FN ) {
+		if ( element.name() == Ginger::GNX_FN ) {
 			this->nesting += 1;			
 		}
 	}
 
 	void endVisit( Ginger::Mnx & element ) {
-		if ( element.name() == FN ) {
+		if ( element.name() == Ginger::GNX_FN ) {
 			this->nesting -= 1;
 			if ( this->nesting > 0 ) {
 				//	We have a nested function definition. Lift it to
@@ -1784,11 +1783,11 @@ public:
 				//	Now replace the current element.
 				{
 					Ginger::MnxBuilder b;
-					b.start( ID );
-					b.put( GNX_VID_PROTECTED, "true" );
-					b.put( GNX_VID_NAME, name );						
-					b.put( GNX_VID_DEF_PKG, "ginger.temporaries" );
-					b.put( GNX_VID_SCOPE, "global" );
+					b.start( Ginger::GNX_ID );
+					b.put( Ginger::GNX_VID_PROTECTED, "true" );
+					b.put( Ginger::GNX_VID_NAME, name );						
+					b.put( Ginger::GNX_VID_DEF_PKG, "ginger.temporaries" );
+					b.put( Ginger::GNX_VID_SCOPE, "global" );
 					b.end();
 					element.copyFrom( *b.build() );					
 				}
@@ -1811,8 +1810,8 @@ public:
 	//
 	void startVisit( Ginger::Mnx & element ) {
 		const string & x = element.name();
-		if ( element.hasAttribute( IS_OUTER, "true" ) && element.hasAttribute( PROTECTED, "false" ) && ( x == VAR || x == ID ) ) {
-			element.putAttribute( IS_OUTER, "deref" );			//	Mark as processed.
+		if ( element.hasAttribute( Ginger::GNX_IS_OUTER, "true" ) && element.hasAttribute( Ginger::GNX_PROTECTED, "false" ) && ( x == Ginger::GNX_VAR || x == Ginger::GNX_ID ) ) {
+			element.putAttribute( Ginger::GNX_IS_OUTER, "deref" );			//	Mark as processed.
 			Gnx t( new Ginger::Mnx( x ) );
 			t->copyFrom( element );
 			Gnx d( new Ginger::Mnx( "deref" ) );
@@ -1824,26 +1823,26 @@ public:
 	void endVisit( Ginger::Mnx & element ) {
 		const string & x = element.name();
 		if ( 
-			x == BIND && 
+			x == Ginger::GNX_BIND && 
 			element.size() == 2 &&
-			element.getChild(0)->name() == DEREF &&
+			element.getChild(0)->name() == Ginger::GNX_DEREF &&
 			element.getChild(0)->size() == 1
 		) {
 			//	<bind><deref><var...></deref>EXPR</bind> 
 			//	<bind><var...><makeref>EXPR</makeref></bind>			
-			Gnx makeref( new Ginger::Mnx( MAKEREF ) );
+			Gnx makeref( new Ginger::Mnx( Ginger::GNX_MAKEREF ) );
 			makeref->addChild( element.getChild(1) );
 			element.setChild( 0, element.getChild(0)->getChild(0) );
 			element.setChild( 1, makeref );
 		} else if (
-			x == SET &&
+			x == Ginger::GNX_SET &&
 			element.size() == 2 &&
-			element.getChild(1)->name() == DEREF &&
+			element.getChild(1)->name() == Ginger::GNX_DEREF &&
 			element.getChild(1)->size() == 1
 		) {
 			//	<set> EXPR <deref><var...></deref> </bind> 
 			//	<setcont> EXPR <var...> </bind>		
-			element.name() = SETCONT;
+			element.name() = Ginger::GNX_SETCONT;
 			element.setChild( 1, element.getChild(1)->getChild(0) );
 		} 
 	}
@@ -1863,7 +1862,7 @@ public:
 
     static int flatten( Gnx x, vector< Gnx > & lhs ) {
         int count = 0;
-        if ( x->hasName( SEQ ) ) {
+        if ( x->hasName( Ginger::GNX_SEQ ) ) {
             count += 1;
             for ( Ginger::MnxChildIterator chit( x ); chit.hasNext(); ) {
                 Gnx g = chit.next();
@@ -1879,21 +1878,21 @@ public:
     void startVisit( Ginger::Mnx & element ) {
         if ( 
             (
-                element.hasName( IN ) ||
-                element.hasName( FROM ) ||
-                element.hasName( BIND )
+                element.hasName( Ginger::GNX_IN ) ||
+                element.hasName( Ginger::GNX_FROM ) ||
+                element.hasName( Ginger::GNX_BIND )
             ) && 
             element.size() >= 1 
         ) {
             Gnx target = element.getChild( 0 );
-            if ( target->hasName( SEQ ) ) {
+            if ( target->hasName( Ginger::GNX_SEQ ) ) {
                 vector< Gnx > lhs;
                 bool was_flattened = flatten( target, lhs ) > 1;
                 if ( lhs.size() == 1 ) {
                     target->copyFrom( *lhs[ 0 ] );
                 } else if ( was_flattened ) {
                     Ginger::MnxBuilder e;
-                    e.start( SEQ );
+                    e.start( Ginger::GNX_SEQ );
                     for ( 
                         vector< Gnx >::iterator it = lhs.begin();
                         it != lhs.end();
@@ -1906,14 +1905,14 @@ public:
                     target->copyFrom( *e.build() );
                 }
             }
-            if ( target->hasName( CONSTANT ) ) {
+            if ( target->hasName( Ginger::GNX_CONSTANT ) ) {
                 const string uuid = makeGUID();
                 Ginger::MnxBuilder where;
-                where.start( WHERE );
+                where.start( Ginger::GNX_WHERE );
                 where.start( element.name() );
-                where.start( VAR );
-                where.put( GNX_VID_NAME, uuid );
-                where.put( IS_TEMPORARY, "true" );
+                where.start( Ginger::GNX_VAR );
+                where.put( Ginger::GNX_VID_NAME, uuid );
+                where.put( Ginger::GNX_IS_TEMPORARY, "true" );
                 where.end();
                 bool not_first = false;
                 for ( Ginger::MnxChildIterator chit( element ); chit.hasNext(); not_first = true ) {
@@ -1924,12 +1923,12 @@ public:
                 }
                 //where.add( element.getChild( 1 ) );
                 where.end();
-                where.start( SYSAPP );
-                where.put( SYSAPP_NAME, "=" );
+                where.start( Ginger::GNX_SYSAPP );
+                where.put( Ginger::GNX_SYSAPP_NAME, "=" );
                 where.add( element.getChild( 0 ) );
-                where.start( ID );
-                where.put( GNX_VID_NAME, uuid );
-                where.put( IS_TEMPORARY, "true" );
+                where.start( Ginger::GNX_ID );
+                where.put( Ginger::GNX_VID_NAME, uuid );
+                where.put( Ginger::GNX_IS_TEMPORARY, "true" );
                 where.end();
                 where.end();
                 where.end();
@@ -1951,7 +1950,7 @@ class Flatten : public Ginger::MnxVisitor {
 private:
 	void flattenSubSeqs( Ginger::Mnx & element ) {
 		for ( int i = 0; i < element.size(); i++ ) {
-			if ( element.getChild( i )->name() == SEQ ) {
+			if ( element.getChild( i )->name() == Ginger::GNX_SEQ ) {
 				element.flattenChild( i );
 				i -= 1;
 			}
@@ -1962,7 +1961,7 @@ public:
 
 	void startVisit( Ginger::Mnx & element ) {
 		const string & nm = element.name();
-		if ( nm == SYSAPP || nm == SEQ || nm == LIST || nm == VECTOR || nm == ERASE ) {
+		if ( nm == Ginger::GNX_SYSAPP || nm == Ginger::GNX_SEQ || nm == Ginger::GNX_LIST || nm == Ginger::GNX_VECTOR || nm == Ginger::GNX_ERASE ) {
 			this->flattenSubSeqs( element );
 		} 
 	}
@@ -1970,19 +1969,19 @@ public:
 	void endVisit( Ginger::Mnx & element ) {
 		const string & nm = element.name();
 		if ( 
-			nm == LIST_APPEND and 
+			nm == Ginger::GNX_LIST_APPEND and 
 			element.size() == 2 
 		) {
-			if ( element.getChild( 0 )->name() == LIST and element.getChild( 0 )->isEmpty() ) {
+			if ( element.getChild( 0 )->name() == Ginger::GNX_LIST and element.getChild( 0 )->isEmpty() ) {
 				element.copyFrom( *element.getChild( 1 ) );
-			} else if ( element.getChild( 1  )->name() == LIST and element.getChild( 1 )->isEmpty() ) {
+			} else if ( element.getChild( 1  )->name() == Ginger::GNX_LIST and element.getChild( 1 )->isEmpty() ) {
 				element.copyFrom( *element.getChild( 0 ) );
-			} else if ( element.getChild( 0 )->name() == LIST and element.getChild( 1 )->name() == LIST ) {
+			} else if ( element.getChild( 0 )->name() == Ginger::GNX_LIST and element.getChild( 1 )->name() == Ginger::GNX_LIST ) {
 				// 	Does LIST/VECTOR introduce a lexical block? In this optimisation
 				//	we assume it does not.
-				element.name() = LIST;
-				element.getChild(0)->name() = SEQ;
-				element.getChild(1)->name() = SEQ;
+				element.name() = Ginger::GNX_LIST;
+				element.getChild(0)->name() = Ginger::GNX_SEQ;
+				element.getChild(1)->name() = Ginger::GNX_SEQ;
 				this->flattenSubSeqs( element );
 			}
 		}
@@ -1996,8 +1995,8 @@ public:
 class StripOuterAttributes : public Ginger::MnxVisitor {
 public:
 	void startVisit( Ginger::Mnx & element ) {
-		element.clearAttribute( IS_OUTER );
-		element.clearAttribute( OUTER_LEVEL );
+		element.clearAttribute( Ginger::GNX_IS_OUTER );
+		element.clearAttribute( Ginger::GNX_OUTER_LEVEL );
 	}
 	
 	void endVisit( Ginger::Mnx & element ) {
@@ -2024,8 +2023,8 @@ private:
 private:
     static bool isBranchIf( Ginger::MnxWalkPath * path ) {
         return (
-            path != NULL && 
-            path->getMnx().name() == IF && 
+            path != nullptr && 
+            path->getMnx().name() == Ginger::GNX_IF && 
             (
                 ( ( path->getIndex() & 0x1 ) == 0x1 ) ||
                 path->isLastIndex()
@@ -2035,8 +2034,8 @@ private:
     
     static bool isBranchSwitch( Ginger::MnxWalkPath * path ) {
         return (
-            path != NULL && 
-            path->getMnx().name() == SWITCH && 
+            path != nullptr && 
+            path->getMnx().name() == Ginger::GNX_SWITCH && 
             (
                 ( ( path->getIndex() & 0x1 ) == 0x0 ) ||
                 path->isLastIndex()
@@ -2045,7 +2044,7 @@ private:
     }
     
 	static bool isFormalArgs( Ginger::MnxWalkPath * path ) {
-		return path != NULL && path->getMnx().name() == FN && path->getIndex() == 0;
+		return path != nullptr && path->getMnx().name() == Ginger::GNX_FN && path->getIndex() == 0;
 	}
 	
 	static Ginger::Mnx & getParent( Ginger::MnxWalkPath * path ) {
@@ -2072,30 +2071,30 @@ private:
 public:
 	void startWalk( Ginger::Mnx & element, Ginger::MnxWalkPath * path ) {
 		const string & x = element.name();
-		if ( x == ID && element.hasAttribute( "scope", "local" ) ) {
+		if ( x == Ginger::GNX_ID && element.hasAttribute( "scope", "local" ) ) {
 			int slot = this->uid_slot[ element.attributeToInt( "uid" ) ];
 			element.putAttribute( "slot", slot );
-		} else if ( x == VAR && element.hasAttribute( "scope", "local" ) ) {
+		} else if ( x == Ginger::GNX_VAR && element.hasAttribute( "scope", "local" ) ) {
 			int slot = this->bumpCount();
 			this->uid_slot[ element.attributeToInt( "uid" ) ] = slot;
 			element.putAttribute( "slot", slot );
-		} else if ( x == FN ) {
+		} else if ( x == Ginger::GNX_FN ) {
 			this->pushCount();
 			this->count = 0;
-		} else if ( x == BLOCK || x == FOR || isBranchIf( path ) || isBranchSwitch( path ) ) {
+		} else if ( x == Ginger::GNX_BLOCK || x == Ginger::GNX_FOR || isBranchIf( path ) || isBranchSwitch( path ) ) {
 			this->pushCount();
 		}
 	}
 	
 	void endWalk( Ginger::Mnx & element, Ginger::MnxWalkPath * path ) {
 		const string & x = element.name();
-		if ( x == FN ) {
+		if ( x == Ginger::GNX_FN ) {
 			element.putAttribute( "locals.count", this->maxcount );
 			this->popCount();			
-		} else if ( x == BLOCK || x == FOR || isBranchIf( path ) || isBranchSwitch( path ) ) {
+		} else if ( x == Ginger::GNX_BLOCK || x == Ginger::GNX_FOR || isBranchIf( path ) || isBranchSwitch( path ) ) {
 			this->popCount();
-            if ( x == BLOCK ) {
-                element.name() = SEQ;
+            if ( x == Ginger::GNX_BLOCK ) {
+                element.name() = Ginger::GNX_SEQ;
             }
 		} else if ( isFormalArgs( path ) ) {
 			//	We are ending an argument list. Stash the count of the formals.

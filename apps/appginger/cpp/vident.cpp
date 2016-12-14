@@ -40,8 +40,8 @@ VIdent::VIdent( CodeGen codegen, shared< Ginger::Mnx > vid ) {
 		vid->render( cerr );
 		cerr << "]]" << endl;
 	#endif
-	const bool nmIsID = nm == ID;
-	if ( nmIsID || nm == VAR ) {
+	const bool nmIsID = nm == GNX_ID;
+	if ( nmIsID || nm == GNX_VAR ) {
 		if ( vid->hasAttribute( GNX_VID_SCOPE, "local" ) ) {
 			this->flavour = LOCAL_FLAVOUR;
 			this->slot = vid->attributeToInt( GNX_VID_SLOT );
@@ -65,7 +65,7 @@ VIdent::VIdent( CodeGen codegen, shared< Ginger::Mnx > vid ) {
 			
 			this->slot = 0;
 		}
-	} else if ( nm == CONSTANT ) {
+	} else if ( nm == GNX_CONSTANT ) {
 		this->flavour = CONSTANT_FLAVOUR;
 		this->valof = NULL;
 		this->slot = 0;

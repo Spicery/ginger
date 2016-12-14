@@ -74,9 +74,9 @@ StringObject Cell::asStringObject() const {
 
 void Cell::dump( MnxBuilder & b, const bool deep ) const {
 	if ( IsSmall( this->ref ) ) {
-		b.start( "constant" );
-		b.put( "type", "int" );
-		b.put( "value", SmallToULong( this->ref ) );
+		b.start( Ginger::GNX_CONSTANT );
+		b.put( Ginger::GNX_CONSTANT_TYPE, "int" );
+		b.put( Ginger::GNX_CONSTANT_VALUE, SmallToULong( this->ref ) );
 		b.end();
 	} else if ( IsObj( this->ref ) ) {
 		HeapObject( RefToPtr4( this->ref ) ).dump( b, deep );
@@ -290,9 +290,9 @@ void HeapObject::dump( MnxBuilder & b, const bool deep ) const {
 			default: {
 				if ( *this->obj_K == sysDoubleKey ) {
 					DoubleObject d( this->obj_K );
-					b.start( CONSTANT );
-					b.put( "type", "double" );
-					b.put( "value", d.toString() );
+					b.start( Ginger::GNX_CONSTANT );
+					b.put( Ginger::GNX_CONSTANT_TYPE, "double" );
+					b.put( Ginger::GNX_CONSTANT_VALUE, d.toString() );
 					b.end();
 				} else {
 					b.start( "to.be.done" );

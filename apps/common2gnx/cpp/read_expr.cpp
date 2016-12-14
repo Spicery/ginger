@@ -46,17 +46,17 @@ using namespace std;
 typedef Ginger::MnxBuilder NodeFactory;
 
 static Node makeApp( Node lhs, Node rhs ) {
-    if ( lhs->name() == GNX_SYSFN ) {
+    if ( lhs->name() == Ginger::GNX_SYSFN ) {
         NodeFactory sysapp;
-        sysapp.start( SYSAPP );
-        std::string name = lhs->attribute( GNX_SYSFN_VALUE );
-        sysapp.put( SYSAPP_NAME, name );
+        sysapp.start( Ginger::GNX_SYSAPP );
+        std::string name = lhs->attribute( Ginger::GNX_SYSFN_VALUE );
+        sysapp.put( Ginger::GNX_SYSAPP_NAME, name );
         sysapp.add( rhs );
         sysapp.end();
         return sysapp.build();
     } else {
         NodeFactory app;
-        app.start( APP );
+        app.start( Ginger::GNX_APP );
         app.add( lhs );
         app.add( rhs );
         app.end();
@@ -66,8 +66,8 @@ static Node makeApp( Node lhs, Node rhs ) {
 
 static Node makeIndex( Node lhs, Node rhs ) {
     NodeFactory index;
-    index.start( SYSAPP );
-    index.put( SYSAPP_NAME, "index" );
+    index.start( Ginger::GNX_SYSAPP );
+    index.put( Ginger::GNX_SYSAPP_NAME, "index" );
     index.add( rhs );
     index.add( lhs );
     index.end();
@@ -75,16 +75,16 @@ static Node makeIndex( Node lhs, Node rhs ) {
 }
 
 static void pushConstant( NodeFactory & f, const char * type, const std::string & value ) {
-    f.start( CONSTANT );
-    f.put( CONSTANT_TYPE, type );
-    f.put( CONSTANT_VALUE, value );
+    f.start( Ginger::GNX_CONSTANT );
+    f.put( Ginger::GNX_CONSTANT_TYPE, type );
+    f.put( Ginger::GNX_CONSTANT_VALUE, value );
     f.end();
 }
 
 static void pushConstant( NodeFactory & f, const char * type, const long value ) {
-    f.start( CONSTANT );
-    f.put( CONSTANT_TYPE, type );
-    f.put( CONSTANT_VALUE, value );
+    f.start( Ginger::GNX_CONSTANT );
+    f.put( Ginger::GNX_CONSTANT_TYPE, type );
+    f.put( Ginger::GNX_CONSTANT_VALUE, value );
     f.end();
 }
 
@@ -105,25 +105,25 @@ static void pushStringConstant( NodeFactory & f, const string & s ) {
 }
 static void pushAnyPattern( NodeFactory & f ) {
     f.start( VAR );
-    f.put( GNX_VID_PROTECTED, "true" );
+    f.put( Ginger::GNX_VID_PROTECTED, "true" );
     f.end();
 }
 #endif
 
 
 static Node makeEmpty() {
-    return shared< Ginger::Mnx >( new Ginger::Mnx( SEQ ) );
+    return make_shared< Ginger::Mnx >( Ginger::GNX_SEQ );
 }
 
 static void updateAsPattern( Node node, const bool val_vs_var ) {
-    if ( node->hasName( ID ) ) {
-        node->name() = VAR;
-        node->putAttribute( GNX_VID_PROTECTED, val_vs_var ? "true" : "false" );
-    } else if ( node->hasName( CONSTANT ) && node->hasAttribute( CONSTANT_WAS_ANON ) ) {
-        node->name() = VAR;
-        node->removeAttribute( CONSTANT_TYPE );
-        node->removeAttribute( CONSTANT_VALUE );
-    } else if ( node->hasName( SEQ ) ) {
+    if ( node->hasName( Ginger::GNX_ID ) ) {
+        node->name() = Ginger::GNX_VAR;
+        node->putAttribute( Ginger::GNX_VID_PROTECTED, val_vs_var ? "true" : "false" );
+    } else if ( node->hasName( Ginger::GNX_CONSTANT ) && node->hasAttribute( CONSTANT_WAS_ANON ) ) {
+        node->name() = Ginger::GNX_VAR;
+        node->removeAttribute( Ginger::GNX_CONSTANT_TYPE );
+        node->removeAttribute( Ginger::GNX_CONSTANT_VALUE );
+    } else if ( node->hasName( Ginger::GNX_SEQ ) ) {
         for ( Ginger::MnxChildIterator chit( node ); !!chit; ++chit ) {
             Node child = *chit;
             updateAsPattern( child, val_vs_var );
@@ -229,7 +229,7 @@ bool ReadStateClass::tryToken( TokType fnc ) {
 Node ReadStateClass::readCompoundCore() {
     if ( this->cstyle_mode ) {
         NodeFactory stmnts;
-        stmnts.start( SEQ );
+        stmnts.start( Ginger::GNX_SEQ );
         while ( this->tryPeekToken( tokty_semi ) || not this->tryPeekCloser() ) {
             Node n = this->readSingleStmnt();
             stmnts.add( n );
@@ -290,7 +290,7 @@ Node ReadStateClass::readSingleStmnt( const bool top_level ) {
     Node n = this->readOptEmptyExpr();
     if ( this->tryToken( tokty_dsemi ) ) {
         NodeFactory f;
-        f.start( ERASE );
+        f.start( Ginger::GNX_ERASE );
         f.add( n );
         f.end();
         return f.build();
@@ -336,22 +336,22 @@ Node ReadStateClass::readQueryPrec( const int prec ) {
     Node e = this->readExprPrec( prec );
     const std::string name = e->name();
     if ( 
-        name == BIND    ||
-        name == IN      ||
-        name == FROM    ||
-        name == WHERE   ||
-        name == WHILE   ||
-        name == ZIP     ||
-        name == CROSS   ||
-        name == OK      ||
-        name == FINALLY ||
-        name == DO
+        name == Ginger::GNX_BIND    ||
+        name == Ginger::GNX_IN      ||
+        name == Ginger::GNX_FROM    ||
+        name == Ginger::GNX_WHERE   ||
+        name == Ginger::GNX_WHILE   ||
+        name == Ginger::GNX_ZIP     ||
+        name == Ginger::GNX_CROSS   ||
+        name == Ginger::GNX_OK      ||
+        name == Ginger::GNX_FINALLY ||
+        name == Ginger::GNX_DO
     ) {
         return e;
     } else {
         NodeFactory where;
-        where.start( WHERE );
-        where.start( OK );
+        where.start( Ginger::GNX_WHERE );
+        where.start( Ginger::GNX_OK );
         where.end();
         where.add( e );
         where.end();
@@ -395,8 +395,8 @@ Node ReadStateClass::postfixProcessing( Node lhs, Item item, int prec ) {
         const bool direction = tok_type_as_direction( fnc );
         if ( role.IsSys() ) {
             NodeFactory a;
-            a.start( SYSAPP );
-            a.put( SYSAPP_NAME, tok_type_as_sysapp( fnc ) );
+            a.start( Ginger::GNX_SYSAPP );
+            a.put( Ginger::GNX_SYSAPP_NAME, tok_type_as_sysapp( fnc ) );
             Node rhs = this->readExprPrec( prec );
             a.add( direction ? lhs : rhs );
             a.add( !direction ? lhs : rhs );
@@ -416,8 +416,8 @@ Node ReadStateClass::postfixProcessing( Node lhs, Item item, int prec ) {
     } else if ( role.IsUnary() ) {
         if ( role.IsSys() ) {
             NodeFactory a;
-            a.start( SYSAPP );
-            a.put( SYSAPP_NAME, tok_type_as_sysapp( fnc ) );
+            a.start( Ginger::GNX_SYSAPP );
+            a.put( Ginger::GNX_SYSAPP_NAME, tok_type_as_sysapp( fnc ) );
             a.add( lhs );
             a.end();
             return a.build();
@@ -438,7 +438,7 @@ Node ReadStateClass::postfixProcessing( Node lhs, Item item, int prec ) {
                 Node rhs = this->readExprPrec( prec );
                 updateAsPattern( fnc == tokty_bind ? lhs : rhs, true );
                 NodeFactory bind;
-                bind.start( BIND );
+                bind.start( Ginger::GNX_BIND );
                 bind.add( fnc == tokty_bind ? lhs : rhs );
                 bind.add( fnc != tokty_bind ? lhs : rhs );
                 bind.end();
@@ -447,7 +447,7 @@ Node ReadStateClass::postfixProcessing( Node lhs, Item item, int prec ) {
             case tokty_cross:
             case tokty_zip: {
                 NodeFactory factory;
-                factory.start( fnc == tokty_cross ? CROSS : ZIP );
+                factory.start( fnc == tokty_cross ? Ginger::GNX_CROSS : Ginger::GNX_ZIP );
                 factory.add( lhs );
                 Node rhs = this->readQueryPrec( prec );
                 factory.add( rhs );
@@ -456,7 +456,7 @@ Node ReadStateClass::postfixProcessing( Node lhs, Item item, int prec ) {
             }
             case tokty_finally: {
                 NodeFactory finally;
-                finally.start( FINALLY );
+                finally.start( Ginger::GNX_FINALLY );
                 finally.add( lhs );
                 Node rhs = this->readExprPrec( prec );
                 finally.add( rhs );
@@ -466,12 +466,12 @@ Node ReadStateClass::postfixProcessing( Node lhs, Item item, int prec ) {
             case tokty_until:
             case tokty_while: {
                 NodeFactory whileuntil;
-                whileuntil.start( WHILE );
+                whileuntil.start( Ginger::GNX_WHILE );
                 whileuntil.add( lhs );
                 Node rhs = this->readExprPrec( prec );
                 if ( fnc == tokty_until ) {
-                    whileuntil.start( SYSAPP );
-                    whileuntil.put( SYSAPP_NAME, "not" );
+                    whileuntil.start( Ginger::GNX_SYSAPP );
+                    whileuntil.put( Ginger::GNX_SYSAPP_NAME, "not" );
                 }
                 whileuntil.add( rhs );
                 if ( fnc == tokty_until ) {
@@ -481,7 +481,7 @@ Node ReadStateClass::postfixProcessing( Node lhs, Item item, int prec ) {
                     Node then = this->readExprPrec( prec_then );
                     whileuntil.add( then );
                 } else {
-                    whileuntil.start( SEQ );
+                    whileuntil.start( Ginger::GNX_SEQ );
                     whileuntil.end();
                 }
                 whileuntil.end();
@@ -489,7 +489,7 @@ Node ReadStateClass::postfixProcessing( Node lhs, Item item, int prec ) {
             }
             case tokty_where: {
                 NodeFactory where;
-                where.start( WHERE );
+                where.start( Ginger::GNX_WHERE );
                 where.add( lhs );
                 Node rhs = this->readExprPrec( prec );
                 where.add( rhs );
@@ -498,7 +498,7 @@ Node ReadStateClass::postfixProcessing( Node lhs, Item item, int prec ) {
             }
             case tokty_do: {
                 NodeFactory node;
-                node.start( DO );
+                node.start( Ginger::GNX_DO );
                 node.add( lhs );
                 Node do_stmnts = this->readCompoundStmnts();
                 if ( not this->tryToken( tokty_enddo ) ) {
@@ -511,7 +511,7 @@ Node ReadStateClass::postfixProcessing( Node lhs, Item item, int prec ) {
             case tokty_from: {              
                 updateAsPattern( lhs, true );
                 NodeFactory node;
-                node.start( FROM );
+                node.start( Ginger::GNX_FROM );
                 Node from_expr = this->readExprPrec( prec );
                 node.add( lhs );
                 node.add( from_expr );
@@ -543,7 +543,7 @@ Node ReadStateClass::postfixProcessing( Node lhs, Item item, int prec ) {
                 updateAsPattern( lhs, true );
                 Node in_expr = this->readExprPrec( prec );
                 NodeFactory node;
-                node.start( IN );
+                node.start( Ginger::GNX_IN );
                 node.add( lhs );
                 node.add( in_expr );
                 node.end();
@@ -557,7 +557,7 @@ Node ReadStateClass::postfixProcessing( Node lhs, Item item, int prec ) {
                     return lhs;
                 } else {
                     NodeFactory s;
-                    s.start( fnc == tokty_semi ? SEQ : ERASE );
+                    s.start( fnc == tokty_semi ? Ginger::GNX_SEQ : Ginger::GNX_ERASE );
                     s.add( lhs );
                     if ( not hasnt_rhs ) s.add( rhs );
                     s.end();
@@ -578,7 +578,7 @@ Node ReadStateClass::postfixProcessing( Node lhs, Item item, int prec ) {
                 Node func = this->readExprPrec( prec_tight );
                 Node rhs = this->readOptExprPrec( prec );           
                 NodeFactory seq;
-                seq.start( SEQ );
+                seq.start( Ginger::GNX_SEQ );
                 seq.add( lhs );
                 if ( not not rhs ) { seq.add( rhs ); }
                 seq.end();
@@ -645,7 +645,7 @@ Node ReadStateClass::readIf( TokType sense, TokType closer ) {
     Node then_part = this->readStmnts();
     if ( this->tryToken( tokty_else ) ) {   
         NodeFactory ifunless;
-        ifunless.start( IF );
+        ifunless.start( Ginger::GNX_IF );
         predicate( sense, ifunless, pred );
         ifunless.add( then_part );
         Node x = this->readStmnts();
@@ -655,7 +655,7 @@ Node ReadStateClass::readIf( TokType sense, TokType closer ) {
         return ifunless.build();
     } else if ( this->cstyle_mode || this->tryToken( closer ) ) {
         NodeFactory ifunless;
-        ifunless.start( IF );
+        ifunless.start( Ginger::GNX_IF );
         predicate( sense, ifunless, pred );
         ifunless.add( then_part );
         ifunless.end();
@@ -669,7 +669,7 @@ Node ReadStateClass::readIf( TokType sense, TokType closer ) {
             new_sense = tokty_unless;
         }
         NodeFactory ifunless;
-        ifunless.start( IF );
+        ifunless.start( Ginger::GNX_IF );
         predicate( sense, ifunless, pred );
         ifunless.add( then_part );
         Node x = this->readIf( new_sense, closer );
@@ -683,7 +683,7 @@ Node ReadStateClass::readSyscall() {
     ItemFactory ifact = this->item_factory; 
     Item it = ifact->read();
     if ( it->tok_type == tokty_id ) {
-        return makeConstant( GNX_SYSFN, it->nameString() );
+        return makeConstant( Ginger::GNX_SYSFN, it->nameString() );
     } else {
         if ( it->item_is_eof() ) {
             throw UnexpectedEndOfInputError().hint( "After >-> (syscall) arrow" );
@@ -699,8 +699,8 @@ Node ReadStateClass::readFor() {
         this->checkToken( tokty_cparen );
         Node body = this->readStmnts();
         NodeFactory for_node;
-        for_node.start( FOR );
-        for_node.start( DO );
+        for_node.start( Ginger::GNX_FOR );
+        for_node.start( Ginger::GNX_DO );
         for_node.add( query );
         for_node.add( body );
         for_node.end(); // DO
@@ -709,7 +709,7 @@ Node ReadStateClass::readFor() {
     } else {
         Node query = this->readQuery();
         NodeFactory for_node;
-        for_node.start( FOR );
+        for_node.start( Ginger::GNX_FOR );
         for_node.add( query );
         this->checkToken( tokty_endfor );
         for_node.end();
@@ -777,13 +777,13 @@ static Node makeCharSequence( Item item ) {
         return makeEmpty();
     } else {
         NodeFactory charseq;
-        charseq.start( SEQ );
+        charseq.start( Ginger::GNX_SEQ );
         const std::string & s = item->nameString();
         std::string::const_iterator iter = s.begin();
         for ( iter = s.begin(); iter != s.end(); ++iter ) {
-            charseq.start( CONSTANT );
-            charseq.put( CONSTANT_TYPE, "char" );
-            charseq.put( CONSTANT_VALUE, std::string() + *iter );   //   WRONG
+            charseq.start( Ginger::GNX_CONSTANT );
+            charseq.put( Ginger::GNX_CONSTANT_TYPE, "char" );
+            charseq.put( Ginger::GNX_CONSTANT_VALUE, std::string() + *iter );   //   WRONG
             charseq.end();
         }
         charseq.end();
@@ -801,7 +801,7 @@ static Node makeSymbol( const std::string & name ) {
 }
 
 static Node makeAssert1( Node node ) {
-    if ( node->hasName( CONSTANT ) ) {
+    if ( node->hasName( Ginger::GNX_CONSTANT ) ) {
         return node;
     } else {
         NodeFactory assert1;
@@ -883,7 +883,7 @@ private:
     void squash( NodeFactory acc, Node rhs ) {
         const std::string 
         name = rhs->name();
-        if ( name == SEQ ) {
+        if ( name == Ginger::GNX_SEQ ) {
             int n = rhs->size();
             for ( int i = 0; i < n; i++ ) {
                 squash( acc, rhs->getChild( i ) );
@@ -895,10 +895,10 @@ private:
 
     Node anon( Node fn ) {
         NodeFactory b;
-        b.start( APP );
-        b.start( VAR ); // But no name - anonymous.
+        b.start( Ginger::GNX_APP );
+        b.start( Ginger::GNX_VAR ); // But no name - anonymous.
         b.end();
-        b.start( SEQ );
+        b.start( Ginger::GNX_SEQ );
         squash( b, fn );
         b.end();
         b.end();
@@ -906,7 +906,7 @@ private:
     }
 
     Node canonise( const int level, Node fn ) {
-        const bool is_var = fn->hasName( VAR );
+        const bool is_var = fn->hasName( Ginger::GNX_VAR );
         if ( is_var ) {
             if ( level == 0 ) {
                 if ( this->name_needed ) this->badHeader();
@@ -916,14 +916,14 @@ private:
             } else {
                 return fn;
             }
-        } else if ( fn->hasName( SEQ ) && not this->name_needed ) {
+        } else if ( fn->hasName( Ginger::GNX_SEQ ) && not this->name_needed ) {
             return this->anon( fn );
-        } else if ( fn->hasName( APP ) && fn->size() == 2 ) {
+        } else if ( fn->hasName( Ginger::GNX_APP ) && fn->size() == 2 ) {
             NodeFactory b;
-            b.start( APP );
+            b.start( Ginger::GNX_APP );
             Node n = this->canonise( level + 1, fn->getChild( 0 ) );
             b.add( n );
-            b.start( SEQ );
+            b.start( Ginger::GNX_SEQ );
             squash( b, fn->getChild( 1 ) );
             b.end();
             b.end();
@@ -936,7 +936,7 @@ private:
     Ginger::Mishap badHeader() {
         Ginger::Mishap mishap( "Invalid function header", Ginger::Mishap::CompileTimeCategory );
         mishap.culprit( "Name", this->raw->name() );
-        if ( this->raw->name() == SYSAPP ) {
+        if ( this->raw->name() == Ginger::GNX_SYSAPP ) {
             mishap.culprit( "Reason", "Trying to redefine a system function" );
         }
         return mishap;
@@ -963,12 +963,12 @@ public:
 
         while ( this->isCurryd() ) {
             NodeFactory b;
-            b.start( FN );
+            b.start( Ginger::GNX_FN );
             Node arg = this->lhs->getChild( 1 );
-            if ( arg->hasName( SEQ ) ) {
+            if ( arg->hasName( Ginger::GNX_SEQ ) ) {
                 b.add( arg );
             } else {
-                b.start( SEQ );
+                b.start( Ginger::GNX_SEQ );
                 b.add( arg );
                 b.end();
             }
@@ -994,9 +994,9 @@ public:
 
     Node getArgs() const {
         Node args = this->lhs->getChild( 1 );
-        if ( args->hasName( SEQ ) ) return args;
+        if ( args->hasName( Ginger::GNX_SEQ ) ) return args;
         NodeFactory b;
-        b.start( SEQ );
+        b.start( Ginger::GNX_SEQ );
         b.add( args );
         b.end();
         return b.build();
@@ -1010,7 +1010,7 @@ private:
         return isApp( this->lhs ) && isApp( this->lhs->getChild( 0 ) );
     }
     static bool isApp( const Node & n ) {
-        return n->hasName( APP ) && n->size() == 2;
+        return n->hasName( Ginger::GNX_APP ) && n->size() == 2;
     }
 };
 
@@ -1055,9 +1055,9 @@ Node ReadStateClass::readLambda() {
     Node fun = components.getFun();
     
     NodeFactory fn;
-    fn.start( FN );
+    fn.start( Ginger::GNX_FN );
     if ( fun && fun->hasAttribute( "name" ) ) {
-        fn.put( FN_NAME, fun->attribute( "name" ) );
+        fn.put( Ginger::GNX_FN_NAME, fun->attribute( "name" ) );
     }
     {
         Node a = components.getArgs();
@@ -1095,15 +1095,15 @@ Node ReadStateClass::readDefinition() {
     Node args = components.getArgs();
     Node body = components.getBody();
 
-    const std::string name( fn->attribute( GNX_VID_NAME ) );
+    const std::string name( fn->attribute( Ginger::GNX_VID_NAME ) );
     NodeFactory def;
-    def.start( BIND );
-    def.start( VAR );
-    def.put( GNX_VID_NAME, name );
-    def.put( GNX_VID_PROTECTED, "true" );
+    def.start( Ginger::GNX_BIND );
+    def.start( Ginger::GNX_VAR );
+    def.put( Ginger::GNX_VID_NAME, name );
+    def.put( Ginger::GNX_VID_PROTECTED, "true" );
     def.end();
-    def.start( FN );
-    def.put( FN_NAME, name );
+    def.start( Ginger::GNX_FN );
+    def.put( Ginger::GNX_FN_NAME, name );
     def.add( args );
     def.add( body );
     def.end();
@@ -1152,7 +1152,7 @@ Node ReadStateClass::readTry( const bool try_vs_transaction ) {
 
 Node ReadStateClass::readVarVal( TokType fnc ) {
     NodeFactory bind;
-    bind.start( BIND );
+    bind.start( Ginger::GNX_BIND );
     
     Node lhs = this->readExprPrec( prec_assign );
     updateAsPattern( lhs, fnc == tokty_val );
@@ -1167,12 +1167,12 @@ Node ReadStateClass::readVarVal( TokType fnc ) {
 
 Node ReadStateClass::readElement() {
     NodeFactory element;
-    element.start( SEQ );
+    element.start( Ginger::GNX_SEQ );
     for (;;) {
-        element.start( SYSAPP );
-        element.put( SYSAPP_NAME, "newElement" );
-        element.start( SYSAPP );
-        element.put( SYSAPP_NAME, "newAttrMap" );
+        element.start( Ginger::GNX_SYSAPP );
+        element.put( Ginger::GNX_SYSAPP_NAME, "newElement" );
+        element.start( Ginger::GNX_SYSAPP );
+        element.put( Ginger::GNX_SYSAPP_NAME, "newAttrMap" );
 
         // Cache the element name for the close tag. Anything other than
         // a literal name will need the close-anything tag.
@@ -1198,8 +1198,8 @@ Node ReadStateClass::readElement() {
                 Node value = this->readAtomicExpr();
                 element.add( value );
             } else {
-                element.start( SYSAPP );
-                element.put( SYSAPP_NAME, "explodeMapsAndMaplets" );
+                element.start( Ginger::GNX_SYSAPP );
+                element.put( Ginger::GNX_SYSAPP_NAME, "explodeMapsAndMaplets" );
                 element.add( key_or_keyvalue );
                 element.end();
             }
@@ -1245,7 +1245,7 @@ Node ReadStateClass::prefixProcessing() {
             span << ";" << end;
         }
         string spanstr( span.str() );
-        string spanspan( SPAN );
+        string spanspan( Ginger::GNX_SPAN );
         node->putAttribute( spanspan, spanstr );
     }
     return node;
@@ -1253,14 +1253,14 @@ Node ReadStateClass::prefixProcessing() {
 
 Node ReadStateClass::readListOrVector( bool vector_vs_list, TokType closer ) {
     NodeFactory list;
-    list.start( vector_vs_list ? VECTOR : LIST );
+    list.start( vector_vs_list ? Ginger::GNX_VECTOR : Ginger::GNX_LIST );
     Node stmnts = this->readCompoundCore();
     if ( not vector_vs_list && this->tryToken( tokty_bar ) ) {
         list.add( stmnts );
         list.end();
         Node L = list.build();
         NodeFactory append;
-        append.start( LIST_APPEND );
+        append.start( Ginger::GNX_LIST_APPEND );
         append.add( L );
         Node x = this->readCompoundCoreCheck( closer );
         append.add( x );
@@ -1276,8 +1276,8 @@ Node ReadStateClass::readListOrVector( bool vector_vs_list, TokType closer ) {
 
 Node ReadStateClass::readMap( TokType closer ) {
     NodeFactory list;
-    list.start( SYSAPP );
-    list.put( SYSAPP_NAME, "newMap" );
+    list.start( Ginger::GNX_SYSAPP );
+    list.put( Ginger::GNX_SYSAPP_NAME, "newMap" );
     Node x = this->readStmntsCheck( closer );
     list.add( x );
     list.end();
@@ -1286,7 +1286,7 @@ Node ReadStateClass::readMap( TokType closer ) {
 
 Node ReadStateClass::readSwitchStmnts() {
     NodeFactory st;
-    st.start( SEQ );
+    st.start( Ginger::GNX_SEQ );
     while (
         not ( 
             this->tryPeekToken( tokty_cbrace ) ||
@@ -1303,7 +1303,7 @@ Node ReadStateClass::readSwitchStmnts() {
 
 Node ReadStateClass::readSwitch() {
     NodeFactory sw;
-    sw.start( SWITCH );
+    sw.start( Ginger::GNX_SWITCH );
 
     bool else_seen = false;
     Node swelse;
@@ -1383,7 +1383,7 @@ Node ReadStateClass::readThrow() {
         Node e = this->readExpr();
         panic.add( e );
     } else {
-        panic.start( SEQ );
+        panic.start( Ginger::GNX_SEQ );
         panic.end();
     }
 
@@ -1395,15 +1395,15 @@ Node ReadStateClass::readId( const std::string name ) {
     SysConst * sysc = lookupSysConst( name );
     if ( sysc != NULL ) {
         NodeFactory constant;
-        constant.start( "constant" );
-        constant.put( "type", sysc->tag );
-        constant.put( "value", sysc->value );
+        constant.start( Ginger::GNX_CONSTANT );
+        constant.put( Ginger::GNX_CONSTANT_TYPE, sysc->tag );
+        constant.put( Ginger::GNX_CONSTANT_VALUE, sysc->value );
         constant.end();
         return constant.build();
     } else {
         NodeFactory id;
-        id.start( this->pattern_mode ? "var" : "id" );
-        id.put( "name", name );
+        id.start( this->pattern_mode ? Ginger::GNX_VAR : Ginger::GNX_ID );
+        id.put( Ginger::GNX_VID_NAME, name );
         id.end();
         return id.build();
     }
@@ -1412,14 +1412,14 @@ Node ReadStateClass::readId( const std::string name ) {
 Node ReadStateClass::readAnon( const std::string name ) {
     NodeFactory anon;
     if ( this->pattern_mode ) {
-        anon.start( VAR );
+        anon.start( Ginger::GNX_VAR );
     } else {
-        anon.start( CONSTANT );
-        anon.put( CONSTANT_TYPE, "absent" );
-        anon.put( CONSTANT_VALUE, "absent" );
+        anon.start( Ginger::GNX_CONSTANT );
+        anon.put( Ginger::GNX_CONSTANT_TYPE, "absent" );
+        anon.put( Ginger::GNX_CONSTANT_VALUE, "absent" );
         anon.put( CONSTANT_WAS_ANON, name );
     }
-    anon.put( COMMENT, name );
+    anon.put( Ginger::GNX_COMMENT, name );
     anon.end();
     return anon.build();
 }
@@ -1427,11 +1427,11 @@ Node ReadStateClass::readAnon( const std::string name ) {
 Node ReadStateClass::readEnvVar() {
     this->checkToken( tokty_obrace );
     NodeFactory envvar;
-    envvar.start( SYSAPP );
+    envvar.start( Ginger::GNX_SYSAPP );
     envvar.put( "name", "sysGetEnv" );
-    envvar.start( "constant" );
-    envvar.put( "type", "string" );
-    envvar.put( "value", this->item_factory->read()->nameString() );
+    envvar.start( Ginger::GNX_CONSTANT );
+    envvar.put( Ginger::GNX_CONSTANT_TYPE, "string" );
+    envvar.put( Ginger::GNX_CONSTANT_VALUE, this->item_factory->read()->nameString() );
     envvar.end();       
     this->checkToken( tokty_cbrace );
     envvar.end();
@@ -1440,7 +1440,7 @@ Node ReadStateClass::readEnvVar() {
 
 Node ReadStateClass::readDHat() {
     NodeFactory maplet;
-    maplet.start( SYSAPP );
+    maplet.start( Ginger::GNX_SYSAPP );
     maplet.put( "name", "newMaplet" );
     const string name( this->readIdName() );
     maplet.start( "constant" );
@@ -1495,8 +1495,8 @@ Node ReadStateClass::readImport() {
 
 Node ReadStateClass::readReturn() {
     NodeFactory ret;
-    ret.start( ASSERT );
-    ret.put( ASSERT_TAILCALL, "true" );
+    ret.start( Ginger::GNX_ASSERT );
+    ret.put( Ginger::GNX_ASSERT_TAILCALL, "true" );
     Node n = this->readExpr();
     ret.add( n );
     ret.end();
@@ -1556,70 +1556,70 @@ Node ReadStateClass::readRecordClass() {
     this->checkToken( this->cstyle_mode ? tokty_cbrace : tokty_endrecordclass );
 
     NodeFactory f;
-    f.start( SEQ );
+    f.start( Ginger::GNX_SEQ );
 
     //  Datakey.
-    f.start( BIND );
-    f.start( VAR ); 
-    f.put( GNX_VID_NAME, class_name );
+    f.start( Ginger::GNX_BIND );
+    f.start( Ginger::GNX_VAR ); 
+    f.put( Ginger::GNX_VID_NAME, class_name );
     f.end(); // VAR
-    f.start( SYSAPP );
-    f.put( SYSAPP_NAME, "newRecordClass" );
+    f.start( Ginger::GNX_SYSAPP );
+    f.put( Ginger::GNX_SYSAPP_NAME, "newRecordClass" );
     pushConstant( f, "string", class_name );        //  CONSTANT
     pushConstant( f, "int", slot_names.size() );    // CONSTANT
     f.end();    //  SYSAPP
     f.end(); // BIND
 
     //  Constructor
-    f.start( BIND );
-    f.start( VAR ); 
+    f.start( Ginger::GNX_BIND );
+    f.start( Ginger::GNX_VAR ); 
     {
         stringstream s;
         s << "new";
         s << class_name;
-        f.put( GNX_VID_NAME, s.str() );
+        f.put( Ginger::GNX_VID_NAME, s.str() );
     }
     f.end(); // VAR
-    f.start( SYSAPP );
-    f.put( SYSAPP_NAME, "newClassConstructor" );
-    f.start( ID );
-    f.put( GNX_VID_NAME, class_name );
+    f.start( Ginger::GNX_SYSAPP );
+    f.put( Ginger::GNX_SYSAPP_NAME, "newClassConstructor" );
+    f.start( Ginger::GNX_ID );
+    f.put( Ginger::GNX_VID_NAME, class_name );
     f.end();    //  ID
     f.end();    //  SYSAPP
     f.end(); // BIND
 
     //  Exploder
-    f.start( BIND );
-    f.start( VAR );
+    f.start( Ginger::GNX_BIND );
+    f.start( Ginger::GNX_VAR );
     {
         stringstream s;
         s << "explode";
         s << class_name;
-        f.put( GNX_VID_NAME, s.str() );     
+        f.put( Ginger::GNX_VID_NAME, s.str() );     
     }
     f.end();        //  VAR
-    f.start( SYSAPP );
-    f.put( SYSAPP_NAME, "newClassExploder" );
-    f.start( ID );
-    f.put( GNX_VID_NAME, class_name );
+    f.start( Ginger::GNX_SYSAPP );
+    f.put( Ginger::GNX_SYSAPP_NAME, "newClassExploder" );
+    f.start( Ginger::GNX_ID );
+    f.put( Ginger::GNX_VID_NAME, class_name );
     f.end();        //  ID
     f.end();        //  SYAPP
     f.end();        //  BIND
 
     //  Recogniser
-    f.start( BIND );
-    f.start( VAR ); 
+    f.start( Ginger::GNX_BIND );
+    f.start( Ginger::GNX_VAR ); 
     {
         stringstream s;
         s << "is";
         s << class_name;
-        f.put( GNX_VID_NAME, s.str() );
+        f.put( Ginger::GNX_VID_NAME, s.str() );
     }
     f.end(); // VAR
-    f.start( SYSAPP );
-    f.put( SYSAPP_NAME, "newClassRecogniser" );
-    f.start( ID );
-    f.put( GNX_VID_NAME, class_name );
+    f.start( Ginger::GNX_SYSAPP );
+    f.put( Ginger::GNX_SYSAPP_NAME, "newClassRecogniser" );
+    f.start( Ginger::GNX_ID );
+    f.put( Ginger::GNX_VID_NAME, class_name );
     f.end();    //  ID
     f.end();    //  SYSAPP
     f.end(); // BIND
@@ -1627,14 +1627,14 @@ Node ReadStateClass::readRecordClass() {
     for ( int i = 0; i < slot_names.size(); i++ ) {
         const string & ith_name( slot_names[ i ] );
 
-        f.start( BIND );
-        f.start( VAR ); 
-        f.put( GNX_VID_NAME, ith_name );
+        f.start( Ginger::GNX_BIND );
+        f.start( Ginger::GNX_VAR ); 
+        f.put( Ginger::GNX_VID_NAME, ith_name );
         f.end(); // VAR
-        f.start( SYSAPP );
-        f.put( SYSAPP_NAME, "newClassAccessor" );
-        f.start( ID );
-        f.put( GNX_VID_NAME, class_name );
+        f.start( Ginger::GNX_SYSAPP );
+        f.put( Ginger::GNX_SYSAPP_NAME, "newClassAccessor" );
+        f.start( Ginger::GNX_ID );
+        f.put( Ginger::GNX_VID_NAME, class_name );
         f.end();    //  ID
         pushConstant( f, "int", i + 1 ); // CONSTANT
         f.end();    //  SYSAPP
@@ -1677,8 +1677,8 @@ Node ReadStateClass::prefixProcessingCore() {
             return unary.build();
         } else if ( role.IsSys() ) {
             NodeFactory sf;
-            sf.start( SYSAPP );
-            sf.put( SYSAPP_NAME, tok_type_as_sysapp( fnc ) );
+            sf.start( Ginger::GNX_SYSAPP );
+            sf.put( Ginger::GNX_SYSAPP_NAME, tok_type_as_sysapp( fnc ) );
             Node x = this->readExprPrec( item->precedence );
             sf.add( x );
             sf.end();
@@ -1692,8 +1692,8 @@ Node ReadStateClass::prefixProcessingCore() {
         case tokty_sub: {
             Node e = this->readExprPrec( prec_negate );
             NodeFactory neg;
-            neg.start( SYSAPP );
-            neg.put( SYSAPP_NAME, "negate" );
+            neg.start( Ginger::GNX_SYSAPP );
+            neg.put( Ginger::GNX_SYSAPP_NAME, "negate" );
             neg.add( e );
             neg.end();
             return neg.build();
@@ -1701,8 +1701,8 @@ Node ReadStateClass::prefixProcessingCore() {
         case tokty_add: {
             Node e = this->readExprPrec( prec_negate );
             NodeFactory pos;
-            pos.start( SYSAPP );
-            pos.put( SYSAPP_NAME, "positivate" );
+            pos.start( Ginger::GNX_SYSAPP );
+            pos.put( Ginger::GNX_SYSAPP_NAME, "positivate" );
             pos.add( e );
             pos.end();
             return pos.build();         
@@ -1740,7 +1740,7 @@ Node ReadStateClass::prefixProcessingCore() {
         case tokty_fat_obracket:
             return this->readListOrVector( false, tokty_fat_cbracket );
         case tokty_fat_ocbracket: {
-            Node list( new Ginger::Mnx( LIST ) );
+            Node list( new Ginger::Mnx( Ginger::GNX_LIST ) );
             return list;
         }
         case tokty_unless:
@@ -1808,7 +1808,7 @@ Node ReadStateClass::readOptExprPrec( int prec ) {
         Item it = ifact->peek();
         if ( it->item_is_signed_num() ) {
             NodeFactory t;
-            t.start( SYSAPP );
+            t.start( Ginger::GNX_SYSAPP );
             t.put( "name", "+" );
             t.add( e );         
             if ( it->tok_type == tokty_int ) {

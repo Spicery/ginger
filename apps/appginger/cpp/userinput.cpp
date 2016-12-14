@@ -17,6 +17,7 @@
 \******************************************************************************/
 
 #include <sstream> 
+#include <algorithm>
 
 #include <unistd.h>
 #include <sys/wait.h>

@@ -11,7 +11,6 @@ all clean:
 	make -C file2gnx $@
 	make -C ginger-admin $@
 	make -C ginger-help $@
-	make -C gngreadline $@
 	make -C gprojlibtool $@
 	make -C gson2gnx $@
 	make -C gvmtest $@

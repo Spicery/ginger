@@ -376,7 +376,11 @@ public:
 				run( elookup.next() );
 			}
 		}
-		throw SystemError( "Cannot detect syntax, giving up" ).culprit( "Source", this->file.isValid() ? this->file.fastValue() : string( "<stdin>" ) );
+		throw (
+			SystemError( "Cannot detect syntax, giving up" ).
+			culprit( "Grammar", this->grammar ).
+			culprit( "Source", this->file.isValid() ? this->file.fastValue() : string( "<stdin>" ) )
+		);
 	}
 
 

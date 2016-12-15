@@ -6,6 +6,7 @@ INSTALL_BIN=@bindir@
 INSTALL_TOOL=@libexecdir@/@PACKAGE_TARNAME@
 INSTALL_LIB=@datarootdir@/@PACKAGE_TARNAME@
 INSTALL_DOC=@docdir@
+USESNAP=@usesnap@
 
 EXEC_DIR="$(INSTALL_BIN)"
 
@@ -15,7 +16,7 @@ CXX=@CXX@
 
 INSTALLDIRS=-DINSTALL_BIN='"$(INSTALL_BIN)"' -DINSTALL_LIB='"$(INSTALL_LIB)"' -DINSTALL_TOOL='"$(INSTALL_TOOL)"'
 
-CXXFLAGS=$(INSTALLDIRS) -DEXEC_DIR='$(EXEC_DIR)' -g -std=c++11 -I../hpp -Wall -Wnon-virtual-dtor # -Weffc++
+CXXFLAGS=$(INSTALLDIRS) -DUSESNAP=$(USESNAP) -DEXEC_DIR='$(EXEC_DIR)' -g -std=c++11 -I../hpp -Wall -Wnon-virtual-dtor # -Weffc++
 CFLAGS=-Wmissing-prototypes 
 
 #	TODO: mnxsax is the updated version of sax & should replace it. Fetchgnx

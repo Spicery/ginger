@@ -7,14 +7,15 @@ INSTALL_TOOL=@libexecdir@/@PACKAGE_TARNAME@
 INSTALL_LIB=@datarootdir@/@PACKAGE_TARNAME@
 INSTALL_DOC=@docdir@
 VERSION=@PACKAGE_VERSION@
+USESNAP=@usesnap@
 
 CC=@CXX@
+CXX=@CXX@
 
 INSTALLDIRS=-DINSTALL_BIN='"$(INSTALL_BIN)"' -DINSTALL_LIB='"$(INSTALL_LIB)"' -DINSTALL_TOOL='"$(INSTALL_TOOL)"'
 
 # -Weffc++
-CXXFLAGS=-DVERSION='"$(VERSION)"' $(INSTALLDIRS) -g -std=c++11 -I../hpp -I../../libgng/hpp -Wall -Wnon-virtual-dtor
-CFLAGS=-Wmissing-prototypes 
+CXXFLAGS=-DVERSION='"$(VERSION)"' -DUSESNAP=$(USESNAP) $(INSTALLDIRS) -g -std=c++11 -I../hpp -I../../libgng/hpp -Wall -Wnon-virtual-dtor -Wmissing-prototypes 
 
 OBJS=ginger-admin.o
 
@@ -23,7 +24,7 @@ all: ginger-admin
 # $@ is make shorthand for the target.
 # $@ is make shorthand for the dependencies
 ginger-admin: $(OBJS)
-	$(CC) $(CXXFLAGS) -o $@ $(OBJS) ../../libgng/cpp/libgng.a -lreadline
+	$(CXX) $(CXXFLAGS) -o $@ $(OBJS) ../../libgng/cpp/libgng.a -lreadline
 
 clean:
 	rm -f *.o

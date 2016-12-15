@@ -6,6 +6,7 @@ INSTALL_BIN=@bindir@
 INSTALL_TOOL=@libexecdir@/@PACKAGE_TARNAME@
 INSTALL_LIB=@datarootdir@/@PACKAGE_TARNAME@
 INSTALL_DOC=@docdir@
+USESNAP=@usesnap@
 
 #LICENSE_FILE="$(INSTALL_LIB)/COPYING"
 #LICENSE_FILE="$(INSTALL_LIB)/COPYING"
@@ -15,7 +16,7 @@ CC=@CXX@
 INSTALLDIRS=-DINSTALL_BIN='"$(INSTALL_BIN)"' -DINSTALL_LIB='"$(INSTALL_LIB)"' -DINSTALL_TOOL='"$(INSTALL_TOOL)"'
 
 CFLAGS=-Wall -Wmissing-prototypes -Wnon-virtual-dtor
-CXXFLAGS=$(CFLAGS) -DRUDECGI $(INSTALLDIRS) -g -std=c++11 -I../hpp -I../../appginger/hpp -I../../libgng/hpp -I../../automatic/machine -I../../automatic/simple -I/usr/local/include
+CXXFLAGS=$(CFLAGS) -DUSESNAP=$(USESNAP) -DRUDECGI $(INSTALLDIRS) -g -std=c++11 -I../hpp -I../../appginger/hpp -I../../libgng/hpp -I../../automatic/machine -I../../automatic/simple -I/usr/local/include
 
 OBJS=gvmtest.o gvm.o
 

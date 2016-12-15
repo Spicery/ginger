@@ -84,6 +84,7 @@ INSTALL_TOOL=@libexecdir@/@PACKAGE_TARNAME@
 INSTALL_LIB=@datarootdir@/@PACKAGE_TARNAME@
 INSTALL_DOC=@docdir@
 SAVED_INSTALLATION_DIR=~/.config/ginger/saved-installation
+USESNAP=@usesnap@
 
 # These will be installed in /usr/local/bin and will be available
 # on the programmer's path.

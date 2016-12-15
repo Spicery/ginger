@@ -9,6 +9,7 @@ INSTALL_BIN=@bindir@
 INSTALL_TOOL=@libexecdir@/@PACKAGE_TARNAME@
 INSTALL_LIB=@datarootdir@/@PACKAGE_TARNAME@
 INSTALL_DOC=@docdir@
+USESNAP=@usesnap@
 
 #LICENSE_FILE="$(INSTALL_LIB)/COPYING"
 #LICENSE_FILE="$(INSTALL_LIB)/COPYING"
@@ -25,7 +26,7 @@ ifneq ($(shell uname),Darwin)
 	NONDARWINCXXFLAGS=-Wl,-Bstatic -luuid -Wl,-Bdynamic
 endif
 
-CXXFLAGS=$(INSTALLDIRS) -std=c++11 -g -I../hpp -I../../libgng/hpp -I../../libmetainfo/hpp -Wall -Wnon-virtual-dtor
+CXXFLAGS=$(INSTALLDIRS) -DUSESNAP=$(USESNAP) -std=c++11 -g -I../hpp -I../../libgng/hpp -I../../libmetainfo/hpp -Wall -Wnon-virtual-dtor
 CFLAGS=-Wmissing-prototypes
 
 OBJS= simplifygnx.o

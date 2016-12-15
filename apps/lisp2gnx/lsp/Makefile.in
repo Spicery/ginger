@@ -6,6 +6,7 @@ INSTALL_BIN=@bindir@
 INSTALL_TOOL=@libexecdir@/@PACKAGE_TARNAME@
 INSTALL_LIB=@datarootdir@/@PACKAGE_TARNAME@
 INSTALL_DOC=@docdir@
+USESNAP=@usesnap@
 
 all: lisp2gnx
 

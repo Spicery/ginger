@@ -6,14 +6,15 @@ INSTALL_BIN=@bindir@
 INSTALL_TOOL=@libexecdir@/@PACKAGE_TARNAME@
 INSTALL_LIB=@datarootdir@/@PACKAGE_TARNAME@
 INSTALL_DOC=@docdir@
+USESNAP=@usesnap@
 
 CC=@CXX@
+CXX=@CXX@
 
 INSTALLDIRS=-DINSTALL_BIN='"$(INSTALL_BIN)"' -DINSTALL_LIB='"$(INSTALL_LIB)"' -DINSTALL_TOOL='"$(INSTALL_TOOL)"'
 
 # -Weffc++
-CXXFLAGS=$(INSTALLDIRS) -g -std=c++11 -I../hpp -I../../libgng/hpp -Wall -Wnon-virtual-dtor
-CFLAGS=-Wmissing-prototypes 
+CXXFLAGS=$(INSTALLDIRS) -DUSESNAP=$(USESNAP) -g -std=c++11 -I../hpp -I../../libgng/hpp -Wall -Wnon-virtual-dtor -Wmissing-prototypes 
 
 OBJS=fetchgnx.o search.o folderscan.o projectcache.o packagecache.o varinfo.o importinfo.o importsetinfo.o resolvervisitor.o
 
@@ -22,7 +23,7 @@ all: fetchgnx
 # $@ is make shorthand for the target.
 # $@ is make shorthand for the dependencies
 fetchgnx: $(OBJS)
-	$(CC) $(CXXFLAGS) $(BOOST_CPPFLAGS) -o $@ $(OBJS) ../../libgng/cpp/libgng.a
+	$(CXX) $(CXXFLAGS) -o $@ $(OBJS) ../../libgng/cpp/libgng.a
 
 clean:
 	rm -f *.o

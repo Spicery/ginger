@@ -6,6 +6,7 @@ INSTALL_BIN=@bindir@
 INSTALL_TOOL=@libexecdir@/@PACKAGE_TARNAME@
 INSTALL_LIB=@datarootdir@/@PACKAGE_TARNAME@
 INSTALL_DOC=@docdir@
+USESNAP=@usesnap@
 
 EXEC_DIR="$(INSTALL_BIN)"
 
@@ -14,7 +15,7 @@ CC=@CXX@
 INSTALLDIRS=-DINSTALL_BIN='"$(INSTALL_BIN)"' -DINSTALL_LIB='"$(INSTALL_LIB)"' -DINSTALL_TOOL='"$(INSTALL_TOOL)"'
 
 
-CXXFLAGS=$(INSTALLDIRS) -g -std=c++11 -I../hpp -I../../libgng/hpp -Wall -Wnon-virtual-dtor # -Weffc++
+CXXFLAGS=$(INSTALLDIRS) -DUSESNAP=$(USESNAP) -g -std=c++11 -I../hpp -I../../libgng/hpp -Wall -Wnon-virtual-dtor # -Weffc++
 CFLAGS=-Wmissing-prototypes 
 
 OBJS=metainfo.o

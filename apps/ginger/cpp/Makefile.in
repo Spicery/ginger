@@ -6,14 +6,14 @@ INSTALL_BIN=@bindir@
 INSTALL_TOOL=@libexecdir@/@PACKAGE_TARNAME@
 INSTALL_LIB=@datarootdir@/@PACKAGE_TARNAME@
 INSTALL_DOC=@docdir@
+USESNAP=@usesnap@
 
 #LICENSE_FILE="$(INSTALL_LIB)/COPYING"
 #LICENSE_FILE="$(INSTALL_LIB)/COPYING"
 
 INSTALLDIRS=-DINSTALL_BIN='"$(INSTALL_BIN)"' -DINSTALL_LIB='"$(INSTALL_LIB)"' -DINSTALL_TOOL='"$(INSTALL_TOOL)"'
 
-CXXFLAGS=-DRUDECGI $(INSTALLDIRS) -g -std=c++11 -I../hpp -I../../libgng/hpp -I../../automatic/machine -I../../automatic/sys -I../../automatic/sysfn -I../../automatic/simple -Wall -Wnon-virtual-dtor
-CFLAGS=-Wmissing-prototypes
+CXXFLAGS=-DRUDECGI $(INSTALLDIRS) -DUSESNAP=$(USESNAP) -g -std=c++11 -I../hpp -I../../libgng/hpp -I../../automatic/machine -I../../automatic/sys -I../../automatic/sysfn -I../../automatic/simple -Wall -Wnon-virtual-dtor -Wmissing-prototypes
 
 # In order to exclude machine implementations, uncomment one or more of
 # the following lines.

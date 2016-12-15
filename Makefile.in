@@ -1,14 +1,38 @@
+# Main constants.
+prefix=@prefix@
+exec_prefix=@prefix@
+datarootdir=@datarootdir@
+PACKAGE_TARNAME=@PACKAGE_TARNAME@
+INSTALL_BIN=@bindir@
+INSTALL_TOOL=@libexecdir@/@PACKAGE_TARNAME@
+INSTALL_LIB=@datarootdir@/@PACKAGE_TARNAME@
+INSTALL_DOC=@docdir@
+SAVED_INSTALLATION_DIR=~/.config/ginger/saved-installation
+
+# By default snapcraft uses $DESTDIR rather than --prefix. These
+# variables allow the targets to work correctly with snapcraft.
+USESNAP=@usesnap@
+DD_INSTALL_TOOL=$(DESTDIR)$(INSTALL_TOOL)
+DD_INSTALL_LIB=$(DESTDIR)$(INSTALL_LIB)
+DD_INSTALL_BIN=$(DESTDIR)$(INSTALL_BIN)
+DD_INSTALL_TOOL=$(DESTDIR)$(INSTALL_TOOL)
+DD_INSTALL_TOOL=$(DESTDIR)$(INSTALL_TOOL)
+DD_INSTALL_TOOL=$(DESTDIR)$(INSTALL_TOOL)
+
+.PHONEY: all
 all:
 	make -C apps $@
 	make -C autodocs $@
 	make -C projects $@
 
+.PHONEY: clean
 clean:
 	rm -rf _build/
 	make -C apps $@
 	make -C autodocs $@
 	make -C projects $@
 
+.PHONEY: distclean
 distclean: clean
 	rm -f Makefile
 	rm -f apps/Makefile
@@ -72,20 +96,6 @@ distclean: clean
 	rmdir -p autom4te.cache
 	rm -f configure
 
-# EPREFIX should be bound to PREFIX by default. This appears to be a lie.
-# As a consequence we override EPREFIX entirely. Probably incorrect but not
-# that interesting.
-prefix=@prefix@
-exec_prefix=@prefix@
-datarootdir=@datarootdir@
-PACKAGE_TARNAME=@PACKAGE_TARNAME@
-INSTALL_BIN=@bindir@
-INSTALL_TOOL=@libexecdir@/@PACKAGE_TARNAME@
-INSTALL_LIB=@datarootdir@/@PACKAGE_TARNAME@
-INSTALL_DOC=@docdir@
-SAVED_INSTALLATION_DIR=~/.config/ginger/saved-installation
-USESNAP=@usesnap@
-
 # These will be installed in /usr/local/bin and will be available
 # on the programmer's path.
 USEREXECUTABLES=\
@@ -116,45 +126,59 @@ LIBEXECUTABLES=\
 	apps/lnx2mnx/cpp/lnx2mnx \
 	apps/gvmtest/cpp/gvmtest
 
-install: all install-as-is
+.PHONEY: install
+install: all 
+	$(MAKE) install-as-is
 
+.PHONEY: install-as-is
 install-as-is:
-	# Installing user binaries into $(INSTALL_BIN)
-	# Installing toolchain binaries into $(INSTALL_TOOL)
-	# Installing support files $(INSTALL_LIB)
-	mkdir -p $(INSTALL_LIB)
-	mkdir -p $(INSTALL_TOOL)
-	cp -r apps/ginger/usage $(INSTALL_LIB)/ginger/
-	cp -r apps/ginger-admin/admin-templates $(INSTALL_LIB)
-	( cd projects; tar cf - standard_library ) | ( cd $(INSTALL_LIB); tar xf - )
-	#echo Installing docs into $(INSTALL_DOC)
-	mkdir -p $(INSTALL_LIB)
-	/usr/bin/install -m a=r AUTHORS BUGS COPYING NEWS THANKS $(INSTALL_LIB)
-	mkdir -p $(INSTALL_LIB)/lisp2gnx
-	/usr/bin/install -m a=r apps/lisp2gnx/lsp/lisp2gnx.lsp $(INSTALL_LIB)/lisp2gnx
-	mkdir -p $(INSTALL_LIB)/gvmtest
-	cp -r apps/gvmtest/cpp/help $(INSTALL_LIB)/gvmtest
-	/usr/bin/install $(LIBEXECUTABLES) $(INSTALL_TOOL)
-	/usr/bin/install $(USEREXECUTABLES) $(INSTALL_BIN)
+	# Installing user binaries into $(DESTDIR)$(INSTALL_BIN)
+	# Installing toolchain binaries into $(DESTDIR)$(INSTALL_TOOL)
+	# Installing support files $(DESTDIR)$(INSTALL_LIB)
+	mkdir -p $(DD_INSTALL_TOOL)
+	chmod a+rx,u+w $(DD_INSTALL_TOOL)
+	mkdir -p $(DD_INSTALL_LIB)
+	chmod a+rx,u+w $(DD_INSTALL_LIB)
+	mkdir -p $(DD_INSTALL_LIB)/ginger
+	chmod a+rx,u+w $(DD_INSTALL_LIB)/ginger
+	mkdir -p $(DD_INSTALL_BIN)
+	chmod a+rx,u+w $(DD_INSTALL_BIN)
+	mkdir -p $(DD_INSTALL_LIB)/lisp2gnx
+	chmod a+rx,u+w $(DD_INSTALL_LIB)/lisp2gnx
+	mkdir -p $(DD_INSTALL_LIB)/gvmtest
+	chmod a+rx,u+w $(DD_INSTALL_LIB)/gvmtest
+	mkdir -p $(DD_INSTALL_LIB)/autodocs
+	chmod a+rx,u+w $(DD_INSTALL_LIB)/autodocs
+	#
+	cp -r apps/ginger/usage $(DD_INSTALL_LIB)/ginger/
+	cp -r apps/ginger-admin/admin-templates $(DD_INSTALL_LIB)
+	( cd projects; tar cf - standard_library ) | ( cd $(DD_INSTALL_LIB); tar xf - )
+	#echo Installing docs into $(DD_INSTALL_DOC)
+	/usr/bin/install -m a=r AUTHORS BUGS COPYING NEWS THANKS $(DD_INSTALL_LIB)
+	/usr/bin/install -m a=r apps/lisp2gnx/lsp/lisp2gnx.lsp $(DD_INSTALL_LIB)/lisp2gnx
+	cp -r apps/gvmtest/cpp/help $(DD_INSTALL_LIB)/gvmtest
+	/usr/bin/install $(LIBEXECUTABLES) $(DD_INSTALL_TOOL)
+	/usr/bin/install $(USEREXECUTABLES) $(DD_INSTALL_BIN)
 	# Copy the autodocs
-	mkdir -p $(INSTALL_LIB)/autodocs
-	( cd autodocs/_build ; tar cf - . ) | ( cd $(INSTALL_LIB)/autodocs ; tar xf - )
+	( cd autodocs/_build ; tar cf - . ) | ( cd $(DD_INSTALL_LIB)/autodocs ; tar xf - )
 
 # N.B. The rm -rf commands are guarded by code that checks the
 # paths end '/ginger'
+.PHONEY: uninstall
 uninstall:
-	# Removing user binaries from $(INSTALL_BIN)
-	rm -f $(INSTALL_BIN)/ginger
-	rm -f $(INSTALL_BIN)/ginger-*
-ifeq (ginger,$(notdir $(INSTALL_TOOL)))
-	# Removing the toolchain binaries from $(INSTALL_TOOL)
-	rm -rf $(INSTALL_TOOL)
+	# Removing user binaries from $(DESTDIR)$(INSTALL_BIN)
+	rm -f $(DESTDIR)$(INSTALL_BIN)/ginger
+	rm -f $(DESTDIR)$(INSTALL_BIN)/ginger-*
+ifeq (ginger,$(notdir $(DESTDIR)$(INSTALL_TOOL)))
+	# Removing the toolchain binaries from $(DESTDIR)$(INSTALL_TOOL)
+	rm -rf $(DESTDIR)$(INSTALL_TOOL)
 endif
-ifeq (ginger,$(notdir $(INSTALL_LIB)))
-	# Removing the support files from $(INSTALL_LIB)
-	rm -rf $(INSTALL_LIB)
+ifeq (ginger,$(notdir $(DESTDIR)$(INSTALL_LIB)))
+	# Removing the support files from $(DESTDIR)$(INSTALL_LIB)
+	rm -rf $(DESTDIR)$(INSTALL_LIB)
 endif
 
+.PHONEY: save-installation
 save-installation:
 	mkdir -p $(SAVED_INSTALLATION_DIR)/bin
 	mkdir -p $(SAVED_INSTALLATION_DIR)/libexec/ginger
@@ -164,21 +188,26 @@ save-installation:
 	( cd $(INSTALL_TOOL); tar cf - . ) | ( cd $(SAVED_INSTALLATION_DIR)/libexec/ginger; tar xf - )
 	( cd $(INSTALL_LIB); tar cf - . ) | ( cd $(SAVED_INSTALLATION_DIR)/share/ginger; tar xf - )
 
+.PHONEY: restore-saved-installation
 restore-saved-installation:
 	cp $(SAVED_INSTALLATION_DIR)/bin/* $(INSTALL_BIN)
-	( cd $(SAVED_INSTALLATION_DIR)/libexec/ginger; tar cf - ) | ( cd $(INSTALL_TOOL); tar xf - . ) 
+	( cd $(SAVED_INSTALLATION_DIR)/libexec/ginger; tar cf - ) | ( cd $(INSTALL_TOOL); tar xf - . )
 	( cd $(SAVED_INSTALLATION_DIR)/share/ginger; tar cf - ) | ( cd $(INSTALL_LIB); tar xf - . ) 
 
 
+.PHONEY: unitcheck
 unitcheck:
 	# To be done
 
+.PHONEY: funccheck
 funccheck:
 	(cd functests; nosetests)
 
+.PHONEY: syscheck
 syscheck:
 	(cd systests; nosetests)
 
+.PHONEY: check
 check:
 	make unitcheck
 	make funccheck

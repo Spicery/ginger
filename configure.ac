@@ -34,11 +34,11 @@ AC_FUNC_VPRINTF
 AC_CHECK_FUNCS([strchr strstr strtoul])
 
 # Add feature for snap sensitivity.
-AC_ARG_ENABLE([usesnap],
-  AS_HELP_STRING([--enable-usesnap], [Enable this feature for snapcraft; makes the executable paths respect $SNAP]),
-  [usesnap=${enableval}],
-  [usesnap=no]
-) 
+AC_ARG_ENABLE([snap],
+  AS_HELP_STRING([--enable-snap], [Enable this feature for snapcraft; makes the executable paths respect $SNAP]),
+  AS_IF([test "x$enableval" = xyes], [usesnap=1], [usesnap=0]),
+  [usesnap=0]
+)
 AC_SUBST( usesnap, $usesnap )
 
 # Allow Boost to be somewhere that requires compile and/or link options.

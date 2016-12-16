@@ -15,8 +15,7 @@ CXX=@CXX@
 INSTALLDIRS=-DINSTALL_BIN='"$(INSTALL_BIN)"' -DINSTALL_LIB='"$(INSTALL_LIB)"' -DINSTALL_TOOL='"$(INSTALL_TOOL)"'
 
 # -Weffc++
-CXXFLAGS=$(INSTALLDIRS) -DUSESNAP=$(USESNAP) -g -std=c++11 -I../hpp -I../../libgng/hpp -Wall -Wnon-virtual-dtor
-CFLAGS=-Wmissing-prototypes 
+CXXFLAGS=$(INSTALLDIRS) -DUSESNAP=$(USESNAP) -g -std=c++11 -I../hpp -I../../libgng/hpp -Wall -Wnon-virtual-dtor -Wmissing-prototypes 
 
 OBJS=gprojlibtool.o folderscan.o
 
@@ -25,7 +24,7 @@ all: gprojlibtool
 # $@ is make shorthand for the target.
 # $@ is make shorthand for the dependencies
 gprojlibtool: $(OBJS)
-	$(CC) $(CXXFLAGS) $(BOOST_CPPFLAGS) -o $@ $(OBJS) ../../libgng/cpp/libgng.a
+	$(CXX) $(CXXFLAGS) $(BOOST_CPPFLAGS) -o $@ $(OBJS) ../../libgng/cpp/libgng.a
 
 clean:
 	rm -f *.o

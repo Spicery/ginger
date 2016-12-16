@@ -1,0 +1,17 @@
+name: gg
+version: "0.1"
+summary: "gg a play snap"
+description: Test of the ginger installation as a snap
+confinement: strict
+
+apps:
+  gg:
+    command: ginger
+  bash:
+    command: bash
+
+parts:
+  gg-steelypip:
+    plugin: autotools
+    configflags: ["--enable-snap"]
+    source: ..

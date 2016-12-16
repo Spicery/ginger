@@ -206,7 +206,7 @@ static void fRenderMnx( FILE * foutd, shared< Ginger::Mnx > mnx ) {
 Valof * OrdinaryPackage::absoluteAutoload( const std::string & c ) {
 	syslog( LOG_INFO, "Autoloading is_absolute_ref %s", c.c_str() );
 	
-	Ginger::Command cmd( FETCHGNX );
+	Ginger::Command cmd( ( USESNAP ? getenv( "SNAP" ) : nullptr ), FETCHGNX );
 	cmd.addArg( "-X" );
 	{
 		list< string > & folders = this->getMachine()->getAppContext().getProjectFolderList();
@@ -313,7 +313,7 @@ void OrdinaryPackage::loadIfNeeded() {
 	
 	syslog( LOG_INFO, "Loading package %s", this->title.c_str() );
 
-	Ginger::Command cmd( FETCHGNX );
+	Ginger::Command cmd( ( USESNAP ? getenv( "SNAP" ) : nullptr ), FETCHGNX );
 	cmd.addArg( "-I" );
 	{
 		list< string > & folders = this->getMachine()->getAppContext().getProjectFolderList();

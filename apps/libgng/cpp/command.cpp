@@ -48,6 +48,16 @@ Command::Command( const std::string command ) :
 {
 }
 
+Command::Command( const char * prefix, const std::string & command ) :
+	command( prefix ? std::string( prefix ) + command : command ),
+	should_wait_on_close( false ),
+	child_pid( 0 ),
+	input_fd( -1 ),
+	output_fd( -1 )
+{
+}
+
+
 Command::~Command() {
 	#ifdef DBG_COMMAND
 		cerr << "~Command" << endl;

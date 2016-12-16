@@ -324,7 +324,15 @@ public:
 private:
 
 	void runExec( const string & command ) {
-		const char * cmd = command.c_str();
+		std::string xcommand;
+		if ( USESNAP ) {
+			const char * snap = getenv( "SNAP" );
+			if ( snap ) {
+				xcommand += snap;
+			}
+		}
+		xcommand += command;
+		const char * cmd = xcommand.c_str();
 		if ( this->file.isValid() ) {
 			execl( cmd, cmd, this->file.fastValue().c_str(), (char)0 );
 		} else {

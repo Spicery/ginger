@@ -438,7 +438,7 @@ void ToolMain::executeLoadFileList( RCEP & rcep ) {
 
 
 void ToolMain::loadFileFromPackage( RCEP & rcep, Package * pkg, const std::string filename ) {
-    Ginger::Command cmd( FETCHGNX );
+    Ginger::Command cmd( ( USESNAP ? getenv( "SNAP" ) : nullptr ), FETCHGNX );
     cmd.addArg( "-X" );
     {
         list< string > & folders = rcep.getMachine()->getAppContext().getProjectFolderList();

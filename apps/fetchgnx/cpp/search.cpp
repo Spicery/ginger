@@ -89,7 +89,15 @@ static void run( string command, string pathname, ostream & out ) {
 		cerr << "FETCHGNX: running " << command << " " << pathname << endl;
 	#endif
 	int pipe_fd[ 2 ];
-	const char * cmd = command.c_str();
+	string xcommand;
+	if ( USESNAP ) {
+		const char * snap = getenv( "SNAP" );
+		if ( snap ) {
+			xcommand += snap;
+		}
+	}
+	xcommand += command;
+	const char * cmd = xcommand.c_str();
 	pipe( pipe_fd );
 	pid_t pid = fork();
 	switch ( pid ) {

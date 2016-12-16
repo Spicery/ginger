@@ -62,6 +62,18 @@ using namespace std;
 #define LOAD                    "load"
 #define LOAD_SIZE               sizeof( LOAD )
 
+static std::string getFile2GnxPath() {
+    std::string cmd;
+    if ( USESNAP ) {
+        const char * snap = getenv( "SNAP" );
+        if ( snap ) {
+            cmd += snap;
+        }
+    }
+    cmd += INSTALL_TOOL PATH_SEPARATOR FILE2GNX;
+    return cmd;
+}
+
 class Task {
 protected:
     vector< string > arguments;
@@ -329,7 +341,8 @@ private:
                     if ( autoloadable_file[ var_name.size() ] != '.' ) continue;
                     if ( std::equal( var_name.begin(), var_name.end(), autoloadable_file.begin() ) ) {
                         const string pathname = autoloadable_scan.fullPath();
-                        execl( INSTALL_TOOL PATH_SEPARATOR FILE2GNX, INSTALL_TOOL PATH_SEPARATOR FILE2GNX, pathname.c_str(), NULL );
+                        std::string cmd = getFile2GnxPath();
+                        execl( cmd.c_str(), cmd.c_str(), pathname.c_str(), NULL );
                     }
                 }
             }
@@ -358,7 +371,8 @@ private:
                 const int pid = fork();
                 if ( pid == 0 ) {
                     //  In the child.
-                    execl( INSTALL_TOOL PATH_SEPARATOR FILE2GNX, INSTALL_TOOL PATH_SEPARATOR FILE2GNX, file.c_str(), NULL );
+                    std::string cmd = getFile2GnxPath();
+                    execl( cmd.c_str(), cmd.c_str(), file.c_str(), NULL );
                 } else if ( pid > 0 ) {
                     int return_status;
                     waitpid( pid, &return_status, 0 );

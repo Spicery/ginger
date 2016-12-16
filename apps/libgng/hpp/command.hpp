@@ -57,6 +57,7 @@ public:
 	void sendString( std::string, std::stringstream & );
 	
 public:
+	Command( const char * prefix, const std::string & command );
 	Command( const std::string command = "" );
 	~Command();
 };

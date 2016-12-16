@@ -92,7 +92,7 @@ const char* AppContext::cgiValue( const char * fieldname ) {
  * This is the command that is run to acquire and parse user input into GNX.
  */
 Ginger::Command AppContext::stdinSyntaxCommand() { 
-    Ginger::Command cmd( FILE2GNX );
+    Ginger::Command cmd( ( USESNAP ? getenv( "SNAP" ) : nullptr ), FILE2GNX );
     if ( not this->initial_syntax.empty() ) {
         cmd.addArg( "-g" );
         cmd.addArg( this->initial_syntax );
@@ -105,7 +105,7 @@ Ginger::Command AppContext::stdinSyntaxCommand() {
  */
 Ginger::Command AppContext::fileSyntaxCommand( const std::string & filename ) { 
     // cerr << "NON-INTERACTIVELY" << endl;
-    Ginger::Command cmd( FILE2GNX );
+    Ginger::Command cmd( ( USESNAP ? getenv( "SNAP" ) : nullptr ), FILE2GNX );
     if ( not this->initial_syntax.empty() ) {
         cmd.addArg( "-g" );
         cmd.addArg( this->initial_syntax );

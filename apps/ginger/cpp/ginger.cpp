@@ -1,8 +1,9 @@
 #include <iostream>
 #include <cstdlib>
 #include <string>
-#include <unistd.h>
 #include <vector>
+
+#include <unistd.h>
 
 using namespace std;
 
@@ -10,7 +11,15 @@ using namespace std;
 #define GINGER "ginger"
 
 static void runDefaultProgram() {
-	execlp( "ginger-cli", "ginger-cli", "--grammar=common", (char *)0 );	
+	std::string cmd;
+	if ( USESNAP ) {
+		const char * snap = getenv( "SNAP" );
+		if ( snap ) {
+			cmd += snap;
+		}
+	}
+	cmd += INSTALL_BIN "ginger-cli";
+	execlp( cmd.c_str(), cmd.c_str(), "--grammar=common", (char *)0 );	
 }
 
 static void lacksCmdOption( int argc, char * argv[] ) {

@@ -56,9 +56,26 @@ static void pause() {
     usleep( 100000 );
 }
 
+static std::string getSnapPath( const char * path ) {
+    std::string cmd;
+    if ( USESNAP ) {
+        const char * snap = getenv( "SNAP" );
+        if ( snap ) {
+            cmd += snap;
+        }
+    }
+    cmd += path;
+    return cmd;
+}
+
+static std::string getGingerHelpSnapPath() {
+    return getSnapPath( INSTALL_TOOL "/ginger-help" );
+}
+
 static void getHelp() {
     if ( fork() == 0 ) {
-        execl( INSTALL_TOOL "/ginger-help", "ginger-help", (char *)0 );
+        const std::string cmd( getGingerHelpSnapPath() );
+        execl( cmd.c_str(), cmd.c_str(), (char *)0 );
         perror( "ginger" );
         exit( EXIT_FAILURE );
     } else {
@@ -70,7 +87,8 @@ static void getHelp( std::string & line ) {
     string topic( line, strlen( "help " ) );
     lttrim( topic );
     if ( fork() == 0 ) {
-        execl( INSTALL_TOOL "/ginger-help", "ginger-help", topic.c_str(), (char *)0 );
+        const std::string cmd( getGingerHelpSnapPath() );
+        execl( cmd.c_str(), cmd.c_str(), topic.c_str(), (char *)0 );
         perror( "ginger" );
         exit( EXIT_FAILURE );
     } else {

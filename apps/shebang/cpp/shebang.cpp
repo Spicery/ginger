@@ -96,6 +96,8 @@ public:
 				cerr << "  argument: " << *it << endl;
 			}
 		#endif
+		// TODO: Should this be adapted for Snap packaging? I honestly 
+		//	don't know. Because this only uses absolute names, it's unclear.
 		execv( argvector[0], &argvector[0] );
 		return EXIT_FAILURE;	//	If we reach here then the exec failed!
 	}

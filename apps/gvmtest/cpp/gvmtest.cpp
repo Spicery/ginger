@@ -336,6 +336,7 @@ public:
                     pid_t pid = fork();
                     if ( pid == 0 ) {
                         // In the child process.
+                        //  TODO: should probably use $PAGER.
                         execl(
                             "/usr/bin/less",
                             "/usr/bin/less",

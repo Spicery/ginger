@@ -462,7 +462,7 @@ public:
 };
 
 std::string resolveUnqualified( vector< string > & project_folders, const std::string & enc_pkg, const std::string & name, const bool undefined_allowed ) {
-	Ginger::Command cmd( FETCHGNX );
+	Ginger::Command cmd( ( USESNAP ? getenv( "SNAP" ) : nullptr ), FETCHGNX );
 	cmd.addArg( "-R" );
 	if ( undefined_allowed ) {
 		cmd.addArg( "-u" );

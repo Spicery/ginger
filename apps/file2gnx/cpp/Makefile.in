@@ -13,7 +13,7 @@ CXX=@CXX@
 
 INSTALLDIRS=-DINSTALL_BIN='"$(INSTALL_BIN)"' -DINSTALL_LIB='"$(INSTALL_LIB)"' -DINSTALL_TOOL='"$(INSTALL_TOOL)"'
 
-CXXFLAGS=$(INSTALLDIRS) -DUSESNAP=$(USESNAP) -g -std=c++11 -I../hpp -I../../libgng/hpp -I../../pstreams-0.8.1 -Wall -Wnon-virtual-dtor -Wmissing-prototypes 
+CXXFLAGS=$(INSTALLDIRS) -DUSESNAP=$(USESNAP) -g -std=c++11 -I../hpp -I../../libgng/hpp -I../../pstreams-0.8.1 -Wall -Wnon-virtual-dtor 
 
 OBJS=file2gnx.o pathparser.o
 

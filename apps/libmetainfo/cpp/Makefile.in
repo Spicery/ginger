@@ -10,13 +10,13 @@ USESNAP=@usesnap@
 
 EXEC_DIR="$(INSTALL_BIN)"
 
+CXX=@CXX@
 CC=@CXX@
 
 INSTALLDIRS=-DINSTALL_BIN='"$(INSTALL_BIN)"' -DINSTALL_LIB='"$(INSTALL_LIB)"' -DINSTALL_TOOL='"$(INSTALL_TOOL)"'
 
 
 CXXFLAGS=$(INSTALLDIRS) -DUSESNAP=$(USESNAP) -g -std=c++11 -I../hpp -I../../libgng/hpp -Wall -Wnon-virtual-dtor # -Weffc++
-CFLAGS=-Wmissing-prototypes 
 
 OBJS=metainfo.o
 

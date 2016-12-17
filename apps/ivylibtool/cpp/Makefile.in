@@ -16,7 +16,6 @@ INSTALLDIRS=-DINSTALL_BIN='"$(INSTALL_BIN)"' -DINSTALL_LIB='"$(INSTALL_LIB)"' -D
 
 # -Weffc++
 CXXFLAGS=$(INSTALLDIRS) -DUSESNAP=$(USESNAP) -g -std=c++11 -I../hpp -I../../libgng/hpp -Wall -Wnon-virtual-dtor
-CFLAGS=-Wmissing-prototypes 
 
 OBJS=ivylibtool.o
 
@@ -25,7 +24,7 @@ all: ivylibtool
 # $@ is make shorthand for the target.
 # $@ is make shorthand for the dependencies
 ivylibtool: $(OBJS)
-	$(CC) $(CXXFLAGS) $(BOOST_CPPFLAGS) -o $@ $(OBJS) ../../libgng/cpp/libgng.a
+	$(CXX) $(CXXFLAGS) $(BOOST_CPPFLAGS) -o $@ $(OBJS) ../../libgng/cpp/libgng.a
 
 clean:
 	rm -f *.o

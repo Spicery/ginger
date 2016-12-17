@@ -27,7 +27,6 @@ ifneq ($(shell uname),Darwin)
 endif
 
 CXXFLAGS=$(INSTALLDIRS) -DUSESNAP=$(USESNAP) -std=c++11 -g -I../hpp -I../../libgng/hpp -I../../libmetainfo/hpp -Wall -Wnon-virtual-dtor
-CFLAGS=-Wmissing-prototypes
 
 OBJS= simplifygnx.o
 
@@ -36,7 +35,7 @@ all: simplifygnx
 # $@ is make shorthand for the target.
 # $@ is make shorthand for the dependencies
 simplifygnx: $(OBJS)
-	@CXX@ $(CXXFLAGS) $(BOOST_CPPFLAGS) -o $@ $^ ../../libgng/cpp/libgng.a ../../libmetainfo/cpp/libmetainfo.a $(NONDARWINCXXFLAGS)
+	$(CXX) $(CXXFLAGS) $(BOOST_CPPFLAGS) -o $@ $^ ../../libgng/cpp/libgng.a ../../libmetainfo/cpp/libmetainfo.a $(NONDARWINCXXFLAGS)
 	
 clean:
 	rm -f *.o

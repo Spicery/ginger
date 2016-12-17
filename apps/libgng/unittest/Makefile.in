@@ -4,8 +4,6 @@ CXX=@CXX@
 
 CXXFLAGS=-g -std=c++11 -I../../CppUnitLite2/src  -I../hpp -Wall -Wnon-virtual-dtor # -Weffc++
 
-CFLAGS=-Wmissing-prototypes 
-
 OBJS=maintest.o transdoubletest.o saxtestlite.o
 
 .PHONEY: all

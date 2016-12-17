@@ -14,14 +14,12 @@ USESNAP=@usesnap@
 #LICENSE_FILE="$(INSTALL_LIB)/COPYING"
 #LICENSE_FILE="$(INSTALL_LIB)/COPYING"
 
-
+CXX=@CXX@
 CC=@CXX@
 
 INSTALLDIRS=-DINSTALL_BIN='"$(INSTALL_BIN)"' -DINSTALL_LIB='"$(INSTALL_LIB)"' -DINSTALL_TOOL='"$(INSTALL_TOOL)"'
 
-
 CXXFLAGS=$(INSTALLDIRS) -DUSESNAP=$(USESNAP) -O -Wall -Wnon-virtual-dtor -std=c++11
-CFLAGS=-Wmissing-prototypes 
 
 OBJS= shebang.o
 
@@ -30,7 +28,7 @@ all: shebang
 # $@ is make shorthand for the target.
 # $@ is make shorthand for the dependencies
 shebang: $(OBJS)
-	$(CC) $(CXXFLAGS) $(BOOST_CPPFLAGS) -o $@ $^
+	$(CXX) $(CXXFLAGS) $(BOOST_CPPFLAGS) -o $@ $^
 	
 clean:
 	rm -f *.o

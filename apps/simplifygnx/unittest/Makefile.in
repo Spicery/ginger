@@ -4,7 +4,6 @@ CXX=@CXX@
 
 
 CXXFLAGS=-g -std=c++11 -I../../CppUnitLite2/src -I../hpp -I../../libgng/hpp -Wall -Wnon-virtual-dtor
-CFLAGS=-Wmissing-prototypes 
 LDFLAGS=-ldl
 OBJS=testsimplifygnx.o
 
@@ -16,7 +15,7 @@ check: testsimplifygnx
 # $@ is make shorthand for the target.
 # $@ is make shorthand for the dependencies
 testsimplifygnx: $(OBJS)
-	$(CC) $(CXXFLAGS) -o $@ $^ ../../libgng/cpp/libgng.a  ../../CppUnitLite2/cppunitlite.a $(LDFLAGS)
+	$(CXX) $(CXXFLAGS) -o $@ $^ ../../libgng/cpp/libgng.a  ../../CppUnitLite2/cppunitlite.a $(LDFLAGS)
 	
 clean:
 	rm -f *.o

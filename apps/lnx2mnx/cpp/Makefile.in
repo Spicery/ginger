@@ -16,12 +16,11 @@ INSTALLDIRS=-DINSTALL_BIN='"$(INSTALL_BIN)"' -DINSTALL_LIB='"$(INSTALL_LIB)"' -D
 
 
 CXXFLAGS=$(INSTALLDIRS) -DUSESNAP=$(USESNAP) -g -std=c++11 -I../hpp -I../../libgng/hpp -Wall
-CFLAGS=-Wmissing-prototypes 
 
 OBJS=lnx2mnx.o item.o toktype.o parser.o
 
 lnx2mnx: $(OBJS)
-	$(CC) $(CXXFLAGS) $(BOOST_CPPFLAGS) -o lnx2mnx $(OBJS) ../../libgng/cpp/libgng.a
+	$(CXX) $(CXXFLAGS) $(BOOST_CPPFLAGS) -o lnx2mnx $(OBJS) ../../libgng/cpp/libgng.a
 
 clean:
 	rm -f *.o

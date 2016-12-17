@@ -5,8 +5,6 @@ CXX=@CXX@
 
 CXXFLAGS=-g -std=c++11 -I../../CppUnitLite2/src -I../hpp -Wall -Wnon-virtual-dtor # -Weffc++
 
-CFLAGS=-Wmissing-prototypes 
-
 OBJS=testlibmetainfo.o
 
 all: testlibmetainfo
@@ -17,7 +15,7 @@ check: testlibmetainfo
 # $@ is make shorthand for the target.
 # $@ is make shorthand for the dependencies
 testlibmetainfo: $(OBJS)
-	$(CC) $(CXXFLAGS) -o $@ $^ ../../CppUnitLite2/cppunitlite.a
+	$(CXX) $(CXXFLAGS) -o $@ $^ ../../CppUnitLite2/cppunitlite.a
 	
 clean:
 	rm -f *.o

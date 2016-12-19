@@ -10,47 +10,57 @@ using namespace std;
 // #define DEBUG 1
 #define GINGER "ginger"
 
-static void runDefaultProgram() {
-	std::string cmd;
+static std::string programPath() {
+	string path;
 	if ( USESNAP ) {
 		const char * snap = getenv( "SNAP" );
 		if ( snap ) {
-			cmd += snap;
+			path += snap;
 		}
 	}
-	cmd += INSTALL_BIN "ginger-cli";
-	execlp( cmd.c_str(), cmd.c_str(), "--grammar=common", (char *)0 );	
+	path += INSTALL_BIN "/";
+	return path;
+}
+
+static void runDefaultProgram() {
+	std::string cmd( programPath() );
+	cmd += "ginger-cli";
+	execl( cmd.c_str(), cmd.c_str(), "--grammar=common", (char *)0 );	
+	cerr << "Installation error [1]: ginger-cli executable cannot be found: " << cmd << endl;
 }
 
 static void lacksCmdOption( int argc, char * argv[] ) {
-	string cmd_name = "ginger-cli";
+	string cmd( programPath() );
+	cmd += "ginger-cli";
 
 	vector< char * > args;
-	args.push_back( &cmd_name[0] );
+	args.push_back( &cmd[0] );
 	args.push_back( const_cast< char * >( "--grammar=common" ) );
 	for ( int i = 1; i < argc; i++ ) {
 		args.push_back( argv[ i ] );
 	}		
 	args.push_back( 0 );
 
-	execvp( &cmd_name[0], &args[ 0 ] );
+	execv( &cmd[0], &args[ 0 ] );
 
-	cerr << "Installation error: ginger-cli executable cannot be found." << endl;
+	cerr << "Installation error [2]: ginger-cli executable cannot be found: " << cmd << endl;
 }
 
 static void hasCmdOption( int argc, char * argv[] ) {
-	string cmd_name = string( GINGER "-" ) + argv[1];
+	string cmd( programPath() );
+	cmd += string( GINGER "-" );
+	cmd += argv[1];
 
 	vector< char * > args;
-	args.push_back( &cmd_name[0] );
+	args.push_back( &cmd[0] );
 	for ( int i = 2; i < argc; i++ ) {
 		args.push_back( argv[ i ] );
 	}		
 	args.push_back( 0 );
 
-	execvp( &cmd_name[0], &args[ 0 ] );
+	execv( &cmd[0], &args[ 0 ] );
 
-	cerr << "Cannot execute command: " << cmd_name << endl;
+	cerr << "Installation error [3]: ginger-cli executable cannot be found: " << cmd << endl;
 }
 
 int main( int argc, char * argv[] ) {

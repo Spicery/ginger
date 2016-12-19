@@ -28,6 +28,7 @@
 #include <iostream>
 #include <sstream> 
 #include <list>
+#include <string>
 
 #include "mishap.hpp"
 
@@ -40,10 +41,21 @@ using namespace std;
 
 #define SIMPLIFYGNX     ( INSTALL_TOOL "/simplifygnx" )
 
+static std::string executable() {
+    if ( USESNAP ) {
+        const char * snap = getenv( "SNAP" );
+        if ( snap ) {
+            return std::string( snap ) + SIMPLIFYGNX;
+        }
+        
+    }
+    return SIMPLIFYGNX;
+}
+
 Simplify::Simplify( AppContext & cxt, Package * package ) :
     started( false ),
     context( cxt ),
-    command( SIMPLIFYGNX )
+    command( executable() )
 {
     command.addArg( "-suA" );
     {

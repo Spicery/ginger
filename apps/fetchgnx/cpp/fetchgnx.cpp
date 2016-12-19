@@ -296,7 +296,14 @@ void Main::summary() {
 
 void Main::init() {
 	//cout << ( INSTALL_LIB "/" STANDARD_LIBRARY ) << endl;
-	this->project_folders.push_back( INSTALL_LIB "/" STANDARD_LIBRARY );
+	std::string basename( INSTALL_LIB "/" STANDARD_LIBRARY );
+	if ( USESNAP ) {
+		const char * snap = getenv( "SNAP" );
+		if ( snap ) {
+			basename = std::string( snap ) + basename;
+		}
+	}
+	this->project_folders.push_back( basename );
 }
 
 void Main::run() {

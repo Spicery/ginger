@@ -27,8 +27,8 @@ namespace Ginger {
 
 Ref makeSysFn( CodeGen codegen, std::string fn_name, Ref default_value ) {
 
-	SysMap::iterator smit = SysMap::sysMap().find( fn_name );
-	if ( smit == SysMap::sysMap().end() ) {
+	SysMap::iterator smit = SysMap::systemFunctionsMap().find( fn_name );
+	if ( smit == SysMap::systemFunctionsMap().end() ) {
 		return default_value;
 	}
 	SysInfo & info = smit->second;

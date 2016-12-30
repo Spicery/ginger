@@ -48,7 +48,7 @@ Ref * sysIsLowerCase( Ref * pc, class MachineClass * vm ) {
     return pc;
 }
 SysInfo infoIsLowerCase( 
-    SysNames( "isLowerCase" ), 
+    FullName( "isLowerCase" ), 
     Arity( 1 ), 
     Arity( 1 ), 
     sysIsLowerCase, 
@@ -77,7 +77,7 @@ Ref * sysIsUpperCase( Ref * pc, class MachineClass * vm ) {
     return pc;
 }
 SysInfo infoIsUpperCase( 
-    SysNames( "isUpperCase" ), 
+    FullName( "isUpperCase" ), 
     Arity( 1 ), 
     Arity( 1 ), 
     sysIsUpperCase, 

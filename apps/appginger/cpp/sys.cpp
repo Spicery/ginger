@@ -57,8 +57,9 @@ namespace Ginger {
 
 //#define DBG_SYS
 
-SysInfo::SysInfo( SysNames _names, Ginger::Arity in, Ginger::Arity out, SysCall * s, const char * ds ) :
-	names( _names ),
+SysInfo::SysInfo( FullName _name, Ginger::Arity in, Ginger::Arity out, SysCall * s, const char * ds ) :
+	sys_module( NULL ),
+	full_name( _name ),
 	flavour( SYS_CALL_FLAVOUR ),
 	instruction( vmc_halt ),
 	cmp_op( CMP_EQ ),
@@ -69,7 +70,31 @@ SysInfo::SysInfo( SysNames _names, Ginger::Arity in, Ginger::Arity out, SysCall 
 	coreFunctionObject( NULL )
 {		
 	//	Self-registration.
-	SysMap::sysMap()[ std::string( this->name() ) ] = *this;
+	SysMap::systemFunctionsMap()[ std::string( this->full_name.baseName() ) ] = *this;
+}
+
+SysInfo::SysInfo( SysModule * _module, FullName _name, Ginger::Arity in, Ginger::Arity out, SysCall * s, const char * ds ) :
+	sys_module( _module ),
+	full_name( _name ),
+	flavour( SYS_CALL_FLAVOUR ),
+	instruction( vmc_halt ),
+	cmp_op( CMP_EQ ),
+	in_arity( in ),
+	out_arity( out ),
+	syscall( s ),
+	docstring( ds ),
+	coreFunctionObject( NULL )
+{		
+	//	Self-registration.
+	this->sys_module->registerSysFunction( this );
+}
+
+RegisterSysAltName::RegisterSysAltName( SysInfo & info, const char * _pkg_name, const char * _base_name ) {
+	info.addSynonym( _pkg_name, _base_name );
+}
+
+void SysModule::registerSysFunction( SysInfo * info ) {
+	SysMap::systemFunctionsMap()[ std::string( info->full_name.baseName() ) ] = *info;
 }
 
 
@@ -449,7 +474,7 @@ Ref * sysBoolAbs( Ref *pc, class MachineClass * vm ) {
 //typedef std::map< std::string, SysInfo > SysMap;
 typedef SysMap::value_type SysMaplet;
 
-SysMap & SysMap::sysMap() {
+SysMap & SysMap::systemFunctionsMap() {
 
 	static SysMap::value_type rawData[] = {
 		SysMaplet( "not", SysInfo( vmc_not, Arity( 1 ), Arity( 1 ), "Negates a boolean value" ) ),

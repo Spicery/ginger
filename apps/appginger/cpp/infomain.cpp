@@ -403,8 +403,8 @@ private:
 		this->formatter->insertComment( "Summary of the built-in functions" );
 
 		for (
-			SysMap::iterator it = SysMap::sysMap().begin();
-			it != SysMap::sysMap().end();
+			SysMap::iterator it = SysMap::systemFunctionsMap().begin();
+			it != SysMap::systemFunctionsMap().end();
 			++it
 		) {
 			this->formatter->startValue( "sysfn" );
@@ -420,31 +420,18 @@ private:
 
 	void printSynonyms() {
 		this->formatter->startSection( "synonyms" );
-
 		this->formatter->insertComment( "Synonyms for built-in functions" );
-
-		for (
-			SysMap::iterator it = SysMap::sysMap().begin();
-			it != SysMap::sysMap().end();
-			++it
-		) {
-			for (
-				SysNames::Generator synonyms = it->second.sysNames().synonymIterator();
-				!!synonyms;
-				++synonyms
-			) {
-				SysNames::SysSynonym & ss = *synonyms;
+		for ( auto & entry : SysMap::systemFunctionsMap() ) {
+			const string & base_name = entry.first;
+			SysInfo & info = entry.second;
+			for ( auto & full_name : info.synonyms() ) {
 				this->formatter->startValue( "synonym" );
-				this->formatter->addAttribute( "base.name", it->first );
-				this->formatter->addAttribute( "alt.name", ss.name() );
-				this->formatter->endValue();
+				this->formatter->addAttribute( "base.name", base_name );
+				this->formatter->addAttribute( "alt.name", full_name.baseName() );
+				this->formatter->endValue();				
 			}
-
-
 		}
-
 		this->formatter->endSection();
-		
 	}
 
 	void printBuildInfo() {

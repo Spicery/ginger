@@ -22,6 +22,7 @@
 #include <map>
 #include <iostream>
 #include <list>
+#include <utility>
 
 #include "arity.hpp"
 
@@ -51,20 +52,8 @@ enum InfoFlavour {
 	SYS_CALL_FLAVOUR
 };
 
-/*
-SysNames( NAME )
-	This basic form asks for NAME to be registered as a system-function
-	*and* by default to be added to ginger.library which is the basic 
-	set of bindings.
-
-SysNames( NAME, SysSynonym( NAME' ) )
-	In addition to registering a system-function and adding an entry to the 
-	ginger.library, this creates an additional synonym in the ginger 
-	library.
-*/
-
 /**
- * 	SysNames is anticipating the need for language-specific bindings
+ * 	Synonyms anticipate the need for language-specific bindings
  * 	for built-in functions. At the moment it is simply a base-name and
  * 	synonyms for it.
  *
@@ -77,62 +66,43 @@ SysNames( NAME, SysSynonym( NAME' ) )
  * 	The next feature I want to accomodate is a system function
  *	that isn't exposed in a library but only as a <sysapp name=NAME/>.
  */
-class SysNames {
-public:
 
-	class SysSynonym {
-	private:
-		std::string alias_name;
-	public:
-		SysSynonym( const char * _alias_name ) : alias_name( _alias_name ) {}
-	public:
-		std::string name() const { return this->alias_name; }
-	};
-
-	class Generator {
-	private:
-		std::list< SysSynonym >::iterator start_it;
-		std::list< SysSynonym >::iterator end_it;
-	public:
-		Generator( std::list< SysSynonym > & _list ) : start_it( _list.begin() ), end_it( _list.end() ) {}
-		~Generator() {}
-	public:
-		bool operator ! () const { return this->start_it == this->end_it; }
-		SysSynonym & operator *() {
-			return *this->start_it;
-		}
-		Generator & operator ++() {
-			++this->start_it;
-			return *this;
-		}
-	};
-
+class FullName {
 private:
-	const char * def_name;
-	std::list< SysSynonym > synonyms;
-
-
-public:
-	SysNames() : def_name( NULL ) {}
-	SysNames( const char * _name ) : def_name( _name ) {}
-	SysNames( const char * _name, SysSynonym _synonym ) : def_name( _name ) {
-		this->synonyms.push_back( _synonym );
-	}
+	const char * pkg_name;
+	const char * base_name;
 
 public:
-	const char * name() {
-		if ( this->def_name == NULL ) throw UnreachableError();
-		return this->def_name;
-	}
+	FullName() : pkg_name( nullptr ), base_name( nullptr ) {}
+	FullName( const char * _base_name ) : pkg_name( "ginger.library" ), base_name( _base_name ) {}
+	FullName( const char * _pkg_name, const char * _base_name ) : pkg_name( _pkg_name ), base_name( _base_name ) {}
 
-	Generator synonymIterator() {
-		return Generator( this->synonyms );
-	}
-
+public:
+	const char * baseName() const { return this->base_name; }
+	const char * pkgName() const { return this->pkg_name; }
 };
 
-struct SysInfo { 
-	SysNames names;
+typedef std::list< FullName > SynonymList;
+
+class SysInfo;
+
+//	This is a point for future expansion.
+class SysModule {
+private:
+	const char * module_name;
+public:
+	const char * moduleName() const { return this->module_name; }
+	void registerSysFunction( SysInfo * info );
+public:
+	SysModule( const char * _module_name ) : module_name( _module_name ) {}
+};
+
+
+class SysInfo { 
+public:
+	SysModule * sys_module;
+	FullName full_name;
+	SynonymList synonym_list;
 	InfoFlavour flavour;		//	Is this system routine implemented as a VM instruction, comparison operator or as a system-call.
 	Instruction instruction;	//	Populated if VM_OP_FLAVOUR (else vmc_halt).
 	CMP_OP cmp_op;				//	Populated if CMP_OP_FLAVOUR (else CMP_EQ)
@@ -146,12 +116,20 @@ struct SysInfo {
 	bool isCmpOp() const { return this->flavour == CMP_OP_FLAVOUR; }
 	bool isVMOp() const { return this->flavour == VM_OP_FLAVOUR; }
 
-	const char * name() {
-		return this->names.name();
+	const char * baseName() {
+		return this->full_name.baseName();
 	}
 
-	SysNames & sysNames() {
-		return this->names;
+	const char * pkgName() {
+		return this->full_name.pkgName();
+	}
+
+	void addSynonym( const char * _pkg_name, const char * _name ) {
+		this->synonym_list.push_back( FullName( _pkg_name, _name ) );
+	}
+
+	SynonymList & synonyms() {
+		return this->synonym_list;
 	}
 
 	//	Only declared to allow adding to std::map, which requires a
@@ -183,7 +161,9 @@ struct SysInfo {
 	}
 
 	//	This is the one that causes self-registration.
-	SysInfo( SysNames _names, Ginger::Arity in, Ginger::Arity out, SysCall * s, const char * ds );
+	SysInfo( FullName _name, Ginger::Arity in, Ginger::Arity out, SysCall * s, const char * ds );
+
+	SysInfo( SysModule * _module, FullName _name, Ginger::Arity in, Ginger::Arity out, SysCall * s, const char * ds );
 
 	SysInfo( const CMP_OP cmp_op, Ginger::Arity in, Ginger::Arity out, const char * ds ) :
 		flavour( CMP_OP_FLAVOUR ),
@@ -206,7 +186,12 @@ private:
 	//SysMap( const SysMap::value_type * start, const SysMap::value_type * end ) : std::map< std::string, SysInfo >( start, end ) {}
 
 public:
-	static SysMap & sysMap(); 
+	static SysMap & systemFunctionsMap(); 
+};
+
+class RegisterSysAltName {
+public:
+	RegisterSysAltName( SysInfo & info, const char * _pkg_name, const char * _base_name );
 };
 
 } // namespace Ginger

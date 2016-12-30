@@ -72,7 +72,7 @@ Ref * sysStringAppend( Ref * pc, class MachineClass * vm ) {
 }
 //SysMap::value_type( "stringAppend", SysInfo( Arity( 2 ), Arity( 1 ), sysStringAppend, "Appends two strings" ) ),
 SysInfo infoStringAppend( 
-    SysNames( "stringAppend" ), 
+    FullName( "stringAppend" ), 
     Ginger::Arity( 2 ), 
     Ginger::Arity( 1 ), 
     sysStringAppend, 
@@ -101,7 +101,7 @@ Ref * sysStringIndex( Ref *pc, class MachineClass * vm ) {
 }
 //SysMap::value_type( "stringIndex", SysInfo( Arity( 2 ), Arity( 1 ), sysStringIndex, "Indexes a string" ) ),
 SysInfo infoStringIndex( 
-    SysNames( "stringIndex" ), 
+    FullName( "stringIndex" ), 
     Ginger::Arity( 2 ), 
     Ginger::Arity( 1 ), 
     sysStringIndex, 
@@ -125,7 +125,7 @@ Ref * sysStringExplode( Ref *pc, class MachineClass * vm ) {
 }
 //SysMap::value_type( "stringExplode", SysInfo( Arity( 1 ), Arity( 0, true ), sysStringExplode, "Explodes a string into its members" ) ),
 SysInfo infoStringExplode( 
-    SysNames( "stringExplode" ), 
+    FullName( "stringExplode" ), 
     Ginger::Arity( 1 ), 
     Ginger::Arity( 0, true ), 
     sysStringExplode, 
@@ -143,7 +143,7 @@ Ref * sysStringLength( Ref *pc, class MachineClass * vm ) {
 }
 //SysMap::value_type( "stringLength", SysInfo( Arity( 1 ), Arity( 1 ), sysStringLength, "Returns the length of a string" ) ),
 SysInfo infoStringLength( 
-    SysNames( "stringLength" ), 
+    FullName( "stringLength" ), 
     Ginger::Arity( 1 ), 
     Ginger::Arity( 1 ), 
     sysStringLength, 
@@ -162,7 +162,7 @@ Ref * sysNewString( Ref *pc, class MachineClass * vm ) {
 }
 //SysMap::value_type( "newString", SysInfo( Arity( 0, true ), Arity( 1 ), sysNewString, "Creates a string from a set of characters" ) ),
 SysInfo infoNewString( 
-    SysNames( "newString" ), 
+    FullName( "newString" ), 
     Ginger::Arity( 0, true ), 
     Ginger::Arity( 1 ), 
     sysNewString, 

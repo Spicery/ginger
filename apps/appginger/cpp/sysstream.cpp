@@ -54,7 +54,7 @@ Ref * sysCloseInputStream( Ref * pc, MachineClass * vm ) {
     return pc;
 }
 SysInfo infoCloseInputStream( 
-    SysNames( "closeInputStream" ), 
+    FullName( "closeInputStream" ), 
     Arity( 1 ), 
     Arity( 0 ), 
     sysCloseInputStream, 
@@ -82,7 +82,7 @@ Ref * sysNextLineInputStream( Ref * pc, MachineClass * vm ) {
     return pc;
 }
 SysInfo infoNextLineInputStream( 
-    SysNames( "nextLineInputStream" ), 
+    FullName( "nextLineInputStream" ), 
     Arity( 1 ), 
     Arity( 1 ), 
     sysNextLineInputStream, 
@@ -118,7 +118,7 @@ Ref * sysPeekLineInputStream( Ref * pc, MachineClass * vm ) {
     return pc;
 }
 SysInfo infoPeekLineInputStream(
-    SysNames( "peekLineInputStream" ), 
+    FullName( "peekLineInputStream" ), 
     Arity( 1 ), 
     Arity( 1 ), 
     sysPeekLineInputStream, 
@@ -145,7 +145,7 @@ Ref * sysIsOpenInputStream( Ref * pc, MachineClass * vm ) {
     return isOpenInputStream( pc, vm, SYS_TRUE, SYS_FALSE );
 }
 SysInfo infoIsOpenInputStream( 
-    SysNames( "isOpenInputStream" ), 
+    FullName( "isOpenInputStream" ), 
     Arity( 1 ), 
     Arity( 1 ), 
     sysIsOpenInputStream, 
@@ -156,7 +156,7 @@ Ref * sysIsClosedInputStream( Ref * pc, MachineClass * vm ) {
     return isOpenInputStream( pc, vm, SYS_FALSE, SYS_TRUE );
 }
 SysInfo infoIsClosedInputStream( 
-    SysNames( "isClosedInputStream" ), 
+    FullName( "isClosedInputStream" ), 
     Arity( 1 ), 
     Arity( 1 ), 
     sysIsClosedInputStream, 
@@ -192,7 +192,7 @@ Ref * sysNewInputStream( Ref * pc, MachineClass * vm ) {
     return pc;
 }
 SysInfo infoNewInputStream( 
-    SysNames( "newInputStream" ), 
+    FullName( "newInputStream" ), 
     Arity( 1 ), 
     Arity( 1 ), 
     sysNewInputStream, 
@@ -205,7 +205,7 @@ Ref * sysNextInputStream( Ref * pc, MachineClass * vm ) {
     return reinterpret_cast< Ginger::InputStreamExternal * >( input_stream_K[ EXTERNAL_KIND_OFFSET_VALUE ] )->sysApply( pc, vm );
 }
 SysInfo infoNextInputStream(
-    SysNames( "nextInputStream" ), 
+    FullName( "nextInputStream" ), 
     Arity( 1 ), 
     Arity( 1 ), 
     sysNextInputStream, 
@@ -229,7 +229,7 @@ Ref * sysPeekInputStream( Ref * pc, MachineClass * vm ) {
     return pc;
 }
 SysInfo infoPeekInputStream(
-    SysNames( "peekInputStream" ), 
+    FullName( "peekInputStream" ), 
     Arity( 1 ), 
     Arity( 1 ), 
     sysPeekInputStream, 
@@ -258,7 +258,7 @@ Ref * sysPushbackInputStream( Ref * pc, MachineClass * vm ) {
     return pc;
 }
 SysInfo infoPushbackInputStream(
-    SysNames( "pushInputStream" ), 
+    FullName( "pushInputStream" ), 
     Arity( 1, true ), 
     Arity( 0 ), 
     sysPushbackInputStream, 
@@ -293,7 +293,7 @@ Ref * sysNewOutputStream( Ref * pc, MachineClass * vm ) {
     return pc;
 }
 SysInfo infoNewOutputStream( 
-    SysNames( "newOutputStream" ), 
+    FullName( "newOutputStream" ), 
     Arity( 1 ), 
     Arity( 1 ), 
     sysNewOutputStream, 
@@ -323,7 +323,7 @@ Ref * sysIsOpenOutputStream( Ref * pc, MachineClass * vm ) {
     return isOpenOutputStream( pc, vm, SYS_TRUE, SYS_FALSE );
 }
 SysInfo infoIsOpenOutputStream(
-    SysNames( "isOpenOutputStream" ), 
+    FullName( "isOpenOutputStream" ), 
     Arity( 1 ), 
     Arity( 1 ), 
     sysIsOpenOutputStream, 
@@ -334,7 +334,7 @@ Ref * sysIsClosedOutputStream( Ref * pc, MachineClass * vm ) {
     return isOpenOutputStream( pc, vm, SYS_FALSE, SYS_TRUE );
 }
 SysInfo infoIsClosedOutputStream(
-    SysNames( "isClosedOutputStream" ), 
+    FullName( "isClosedOutputStream" ), 
     Arity( 1 ), 
     Arity( 1 ), 
     sysIsClosedOutputStream, 
@@ -349,7 +349,7 @@ Ref * sysCloseOutputStream( Ref * pc, MachineClass * vm ) {
     return pc;
 }
 SysInfo infoCloseOutputStream(
-    SysNames( "closeOutputStream" ), 
+    FullName( "closeOutputStream" ), 
     Arity( 1 ), 
     Arity( 0 ), 
     sysCloseOutputStream, 

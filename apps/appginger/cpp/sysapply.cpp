@@ -196,7 +196,7 @@ Ref * sysApply( Ref * pc, MachineClass *vm ) {
     }
 }
 SysInfo infoApplyData( 
-    SysNames( "applyData" ),   
+    FullName( "applyData" ),   
     Arity( 1, true ), 
     Arity( 0, true ), 
     sysApply, 

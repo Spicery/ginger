@@ -755,7 +755,7 @@ Ref * sysPow( Ref * pc, class MachineClass * vm ) {
 }
 
 SysInfo infoPow(
-    SysNames( "**" ),
+    FullName( "**" ),
     Ginger::Arity( 2 ), 
     Ginger::Arity( 1 ),  
     sysPow,
@@ -782,7 +782,7 @@ Ref * sysAbs( Ref *pc, class MachineClass * vm ) {
     return pc;
 }
 SysInfo infoAbs(
-    SysNames( "abs" ),
+    FullName( "abs" ),
     Ginger::Arity( 1 ), 
     Ginger::Arity( 1 ),  
     sysAbs,
@@ -798,7 +798,7 @@ Ref * sysMax( Ref * pc, class MachineClass * vm ) {
     return pc;
 }
 SysInfo infoMax( 
-    SysNames( "max" ), 
+    FullName( "max" ), 
     Ginger::Arity( 2, true ), 
     Ginger::Arity( 1 ), 
     sysMax, 
@@ -813,7 +813,7 @@ Ref * sysMin( Ref * pc, class MachineClass * vm ) {
     return pc;
 }
 SysInfo infoMin( 
-    SysNames( "min" ), 
+    FullName( "min" ), 
     Ginger::Arity( 2, true ), 
     Ginger::Arity( 1 ), 
     sysMin, 
@@ -837,7 +837,7 @@ Ref * sysMaxAll( Ref * pc, class MachineClass * vm ) {
     return pc;
 }
 SysInfo infoMaxAll( 
-    SysNames( "maxAll" ), 
+    FullName( "maxAll" ), 
     Ginger::Arity( 0, false ), 
     Ginger::Arity( 1 ), 
     sysMaxAll, 
@@ -861,7 +861,7 @@ Ref * sysMinAll( Ref * pc, class MachineClass * vm ) {
     return pc;
 }
 SysInfo infoMinAll( 
-    SysNames( "minAll" ), 
+    FullName( "minAll" ), 
     Ginger::Arity( 0, false ), 
     Ginger::Arity( 1 ), 
     sysMinAll, 
@@ -876,7 +876,7 @@ Ref * sysLtGt( Ref * pc, class MachineClass * vm ) {
     return pc;
 }
 SysInfo infoLtGt( 
-    SysNames( "<>" ), 
+    FullName( "<>" ), 
     Ginger::Arity( 2 ), 
     Ginger::Arity( 1 ), 
     sysLtGt, 
@@ -889,7 +889,7 @@ Ref * sysNotLtGt( Ref * pc, class MachineClass * vm ) {
     return pc;
 }
 SysInfo infoNotLtGt( 
-    SysNames( "!<>" ), 
+    FullName( "!<>" ), 
     Ginger::Arity( 2 ), 
     Ginger::Arity( 1 ), 
     sysNotLtGt, 
@@ -904,7 +904,7 @@ Ref * sysLtEGt( Ref * pc, class MachineClass * vm ) {
     return pc;
 }
 SysInfo infoLtEGt( 
-    SysNames( "<=>" ), 
+    FullName( "<=>" ), 
     Ginger::Arity( 2 ), 
     Ginger::Arity( 1 ), 
     sysLtEGt, 
@@ -917,7 +917,7 @@ Ref * sysNotLtEGt( Ref * pc, class MachineClass * vm ) {
     return pc;
 }
 SysInfo infoNotLtEGt( 
-    SysNames( "!<=>" ), 
+    FullName( "!<=>" ), 
     Ginger::Arity( 2 ), 
     Ginger::Arity( 1 ), 
     sysNotLtEGt, 
@@ -932,7 +932,7 @@ Ref * sysNotLt( Ref * pc, class MachineClass * vm ) {
     return pc;
 }
 SysInfo infoNotLt( 
-    SysNames( "!<" ), 
+    FullName( "!<" ), 
     Ginger::Arity( 2 ), 
     Ginger::Arity( 1 ), 
     sysNotLt, 
@@ -947,7 +947,7 @@ Ref * sysNotLtE( Ref * pc, class MachineClass * vm ) {
     return pc;
 }
 SysInfo infoNotLtE( 
-    SysNames( "!<=" ), 
+    FullName( "!<=" ), 
     Ginger::Arity( 2 ), 
     Ginger::Arity( 1 ), 
     sysNotLtE, 
@@ -962,7 +962,7 @@ Ref * sysNotGt( Ref * pc, class MachineClass * vm ) {
     return pc;
 }
 SysInfo infoNotGt( 
-    SysNames( "!>" ), 
+    FullName( "!>" ), 
     Ginger::Arity( 2 ), 
     Ginger::Arity( 1 ), 
     sysNotGt, 
@@ -977,7 +977,7 @@ Ref * sysNotGtE( Ref * pc, class MachineClass * vm ) {
     return pc;
 }
 SysInfo infoNotGtE( 
-    SysNames( "!>=" ), 
+    FullName( "!>=" ), 
     Ginger::Arity( 2 ), 
     Ginger::Arity( 1 ), 
     sysNotGtE, 
@@ -1135,7 +1135,7 @@ Ref * sysDivMod( Ref * pc, class MachineClass * vm ) {
     return pc;    return pc;
 }
 SysInfo infoDivMod( 
-    SysNames( "divmod" ), 
+    FullName( "divmod" ), 
     Ginger::Arity( 2 ), 
     Ginger::Arity( 2 ), 
     sysDivMod, 

@@ -80,7 +80,7 @@ Ref * sysMD5( Ref * pc, class MachineClass * vm ) {
     return pc;
 }
 SysInfo infoSysMD5( 
-    SysNames( "sysMD5" ), 
+    FullName( "sysMD5" ), 
     Ginger::Arity( 1 ), 
     Ginger::Arity( 1 ), 
     sysMD5, 

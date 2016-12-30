@@ -185,7 +185,7 @@ def generateMathSysFn( sysfn_name, arity_args, arity_rtn, doc_string ):
 				'    return pc;',
 				'}}',
 				'SysInfo info_{name}(',
-				'    SysNames( "{name}" ),',
+				'    FullName( "{name}" ),',
 				'    Ginger::Arity( {args} ),',
 				'    Ginger::Arity( {rtn} ),',
 				'    sys_{name},',

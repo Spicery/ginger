@@ -45,7 +45,7 @@ Ref * sysAttrMapExplode( Ref *pc, class MachineClass * vm ) {
 }
 //SysMap::value_type( "attrMapExplode", SysInfo( Arity( 1 ), Arity( 0, true ), sysAttrMapExplode, "Explodes an attribute-map into its members" ) ),
 SysInfo infoAttrMapExplode( 
-    SysNames( "attrMapExplode" ), 
+    FullName( "attrMapExplode" ), 
     Ginger::Arity( 1 ), 
     Ginger::Arity( 0, true ), 
     sysAttrMapExplode, 
@@ -75,7 +75,7 @@ Ref * sysAttrMapIndex( Ref *pc, class MachineClass * vm ) {
 }
 //SysMap::value_type( "attrMapIndex", SysInfo( Arity( 2 ), Arity( 1 ), sysAttrMapIndex, "Indexes an attribute-map" ) ),
 SysInfo infoAttrMapIndex( 
-    SysNames( "attrMapIndex" ), 
+    FullName( "attrMapIndex" ), 
     Ginger::Arity( 2 ), 
     Ginger::Arity( 1 ), 
     sysAttrMapIndex, 

@@ -103,7 +103,7 @@ Ref * sysExplodeMapsAndMaplets( Ref *pc, class MachineClass * vm ) {
 	return pc;
 }
 SysInfo infoExplodeMapsAndMaplets( 
-    SysNames( "explodeMapsAndMaplets" ), 
+    FullName( "explodeMapsAndMaplets" ), 
     Arity( 0, true ), 
     Arity( 0, true ), 
     sysExplodeMapsAndMaplets, 

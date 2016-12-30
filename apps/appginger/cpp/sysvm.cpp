@@ -51,7 +51,7 @@ Ref * sysVirtualMachineLoadFile( Ref * pc, class MachineClass * vm ) {
 
 }
 SysInfo infoVirtualMachineLoadFile( 
-    SysNames( "virtualMachineLoadFile" ), 
+    FullName( "virtualMachineLoadFile" ), 
     Ginger::Arity( 2 ), 
     Ginger::Arity( 0 ), 
     sysVirtualMachineLoadFile, 
@@ -71,7 +71,7 @@ Ref * sysVMResults( Ref * pc, class MachineClass * vm ) {
     return pc;
 }
 SysInfo infoVMResults( 
-    SysNames( "virtualMachineResults" ), 
+    FullName( "virtualMachineResults" ), 
     Ginger::Arity( 1 ), 
     Ginger::Arity( 0 ), 
     sysVMResults, 
@@ -90,7 +90,7 @@ Ref * sysNewVM( Ref * pc, class MachineClass * vm ) {
     return pc;
 }
 SysInfo infoNewVM( 
-    SysNames( "newVirtualMachine" ), 
+    FullName( "newVirtualMachine" ), 
     Ginger::Arity( 0 ), 
     Ginger::Arity( 1 ), 
     sysNewVM, 

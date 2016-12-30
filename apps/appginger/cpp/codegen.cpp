@@ -946,8 +946,8 @@ void CodeGenClass::compileIfTest( bool sense, Gnx mnx, LabelClass * dst, LabelCl
 
 	//	This next section should be refactored.
 	if ( mnx->name() == GNX_SYSAPP ) {
-		SysMap::iterator it = SysMap::sysMap().find( mnx->attribute( GNX_SYSAPP_NAME ) );
-		if ( it != SysMap::sysMap().end() ) {
+		SysMap::iterator it = SysMap::systemFunctionsMap().find( mnx->attribute( GNX_SYSAPP_NAME ) );
+		if ( it != SysMap::systemFunctionsMap().end() ) {
 			const SysInfo & info = it->second;
 			if ( 
 				info.isCmpOp() and mnx->size() == 2 and
@@ -1514,8 +1514,8 @@ void CodeGenClass::compileChildrenChecked( Gnx mnx, Arity arity ) {
 
 void CodeGenClass::compileGnxSysApp( Gnx mnx, LabelClass * contn ) {
 	const string & nm = mnx->attribute( GNX_SYSAPP_NAME );
-	SysMap::iterator it = SysMap::sysMap().find( nm );
-	if ( it != SysMap::sysMap().end() ) {
+	SysMap::iterator it = SysMap::systemFunctionsMap().find( nm );
+	if ( it != SysMap::systemFunctionsMap().end() ) {
 		const SysInfo & info = it->second;
 		if ( info.isSysCall() ) {
 			int v = this->tmpvar();

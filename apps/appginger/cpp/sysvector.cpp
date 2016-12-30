@@ -72,7 +72,7 @@ Ref * sysVectorAppend( Ref * pc, class MachineClass * vm ) {
 	return pc;
 }
 SysInfo infoVectorAppend( 
-	SysNames( "appendVector" ), 
+	FullName( "appendVector" ), 
 	Ginger::Arity( 2 ), 
 	Ginger::Arity( 1 ), 
 	sysVectorAppend, 
@@ -85,7 +85,7 @@ Ref * sysIsVectorLike( Ref *pc, class MachineClass * vm ) {
 	return pc;
 }
 SysInfo infoIsVectorLike( 
-	SysNames( "isVectorLike" ), 
+	FullName( "isVectorLike" ), 
 	Ginger::Arity( 1 ), 
 	Ginger::Arity( 1 ), 
 	sysIsVectorLike, 
@@ -108,7 +108,7 @@ Ref * sysVectorExplode( Ref *pc, class MachineClass * vm ) {
 	return pc;
 }
 SysInfo infoVectorExplode( 
-	SysNames( "explodeVector" ), 
+	FullName( "explodeVector" ), 
 	Ginger::Arity( 1 ), 
 	Ginger::Arity( 0, true ), 
 	sysVectorExplode, 
@@ -126,7 +126,7 @@ Ref * sysVectorLength( Ref *pc, class MachineClass * vm ) {
 	return pc;
 }
 SysInfo infoVectorLength( 
-	SysNames( "lengthVector" ), 
+	FullName( "lengthVector" ), 
 	Ginger::Arity( 1 ), 
 	Ginger::Arity( 1 ), 
 	sysVectorLength, 

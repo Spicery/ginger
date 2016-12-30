@@ -37,7 +37,7 @@ Ref * sysSwap( Ref *pc, class MachineClass * vm ) {
 }
 
 SysInfo infoSwap(
-    SysNames( "swap" ), 
+    FullName( "swap" ), 
     Arity( 2 ), 
     Arity( 2 ), 
     sysSwap, 
@@ -51,7 +51,7 @@ Ref * sysEraseAll( Ref * pc, class MachineClass * vm ) {
     return pc;
 }
 SysInfo infoEraseAll(
-    SysNames( "eraseAll" ),
+    FullName( "eraseAll" ),
     Arity( 0, true ), 
     Arity( 0 ), 
     sysEraseAll, 
@@ -90,7 +90,7 @@ Ref * sysEraseLeading( Ref * pc, class MachineClass * vm ) {
     return pc;
 }
 SysInfo infoEraseLeading(
-    SysNames( "eraseLeading" ),
+    FullName( "eraseLeading" ),
     Arity( 1, true ),
     Arity( 0, true ),
     sysEraseLeading,
@@ -120,7 +120,7 @@ Ref * sysEraseAllButLeading( Ref * pc, class MachineClass * vm ) {
     return pc;
 }
 SysInfo infoEraseAllButLeading(
-    SysNames( "eraseAllButLeading" ),
+    FullName( "eraseAllButLeading" ),
     Arity( 1, true ),
     Arity( 0, true ),
     sysEraseAllButLeading,
@@ -150,7 +150,7 @@ Ref * sysEraseTrailing( Ref * pc, class MachineClass * vm ) {
     return pc;
 }
 SysInfo infoEraseTrailing(
-    SysNames( "eraseTrailing" ),
+    FullName( "eraseTrailing" ),
     Arity( 1, true ),
     Arity( 0, true ),
     sysEraseTrailing,
@@ -190,7 +190,7 @@ Ref * sysEraseAllButTrailing( Ref * pc, class MachineClass * vm ) {
     return pc;
 }
 SysInfo infoEraseAllButTrailing(
-    SysNames( "eraseAllButTrailing" ),
+    FullName( "eraseAllButTrailing" ),
     Arity( 1, true ),
     Arity( 0, true ),
     sysEraseAllButTrailing,
@@ -216,7 +216,7 @@ Ref * sysEraseFirst( Ref * pc, class MachineClass * vm ) {
     return pc;
 }
 SysInfo infoEraseFirst(
-    SysNames( "eraseFirst" ),
+    FullName( "eraseFirst" ),
     Arity( 1, true ),
     Arity( 0, true ),
     sysEraseFirst,
@@ -233,7 +233,7 @@ Ref * sysEraseAllButFirst( Ref * pc, class MachineClass * vm ) {
     return pc;
 }
 SysInfo infoEraseAllButFirst(
-    SysNames( "eraseAllButFirst" ),
+    FullName( "eraseAllButFirst" ),
     Arity( 1, true ),
     Arity( 1 ),
     sysEraseAllButFirst,
@@ -250,7 +250,7 @@ Ref * sysEraseLast( Ref * pc, class MachineClass * vm ) {
     return pc;
 }
 SysInfo infoEraseLast(
-    SysNames( "eraseLast" ),
+    FullName( "eraseLast" ),
     Arity( 1, true ),
     Arity( 0, true ),
     sysEraseLast,
@@ -269,7 +269,7 @@ Ref * sysEraseAllButLast( Ref * pc, class MachineClass * vm ) {
     return pc;
 }
 SysInfo infoEraseAllButLast(
-    SysNames( "eraseAllButLast" ),
+    FullName( "eraseAllButLast" ),
     Arity( 1, true ),
     Arity( 1 ),
     sysEraseAllButLast,
@@ -287,7 +287,7 @@ Ref * sysDupAll( Ref * pc, class MachineClass * vm ) {
     return pc;
 }
 SysInfo infoDupAll(
-    SysNames( "dupAll" ),
+    FullName( "dupAll" ),
     Arity( 0, true ),
     Arity( 0, true ),
     sysDupAll,
@@ -306,7 +306,7 @@ Ref * sysDupFirst( Ref * pc, class MachineClass * vm ) {
     return pc;
 }
 SysInfo infoDupFirst(
-    SysNames( "dupFirst" ),
+    FullName( "dupFirst" ),
     Arity( 1, true ),
     Arity( 2, true ),
     sysDupFirst,
@@ -327,7 +327,7 @@ Ref * sysDupAllButFirst( Ref * pc, class MachineClass * vm ) {
     return pc;
 }
 SysInfo infoDupAllButFirst(
-    SysNames( "dupAllButFirst" ),
+    FullName( "dupAllButFirst" ),
     Arity( 1, true ),
     Arity( 1, true ),
     sysDupAllButFirst,
@@ -359,7 +359,7 @@ Ref * sysDupLeading( Ref * pc, class MachineClass * vm ) {
     return pc;
 }
 SysInfo infoDupLeading(
-    SysNames( "dupLeading" ),
+    FullName( "dupLeading" ),
     Arity( 1, true ),
     Arity( 0, true ),
     sysDupLeading,
@@ -391,7 +391,7 @@ Ref * sysDupAllButLeading( Ref * pc, class MachineClass * vm ) {
     return pc;
 }
 SysInfo infoDupAllButLeading(
-    SysNames( "dupAllButLeading" ),
+    FullName( "dupAllButLeading" ),
     Arity( 1, true ),
     Arity( 0, true ),
     sysDupAllButLeading,
@@ -409,7 +409,7 @@ Ref * sysDupLast( Ref * pc, class MachineClass * vm ) {
     return pc;
 }
 SysInfo infoDupLast(
-    SysNames( "dupLast" ),
+    FullName( "dupLast" ),
     Arity( 1, true ),
     Arity( 2, true ),
     sysDupLast,
@@ -431,7 +431,7 @@ Ref * sysDupAllButLast( Ref * pc, class MachineClass * vm ) {
     return pc;
 }
 SysInfo infoDupAllButLast(
-    SysNames( "dupAllButLast" ),
+    FullName( "dupAllButLast" ),
     Arity( 1, true ),
     Arity( 1, true ),
     sysDupAllButLast,
@@ -463,7 +463,7 @@ Ref * sysDupTrailing( Ref * pc, class MachineClass * vm ) {
     return pc;
 }
 SysInfo infoDupTrailing(
-    SysNames( "dupTrailing" ),
+    FullName( "dupTrailing" ),
     Arity( 1, true ),
     Arity( 0, true ),
     sysDupTrailing,
@@ -496,7 +496,7 @@ Ref * sysDupAllButTrailing( Ref * pc, class MachineClass * vm ) {
     return pc;
 }
 SysInfo infoDupAllButTrailing(
-    SysNames( "dupAllButTrailing" ),
+    FullName( "dupAllButTrailing" ),
     Arity( 1, true ),
     Arity( 0, true ),
     sysDupAllButTrailing,
@@ -509,7 +509,7 @@ Ref * sysIdentfn( Ref * pc, class MachineClass * vm ) {
     return pc;
 }
 SysInfo infoIdentfn(
-    SysNames( "identfn" ),
+    FullName( "identfn" ),
     Arity( 0, true ),
     Arity( 0, true ),
     sysIdentfn,

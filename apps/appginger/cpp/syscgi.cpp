@@ -35,7 +35,7 @@ Ref * cgiValue( Ref * pc, class MachineClass * vm ) {
 	return pc;
 }
 SysInfo infoCgiValue( 
-    SysNames( "cgiValue" ), 
+    FullName( "cgiValue" ), 
     Arity( 1 ), 
     Arity( 1 ), 
     cgiValue, 

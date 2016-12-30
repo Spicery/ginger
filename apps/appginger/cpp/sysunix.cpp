@@ -64,7 +64,7 @@ Ref * sysGetEnv( Ref * pc, class MachineClass * vm ) {
 	return pc;
 }
 SysInfo infoSysGetEnv( 
-    SysNames( "sysGetEnv" ), 
+    FullName( "sysGetEnv" ), 
     Ginger::Arity( 1 ), 
     Ginger::Arity( 1 ), 
     sysGetEnv, 
@@ -90,7 +90,7 @@ Ref * sysPutEnv( Ref * pc, class MachineClass * vm ) {
 	return pc;
 }
 SysInfo infoSysPutEnv( 
-    SysNames( "sysPutEnv" ), 
+    FullName( "sysPutEnv" ), 
     Ginger::Arity( 2 ), 
     Ginger::Arity( 0 ), 
     sysPutEnv, 
@@ -117,7 +117,7 @@ Ref * sysEnvVars( Ref * pc, class MachineClass * vm ) {
 	return pc;
 }
 SysInfo infoSysEnvVars( 
-    SysNames( "sysEnv" ), 
+    FullName( "sysEnv" ), 
     Ginger::Arity( 0 ), 
     Ginger::Arity( 1 ), 
     sysEnvVars, 

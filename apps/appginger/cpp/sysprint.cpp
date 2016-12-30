@@ -46,7 +46,7 @@ Ref * sysRefPrint( Ref * pc, class MachineClass * vm ) {
 	return pc;
 }
 SysInfo infoRefPrint( 
-	SysNames( "print" ), 
+	FullName( "print" ), 
 	Ginger::Arity( 0, true ), 
 	Ginger::Arity( 0 ), 
 	sysRefPrint, 
@@ -59,7 +59,7 @@ Ref * sysRefPrintln( Ref * pc, class MachineClass * vm ) {
 	return pc;
 }
 SysInfo infoRefPrintln( 
-	SysNames( "println" ), 
+	FullName( "println" ), 
 	Ginger::Arity( 0, true ), 
 	Ginger::Arity( 0 ), 
 	sysRefPrintln, 
@@ -82,7 +82,7 @@ Ref * sysRefShow( Ref * pc, class MachineClass * vm ) {
 	return pc;
 }
 SysInfo infoSysPrint( 
-	SysNames( "sysPrint" ), 
+	FullName( "sysPrint" ), 
 	Ginger::Arity( 1, true ), 
 	Ginger::Arity( 0 ), 
 	sysRefShow, 
@@ -98,12 +98,13 @@ Ref * sysRefShowln( Ref * pc, class MachineClass * vm ) {
 	return pc;
 }
 SysInfo infoSysPrintln( 
-	SysNames( "showMe", SysNames::SysSynonym( "sysPrintln" ) ), 
+	FullName( "showMe" ), 
 	Ginger::Arity( 1, true ), 
 	Ginger::Arity( 0 ), 
 	sysRefShowln, 
 	"Prints any values in summary format and then adds a new line" 
 );
+RegisterSysAltName altSysPrintln( infoSysPrintln, "ginger.library", "sysPrintln" );
 
 //------------------------------------------------------------------------------
 
@@ -163,12 +164,13 @@ Ref * sysShowMeRuntimeInfo( Ref * pc, class MachineClass * vm ) {
 	return pc;
 }
 SysInfo infoShowMeRuntimeInfo(
-	SysNames( "showMeRuntimeInfo", SysNames::SysSynonym( "gingerInfo" ) ),
+	FullName( "showMeRuntimeInfo" ),
 	Ginger::Arity( 0 ), 
 	Ginger::Arity( 0 ), 
 	sysShowMeRuntimeInfo, 
 	"Prints the runtime info to stdout"
 );
+RegisterSysAltName altShowMeRuntimeInfo( infoShowMeRuntimeInfo, "ginger.library", "gingerInfo" );
 
 // - printf & printfln ---------------------------------------------------------
 //	
@@ -230,7 +232,7 @@ Ref * sysPrintf( Ref * pc, class MachineClass * vm ) {
 	return pc;
 }
 SysInfo infoPrintf( 
-	SysNames( "printf" ), 
+	FullName( "printf" ), 
 	Ginger::Arity( 1, true ), 
 	Ginger::Arity( 0 ), 
 	sysPrintf, 
@@ -243,7 +245,7 @@ Ref * sysPrintfln( Ref * pc, class MachineClass * vm ) {
 	return pc;
 }
 SysInfo infoPrintfln( 
-	SysNames( "printfln" ), 
+	FullName( "printfln" ), 
 	Ginger::Arity( 1, true ), 
 	Ginger::Arity( 0 ), 
 	sysPrintfln, 
@@ -258,7 +260,7 @@ Ref * sysStringf( Ref * pc, class MachineClass * vm ) {
 	return pc;
 }
 SysInfo infoStringf( 
-	SysNames( "stringf" ), 
+	FullName( "stringf" ), 
 	Ginger::Arity( 1, true ), 
 	Ginger::Arity( 0 ), 
 	sysStringf, 
@@ -287,7 +289,7 @@ Ref * sysStringPrint( Ref * pc, class MachineClass * vm ) {
 	return pc;
 }
 SysInfo infoStringPrint( 
-	SysNames( "stringPrint" ), 
+	FullName( "stringPrint" ), 
 	Ginger::Arity( 0, true ), 
 	Ginger::Arity( 1 ), 
 	sysStringPrint, 

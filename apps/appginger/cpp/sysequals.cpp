@@ -417,7 +417,7 @@ Ref * sysEquals( Ref * pc, class MachineClass * vm ) {
 	}
 }
 SysInfo infoEquals( 
-    SysNames( "==" ), 
+    FullName( "==" ), 
     Ginger::Arity( 2 ), 
     Ginger::Arity( 1 ), 
     sysEquals, 
@@ -436,7 +436,7 @@ Ref * sysInexactlyEquals( Ref * pc, class MachineClass * vm ) {
 	}
 }
 SysInfo infoInexactlyEquals( 
-    SysNames( "=" ), 
+    FullName( "=" ), 
     Ginger::Arity( 2 ), 
     Ginger::Arity( 1 ), 
     sysInexactlyEquals, 
@@ -449,7 +449,7 @@ Ref * sysNotEquals( Ref * pc, class MachineClass * vm ) {
 	return pc;
 }
 SysInfo infoNotEquals( 
-    SysNames( "!=" ), 
+    FullName( "!=" ), 
     Ginger::Arity( 2 ), 
     Ginger::Arity( 1 ), 
     sysNotEquals, 

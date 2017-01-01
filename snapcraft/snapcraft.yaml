@@ -2,7 +2,7 @@ name: ginger
 version: "0.9.2"
 summary: "The Ginger programming language, packaged as a snap"
 description: "Ginger itself is a intended to be a rigorous but friendly programming language and supporting toolset. It includes a syntax-neutral programming language, a virtual machine implemented in C++ that is designed to support the family of Spice language efficiently, and a collection of supporting tools."
-confinement: strict
+confinement: devmode
 
 apps:
     ginger:
@@ -14,4 +14,4 @@ parts:
     ginger-steelypip:
         plugin: autotools
         configflags: ["--enable-snap"]
-        source: ..
+        source: https://github.com/Spicery/ginger.git

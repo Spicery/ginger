@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.61)
-AC_INIT([Ginger],[0.9.2-dev],[https://github.com/Spicery/ginger],[ginger])
+AC_INIT([Ginger],[0.9.2],[https://github.com/Spicery/ginger],[ginger])
 AC_CONFIG_SRCDIR([appginger.png])
 AC_CONFIG_HEADER([config.h])
 

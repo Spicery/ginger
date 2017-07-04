@@ -16,7 +16,11 @@ CC=@CXX@
 
 INSTALLDIRS=-DINSTALL_BIN='"$(INSTALL_BIN)"' -DINSTALL_LIB='"$(INSTALL_LIB)"' -DINSTALL_TOOL='"$(INSTALL_TOOL)"'
 
-CXXFLAGS=-DRUDECGI $(INSTALLDIRS) -DUSESNAP=$(USESNAP) -g -std=c++11 -I../hpp -I../../libgng/hpp -I../../automatic/machine -I../../automatic/sys -I../../automatic/sysfn -I../../automatic/simple -Wall -Wnon-virtual-dtor
+CXXFLAGS:=-DRUDECGI $(INSTALLDIRS) -DUSESNAP=$(USESNAP) -g -std=c++11 -I../hpp -I../../libgng/hpp -I../../automatic/machine -I../../automatic/sys -I../../automatic/sysfn -I../../automatic/simple -Wall -Wnon-virtual-dtor
+ifeq ($(shell uname),Darwin)
+	CXXFLAGS:=$(CXXFLAGS) -I/usr/local/include
+endif
+
 
 # In order to exclude machine implementations, uncomment one or more of
 # the following lines.
@@ -78,7 +82,7 @@ LIBAPPGINGER:=
 ifneq ($(shell uname),Darwin)
 	LIBAPPGINGER=-Wl,--whole-archive libappginger.a -Wl,--no-whole-archive
 else
-	LIBAPPGINGER=-Wl,-force_load libappginger.a -L/usr/local/lib -I/usr/local/include
+	LIBAPPGINGER=-Wl,-force_load libappginger.a -L/usr/local/lib
 endif
 
 LIBRARIES=../../libgng/cpp/libgng.a /usr/local/lib/librudecgi.a -lgmp -lgmpxx -lcrypto -lssl -lreadline
@@ -86,21 +90,21 @@ LIBRARIES=../../libgng/cpp/libgng.a /usr/local/lib/librudecgi.a -lgmp -lgmpxx -l
 # $@ is make shorthand for the target.
 # $@ is make shorthand for the dependencies
 ginger-info: libappginger.a infomain.o
-	ranlib libappginger.a ../../libgng/cpp/libgng.a
+	#ranlib libappginger.a ../../libgng/cpp/libgng.a
 	$(CXX) $(CXXFLAGS) $(BOOST_CPPFLAGS) -o $@ infomain.o $(LIBAPPGINGER) $(LIBRARIES)
 	./ginger-info -H > info-debug.hlp
 	./ginger-info -r > info-debug.rst
 
 ginger-cli: libappginger.a climain.o
-	ranlib libappginger.a ../../libgng/cpp/libgng.a
+	#ranlib libappginger.a ../../libgng/cpp/libgng.a
 	$(CXX) $(CXXFLAGS) $(BOOST_CPPFLAGS) -o $@ climain.o $(LIBAPPGINGER) $(LIBRARIES)
 
 ginger-cgi: libappginger.a cgimain.o
-	ranlib libappginger.a ../../libgng/cpp/libgng.a
+	#ranlib libappginger.a ../../libgng/cpp/libgng.a
 	$(CXX) $(CXXFLAGS) $(BOOST_CPPFLAGS) -o $@ cgimain.o $(LIBAPPGINGER) $(LIBRARIES)
 
 ginger-script: libappginger.a scriptmain.o
-	ranlib libappginger.a ../../libgng/cpp/libgng.a
+	#ranlib libappginger.a ../../libgng/cpp/libgng.a
 	$(CXX) $(CXXFLAGS) $(BOOST_CPPFLAGS) -o $@ scriptmain.o $(LIBAPPGINGER) $(LIBRARIES)
 
 clean:
@@ -113,3 +117,4 @@ check:
 	
 libappginger.a: $(OBJS)
 	ar -rcs $@ $+
+	ranlib $+ ../../libgng/cpp/libgng.a

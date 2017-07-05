@@ -96,15 +96,12 @@ ginger-info: libappginger.a infomain.o
 	./ginger-info -r > info-debug.rst
 
 ginger-cli: libappginger.a climain.o
-	#ranlib libappginger.a ../../libgng/cpp/libgng.a
 	$(CXX) $(CXXFLAGS) $(BOOST_CPPFLAGS) -o $@ climain.o $(LIBAPPGINGER) $(LIBRARIES)
 
 ginger-cgi: libappginger.a cgimain.o
-	#ranlib libappginger.a ../../libgng/cpp/libgng.a
 	$(CXX) $(CXXFLAGS) $(BOOST_CPPFLAGS) -o $@ cgimain.o $(LIBAPPGINGER) $(LIBRARIES)
 
 ginger-script: libappginger.a scriptmain.o
-	#ranlib libappginger.a ../../libgng/cpp/libgng.a
 	$(CXX) $(CXXFLAGS) $(BOOST_CPPFLAGS) -o $@ scriptmain.o $(LIBAPPGINGER) $(LIBRARIES)
 
 clean:
@@ -116,5 +113,6 @@ clean:
 check:
 	
 libappginger.a: $(OBJS)
-	ar -rcs $@ $+
-	ranlib $+ ../../libgng/cpp/libgng.a
+	ar -rcs libappginger.a.tmp $+
+	ranlib libappginger.a.tmp
+	mv libappginger.a.tmp $@

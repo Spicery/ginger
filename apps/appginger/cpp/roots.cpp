@@ -16,9 +16,25 @@
     along with AppGinger.  If not, see <http://www.gnu.org/licenses/>.
 \******************************************************************************/
 
+#include "common.hpp"
 #include "roots.hpp"
 
 namespace Ginger {
+
+DynamicRoots::DynamicRoots( MachineClass * vm ) : 
+    vm( vm ),
+    saved_length( vm->spare_registers.size() )
+{
+}
+
+DynamicRoots::~DynamicRoots() {
+    this->vm->spare_registers.resize( this->saved_length );
+}
+
+Cell & DynamicRoots::nextRoot( const Cell initial_value ) {
+    this->vm->spare_registers.push_back( initial_value );
+    return this->vm->spare_registers.back();
+}
 
 Roots::Roots( MachineClass * vm ) :
 	registers( vm->registers ),

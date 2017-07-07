@@ -397,6 +397,12 @@ private:
 			this->forward( this->vm->registers.get( i ) );
 		}
 	}
+
+	void forwardDynamicRoots() {
+		for ( auto & c : this->vm->spare_registers ) {
+			this->forward( c.asRRef() );
+		}	
+	}
 	
 	void forwardRoots( const bool scan_call_stack ) {
 		if ( this->tracker ) this->tracker->startValueStack();
@@ -413,6 +419,9 @@ private:
 		if ( this->tracker ) this->tracker->startRegisters();
 		this->forwardRegisters();
 		if ( this->tracker ) this->tracker->endRegisters();
+		if ( this->tracker ) this->tracker->startDynamicRoots();
+		this->forwardDynamicRoots();
+		if ( this->tracker ) this->tracker->endDynamicRoots();
 	}
 	
 	static bool isTargetForwarded( Ref r ) {

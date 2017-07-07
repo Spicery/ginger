@@ -25,6 +25,18 @@
 
 namespace Ginger {
 
+class DynamicRoots {
+private:
+	MachineClass * vm;
+	size_t saved_length;
+public:
+	DynamicRoots( MachineClass * vm );
+	~DynamicRoots();
+public:
+	Cell & nextRoot() { return this->nextRoot( SYS_ABSENT ); }
+	Cell & nextRoot( const Cell initial_value );
+};
+
 class Roots {
 private:
 	Registers & registers;

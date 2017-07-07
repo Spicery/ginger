@@ -46,6 +46,8 @@ public:
 	virtual void endDictionary() {}
 	virtual void startRegisters() {}
 	virtual void endRegisters() {}
+	virtual void startDynamicRoots() {}
+	virtual void endDynamicRoots() {}
 	virtual void startGarbageCollection() {}
 	virtual void endGarbageCollection() {}
 	virtual void pickedObjectToCopy( Ref * obj ) {}

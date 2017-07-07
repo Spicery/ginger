@@ -40,6 +40,8 @@ public:
 	void endDictionary();
 	void startRegisters();
 	void endRegisters();
+	void startDynamicRoots();
+	void endDynamicRoots();
 	void startGarbageCollection();
 	void endGarbageCollection();
 	void pickedObjectToCopy( Ref * obj );

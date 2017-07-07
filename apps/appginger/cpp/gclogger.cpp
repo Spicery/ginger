@@ -77,6 +77,13 @@ void GCLogger::startRegisters() {
 void GCLogger::endRegisters() {
 }
 
+void GCLogger::startDynamicRoots() {
+	gclog << "Forward dynamic roots" << endl;
+}
+
+void GCLogger::endDynamicRoots() {
+}
+
 void GCLogger::startGarbageCollection() {
 	gclog << "### " << ( scan_call_stack ? "" : "Quiescent " ) << "GC" << endl;	
 }

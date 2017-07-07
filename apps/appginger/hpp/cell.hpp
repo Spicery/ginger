@@ -67,6 +67,7 @@ public:
 
 	HeapObject asHeapObject() const;
 	Ref asRef() const { return this->ref; }
+	Ref & asRRef() { return this->ref; }
 	long getLong() const { return SmallToLong( this->ref ); }
 	bool isSimple() const { return IsSimple( this->ref ); }
 	bool isPositive() const { return ToLong( this->ref ) > 0; }

@@ -8,7 +8,8 @@ before_install:
     - sudo apt-get -qq update
     - sudo apt-get -qq install uuid-dev
     - sudo apt-get -qq install libreadline-dev
-    - sudo apt-get -qq install python-nose
+    - sudo apt-get -qq install python3
+    - sudo apt-get -qq install python3-nose2
     - sudo apt-get -qq install guile-2.0
     - sudo apt-get -qq install libpcap-dev libssl-dev
     - sudo apt-get -qq install libgmp-dev

@@ -37,7 +37,7 @@ def writeMaplet( pw, alt_name, base_name, e ):
     )
 
 def generateMetaInfo():
-    metainfo = json.loads( subprocess.check_output( [ "../../appginger/cpp/ginger-info", "-j" ] ) )
+    metainfo = json.loads( str( subprocess.check_output( [ "../../appginger/cpp/ginger-info", "-j" ] ), 'utf-8' ) )
     stdinfo = metainfo[ "std" ]
     synonyms = metainfo[ "synonyms" ]
 

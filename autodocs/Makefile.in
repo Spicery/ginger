@@ -8,7 +8,7 @@ clean:
 
 $(BUILDDIR)/instruction_set.rst: *.i*
 	mkdir -p $(BUILDDIR)
-	python make_instrsetdocs.py $(INSTRUCTIONSDIR) > $(BUILDDIR)/instruction_set.rst
+	python3 make_instrsetdocs.py $(INSTRUCTIONSDIR) > $(BUILDDIR)/instruction_set.rst
 
 $(BUILDDIR)/sysfns.rst:
 	../apps/appginger/cpp/ginger-info --rst > $(BUILDDIR)/sysfns.rst

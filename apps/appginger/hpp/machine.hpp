@@ -129,10 +129,16 @@ public:
     
 public:
     Ref &           fastPeek() { return *vp; }
+    void            fastPoke( Cell c ) { *vp = c.asRef(); }
     Ref &           fastPeek( int n ) { return *( vp - n ); } 
+    void            fastPoke( int n, Cell c ) { *( vp - n ) = c.asRef(); } 
     Ref             fastPop() { return *vp--; }
+    Cell            fastPopAsCell() { return *vp--; }
     Ref             fastSet( Ref r ) { return *vp = r; }
+    Ref             fastSet( Cell c ) { return *vp = c.asRef(); }
     void            fastPush( Ref r ) { *++vp = r; }
+    void            fastPush( Cell c ) { *++vp = c.asRef(); }
+    void            fastPushLong( const long n ) { fastPush( Cell( n ) ); }
     Ref             fastSubscr( int n ) { return *( vp - n ); }
     void            fastDrop( int n ) { vp -= n; }
     ptrdiff_t       stackLength() { return this->vp - this->vp_base; }

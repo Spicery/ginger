@@ -142,22 +142,22 @@ Ref * sysNewClass( Ref * pc, MachineClass * vm ) {
 	pc = sysClassSlots( pc, vm );		
 	
 	//	Save the slots list and compute a new class object.
-	Roots roots( vm );
-	Ref & slots = roots.reserveRegister( vm->fastPeek() );
-	vm->fastPeek() = RefToPtr4( slots )[ VECTOR_LAYOUT_OFFSET_LENGTH ];
+	DynamicRoots droots( vm );
+	Cell & slots = droots.nextRoot( vm->fastPeek() );
+	vm->fastPoke( slots.index( VECTOR_LAYOUT_OFFSET_LENGTH ) );
 	
 	//	Compute the new class object.
 	vm->count = 2;
 	pc = sysNewRecordClass( pc, vm );
-	Ref & gclass = roots.reserveRegister( vm->fastPop() );
+	Cell & gclass = droots.nextRoot( vm->fastPop() );
 	
 	//	For each position, set up the slot.
-	const long nslots = lengthOfVectorLayout( RefToPtr4( slots ) );
+	const long nslots = slots.asVectorObject().length();
 	for ( long i = 1; i <= nslots; i++ ) {
 		vm->count = 3;
 		vm->fastPush( gclass );
-		vm->fastPush( LongToSmall( i ) );
-		vm->fastPush( INDEX( slots, i ) );
+		vm->fastPushLong( i );
+		vm->fastPush( slots.index( i ) );
 		pc = sysSetSlot( pc, vm );
 	}
 	

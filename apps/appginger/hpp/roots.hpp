@@ -35,6 +35,7 @@ public:
 public:
 	Cell & nextRoot() { return this->nextRoot( SYS_ABSENT ); }
 	Cell & nextRoot( const Cell initial_value );
+	Cell & nextRoot( const Ref initial_value ) { return this->nextRoot( Cell( initial_value ) ); }
 };
 
 class Roots {

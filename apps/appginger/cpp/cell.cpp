@@ -72,6 +72,10 @@ StringObject Cell::asStringObject() const {
 	return this->asHeapObject().asStringObject(); 
 }
 
+VectorObject Cell::asVectorObject() const { 
+	return this->asHeapObject().asVectorObject(); 
+}
+
 void Cell::dump( MnxBuilder & b, const bool deep ) const {
 	if ( IsSmall( this->ref ) ) {
 		b.start( Ginger::GNX_CONSTANT );

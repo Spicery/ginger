@@ -62,10 +62,13 @@ public:
 	Cell() : ref( SYS_ABSENT ) {}
 	Cell( Ref _r ) : ref( _r ) {}
 	Cell( HeapObject _h );
+	Cell( long n ) : ref( LongToSmall( n ) ) {}
 
 public:
 
 	HeapObject asHeapObject() const;
+	Cell index( const int n ) const { return INDEX( this->ref, n ); }
+	Ref indexAsRef( const int n ) const { return INDEX( this->ref, n ); }
 	Ref asRef() const { return this->ref; }
 	Ref & asRRef() { return this->ref; }
 	long getLong() const { return SmallToLong( this->ref ); }
@@ -78,6 +81,7 @@ public:
 	RationalObject asRationalObject() const;
 	ExternalObject asExternalObject() const;
 	StringObject asStringObject() const;
+	VectorObject asVectorObject() const;
 
 
 	bool isTermin() const { return this->ref == SYS_TERMIN; }
@@ -118,6 +122,8 @@ public:	//	Generic methods (works on any value)
 	shared< Mnx > toMnx() const;
 	Cell deref() const;
 	Cell upCast() const { return Cell( Ptr4ToRef( this->obj_K ) ); }
+	Cell index( const int n ) const { return this->obj_K[ n ]; }
+	Ref indexAsRef( const int n ) const { return this->obj_K[ n ]; }
 
 public:	//	Checked downcasts.
 	StringObject asStringObject() const;

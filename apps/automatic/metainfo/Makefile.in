@@ -1,5 +1,5 @@
 all:
-	python make_metainfo.py
+	python3 make_metainfo.py
 
 clean:
 	rm -f metainfo.cpp.inc

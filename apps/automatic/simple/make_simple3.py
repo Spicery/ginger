@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 ################################################################################
 #
 #	This file automates the production of C++ code to support the

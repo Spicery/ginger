@@ -201,11 +201,11 @@ unitcheck:
 
 .PHONEY: funccheck
 funccheck:
-	(cd functests; nosetests)
+	(cd functests; nose2)
 
 .PHONEY: syscheck
 syscheck:
-	(cd systests; nosetests)
+	(cd systests; nose2)
 
 .PHONEY: check
 check:

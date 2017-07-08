@@ -11,8 +11,12 @@ Installing on Ubuntu or Mac OS X
 
 *	Pre-requisites: you'll need some basic developer tools 
 		git, python3 (with pip3 and nose2), g++, autoconf, uuid, readline, make
-	You can ensure you have these in one step with
+	and the relevant libraries.	You can ensure you have these in one step with
 		% sudo apt-get install make git python3 python3-pip g++ autoconf uuid-dev libreadline-dev wget libpcap-dev libssl-dev libgmp-dev
+	After this you will need to update pip3 and nose2
+		% sudo pip3 install --upgrade pip
+		% sudo pip3 install nose2
+
 
 *	We also need the RudeCGI library
 		% mkdir /tmp/rudecgi

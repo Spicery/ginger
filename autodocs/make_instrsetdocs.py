@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 
 import sys
 import os
@@ -9,12 +9,12 @@ line_a = "/*********************************************************************
 line_b = "\\*****************************************************************************/\n"
 
 def code_header():
-	print
-	print ".. code-block:: c++"
-	print
+	print()
+	print( ".. code-block:: c++" )
+	print()
 
 def code_footer():
-	print
+	print()
 
 def extractDocs( file ):
 	state = 0
@@ -27,39 +27,38 @@ def extractDocs( file ):
 			code_header()
 		elif state == 1:
 			if line[ 0 ].isalpha():
-				print "**{}**".format( line.rstrip() )
+				print( "**{}**".format( line.rstrip() ) )
 			else:
-				print line,
+				print( line, end='' )
 		elif state == 2:
-			print "    ", line,
+			print( "    ", line, end='' )
 	if state == 2:
 		code_footer()
 
 def file_header( fname ):
-	print ".. Start of file", fname
-	print
+	print( ".. Start of file", fname )
+	print()
 	m = re.match( "([^.]*)", fname )
 	title = "Instruction {}".format( m.group( 1 ) )
-	print title
-	print "-" * len( title )
-	print
+	print( title )
+	print( "-" * len( title ) )
+	print()
 
 def file_footer( fname ):
-	print ".. End of file", fname
-	print
+	print( ".. End of file", fname )
+	print()
 
 def doc_header():
-	print "======================"
-	print "Ginger Instruction Set"
-	print "======================"
-	print
+	print( "======================" )
+	print( "Ginger Instruction Set" )
+	print( "======================" )
+	print()
 	with open( "README.rst" ) as intro:
-		for line in intro:
-			print line,
-
+		print( intro.read() )
+	print()
 
 def doc_footer():
-	print ".. End of document"
+	print( ".. End of document" )
 
 def processAllFiles():
 	doc_header()

@@ -2,7 +2,7 @@ all: standard_library
 
 standard_library:
 	cp -r standard_library.template standard_library
-	python make_standard_library.py
+	python3 make_standard_library.py
 	sh simplify_all_gnx_files.sh
 
 clean:

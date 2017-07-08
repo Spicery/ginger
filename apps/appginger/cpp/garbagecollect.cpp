@@ -391,12 +391,12 @@ private:
 		}
 	}
 	
-	void forwardRegisters() {
-		this->vm->registers.clearUnusedRegisters();
-		for ( int i = 0; i < Registers::NREG; i++ ) { 
-			this->forward( this->vm->registers.get( i ) );
-		}
-	}
+	// void forwardRegisters() {
+	// 	this->vm->registers.clearUnusedRegisters();
+	// 	for ( int i = 0; i < Registers::NREG; i++ ) { 
+	// 		this->forward( this->vm->registers.get( i ) );
+	// 	}
+	// }
 
 	void forwardDynamicRoots() {
 		for ( auto & c : this->vm->spare_registers ) {
@@ -416,9 +416,9 @@ private:
 		if ( this->tracker ) this->tracker->startDictionary();
 		this->forwardAllDictionaries();
 		if ( this->tracker ) this->tracker->endDictionary();
-		if ( this->tracker ) this->tracker->startRegisters();
-		this->forwardRegisters();
-		if ( this->tracker ) this->tracker->endRegisters();
+		// if ( this->tracker ) this->tracker->startRegisters();
+		// this->forwardRegisters();
+		// if ( this->tracker ) this->tracker->endRegisters();
 		if ( this->tracker ) this->tracker->startDynamicRoots();
 		this->forwardDynamicRoots();
 		if ( this->tracker ) this->tracker->endDynamicRoots();

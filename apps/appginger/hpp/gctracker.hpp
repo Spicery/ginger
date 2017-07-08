@@ -44,8 +44,8 @@ public:
 	virtual void endCallStackAndPC() {}
 	virtual void startDictionary() {}
 	virtual void endDictionary() {}
-	virtual void startRegisters() {}
-	virtual void endRegisters() {}
+	// virtual void startRegisters() {}
+	// virtual void endRegisters() {}
 	virtual void startDynamicRoots() {}
 	virtual void endDynamicRoots() {}
 	virtual void startGarbageCollection() {}

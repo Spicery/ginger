@@ -148,7 +148,7 @@ def generateGingerInteractive():
 
 
 def standardLibraryFiles():
-	metainfo = json.loads( subprocess.check_output( [ "../apps/appginger/cpp/ginger-info", "-j" ] ) )
+	metainfo = json.loads( str( subprocess.check_output( [ "../apps/appginger/cpp/ginger-info", "-j" ] ), 'utf-8' ) )
 	stdinfo = metainfo[ "std" ]
 	synonyms = metainfo[ "synonyms" ]
 	generateGingerLibrary( stdinfo, synonyms )

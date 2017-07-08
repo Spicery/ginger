@@ -17,7 +17,6 @@ Installing on Ubuntu or Mac OS X
 		% sudo pip3 install --upgrade pip
 		% sudo pip3 install nose2
 
-
 *	We also need the RudeCGI library
 		% mkdir /tmp/rudecgi
 		% cd /tmp/rudecgi

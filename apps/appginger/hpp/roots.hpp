@@ -38,21 +38,6 @@ public:
 	Cell & nextRoot( const Ref initial_value ) { return this->nextRoot( Cell( initial_value ) ); }
 };
 
-// class Roots {
-// private:
-// 	Registers & registers;
-// 	unsigned long mask;
-// 	int count;
-	
-// public:
-// 	Ref & reserveRegister( Ref r );
-// 	Cell & reserveRootCell( Ref r = SYS_ABSENT ) { return reinterpret_cast< Cell & >( this->reserveRegister( r ) ); }
-
-// public:
-// 	Roots( MachineClass * vm );
-// 	~Roots();
-// };
-
 } // namespace Ginger
 
 #endif

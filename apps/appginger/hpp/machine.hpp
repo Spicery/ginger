@@ -94,7 +94,6 @@ private:
 
 public:
     ExternalTracker                 external_objects;
-    // Registers                       registers;
     std::vector< Cell >             spare_registers;
     bool                            sigint_flag;
 

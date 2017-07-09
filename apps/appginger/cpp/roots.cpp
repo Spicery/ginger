@@ -36,20 +36,4 @@ Cell & DynamicRoots::nextRoot( const Cell initial_value ) {
     return this->vm->spare_registers.back();
 }
 
-// Roots::Roots( MachineClass * vm ) :
-// 	registers( vm->registers ),
-// 	mask( 0 ),
-// 	count( 0 )
-// {
-// }
-
-// Roots::~Roots() {
-// 	this->registers.release( this->count, this->mask );
-// }
-
-// Ref & Roots::reserveRegister( Ref r ) {
-// 	this->count += 1;
-// 	return this->registers.reserve( this->mask ) = r;
-// }
-
 } // namespace Ginger

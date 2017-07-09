@@ -16,7 +16,6 @@
     along with AppGinger.  If not, see <http://www.gnu.org/licenses/>.
 \******************************************************************************/
 
-
 #include "gclogger.hpp"
 
 namespace Ginger {
@@ -68,13 +67,6 @@ void GCLogger::startDictionary() {
 }
 
 void GCLogger::endDictionary() {
-}
-
-void GCLogger::startRegisters() {
-	gclog << "Forward registers" << endl;
-}
-
-void GCLogger::endRegisters() {
 }
 
 void GCLogger::startDynamicRoots() {

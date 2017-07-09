@@ -38,8 +38,6 @@ public:
 	void endCallStackAndPC();
 	void startDictionary();
 	void endDictionary();
-	// void startRegisters();
-	// void endRegisters();
 	void startDynamicRoots();
 	void endDynamicRoots();
 	void startGarbageCollection();

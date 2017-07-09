@@ -1624,7 +1624,7 @@ Node ReadStateClass::readRecordClass() {
     f.end();    //  SYSAPP
     f.end(); // BIND
 
-    for ( int i = 0; i < slot_names.size(); i++ ) {
+    for ( size_t i = 0; i < slot_names.size(); i++ ) {
         const string & ith_name( slot_names[ i ] );
 
         f.start( Ginger::GNX_BIND );

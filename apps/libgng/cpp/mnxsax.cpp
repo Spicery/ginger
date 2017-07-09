@@ -106,7 +106,7 @@ void MnxSaxParser::readAttributeValue( std::string & attr ) {
 				if ( esc[1] == 'x' ) {
 					stringstream s( &esc[2] );
 					unsigned int n;
-					if ( s >> std::hex >> n && n == static_cast< char >( n ) ) {
+					if ( s >> std::hex >> n && n < ( 1 << sizeof( char ) ) ) {
 						attr.push_back( static_cast< char >( n ) );
 					} else {
 						throw Mishap( "Unexpected numeric sequence after &#" ).culprit( "Sequence", esc );
@@ -114,7 +114,7 @@ void MnxSaxParser::readAttributeValue( std::string & attr ) {
 				} else {
 					stringstream s( &esc[1] );
 					unsigned int n;
-					if ( s >> n && n == static_cast< char >( n ) ) {
+					if ( s >> n && n < ( 1 << sizeof( char ) ) ) {
 						attr.push_back( static_cast< char >( n ) );
 					} else {
 						throw Mishap( "Unexpected numeric sequence after &#" ).culprit( "Sequence", esc );

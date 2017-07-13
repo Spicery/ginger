@@ -7,11 +7,11 @@ COPY apps/ /tmp/ginger/apps/
 COPY projects/ /tmp/ginger/projects/
 COPY instruction_set/ /tmp/ginger/instruction_set/
 COPY config* /tmp/ginger/
-COPY docker-scripts/ /tmp/ginger/docker-scripts/
+COPY devtools/docker-scripts/ /tmp/ginger/devtools/docker-scripts/
 COPY appginger.png /tmp/ginger/
 COPY Makefile.in /tmp/ginger/
 COPY autodocs/ /tmp/ginger/autodocs/
 COPY AUTHORS BUGS NEWS THANKS COPYING /tmp/ginger/
-RUN [ "/bin/dash", "/tmp/ginger/docker-scripts/install-rudecgi" ]
-RUN [ "/bin/dash", "/tmp/ginger/docker-scripts/build-ginger" ]
+RUN [ "/bin/dash", "/tmp/ginger/devtools/docker-scripts/install-rudecgi.bsh" ]
+RUN [ "/bin/dash", "/tmp/ginger/devtools/docker-scripts/build-ginger.bsh" ]
 CMD /usr/local/bin/ginger

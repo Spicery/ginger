@@ -1,0 +1,13 @@
+#!/bin/bash
+TMPDIR=$(mktemp)
+pushd $TMPDIR
+sudo apt-get -qq install wget
+wget http://www.rudeserver.com/cgiparser/download/rudecgi-5.0.0.tar.bz2
+tar jxf rudecgi-5.0.0.tar.bz2
+pushd rudecgi-5.0.0
+./configure --prefix=/usr/local
+sudo make install
+popd
+popd
+# And remove the build files.
+rm -rf $TMPDIR

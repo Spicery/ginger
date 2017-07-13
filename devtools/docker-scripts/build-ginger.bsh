@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 SPICERY_HOME=/tmp
 cd $SPICERY_HOME/ginger
 autoconf; ./configure; make

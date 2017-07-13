@@ -1,0 +1,75 @@
+#!/bin/bash -v
+
+#
+# If a parameter is supplied, that's where Ginger will be installed.
+# Otherwise it defaults to /usr/local.
+#
+INSTALL_DIR=${1:-/usr/local}
+echo "Installation dir = ${INSTALL_DIR}"
+
+# Now verify that the target folder has the right structure.
+# It should contain the following folders at least: bin, share.
+echo "Step 1: Checking target folder is suitable."
+if [[ -d ${INSTALL_DIR}/bin && -d ${INSTALL_DIR}/share ]]
+then
+	echo "      : Target folder looks suitable"
+else
+	echo "      : Target folder is missing expected folders (bin, share)."
+	echo -n "      : Continue? [y/n] "
+	read continueflag
+	if [[ $continueflag != y ]]
+	then
+		echo "      : Stopping before any changes are made."
+		exit 1
+	else
+		echo "      : Continuing."
+	fi
+fi
+
+echo "Step 2: Removing any pre-existing installation."
+if [ -e ${INSTALL_DIR}/bin/ginger ]
+then
+	echo "      : Found - removing."
+	/bin/rm ${INSTALL_DIR}/bin/ginger
+	/bin/rm ${INSTALL_DIR}/bin/ginger-*
+	/bin/rm -rf ${INSTALL_DIR}/libexec/ginger
+	/bin/rm -rf ${INSTALL_DIR}/share/ginger
+else
+	echo "      : Nothing to remove."
+fi
+
+#
+#	Install the packed files archive into /usr/local. We assume that the
+#	packed files archive is in the current directory. 
+#	N.B. You will probably need to run this script with root privileges.
+#
+echo "Step 3: Copying the new installation in place."
+PACKED_FILES=ginger-files.tgz
+gzip -d < ${PACKED_FILES} | ( cd ${INSTALL_DIR}; tar xf -)
+echo "      : Copied."
+
+#
+# Now create the uninstaller (uninstall.sh) in the share directory.
+# Arguably it could go in the libexec.
+# 
+echo "Step 4: Creating uninstall.bsh file."
+UNINSTALL_FILE=${INSTALL_DIR}/share/ginger/uninstall.bsh
+touch ${UNINSTALL_FILE}
+echo '#!/bin/sh' > ${UNINSTALL_FILE}
+echo "/bin/rm ${INSTALL_DIR}/bin/ginger" >> ${UNINSTALL_FILE}
+echo "/bin/rm ${INSTALL_DIR}/bin/ginger-*" >> ${UNINSTALL_FILE}
+echo "/bin/rm -rf ${INSTALL_DIR}/libexec/ginger" >> ${UNINSTALL_FILE}
+echo "/bin/rm -rf ${INSTALL_DIR}/share/ginger" >> ${UNINSTALL_FILE}
+chmod a+x ${UNINSTALL_FILE}
+echo "      : Created at ${UNINSTALL_FILE}"
+
+echo "Step 4: Creating installation summary file."
+INSTALL_INFO_FILE=${INSTALL_DIR}/share/ginger/INSTALL_INFO.txt
+touch ${INSTALL_INFO_FILE}
+echo "Ginger Installation from Tarball Information" >> ${INSTALL_INFO_FILE}
+echo "--------------------------------------------" >> ${INSTALL_INFO_FILE}
+echo "date         : " `date` >> ${INSTALL_INFO_FILE}
+echo "uname -mn    : " `uname -mn` >> ${INSTALL_INFO_FILE}
+echo "uname -rsv   : " `uname -rsv` >> ${INSTALL_INFO_FILE}
+chmod a+r ${INSTALL_INFO_FILE}
+echo "      : Created at ${INSTALL_INFO_FILE}"

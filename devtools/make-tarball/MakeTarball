@@ -28,6 +28,10 @@ TB_BUILD_INFO_FILE := $(TB_WRAP_DIR)/BUILD_INFO.txt
 TB_USR_TARBALL := $(TB_WRAP_DIR)/$(TB_PACKAGE)-files.tgz
 TB_WRAP_TARBALL := $(TB_BUILD_DIR)/$(TB_PACKAGE).tgz
 
+all:
+	# tarball-clean	- clean the _build area
+	# tarball-as-is	- construct the tarball in the _build area
+
 tarball-clean:
 	mkdir -p $(TB_BUILD_DIR)
 	rm -f $(TB_WRAP_TARBALL)
@@ -50,7 +54,7 @@ set-up:
 	mkdir -p $(TB_TOOLS_DIR)
 	mkdir -p $(TB_BIN_DIR)
 	mkdir -p $(TB_SHARE_DIR)
-	( cd build_template; tar cf - . ) | ( cd $(TB_WRAP_DIR); tar xf - )
+	( cd devtools/make-tarball/build_template; tar cf - . ) | ( cd $(TB_WRAP_DIR); tar xf - )
 
 copy-executables:
 	cp $(INSTALLED_BIN)/ginger $(TB_BIN_DIR)

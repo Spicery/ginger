@@ -1,0 +1,48 @@
+#!/bin/bash
+
+# Is sudo available? 
+if [[ $(type -p sudo) ]]
+then
+	sudo apt-get update && apt-get upgrade -y
+else
+	if [[ $EUID == 0 ]]; then 
+		apt-get update && apt-get upgrade -y
+		apt-get -qq install sudo
+	else
+		echo "ERROR: sudo not installed and no root privileges - stopping." >&2
+		exit 0
+	fi
+fi
+
+# Now install required packages via APT.
+sudo apt-get -qq update
+sudo apt-get -qq install uuid-dev
+sudo apt-get -qq install libreadline-dev
+sudo apt-get -qq install python3
+sudo apt-get -qq install guile-2.0
+sudo apt-get -qq install libpcap-dev libssl-dev libgmp-dev
+sudo apt-get -qq install python3-pip
+
+# And now install required packages via pip3.
+sudo pip3 install --upgrade pip
+sudo pip3 install nose2 
+
+# Lastly install RudeCGI from the website.
+TMPDIR=$(mktemp)
+pushd $TMPDIR
+sudo apt-get -qq install wget
+wget http://www.rudeserver.com/cgiparser/download/rudecgi-5.0.0.tar.bz2
+tar jxf rudecgi-5.0.0.tar.bz2
+pushd rudecgi-5.0.0
+./configure --prefix=/usr/local
+sudo make install
+popd
+popd
+# And remove the build files.
+rm -rf $TMPDIR
+
+# Now install the development tools (some dependencies will have already been
+# satisified during the installation of RudeCGI)
+sudo apt-get -qq install autoconf git g++ make
+
+

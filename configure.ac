@@ -41,41 +41,6 @@ AC_ARG_ENABLE([snap],
 )
 AC_SUBST( usesnap, $usesnap )
 
-# Allow Boost to be somewhere that requires compile and/or link options.
-BOOST_CPPFLAGS=""
-BOOST_LDFLAGS=""
-AC_ARG_WITH([boost],
- AS_HELP_STRING([--with-boost@<:@=DIR@:>@],
- [root directory of Boost installation]),
- [
- boost_root="${withval}"
- if test "${boost_root}" != yes; then
- boost_include="${boost_root}/include"
- boost_libdir="${boost_root}/lib"
- echo "BOOST FOUND"
- fi
- ])
-
-AC_ARG_WITH([boost-include],
- AS_HELP_STRING([--with-boost-include=DIR],
- [specify exact directory for Boost headers]),
- [boost_include="$withval"])
-
-AC_ARG_WITH([boost-libdir],
- AS_HELP_STRING([--with-boost-libdir=DIR],
- [specify exact directory for Boost libraries]),
- [boost_libdir="$withval"])
-
-if test "${boost_include}"; then
- BOOST_CPPFLAGS="-I${boost_include}"
- echo "BOOST_CPPFLAGS set"
-fi
-
-if test "${boost_libdir}"; then
- BOOST_LDFLAGS="-L${boost_libdir}"
- echo "BOOST_LDDFLAGS set"
-fi
-
 AC_CONFIG_FILES([Makefile
                  apps/Makefile
                  apps/appginger/Makefile

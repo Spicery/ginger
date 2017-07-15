@@ -1,26 +1,26 @@
 /*****************************************************************************\
 Definition
-	SYSCALL_DAT RAW_SYSCALL_PTR DATA
+    SYSCALL_DAT RAW_SYSCALL_PTR DATA
 
 Summary
-	Invokes the native function with a data argument frozen in.
+    Invokes the native function with a data argument frozen in.
 
 Unchecked Precondition
-	RAW_SYSCALL_PTR is a valid pointer to a SysCall object.
-	
+    RAW_SYSCALL_PTR is a valid pointer to a SysCall object.
+    
 Exceptions (Checked Preconditions)
-	None
-	
-Result (Postcondition)		
-	* The native function has been called and returned.
-	* Execution continues at the instruction indicated by the native function.
+    None
+    
+Result (Postcondition)      
+    * The native function has been called and returned.
+    * Execution continues at the instruction indicated by the native function.
 
 \*****************************************************************************/
 
 SysCall * sys = ToSysCall( pc[ 1 ] );
 FREEZE;
-//	Skip the data arg. The system call picks it up via pc[-1]. Note that
-//	it is NOT garbage collected. That means it cannot be an object.
+//  Skip the data arg. The system call picks it up via pc[-1]. Note that
+//  it is NOT garbage collected. That means it cannot be an object.
 pc = (*sys)( pc + 3, vm );
 MELT;
 RETURN( pc );

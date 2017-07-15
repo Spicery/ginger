@@ -1,32 +1,32 @@
 /*****************************************************************************\
 Definition
-	* PUSH_LOCAL_RET LOCAL_N
-	* VMPCFUNC, VMSP, VPC restored from previous call
+    * PUSH_LOCAL_RET LOCAL_N
+    * VMPCFUNC, VMSP, VPC restored from previous call
 
 Summary
-	Pushes the value of a local and returns from the calling function.
+    Pushes the value of a local and returns from the calling function.
 
 Unchecked Precondition
-	* There's room on the stack for one more value.
-	* There's a calling function waiting on the call-stack.
-	
+    * There's room on the stack for one more value.
+    * There's a calling function waiting on the call-stack.
+    
 Exceptions (Checked Preconditions)
-	None.
-	
-Result (Postcondition)		
-	* The top of stack is the value of LOCAL[ N ]
-	* The stack is one bigger.
-	* Execution continues from the calling function.
+    None.
+    
+Result (Postcondition)      
+    * The top of stack is the value of LOCAL[ N ]
+    * The stack is one bigger.
+    * Execution continues from the calling function.
 
 \*****************************************************************************/
 
 *( ++VMVP ) = LOCAL( ToLong( *( ++pc ) ) );
 Ref *linkptr;
 VMPCFUNC = ToRefRef( VMSP[ SP_FUNC ] );
-linkptr = ToRefRef( VMSP[ SP_LINK ] );				//	recover return address
-VMSP = ToRefRef( VMSP[ SP_PREV_SP ] );				//	restore stack pointer
+linkptr = ToRefRef( VMSP[ SP_LINK ] );              //  recover return address
+VMSP = ToRefRef( VMSP[ SP_PREV_SP ] );              //  restore stack pointer
 #ifdef DBG_SPECIAL
-	cout << "Recover link = " << hex << ToUInt( link ) << dec << endl;
-	cout << "Stack pointer recovered as " << hex << ToUInt( VMSP ) << dec << endl;
+    cout << "Recover link = " << hex << ToUInt( link ) << dec << endl;
+    cout << "Stack pointer recovered as " << hex << ToUInt( VMSP ) << dec << endl;
 #endif
 RETURN( linkptr );

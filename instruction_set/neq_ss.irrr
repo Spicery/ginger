@@ -1,24 +1,24 @@
 /*****************************************************************************\
 Instruction
-	NEQ_SS LOCAL_S LOCAL_T JUMP_TO
+    NEQ_SS LOCAL_S LOCAL_T JUMP_TO
 
 Summary
-	Compares two local variables LOCAL_S and LOCAL_T for identity and
-	jumping to JUMP_D if they are different, otherwise falling through.
-	
+    Compares two local variables LOCAL_S and LOCAL_T for identity and
+    jumping to JUMP_D if they are different, otherwise falling through.
+    
 Unchecked Precondition
-	* JUMP_D is in range of the enclosing function object.
-	* LOCAL_S and LOCAL_T are valid indexes for local variables of the 
-	  enclosing function object.
+    * JUMP_D is in range of the enclosing function object.
+    * LOCAL_S and LOCAL_T are valid indexes for local variables of the 
+      enclosing function object.
 
-	Q: Should this be marked as rrr?
-	
+    Q: Should this be marked as rrr?
+    
 Exceptions (Checked Preconditions)
-	None
-	
-Result (Postcondition)		
-	* 	Control is transferred to the target forwards or backwards if
-		two local variables are different.
+    None
+    
+Result (Postcondition)      
+    *   Control is transferred to the target forwards or backwards if
+        two local variables are different.
 
 \*****************************************************************************/
 

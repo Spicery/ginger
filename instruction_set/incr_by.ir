@@ -1,22 +1,22 @@
 /*****************************************************************************\
 Definition
-	INCR_BY N
+    INCR_BY N
 
 Summary
-	Increments the value on top of the stack by N.
-	
+    Increments the value on top of the stack by N.
+    
 Unchecked Precondition
-	* There is at least one value on the stack
-	* N is a Small (enforced by vmiINCR(long))
+    * There is at least one value on the stack
+    * N is a Small (enforced by vmiINCR(long))
 
 Exceptions (Checked Preconditions)
-	* The value on the top of the stack is a Num.
-	
+    * The value on the top of the stack is a Num.
+    
 Result (Postcondition)
-	The top of the stack has been incremented by N.
+    The top of the stack has been incremented by N.
 
 Tags
-	* Arithmetic operator
+    * Arithmetic operator
 
 \*****************************************************************************/
 
@@ -24,13 +24,13 @@ Ref ry = ToRef( pc[ 1 ] );
 Ref rx = *( VMVP );
 
 if ( IsSmall( rx ) ) {
-	long y = (long)ry;
-	long x = (long)rx;
-	long sum = x + y;
-	if ( x < 0 ? sum < y : sum >= y ) {
-		*VMVP = ToRef( sum );
-		RETURN( pc + 2 );
-	} 
+    long y = (long)ry;
+    long x = (long)rx;
+    long sum = x + y;
+    if ( x < 0 ? sum < y : sum >= y ) {
+        *VMVP = ToRef( sum );
+        RETURN( pc + 2 );
+    } 
 }
 pc += 2;
 FREEZE;

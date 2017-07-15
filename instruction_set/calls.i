@@ -4,13 +4,13 @@ Definition
     CALLS ( F ) -> ()
 
 Summary
-	Takes one value F off the stack (unchecked) and calls it.
+    Takes one value F off the stack (unchecked) and calls it.
 
 Unchecked Precondition
-	There has to be at least one item on the stack.
+    There has to be at least one item on the stack.
 
 Checked Preconditions
-	The value F is a function object.
+    The value F is a function object.
 
 Postcondition
     The return address and the current function object

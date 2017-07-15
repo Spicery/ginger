@@ -1,39 +1,39 @@
 /*****************************************************************************\
 Definition 
-	AND JUMP_TO ( X ) -> ( false | () )
+    AND JUMP_TO ( X ) -> ( false | () )
 
 Summary
-	Pop the top of the stack and compare with false. If it is the same then
-	push false and jump to JUMP_TO. Otherwise fall through.
+    Pop the top of the stack and compare with false. If it is the same then
+    push false and jump to JUMP_TO. Otherwise fall through.
 
-	The idea is to compile the expression ``( LHS and RHS )`` as
+    The idea is to compile the expression ``( LHS and RHS )`` as
 
-	- compile1( LHS );
-	- AND Ldone
-	- compile1( RHS );
-	- Ldone:
+    - compile1( LHS );
+    - AND Ldone
+    - compile1( RHS );
+    - Ldone:
 
 Unchecked Precondition
-	There is at least one item on the stack.
-	
+    There is at least one item on the stack.
+    
 Exceptions (Checked Preconditions)
-	JUMP_TO is in range of the current enclosing function object.
-	
+    JUMP_TO is in range of the current enclosing function object.
+    
 Result (Postcondition)
-	If X was false then
-		* Value stack = ( false )
-		* VPC = JUMP_TO + 1
-	
-	If X was non-false
-		* Value stack = ()
-		* VPC = next instruction, i.e. VPC + 2.
+    If X was false then
+        * Value stack = ( false )
+        * VPC = JUMP_TO + 1
+    
+    If X was non-false
+        * Value stack = ()
+        * VPC = next instruction, i.e. VPC + 2.
 
 
 \*****************************************************************************/
 
 if ( *VMVP == SYS_FALSE ) {
-	RETURN( pc + ToLong( pc[ 1 ] ) + 1 );
+    RETURN( pc + ToLong( pc[ 1 ] ) + 1 );
 } else {
-	VMVP--;
-	RETURN( pc + 2 );
+    VMVP--;
+    RETURN( pc + 2 );
 }

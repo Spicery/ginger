@@ -1,27 +1,27 @@
 /*****************************************************************************\
 Definition
-	SYSCALL_ARGDAT RAW_SYSCALL_PTR DATA ARG
+    SYSCALL_ARGDAT RAW_SYSCALL_PTR DATA ARG
 
 Summary
-	
+    
 Unchecked Precondition
-	* RAW_SYSCALL_PTR is a valid pointer to a SysCall structure.
-	* DATA is not a reference (because it is GC cloaked)
-	
+    * RAW_SYSCALL_PTR is a valid pointer to a SysCall structure.
+    * DATA is not a reference (because it is GC cloaked)
+    
 Exceptions (Checked Preconditions)
-	None
-	
+    None
+    
 Result (Postcondition)
-	* The native function has been called.
-	* Execution continues where the native function indicates.
+    * The native function has been called.
+    * Execution continues where the native function indicates.
 
 \*****************************************************************************/
 
 SysCall * sys = ToSysCall( pc[ 1 ] );
 FREEZE;
-//	Skip the data & arg. The system call picks it up via pc[-1] & pc[-2]. 
+//  Skip the data & arg. The system call picks it up via pc[-1] & pc[-2]. 
 //  Note that the data is NOT garbage collected. That means it cannot be 
-//	an object.
+//  an object.
 pc = (*sys)( pc + 4, vm );
 MELT;
 RETURN( pc );

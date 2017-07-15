@@ -1,33 +1,33 @@
 /*****************************************************************************\
 Definition 
-	CHECK_COUNT N
+    CHECK_COUNT N
 
 Summary
-	Checks that the VMCOUNT register equals N, otherwise throw a
-	run-time error complaining about an arity mismatch.
+    Checks that the VMCOUNT register equals N, otherwise throw a
+    run-time error complaining about an arity mismatch.
 
-	VMCOUNT is intended to be set to the number of values passed on
-	the stack.
-	
+    VMCOUNT is intended to be set to the number of values passed on
+    the stack.
+    
 Unchecked Precondition
-	VMCOUNT >= the size of the value stack.
-	
+    VMCOUNT >= the size of the value stack.
+    
 Exceptions (Checked Preconditions)
-	VMCOUNT != N
-	
+    VMCOUNT != N
+    
 Result (Postcondition)
-	VMCOUNT == N
+    VMCOUNT == N
 
 \*****************************************************************************/
 
 long n = ToLong( *( ++pc ) );
 #ifdef DBG_SPECIAL
-	std::cerr << 
-	"Difference between " <<
-	ToULong( VMVP ) << " and " << ToULong( LOCAL(n) ) <<
-	" (held in " << n ")" << 
-	std::endl;
+    std::cerr << 
+    "Difference between " <<
+    ToULong( VMVP ) << " and " << ToULong( LOCAL(n) ) <<
+    " (held in " << n ")" << 
+    std::endl;
 #endif
 if ( VMCOUNT == n ) RETURN( pc + 1 );
 throw Mishap( "Wrong number of results" ).culprit( "Wanted", n ).culprit( "Received", VMCOUNT );
-RETURN( NULL );	// stupid compiler
+RETURN( NULL ); // stupid compiler

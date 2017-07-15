@@ -1,30 +1,30 @@
 /*****************************************************************************\
 Definition
-	* SET LOCAL
-	* VMCOUNT = VSTACK - Value( LOCAL )
-	* VPC += 2
+    * SET LOCAL
+    * VMCOUNT = VSTACK - Value( LOCAL )
+    * VPC += 2
 
 Summary
-	Sets the VMCOUNT to the previously set MARK.
-	
-	Assigns the VMCOUNT to the difference between the top of the stack
-	and the previous value cached in LOCAL.
+    Sets the VMCOUNT to the previously set MARK.
+    
+    Assigns the VMCOUNT to the difference between the top of the stack
+    and the previous value cached in LOCAL.
 
-	The code critically depends the fact that raw-pointers are ignored 
-	by the garbage collector. Note that VMCOUNT is calculated in units
-	of sizeof( void * ).
-	
+    The code critically depends the fact that raw-pointers are ignored 
+    by the garbage collector. Note that VMCOUNT is calculated in units
+    of sizeof( void * ).
+    
 Unchecked Precondition
-	* The stack is no smaller than before.
-	* LOCAL is a valid index.
-	
+    * The stack is no smaller than before.
+    * LOCAL is a valid index.
+    
 Exceptions (Checked Preconditions)
-	None
+    None
 
-Result (Postcondition)		
-	* VMCOUNT is the number of items put on the stack since the corresponding
-	  mark.
-	* Execution continues at the next instruction.
+Result (Postcondition)      
+    * VMCOUNT is the number of items put on the stack since the corresponding
+      mark.
+    * Execution continues at the next instruction.
 
 \*****************************************************************************/
 

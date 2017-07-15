@@ -11,11 +11,11 @@ Summary
 Unchecked Precondition
     * There is space on the stack for one more value, if GLOBAL( F ) is not
       a function object.
-	
+    
 Exceptions (Checked Preconditions)
     None.
-	
-Result (Postcondition)		
+    
+Result (Postcondition)      
     * The object F has been entered.
 
 \*****************************************************************************/
@@ -27,7 +27,7 @@ VMCOUNT = ToLong( pc[ 1 ] );
     if ( IsObj( r ) && IsFunctionKey( *( ptr = RefToPtr4( r ) ) ) ) {
         VMLINK = pc + 3;
         VMLINKFUNC = VMPCFUNC;
-    	VMPCFUNC = ptr;
+        VMPCFUNC = ptr;
         RETURN( ptr + 1 );
     } else {
         *( ++VMVP ) = r;

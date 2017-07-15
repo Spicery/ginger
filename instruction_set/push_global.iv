@@ -1,30 +1,30 @@
 /*****************************************************************************\
 Definition
-	* POP_GLOBAL VALOF_V () -> ( X ), where X = GLOBAL( V )
-	* VPC += 2
+    * POP_GLOBAL VALOF_V () -> ( X ), where X = GLOBAL( V )
+    * VPC += 2
  
 Summary
-	Pushes the value of GLOBAL( V ) onto the stack.
-	
+    Pushes the value of GLOBAL( V ) onto the stack.
+    
 Unchecked Precondition
-	* V is a pointer to a Valof structure.
-	* There is room on the stack for one more value.
-	
+    * V is a pointer to a Valof structure.
+    * There is room on the stack for one more value.
+    
 Exceptions (Checked Preconditions)
-	* V is not an uninitialised variable.
-	
-Result (Postcondition)		
-	* The top of stack is X.
-	* The stack is one bigger.
-	* Execution continues at the next instruction.
+    * V is not an uninitialised variable.
+    
+Result (Postcondition)      
+    * The top of stack is X.
+    * The stack is one bigger.
+    * Execution continues at the next instruction.
 
 \*****************************************************************************/
 
 Valof * id = (Valof *)( *( ++pc ) );
 if ( SYS_UNASSIGNED == ( *( ++VMVP ) = id->valof ) ) {
-	//	TO DO: Two problems here. Firstly it is not efficient to
-	//	do this check more than once. Secondly, the error message
-	//	does not supply enough context.
-	throw Mishap( "Accessing uninitialised variable" );
+    //  TO DO: Two problems here. Firstly it is not efficient to
+    //  do this check more than once. Secondly, the error message
+    //  does not supply enough context.
+    throw Mishap( "Accessing uninitialised variable" );
 }
 RETURN( pc + 1 );

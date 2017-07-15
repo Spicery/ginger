@@ -1,17 +1,17 @@
 /*****************************************************************************\
 Definition
-	FIELD N ( RECORD ) -> ( RECORD_FIELD[n] )
+    FIELD N ( RECORD ) -> ( RECORD_FIELD[n] )
 
 Summary
-	Given a record on the top of the stack, it extracts the Nth field
-	and replaces the record with this.
-	
+    Given a record on the top of the stack, it extracts the Nth field
+    and replaces the record with this.
+    
 Unchecked Precondition
-	* The top of the stack is a record
-	* N is in range
-	
+    * The top of the stack is a record
+    * N is in range
+    
 Exceptions (Checked Preconditions)
-	
+    
 Result (Postcondition)
 
 \*****************************************************************************/

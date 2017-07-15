@@ -1,21 +1,21 @@
 /*****************************************************************************\
 Definition
-	* PUSHQ CONST
-	* VPC += 2
-	
+    * PUSHQ CONST
+    * VPC += 2
+    
 Summary
-	Pushes a constant onto the stack.
+    Pushes a constant onto the stack.
 
 Unchecked Precondition
-	There is room on a stack for this.
-	
+    There is room on a stack for this.
+    
 Exceptions (Checked Preconditions)
-	None.
-	
-Result (Postcondition)		
-	* The top of the stack is CONST.
-	* The stack is one bigger.
-	* Execution continues at the next instruction.
+    None.
+    
+Result (Postcondition)      
+    * The top of the stack is CONST.
+    * The stack is one bigger.
+    * Execution continues at the next instruction.
 
 \*****************************************************************************/
 

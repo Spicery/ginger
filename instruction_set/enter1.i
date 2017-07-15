@@ -1,22 +1,22 @@
 /*****************************************************************************\
 Definition
-	ENTER1
+    ENTER1
 
 Summary
-	A simplified version of ENTER for unary function objects.
-	
+    A simplified version of ENTER for unary function objects.
+    
 Unchecked Precondition
-	Must be the first instruction of a function object.
-	
+    Must be the first instruction of a function object.
+    
 Exceptions (Checked Preconditions)
-	0 or 2+ number of arguments were passed.
-	
-Result (Postcondition)	
-	As for ENTER	
+    0 or 2+ number of arguments were passed.
+    
+Result (Postcondition)  
+    As for ENTER    
 
 \*****************************************************************************/
 
-//	ENTER1 only works as the 1st instruction of a function.
+//  ENTER1 only works as the 1st instruction of a function.
 Ref *prev = VMSP;
 VMSP -= SP_OVERHEAD + ToULong( pc[ -3 ] );
 VMSP[ SP_PREV_SP ] = prev;

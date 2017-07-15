@@ -1,29 +1,29 @@
 /*****************************************************************************\
 Definition
-	* IFSO JUMP_TO ( X ) -> ()
+    * IFSO JUMP_TO ( X ) -> ()
 
 Summary
-	Compare the top of the stack against false. If it is different then
-	jump to JUMP_TO, otherwise fall through. Remove the top of the stack
-	in either case.
+    Compare the top of the stack against false. If it is different then
+    jump to JUMP_TO, otherwise fall through. Remove the top of the stack
+    in either case.
 
 Unchecked Precondition
-	There is at least one item on the stack.
-	
+    There is at least one item on the stack.
+    
 Exceptions (Checked Preconditions)
-	JUMP_TO is in range of the current enclosing function object.
-	
+    JUMP_TO is in range of the current enclosing function object.
+    
 Result (Postcondition)
-	* The stack is one less.
-	* If X is false
-		* Execution continues at the next instruction.
-	* Otherwise
-		* Execution continues at JUMP_TO + 1.
+    * The stack is one less.
+    * If X is false
+        * Execution continues at the next instruction.
+    * Otherwise
+        * Execution continues at JUMP_TO + 1.
 
 \*****************************************************************************/
 
 RETURN(
-	*( VMVP-- ) == SYS_FALSE ?
-	pc + 2 :
-	pc + ToLong( pc[ 1 ] ) + 1
+    *( VMVP-- ) == SYS_FALSE ?
+    pc + 2 :
+    pc + ToLong( pc[ 1 ] ) + 1
 );

@@ -1,24 +1,24 @@
 /*****************************************************************************\
 Definition
-	* EQ_SI LOCAL_S VALUE_I JUMP_D
+    * EQ_SI LOCAL_S VALUE_I JUMP_D
 
 Summary
-	Compares the value of local variable LOCAL_S using identity to
-	a constant VALUE_I jumping JUMP_D words if true, else falling
-	through to the next instruction.
-	
+    Compares the value of local variable LOCAL_S using identity to
+    a constant VALUE_I jumping JUMP_D words if true, else falling
+    through to the next instruction.
+    
 Unchecked Precondition
-	* JUMP_D is in the bounds of the enclosing function object
-	* LOCAL_S is a valid index into the callstack.
-	
-	Q: should this really be marked as rrr????
-	
+    * JUMP_D is in the bounds of the enclosing function object
+    * LOCAL_S is a valid index into the callstack.
+    
+    Q: should this really be marked as rrr????
+    
 Exceptions (Checked Preconditions)
-	None
-	
-Result (Postcondition)		
-	* 	Control is transferred to the target forwards or backwards if
-		the local variable is identical to a constant.
+    None
+    
+Result (Postcondition)      
+    *   Control is transferred to the target forwards or backwards if
+        the local variable is identical to a constant.
 
 \*****************************************************************************/
 

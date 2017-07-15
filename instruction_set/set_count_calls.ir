@@ -10,11 +10,11 @@ Summary
 
 Unchecked Precondition
     * There is an object on the stack.
-	
+    
 Exceptions (Checked Preconditions)
     None
-	
-Result (Postcondition)		
+    
+Result (Postcondition)      
     * The value on top of the stack is popped and called.
     * VMCOUNT = COUNT
     * If the value is a function object, then a normal function entry

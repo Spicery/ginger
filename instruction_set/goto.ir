@@ -1,17 +1,17 @@
 /*****************************************************************************\
 Definition
-	BYPASS JUMP_D
+    BYPASS JUMP_D
 
 Summary
-	Unconditional transfer of control by JUMP_D words.
-	
+    Unconditional transfer of control by JUMP_D words.
+    
 Unchecked Precondition
-	* Immediately following instruction can only be reached through the
-	  use of an ESCAPE instruction in the nested function call.	
-	* JUMP_D is in range of the enclosing function object.
-	
+    * Immediately following instruction can only be reached through the
+      use of an ESCAPE instruction in the nested function call. 
+    * JUMP_D is in range of the enclosing function object.
+    
 Exceptions (Checked Preconditions)
-	
+    
 Result (Postcondition)
 
 \*****************************************************************************/

@@ -89,8 +89,8 @@ In addition to the main uses of queries in for-loops, 'naked' queries have also
 been implemented. This allows you to write declarations like these.
 
 ::
-	i := 99;							### Declares the variable 99.
-	j from 80 where j.isprime;			### j is the smallest prime number > 80.
+    i := 99;                            ### Declares the variable 99.
+    j from 80 where j.isprime;          ### j is the smallest prime number > 80.
 
 Queries can also be used inside if-statements. These 'if'-queries execute their
 then-part if the match succeeded or the else-part if the match failed.
@@ -430,13 +430,13 @@ them as commands. These
 Unix shell command - any input starting with an exclamation mark is now
 handed off to the shell. e.g.
 
-	>>> !pwd
-	/Users/steve/projects/Spicery/ginger/design
+    >>> !pwd
+    /Users/steve/projects/Spicery/ginger/design
 
 Help command - any input matching 'help' or 'help <topic-name>' will
 now open a web browser on that topic. e.g.
 
-	>>> help instruction_set
+    >>> help instruction_set
 
 
 User Configurable File-Extension-to-Parser Mapping
@@ -479,36 +479,36 @@ instructions.
 In later versions this will be integrated fully into the Ginger Documentation
 project. For this release the documentation is stored by default at:
 
-	/usr/local/share/ginger/html/instruction_set.html
+    /usr/local/share/ginger/html/instruction_set.html
 
 Version 0.8
 -----------
 
 Arithmetic
 ~~~~~~~~~~
-	* 	Adds new datatype Float (double precision) and support
-		for floating point arithmetic.
-	* 	Integer arithmetic now includes div, rem operators.
-	*	Integer arithmetic smoothly overflows into floating point.
+    *   Adds new datatype Float (double precision) and support
+        for floating point arithmetic.
+    *   Integer arithmetic now includes div, rem operators.
+    *   Integer arithmetic smoothly overflows into floating point.
 
 Common Syntax
 ~~~~~~~~~~~~~
-	*	New reversible syntax for assignment ::= and =::
-	*	Elements can now be closed using the universal closing tag </>.
+    *   New reversible syntax for assignment ::= and =::
+    *   Elements can now be closed using the universal closing tag </>.
 
 Short-circuit Conditionals
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
-	*	<and> and <or> short-circuit operators added to the runtime.
+    *   <and> and <or> short-circuit operators added to the runtime.
 
 Build Process
 ~~~~~~~~~~~~~
-	*	Replaced the old Java code with new compact Python scripts,
-		greatly simplifying the build process.
-	*	New executable ginger-info replaces the --meta-info flag (now 
-		removed) and makes the build process more straightforward. Easy way
-		to dump the meta-info about Ginger.
-	*	Dependency on Boost eliminated.
+    *   Replaced the old Java code with new compact Python scripts,
+        greatly simplifying the build process.
+    *   New executable ginger-info replaces the --meta-info flag (now 
+        removed) and makes the build process more straightforward. Easy way
+        to dump the meta-info about Ginger.
+    *   Dependency on Boost eliminated.
 
 Other
 ~~~~~
-	*	Many minor defect fixes.
+    *   Many minor defect fixes.

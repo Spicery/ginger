@@ -1,20 +1,20 @@
 /*****************************************************************************\
 Definition
-	* SELF_CALL_N COUNT
-	* VMCOUNT = COUNT
+    * SELF_CALL_N COUNT
+    * VMCOUNT = COUNT
 
 Summary
-	Makes a recursive call to the currently active function with a fixed
-	count of arguments.
-	
+    Makes a recursive call to the currently active function with a fixed
+    count of arguments.
+    
 Unchecked Precondition
-	The currently active function takes N arguments
+    The currently active function takes N arguments
 
 Exceptions (Checked Preconditions)
-	None
-	
-Result (Postcondition)		
-	* The current function is re-entered, passing N items from the stack.
+    None
+    
+Result (Postcondition)      
+    * The current function is re-entered, passing N items from the stack.
 
 \*****************************************************************************/
 

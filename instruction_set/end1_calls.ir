@@ -4,21 +4,21 @@ Instruction END1_CALLS LOCAL_VAR ( FUNCTION ) -> ()
 Summary
     Pop and save FUNCTION which is the top of the stack & perform a 
     value count using LOCAL_VAR as the mark. Then call FUNCTION.
-	
+    
 Unchecked Precondition
     LOCAL_VAR is a valid local variable & holds a mark.
     There is at least one value on the value-stack.
-	
+    
 Exceptions (Checked Preconditions)
     * The top of the stack is not a function object.
-	
-Result (Postcondition)		
+    
+Result (Postcondition)      
 
 \*****************************************************************************/
 
-Ref r = *( VMVP-- );							//	Reduce stack by 1, safely.
+Ref r = *( VMVP-- );                            //  Reduce stack by 1, safely.
 long var = ToLong( pc[ 1 ] );
-VMCOUNT = ( VMVP - ToRefRef( LOCAL( var ) ) );	//	Stack reduced by 1 already, don't redo.
+VMCOUNT = ( VMVP - ToRefRef( LOCAL( var ) ) );  //  Stack reduced by 1 already, don't redo.
 {    
     Ref *ptr;
     if ( IsObj( r ) && IsFunctionKey( *( ptr = RefToPtr4( r ) ) ) ) {

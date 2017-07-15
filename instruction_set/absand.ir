@@ -1,38 +1,38 @@
 /*****************************************************************************\
 Definition
-	ANDABS JUMP_TO ( X ) -> ( absent | () )
+    ANDABS JUMP_TO ( X ) -> ( absent | () )
 
 Summary
-	Compare the top of the stack against absent. If it is the same then
-	jump to JUMP_TO. Otherwise fall through, removing the top of the stack.
-	
-	The idea is to compile the expression ``( LHS && RHS )`` as
+    Compare the top of the stack against absent. If it is the same then
+    jump to JUMP_TO. Otherwise fall through, removing the top of the stack.
+    
+    The idea is to compile the expression ``( LHS && RHS )`` as
 
-	- compile1( LHS );
-	- ABSAND Ldone
-	- compile1( RHS );
-	- Ldone:
+    - compile1( LHS );
+    - ABSAND Ldone
+    - compile1( RHS );
+    - Ldone:
 
 Unchecked Precondition
-	There is at least one item on the stack.
-	
+    There is at least one item on the stack.
+    
 Exceptions (Checked Preconditions)
-	JUMP_TO is in range of the current enclosing function object.
-	
+    JUMP_TO is in range of the current enclosing function object.
+    
 Result (Postcondition)
-	If X was absent then
-		* Value stack = ( absent )
-		* VPC = JUMP_TO + 1
-	
-	If X was non-absent	
-		* Value stack = ()
-		* VPC = next instruction, i.e. VPC + 2.
+    If X was absent then
+        * Value stack = ( absent )
+        * VPC = JUMP_TO + 1
+    
+    If X was non-absent 
+        * Value stack = ()
+        * VPC = next instruction, i.e. VPC + 2.
 
 \*****************************************************************************/
 
 if ( *VMVP == SYS_ABSENT ) {
-	RETURN( pc + ToLong( pc[ 1 ] ) + 1 );
+    RETURN( pc + ToLong( pc[ 1 ] ) + 1 );
 } else {
-	VMVP--;
-	RETURN( pc + 2 );
+    VMVP--;
+    RETURN( pc + 2 );
 }

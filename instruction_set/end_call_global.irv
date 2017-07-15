@@ -10,7 +10,7 @@ Summary
     object is not a function then sysApply is utilised to call it.
 
     Q: Does this have the correct extension?
-	
+    
 Unchecked Precondition
     * VMCOUNT has the correct count of arguments to be passed.
     * LOCAL[ N ] is a valid local variable.
@@ -21,7 +21,7 @@ Unchecked Precondition
 
 Exceptions (Checked Preconditions)
     * GLOBAL( V ) is a reference to a callable object, checked via sysApply.
-	
+    
 Result (Postcondition)
     * VMLINK, VMPCFUNC, VPC are saved and updated
     * Execution continues in GLOBAL( V )
@@ -36,7 +36,7 @@ VMCOUNT = VMVP - ToRefRef( LOCAL( var ) );
     if ( IsObj( r ) && IsFunctionKey( *( ptr = RefToPtr4( r ) ) ) ) {
         VMLINK = pc + 3;
         VMLINKFUNC = VMPCFUNC;
-    	VMPCFUNC = ptr;
+        VMPCFUNC = ptr;
         RETURN( ptr + 1 );
     } else {
         *( ++VMVP ) = r;

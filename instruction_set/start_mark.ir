@@ -1,26 +1,26 @@
 /*****************************************************************************\
 Definition
-	* START_MARK LOCAL_N
-	* LOCAL[ N ] = address of stack top.
+    * START_MARK LOCAL_N
+    * LOCAL[ N ] = address of stack top.
 
 Summary
-	The first part of a MARK-SET pair.
-	
+    The first part of a MARK-SET pair.
+    
 Unchecked Precondition
-	* LOCAL_N is a valid local variable.
-	
+    * LOCAL_N is a valid local variable.
+    
 Exceptions (Checked Preconditions)
-	None
-	
+    None
+    
 Result (Postcondition)
-	* LOCAL[ N ] contains the current top-of-stack address.
-	* Execution continues at the next instruction.		
+    * LOCAL[ N ] contains the current top-of-stack address.
+    * Execution continues at the next instruction.      
 
 \*****************************************************************************/
 
 long n = ToLong( *( ++pc ) );
 #ifdef DBG_SPECIAL
-	std::cerr << "Storing " << std::hex << ToULong( ToRef( VMVP ) ) << std::dec << " in " << n << std::endl; 
+    std::cerr << "Storing " << std::hex << ToULong( ToRef( VMVP ) ) << std::dec << " in " << n << std::endl; 
 #endif
 LOCAL(n) = ToRef( VMVP );
 RETURN( pc + 1 );

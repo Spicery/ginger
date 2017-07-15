@@ -1,25 +1,25 @@
 /*****************************************************************************\
 Definition
-	LTE_SI A, K, L
+    LTE_SI A, K, L
 
 Summary
-	* Compares the local variable A against a constant K.
-	* If A <= K then control is transferred to L.
-	* Otherwise the next instruction is executed.
-	
+    * Compares the local variable A against a constant K.
+    * If A <= K then control is transferred to L.
+    * Otherwise the next instruction is executed.
+    
 Unchecked Precondition
-	* A is a valid local register index.
-	* L is a valid label.
-	* K is a small value.
-	
+    * A is a valid local register index.
+    * L is a valid label.
+    * K is a small value.
+    
 Checked Preconditions
-	A is a small.
-	
+    A is a small.
+    
 Result
-	Control continues at L if A <= K otherwise fallthru.
+    Control continues at L if A <= K otherwise fallthru.
 
 Tags
-	* Arithmetic comparison
+    * Arithmetic comparison
 
 \*****************************************************************************/
 
@@ -28,17 +28,17 @@ Ref a = LOCAL( s );
 Ref b = pc[2];
 
 if ( IsSmall( a ) ) {
-	if ( IsSmall( b ) ) {
-		RETURN( ToLong( a ) <= ToLong( b ) ? pc + ToLong( pc[3] ) + 3 : pc + 4 );
-	} else if ( IsDouble( b ) ) {
-		RETURN( static_cast< gngdouble_t >( SmallToLong( a ) ) <= gngFastDoubleValue( b ) ? pc + ToLong( pc[3] ) + 3 : pc + 4 );
-	}
+    if ( IsSmall( b ) ) {
+        RETURN( ToLong( a ) <= ToLong( b ) ? pc + ToLong( pc[3] ) + 3 : pc + 4 );
+    } else if ( IsDouble( b ) ) {
+        RETURN( static_cast< gngdouble_t >( SmallToLong( a ) ) <= gngFastDoubleValue( b ) ? pc + ToLong( pc[3] ) + 3 : pc + 4 );
+    }
 } else if ( IsDouble( a ) ) {
-	if ( IsSmall( b ) ) {
-		RETURN( gngFastDoubleValue( a ) <= static_cast< gngdouble_t >( SmallToLong( b ) ) ? pc + ToLong( pc[3] ) + 3 : pc + 4 );
-	} else if ( IsDouble( b ) ) {
-		RETURN( gngFastDoubleValue( a ) <= gngFastDoubleValue( b ) ? pc + ToLong( pc[3] ) + 3 : pc + 4 );
-	} 
+    if ( IsSmall( b ) ) {
+        RETURN( gngFastDoubleValue( a ) <= static_cast< gngdouble_t >( SmallToLong( b ) ) ? pc + ToLong( pc[3] ) + 3 : pc + 4 );
+    } else if ( IsDouble( b ) ) {
+        RETURN( gngFastDoubleValue( a ) <= gngFastDoubleValue( b ) ? pc + ToLong( pc[3] ) + 3 : pc + 4 );
+    } 
 } 
 RETURN( sysCompareNumbers( a, b, true, true, false ) ? pc + ToLong( pc[3] ) + 3 : pc + 4 );
 

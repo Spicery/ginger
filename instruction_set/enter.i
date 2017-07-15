@@ -1,29 +1,29 @@
 /*****************************************************************************\
 Definition
-	ENTER
+    ENTER
 
 Summary
-	This is the most general instruction for setting up a non-leaf
-	function call i.e. one that pushes onto the callstack. It should
-	be matched with a RETURN instruction to cut the callstack back.
-	
+    This is the most general instruction for setting up a non-leaf
+    function call i.e. one that pushes onto the callstack. It should
+    be matched with a RETURN instruction to cut the callstack back.
+    
 Unchecked Precondition
-	This MUST be the first instruction of a function so that the fields
-	of the function object can be accessed by an offset.
-	
+    This MUST be the first instruction of a function so that the fields
+    of the function object can be accessed by an offset.
+    
 Exceptions (Checked Preconditions)
-	VMCOUNT is not consistent with the number of required arguments.
-	
-Result (Postcondition)		
-	* The callstack pointer, the link pointer and the link-function pointer
-	* are pushed onto the callstack.
-	* The arguments are pushed in order onto the callstack.
+    VMCOUNT is not consistent with the number of required arguments.
+    
+Result (Postcondition)      
+    * The callstack pointer, the link pointer and the link-function pointer
+    * are pushed onto the callstack.
+    * The arguments are pushed in order onto the callstack.
 
 \*****************************************************************************/
 
 //
-//	ENTER only works as the 1st instruction of a function.
-//	It uses -ve offsets to access the fields before the key.
+//  ENTER only works as the 1st instruction of a function.
+//  It uses -ve offsets to access the fields before the key.
 //
 long A = ToLong( pc[ -2 ] ); // field before the function key.
 Ref *prev = VMSP;

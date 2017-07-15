@@ -1,21 +1,21 @@
 /*****************************************************************************\
 Definition
-	CHECK_MARK1 LOCAL_N
+    CHECK_MARK1 LOCAL_N
 
 Summary
-	Checks that the value of the local variable LOCAL_N one less
-	that the address of top of the value stack. i.e. that a counted
-	group has size 1.
-	
+    Checks that the value of the local variable LOCAL_N one less
+    that the address of top of the value stack. i.e. that a counted
+    group has size 1.
+    
 Unchecked Precondition
-	Pointer values are long-aligned and hence masquerade as Smalls
-	as far as the garbage collector is concerned.
-	
+    Pointer values are long-aligned and hence masquerade as Smalls
+    as far as the garbage collector is concerned.
+    
 Exceptions (Checked Preconditions)
-	The difference between the two pointers LOCAL[n] & VMVP isn't 1.
-	
-Result (Postcondition)		
-	It is confirmed that 1 value was pushed on the stack.
+    The difference between the two pointers LOCAL[n] & VMVP isn't 1.
+    
+Result (Postcondition)      
+    It is confirmed that 1 value was pushed on the stack.
 
 \*****************************************************************************/
 
@@ -23,10 +23,10 @@ long n = ToLong( *( ++pc ) );
 unsigned long d;
 #ifdef DBG_SPECIAL
     std::cerr << "Recovering " << ToULong( LOCAL(n) ) << " from " << n << std::endl;
-	std::cerr << "Comparing with " <<  ToULong( VMVP ) << std::endl;
-	std::cerr << "Length of value stack = " << ( VMVP - VMVP_base ) << std::endl;
+    std::cerr << "Comparing with " <<  ToULong( VMVP ) << std::endl;
+    std::cerr << "Length of value stack = " << ( VMVP - VMVP_base ) << std::endl;
 #endif
 d = VMVP - ToRefRef( LOCAL(n) );
 if ( d == 1 ) RETURN( pc + 1 );
 throw Mishap( "Wrong number of results (needed 1)" ).culprit( "#results", d );
-RETURN( NULL );	// stupid compiler
+RETURN( NULL ); // stupid compiler

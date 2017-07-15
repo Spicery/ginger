@@ -1,16 +1,16 @@
 /*****************************************************************************\
 Definition
-	GOTO JUMP_D
+    GOTO JUMP_D
 
 Summary
-	Unconditional transfer of control by JUMP_D words.
-	
+    Unconditional transfer of control by JUMP_D words.
+    
 Unchecked Precondition
-	JUMP_D is in range of the enclosing function object.
-	
+    JUMP_D is in range of the enclosing function object.
+    
 Exceptions (Checked Preconditions)
-	
-Result (Postcondition)		
+    
+Result (Postcondition)      
 
 \*****************************************************************************/
 

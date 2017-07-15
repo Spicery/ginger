@@ -1,20 +1,20 @@
 /*****************************************************************************\
 Definition
-	NOT ( X ) -> ( R ), where R = not( X )
+    NOT ( X ) -> ( R ), where R = not( X )
 
 Summary
-	Boolean negation
-	
+    Boolean negation
+    
 Unchecked Precondition
-	There's at least one item on the stack.
-	
+    There's at least one item on the stack.
+    
 Exceptions (Checked Preconditions)
-	None
-	
+    None
+    
 Result (Postcondition)
-	The top of the stack is replaced by its boolean negation. Note that
-	non-false values count as true for this instruction - that's a feature
-	not a bug.
+    The top of the stack is replaced by its boolean negation. Note that
+    non-false values count as true for this instruction - that's a feature
+    not a bug.
 
 \*****************************************************************************/
 

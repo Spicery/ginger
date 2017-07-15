@@ -1,20 +1,20 @@
 /*****************************************************************************\
 Definition
-	RESET
+    RESET
 
 Summary
-	Exits the interpreter loop.
+    Exits the interpreter loop.
 
 Unchecked Precondition
-	None.
-	
+    None.
+    
 Exceptions (Checked Preconditions)
-	None.
-	
-Result (Postcondition)		
-	* The interpreter loop immediately exits.
-	* The VM state is untouched.
-	* If execution was to continue, the VPC would be the next instruction.
+    None.
+    
+Result (Postcondition)      
+    * The interpreter loop immediately exits.
+    * The VM state is untouched.
+    * If execution was to continue, the VPC would be the next instruction.
 
 \*****************************************************************************/
 

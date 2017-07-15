@@ -1,27 +1,27 @@
 /*****************************************************************************\
 Definition
-	LT_SS LOCAL_S LOCAL_T
+    LT_SS LOCAL_S LOCAL_T
 
 Summary
-	Compares a local variable LOCAL_S using less than versus another
-	local variable LOCAL_T and if true jumps to JUMP_D, otherwise falls through.
-	
+    Compares a local variable LOCAL_S using less than versus another
+    local variable LOCAL_T and if true jumps to JUMP_D, otherwise falls through.
+    
 Unchecked Precondition
-	* JUMP_D is in range of the enclosing function object.
-	* LOCAL_S and LOCAL_T are valid indexes for local variables of the 
-	  enclosing function object.
+    * JUMP_D is in range of the enclosing function object.
+    * LOCAL_S and LOCAL_T are valid indexes for local variables of the 
+      enclosing function object.
 
-	Q: Should this be marked as rrr?
-	
+    Q: Should this be marked as rrr?
+    
 Exceptions (Checked Preconditions)
-	* LOCAL[ S ] and LOCAL[ T ] must both be numbers.
-	
-Result (Postcondition)		
-	* 	Control is transferred to the target forwards or backwards if
-		two local variables are less-than each other.
+    * LOCAL[ S ] and LOCAL[ T ] must both be numbers.
+    
+Result (Postcondition)      
+    *   Control is transferred to the target forwards or backwards if
+        two local variables are less-than each other.
 
 Tags
-	* Arithmetic comparison
+    * Arithmetic comparison
 
 \*****************************************************************************/
 
@@ -32,16 +32,16 @@ Ref a = LOCAL( s );
 Ref b = LOCAL( t );
 
 if ( IsSmall( a ) ) {
-	if ( IsSmall( b ) ) {
-		RETURN( ToLong( a ) < ToLong( b ) ? pc + ToLong( pc[3] ) + 3 : pc + 4 );
-	} else if ( IsDouble( b ) ) {
-		RETURN( static_cast< gngdouble_t >( SmallToLong( a ) ) < gngFastDoubleValue( b ) ? pc + ToLong( pc[3] ) + 3 : pc + 4 );
-	}
+    if ( IsSmall( b ) ) {
+        RETURN( ToLong( a ) < ToLong( b ) ? pc + ToLong( pc[3] ) + 3 : pc + 4 );
+    } else if ( IsDouble( b ) ) {
+        RETURN( static_cast< gngdouble_t >( SmallToLong( a ) ) < gngFastDoubleValue( b ) ? pc + ToLong( pc[3] ) + 3 : pc + 4 );
+    }
 } else if ( IsDouble( a ) ) {
-	if ( IsSmall( b ) ) {
-		RETURN( gngFastDoubleValue( a ) < static_cast< gngdouble_t >( SmallToLong( b ) ) ? pc + ToLong( pc[3] ) + 3 : pc + 4 );
-	} else if ( IsDouble( b ) ) {
-		RETURN( gngFastDoubleValue( a ) < gngFastDoubleValue( b ) ? pc + ToLong( pc[3] ) + 3 : pc + 4 );
-	} 
+    if ( IsSmall( b ) ) {
+        RETURN( gngFastDoubleValue( a ) < static_cast< gngdouble_t >( SmallToLong( b ) ) ? pc + ToLong( pc[3] ) + 3 : pc + 4 );
+    } else if ( IsDouble( b ) ) {
+        RETURN( gngFastDoubleValue( a ) < gngFastDoubleValue( b ) ? pc + ToLong( pc[3] ) + 3 : pc + 4 );
+    } 
 } 
 RETURN( sysCompareNumbers( a, b, true, false, false ) ? pc + ToLong( pc[3] ) + 3 : pc + 4 );

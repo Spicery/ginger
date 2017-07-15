@@ -4,7 +4,7 @@ Tidying up Code Planting
 Instructions::
 
 	vmiPUSH( VIdent src )
-	llvmiPUHC( Ref r )
+	llvmiPUSHC( Ref r )
 	llvmiPUSHS()
 	llvmiPUSHL( int n )
 	llvmiPUSHG( Valof v )

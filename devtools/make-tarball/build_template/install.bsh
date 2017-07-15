@@ -26,7 +26,10 @@ else
 	fi
 fi
 
-echo "Step 2: Removing any pre-existing installation."
+echo "Step 2: Ensure pre-requisites are in place."
+sudo apt-get install sudo
+
+echo "Step 3: Removing any pre-existing installation."
 if [ -e ${INSTALL_DIR}/bin/ginger ]
 then
 	echo "      : Found - removing."
@@ -43,7 +46,7 @@ fi
 #	packed files archive is in the current directory. 
 #	N.B. You will probably need to run this script with root privileges.
 #
-echo "Step 3: Copying the new installation in place."
+echo "Step 4: Copying the new installation in place."
 PACKED_FILES=ginger-files.tgz
 gzip -d < ${PACKED_FILES} | ( cd ${INSTALL_DIR}; tar xf -)
 echo "      : Copied."
@@ -52,7 +55,7 @@ echo "      : Copied."
 # Now create the uninstaller (uninstall.sh) in the share directory.
 # Arguably it could go in the libexec.
 # 
-echo "Step 4: Creating uninstall.bsh file."
+echo "Step 5: Creating uninstall.bsh file."
 UNINSTALL_FILE=${INSTALL_DIR}/share/ginger/uninstall.bsh
 touch ${UNINSTALL_FILE}
 echo '#!/bin/sh' > ${UNINSTALL_FILE}
@@ -63,7 +66,7 @@ echo "/bin/rm -rf ${INSTALL_DIR}/share/ginger" >> ${UNINSTALL_FILE}
 chmod a+x ${UNINSTALL_FILE}
 echo "      : Created at ${UNINSTALL_FILE}"
 
-echo "Step 4: Creating installation summary file."
+echo "Step 6: Creating installation summary file."
 INSTALL_INFO_FILE=${INSTALL_DIR}/share/ginger/INSTALL_INFO.txt
 touch ${INSTALL_INFO_FILE}
 echo "Ginger Installation from Tarball Information" >> ${INSTALL_INFO_FILE}

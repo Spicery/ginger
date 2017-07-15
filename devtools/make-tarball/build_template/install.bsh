@@ -27,7 +27,21 @@ else
 fi
 
 echo "Step 2: Ensure pre-requisites are in place."
-sudo apt-get install sudo
+# Is sudo available? 
+if [[ $(type -p sudo) ]]
+then
+        sudo apt-get update && apt-get upgrade -y
+else
+        if [[ $EUID == 0 ]]; then 
+                apt-get update && apt-get upgrade -y
+                apt-get -qq install sudo
+        else
+                echo "ERROR: sudo not installed and no root privileges - stopping." >&2
+                exit 1
+        fi
+fi
+# Now get the real pre-reqs.
+sudo apt-get -qq install libgmp-dev libreadline-dev libssl-dev
 
 echo "Step 3: Removing any pre-existing installation."
 if [ -e ${INSTALL_DIR}/bin/ginger ]

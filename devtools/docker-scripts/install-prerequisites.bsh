@@ -10,7 +10,7 @@ else
 		apt-get -qq install sudo
 	else
 		echo "ERROR: sudo not installed and no root privileges - stopping." >&2
-		exit 0
+		exit 1
 	fi
 fi
 

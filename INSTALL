@@ -6,89 +6,88 @@ Introduction
 This note describes how to install the Ginger Virtual Machine from source
 onto a bare machine.
 
-Installing on Ubuntu or Mac OS X
---------------------------------
+Installing on Ubuntu - or any Debian Distribution
+-------------------------------------------------
+You will need git and make already installed for this recipe. 
 
-*	Pre-requisites: you'll need some basic developer tools 
-		git, python3 (with pip3 and nose2), g++, autoconf, uuid, readline, make
-	and the relevant libraries.	You can ensure you have these in one step with
-		% sudo apt-get install make git python3 python3-pip g++ autoconf uuid-dev libreadline-dev wget libpcap-dev libssl-dev libgmp-dev
-	After this you will need to update pip3 and nose2
-		% sudo pip3 install --upgrade pip
-		% sudo pip3 install nose2
+Start by deciding where you want to put the Ginger development folder to live. 
+That will be $SPICERY_HOME and this recipe assigns it to ~/Spicery (but you 
+can make it what you like). 
 
-*	We also need the RudeCGI library
-		% mkdir /tmp/rudecgi
-		% cd /tmp/rudecgi
-		% wget http://www.rudeserver.com/cgiparser/download/rudecgi-5.0.0.tar.gz
-		% tar zxf rudecgi-5.0.0.tar.gz
-		% cd rudecgi-5.0.0
-		% ./configure
-		% make
-		% sudo make install
-
-*	Create a Spicery folder for ginger and any sister projects. e.g.
-		% SPICERY_HOME=~/Spicery
-		% mkdir $SPICERY_HOME
-		% cd $SPICERY_HOME
-
-*	Clone from the GitHub repository into a folder.
-		% git clone https://github.com/Spicery/ginger.git
-
-*	Then build and install
-		% autoconf
-		% ./configure
-		% make
-		% sudo make install
+	export SPICERY_HOME=~/Spicery
+	mkdir -p $SPICERY_HOME
+	cd $SPICERY_HOME
+	# Unpacks into a folder called 'ginger'.
+	git clone https://github.com/Spicery/ginger.git
+	cd ginger
+	# We're now in the home folder for Ginger dev.
+	# Checkout the development branch.
+	git checkout --track origin/development
+	# The JumpStart makefile is a one-stop shop for project
+	# management commands, not really a makefile.
+	make -f JumpStart.makefile ubuntu
+	make -f JumpStart.makefile configure
+	# At this point the regular Makefile can take over.
+	# Building the Ginger system will take around 5-10 mins.
+	make
+	# You'll need a local installation to do component testing.
+	sudo make install-as-is
 
 Installing from Source Using Vagrant
 ------------------------------------
 If you have Vagrant available, then you can use the source-bootstrap.sh file to 
 build Ginger from source. 
 
-*	Create a Spicery folder for ginger and any sister projects. e.g.
-		% SPICERY_HOME=~/Spicery
-		% mkdir $SPICERY_HOME
-		% cd $SPICERY_HOME
+Create a Spicery folder for ginger and any sister projects. e.g.
+		
+	SPICERY_HOME=~/Spicery
+	mkdir $SPICERY_HOME
+	cd $SPICERY_HOME
 
-*	Clone from the GitHub repository into a folder.
-		% git clone https://github.com/Spicery/ginger.git
+Clone from the GitHub repository into a folder.
+		
+	git clone https://github.com/Spicery/ginger.git
 
-*	Create a Vagrant folder for running Ginger. e.g. ginger-[BASEBOX]
-	you will find minimal Vagrantfile's for baseboxes precise32 and
-	precise64 in $SPICERY_HOME/ginger/vagrant. Here's the script for
-	building against the precise32 base box.
-		% cd $SPICERY_HOME/ginger/vagrant
-		% mkdir ginger-precise32
-		% cp Vagrantfile.precise32 ginger-precise32/Vagrantfile
-		% cp source-bootstrap.sh ginger-precise32
-		% cd ginger-precise32
-		% vagrant up
+Create a Vagrant folder for running Ginger. e.g. ginger-[BASEBOX]
+you will find minimal Vagrantfile's for baseboxes precise32 and
+precise64 in $SPICERY_HOME/ginger/vagrant. Here's the script for
+building against the precise32 base box.
+		
+	cd $SPICERY_HOME/ginger/vagrant
+	mkdir ginger-precise32
+	cp Vagrantfile.precise32 ginger-precise32/Vagrantfile
+	cp source-bootstrap.sh ginger-precise32
+	cd ginger-precise32
+	vagrant up
 
 Installing from Tarball Using Vagrant
 -------------------------------------
 For a quicker startup, you can use the Ginger tarball and the 
 tarball-bootstrap.sh file.
 
-*	Create a Spicery folder for ginger and any sister projects. e.g.
-		% SPICERY_HOME=~/Spicery
-		% mkdir $SPICERY_HOME
-		% cd $SPICERY_HOME
+Create a Spicery folder for ginger and any sister projects. e.g.
 
-*	Download the latest tarball. Install into the folder you intend to
-	use for the virtual machine
-	e.g. $SPICERY_HOME/ginger/vagrant/ginger-[BASEBOX]
-	In this case we'll build for the precise32 basebox. For other baseboxes
-	just change the name accordingly.
-		% cd ginger/vagrant
-		% mkdir ginger-precise32
-		% cd ginger-precise32
-		% wget <url of latest ginger tarball>
+	export SPICERY_HOME=~/Spicery
+	mkdir $SPICERY_HOME
+	cd $SPICERY_HOME
 
-* 	Copy in the tarball-bootstrap.sh file and rename to bootstrap.sh. 
-	Set up the Vagrantfile appropriate for the base box.
-		% cp ../tarball-bootstrap.sh bootstrap.sh
-		% cp ../Vagrantfile.precise32 Vagrantfile
+Download the latest tarball. Install into the folder you intend to
+use for the virtual machine
+e.g. $SPICERY_HOME/ginger/vagrant/ginger-[BASEBOX]
+In this case we'll build for the precise32 basebox. For other baseboxes
+just change the name accordingly.
 
-* 	And vagrant up
-		% vagrant up
+	cd ginger/vagrant
+	mkdir ginger-precise32
+	cd ginger-precise32
+	wget <url of latest ginger tarball>
+
+Copy in the tarball-bootstrap.sh file and rename to bootstrap.sh. 
+Set up the Vagrantfile appropriate for the base box.
+		
+	cp ../tarball-bootstrap.sh bootstrap.sh
+	cp ../Vagrantfile.precise32 Vagrantfile
+
+And vagrant up
+		
+	vagrant up

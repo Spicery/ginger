@@ -40,7 +40,7 @@ build Ginger from source.
 
 Create a Spicery folder for ginger and any sister projects. e.g.
 		
-	SPICERY_HOME=~/Spicery
+	export SPICERY_HOME=~/Spicery
 	mkdir $SPICERY_HOME
 	cd $SPICERY_HOME
 

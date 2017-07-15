@@ -19,6 +19,7 @@ Contents:
    issues_with_queries
    maths
    roadmap
+   fn2code
    version_0.8
    version_0.8.1
 

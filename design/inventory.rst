@@ -2,7 +2,7 @@ Design of the Inventory Format
 ==============================
 
 The idea is to represent the whole of a project inside a single file, called
-an inventory (*.ivy). The inventory will be regarded as the library format
+an inventory (\*.ivy). The inventory will be regarded as the library format
 by the run-time system. The development loop will automatically detect when
 the inventory is out of date with regard to source files and rebuild it on
 the fly.

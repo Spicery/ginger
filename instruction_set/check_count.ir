@@ -2,6 +2,9 @@
 Definition 
     CHECK_COUNT N
 
+Code
+    <check.count n=N />
+
 Summary
     Checks that the VMCOUNT register equals N, otherwise throw a
     run-time error complaining about an arity mismatch.

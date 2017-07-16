@@ -2,6 +2,9 @@
 Definition
     LISTITERATE ( L: List, DUMMY ) -> ( Head, Tail : List )
 
+Code
+    <listiterate />
+    
 Summary
     The basis for list iteration. It is a portmanteau iterator instruction
     that is fused with a return.

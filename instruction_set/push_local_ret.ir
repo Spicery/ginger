@@ -1,7 +1,9 @@
 /*****************************************************************************\
 Definition
-    * PUSH_LOCAL_RET LOCAL_N
-    * VMPCFUNC, VMSP, VPC restored from previous call
+    PUSH_LOCAL_RET LOCAL_N
+
+Code
+    <push.local.ret local=LOCAL_N />
 
 Summary
     Pushes the value of a local and returns from the calling function.
@@ -16,6 +18,7 @@ Exceptions (Checked Preconditions)
 Result (Postcondition)      
     * The top of stack is the value of LOCAL[ N ]
     * The stack is one bigger.
+    * VMPCFUNC, VMSP, VPC restored from previous call
     * Execution continues from the calling function.
 
 \*****************************************************************************/

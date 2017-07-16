@@ -2,6 +2,9 @@
 Definition
 	RESET
 
+Code
+    <fail />
+    
 Summary
 	Exits the interpreter loop.
 

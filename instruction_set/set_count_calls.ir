@@ -1,9 +1,9 @@
 /*****************************************************************************\
 Definition
-    * SET_CALLS RAW_COUNT ( F ) -> ()
-    * VMCOUNT = RAW_COUNT
-    * VMLINK, VMLINKFUNC, VMPCFUNC are updated.
-    * VPC is set to the entry point of the function.
+    SET_CALLS RAW_COUNT ( F ) -> ()
+
+Code
+    <set.calls count=RAW_COUNT />
 
 Summary
     The top of stack is popped and called with a fixed argument count.
@@ -16,11 +16,13 @@ Exceptions (Checked Preconditions)
     
 Result (Postcondition)      
     * The value on top of the stack is popped and called.
-    * VMCOUNT = COUNT
     * If the value is a function object, then a normal function entry
       is started.
     * If the value is not a function object, the value is pushed and sysApply
       is invoked.
+    * VMCOUNT = RAW_COUNT
+    * VMLINK, VMLINKFUNC, VMPCFUNC are updated.
+    * VPC is set to the entry point of the function.
 
 \*****************************************************************************/
 

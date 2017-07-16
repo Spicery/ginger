@@ -2,6 +2,9 @@
 Definition
 	LTE (A, B) -> ( R ), where R = A <= B
 
+Code
+    <lte />
+    
 Summary
 	Takes two numbers A & B off the stack and pushs a boolean result
 	A <= B onto the stack.

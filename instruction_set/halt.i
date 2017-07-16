@@ -2,6 +2,9 @@
 Definition
     HALT
 
+Code
+    <halt />
+    
 Summary
     Forces the virtual machine to exit with a failure.
     

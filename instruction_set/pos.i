@@ -7,6 +7,9 @@ Definition
     doesn't really deserve to be a machine instruction either. So
     a good refactoring might be to transform them into system functions.
 
+Code
+    <positivate />
+
 Summary
     Checks the top of the stack is a number and leaves it
     unchanged.

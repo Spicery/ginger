@@ -2,6 +2,9 @@
 Definition
     SELF_CALL
 
+Code
+    <self.call />
+
 Summary
     Used by directly recursive functions as they have a bit better self
     knowledge and can call themselves efficiently.

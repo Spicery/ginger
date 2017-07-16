@@ -2,6 +2,9 @@
 Definition
 	GTE_SI LOCAL_S VALUE_B:Num JUMP_D
 
+Code
+    <gte.si local=LOCAL value=VALUE_B to=JUMP_D />
+    
 Summary
 	Compares a local variable LOCAL_S using greater than or equal to versus a 
 	number VALUE_B and if true jumps to JUMP_D, otherwise falls through.

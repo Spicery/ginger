@@ -1,8 +1,10 @@
 /*****************************************************************************\
 Definition
-    * PUSHQ CONST
-    * VPC += 2
+    PUSHQ CONST
     
+Code
+    <pushq> <constant type=TYPE value=VALUE ... /> </pushq>
+
 Summary
     Pushes a constant onto the stack.
 

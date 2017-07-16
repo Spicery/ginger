@@ -2,6 +2,9 @@
 Definition
 	ERASE_MARK LOCAL_N
 
+Code
+    <erase.mark local=LOCAL_N />
+    
 Summary
 	Reset the value stack length to that recorded 
 	in the variable LOCAL_N.

@@ -2,6 +2,9 @@
 Definition 
     AND JUMP_TO ( X ) -> ( false | () )
 
+Code
+    <and to=JUMP_TO />
+
 Summary
     Pop the top of the stack and compare with false. If it is the same then
     push false and jump to JUMP_TO. Otherwise fall through.

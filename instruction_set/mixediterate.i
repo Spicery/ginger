@@ -2,6 +2,9 @@
 Definition
     MIXEDITERATE ( i:Small, m:Mixed ) -> ( x, i' )
 
+Code
+    <mixediterate />
+    
 Summary
     The basis for mixed record/vector iteration. It is a portmanteau 
     iterator instruction that is fused with a return.

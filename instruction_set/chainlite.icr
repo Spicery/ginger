@@ -2,6 +2,9 @@
 Definition 
     CHAINLITE F N
 
+Code
+    No static representation at the moment.
+
 Summary
     Used to implement chaining in partial evaluation.
     

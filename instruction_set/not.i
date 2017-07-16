@@ -2,6 +2,9 @@
 Definition
     NOT ( X ) -> ( R ), where R = not( X )
 
+Code
+    <not />
+
 Summary
     Boolean negation
     

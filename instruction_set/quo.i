@@ -1,11 +1,14 @@
 /*****************************************************************************\
 Definition
     QUO ( X : Small, Y: Small ) -> ( R ), where R = X div Y
-    Note that this is floored quotient.
+    
+Code
+    <quo />
 
 Summary
     Computes the integer quotient of A/B
-    
+    Note that this is floored quotient.
+
 Unchecked Precondition
     * There are two values on the stack
 

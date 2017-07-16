@@ -1,8 +1,10 @@
 /*****************************************************************************\
 Definition
-    * MOD_I ( X : Small, Y : Small ) -> ( R ), where R = X mod Y
-    * VPC += 1
+    MOD_I ( X : Small, Y : Small ) -> ( R ), where R = X mod Y
 
+Code
+    <mod.i />
+    
 Summary
     Computes the integer modulus R of X and Y, such that R is in the
     half open interval [0,Y). X and Y are removed from the stack and 
@@ -17,6 +19,7 @@ Exceptions (Checked Preconditions)
 Result (Postcondition)      
     * R = X mod Y is pushed.
     * Execution continues at the next instruction.
+    * VPC += 1
 
 Tags
     * Arithmetic operator

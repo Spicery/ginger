@@ -2,6 +2,9 @@
 Definition
     RETURN
 
+Code
+    <return />
+
 Summary
     Returns from a function call.
     

@@ -5,6 +5,9 @@ Definition
 		LOCAL_N : long
 		COUNT	: long
 
+Code
+	<check.mark.gte local=LOCAL_N count=COUNT />
+
 Summary
 	Checks that the value of the local variable LOCAL_N is at least N 
 	less than the address of the top of the stack.

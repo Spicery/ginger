@@ -2,6 +2,9 @@
 Definition
     SYSCALL_DAT RAW_SYSCALL_PTR DATA
 
+Code
+    No static representation.
+
 Summary
     Invokes the native function with a data argument frozen in.
 

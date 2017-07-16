@@ -1,6 +1,9 @@
 /*****************************************************************************\
 Definition
-    * NEGATE ( X : Num ) -> ( -X )
+    NEGATE ( X : Num ) -> ( -X )
+
+Code
+    <negate />
 
 Summary
     Takes a number x off the value stack and replaces it

@@ -2,6 +2,9 @@
 Definition
     ENTER
 
+Code
+    <enter />
+    
 Summary
     This is the most general instruction for setting up a non-leaf
     function call i.e. one that pushes onto the callstack. It should

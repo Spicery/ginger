@@ -1,8 +1,9 @@
 /*****************************************************************************\
 Definition
-    * POP_GLOBAL VALOF_V ( X ) -> ()
-    * V = X
-    * VPC += 2
+    POP_GLOBAL VALOF_V ( X ) -> ()
+
+Code
+    <pop.global def.pkg=PKG global=NAME />
 
 Summary
     Pops the top of the stack into the global variable V.

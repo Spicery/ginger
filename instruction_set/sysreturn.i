@@ -2,6 +2,9 @@
 Definition
     SYSRETURN
 
+Code
+    <sysreturn />
+
 Summary
     An especially high performance return for native function objects.
     

@@ -1,7 +1,9 @@
 /*****************************************************************************\
 Definition
-    * SUB ( X : Num, Y : Num ) -> ( R : Num ), where R = X - Y
-    * VPC += 1
+    SUB ( X : Num, Y : Num ) -> ( R : Num ), where R = X - Y
+    
+Code
+    <sub />
 
 Summary
     Takes two Nums X & Y off the value stack and replaces them

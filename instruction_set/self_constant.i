@@ -2,6 +2,9 @@
 Definition
     SELF_CONSTANT () -> ( F )
 
+Code
+	<self.constant />
+	
 Summary
     A function can push a reference to itself very efficiently. This
     helps implement the named-lambda form.

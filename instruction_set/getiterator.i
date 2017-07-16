@@ -2,6 +2,9 @@
 Definition
 	* GETITERATOR ( OBJ ) -> ( state, context, next_fn )
 
+Code
+    <getiterator />
+    
 Summary
 	This provides an interface to sysFastGetFastIterator, which is the
 	basis for looping.

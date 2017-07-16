@@ -1,8 +1,9 @@
 /*****************************************************************************\
 Definition
-    * SET LOCAL
-    * VMCOUNT = VSTACK - Value( LOCAL )
-    * VPC += 2
+    SET LOCAL
+
+Code
+    <set local=LOCAL />
 
 Summary
     Sets the VMCOUNT to the previously set MARK.
@@ -24,6 +25,7 @@ Exceptions (Checked Preconditions)
 Result (Postcondition)      
     * VMCOUNT is the number of items put on the stack since the corresponding
       mark.
+    * VMCOUNT = VSTACK - Value( LOCAL )
     * Execution continues at the next instruction.
 
 \*****************************************************************************/

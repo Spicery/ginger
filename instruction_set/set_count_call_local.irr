@@ -1,7 +1,9 @@
 /*****************************************************************************\
 Define
-    * SET_COUNT_CALL_LOCAL RAW_COUNT LOCAL_N
-    * VMCOUNT = RAW_COUNT
+    SET_COUNT_CALL_LOCAL RAW_COUNT LOCAL_N
+
+Code
+    <set.count.call.local count=RAW_COUNT local=LOCAL_N />
 
 Summary
     Calls the Nth local variable with a fixed count of the arguments. Note
@@ -16,6 +18,7 @@ Exceptions (Checked Preconditions)
     None.
     
 Result (Postcondition)      
+    * VMCOUNT = RAW_COUNT
     * The local variable has been entered.
 
 \*****************************************************************************/

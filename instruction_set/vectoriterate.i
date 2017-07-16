@@ -2,6 +2,9 @@
 Definition
     VECTORITERATE ( i:Small, v:Vector ) -> ( x, i' )
 
+Code
+    <vectoriterate />
+
 Summary
     The basis for vector iteration. It is a portmanteau iterator instruction
     that is fused with a return.

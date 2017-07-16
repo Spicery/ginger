@@ -2,6 +2,9 @@
 Definition
 	ENTER0
 
+Code
+    <enter0 />
+    
 Summary
 	A simplified version of ENTER for nullary function objects.
 	

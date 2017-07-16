@@ -2,6 +2,9 @@
 Definition
 	GT ( A, B ) -> ( A > B )
 
+Code
+    <gt />
+    
 Summary
 	Removes the top two items from the value stack, which must be
 	numbers, and compares them using the greater than operator.

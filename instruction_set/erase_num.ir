@@ -4,6 +4,9 @@ Definition
 	where
 		N : long
 
+Code
+    <erase.num n=N/>
+    
 Summary
 	Removes the topmost N items from the value stack.
 	

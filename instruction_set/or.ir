@@ -2,6 +2,9 @@
 Definition
 	* OR JUMP_TO ( X ) -> ( X ) | ()
 
+Code
+    <or to=JUMP_TO />
+
 Summary
 	Compare the top of the stack against false. If it is the same then
 	remove the top of the stack and fall thru. Otherwise jump to JUMP_TO.

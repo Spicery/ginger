@@ -2,6 +2,9 @@
 Definition
     ABSOR JUMP_TO ( X ) -> ( X ) | ()
 
+Code
+    <absor to=JUMP_TO />
+
 Summary
     Compare the top of the stack against absent. If it is the same then
     fall through and remove the top of the stack. Otherwise jump to JUMP_TO.

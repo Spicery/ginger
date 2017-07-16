@@ -2,6 +2,9 @@
 Definition
 	EQ ( A, B ) -> ( A == B )
 
+Code
+    <eq />
+    
 Summary
 	Removes two items from the top of the stack and compares them for 
 	identity. If they are identical then true is pushed, otherwise false.

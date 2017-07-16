@@ -1,8 +1,10 @@
 /*****************************************************************************\
 Definition
-    * START_MARK LOCAL_N
-    * LOCAL[ N ] = address of stack top.
+    START_MARK LOCAL_N
 
+Code
+    <start.mark local=LOCAL_N />
+    
 Summary
     The first part of a MARK-SET pair.
     

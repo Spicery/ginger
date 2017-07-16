@@ -2,6 +2,9 @@
 Definition
 	EQ_SS LOCAL_S LOCAL_T JUMP_D
 
+Code
+    <eq.ss local.0=LOCAL_S local.1=LOCAL_T to=JUMP_D />
+    
 Summary
 	Compares two local variables LOCAL_S and LOCAL_T for identity and
 	jumping to JUMP_D if they are, otherwise falling through.

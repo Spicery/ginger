@@ -1,7 +1,9 @@
 /*****************************************************************************\
 Define
     * SET_CALL_GLOBAL RAW_COUNT VALOF_F
-    * VMCOUNT = RAW_COUNT
+
+Code
+    <set.call.global count=RAW_COUNT def.pkg=PKG global=NAME />
 
 Summary
     Calls a variable GLOBAL( F ) with a fixed count of the arguments. Note
@@ -16,6 +18,7 @@ Exceptions (Checked Preconditions)
     None.
     
 Result (Postcondition)      
+    * VMCOUNT = RAW_COUNT
     * The object F has been entered.
 
 \*****************************************************************************/

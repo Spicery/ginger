@@ -2,6 +2,9 @@
 Definition
     RETURN_IFNOT ( X ) -> ()
 
+Code
+    <return.ifnot />
+
 Summary
     Conditionally returns from a function depending on the value on top
     of the stack.

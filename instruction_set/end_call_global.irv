@@ -1,8 +1,12 @@
 /*****************************************************************************\
 Definition
-    * END_CALL_GLOBAL LOCAL_N VALOF_V
-    * VMLINK, VMPCFUNC, VPC are saved and updated
-    * VMCOUNT has the argument count.
+    END_CALL_GLOBAL LOCAL_N VALOF_V
+    Side-effects
+        * VMLINK, VMPCFUNC, VPC are saved and updated
+        * VMCOUNT has the argument count.
+
+Code
+    <end.call.global local=LOCAL_N def.pkg=PKG global=NAME />
 
 Summary
     Updates VMCOUNT with a value-count using LOCAL[ N ] as the mark.

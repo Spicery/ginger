@@ -1,6 +1,9 @@
 /*****************************************************************************\
 Definition
-	DUP
+	DUP ( X ) -> ( X, X )
+
+Code
+	<dup />
 
 Summary
 	Duplicates the topmost item of the value stack.

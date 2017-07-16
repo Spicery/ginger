@@ -1,8 +1,10 @@
 /*****************************************************************************\
 Definition
-    * PUSHQ_RET CONST () -> ( CONST )
-    * VMPCFUNC, VMSP, VPC restored from call-stack.
+    PUSHQ_RET CONST () -> ( CONST )
     
+Code
+    <pushq.ret> <constant type=TYPE value=VALUE ... /> </pushq.ret>
+
 Summary
     Push a constant and return from the calling function.
 
@@ -16,6 +18,7 @@ Exceptions (Checked Preconditions)
 Result (Postcondition)
     * The top of the stack is CONST.
     * The stack is one bigger.
+    * VMPCFUNC, VMSP, VPC restored from call-stack.
     * Execution continues from previous function call.
 
 \*****************************************************************************/

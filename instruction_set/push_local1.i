@@ -1,8 +1,10 @@
 /*****************************************************************************\
 Definition
-    * PUSH_LOCAL1 () -> ( R ), where R = LOCAL[ 1 ]
-    * VPC += 1
-    
+    PUSH_LOCAL1 () -> ( R ), where R = LOCAL[ 1 ]
+
+Code
+	<push.local1 />
+
 Summary
     Pushes the value of LOCAL[ 1 ] onto the stack.
     

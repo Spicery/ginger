@@ -1,8 +1,10 @@
 /*****************************************************************************\
 Definition
-    * POP_GLOBAL VALOF_V () -> ( X ), where X = GLOBAL( V )
-    * VPC += 2
+    POP_GLOBAL VALOF_V () -> ( X ), where X = GLOBAL( V )
  
+Code
+    <pop.global def.pkg=PKG global=NAME />
+
 Summary
     Pushes the value of GLOBAL( V ) onto the stack.
     

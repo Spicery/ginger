@@ -2,6 +2,9 @@
 Definition
 	INCR ( X ) -> ( X1 )
 
+Code
+    <incr />
+    
 Summary
 	Increments X, the value on top of the stack, by 1.
 	

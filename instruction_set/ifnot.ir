@@ -2,6 +2,9 @@
 Definition
 	* IFNOT JUMP_TO ( X ) -> ()
 
+Code
+    <ifnot to=JUMP_D />
+    
 Summary
 	If the top of the stack is false then jump to JUMP_TO,
 	otherwise fall through. Remove the item from the stack in

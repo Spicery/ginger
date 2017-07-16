@@ -2,6 +2,9 @@
 Definition
     NEQ ( A, B ) -> ( R ), where R = A != B
 
+Code
+    <neq />
+
 Summary
     Removes two items from the top of the stack and compares them for 
     non-identity. If they are identical then false is pushed, otherwise true.

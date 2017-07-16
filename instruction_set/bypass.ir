@@ -1,6 +1,9 @@
 /*****************************************************************************\
 Definition
-    GOTO JUMP_D
+    BYPASS JUMP_D
+
+Code
+    <bypass to=JUMP_D />
 
 Summary
     Unconditional transfer of control by JUMP_D words.

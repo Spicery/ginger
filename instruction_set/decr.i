@@ -2,6 +2,9 @@
 Definition
 	DECR 
 
+Code
+	<decr />
+
 Summary
 	Decrements the value on top of the stack by 1.
 	

@@ -1,7 +1,9 @@
 /*****************************************************************************\
 Definition
     * SELF_CALL_N COUNT
-    * VMCOUNT = COUNT
+
+Code
+    <self.call.n count=COUNT />
 
 Summary
     Makes a recursive call to the currently active function with a fixed
@@ -14,6 +16,7 @@ Exceptions (Checked Preconditions)
     None
     
 Result (Postcondition)      
+    * VMCOUNT = COUNT
     * The current function is re-entered, passing N items from the stack.
 
 \*****************************************************************************/

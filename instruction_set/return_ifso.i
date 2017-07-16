@@ -2,6 +2,9 @@
 Definition
     RETURN_IFSO ( X ) -> ()
 
+Code
+    <return.ifso />
+
 Summary
     Conditionally returns from a function based on the value on top
     of the stack.

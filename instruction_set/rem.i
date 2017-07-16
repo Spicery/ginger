@@ -3,7 +3,9 @@ DISABLED IN FAVOUR OF MOD =^= FLOORED REMAINDER
 
 Definition
     * REM_I ( X : Small, Y : Small ) -> ( R ), where R = X mod Y
-    * VPC += 1
+
+Code
+    <rem.i />
 
 Summary
     Computes the integer remainder R of X / Y, such that R is in the

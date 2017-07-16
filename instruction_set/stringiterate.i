@@ -2,6 +2,9 @@
 Definition
     STRINGITERATE ( i : Small, s : String ) -> ( c, i' )
 
+Code
+    <stringiterate />
+    
 Summary
     The basis for string iteration. It is a portmanteau iterator instruction
     that is fused with a return.

@@ -2,6 +2,9 @@
 Definition 
     CHECK_MARK0 LOCAL_N 
 
+Code
+    <check.mark0 local=LOCAL_N />
+
 Summary
     Checks that the value of the local variable LOCAL_N is the same
     as the top of the stack. 

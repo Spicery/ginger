@@ -3,6 +3,9 @@ Definition
     * PUSH_LOCAL0 () -> ( X ), where X = LOCAL[ 0 ]
     * VPC += 1
     
+Code
+	<push.local0 />
+
 Summary
     Pushes the value of local variable 0 onto the stack.
     

@@ -2,6 +2,9 @@
 Definition
 	MUL ( X:Num, Y:Num ) -> ( R:Num )
 
+Code
+    <mul />
+    
 Summary
 	Takes two numbers X & Y off the value stack and replaces them
 	with their product R, which will be a number.

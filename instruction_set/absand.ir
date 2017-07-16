@@ -2,6 +2,9 @@
 Definition
     ANDABS JUMP_TO ( X ) -> ( absent | () )
 
+Code
+    <absand to=JUMP_TO />
+
 Summary
     Compare the top of the stack against absent. If it is the same then
     jump to JUMP_TO. Otherwise fall through, removing the top of the stack.

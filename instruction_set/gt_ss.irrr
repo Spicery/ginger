@@ -1,6 +1,9 @@
 /*****************************************************************************\
 Instruction GT_SS LOCAL_S LOCAL_T JUMP_D
 
+Code
+    <gt.ss local.0=LOCAL_S local.1=LOCAL_T to=JUMP_D />
+    
 Summary
     Compares a local variable LOCAL_S using greater than versus another
     local variable LOCAL_T and if true jumps to JUMP_D, otherwise falls through.

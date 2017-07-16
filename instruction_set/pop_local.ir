@@ -1,7 +1,9 @@
 /*****************************************************************************\
 Definition
-	* POP_LOCAL LOCAL_N ( X ) -> ()
-	* LOCAL[ N ] = X
+	POP_LOCAL LOCAL_N ( X ) -> ()
+
+Code
+	<pop.local local=LOCAL_N />
 
 Summary
 	Pops the top of the stack into LOCAL[ N ].

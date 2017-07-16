@@ -1,8 +1,10 @@
 /*****************************************************************************\
 Definition
-    * PUSH_LOCAL0_RET () -> ( R ), R = LOCAL[ 0 ]
-    * VMPCFUNC, VMSPC, VPC all restored from call-stack.
+    PUSH_LOCAL0_RET () -> ( R ), R = LOCAL[ 0 ]
     
+Code
+    <push.local0.ret />
+
 Summary
     Pushes the value of LOCAL[ 0 ] onto the stack and returns.
     
@@ -17,6 +19,7 @@ Exceptions (Checked Preconditions)
 Result (Postcondition)      
     * The top of stack is LOCAL[ 0 ]
     * The stack is one bigger.
+    * VMPCFUNC, VMSPC, VPC all restored from call-stack.
     * Execution is returned to the calling function.
 
 \*****************************************************************************/

@@ -2,6 +2,9 @@
 Definition
     SYSCALL_ARG RAW_SYSCALL_PTR DATA_ARG
 
+Code
+    No static representation.
+
 Summary
     Calls a native function with in-line data value.
     

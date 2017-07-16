@@ -35,8 +35,8 @@ This should be turned into::
         <var arity.pattern="1" def.pkg="ginger.interactive" name="f" protected="true" scope="global" uid="0"/>
         <fn.code args.count="2" arity.eval="1" locals.count="2" arg.count="2" name="f">
             <enter/>
-            <push local="0"/>
-            <push local="1"/>
+            <push.local local="0"/>
+            <push.local local="1"/>
             <add/>
             <return/>
         </code>
@@ -49,6 +49,6 @@ Or, with suitable optimisation, into::
         <fn.code args.count="2" arity.eval="1" locals.count="2" arg.count="2" name="f">
             <check count="2"/>
             <add/>
-            <sysreturn/>
+            <sysreturn/> 
         </code>
     </bind>

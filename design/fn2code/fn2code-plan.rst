@@ -62,9 +62,9 @@ Acceptance Criteria
 
 Integration with Codebase
 -------------------------
-  * A new tool whose C++ source code resides in ${GINGER_DEV_HOME}/apps/fn2code.
-  * When compiled, the tool creates a native executable ${GINGER_DEV_HOME}/apps/fn2code/fn2code.
-  * When installed, the tool's executable is placed in ${GINGER_HOME}/libexec/ginger/fn2code.
+  * A new tool whose C++ source code resides in ``${GINGER_DEV_HOME}/apps/fn2code``.
+  * When compiled, the tool creates a native executable ``${GINGER_DEV_HOME}/apps/fn2code/fn2code``.
+  * When installed, the tool's executable is placed in ``${GINGER_HOME}/libexec/ginger/fn2code``.
 
 Features
 --------
@@ -72,12 +72,11 @@ Features
     the ``fn`` elements with ``fn.code`` elements. 
   * The instructions to be used by ``fn.code`` will be documented as part of 
     the instruction set files. [This has already been done 
-    e.g. see ${GINGER_DEV_HOME}/instruction_set/and.i]
-  * The input and output will be in the custom format Minimal XML. This
-    is described on http://steelypip.wikidot.com/minimal-xml. 
+    e.g. see ``${GINGER_DEV_HOME}/instruction_set/and.i``]
+  * The input and output will be in the custom format `Minimal XML`_. 
   * The tool will be a command-line tool and process its command-options
     consistently with the other tools (i.e. in GNU long options style.)
-  * The GingerVM (libappginger.a) will behave exactly the same on the
+  * The Ginger Runtime (``libappginger.a``) will behave exactly the same on the
     replaced ``fn.code`` elements as it would have on the ``fn`` elements. 
   * A new option, --fn2code available on ginger-cli, ginger-script and 
     ginger-cgi, that enables/disables the new tool in the toolchain. 
@@ -91,8 +90,8 @@ Documentation
 -------------
   * The Ginger Docs will be updated with a manual page describing the
     usage of the new tool.
-  * A technical note will be included in the ${GINGER_DEV_HOME}/design.
-  * Both will be authored in ReStructured text (\*.rst).
+  * A technical note will be included in the ``${GINGER_DEV_HOME}/design``.
+  * Both will be authored in ReStructured text (``\*.rst``).
 
 Standards (Definition of Done)
 ------------------------------
@@ -100,10 +99,12 @@ Standards (Definition of Done)
     tools and be based on 1TB style. The house style is called
     balanced indentation and is described here 
     http://steelypip.wikidot.com/balanced-indentation
+  * Documentation is written in `ReStructured Text`_.
+
 
 Testing
 -------
-  * A new test folder, ${GINGER_DEV_HOME}/functests/fn2code will contain component
+  * A new test folder, ``${GINGER_DEV_HOME}/functests/fn2code`` will contain component
     integration tests for the new ``fn2code`` tool. It may assume that there is 
     an up-to-date Ginger installation and use any of the other installed tools,
     except itself.
@@ -117,9 +118,94 @@ Testing
 Process
 ================================================================================
 
-Supporting Documents and Tools
-------------------------------
+Supporting Documents
+--------------------
 
+  * This work is part of `Sprint 0.9.3`_ - although the word Sprint is 
+    used a little loosely. (Perhaps 'Advance' would be better than 'Sprint'?)
+
+  * The GingerXML_ (or GNX) syntax is described in the Ginger Docs repository
+    at ``${GINGER_DEV_DOCS}/format/gnx_syntax.rst``. This is a key document.
+    To generate GingerXML it is handy to use one of the front-end syntaxes
+    such as Common_ - although the documentation on the latter could do
+    with a lot of improvement (and could reasonably be a story we take on
+    in this cycle.)
+
+  * The instruction set is not directly documented. Instead each instruction
+    is represented by a file in the folder ``${GINGER_DEV_HOME}/instruction_set``.
+    The header of each file is (at a stretch) self-documenting. 
+
+    I have made a somewhat clumsy attempt to generate documentation but the 
+    integration with the rest of the system is very unsatisfactory. In lieu
+    of getting that right, I have attached a PDF of the instruction set docs 
+    to the Trello epic.
+
+  * The Ginger Runtime (aka appginger) currently implements a compiler for GNX
+    into the instruction set - so that's a fairly useful resource, in so
+    far that it provides a template for how this can be done. The goal of this
+    epic is to rip out that code from the Ginger Runtime, of course.
+
+  * A description of the `MinXML`_ syntax is provided on the Steelypip wiki.
+
+  * A handy list of well-known folders is provided in 
+    ``${GINGER_DEV_HOME}/design/envvars.rst`` (or `online`_)
+
+  * The `Balanced Indentation`_ style is described on the Steelypip wiki.
+
+  * Documentation in written in the lightweight markup of `ReStructured Text`_.
+
+.. _Sprint 0.9.3: https://trello.com/b/a60qNt0K/ginger-sprint-093
+.. _GingerXML: http://ginger.readthedocs.io/en/latest/formats/gnx_syntax.html
+.. _Common: http://ginger.readthedocs.io/en/latest/syntax/common_syntax.html
+.. _MinXML: http://steelypip.wikidot.com/minimal-xml
+.. _Minimal XML: MinXML_
+.. _online: https://github.com/Spicery/ginger/blob/development/design/envvars.rst
+.. _Balanced Indentation: http://steelypip.wikidot.com/balanced-indentation
+.. _ReStructured Text: http://docutils.sourceforge.net/rst.html
+
+Supporting Tools
+----------------
+I envisage the main tools that will be useful, at least at first, will
+be the parser (for Common_), the simplifier and the pretty printer. You
+use these in a pipeline like this - where /usr/local is shorthand for
+${GINGER_HOME}.
+
+.. code-block:: bash
+
+    cat FILE | \
+    /usr/local/libexec/ginger/common2gnx | \
+    /usr/local/libexec/ginger/simplifygnx -suA | \
+    /usr/local/libexec/ginger/tidymnx
+
+For example, we can try compiling a simple function that doubles a number
+then adds one. For example, the following command 
+
+.. code-block:: bash
+
+    echo 'define f( x ) =>> 2 * x + 1 enddefine;' | \
+    /usr/local/libexec/ginger/common2gnx | \
+    /usr/local/libexec/ginger/simplifygnx -suA | \
+    /usr/local/libexec/ginger/tidymnx
+
+will generate the somewhat intimidating output ...
+
+.. code-block:: xml
+
+    <bind arity.eval="0" span="1">
+        <var arity.pattern="1" def.pkg="" name="f" protected="true" scope="global" uid="0"/>
+        <fn args.count="1" arity.eval="1" locals.count="1" name="f">
+            <seq arity.pattern="1">
+                <var arity.pattern="1" name="x" protected="true" scope="local" slot="0" span="1" uid="1"/>
+            </seq>
+            <sysapp args.arity="2" arity.eval="1" name="+">
+                <sysapp args.arity="2" arity.eval="1" name="*">
+                    <constant arity.eval="1" span="1" type="int" value="2"/>
+                    <id arity.eval="1" name="x" protected="true" scope="local" slot="0" span="1" uid="1"/>
+                </sysapp>
+                <constant arity.eval="1" span="1" type="int" value="1"/>
+            </sysapp>
+        </fn>
+    </bind>
 
 Branch Discipline
 -----------------
@@ -130,6 +216,10 @@ Prototype in Python
 
 Implementation in C++
 ---------------------
+
+Dividing Up Tasks
+-----------------
+
   
 
 

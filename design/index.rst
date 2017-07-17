@@ -19,6 +19,7 @@ Contents:
    issues_with_queries
    maths
    roadmap
+   envvars
    version_0.8
    version_0.8.1
 

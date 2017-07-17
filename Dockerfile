@@ -3,8 +3,8 @@ MAINTAINER Stephen Leach "sfkleach@gmail.com"
 ENV REFRESHED_AT 2015-03-15
 RUN apt-get update
 RUN DEBIAN_FRONTEND=noninteractive apt-get install -y make git python3 g++ autoconf uuid-dev libreadline-dev wget libpcap-dev libssl-dev libgmp-dev
-ENV SPICERY_HOME=/tmp
-ENV GINGER_HOME=/tmp/ginger
+ENV SPICERY_DEV_HOME=/tmp
+ENV GINGER_DEV_HOME=/tmp/ginger
 COPY apps/ /tmp/ginger/apps/
 COPY projects/ /tmp/ginger/projects/
 COPY instruction_set/ /tmp/ginger/instruction_set/

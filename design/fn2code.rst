@@ -62,7 +62,6 @@ Acceptance Criteria
 
 Integration with Codebase
 -------------------------
-
   * A new tool whose C++ source code resides in ${GINGER_HOME}/apps/fn2code.
   * When compiled, the tool creates a native executable ${GINGER_HOME}/apps/fn2code/fn2code.
   * When installed, the tool's executable is placed in ${INSTALL_DIR}/libexec/ginger/fn2code.
@@ -70,9 +69,14 @@ Integration with Codebase
 Features
 --------
   * The ``fn2code`` will take output from simplifygnx that and replace
-    the ``fn`` elements with ``fn.code`` elements. The instructions used
-    by ``fn.code`` will be documented as part of the instruction set files
-    e.g. see ${GINGER_HOME}/instruction_set/and.i 
+    the ``fn`` elements with ``fn.code`` elements. 
+  * The instructions to be used by ``fn.code`` will be documented as part of 
+    the instruction set files. [This has already been done 
+    e.g. see ${GINGER_HOME}/instruction_set/and.i]
+  * The input and output will be in the custom format Minimal XML. This
+    is described on http://steelypip.wikidot.com/minimal-xml. 
+  * The tool will be a command-line tool and process its command-options
+    consistently with the other tools (i.e. in GNU long options style.)
   * The GingerVM (libappginger.a) will behave exactly the same on the
     replaced ``fn.code`` elements as it would have on the ``fn`` elements. 
   * A new option, --fn2code available on ginger-cli, ginger-script and 
@@ -83,9 +87,22 @@ Features
     recognition of ``fn`` elements and all the supporting code.
     If this option is enabled the --fn2code option is ignored.
 
+Documentation
+-------------
+  * The Ginger Docs will be updated with a manual page describing the
+    usage of the new tool.
+  * A technical note will be included in the ${GINGER_HOME}/design.
+  * Both will be authored in ReStructured text (\*.rst).
+
+Standards (Definition of Done)
+------------------------------
+  * Indentation of C++ source code will be consistent with the other
+    tools and be based on 1TB style. The house style is called
+    balanced indentation and is described here 
+    http://steelypip.wikidot.com/balanced-indentation
+
 Testing
 -------
-
   * A new test folder, ${GINGER_HOME}/functests/fn2code will contain component
     integration tests for the new ``fn2code`` tool. It may assume that there is 
     an up-to-date Ginger installation and use any of the other installed tools,

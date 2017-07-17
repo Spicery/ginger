@@ -19,7 +19,8 @@ Contents:
    issues_with_queries
    maths
    roadmap
-   fn2code
+   fn2code/fn2code-plan
+   envvars
    version_0.8
    version_0.8.1
 

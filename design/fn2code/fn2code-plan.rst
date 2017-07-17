@@ -62,9 +62,9 @@ Acceptance Criteria
 
 Integration with Codebase
 -------------------------
-  * A new tool whose C++ source code resides in ${GINGER_HOME}/apps/fn2code.
-  * When compiled, the tool creates a native executable ${GINGER_HOME}/apps/fn2code/fn2code.
-  * When installed, the tool's executable is placed in ${INSTALL_DIR}/libexec/ginger/fn2code.
+  * A new tool whose C++ source code resides in ${GINGER_DEV_HOME}/apps/fn2code.
+  * When compiled, the tool creates a native executable ${GINGER_DEV_HOME}/apps/fn2code/fn2code.
+  * When installed, the tool's executable is placed in ${GINGER_HOME}/libexec/ginger/fn2code.
 
 Features
 --------
@@ -72,7 +72,7 @@ Features
     the ``fn`` elements with ``fn.code`` elements. 
   * The instructions to be used by ``fn.code`` will be documented as part of 
     the instruction set files. [This has already been done 
-    e.g. see ${GINGER_HOME}/instruction_set/and.i]
+    e.g. see ${GINGER_DEV_HOME}/instruction_set/and.i]
   * The input and output will be in the custom format Minimal XML. This
     is described on http://steelypip.wikidot.com/minimal-xml. 
   * The tool will be a command-line tool and process its command-options
@@ -91,7 +91,7 @@ Documentation
 -------------
   * The Ginger Docs will be updated with a manual page describing the
     usage of the new tool.
-  * A technical note will be included in the ${GINGER_HOME}/design.
+  * A technical note will be included in the ${GINGER_DEV_HOME}/design.
   * Both will be authored in ReStructured text (\*.rst).
 
 Standards (Definition of Done)
@@ -103,7 +103,7 @@ Standards (Definition of Done)
 
 Testing
 -------
-  * A new test folder, ${GINGER_HOME}/functests/fn2code will contain component
+  * A new test folder, ${GINGER_DEV_HOME}/functests/fn2code will contain component
     integration tests for the new ``fn2code`` tool. It may assume that there is 
     an up-to-date Ginger installation and use any of the other installed tools,
     except itself.
@@ -117,8 +117,9 @@ Testing
 Process
 ================================================================================
 
-Resources
----------
+Supporting Documents and Tools
+------------------------------
+
 
 Branch Discipline
 -----------------

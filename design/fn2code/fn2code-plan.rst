@@ -244,16 +244,19 @@ but it is nearly at the end of the development cycle. The main shortcoming
 is that I haven't implemented the doc-comments. However the unit tests give
 plenty of examples how to use it.
 
+This work will be done inside a new folder in the ``apps`` directory,
+${GINGER_DEV_HOME}/apps/fn2code.
+
 For this work you want to read a series of GingerXML_ expressions on the 
 input, transform them, and emit them as GingerXML_ on the output. So it
 will look something like:
 
 .. code-block:: Python
 
-import minxml
-import sys
+    import minxml
+    import sys
 
-.... code here .....
+    .... code here .....
 
     def main():
         while True:
@@ -266,10 +269,18 @@ import sys
     if __name__ == "__main__":
         main()
 
+I suggest this prototype should be implemented in a subfolder called (say)
+``prototype``. For the prototype we will assume that python3 is installed
+and set about installing the python scripts in ${GINGER_SHARE}. 
+
+In parallel I will start implementing the new flags on the Ginger Runtime
+so that we can system-test the prototype. And I will probably do the install
+script for the prototype too.
 
 
 Then, Implement in C++
 ----------------------
+
 
 Dividing Up Tasks
 -----------------

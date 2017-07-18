@@ -245,22 +245,29 @@ is that I haven't implemented the doc-comments. However the unit tests give
 plenty of examples how to use it.
 
 This work will be done inside a new folder in the ``apps`` directory,
-${GINGER_DEV_HOME}/apps/fn2code.
+${GINGER_DEV_HOME}/apps/fn2code. I suggest this prototype should be implemented 
+in a subfolder called (say) ``prototype``. For the prototype we will assume that 
+python3 is installed and set about installing the python scripts in 
+${GINGER_SHARE}.
 
 For this work you want to read a series of GingerXML_ expressions on the 
-input, transform them, and emit them as GingerXML_ on the output. So it
-will look something like:
+input, transform them, and emit them as GingerXML_ on the output. So the
+key file fn2code.py will look something like:
 
-.. code-block:: Python
+.. code-block:: Python3
+
+    #!/usr/bin/env python3
 
     import minxml
     import sys
 
-    .... code here .....
+    def doSomeTransformation( gnx ):
+        # Processing goes here.
+        return gnx
 
     def main():
         while True:
-            gnx = minxml.readMinXML( sys.stdin)
+            gnx = minxml.readMinXML( sys.stdin )
             if gnx == None:
                 break
             gnx = doSomeTransformation( gnx )
@@ -269,17 +276,20 @@ will look something like:
     if __name__ == "__main__":
         main()
 
-I suggest this prototype should be implemented in a subfolder called (say)
-``prototype``. For the prototype we will assume that python3 is installed
-and set about installing the python scripts in ${GINGER_SHARE}. 
 
-In parallel I will start implementing the new flags on the Ginger Runtime
-so that we can system-test the prototype. And I will probably do the install
-script for the prototype too.
+In parallel I will start implementing the new flags and compiler on the 
+Ginger Runtime so that we can system-test the prototype. And I will probably 
+do the install script for the prototype too.
 
 
 Then, Implement in C++
 ----------------------
+Once we have got the prototype working nicely, it can be turned into the 
+core of a unit test for the C++ code. 
+
+The C++ applications have got quite a set style to the way they are written.
+I haved created the skeleton for the C++ version, including editing the 
+make scripts, which isn't intuitive.
 
 
 Dividing Up Tasks

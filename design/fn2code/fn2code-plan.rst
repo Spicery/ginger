@@ -154,14 +154,8 @@ Supporting Documents
 
   * Documentation in written in the lightweight markup of `ReStructured Text`_.
 
-.. _Sprint 0.9.3: https://trello.com/b/a60qNt0K/ginger-sprint-093
-.. _GingerXML: http://ginger.readthedocs.io/en/latest/formats/gnx_syntax.html
-.. _Common: http://ginger.readthedocs.io/en/latest/syntax/common_syntax.html
-.. _MinXML: http://steelypip.wikidot.com/minimal-xml
-.. _Minimal XML: MinXML_
-.. _online: https://github.com/Spicery/ginger/blob/development/design/envvars.rst
-.. _Balanced Indentation: http://steelypip.wikidot.com/balanced-indentation
-.. _ReStructured Text: http://docutils.sourceforge.net/rst.html
+  * Development practices are described in on the `Ginger Dev Practices`_
+    Trello board.
 
 Supporting Tools
 ----------------
@@ -187,7 +181,7 @@ then adds one. For example, the following command
     /usr/local/libexec/ginger/simplifygnx -suA | \
     /usr/local/libexec/ginger/tidymnx
 
-will generate the somewhat intimidating output ...
+will generate the slightly intimidating output ...
 
 .. code-block:: xml
 
@@ -209,18 +203,89 @@ will generate the somewhat intimidating output ...
 
 Branch Discipline
 -----------------
+There are two persistent branches in the Ginger project, namely master and 
+development. Master is our release branch and each push to master must be
+version tagged (using `semantic versioning`_). In addition the version number
+of Ginger (defined in ${GINGER_DEV_HOME}/configure.ac) must be consistent
+with the tag.
 
-Prototype in Python
--------------------
+Development is the branch representing the current sprint's work and the
+version number should have the suffix "-dev". At the time of writing it
+is 0.9.3-dev, for instance. 
+
+Two types of pushes are permitted to development and feature branches. Normal
+pushes are done when the code compiles and is locally tested using make check. 
+But because this is a hobby activity squeezed into odd moments, sometimes it
+is necessary to make an untested work-in-progress (WIP) commit. The commit 
+comment for such a push *must* be marked with the code "WIP" at the start of the 
+message. Furthermore, if there are any code changes it must be marked so as
+not to trigger Travis, the continuous integration system.
+
+On a release to master the code is always fully tested locally in the
+development branch plus verifying the Travis build before merging into the 
+master branch. Then the master branch is locally and fully retested in a 
+clean environment. 
+
+Each epic or user story should be worked on in a separate feature branch. 
+This work package (epic) will be done on the fn2code branch. Changes that
+need to be shared across feature branches are made on the development 
+branch and merged into all the current feature branches.
 
 
-Implementation in C++
----------------------
+First, Prototype in Python
+--------------------------
+This is just a suggestion - but I think commonsense. It's not easy to solve 
+an unfamiliar problem while programming in an unfamiliar language. So I 
+recommend doing a prototype in Python first.
+
+The only real stumbling block will be parsing MinXML_, so I have written
+a Python3 `module minxml`_. That library is technically still in development
+but it is nearly at the end of the development cycle. The main shortcoming
+is that I haven't implemented the doc-comments. However the unit tests give
+plenty of examples how to use it.
+
+For this work you want to read a series of GingerXML_ expressions on the 
+input, transform them, and emit them as GingerXML_ on the output. So it
+will look something like:
+
+.. code-block:: Python
+
+import minxml
+import sys
+
+.... code here .....
+
+    def main():
+        while True:
+            gnx = minxml.readMinXML( sys.stdin)
+            if gnx == None:
+                break
+            gnx = doSomeTransformation( gnx )
+            print( gnx )
+
+    if __name__ == "__main__":
+        main()
+
+
+
+Then, Implement in C++
+----------------------
 
 Dividing Up Tasks
 -----------------
 
   
+.. _Sprint 0.9.3: https://trello.com/b/a60qNt0K/ginger-sprint-093
+.. _GingerXML: http://ginger.readthedocs.io/en/latest/formats/gnx_syntax.html
+.. _Common: http://ginger.readthedocs.io/en/latest/syntax/common_syntax.html
+.. _MinXML: http://steelypip.wikidot.com/minimal-xml
+.. _Minimal XML: MinXML_
+.. _online: https://github.com/Spicery/ginger/blob/development/design/envvars.rst
+.. _Balanced Indentation: http://steelypip.wikidot.com/balanced-indentation
+.. _ReStructured Text: http://docutils.sourceforge.net/rst.html
+.. _semantic versioning: http://semver.org/
+.. _Ginger Dev Practices: https://trello.com/b/qk0KWBd7/ginger-dev-practices
+.. _module minxml: https://github.com/sfkleach/MinXML/blob/dev/python3/minxml.py
 
 
 

@@ -1,4 +1,4 @@
-.PHONEY: all
+.PHONY: all
 all:
 	# Targets
 	#	ubuntu - installs prerequisites for ubuntu
@@ -7,7 +7,7 @@ all:
 	# 	build - clean build
 	#	install - clean install
 
-.PHONEY: ubuntu
+.PHONY: ubuntu
 ubuntu:
 	bash devtools/docker-scripts/install-prerequisites.bsh
 
@@ -16,19 +16,19 @@ define runconfigure
 	./configure
 endef
 
-.PHONEY: configure
+.PHONY: configure
 configure:
 	$(call runconfigure)
 
-.PHONEY: build
+.PHONY: build
 build: clean
 	$(call runconfigure)
 	make
 
-.PHONEY: install
+.PHONY: install
 install: build
 	sudo make install-as-is
 
-.PHONEY: clean
+.PHONY: clean
 clean:
 	if [ -e Makefile ]; then make clean; make distclean; fi

@@ -1,0 +1,42 @@
+# EPREFIX should be bound to PREFIX by default. This appears to be a lie.
+# As a consequence we override EPREFIX entirely. Probably incorrect but not
+# that interesting.
+prefix=@prefix@
+exec_prefix=@prefix@
+datarootdir=@datarootdir@
+PACKAGE_TARNAME=@PACKAGE_TARNAME@
+INSTALL_BIN=@bindir@
+INSTALL_TOOL=@libexecdir@/@PACKAGE_TARNAME@
+INSTALL_LIB=@datarootdir@/@PACKAGE_TARNAME@
+INSTALL_DOC=@docdir@
+USESNAP=@usesnap@
+
+#LICENSE_FILE="$(INSTALL_LIB)/COPYING"
+#LICENSE_FILE="$(INSTALL_LIB)/COPYING"
+
+CXX=@CXX@
+
+INSTALLDIRS=-DINSTALL_BIN='"$(INSTALL_BIN)"' -DINSTALL_LIB='"$(INSTALL_LIB)"' -DINSTALL_TOOL='"$(INSTALL_TOOL)"'
+
+NONDARWINCXXFLAGS:=
+ifneq ($(shell uname),Darwin)
+	NONDARWINCXXFLAGS=-Wl,-Bstatic -luuid -Wl,-Bdynamic
+endif
+
+CXXFLAGS=$(INSTALLDIRS) -DUSESNAP=$(USESNAP) -std=c++11 -g -I../hpp -I../../libgng/hpp -I../../libmetainfo/hpp -Wall -Wnon-virtual-dtor
+
+OBJS= fn2code.o toolmain.o
+
+all: fn2code
+
+# $@ is make shorthand for the target.
+# $@ is make shorthand for the dependencies
+fn2code: $(OBJS)
+	$(CXX) $(CXXFLAGS) $(BOOST_CPPFLAGS) -o $@ $^ ../../libgng/cpp/libgng.a $(NONDARWINCXXFLAGS)
+	
+clean:
+	rm -f *.o
+	rm -f fn2code
+
+#	Nothing needs doing.
+check:

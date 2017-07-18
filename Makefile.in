@@ -19,20 +19,20 @@ DD_INSTALL_TOOL=$(DESTDIR)$(INSTALL_TOOL)
 DD_INSTALL_TOOL=$(DESTDIR)$(INSTALL_TOOL)
 DD_INSTALL_TOOL=$(DESTDIR)$(INSTALL_TOOL)
 
-.PHONEY: all
+.PHONY: all
 all:
 	make -C apps $@
 	make -C autodocs $@
 	make -C projects $@
 
-.PHONEY: clean
+.PHONY: clean
 clean:
 	rm -rf _build/
 	make -C apps $@
 	make -C autodocs $@
 	make -C projects $@
 
-.PHONEY: distclean
+.PHONY: distclean
 distclean: clean
 	rm -f Makefile
 	rm -f apps/Makefile
@@ -79,6 +79,8 @@ distclean: clean
 	rm -f apps/simplifygnx/Makefile
 	rm -f apps/simplifygnx/cpp/Makefile
 	rm -f apps/simplifygnx/unittest/Makefile
+	rm -f apps/fn2code/Makefile
+	rm -f apps/fn2code/cpp/Makefile
 	rm -f apps/gson2gnx/Makefile
 	rm -f apps/gson2gnx/cpp/Makefile
 	rm -f apps/lnx2mnx/Makefile
@@ -119,6 +121,7 @@ LIBEXECUTABLES=\
 	apps/lisp2gnx/lsp/lisp2gnx \
 	apps/shebang/cpp/shebang \
 	apps/simplifygnx/cpp/simplifygnx \
+	apps/fn2code/cpp/fn2code \
 	apps/tidymnx/cpp/tidymnx \
 	apps/gson2gnx/cpp/gson2gnx \
 	apps/src2lnx/cpp/src2lnx \
@@ -126,11 +129,11 @@ LIBEXECUTABLES=\
 	apps/lnx2mnx/cpp/lnx2mnx \
 	apps/gvmtest/cpp/gvmtest
 
-.PHONEY: install
+.PHONY: install
 install: all 
 	$(MAKE) install-as-is
 
-.PHONEY: install-as-is
+.PHONY: install-as-is
 install-as-is:
 	# Installing user binaries into $(DESTDIR)$(INSTALL_BIN)
 	# Installing toolchain binaries into $(DESTDIR)$(INSTALL_TOOL)
@@ -164,7 +167,7 @@ install-as-is:
 
 # N.B. The rm -rf commands are guarded by code that checks the
 # paths end '/ginger'
-.PHONEY: uninstall
+.PHONY: uninstall
 uninstall:
 	# Removing user binaries from $(DESTDIR)$(INSTALL_BIN)
 	rm -f $(DESTDIR)$(INSTALL_BIN)/ginger
@@ -178,7 +181,7 @@ ifeq (ginger,$(notdir $(DESTDIR)$(INSTALL_LIB)))
 	rm -rf $(DESTDIR)$(INSTALL_LIB)
 endif
 
-.PHONEY: save-installation
+.PHONY: save-installation
 save-installation:
 	mkdir -p $(SAVED_INSTALLATION_DIR)/bin
 	mkdir -p $(SAVED_INSTALLATION_DIR)/libexec/ginger
@@ -188,26 +191,26 @@ save-installation:
 	( cd $(INSTALL_TOOL); tar cf - . ) | ( cd $(SAVED_INSTALLATION_DIR)/libexec/ginger; tar xf - )
 	( cd $(INSTALL_LIB); tar cf - . ) | ( cd $(SAVED_INSTALLATION_DIR)/share/ginger; tar xf - )
 
-.PHONEY: restore-saved-installation
+.PHONY: restore-saved-installation
 restore-saved-installation:
 	cp $(SAVED_INSTALLATION_DIR)/bin/* $(INSTALL_BIN)
 	( cd $(SAVED_INSTALLATION_DIR)/libexec/ginger; tar cf - ) | ( cd $(INSTALL_TOOL); tar xf - . )
 	( cd $(SAVED_INSTALLATION_DIR)/share/ginger; tar cf - ) | ( cd $(INSTALL_LIB); tar xf - . ) 
 
 
-.PHONEY: unitcheck
+.PHONY: unitcheck
 unitcheck:
 	# To be done
 
-.PHONEY: funccheck
+.PHONY: funccheck
 funccheck:
 	(cd functests; nose2)
 
-.PHONEY: syscheck
+.PHONY: syscheck
 syscheck:
 	(cd systests; nose2)
 
-.PHONEY: check
+.PHONY: check
 check:
 	make unitcheck
 	make funccheck

@@ -22,5 +22,6 @@ all clean:
 	make -C lnx2mnx $@
 	make -C shebang $@
 	make -C simplifygnx $@
+	make -C fn2code $@
 	make -C src2lnx $@
 	make -C tidymnx $@

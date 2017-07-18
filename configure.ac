@@ -61,6 +61,8 @@ AC_CONFIG_FILES([Makefile
                  apps/file2gnx/Makefile
                  apps/file2gnx/cpp/Makefile
                  apps/file2gnx/unittest/Makefile
+                 apps/fn2code/Makefile
+                 apps/fn2code/cpp/Makefile
                  apps/ginger/Makefile
                  apps/ginger/cpp/Makefile
                  apps/ginger-admin/Makefile

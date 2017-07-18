@@ -6,10 +6,10 @@ CXXFLAGS=-g -std=c++11 -I../../CppUnitLite2/src  -I../hpp -Wall -Wnon-virtual-dt
 
 OBJS=maintest.o transdoubletest.o saxtestlite.o
 
-.PHONEY: all
+.PHONY: all
 all: maintest readlinetest readstdin
 
-.PHONEY: check
+.PHONY: check
 check: maintest
 	./maintest
 

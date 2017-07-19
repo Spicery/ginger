@@ -278,8 +278,9 @@ key file fn2code.py will look something like:
 
 
 In parallel I will start implementing the new flags and compiler on the 
-Ginger Runtime so that we can system-test the prototype. And I will probably 
-do the install script for the prototype too.
+Ginger Runtime so that we can system-test the prototype. And I have coded up
+the install script for the prototype too. By default the prototype gets
+put in ``${GINGER_SHARE}/fn2code/*.py``.
 
 
 Then, Implement in C++
@@ -289,11 +290,21 @@ core of a unit test for the C++ code.
 
 The C++ applications have got quite a set style to the way they are written.
 I haved created the skeleton for the C++ version, including editing the 
-make scripts, which isn't intuitive.
+make scripts, which isn't intuitive. This skeleton currently just invokes the 
+installed prototype.
 
 
 Dividing Up Tasks
 -----------------
+LH: Python prototype and unit tests
+LH: C++ version
+LH: Tech note on implementation (in the design folder)
+LH: Programmer guide (on Gingerdocs)
+SFKL: minxml.py [done]
+SFKL: C++ skeleton [done]
+SFKL: Install scripts [done]
+SFKL: Modify Ginger Runtime to implement new flags
+SFKL: 
 
   
 .. _Sprint 0.9.3: https://trello.com/b/a60qNt0K/ginger-sprint-093

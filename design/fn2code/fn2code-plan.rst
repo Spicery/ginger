@@ -213,15 +213,19 @@ Development is the branch representing the current sprint's work and the
 version number should have the suffix "-dev". At the time of writing it
 is 0.9.3-dev, for instance. 
 
-Two types of pushes are permitted to development and feature branches. Normal
+We will do this work in a feature branch ``fn2code`` which I have already
+pushed to GitHub.
+
+Two types of pushes are permitted to ``development`` and feature branches. Normal
 pushes are done when the code compiles and is locally tested using make check. 
 But because this is a hobby activity squeezed into odd moments, sometimes it
 is necessary to make an untested work-in-progress (WIP) commit. The commit 
 comment for such a push *must* be marked with the code "WIP" at the start of the 
 message. Furthermore, if there are any code changes it must be marked so as
-not to trigger Travis, the continuous integration system.
+not to trigger Travis, the continuous integration system by adding ``[ci skip]``
+into the commit comment.
 
-On a release to master the code is always fully tested locally in the
+On a release to ``master`` the code is always fully tested locally in the
 development branch plus verifying the Travis build before merging into the 
 master branch. Then the master branch is locally and fully retested in a 
 clean environment. 

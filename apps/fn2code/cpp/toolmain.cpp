@@ -107,29 +107,11 @@ void ToolMain::parseArgs( int argc, char **argv, char **envp ) {
 
 }
 
+#define FN2CODE_PY   ( INSTALL_LIB "/fn2code/fn2code.py" )
 
-void ToolMain::run( FILE * in ) {
-	// TO BE CONTINUED ...
-}
 
 int ToolMain::run() {
-	openlog( this->app_title, 0, LOG_FACILITY );
-	setlogmask( LOG_UPTO( LOG_INFO ) );
-	
-	try {
-		if ( this->use_stdin ) {
-			this->run( stdin );
-		} else {
-			const char * fname = input_file_name.c_str();
-			FILE * in = fopen( fname, "r" ); 
-			if ( in == NULL ) throw Ginger::Mishap( "Cannot open file" ).culprit( "Filename", fname );
-			run( in );
-		}
-	} catch ( Ginger::Mishap & m ) {
-		m.gnxReport();
-		return EXIT_FAILURE;
-	}
-	
-	return EXIT_SUCCESS;
+    execl( "/usr/bin/env", "/usr/bin/env", "python3", FN2CODE_PY );
+    throw Ginger::Mishap( "Cannot find fn2code.py (prototype)" );
 }
 

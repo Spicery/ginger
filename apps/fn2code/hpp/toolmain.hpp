@@ -32,7 +32,6 @@ public:
 
 private:
 	void parse( FILE * in );
-	void run( FILE * in );
 
 public:
 	int run();

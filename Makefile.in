@@ -152,6 +152,10 @@ install-as-is:
 	chmod a+rx,u+w $(DD_INSTALL_LIB)/gvmtest
 	mkdir -p $(DD_INSTALL_LIB)/autodocs
 	chmod a+rx,u+w $(DD_INSTALL_LIB)/autodocs
+	# Create folder for fn2code prototype & populate it. This section is temporary.
+	mkdir -p $(DD_INSTALL_LIB)/fn2code
+	chmod a+rx,u+w $(DD_INSTALL_LIB)/fn2code
+	cp apps/fn2code/prototype/*.py $(DD_INSTALL_LIB)/fn2code
 	#
 	cp -r apps/ginger/usage $(DD_INSTALL_LIB)/ginger/
 	cp -r apps/ginger-admin/admin-templates $(DD_INSTALL_LIB)

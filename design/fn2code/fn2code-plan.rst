@@ -70,6 +70,9 @@ Features
 --------
   * The ``fn2code`` will take output from simplifygnx that and replace
     the ``fn`` elements with ``fn.code`` elements. 
+  * It will not generate jump-to-jumps.
+  * It will support tail-call optimisation (TCO) by generating chain 
+    calls rather than direct calls. This may require additional VM instructions.
   * The instructions to be used by ``fn.code`` will be documented as part of 
     the instruction set files. [This has already been done 
     e.g. see ``${GINGER_DEV_HOME}/instruction_set/and.i``]
@@ -308,6 +311,7 @@ Dividing Up Tasks
 - SFKL: C++ skeleton [done]
 - SFKL: Install scripts [done]
 - SFKL: Modify Ginger Runtime to implement new flags
+- SFKL: Add any new chain instructions.
 
   
 .. _Sprint 0.9.3: https://trello.com/b/a60qNt0K/ginger-sprint-093

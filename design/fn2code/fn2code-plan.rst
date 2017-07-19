@@ -216,8 +216,15 @@ Development is the branch representing the current sprint's work and the
 version number should have the suffix "-dev". At the time of writing it
 is 0.9.3-dev, for instance. 
 
+Each epic or user story should be worked on in a separate feature branch. 
+This work package (epic) will be done on the fn2code branch. Changes that
+need to be shared across feature branches are made on the development 
+branch and merged into all the current feature branches.
+
 We will do this work in a feature branch ``fn2code`` which I have already
-pushed to GitHub.
+pushed to GitHub. The typical work flow begins with making a private branch 
+from the HEAD of ``fn2code``, doing some work, then a pull+fix followed by
+merging back onto ``fn2code``.
 
 Two types of pushes are permitted to ``development`` and feature branches. Normal
 pushes are done when the code compiles and is locally tested using make check. 
@@ -232,11 +239,6 @@ On a release to ``master`` the code is always fully tested locally in the
 development branch plus verifying the Travis build before merging into the 
 master branch. Then the master branch is locally and fully retested in a 
 clean environment. 
-
-Each epic or user story should be worked on in a separate feature branch. 
-This work package (epic) will be done on the fn2code branch. Changes that
-need to be shared across feature branches are made on the development 
-branch and merged into all the current feature branches.
 
 
 First, Prototype in Python

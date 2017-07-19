@@ -296,15 +296,14 @@ installed prototype.
 
 Dividing Up Tasks
 -----------------
-LH: Python prototype and unit tests
-LH: C++ version
-LH: Tech note on implementation (in the design folder)
-LH: Programmer guide (on Gingerdocs)
-SFKL: minxml.py [done]
-SFKL: C++ skeleton [done]
-SFKL: Install scripts [done]
-SFKL: Modify Ginger Runtime to implement new flags
-SFKL: 
+- LH: Python prototype and unit tests
+- LH: C++ version
+- LH: Tech note on implementation (in the design folder)
+- LH: Programmer guide (on Gingerdocs)
+- SFKL: minxml.py [done]
+- SFKL: C++ skeleton [done]
+- SFKL: Install scripts [done]
+- SFKL: Modify Ginger Runtime to implement new flags
 
   
 .. _Sprint 0.9.3: https://trello.com/b/a60qNt0K/ginger-sprint-093

@@ -34,14 +34,16 @@ private:
 	bool				is_set;
 	bool				is_return;
 	int					the_location;
+	bool				has_been_used;
 	
 public:
-	int location() { return this->the_location; }
-	CodeGenClass * codeGen() { return this->codegen; }
-	bool isSet() { return this->is_set; }
-	bool isReturn() { return this->is_return; }
-	bool isntReturn() { return not this->is_return; }
+	int location() const { return this->the_location; }
+	CodeGenClass * codeGen() const { return this->codegen; }
+	bool isSet() const { return this->is_set; }
+	bool isReturn() const { return this->is_return; }
+	bool isntReturn() const { return not this->is_return; }
 	LabelClass * jumpToJump( LabelClass * contn );
+	bool hasBeenUsed() const { return this->has_been_used; }
 	
 public:
 	LabelClass( CodeGenClass * codegen, bool is_return = false ) : 

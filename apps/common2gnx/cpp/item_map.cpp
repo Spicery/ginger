@@ -168,11 +168,11 @@ ItemMap::ItemMap( const bool cstyle ) {
 	add( true,		KW_TRANSACTION,		tokty_transaction,	PrF,		0		);
 	add( true,		KW_TRY,				tokty_try,			PrF,		0		);
 	add( !cstyle,	KW_UNLESS,			tokty_unless,		PrF, 		0		);
-	add( true,		KW_UNTIL, 			tokty_until,		PoF, 		prec_whileuntil		);
+	add( true,		KW_UNTIL, 			tokty_until,		BoF, 		prec_whileuntil		);
 	add( true,		KW_VAL,				tokty_val,			PrF, 		0		);
 	add( true,	 	KW_VAR,				tokty_var,			PrF,		0		);
 	add( !cstyle,	KW_WHERE,			tokty_where,		PoF,		prec_where		);
-	add( true,		KW_WHILE,			tokty_while,		PoF,		prec_whileuntil		);
+	add( true,		KW_WHILE,			tokty_while,		BoF,		prec_whileuntil		);
 	add( !cstyle,	KW_WITH,			tokty_with,			Clo, 		0		);
 	add( !cstyle,	KW_ZIP,				tokty_zip,			PoF,		prec_zip );
 }

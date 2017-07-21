@@ -1050,7 +1050,7 @@ bool CompileQuery::isValidQuery( Gnx query ) {
 		( nm == GNX_IN && N == 2 ) 				||
 		( nm == GNX_FROM && 2 <= N && N <= 4 ) 	||
 		( nm == GNX_WHERE && N == 2 ) 			||
-		( nm == GNX_WHILE && N == 3 ) 			||
+		( nm == GNX_WHILE && N == 2 ) 			||
 		( nm == GNX_DO && N == 2 ) 				||
 		( nm == GNX_FINALLY && N == 2 ) 		||
 		( nm == GNX_ZIP && N == 2 ) 			||
@@ -1064,7 +1064,7 @@ bool CompileQuery::isValidQuery( Gnx query ) {
 void CompileQuery::compileQueryDecl( Gnx query ) {
 	const string & nm = query->name();
 	const int N = query->size();
-	if ( ( ( nm == GNX_DO || nm == GNX_WHERE || nm == GNX_FINALLY ) && N == 2 ) || ( nm == GNX_WHILE && N == 3 ) ) {
+	if ( ( ( nm == GNX_DO || nm == GNX_WHERE || nm == GNX_FINALLY ) && N == 2 ) || ( nm == GNX_WHILE && N == 2 ) ) {
 		this->compileQueryDecl( query->getChild( 0 )  );
 	} else if ( ( nm == GNX_CROSS || nm == GNX_ZIP ) && N == 2 ) {
 		this->compileQueryDecl( query->getChild( 0 ) );
@@ -1109,7 +1109,7 @@ void CompileQuery::compileQueryDecl( Gnx query ) {
 void CompileQuery::compileQueryInit( Gnx query, LabelClass * contn ) {
 	const string & nm = query->name();
 	const int N = query->size();
-	if ( ( ( nm == GNX_DO || nm == GNX_WHERE || nm == GNX_FINALLY ) && N == 2 ) || ( nm == GNX_WHILE && N == 3 ) ) {
+	if ( ( ( nm == GNX_DO || nm == GNX_WHERE || nm == GNX_FINALLY ) && N == 2 ) || ( nm == GNX_WHILE && N == 2 ) ) {
 		this->compileQueryInit( query->getChild( 0 ), contn );
 	} else if ( nm == GNX_CROSS && N == 2 ) {
 		int tmp_cross_needs_test_lhs = this->codegen->tmpvar();
@@ -1223,11 +1223,10 @@ void CompileQuery::compileQueryTest( Gnx query, LabelClass * dst, LabelClass * c
 		this->compileQueryTest( query->getChild( 0 ), CONTINUE_LABEL, done_label.jumpToJump( contn ) );
 		this->compileQueryTest( query->getChild( 1 ), dst, contn );
 		done_label.labelSet();
-	} else if ( nm == GNX_WHILE && N == 3 ) {
+	} else if ( nm == GNX_WHILE && N == 2 ) {
 		LabelClass done_label( this->codegen );
 		this->compileQueryTest( query->getChild( 0 ), CONTINUE_LABEL, & done_label );
-		this->codegen->compileIfSo( query->getChild( 1 ), done_label.jumpToJump( dst ), CONTINUE_LABEL );
-		this->codegen->compileGnx( query->getChild( 2 ), contn );
+		this->codegen->compileIfSo( query->getChild( 1 ), done_label.jumpToJump( dst ), contn );
 		done_label.labelSet();
 	} else if ( nm == GNX_WHERE && N == 2 ) {
 		Gnx lhs = query->getChild( 0 );
@@ -1313,7 +1312,7 @@ void CompileQuery::compileQueryBody( Gnx query, LabelClass * contn ) {
 		this->compileQueryBody( query->getChild( 1 ), contn );
 	} else if (
 		( nm == GNX_WHERE && N == 2 ) || 
-		( nm == GNX_WHILE && N == 3 ) ||
+		( nm == GNX_WHILE && N == 2 ) ||
 		( nm == GNX_FINALLY && N == 2 )
 	) {
 		this->compileQueryBody( query->getChild( 0 ), contn );
@@ -1328,7 +1327,7 @@ void CompileQuery::compileQueryAdvn( Gnx query, LabelClass * contn ) {
 	const int N = query->size();
 	if ( 
 		( ( nm == GNX_DO || nm == GNX_WHERE || nm == GNX_FINALLY ) && N == 2 ) || 
-		( nm == GNX_WHILE && N == 3 )
+		( nm == GNX_WHILE && N == 2 )
 	) {
 		this->compileQueryAdvn( query->getChild( 0 ), contn );
 	} else if ( nm == GNX_ZIP && N == 2 ) {
@@ -1513,7 +1512,9 @@ void CodeGenClass::compileGnxFn( Gnx mnx, LabelClass * contn ) {
 	LabelClass retn( this, true );
 	this->compileGnx( mnx->getChild( 1 ), &retn );
 	retn.labelSet();
-	this->vmiRETURN();
+	if ( retn.hasBeenUsed() ) {
+		this->vmiRETURN();
+	}
 	this->vmiPUSHQ( this->vmiENDFUNCTION() );
 	this->continueFrom( contn );
 }

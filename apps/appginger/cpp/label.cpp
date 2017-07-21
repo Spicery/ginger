@@ -53,6 +53,7 @@ void LabelClass::labelSet() {
 	an argument to a virtual instruction.
 */
 void LabelClass::labelInsert() {
+	this->has_been_used = true;
 	int where = this->codegen->codePosition();
 	if ( this->is_set ) {
 		#ifdef DBG_LABEL

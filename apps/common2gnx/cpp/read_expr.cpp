@@ -468,7 +468,7 @@ Node ReadStateClass::postfixProcessing( Node lhs, Item item, int prec ) {
                 NodeFactory whileuntil;
                 whileuntil.start( Ginger::GNX_WHILE );
                 whileuntil.add( lhs );
-                Node rhs = this->readExprPrec( prec );
+                Node rhs = this->readExprPrec( prec_whileuntil );
                 if ( fnc == tokty_until ) {
                     whileuntil.start( Ginger::GNX_SYSAPP );
                     whileuntil.put( Ginger::GNX_SYSAPP_NAME, "not" );
@@ -477,13 +477,16 @@ Node ReadStateClass::postfixProcessing( Node lhs, Item item, int prec ) {
                 if ( fnc == tokty_until ) {
                     whileuntil.end();
                 }
-                if ( this->tryToken( tokty_then ) ) {
-                    Node then = this->readExprPrec( prec_then );
-                    whileuntil.add( then );
-                } else {
-                    whileuntil.start( Ginger::GNX_SEQ );
-                    whileuntil.end();
-                }
+                //  TODO: This section is left in to provide a record of
+                //  how the syntax of -while- has shifted while I sort 
+                //  out the defects.
+                // if ( this->tryToken( tokty_then ) ) {
+                //     Node then = this->readExprPrec( prec_then );
+                //     whileuntil.add( then );
+                // } else {
+                //     whileuntil.start( Ginger::GNX_SEQ );
+                //     whileuntil.end();
+                // }
                 whileuntil.end();
                 return whileuntil.build();              
             }
@@ -1726,6 +1729,34 @@ Node ReadStateClass::prefixProcessingCore() {
         case tokty_val:
         case tokty_var : 
             return this->readVarVal( fnc );
+        case tokty_while:
+        case tokty_until: {
+            NodeFactory whileuntil;
+            whileuntil.start( Ginger::GNX_WHILE );
+            whileuntil.start( Ginger::GNX_OK );
+            whileuntil.end();
+            Node rhs = this->readExprPrec( prec_whileuntil );
+            if ( fnc == tokty_until ) {
+                whileuntil.start( Ginger::GNX_SYSAPP );
+                whileuntil.put( Ginger::GNX_SYSAPP_NAME, "not" );
+            }
+            whileuntil.add( rhs );
+            if ( fnc == tokty_until ) {
+                whileuntil.end();
+            }
+            //  TODO: This section is left in to provide a record of
+            //  how the syntax of -while- has shifted while I sort 
+            //  out the defects.
+            // if ( this->tryToken( tokty_then ) ) {
+            //     Node then = this->readExprPrec( prec_then );
+            //     whileuntil.add( then );
+            // } else {
+            //     whileuntil.start( Ginger::GNX_SEQ );
+            //     whileuntil.end();
+            // }
+            whileuntil.end();
+            return whileuntil.build();              
+        }            
         case tokty_oparen: {
             if ( this->cstyle_mode ) {
                 return this->readOptEmptyExprCheck( tokty_cparen );

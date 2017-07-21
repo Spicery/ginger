@@ -104,6 +104,12 @@ namespace Ginger {
     extern const char * GNX_FN_LOCALS_COUNT;
     extern const char * GNX_SELF_CONSTANT;
 
+    extern const char * GNX_FN_CODE;
+    extern const char * GNX_FN_CODE_NAME;
+    extern const char * GNX_FN_CODE_ARGS_COUNT;
+    extern const char * GNX_FN_CODE_LOCALS_COUNT;
+    extern const char * GNX_SELF_CONSTANT;
+
     extern const char * GNX_THROW;
     extern const char * GNX_THROW_EVENT;
     extern const char * GNX_THROW_LEVEL;

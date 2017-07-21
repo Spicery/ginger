@@ -48,14 +48,10 @@
 #include "syslist.hpp"
 #include "sysindirection.hpp"
 #include "maybe.hpp"
+#include "vm_instructions.hpp"
 
 namespace Ginger {
 using namespace std;
-
-
-#ifndef NULL
-#define NULL 0
-#endif
 
 CodeGenClass::CodeGenClass( Machine vm ) {
 	this->nlocals = 0;
@@ -111,6 +107,29 @@ Ref * sysCheckExplodeGteN( Ref * pc, MachineClass * vm ) {
 	pc = sysExplode( pc, vm );
 	if ( N <= vm->vp - stack ) return pc;
 	throw Mishap( "Wrong number of arguments from explode" ).culprit( "Expected at least", N ).culprit( "Actual", vm->vp - stack );
+}
+
+
+/*	Driving Example
+            <enter/>
+            <push.local local="0"/>
+            <push.local local="1"/>
+            <add/>
+            <return>
+*/
+void CodeGenClass::compileInstruction( Gnx instruction ) {
+	const string name = instruction->name();
+	if ( name == VM_ENTER ) {
+		this->vmiENTER();
+	} else if ( name == VM_PUSH_LOCAL ) {
+		this->vmiPUSH_INNER_SLOT( instruction->attributeToInt( VM_PUSH_LOCAL_LOCAL ) );
+	} else if ( name == VM_ADD ) {
+		this->vmiINSTRUCTION( vmc_add );
+	} else if ( name == VM_RETURN ) {
+		this->vmiRETURN();
+	} else {
+		throw Mishap( "Unrecognised instruction name" ).culprit( "Name", name );
+	}
 }
 
 //	Check that what is on the stack is consistent with a given arity.
@@ -284,7 +303,9 @@ void CodeGenClass::vmiPOP( const VIdent & id, const bool assign_vs_bind ) {
 	}
 }
 
-/*bool CodeGenClass::vmiTRY_POP( const VIdent & id, const bool assign_vs_bind, LabelClass * dst, LabelClass * contn ) {
+/*
+TODO: Figure out what this relic is doing. Violates my own standards :(
+bool CodeGenClass::vmiTRY_POP( const VIdent & id, const bool assign_vs_bind, LabelClass * dst, LabelClass * contn ) {
 	if ( id.isLocal() ) {
 		this->vmiPOP_INNER_SLOT( id.getSlot() );
 		this->continueFrom( dst );
@@ -368,7 +389,7 @@ void CodeGenClass::vmiPUSH_INNER_SLOT( int slot ) {
 }
 
 void CodeGenClass::vmiPUSH_INNER_SLOT( int slot, LabelClass * contn ) {
-	const bool is_ret = contn != NULL and contn->isReturn();
+	const bool is_ret = contn != nullptr and contn->isReturn();
 	switch ( slot ) {
 		case 0:
 			this->emitSPC( is_ret ? vmc_push_local0_ret : vmc_push_local0 );
@@ -537,7 +558,7 @@ void CodeGenClass::vmiPUSHQ_RETURN( Ref obj ) {
 }
 
 void CodeGenClass::vmiPUSHQ( Ref obj, LabelClass * contn ) {
-	if ( contn != NULL and contn->isReturn() ) {
+	if ( contn != nullptr and contn->isReturn() ) {
 		this->vmiPUSHQ_RETURN( obj );
 	} else {
 		this->vmiPUSHQ( obj );
@@ -873,7 +894,7 @@ Ref CodeGenClass::detach( const bool in_heap, Ref fnkey ) {
 	
 	if ( in_heap ) {
 
-		Ref * fake_pc = NULL;
+		Ref * fake_pc = nullptr;
 		XfrClass xfr( fake_pc, *this->vm, preflight_size );
 	
 		//	L has to be a "procedure-length" value if heap scanning is
@@ -1497,6 +1518,23 @@ void CodeGenClass::compileGnxFn( Gnx mnx, LabelClass * contn ) {
 	this->continueFrom( contn );
 }
 
+void CodeGenClass::compileGnxFnCode( Gnx mnx, LabelClass * contn ) {
+	int args_count = mnx->attributeToInt( GNX_FN_CODE_ARGS_COUNT );
+	int locals_count = mnx->attributeToInt( GNX_FN_CODE_LOCALS_COUNT );
+	this->vmiFUNCTION( mnx->attribute( GNX_FN_CODE_NAME, GNX_EMPTY_FN_NAME ), locals_count, args_count );
+	//	TODO: remove these relics - left in to prompt my thoughts.
+	// LabelClass retn( this, true );
+	
+	for ( Gnx instruction : *mnx ) {
+		this->compileInstruction( instruction );
+	}
+
+	// retn.labelSet();
+	// this->vmiRETURN();
+	this->vmiPUSHQ( this->vmiENDFUNCTION() );
+	this->continueFrom( contn );
+}
+
 void CodeGenClass::compileChildrenChecked( Gnx mnx, Arity arity ) {
 	Ginger::Arity args_arity( mnx->attribute( GNX_ARGS_ARITY, "+0" ) );
 	if ( arity == args_arity ) {
@@ -1942,6 +1980,8 @@ void CodeGenClass::compileGnx( Gnx mnx, LabelClass * contn ) {
 		}
 	} else if ( nm == GNX_FN ) {
 		this->compileGnxFn( mnx, contn );
+	} else if ( nm == GNX_FN_CODE ) {
+		this->compileGnxFnCode( mnx, contn );
 	} else if ( nm == GNX_DEREF and mnx->size() == 1 ) {
 		this->compileGnxDeref( mnx, contn );
 	} else if ( nm == GNX_MAKEREF and mnx->size() == 1 ) {

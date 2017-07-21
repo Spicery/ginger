@@ -103,6 +103,11 @@ namespace Ginger {
     const char * GNX_FN_LOCALS_COUNT = "locals.count";
     const char * GNX_SELF_CONSTANT = "self.constant";
 
+    const char * GNX_FN_CODE = "fn.code";
+    const char * GNX_FN_CODE_NAME = "name";
+    const char * GNX_FN_CODE_ARGS_COUNT = "args.count";
+    const char * GNX_FN_CODE_LOCALS_COUNT = "locals.count";
+
     const char * GNX_THROW = "throw";
     const char * GNX_THROW_EVENT = "event";
     const char * GNX_THROW_LEVEL = "level";

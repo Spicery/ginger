@@ -170,6 +170,10 @@ public:
 	void andFlags( int mask );
 
 public:
+	std::vector< shared< Mnx > >::iterator begin() { return this->children.begin(); }
+	std::vector< shared< Mnx > >::iterator end() { return this->children.end(); }
+
+public:
 	void clearAttribute( const std::string & key );
 	void clearAllAttributes();
 	void putAttribute( const std::string & key, const std::string & value );
@@ -295,7 +299,8 @@ public:
 
 };
 
-/*class PrettyPrint {
+/* TODO: Remove this relic code.
+class PrettyPrint {
 private:
 	std::ostream & out;
 	std::string indentation;

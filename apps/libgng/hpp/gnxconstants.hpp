@@ -65,12 +65,14 @@ namespace Ginger {
     extern const char * GNX_CROSS;
     extern const char * GNX_DO;
     extern const char * GNX_ERASE;
+    extern const char * GNX_FAIL;
     extern const char * GNX_FINALLY;
     extern const char * GNX_FOR;
     extern const char * GNX_FROM;
     extern const char * GNX_IF;
     extern const char * GNX_IN;
     extern const char * GNX_OK;
+    extern const char * GNX_ONCE;
     extern const char * GNX_OR;
     extern const char * GNX_SEQ;
     extern const char * GNX_SET;

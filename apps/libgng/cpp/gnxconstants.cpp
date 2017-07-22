@@ -64,12 +64,14 @@ namespace Ginger {
     const char * GNX_CROSS = "cross";
     const char * GNX_DO = "do";
     const char * GNX_ERASE = "erase";
+    const char * GNX_FAIL = "fail";
     const char * GNX_FINALLY = "finally";
     const char * GNX_FOR = "for";
     const char * GNX_FROM = "from";
     const char * GNX_IF = "if";
     const char * GNX_IN = "in";
     const char * GNX_OK = "ok";
+    const char * GNX_ONCE = "once";
     const char * GNX_OR = "or";
     const char * GNX_SEQ = "seq";
     const char * GNX_SET = "set";

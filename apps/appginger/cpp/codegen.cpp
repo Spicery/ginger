@@ -1098,7 +1098,10 @@ void CompileQuery::compileQueryDecl( Gnx query ) {
 		query->putAttribute( "tmp.bind.hi", hi );
 		int tmp = this->codegen->tmpvar();
 		query->putAttribute( "tmp.bind.var", tmp );
-	} else if ( nm == GNX_OK && N == 0 ) {
+	} else if ( nm == GNX_ONCE && N == 0 ) {
+		int tmp_loop_var = this->codegen->tmpvar();
+		query->putAttribute( "tmp.once.var", tmp_loop_var );		
+	} else if ( ( nm == GNX_OK || nm == GNX_FAIL ) && N == 0 ) {
 		//	Nothing to do.
 	} else {
 		throw SystemError( "Not implemented general queries" ).culprit( "Name", nm ).culprit( "N", (long)N );
@@ -1174,7 +1177,12 @@ void CompileQuery::compileQueryInit( Gnx query, LabelClass * contn ) {
 		this->codegen->vmiPUSHQ( SYS_TRUE );
 		this->codegen->vmiPOP_INNER_SLOT( tmp );
 		this->codegen->continueFrom( contn );
-	} else if ( nm == GNX_OK && N == 0 ) {
+	} else if ( nm == GNX_ONCE && N == 0 ) {
+		const int tmp = query->attributeToInt( "tmp.once.var" );
+		this->codegen->vmiPUSHQ( SYS_TRUE );
+		this->codegen->vmiPOP_INNER_SLOT( tmp );
+		this->codegen->continueFrom( contn );
+	} else if ( ( nm == GNX_OK || GNX_FAIL ) && N == 0 ) {
 		this->codegen->continueFrom( contn );
 	} else {
 		throw SystemError( "Not implemented general queries [2]" ).culprit( "Name", nm ).culprit( "N", static_cast< long >( N ) );
@@ -1295,8 +1303,14 @@ void CompileQuery::compileQueryTest( Gnx query, LabelClass * dst, LabelClass * c
 		} else {
 			throw Ginger::Mishap( "BIND not fully implemented [3]" );
 		}
+	} else if ( nm == GNX_ONCE && N == 0 ) {
+		const int tmp = query->attributeToInt( "tmp.once.var" );
+		this->codegen->vmiPUSH_INNER_SLOT( tmp );
+		this->codegen->vmiIFSO( dst, contn );
 	} else if ( nm == GNX_OK && N == 0 ) {
 		this->codegen->continueFrom( dst );
+	} else if ( nm == GNX_FAIL && N == 0 ) {
+		this->codegen->continueFrom( contn );
 	} else {
 		throw SystemError( "Not implemented general queries" );
 	}
@@ -1349,11 +1363,17 @@ void CompileQuery::compileQueryAdvn( Gnx query, LabelClass * contn ) {
 		}
 		this->codegen->vmiPOP( lv, false );
 
+	} else if ( nm == GNX_ONCE ) {
+		const int tmp = query->attributeToInt( "tmp.once.var" );
+		this->codegen->vmiPUSHQ( SYS_FALSE );
+		this->codegen->vmiPOP_INNER_SLOT( tmp );
 	} else if ( nm == GNX_IN || nm == GNX_BIND || nm == GNX_OK ) {
 		//	Nothing.
 	} else {
 		throw SystemError( "Not implemented general queries" );
 	}
+
+	//	Otherwise continue onto the test phase.
 	this->codegen->continueFrom( contn );
 }
 

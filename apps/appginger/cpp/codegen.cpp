@@ -125,8 +125,42 @@ void CodeGenClass::compileInstruction( Gnx instruction ) {
 		this->vmiPUSH_INNER_SLOT( instruction->attributeToInt( VM_PUSH_LOCAL_LOCAL ) );
 	} else if ( name == VM_ADD ) {
 		this->vmiINSTRUCTION( vmc_add );
+	} else if ( name == VM_MUL ) {
+		this->vmiINSTRUCTION( vmc_mul );
+	} else if ( name == VM_SUB ) {
+		this->vmiINSTRUCTION( vmc_sub );
+	} else if ( name == VM_DIV ) {
+		this->vmiINSTRUCTION( vmc_div );
+	} else if ( name == VM_QUO ) {
+		this->vmiINSTRUCTION( vmc_quo );
+	} else if ( name == VM_NEG ) {
+		this->vmiINSTRUCTION( vmc_neg );
+	} else if ( name == VM_POS ) {
+		this->vmiINSTRUCTION( vmc_pos );
+	} else if ( name == VM_NOT ) {
+		this->vmiINSTRUCTION( vmc_not );
+	} else if ( name == VM_LT ) {
+		this->vmiINSTRUCTION( vmc_lt );
+	} else if ( name == VM_LTE ) {
+		this->vmiINSTRUCTION( vmc_lte );
+	} else if ( name == VM_GT ) {
+		this->vmiINSTRUCTION( vmc_gt );
+	} else if ( name == VM_GTE ) {
+		this->vmiINSTRUCTION( vmc_gte );
+	} else if ( name == VM_EQ ) {
+		this->vmiINSTRUCTION( vmc_eq );
+	} else if ( name == VM_NEQ ) {
+		this->vmiINSTRUCTION( vmc_neq );
 	} else if ( name == VM_RETURN ) {
 		this->vmiRETURN();
+	} else if ( name == VM_DUP ) {
+		this->vmiINSTRUCTION( vmc_dup );
+	} else if ( name == VM_INCR ) {
+		this->vmiINSTRUCTION( vmc_incr );
+	} else if ( name == VM_DECR ) {
+		this->vmiINSTRUCTION( vmc_decr );
+	} else if ( name == VM_ERASE ) {
+		this->vmiINSTRUCTION( vmc_erase );
 	} else {
 		throw Mishap( "Unrecognised instruction name" ).culprit( "Name", name );
 	}
@@ -1542,16 +1576,10 @@ void CodeGenClass::compileGnxFn( Gnx mnx, LabelClass * contn ) {
 void CodeGenClass::compileGnxFnCode( Gnx mnx, LabelClass * contn ) {
 	int args_count = mnx->attributeToInt( GNX_FN_CODE_ARGS_COUNT );
 	int locals_count = mnx->attributeToInt( GNX_FN_CODE_LOCALS_COUNT );
-	this->vmiFUNCTION( mnx->attribute( GNX_FN_CODE_NAME, GNX_EMPTY_FN_NAME ), locals_count, args_count );
-	//	TODO: remove these relics - left in to prompt my thoughts.
-	// LabelClass retn( this, true );
-	
+	this->vmiFUNCTION( mnx->attribute( GNX_FN_CODE_NAME, GNX_EMPTY_FN_NAME ), locals_count, args_count );	
 	for ( Gnx instruction : *mnx ) {
 		this->compileInstruction( instruction );
 	}
-
-	// retn.labelSet();
-	// this->vmiRETURN();
 	this->vmiPUSHQ( this->vmiENDFUNCTION() );
 	this->continueFrom( contn );
 }

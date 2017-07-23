@@ -1,28 +1,35 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+GVMTest
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 (Extracted from a letter to Phil Allen)
 
 I'd like to see if I can give you something more powerful to probe the GVM. What I have in mind is writing the prototype version of the GVM class, embedding it in a special test harness, with a view to turning it into a Python module for test scripting. So there would be three views: C++ view, a shell scripting view and a Pythonic view.
 
 The C++ View
+============
 
 In namespace ::Ginger we would have a class VirtualMachine. This would encapsulate an instance of Machine together with its configuration (AppContext), and provide wrapper methods for probing the machine and so on. To keep things tidy, it would probably be a good idea to have a VirtualMachineFactory for building VirtualMachine instances.
 
-namespace Ginger {
-	class VirtualMachine {
-		... methods...
-	};
+.. code-block:: C++
 
-	class VirtualMachineFactory {
-		VirtualMachine newVirtualMachine();
-		... other methods ...
-	};
-}
+    namespace Ginger {
+        class VirtualMachine {
+            ... methods...
+        };
+
+        class VirtualMachineFactory {
+            VirtualMachine newVirtualMachine();
+            ... other methods ...
+        };
+    }
 
 The methods on VirtualMachine would allow for probing the machine state in detail including:
 
-	(1) registers
-	(2) value stack ("the stack")
-	(3) the callstack
-	(4) the heap: includes heap crawl
+    (1) registers
+    (2) value stack ("the stack")
+    (3) the callstack
+    (4) the heap: includes heap crawl
 
 It would be possible to build and dump MinimalXML and/or extended JSON representations of the machine state.
 
@@ -32,14 +39,16 @@ It would be possible to manually push and pop the value-stack, run individual in
 
 
 The Shell Scripting View
+========================
 
 In the ${GINGER_LIBEXEC}/ginger folder (i.e. /usr/local/libexec/ginger) we would have a new tool gvmtest i.e.
 
-	${GINGER_LIBEXEC}/ginger/gvmtest
+    ${GINGER_LIBEXEC}/ginger/gvmtest
 
 This executable would have a read-eval-print loop that accepted commands in MNX or, more conveniently, extended JSON. This would allow the manipulation of a single instance of the GVM (or more, if that proved useful). It would also allow the state of the GVM to be written to the standard output.
 
 
 The Pythonic View
+=================
 
 This would be a module that could be loaded. It would allow the machine state to be probed directly and access would generate the obvious Python objects corresponding to JSON.

@@ -1,0 +1,35 @@
+Notes on the Ginger Admin Utilities
+===================================
+
+Task: Add a new project to the current directory::
+
+	% ginger-admin --new-project PRJ_FOLDER
+
+
+- Task: Add a package folder into a project directory
+- Checked: The named folder is a project folder.
+- Default: The folder defaults to the current directory.
+
+::
+	% ginger-admin [--project PRJ_FOLDER] --add-package PKG_NAME
+
+
+- Task: Add an import into a package specified by folder
+- Checked: The name package folder is indeed a Ginger package folder.
+- Default: The package folder defaults to the current directory.
+- Default: The --with-tag defaults to "public" if none are specified.
+
+::
+	% ginger-admin [--package PKG_FOLDER] --add-import PKG_NAME (--with-tag TAG)*
+
+
+- Task: Get help on project admin
+
+::
+	% ginger-admin --help
+
+
+- Task: Interactively select task and arguments
+
+::
+	% ginger-admin [--interactive]

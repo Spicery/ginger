@@ -21,6 +21,7 @@ Contents:
    roadmap
    fn2code/fn2code-plan
    envvars
+   simplifygnx/index.rst
    version_0.8
    version_0.8.1
 

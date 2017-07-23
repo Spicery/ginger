@@ -2,6 +2,10 @@
 Definition
     ENTER1
 
+Code
+	No representation needed - the backend automatically generates the
+	optimal enter instruction.
+
 Summary
     A simplified version of ENTER for unary function objects.
     

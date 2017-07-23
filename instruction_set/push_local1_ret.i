@@ -3,7 +3,8 @@ Definition
     PUSH_LOCAL1_RET () -> ( R ), R = LOCAL[ 1 ]
     
 Code
-    <push.local1.ret />
+    No representation needed as backend will peephole optimise 
+    <push.local.ret local="1" />.
 
 Summary
     Pushes the value of LOCAL[ 0 ] onto the stack and returns.

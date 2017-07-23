@@ -3,11 +3,22 @@
 namespace Ginger {
 
 	static const char * VM_ENTER = "enter";
+	static const char * VM_RETURN = "return";
+	static const char * VM_RETURN_IFSO = "return.ifso";
+	static const char * VM_RETURN_IFNOT = "return.ifnot";
+
 	static const char * VM_PUSH_LOCAL = "push.local";
 	static const char * VM_PUSH_LOCAL_LOCAL = "local";
-	static const char * VM_ADD = "add";
-	static const char * VM_RETURN = "return";
+	static const char * VM_PUSH_LOCAL_RET = "push.local.ret";
+	static const char * VM_PUSH_LOCAL_RET_LOCAL = "local";
 
+	static const char * VM_CALLS = "calls";
+	static const char * VM_SELF_CALL = "self.call";
+	static const char * VM_SELF_CONSTANT = "self.constant";
+
+	static const char * VM_FAIL = "fail";
+
+	static const char * VM_ADD = "add";
 	static const char * VM_MUL = "mul";
 	static const char * VM_SUB = "sub";
 	static const char * VM_DIV = "div";

@@ -3,7 +3,8 @@ Definition
     PUSH_LOCAL1 () -> ( R ), where R = LOCAL[ 1 ]
 
 Code
-	<push.local1 />
+	No representation needed as backend will peephole optimise 
+    <push.local local="1"/>.
 
 Summary
     Pushes the value of LOCAL[ 1 ] onto the stack.

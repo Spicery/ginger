@@ -121,8 +121,36 @@ void CodeGenClass::compileInstruction( Gnx instruction ) {
 	const string name = instruction->name();
 	if ( name == VM_ENTER ) {
 		this->vmiENTER();
+	} else if ( name == VM_RETURN ) {
+		this->vmiRETURN();
+	} else if ( name == VM_RETURN_IFSO ) {
+		this->emitSPC( vmc_return_ifso );
+	} else if ( name == VM_RETURN_IFNOT ) {
+		this->emitSPC( vmc_return_ifnot );
 	} else if ( name == VM_PUSH_LOCAL ) {
 		this->vmiPUSH_INNER_SLOT( instruction->attributeToInt( VM_PUSH_LOCAL_LOCAL ) );
+	} else if ( name == VM_PUSH_LOCAL_RET ) {
+		int slot = instruction->attributeToInt( VM_PUSH_LOCAL_RET_LOCAL );
+		switch ( slot ) {
+			case 0:
+				this->emitSPC( vmc_push_local0_ret );
+				break;
+			case 1:
+				this->emitSPC( vmc_push_local1_ret );
+				break;
+			default:	
+				this->emitSPC( vmc_push_local_ret );
+				this->emitRef( IntToRef( slot ) );
+				break;
+		}	
+	} else if ( name == VM_CALLS ) {
+		this->vmiCALLS();
+	} else if ( name == VM_SELF_CALL ) {
+		this->vmiSELF_CALL();
+	} else if ( name == VM_SELF_CONSTANT ) {
+		this->vmiSELF_CONSTANT();
+	} else if ( name == VM_FAIL ) {
+		this->vmiFAIL();
 	} else if ( name == VM_ADD ) {
 		this->vmiINSTRUCTION( vmc_add );
 	} else if ( name == VM_MUL ) {
@@ -151,8 +179,6 @@ void CodeGenClass::compileInstruction( Gnx instruction ) {
 		this->vmiINSTRUCTION( vmc_eq );
 	} else if ( name == VM_NEQ ) {
 		this->vmiINSTRUCTION( vmc_neq );
-	} else if ( name == VM_RETURN ) {
-		this->vmiRETURN();
 	} else if ( name == VM_DUP ) {
 		this->vmiINSTRUCTION( vmc_dup );
 	} else if ( name == VM_INCR ) {
@@ -338,7 +364,7 @@ void CodeGenClass::vmiPOP( const VIdent & id, const bool assign_vs_bind ) {
 }
 
 /*
-TODO: Figure out what this relic is doing. Violates my own standards :(
+TODO: Figure out what this relic is doing. Violates my own standards to leave it in :(
 bool CodeGenClass::vmiTRY_POP( const VIdent & id, const bool assign_vs_bind, LabelClass * dst, LabelClass * contn ) {
 	if ( id.isLocal() ) {
 		this->vmiPOP_INNER_SLOT( id.getSlot() );
@@ -610,14 +636,8 @@ void CodeGenClass::vmiPUSHQ_SYMBOL( const std::string & s, LabelClass * contn ) 
 	this->continueFrom( contn );
 }
 
-
-
 void CodeGenClass::vmiRETURN() {
 	this->emitSPC( vmc_return );
-}
-
-void CodeGenClass::vmiHALT() {
-	this->emitSPC( vmc_halt );
 }
 
 void CodeGenClass::vmiENTER() {

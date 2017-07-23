@@ -3,8 +3,9 @@ Definition
 	ENTER0
 
 Code
-    <enter0 />
-    
+	No representation needed - the backend automatically generates the
+	optimal enter instruction.
+   
 Summary
 	A simplified version of ENTER for nullary function objects.
 	

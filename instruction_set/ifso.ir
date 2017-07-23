@@ -2,6 +2,9 @@
 Definition
     * IFSO JUMP_TO ( X ) -> ()
 
+Code
+    <ifso to=JUMP_TO />
+
 Summary
     Compare the top of the stack against false. If it is different then
     jump to JUMP_TO, otherwise fall through. Remove the top of the stack

@@ -3,7 +3,8 @@ Definition
     HALT
 
 Code
-    <halt />
+    This instruction is only generated internally, no need for
+    GNX representation.
     
 Summary
     Forces the virtual machine to exit with a failure.

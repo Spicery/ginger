@@ -4,7 +4,8 @@ Definition
     * VPC += 1
     
 Code
-	<push.local0 />
+	No representation needed as backend will peephole optimise 
+    <push.local local="0"/>.
 
 Summary
     Pushes the value of local variable 0 onto the stack.

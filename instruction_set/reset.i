@@ -3,7 +3,8 @@ Definition
     RESET
 
 Code
-    <reset />
+    This instruction is only generated internally, no need for
+    GNX representation.
 
 Summary
     Exits the interpreter loop.

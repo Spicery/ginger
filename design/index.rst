@@ -21,6 +21,7 @@ Contents:
    roadmap
    envvars
    simplifygnx/index.rst
+   fetchgnx/index.rst
    version_0.8
    version_0.8.1
 

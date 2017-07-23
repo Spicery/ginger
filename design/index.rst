@@ -20,6 +20,7 @@ Contents:
    maths
    roadmap
    envvars
+   simplifygnx/index.rst
    version_0.8
    version_0.8.1
 

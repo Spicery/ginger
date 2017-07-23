@@ -13,7 +13,7 @@ Steps
 	ginger_xml_syntax.txt
 	
 	In this case we added the element
-		<package url=URL/>
+	``<package url=URL/>``
 	This is obviously incomplete since it does not include
 	imports. Those will get added in a separate development step.
 	

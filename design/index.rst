@@ -22,6 +22,11 @@ Contents:
    envvars
    simplifygnx/index.rst
    fetchgnx/index.rst
+   gvmtest/index.rst
+   common2gnx/index.rst
+   file2gnx/index.rst
+   ginger-admin/index.rst
+   appginger/index.rst
    version_0.8
    version_0.8.1
 

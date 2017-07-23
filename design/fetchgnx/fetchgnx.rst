@@ -7,11 +7,11 @@ The concept behind fetchgnx is to isolate the knowledge of the on-disk
 structure of Ginger projects (aka inventories). There are three tasks that
 requires the knowledge of projects: 
 
-  # resolving a reference to a global variable from an enclosing package,
+  - resolving a reference to a global variable from an enclosing package,
   	* 1st case, resolve a qualified reference
   	* 2nd case, resolve an unqualified reference
-  # fetching the definition of a global variable from a defining package,
-  # fetching the on-load initialisation code for a package.
+  - fetching the definition of a global variable from a defining package
+  - fetching the on-load initialisation code for a package.
 
 Arguably these are significantly separate functions. However because there
 is inevitably a great deal of shared code, I allowed for the possibility of

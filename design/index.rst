@@ -22,6 +22,7 @@ Contents:
    envvars
    fn2code/fn2code-plan
    simplifygnx/index.rst
+   fetchgnx/index.rst
    version_0.8
    version_0.8.1
 

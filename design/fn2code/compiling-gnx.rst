@@ -252,10 +252,38 @@ flattened by the Ginger Runtime.
 
 System Function Applications
 ----------------------------
+System functions are built-in to the Ginger Runtime, each with a unique
+name. Calling them is especially efficient. 
 
 .. code-block:: XML
-    <sysapp name=NAME> EXPR* </sysapp>
+    <sysapp name=NAME> EXPR1 EXPR2 ... EXPRn </sysapp>
 
+Arguments are passed on the stack but, because Ginger allows multiple valued 
+expressions, the count of the argument has to be computed and placed into 
+VMCOUNT. A typical way to compile this would be as follows, using ``start.mark``
+and ``set.count.mark``
+
+.. code-block:: XML
+ 	<seq>
+ 		<!-- Put the stacklength in the slot NUM -->
+		<start.mark local=NUM/>
+		<seq>
+			<!-- Compile the arguments -->
+			instructions( EXPR1 )
+			instructions( EXPR2 )
+			... 
+			instructions( EXPRn )
+		</set>
+		<!-- Find the difference between stacklength now and the value in NUM -->
+		<!-- and put the difference in the virtual register VMCOUNT -->
+		<set.count.mark local=NUM/>
+		<!-- Finally invoke the system-function -->
+		<syscall name=SYSFN_NAME/>
+	<seq/>
+
+It may be possible to statically compute the number of arguments the 
+sub-expressions will have. In that case there are a variety of more efficient
+ways to invoke a syscall.
 
 Function Application
 --------------------

@@ -395,7 +395,7 @@ void CodeGenClass::vmiSETCONT() {
 }
 
 void CodeGenClass::vmiSET_COUNT_TO_MARK( int A ) {
-	this->emitSPC( vmc_set );
+	this->emitSPC( vmc_set_count_mark );
 	this->emitRef( IntToRef( A ) );
 }
 

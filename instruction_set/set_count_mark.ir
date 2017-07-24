@@ -1,8 +1,9 @@
 /*****************************************************************************\
 Definition
-    * SET LOCAL
-    * VMCOUNT = VSTACK - Value( LOCAL )
-    * VPC += 2
+    SET_COUNT_MARK LOCAL
+
+Code
+    <set.count.mark local=LOCAL/>
 
 Summary
     Sets the VMCOUNT to the previously set MARK.
@@ -13,6 +14,9 @@ Summary
     The code critically depends the fact that raw-pointers are ignored 
     by the garbage collector. Note that VMCOUNT is calculated in units
     of sizeof( void * ).
+
+Stats
+    Width = 2
     
 Unchecked Precondition
     * The stack is no smaller than before.

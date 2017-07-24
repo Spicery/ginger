@@ -128,27 +128,49 @@ the stack frame and returns to the caller.
 	</fn.code>
 
 All that remains is to compute the distance that the ``and`` has to jump. The
-jump has to skip two ``push.local0``s (2 x width 1), one ``mul`` (1 x width 1), a ``push.constant`` (1 x width 2), for a total of 6 words. There is also an
-offset of 1 that has to be factored in - when the instruction is executed the
+jump has to skip two ``push.local0`` (2 x width 1), one ``mul`` (1 x width 1), a ``push.constant`` (1 x width 2), for a total of 6 words. There is also an
+offset of 1 that has to be factored in (when the instruction is executed the
 virtual-pc is pointing one past the start of the current instruction, which is
-two words long. So the value that has to be substituted is 6 + 1 = 7.
+two words long.) So the value that has to be substituted is 6 + 1 = 7.
 
-To assist with readability, some additional label attributes have been added.
+To assist with readability, some additional label attributes have been added to
+create a complete solution.
 
 .. code-block:: XML
 
 	<fn.code args.count="1" locals.count="1">
 		<enter1/>
 		<push.local0/>
-		<push.constant type="int" value="0"/>
+		<push.constant>
+			<constant type="int" value="0"/>
+		</push.constant>
 		<gt/>
 		<and to="7" to.label="L1"/>
 		<push.local0/>
 		<push.local0/>
 		<mul/>
-		<push.constant type="int" value="1"/>
+		<push.constant>
+			<constant type="int" value="1"/>
+		</push.constant>
 		<lt/>
 		<return label="L1"/>
 	</fn.code>
+
+Compiling GingerXML
+===================
+
+Here we breakdown how the current Ginger Runtime compiles the different
+GingerXML elements.
+
+constant
+--------
+Constants are simply pushed onto the stack, ignoring the necessity to check
+for available room. The instruction that is set aside for this is the 
+``push.constant``. This instruction has a single child that is the constant
+expression to be pushed.
+
+
+
+
 
 

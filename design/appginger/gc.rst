@@ -10,10 +10,10 @@ code, dead objects are not traced and entail no cost, it is easy to make good
 expand-versus-shrink memory decisions and will not blow out the C++ callstack due 
 to recursion. 
 
-The VM uses a heap build on top of subheaps called “cages”. Cages are very large 
-areas of memory (>1MB) that are themselves managed by C++’s new/delete. The 
+The VM uses a heap build on top of subheaps called "cages". Cages are very large 
+areas of memory (>1MB) that are themselves managed by C++'s new/delete. The 
 fragmentation of the heap means we have to complicate the algorithm a little. 
-Here’s how it all works:- 
+Here's how it all works:- 
 
 When the VM tries to allocate an object, it finds a cage that is suitable for 
 that object.  If a suitable cage is available, all well and good. If no suitable 
@@ -31,36 +31,31 @@ Phases of the Garbage Collector
 
 The first phase of the garbage collector is to separate all the cages into two 
 groups: those that are in use and those that are empty. These become the 
-“from-cages” and the “to-cages”. If there are no empty cages then new cages are 
+"from-cages" and the "to-cages". If there are no empty cages then new cages are 
 created on demand.
 
-The main phase of the garbage collector interleaves two operations: “forwarding” 
-with “scanning”. 
+The main phase of the garbage collector interleaves two operations: "forwarding" 
+with "scanning". 
 
--	Forwarding means to copy an object from one of the from-cages onto the 
-growing point of a to-cage AND leave a ‘forwarding address’ behind (which is 
-space efficient but damages the old object).  A forwarded copy is in a limbo 
-state. Although it lives in a to-cage, all its internal pointers are into the old 
-from-cages. 
+-   Forwarding means to copy an object from one of the from-cages onto 
+    the growing point of a to-cage AND leave a 'forwarding address' behind 
+    (which is space efficient but damages the old object).  A forwarded copy 
+    is in a limbo state. Although it lives in a to-cage, all its internal pointers are into the old from-cages. 
 
--	Scanning means iterating across all the internal pointers of a forwarded 
-object and replaces them with the new addresses. If the pointer is to an object 
-that has already been forward, this just means replacing with the forwarded 
-address. If it hasn’t been forwarded, then forwarding is immediately performed.
+-   Scanning means iterating across all the internal pointers of a 
+    forwarded object and replaces them with the new addresses. If the pointer 
+    is to an object that has already been forward, this just means replacing
+    with the forwarded address. If it hasn't been forwarded, then forwarding 
+    is immediately performed.
 
--	Each to-cage keeps track of its limbo objects (forwarded but not scanned) by 
-maintaining a start-of-limbo pointer  in addition to its growing point. Limbo 
-objects are added at the growing point and scanned at the start-of-limbo. When an 
-object has been scanned, the start-of-limbo pointer is bumped past the object. 
-When the start-of-limbo pointer catches up with the growing-point, there are 
-objects left in limbo.
+-   Each to-cage keeps track of its limbo objects (forwarded but not scanned) 
+    by maintaining a start-of-limbo pointer  in addition to its growing point.
+    Limbo objects are added at the growing point and scanned at the 
+    start-of-limbo. When an  object has been scanned, the start-of-limbo 
+    pointer is bumped past the object. When the start-of-limbo pointer 
+    catches up with the growing-point, there are objects left in limbo.
 
-The second phase initialises the main phase by forwarding all the “root pointers” 
-of the virtual machine. At that moment, the to-cages are loaded with a queue of 
-limbo objects from which all accessible store can be reached. One complication is 
-that some of the fields of the virtual machine are pointers into the middle of 
-objects. These unrestricted-pointers have to be “frozen” into a pointer to an 
-object and its offset.
+The second phase initialises the main phase by forwarding all the "root pointers" of the virtual machine. At that moment, the to-cages are loaded with a queue of limbo objects from which all accessible store can be reached. One complication is that some of the fields of the virtual machine are pointers into the middle of objects. These unrestricted-pointers have to be "frozen" into a pointer to an object and its offset.
 
 The main phase is then to repeatedly select a limbo object, remove it from limbo 
 and scan it, until there are no more limbo objects left to select. Because the 

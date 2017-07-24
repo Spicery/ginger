@@ -20,7 +20,7 @@ Contents:
    maths
    roadmap
    envvars
-   fn2code/fn2code-plan
+   fn2code/index.rst
    simplifygnx/index.rst
    fetchgnx/index.rst
    gvmtest/index.rst

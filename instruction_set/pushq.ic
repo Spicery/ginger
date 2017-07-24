@@ -1,10 +1,13 @@
 /*****************************************************************************\
 Definition
-    * PUSHQ CONST
-    * VPC += 2
-    
+    PUSHQ CONST
+
+Code
+	<pushq> GNX_CONSTANT_EXPR </pushq>
+	
 Summary
     Pushes a constant onto the stack.
+    Width = 2
 
 Unchecked Precondition
     There is room on a stack for this.

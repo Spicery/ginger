@@ -1,10 +1,13 @@
 /*****************************************************************************\
 Definition
-    * POP_GLOBAL VALOF_V () -> ( X ), where X = GLOBAL( V )
-    * VPC += 2
+    PUSH_GLOBAL VALOF_V () -> ( X ), where X = GLOBAL( V )
+
+Code
+    <push.global name=NAME def.pkg=PKG/>
  
 Summary
     Pushes the value of GLOBAL( V ) onto the stack.
+    Width = 2
     
 Unchecked Precondition
     * V is a pointer to a Valof structure.

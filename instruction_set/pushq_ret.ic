@@ -8,6 +8,9 @@ Code
 Summary
     Push a constant and return from the calling function.
 
+Stats
+    Width = 2
+
 Unchecked Precondition
     * There is room on the stack for one more value.
     * There is a previous function call.

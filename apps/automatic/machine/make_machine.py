@@ -120,7 +120,7 @@ instructionSet = [
 	Instruction( "self_call", "i" ),
 	Instruction( "self_call_n", "ir" ),
 	Instruction( "self_constant", "i" ),
-	Instruction( "set", "ir" ),
+	Instruction( "set_count_mark", "ir" ),
 	Instruction( "set_count_call_global", "irv" ),
 	Instruction( "set_count_calls", "ir" ),
 	Instruction( "set_count_call_local", "irr" ),

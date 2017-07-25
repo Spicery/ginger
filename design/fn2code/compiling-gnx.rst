@@ -41,9 +41,9 @@ square is less than one.
 
 .. code-block:: text
 
-	define check( x ) =>>
-		x >= 0 and x*x < 1
-	enddefine;
+    define check( x ) =>>
+        x >= 0 and x*x < 1
+    enddefine;
 
 The idea is that we will generate a ``<fn2code>`` elements, with attributes
 ``args.count`` and ``locals.count``, and whose children are a sequence of
@@ -58,9 +58,9 @@ we will generate:
 
 .. code-block:: xml
 
-	<fn.code args.count="1" locals.count="1">
-		... instructions ...
-	</fn.code>
+    <fn.code args.count="1" locals.count="1">
+        ... instructions ...
+    </fn.code>
 
 The first instruction we generate will be <enter1/>. This is a very specialised
 instruction that builds a stack-frame for functions with one input and pops
@@ -70,23 +70,23 @@ to find the locals-count. So our generated code will look like ...
 
 .. code-block:: xml
 
-	<fn.code args.count="1" locals.count="1">
-		<enter1/>
-		... further instructions ...
-	</fn.code>
+    <fn.code args.count="1" locals.count="1">
+        <enter1/>
+        ... further instructions ...
+    </fn.code>
 
 The comparison x > 0 is tackled first. The simplest way to compile this is
 with the stack-based code: push x, push 0, call greater than or equal to.
 
 .. code-block:: xml
 
-	<fn.code args.count="1" locals.count="1">
-		<enter1/>
-		<push.local0/>
-		<push.constant type="int" value="0"/>
-		<gte/>
-		... further instructions ...
-	</fn.code>
+    <fn.code args.count="1" locals.count="1">
+        <enter1/>
+        <push.local0/>
+        <push.constant type="int" value="0"/>
+        <gte/>
+        ... further instructions ...
+    </fn.code>
 
 Then we need to implement the short-circuit operator ``and``, which is
 done via the ``and`` instruction. This instruction checks the top of the
@@ -96,14 +96,14 @@ so we have to leave that blank.
 
 .. code-block:: xml
 
-	<fn.code args.count="1" locals.count="1">
-		<enter1/>
-		<push.local0/>
-		<push.constant type="int" value="0"/>
-		<gte/>
-		<and to=END/>
-		... further instructions ...
-	</fn.code>
+    <fn.code args.count="1" locals.count="1">
+        <enter1/>
+        <push.local0/>
+        <push.constant type="int" value="0"/>
+        <gte/>
+        <and to=END/>
+        ... further instructions ...
+    </fn.code>
 
 Now we compute x*x > 0, although we will skip checking there's enough room
 on the stack (that's an omission in the current design, based on the plan
@@ -113,19 +113,19 @@ the stack frame and returns to the caller.
 
 .. code-block:: xml
 
-	<fn.code args.count="1" locals.count="1">
-		<enter1/>
-		<push.local0/>
-		<push.constant type="int" value="0"/>
-		<gt/>
-		<and to=END/>
-		<push.local0/>
-		<push.local0/>
-		<mul/>
-		<push.constant type="int" value="1"/>
-		<lt/>
-		<return/>
-	</fn.code>
+    <fn.code args.count="1" locals.count="1">
+        <enter1/>
+        <push.local0/>
+        <push.constant type="int" value="0"/>
+        <gt/>
+        <and to=END/>
+        <push.local0/>
+        <push.local0/>
+        <mul/>
+        <push.constant type="int" value="1"/>
+        <lt/>
+        <return/>
+    </fn.code>
 
 All that remains is to compute the distance that the ``and`` has to jump. The
 jump has to skip two ``push.local0`` (2 x width 1), one ``mul`` (1 x width 1), a ``push.constant`` (1 x width 2), for a total of 6 words. There is also an
@@ -138,23 +138,23 @@ create a complete solution.
 
 .. code-block:: xml
 
-	<fn.code args.count="1" locals.count="1">
-		<enter1/>
-		<push.local0/>
-		<push.constant>
-			<constant type="int" value="0"/>
-		</push.constant>
-		<gt/>
-		<and to="7" to.label="L1"/>
-		<push.local0/>
-		<push.local0/>
-		<mul/>
-		<push.constant>
-			<constant type="int" value="1"/>
-		</push.constant>
-		<lt/>
-		<return label="L1"/>
-	</fn.code>
+    <fn.code args.count="1" locals.count="1">
+        <enter1/>
+        <push.local0/>
+        <push.constant>
+            <constant type="int" value="0"/>
+        </push.constant>
+        <gt/>
+        <and to="7" to.label="L1"/>
+        <push.local0/>
+        <push.local0/>
+        <mul/>
+        <push.constant>
+            <constant type="int" value="1"/>
+        </push.constant>
+        <lt/>
+        <return label="L1"/>
+    </fn.code>
 
 Compiling GingerXML
 ===================
@@ -176,9 +176,9 @@ expression to be pushed e.g.
 
 .. code-block:: xml
 
-	<pushq>	
-		<constant type="string" value="Hello, World!"/>
-	</pushq>
+    <pushq> 
+        <constant type="string" value="Hello, World!"/>
+    </pushq>
 
 N.B. InstructionXML is not particularly concise - and nor is GingerXML.
 The aim of both formats is clarity and simplicity.
@@ -204,14 +204,14 @@ reference elements have the pattern:
 
 .. code-block:: xml
 
-	<id name=NAME def.pkg=PACKAGE scope="global"/>
+    <id name=NAME def.pkg=PACKAGE scope="global"/>
 
 The compiler simply pushes references onto the stack using the  ``push.global`` 
 instruction.
 
 .. code-block:: xml
 
-	<push.global name=NAME def.pkg=PACKAGE/>
+    <push.global name=NAME def.pkg=PACKAGE/>
 
 
 Local Variables
@@ -220,14 +220,14 @@ A local variable is defined in GingerXML as follows.
 
 .. code-block:: xml
 
-	<id name=NAME scope="local" slot=SLOT_NUMBER/>
+    <id name=NAME scope="local" slot=SLOT_NUMBER/>
 
 The compiler simply pushes references onto the stack using the  ``push.local`` 
 instruction. 
 
 .. code-block:: xml
 
-	<push.local local=SLOT_NUMBER/>
+    <push.local local=SLOT_NUMBER/>
 
 Note that the ``slot`` attribute field is generated by using the option ``-A`` 
 on the ``simplifygnx`` tool. This is simplistic algorithm and the compiler tool
@@ -243,7 +243,7 @@ compiled instructions for each expression in turn.
 
 .. code-block:: xml
 
-	<seq> EXPR1 EXPR2 ... EXPRn </seq>
+    <seq> EXPR1 EXPR2 ... EXPRn </seq>
 
 For the convenience of delivering a single result, InstructionXML allows a 
 sequence of instructions to be bundled up as a ``seq``. These are automatically
@@ -251,12 +251,12 @@ flattened by the Ginger Runtime. You are not obliged to use these.
 
 .. code-block:: xml
 
-	<seq>
-		instructions( EXPR1 )
-		instructions( EXPR2 )
-		... 
-		instructions( EXPRn )
-	</seq>
+    <seq>
+        instructions( EXPR1 )
+        instructions( EXPR2 )
+        ... 
+        instructions( EXPRn )
+    </seq>
 
 System Function Applications
 ----------------------------
@@ -275,22 +275,22 @@ and ``set.count.mark``
 .. code-block:: xml
 
 
- 	<seq>
- 		<!-- Put the stacklength in the slot NUM -->
-		<start.mark local=NUM/>
-		<seq>
-			<!-- Compile the arguments -->
-			instructions( EXPR1 )
-			instructions( EXPR2 )
-			... 
-			instructions( EXPRn )
-		</set>
-		<!-- Find the difference between stacklength now and the value in NUM -->
-		<!-- and put the difference in the virtual register VMCOUNT -->
-		<set.count.mark local=NUM/>
-		<!-- Finally invoke the system-function -->
-		<syscall name=SYSFN_NAME/>
-	<seq/>
+    <seq>
+        <!-- Put the stacklength in the slot NUM -->
+        <start.mark local=NUM/>
+        <seq>
+            <!-- Compile the arguments -->
+            instructions( EXPR1 )
+            instructions( EXPR2 )
+            ... 
+            instructions( EXPRn )
+        </set>
+        <!-- Find the difference between stacklength now and the value in NUM -->
+        <!-- and put the difference in the virtual register VMCOUNT -->
+        <set.count.mark local=NUM/>
+        <!-- Finally invoke the system-function -->
+        <syscall name=SYSFN_NAME/>
+    <seq/>
 
 It may be possible to statically compute the number of arguments the 
 sub-expressions will have. In that case there is a more efficient
@@ -299,17 +299,17 @@ N arguments, we should use ``set.count.syscall``.
 
 .. code-block:: xml
 
- 	<seq>
-		<seq>
-			<!-- Compile the arguments -->
-			instructions( EXPR1 )
-			instructions( EXPR2 )
-			... 
-			instructions( EXPRn )
-		</set>
-		<!-- Call with N arguments -->
-		<set.count.syscall name=SYSFN_NAME count=N />
-	<seq/>
+    <seq>
+        <seq>
+            <!-- Compile the arguments -->
+            instructions( EXPR1 )
+            instructions( EXPR2 )
+            ... 
+            instructions( EXPRn )
+        </set>
+        <!-- Call with N arguments -->
+        <set.count.syscall name=SYSFN_NAME count=N />
+    <seq/>
 
 
 
@@ -321,71 +321,77 @@ to pass to the invocation.
 
 .. code-block:: xml
 
-	<app> FN_EXPR ARG_EXPR </app>
+    <app> FN_EXPR ARG_EXPR </app>
 
 At the virtual-machine level, the VMCOUNT register must be set with
 the number of arguments being passed across. In addition, the function
 argument is restricted to evaluating to a single result.
 
-The Ginger Runtime uses the *arity* attributes to avoid generating
-run time checks on the FN_EXPR in many common situations. However
-it cannot always be avoided. As a consequence the general function
-call looks like this:
+Calling functions is very common and important, so the Ginger Runtime
+compiler tries to use specialised instructions where it can. For
+example, it uses the *arity* attributes to avoid generating
+run time checks on the FN_EXPR in many common situations and to
+avoid the necessity of dynamically calculating the number of arguments
+being passed.
 
-The Ginger Runtime uses the *arity* attributes to avoid generating
-run time checks on the FN_EXPR in many common situations. However
-it cannot always be avoided. As a consequence the general function
-call looks like this:
-
-The Ginger Runtime uses the *arity* attributes to avoid generating
-run time checks on the FN_EXPR in many common situations. However
-it cannot always be avoided. As a consequence the general function
-call looks like this:
+However these overheads cannot always be avoided. As a consequence the 
+general function call looks like this:
 
 .. code-block:: xml
 
-        <seq>
-		<!-- Compute the arguments -->
-		<start.mark local=TMP0 />
-		instructions( ARG_EXPR )
-		<!- Compute the single valued function -->
-		<start.mark local=TMP1 />
-		instructions( FN_EXPR )
-		<check.mark1 />
-		<!-- Now call the function that is on the stack -->
-		<end1.calls local=TMP0 />
-        <seq/>
+    <seq>
+        <!-- Compute the arguments -->
+        <start.mark local=TMP0 />
+        instructions( ARG_EXPR )
+        <!- Compute the single valued function -->
+        <start.mark local=TMP1 />
+        instructions( FN_EXPR )
+        <check.mark1 />
+        <!-- Now call the function that is on the stack -->
+        <end1.calls local=TMP0 />
+    <seq/>
 
 More frequently the compiler knows that FN_EXPR yields a single value 
 in which case the following code is slightly better.
 
 .. code-block:: xml
 
-        <seq>
-                <!-- Compute the arguments -->
-                <start.mark local=TMP0 />
-                instructions( ARG_EXPR )
-                <!- Compute the single valued function -->
-                instructions( FN_EXPR )
-                <!-- Now call the function that is on the stack -->
-                <end1.calls local=TMP0 />
-        <seq/>
+    <seq>
+        <!-- Compute the arguments -->
+        <start.mark local=TMP0 />
+        instructions( ARG_EXPR )
+        <!- Compute the single valued function -->
+        instructions( FN_EXPR )
+        <!-- Now call the function that is on the stack -->
+        <end1.calls local=TMP0 />
+    <seq/>
 
-And more frequently, the compiler knows the number of arguments that
+And more frequently, the compiler also knows the number of arguments that
 ARG_EXPR would push. In that case it can be simplified yet further.
 
 .. code-block:: xml
 
-        <seq>
-                <!-- Compute the arguments -->
-                instructions( ARG_EXPR )
-		<!-- Compute the funcion (on the stack) -->
-                instructions( FN_EXPR )
-                <!-- Now call the function that is on the stack -->
-                <calls />
-        <seq/>
+    <seq>
+        <!-- Compute the arguments -->
+        instructions( ARG_EXPR )
+        <!-- Compute the funcion (on the stack) -->
+        instructions( FN_EXPR )
+        <!-- Now call the function that is on the stack -->
+        <set.count.calls count=NUM_ARGS />
+    <seq/>
 
+And a very common case indeed is that the function being called is held 
+in a global variable, in which case the ``set.count.call.global`` instruction
+is used.
 
+.. code-block:: xml
+
+    <seq>
+        <!-- Compute the arguments -->
+        instructions( ARG_EXPR )
+        <!-- Call the named global function -->
+        <set.count.call.global def.pkg=PKG name=NAME count=NUM_ARGS />
+    <seq/>
 
 
 
@@ -396,7 +402,7 @@ order; the logic behind this is that the source value is computed before
 
 .. code-block:: xml
 
-	<set> SRC_EXPR DEST_EXPR </set>
+    <set> SRC_EXPR DEST_EXPR </set>
 
 Assignment to Local Variable
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~

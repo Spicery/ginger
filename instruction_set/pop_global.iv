@@ -7,6 +7,8 @@ Code
 
 Summary
     Pops the top of the stack into the global variable V.
+
+Stats
     Width = 2
     
 Unchecked Precondition

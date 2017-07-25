@@ -282,8 +282,24 @@ and ``set.count.mark``
 	<seq/>
 
 It may be possible to statically compute the number of arguments the 
-sub-expressions will have. In that case there are a variety of more efficient
-ways to invoke a syscall.
+sub-expressions will have. In that case there is a more efficient
+ways to invoke a syscall. For example if we know that there are exactly 
+N arguments, we should use ``set.count.syscall``.
+
+.. code-block:: XML
+ 	<seq>
+		<seq>
+			<!-- Compile the arguments -->
+			instructions( EXPR1 )
+			instructions( EXPR2 )
+			... 
+			instructions( EXPRn )
+		</set>
+		<!-- Call with N arguments -->
+		<set.count.syscall name=SYSFN_NAME count=N />
+	<seq/>
+
+
 
 Function Application
 --------------------

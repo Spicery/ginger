@@ -598,5 +598,61 @@ in a later phase.
             return MinXML( "goto", to_label=contn_label )
 
 
+List Expressions
+----------------
+Immutable, singly linked lists are constructed via the ``[% ... %]`` syntax.
+The GingerXML that corresponds to this is:
+
+.. code-block:: xml
+
+    <list>
+        EXPR1
+        EXPR2
+        ...
+        EXPRn
+    </list>
+
+This gets translated in the obvious way into:
+
+.. code-block:: xml
+
+    <seq>
+        <start.mark local=TMP />
+        instructions( EXPR1 )
+        instructions( EXPR2 )
+        ...
+        instructions( EXPRn )
+        <set.count.mark local=TMP />
+        <syscall name="newList" />
+    </seq>
+
+
+Vector Expressions
+------------------
+An immutable 1D array is call a vector and is constructed via the ``[ ... ]`` 
+syntax. The GingerXML this corresponds to is:
+
+.. code-block:: xml
+
+    <vector>
+        EXPR1
+        EXPR2
+        ...
+        EXPRn
+    </vector>
+
+This gets translated in the obvious way into:
+
+.. code-block:: xml
+
+    <seq>
+        <start.mark local=TMP />
+        instructions( EXPR1 )
+        instructions( EXPR2 )
+        ...
+        instructions( EXPRn )
+        <set.count.mark local=TMP />
+        <syscall name="newVector" />
+    </seq>
 
 

@@ -481,5 +481,122 @@ Assignments to ``<sysapp/>`` elements will become:
     </sysupdate>
 
 
+Conditional Expressions
+-----------------------
+Conditional expressions are formed using the ``if`` element. This has
+zero (!) or more (!!) arguments. If there are an odd number of arguments then
+the last argument is an *else* clause. Otherwise the arguments pair up into
+*guard* and *action* pairs. 
+
+The rather peculiar ``<if/>`` elements is therefore equivalent to do-nothing
+or ``<seq>``. The equally peculiar ``<if> EXPR </if>`` is equivalent to 
+``EXPR``. Simplifygnx should (but doesn't right now) eliminate these oddballs.
+
+To keep it simple, we'll look at the case with 2-arguments (if-then) and the
+case with 3-arguments (if-then-else). 
+
+If-Then
+~~~~~~~
+Guards are required to evaluate to a single boolean value. 
+
+.. code-block:: xml
+
+    <if name=NAME>
+        GUARD_EXPR0
+        ACTION_EXPR0
+    </if>
+
+Compilation relies on the ``ifnot`` instruction. There is a corresponding 
+``ifso`` instruction for dealing with negated conditions. The distance jumped 
+forward is the sum of widths of the ACTION_EXPR0 instructions (plus 1).
+
+.. code-block:: xml
+
+    <seq>
+        <start.mark local=TMP0/>
+        instructions( GUARD_EXPR0 )
+        <check.mark1 local=TMP0/>
+        <ifnot to=TBC to.label="done" />
+        instructions( ACTION_EXPR0 )
+        <!-- seq used to mimick a non-op -->
+        <seq label="done"/>     
+    </seq>
+
+If-Then-Else
+~~~~~~~~~~~~
+
+.. code-block:: xml
+
+    <if name=NAME>
+        GUARD_EXPR0
+        ACTION_EXPR0
+        ELSE_EXPR
+    </if>
+
+The simple-minded approach is to generate a ``goto`` with the target being the
+end of the loop. 
+
+.. code-block:: xml
+
+    <seq>
+        <start.mark local=TMP0/>
+        instructions( GUARD_EXPR0 )
+        <check.mark1 local=TMP0/>
+        <ifnot to=TBC to.label="else" />
+        instructions( ACTION_EXPR0 )
+        <goto to=TBC to.label="done" />
+        <seq label="else" />
+        instructions( ACTION_EXPR0 )
+        <seq label="done" />     
+    </seq>
+
+The problem with generating code this way is that it is likely to generate
+jumps-to-jumps. The trick to avoid this is to pass a 'continuation' label 
+into the function that compiles an expression. The idea is that compiling
+an expression includes the transfer of control.
+
+Sketching this in (say) Python3, it would look like this. Note that this
+sketch assumes that the final calculation of jump-distances is handled
+in a later phase.
+
+.. code-block:: python
+
+    def compileExpression( expr, contn_label ):
+        # List of instructions we will add to.
+        instructions = MinXML( "seq" )
+
+        if expr.getName() == "constant":
+            instructions.add( MinXML( "pushq", expr ) )
+            simpleContinuation( contn_label )
+        
+        elif expr.getName() == "and":
+            # First expression must carry on in this sequence
+            # so we pass the fake label Label.CONTINUE.
+            lhs = compileSingleValue( expr[0], Label.CONTINUE );
+            instructions.add( lhs )
+
+            # If false jump to the label immediately.
+            iand = MinXML( "and", to_label=contn_label )
+            instructions.add( iand )
+
+            # Run the rhs & continue to the label.
+            rhs = compileExpression( expr[1], contn_label ) 
+        
+        elif .... :
+            ....
+            ....
+        
+        return instructions
+
+    def simpleContinuation( contn_label ):
+        '''Compiles an explicit jump to the label'''
+        if label == Label.CONTINUE:
+            return MinXML( "seq" )
+        elif label == Label.RETURN:
+            return MinXML( "return" )
+        else:
+            return MinXML( "goto", to_label=contn_label )
+
+
 
 

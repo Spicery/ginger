@@ -397,21 +397,89 @@ is used.
 
 Assignment
 ----------
-Assignments in GingerXML are defined in 'reverse'
-order; the logic behind this is that the source value is computed before
+Assignments in GingerXML are defined in 'reverse' order; the not-very strong 
+logic behind this convention is that the source value is computed before the 
+destination. 
 
 .. code-block:: xml
 
     <set> SRC_EXPR DEST_EXPR </set>
 
+There are two main cases, assignment to a variable and assignment
+to a function-call like expression. But each of these breaks down into
+sub-cases.
+
 Assignment to Local Variable
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+When DEST_EXPR is a local variable ``<id name=NAME scope="local" slot=SLOT />``
+the Ginger Runtime uses the ``pop.local`` instruction. It also ensures that 
+the SRC_EXPR delivers one and only on result - either through arity analysis
+or by using ``start.mark`` and ``check.mark1``. The latter is illustrated below.
 
+.. code-block:: xml
+
+    <seq>
+        <start.mark local=TMP0 />
+        instructions( SRC_EXPR )
+        <check.mark1 local=TMP0 />
+        <pop.local local=SLOT />
+    </seq>
 
 Assignment to Global Variable
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+This is similar to the local case except that the ``pop.global`` instruction is
+used. So for ``<id scope="global" name=NAME def.pkg=PKG />``:
 
-Assignment to Function Application
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.. code-block:: xml
+
+    <seq>
+        <start.mark local=TMP0 />
+        instructions( SRC_EXPR )
+        <check.mark1 local=TMP0 />
+        <pop.global name=NAME def.pkg=PKG />
+    </seq>
+
+Assignment to a Sequence
+~~~~~~~~~~~~~~~~~~~~~~~~
+Ginger allows assignments to several variables in a row, such as 
+
+.. code-block:: text
+
+    ( 99, 88 ) -> ( x, y );
+
+This simply generates a series of ``pop.local`` and ``pop.global`` 
+expressions as appropriate.
+
+
+Assignment to Other Expressions
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+This is an area that has not been implemented yet in the current code-base
+but is planned as to how it should work. 
+
+Assignments to ``<if/>`` elements should compile the SRC_EXPR but
+use the predicate of the ``if`` to select the DST_EXPR.
+
+Assignments to ``<app/>`` elements should be translated from
+``<set> SRC_EXPR <app> FN_EXPR ARG_EXPR </app> </set>`` into the
+below. The SRC_EXPR and ARG_EXPR values are simply passed across
+to the *updater* of the function.
+
+.. code-block:: xml
+
+    <app> 
+        <sysapp name="updater"/> FN_EXPR </sysapp> 
+        <seq> SRC_EXPR ARG_EXPR </seq> 
+    </app>
+
+Assignments to ``<sysapp/>`` elements will become:
+
+.. code-block:: xml
+
+    <sysupdate name=NAME>
+        SRC_EXPR 
+        ARG_EXPR
+    </sysupdate>
+
+
 
 

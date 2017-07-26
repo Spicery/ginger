@@ -1,9 +1,15 @@
 /*****************************************************************************\
 Definition
-    BYPASS JUMP_D
+    GOTO JUMP_D
+
+Code
+	<goto to=JUMP_D/>
 
 Summary
     Unconditional transfer of control by JUMP_D words.
+
+Stats
+	Width=2
     
 Unchecked Precondition
     * Immediately following instruction can only be reached through the
@@ -11,8 +17,10 @@ Unchecked Precondition
     * JUMP_D is in range of the enclosing function object.
     
 Exceptions (Checked Preconditions)
+	None
     
 Result (Postcondition)
+	None
 
 \*****************************************************************************/
 

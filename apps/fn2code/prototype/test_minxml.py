@@ -15,6 +15,29 @@ def testBasic():
     x.add( MinXML( "zzz" ) )
     assert 2 == len( x )
     assert "yyy" == x[0].getName()
+
+def testMultiAddKids():
+    x = MinXML( "xxx" )
+    assert len( x ) == 0
+    x.add()
+    assert len( x ) == 0
+    x.add( MinXML( "yyy" ), MinXML( "zzz" ) )    
+    assert len( x ) == 2
+
+def testMultiAddBoth():
+    x = MinXML( "xxx" )
+    x.add( MinXML( "yyy" ), MinXML( "zzz" ), look='ahead' )    
+    assert len( x ) == 2
+    assert x.get( 'look' ) == 'ahead'
+
+def testMultiPut():
+    x = MinXML( "xxx" )
+    assert len( x.attributes ) == 0
+    x.put()
+    assert len( x.attributes ) == 0
+    x.put( "left", "right", "black", "white", who='goes there' )
+    assert len( x.attributes ) == 3
+    assert x.get( 'who' ) == 'goes there'
     
 def testPrintingEmpty():
     x = MinXML( "xxx" );

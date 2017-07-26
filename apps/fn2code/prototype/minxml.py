@@ -96,8 +96,9 @@ class MinXML:
 		self.strlist( sofar )
 		return ''.join( sofar )
 
-	def add( self, minx ):
-		self.children.append( minx )
+	def add( self, *minx, **kwargs ):
+		self.children.extend( minx )
+		self.attributes.update( kwargs )
 
 	def __getitem__( self, n ):
 		return self.children[ n ]
@@ -137,8 +138,16 @@ class MinXML:
 				raise KeyError
 			return otherwise
 
-	def put( self, key, value ):
-		self.attributes[ key ] = value
+	def put( self, *key_values, **kwargs ):
+		it = iter( key_values )
+		try:
+			while True:
+				key = it.__next__()
+				value = it.__next__()
+				self.attributes[ key ] = value
+		except StopIteration:
+			pass
+		self.attributes.update( kwargs )
 
 	def clear( self ):
 		self.children = []

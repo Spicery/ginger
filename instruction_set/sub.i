@@ -8,6 +8,9 @@ Code
 Summary
     Takes two Nums X & Y off the value stack and replaces them
     with their difference, which should be a Num.
+
+Stats
+    Width = 1
     
 Unchecked Precondition
     There must be at least two values on the stack.

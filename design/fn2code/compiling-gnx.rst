@@ -681,7 +681,8 @@ ourselves to the current case.
         EXPR
     </bind>
 
-This compiles into:
+This compiles into the following general case. Fairly obviously if the arity
+of EXPR is known, better code can be generated.
 
 .. code-block:: xml
 
@@ -692,6 +693,93 @@ This compiles into:
         <check.mark local=TMP COUNT=n />
         <pop.local slot=Vn_SLOT />
         ...
-        <pop.local slot=V2_slot />
-        <pop.local slot=V1_slot />
+        <pop.local local=V2_slot />
+        <pop.local local=V1_slot />
     </seq>
+
+Note that we also should deal with anonymous pattern-variables (in Common, a
+variable that starts with an underscore is considered a write-only variable).
+These are represented as ``var`` elements without any ``name`` attribute.
+
+In the future we will need to deal with matched constructors by invoking
+their deconstructors. For example:
+
+.. code-block:: text
+
+    [ x, y, z ] := my_array
+    f( p, q ) := some_expr
+
+In this case the vector and function calls should be deconstructed, effectively 
+re-writing the code as follows:
+
+.. code-block:: text
+
+    ( x, y, z ) := deconstructor( newVector )( my_array )
+    ( p, q ) := deconstructor( f )( some_expr )
+
+And we will deal with exploders:
+
+    ( head, tail... ) := "This is a string"
+    ### head will be bound to 'T' and the tail to "his is a string"
+
+And non-deterministic matches such as:
+
+    ( ..., char0, char1, ... ) := "My theory"...;
+    ### char0 & char1 will be bound to two successive characters (if they exist)
+
+I have had all these pattern matches working in an earlier incarnation of 
+Ginger called JSpice, incidentally. So it is possible but is probably one of
+the more demanding bits of the compiler work.
+
+For Loops
+---------
+In Ginger, looping is unified with the process of finding the solutions of a 
+query, so all of the expressive work is carried out by the query. For each 
+solution of the query a new set of bindings is made to the variables of the 
+query.
+
+Queries are designed so that the familiar loops can all be easily composed 
+and all work in the expected way. As an example, iterating a variable n from 
+A to B becomes (in Common and GingerXML):
+
+.. code-block:: text
+
+    for n from A to B do STMNTS endfor
+
+.. code-block::xml
+
+    <for>
+        <do>
+            <from>
+                <var name="n"/>
+                <id name="A"/>
+                <id name="B"/>
+            </from>
+            STMNTS
+        </do>
+    </for>
+
+The key to understanding this is to appreciate that both ``do`` and ``from``
+are examples of *queries*. The ``do`` element finds a solution for a query and
+then runs some statements in the context of that solution. The ``from`` 
+element binds the pattern to successive values. 
+
+Ginger supports the following kinds of queries note that ``bind`` (see above)
+is actually a kind of query! (See `Read The Docs`_ for details.)
+
+.. _`Read the Docs`: http://ginger.readthedocs.io/en/latest/formats/gnx_syntax.html#queries
+
+.. code-block:: xml
+
+    <bind> PATTERN EXPR </bind>
+    <from> PATTERN FROM_EXPR [ BY_EXPR [ TO_EXPR ] ] </from>
+    <in> PATTERN EXPR </in>
+    <do> QUERY EXPR </do>
+    <cross> QUERY QUERY </cross>
+    <zip> QUERY QUERY </zip>
+    <while> QUERY EXPR </while>
+    <ok />
+    <fail />
+    <once />
+
+

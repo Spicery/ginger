@@ -656,3 +656,42 @@ This gets translated in the obvious way into:
     </seq>
 
 
+Bind
+----
+Bind matches a pattern to a set of values. When the match succeeds, all the 
+pattern-variables (``var``) are bound to values. If the match fails, the 
+whole bind expression fails and causes a rollback.
+
+.. code-block:: xml
+
+    <bind>
+        PATTERN
+        EXPR
+    </bind>
+
+At the time of writing the Ginger Runtime can only cope with patterns that
+consist of one or more pattern-variables. However, over time, we want to 
+extend that to the full range of allowed patterns. For the moment we restrict
+ourselves to the current case.
+
+.. code-block:: xml
+
+    <bind>
+        <seq> <var name=V1 /> <var name=V2 /> ... <var name=Vn /> </seq>
+        EXPR
+    </bind>
+
+This compiles into:
+
+.. code-block:: xml
+
+    <seq>
+        <!-- EXPR mustr deliver 'n' results -->
+        <start.mark local=TMP />
+        instructions( EXPR )
+        <check.mark local=TMP COUNT=n />
+        <pop.local slot=Vn_SLOT />
+        ...
+        <pop.local slot=V2_slot />
+        <pop.local slot=V1_slot />
+    </seq>

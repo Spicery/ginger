@@ -4,11 +4,15 @@ Compiling GingerXML into GingerVM-Code
 
 Introduction
 ============
-The Ginger virtual machine is word-coded and stack-based. 
+This technical note describes the current on-the-fly (OTF) compiler of the 
+Ginger Runtime that we wish to supplant with the ``fn2code`` tool. For 
+clarity the description uses Ginger's InstructionXML as a target. In reality the 
+OTF-compiler actually directly plants words into an internal memory buffer.
 
+The Ginger virtual machine is word-coded and stack-based. 
 Word-coded means that an instruction consists of an instruction word 
 followed by one or more data words, where each word has the same width 
-as a C++ (void \*). Although this isn't at all compact, it allows us
+as a C++ (void \*). Although this is far from compact, it has allowed us
 to experiment with radically different implementations of instruction-codes
 ranging from simple integers, through pointers to native functions or 
 objects to raw pointers that can be jumped to (TIL). It also allows us
@@ -555,47 +559,109 @@ jumps-to-jumps. The trick to avoid this is to pass a 'continuation' label
 into the function that compiles an expression. The idea is that compiling
 an expression includes the transfer of control.
 
-Sketching this in (say) Python3, it would look like this. Note that this
+Sketching this in (say) Python3, it might look like this. Note that this
 sketch assumes that the final calculation of jump-distances is handled
 in a later phase.
 
 .. code-block:: python
 
-    def compileExpression( expr, contn_label ):
-        # List of instructions we will add to.
-        instructions = MinXML( "seq" )
+    import abc
 
-        if expr.getName() == "constant":
-            instructions.add( MinXML( "pushq", expr ) )
-            simpleContinuation( contn_label )
-        
-        elif expr.getName() == "and":
+    class SlotAllocations:
+        # Stuff to track the way variables are allocated to slots.
+
+    class GnxCompiler:
+
+        def __init__( self, share=None, parent=None ):
+            '''
+            List of instructions we will add to. If the optional parameter
+            share is provided then it will share the instruction list. The
+            optional parameter parent specifies a compiler-value whose
+            slot allocations must be shared - if parent is not provided then
+            share must be.
+            '''
+            self.instructions = share and share.instructions or MinXML( "seq" )
+            self.allocations = (
+                parent and parent.allocations or
+                share and share.allocations or
+                SlotAllocations()
+            )
+
+        def add( self, *args ):
+            '''Extends the instructions with an arbitrary number of GNX values'''
+            self.instructions.add( *args )
+
+        def plant( self, name, *kids, **attributes ):
+            '''Creates a single GNX element and adds it to the instruction list'''
+            self.add( MinXML( name, *kids, **attributes ) )
+
+        def setLabel( self, label ):
+            '''Adds a no-op into the tree with a label on it'''
+            self.plant( "seq", to_label=label )
+
+        def __call__( self, *args, **kwargs ):
+            '''
+            Invokes the abstract method compile and then returns the instruction list.
+            This is the main way of using these objects.
+            '''
+            self.compile( *args, **kwargs )
+            return self.instructions
+
+        def simpleContinuation( self, contn_label ):
+            '''Compiles an explicit jump to the label'''
+            if label == Label.CONTINUE:
+                pass
+            elif label == Label.RETURN:
+                self.plant( "return" )
+            else:
+                self.plant( "goto", to_label=contn_label )
+
+        @abc.abstractmethod
+        def compile( self, *args, **kwargs ):
+            pass
+
+    class ExprCompile:
+        '''
+        Compiles a general expression by handing off to 
+        subexpression compilers.
+        '''
+
+        def __init__( self, *args, **kwargs ):
+            super().__init__( args, kwargs )
+
+        def compile( self, expr, contn_label ):
+            if expr.getName() == "constant":
+                ConstantCompiler( share=self ).compile( expr, contn_label )
+            elif expr.getName() == "and":
+                AndCompiler( share=self )( expr, contn_label )
+            else:
+                raise Exception( "To be implemented" )
+
+    class ConstantCompiler( GnxCompiler ):
+
+        def __init__( self, *args, **kwargs ):
+            super().__init__( args, kwargs )
+
+        def compile( self, expr, contn_label ):   
+            self.plant( "pushq", expr )
+            self.simpleContinuation( contn_label )
+
+    class AndCompiler( GnxCompiler ):
+
+        def __init__( self, *args, **kwargs ):
+            super().__init__( args, kwargs )
+
+        def compile( self, expr, contn_label ):   
             # First expression must carry on in this sequence
             # so we pass the fake label Label.CONTINUE.
-            lhs = compileSingleValue( expr[0], Label.CONTINUE );
-            instructions.add( lhs )
-
+            self.compileSingleValue( expr[0], Label.CONTINUE );
+            
             # If false jump to the label immediately.
-            iand = MinXML( "and", to_label=contn_label )
-            instructions.add( iand )
+            self.plant( "and", to_label=contn_label )
 
             # Run the rhs & continue to the label.
-            rhs = compileExpression( expr[1], contn_label ) 
-        
-        elif .... :
-            ....
-            ....
-        
-        return instructions
+            self.compileExpression( expr[1], contn_label ) 
 
-    def simpleContinuation( contn_label ):
-        '''Compiles an explicit jump to the label'''
-        if label == Label.CONTINUE:
-            return MinXML( "seq" )
-        elif label == Label.RETURN:
-            return MinXML( "return" )
-        else:
-            return MinXML( "goto", to_label=contn_label )
 
 
 List Expressions
@@ -733,6 +799,9 @@ the more demanding bits of the compiler work.
 
 For Loops
 ---------
+
+Overview of Loops
+~~~~~~~~~~~~~~~~~
 In Ginger, looping is unified with the process of finding the solutions of a 
 query, so all of the expressive work is carried out by the query. For each 
 solution of the query a new set of bindings is made to the variables of the 
@@ -781,5 +850,135 @@ is actually a kind of query! (See `Read The Docs`_ for details.)
     <ok />
     <fail />
     <once />
+
+Initialisation, Test, Next
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+A loop has six basic parts: 
+
+ #  declaration of locals & temporaries, 
+ #  the setup 
+ #  the test for continuation
+ #  the loop body
+ #  the advance to next step
+ #  any finalisation
+
+Each of these parts is given its own compilation method:
+
+.. code-block:: python
+
+    class LoopCompiler( GnxCompiler ):
+
+        def __init__( self, *args, **kwargs ):
+            super().__init__( *args, **kwargs )
+
+        def compile( self, query, contn_label ):
+            if query.hasName( "from" ):
+                FromQueryCompiler( share=self )( query, contn_label )
+            elif query.hasName( "in" ):
+                InQueryCompiler( share=self )( query, contn_label )
+            else:
+                raise Exception( "To be implemented" )
+
+    class QueryCompiler( GnxCompiler ):
+
+        def __init__( self, *args, **kwargs ):
+            super().__init__( *args, **kwargs )
+
+        # Abstract method just sketched here.
+        def compileLoopDeclarations( self, query ): ...
+        def compileLoopInit( self, query, continue=Label.CONTINUE ): ...
+        def compileLoopTest( self, query, ifso=Label.CONTINUE, ifnot=Label.CONTINUE ): ...
+        def compileLoopBody( self, query ): ...
+        def compileLoopNext( self, query ): ...
+        def compileLoopFini( self, query, continue=Label.CONTINUE ): ...
+
+        def compile( self, query, contn_label ):
+            '''See below for an explanation of this way this works'''
+            TEST_label = Label( 'test' )
+            NEXT_label = Label( 'next' )
+            EXIT_LABEL = Label( 'exit' )
+            self.compileLoopDeclarations( query )
+            self.compileLoopInit( self, query, continue=TEST_label )
+            self.addLabel( NEXT_label )
+            self.compileLoopBody( query )
+            self.compileLoopNext( query )
+            self.addLabel( TEST_LABEL )
+            self.compileLoopTest( query, ifso=NEXT_LABEL, ifnot=Label.CONTINUE )
+            self.compileLoopFini( query, continue=contn_label )
+
+    # Just sketching the definitions.
+    class FromQueryCompiler( QueryCompiler ): ...
+    class InQueryCompiler( QueryCompiler ): ...
+
+The loop-compiler invokes ``LoopCompiler()( ... )`` and the result is code that typically
+looks a lot like this:
+
+.. code-block:: xml
+
+    <seq>
+        instructions( InitPart )
+        <goto to=TBD to.label="TEST" />
+        <seq label="NEXT" />
+        instruction( BodyPart )
+        instructions( NextPart )
+        <seq label="TEST" />
+        instructions( TestPart )
+        <ifso to=TBD to.label="NEXT"/>
+        instructions( FiniPart )
+    </seq>
+
+This slightly unexpected way of coding the loop is actually a well-known
+trick. It eliminates the need for an unconditional goto inside the loop itself. 
+Instead it has an unconditional goto after the initialisation, which is only 
+executed once. This saves an instruction per-loop.
+
+The FROM-query
+~~~~~~~~~~~~~~
+The FROM form is intended for numerical iteration from one value to another
+inclusively. At the moment, Ginger does not subscribe to Dijkstra's 
+very influential half-open loop recommendation 
+(see http://www.cs.utexas.edu/users/EWD/ewd08xx/EWD831.PDF). I do feel this is
+an area that needs re-visiting but I am just interested in documenting the
+current behaviour for the moment.
+
+Continuing the running Python sketch:
+
+.. code-block:: python
+
+    class FromQueryCompiler( QueryCompiler ):
+
+        def __init__( self, *args, **kwargs ):
+            super().__init__( *args, **kwargs )
+            self.end_value_tmp_var = self.newTmpVar()
+
+        def compileLoopDeclarations( self, query ):
+            '''Hand-waving allocation of slot to the variable'''
+            self.loop_var_slot = self.allocateSlot( query[0] )
+            self.end_value_slot = self.allocateSlot( self.end_value_tmp_var )
+
+        def compileLoopInit( self, query, continue=Label.CONTINUE ):
+            '''For simplicity we assume the BY part is 1'''
+            SingleValueCompiler( share=self )( query[1]. Label.CONTINUE )
+            self.plant( "pop.local", slot=self.loop_var_slot )            
+            SingleValueCompiler( share=self )( query[2]. Label.CONTINUE )
+            self.plant( "pop.local", slot=self.end_value_slot )            
+
+        def compileLoopTest( self, query, ifso=Label.CONTINUE, ifnot=Label.CONTINUE ):
+            # Inventing something to generate efficient comparison code.
+            self.compileComparison( self.loop_var_slot, CMP_LTE, self.end_value_slot, ifso, ifnot );
+
+        def compileLoopBody( self, query ):
+            pass
+
+        def compileLoopNext( self, query ):
+            # Great candidate for a merged instruction push-incr-pop.
+            self.plant( "push.local", slot=self.loop_var_slot )
+            self.plant( "incr" )
+            self.plant( "pop.local", slot=self.loop_var_slot )
+
+        def compileLoopFini( self, query, continue=Label.CONTINUE ): ...
+            self.deallocateSlot( self.loop_var_slot )            
+            self.deallocateSlot( self.end_value_slot )
+
 
 

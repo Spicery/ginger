@@ -40,4 +40,22 @@ namespace Ginger {
 	static const char * VM_INCR = "incr";
 	static const char * VM_DECR = "decr";
 
+	static const char * VM_START_MARK = "start.mark";
+	static const char * VM_START_MARK_LOCAL = "local";
+	static const char * VM_END_MARK = "end.mark";
+	static const char * VM_END_MARK_LOCAL = "local";
+	static const char * VM_SET_COUNT_MARK = "set.count.mark";
+	static const char * VM_SET_COUNT_MARK_LOCAL = "local";
+	static const char * VM_ERASE_MARK = "erase.mark";
+	static const char * VM_ERASE_MARK_LOCAL = "local";
+	static const char * VM_CHECK_MARK_GTE = "check.mark.gte";
+	static const char * VM_CHECK_MARK_GTE_LOCAL = "local";
+	static const char * VM_CHECK_MARK_GTE_COUNT = "count";
+	static const char * VM_CHECK_MARK = "check.mark";
+	static const char * VM_CHECK_MARK_LOCAL = "local";
+	static const char * VM_CHECK_MARK_COUNT = "count";
+	static const char * VM_CHECK_MARK0 = "check.mark0";
+	static const char * VM_CHECK_MARK0_LOCAL = "local";
+	static const char * VM_CHECK_MARK1 = "check.mark1";
+	static const char * VM_CHECK_MARK1_LOCAL = "local";
 }

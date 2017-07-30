@@ -187,6 +187,42 @@ void CodeGenClass::compileInstruction( Gnx instruction ) {
 		this->vmiINSTRUCTION( vmc_decr );
 	} else if ( name == VM_ERASE ) {
 		this->vmiINSTRUCTION( vmc_erase );
+	} else if ( name == VM_START_MARK ) {
+		int slot = instruction->attributeToInt( VM_START_MARK_LOCAL );
+		this->vmiINSTRUCTION( vmc_start_mark );
+		this->emitRef( IntToRef( slot ) );
+	} else if ( name == VM_END_MARK ) {
+		int slot = instruction->attributeToInt( VM_END_MARK_LOCAL );
+		this->vmiINSTRUCTION( vmc_end_mark );
+		this->emitRef( IntToRef( slot ) );
+	} else if ( name == VM_SET_COUNT_MARK ) {
+		int slot = instruction->attributeToInt( VM_SET_COUNT_MARK_LOCAL );
+		this->vmiINSTRUCTION( vmc_set_count_mark );
+		this->emitRef( IntToRef( slot ) );
+	} else if ( name == VM_ERASE_MARK_LOCAL ) {
+		int slot = instruction->attributeToInt( VM_ERASE_MARK_LOCAL );
+		this->vmiINSTRUCTION( vmc_erase_mark );
+		this->emitRef( IntToRef( slot ) );
+	} else if ( name == VM_CHECK_MARK0 ) {
+		int slot = instruction->attributeToInt( VM_CHECK_MARK0_LOCAL );
+		this->vmiINSTRUCTION( vmc_check_mark0 );
+		this->emitRef( IntToRef( slot ) );
+	} else if ( name == VM_CHECK_MARK1 ) {
+		int slot = instruction->attributeToInt( VM_CHECK_MARK1_LOCAL );
+		this->vmiINSTRUCTION( vmc_check_mark1 );
+		this->emitRef( IntToRef( slot ) );
+	} else if ( name == VM_CHECK_MARK ) {
+		const int slot = instruction->attributeToInt( VM_CHECK_MARK_LOCAL );
+		const int count = instruction->attributeToInt( VM_CHECK_MARK_COUNT );
+		this->vmiINSTRUCTION( vmc_check_mark );
+		this->emitRef( IntToRef( slot ) );
+		this->emitRef( IntToRef( count ) );		
+	} else if ( name == VM_CHECK_MARK_GTE ) {
+		const int slot = instruction->attributeToInt( VM_CHECK_MARK_GTE_LOCAL );
+		const int count = instruction->attributeToInt( VM_CHECK_MARK_GTE_COUNT );
+		this->vmiINSTRUCTION( vmc_check_mark_gte );
+		this->emitRef( IntToRef( slot ) );
+		this->emitRef( IntToRef( count ) );		
 	} else {
 		throw Mishap( "Unrecognised instruction name" ).culprit( "Name", name );
 	}

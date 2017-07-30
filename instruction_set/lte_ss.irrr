@@ -1,10 +1,16 @@
 /*****************************************************************************\
 Instruction LTE_SS A, B, L
 
+Code
+	<lte.ss local.a=A local.b=B to=L />
+
 Summary
 	Compares two local variables for A <= B, where A & B
 	are both Smalls. If true jump to Label L, otherwise
 	fallthru.
+
+Stats
+	Width = 4
 	
 Unchecked Precondition
 	A & B are valid local variable indexes.

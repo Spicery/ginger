@@ -2,7 +2,7 @@
 Instruction LTE_SS A, B, L
 
 Code
-	<lte.ss local.a=A local.b=B to=L />
+	<lte.ss local0=A local1=B to=L />
 
 Summary
 	Compares two local variables for A <= B, where A & B

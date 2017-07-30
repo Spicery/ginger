@@ -74,7 +74,7 @@ void MnxSaxParser::eatWhiteSpace() {
 }
 
 static bool is_name_char( const char ch ) {
-	return isalnum( ch ) || ch == '-' || ch == '.';
+	return isalnum( ch ) || ch == '-' || ch == '.' || ch == '_';
 }
 
 void MnxSaxParser::readName( std::string & name ) {

@@ -531,7 +531,7 @@ If-Then-Else
 
 .. code-block:: xml
 
-    <if name=NAME>
+    <if>
         GUARD_EXPR0
         ACTION_EXPR0
         ELSE_EXPR
@@ -705,6 +705,45 @@ in a later phase.
             # Run the rhs & continue to the label.
             self.compileExpression( expr[1], contn_label ) 
 
+Switch Expressions
+------------------
+The switch expression is an alternative form of conditional. 
+
+.. code-block:: xml
+
+    <switch>
+        SWITCH_VALUE_EXPR
+        CASE_EXPR1
+        ACTION_EXPR1
+        CASE_EXPR2
+        ACTION_EXPR2
+        ....
+        CASE_EXPRn
+        ACTION_EXPRm
+        ELSE_ACTION_EXPR <!-- optional -->
+    </switch>
+
+This gets translated into something like this:
+
+.. code-block:: xml
+
+    <seq>
+        instructions( SWITCH_VALUE_EXPR )
+        <pop.local local=TMP />
+        <!-- CASE1 -->
+        <start.mark local=TMP1 />
+        instructions( CASE_EXPR2 )
+        <check.count local=TMP1 count="1" />
+        <push.local local=TMP />
+        <eq/>
+        <ifnot to=TBD to_label=CASE2 />
+        instructions( ACTION_EXPR1)
+        <goto to=TBD to_label=DONE />
+        <!-- CASE2 -->
+        <seq label=CASE2 />
+        ....
+        <seq label=DONE />
+    </seq>
 
 
 
@@ -1079,6 +1118,73 @@ Continuing the running Python sketch:
         def compileLoopFini( self, query, contn=Label.CONTINUE ):
             self.deallocateSlot( self.loop_var_slot )  
 
+The IN-query
+~~~~~~~~~~~~
+In order to implement 'for i in L', the ``getiterator`` instruction is provided.
+This is one of the most complicated instructions. It takes an iterable object
+on the stack and returns three values:
 
+    * state - passed into the *next_fn* and will be updated on each iteration
+    * context - passed into the *next_fn*
+    * next_fn - each iteration is called like this: 
+        - ``next_fn( state, context ) -> state``
 
+The loop is terminated when the special constant ``termin`` is returned as
+the state. In effect the loop would look like this in Python3:
 
+.. code-block:: python
+
+    ( state, context, next_fn ) = getiterator( L )
+    while True:
+        ( i, state ) = next_fn( state, context )
+        if state == termin:
+            break
+        STATEMENTS
+
+We can outline how this might work in our running Python3 sketch:
+
+.. code-block:: python
+
+    class InQueryCompiler( QueryCompiler ):
+
+        def __init__( self, *args, **kwargs ):
+            super().__init__( *args, **kwargs )
+
+        def compileLoopDeclarations( self, query ):
+            self.state = self.newTmpVar( 'STATE' )
+            self.context = self.newTmpVar( 'CONTENT' )
+            self.next_fn = self.newTmpVar( 'NEXT' )
+            self.loop_var = self.allocateSlot( query[0] )
+
+        def compileLoopInit( self, query, contn=Label.CONTINUE ):
+            SingleValueCompiler( share=self )( query[1], Label.CONTINUE )
+            self.plant( "getiterator" )
+            self.plant( "pop.local", local=self.next_fn )
+            self.plant( "pop.local", local=self.context )
+            self.plant( "pop.local", local=self.state )
+
+        def compileLoopTest( self, query, ifso=Label.CONTINUE, ifnot=Label.CONTINUE ):
+            self.plant( "push.local", local=self.state )                        
+            self.plant( "push.local", local=self.context )
+            self.plant( "call.local", local=self.next_fn )
+            self.plant( "pop.local", local=self.state )
+            self.plant( "pop.local", local=self.loop_var )
+            self.plant( "push.local", local=self.state )
+            self.plant( "pushq", MinXML( "constant", type="termin", value="termin" ) )
+            self.plant( "neq" )
+            if ifso != Label.CONTINUE:
+                self.plant( "ifso", to_label=ifso )
+                self.simpleContinuation( ifnot )
+            else:
+                raise Exception( "To be implemented" )
+
+        def compileLoopBody( self, query ):
+            pass
+
+        def compileLoopNext( self, query ):
+            pass
+
+        def compileLoopFini( self, query, contn=Label.CONTINUE ):
+            self.deallocateSlot( self.state )
+            self.deallocateSlot( self.context )
+            self.deallocateSlot( self.next_fn )  

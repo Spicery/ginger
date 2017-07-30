@@ -4,11 +4,15 @@ Compiling GingerXML into GingerVM-Code
 
 Introduction
 ============
-The Ginger virtual machine is word-coded and stack-based. 
+This technical note describes the current on-the-fly (OTF) compiler of the 
+Ginger Runtime that we wish to supplant with the ``fn2code`` tool. For 
+clarity the description uses Ginger's InstructionXML as a target. In reality the 
+OTF-compiler actually directly plants words into an internal memory buffer.
 
+The Ginger virtual machine is word-coded and stack-based. 
 Word-coded means that an instruction consists of an instruction word 
 followed by one or more data words, where each word has the same width 
-as a C++ (void *). Although this isn't at all compact, it allows us
+as a C++ (void \*). Although this is far from compact, it has allowed us
 to experiment with radically different implementations of instruction-codes
 ranging from simple integers, through pointers to native functions or 
 objects to raw pointers that can be jumped to (TIL). It also allows us
@@ -41,9 +45,9 @@ square is less than one.
 
 .. code-block:: text
 
-	define check( x ) =>>
-		x >= 0 and x*x < 1
-	enddefine;
+    define check( x ) =>>
+        x >= 0 and x*x < 1
+    enddefine;
 
 The idea is that we will generate a ``<fn2code>`` elements, with attributes
 ``args.count`` and ``locals.count``, and whose children are a sequence of
@@ -56,11 +60,11 @@ Since this function only has one input ``x`` and everything else is done
 using the stack, the number of args is 1 and so is the number of locals. Hence
 we will generate:
 
-.. code-block:: XML
+.. code-block:: xml
 
-	<fn.code args.count="1" locals.count="1">
-		... instructions ...
-	</fn.code>
+    <fn.code args.count="1" locals.count="1">
+        ... instructions ...
+    </fn.code>
 
 The first instruction we generate will be <enter1/>. This is a very specialised
 instruction that builds a stack-frame for functions with one input and pops
@@ -68,25 +72,25 @@ the arguments off the stack into the frame. It must be
 the very first instruction as it uses offsets of the virtual-program-counter 
 to find the locals-count. So our generated code will look like ...
 
-... code-block:: XML
+.. code-block:: xml
 
-	<fn.code args.count="1" locals.count="1">
-		<enter1/>
-		... further instructions ...
-	</fn.code>
+    <fn.code args.count="1" locals.count="1">
+        <enter1/>
+        ... further instructions ...
+    </fn.code>
 
 The comparison x > 0 is tackled first. The simplest way to compile this is
 with the stack-based code: push x, push 0, call greater than or equal to.
 
-... code-block:: XML
+.. code-block:: xml
 
-	<fn.code args.count="1" locals.count="1">
-		<enter1/>
-		<push.local0/>
-		<push.constant type="int" value="0"/>
-		<gte/>
-		... further instructions ...
-	</fn.code>
+    <fn.code args.count="1" locals.count="1">
+        <enter1/>
+        <push.local0/>
+        <push.constant type="int" value="0"/>
+        <gte/>
+        ... further instructions ...
+    </fn.code>
 
 Then we need to implement the short-circuit operator ``and``, which is
 done via the ``and`` instruction. This instruction checks the top of the
@@ -94,16 +98,16 @@ stack and if it is false, short-circuits the rest of the computation by
 jumping to the end. The only thing is we don't know how far to jump yet,
 so we have to leave that blank.
 
-... code-block:: XML
+.. code-block:: xml
 
-	<fn.code args.count="1" locals.count="1">
-		<enter1/>
-		<push.local0/>
-		<push.constant type="int" value="0"/>
-		<gte/>
-		<and to=END/>
-		... further instructions ...
-	</fn.code>
+    <fn.code args.count="1" locals.count="1">
+        <enter1/>
+        <push.local0/>
+        <push.constant type="int" value="0"/>
+        <gte/>
+        <and to=END/>
+        ... further instructions ...
+    </fn.code>
 
 Now we compute x*x > 0, although we will skip checking there's enough room
 on the stack (that's an omission in the current design, based on the plan
@@ -111,21 +115,21 @@ to implement guard pages.) At this point the instructions should be self
 explanatory - and must finish on a ``return`` instruction that tears down
 the stack frame and returns to the caller.
 
-... code-block:: XML
+.. code-block:: xml
 
-	<fn.code args.count="1" locals.count="1">
-		<enter1/>
-		<push.local0/>
-		<push.constant type="int" value="0"/>
-		<gt/>
-		<and to=END/>
-		<push.local0/>
-		<push.local0/>
-		<mul/>
-		<push.constant type="int" value="1"/>
-		<lt/>
-		<return/>
-	</fn.code>
+    <fn.code args.count="1" locals.count="1">
+        <enter1/>
+        <push.local0/>
+        <push.constant type="int" value="0"/>
+        <gt/>
+        <and to=END/>
+        <push.local0/>
+        <push.local0/>
+        <mul/>
+        <push.constant type="int" value="1"/>
+        <lt/>
+        <return/>
+    </fn.code>
 
 All that remains is to compute the distance that the ``and`` has to jump. The
 jump has to skip two ``push.local0`` (2 x width 1), one ``mul`` (1 x width 1), a ``push.constant`` (1 x width 2), for a total of 6 words. There is also an
@@ -136,25 +140,25 @@ two words long.) So the value that has to be substituted is 6 + 1 = 7.
 To assist with readability, some additional label attributes have been added to
 create a complete solution.
 
-.. code-block:: XML
+.. code-block:: xml
 
-	<fn.code args.count="1" locals.count="1">
-		<enter1/>
-		<push.local0/>
-		<push.constant>
-			<constant type="int" value="0"/>
-		</push.constant>
-		<gt/>
-		<and to="7" to.label="L1"/>
-		<push.local0/>
-		<push.local0/>
-		<mul/>
-		<push.constant>
-			<constant type="int" value="1"/>
-		</push.constant>
-		<lt/>
-		<return label="L1"/>
-	</fn.code>
+    <fn.code args.count="1" locals.count="1">
+        <enter1/>
+        <push.local0/>
+        <push.constant>
+            <constant type="int" value="0"/>
+        </push.constant>
+        <gt/>
+        <and to="7" to.label="L1"/>
+        <push.local0/>
+        <push.local0/>
+        <mul/>
+        <push.constant>
+            <constant type="int" value="1"/>
+        </push.constant>
+        <lt/>
+        <return label="L1"/>
+    </fn.code>
 
 Compiling GingerXML
 ===================
@@ -174,9 +178,11 @@ probably be renamed ``push.constant``.
 This instruction has a single child that is the constant
 expression to be pushed e.g.
 
-	<pushq>	
-		<constant type="string" value="Hello, World!"/>
-	</pushq>
+.. code-block:: xml
+
+    <pushq> 
+        <constant type="string" value="Hello, World!"/>
+    </pushq>
 
 N.B. InstructionXML is not particularly concise - and nor is GingerXML.
 The aim of both formats is clarity and simplicity.
@@ -200,28 +206,32 @@ Global Variables
 A global variable is uniquely defined by both package and name so in addition
 reference elements have the pattern:
 
-..code-block:: XML
-	<id name=NAME def.pkg=PACKAGE scope="global"/>
+.. code-block:: xml
+
+    <id name=NAME def.pkg=PACKAGE scope="global"/>
 
 The compiler simply pushes references onto the stack using the  ``push.global`` 
 instruction.
 
-..code-block:: XML
-	<push.global name=NAME def.pkg=PACKAGE/>
+.. code-block:: xml
+
+    <push.global name=NAME def.pkg=PACKAGE/>
 
 
 Local Variables
 ~~~~~~~~~~~~~~~
 A local variable is defined in GingerXML as follows. 
 
-..code-block:: XML
-	<id name=NAME scope="local" slot=SLOT_NUMBER/>
+.. code-block:: xml
+
+    <id name=NAME scope="local" slot=SLOT_NUMBER/>
 
 The compiler simply pushes references onto the stack using the  ``push.local`` 
 instruction. 
 
-..code-block:: XML
-	<push.local local=SLOT_NUMBER/>
+.. code-block:: xml
+
+    <push.local local=SLOT_NUMBER/>
 
 Note that the ``slot`` attribute field is generated by using the option ``-A`` 
 on the ``simplifygnx`` tool. This is simplistic algorithm and the compiler tool
@@ -235,27 +245,30 @@ Sequences simply chain together expressions in Ginger. Because Ginger supports
 multiple-values, compiling a sequence is as simple as concatenating the 
 compiled instructions for each expression in turn.
 
-..code-block:: XML
-	<seq> EXPR1 EXPR2 ... EXPRn </seq>
+.. code-block:: xml
+
+    <seq> EXPR1 EXPR2 ... EXPRn </seq>
 
 For the convenience of delivering a single result, InstructionXML allows a 
 sequence of instructions to be bundled up as a ``seq``. These are automatically
-flattened by the Ginger Runtime.
+flattened by the Ginger Runtime. You are not obliged to use these.
 
-..code-block:: XML
-	<seq>
-		instructions( EXPR1 )
-		instructions( EXPR2 )
-		... 
-		instructions( EXPRn )
-	</seq>
+.. code-block:: xml
+
+    <seq>
+        instructions( EXPR1 )
+        instructions( EXPR2 )
+        ... 
+        instructions( EXPRn )
+    </seq>
 
 System Function Applications
 ----------------------------
 System functions are built-in to the Ginger Runtime, each with a unique
 name. Calling them is especially efficient. 
 
-.. code-block:: XML
+.. code-block:: xml
+
     <sysapp name=NAME> EXPR1 EXPR2 ... EXPRn </sysapp>
 
 Arguments are passed on the stack but, because Ginger allows multiple valued 
@@ -263,53 +276,809 @@ expressions, the count of the argument has to be computed and placed into
 VMCOUNT. A typical way to compile this would be as follows, using ``start.mark``
 and ``set.count.mark``
 
-.. code-block:: XML
- 	<seq>
- 		<!-- Put the stacklength in the slot NUM -->
-		<start.mark local=NUM/>
-		<seq>
-			<!-- Compile the arguments -->
-			instructions( EXPR1 )
-			instructions( EXPR2 )
-			... 
-			instructions( EXPRn )
-		</set>
-		<!-- Find the difference between stacklength now and the value in NUM -->
-		<!-- and put the difference in the virtual register VMCOUNT -->
-		<set.count.mark local=NUM/>
-		<!-- Finally invoke the system-function -->
-		<syscall name=SYSFN_NAME/>
-	<seq/>
+.. code-block:: xml
+
+
+    <seq>
+        <!-- Put the stacklength in the slot NUM -->
+        <start.mark local=NUM/>
+        <seq>
+            <!-- Compile the arguments -->
+            instructions( EXPR1 )
+            instructions( EXPR2 )
+            ... 
+            instructions( EXPRn )
+        </set>
+        <!-- Find the difference between stacklength now and the value in NUM -->
+        <!-- and put the difference in the virtual register VMCOUNT -->
+        <set.count.mark local=NUM/>
+        <!-- Finally invoke the system-function -->
+        <syscall name=SYSFN_NAME/>
+    <seq/>
 
 It may be possible to statically compute the number of arguments the 
-sub-expressions will have. In that case there are a variety of more efficient
-ways to invoke a syscall.
+sub-expressions will have. In that case there is a more efficient
+ways to invoke a syscall. For example if we know that there are exactly 
+N arguments, we should use ``set.count.syscall``.
+
+.. code-block:: xml
+
+    <seq>
+        <seq>
+            <!-- Compile the arguments -->
+            instructions( EXPR1 )
+            instructions( EXPR2 )
+            ... 
+            instructions( EXPRn )
+        </set>
+        <!-- Call with N arguments -->
+        <set.count.syscall name=SYSFN_NAME count=N />
+    <seq/>
+
+
 
 Function Application
 --------------------
+Programmer defined functions are invoked through the ``app`` element.
+This has exactly two arguments: a function to invoke and the arguments
+to pass to the invocation.
 
-..code-block:: XML
-	<app> FN_EXPR ARG_EXPR </app>
+.. code-block:: xml
 
+    <app> FN_EXPR ARG_EXPR </app>
+
+At the virtual-machine level, the VMCOUNT register must be set with
+the number of arguments being passed across. In addition, the function
+argument is restricted to evaluating to a single result.
+
+Calling functions is very common and important, so the Ginger Runtime
+compiler tries to use specialised instructions where it can. For
+example, it uses the *arity* attributes to avoid generating
+run time checks on the FN_EXPR in many common situations and to
+avoid the necessity of dynamically calculating the number of arguments
+being passed.
+
+However these overheads cannot always be avoided. As a consequence the 
+general function call looks like this:
+
+.. code-block:: xml
+
+    <seq>
+        <!-- Compute the arguments -->
+        <start.mark local=TMP0 />
+        instructions( ARG_EXPR )
+        <!- Compute the single valued function -->
+        <start.mark local=TMP1 />
+        instructions( FN_EXPR )
+        <check.mark1 />
+        <!-- Now call the function that is on the stack -->
+        <end1.calls local=TMP0 />
+    <seq/>
+
+More frequently the compiler knows that FN_EXPR yields a single value 
+in which case the following code is slightly better.
+
+.. code-block:: xml
+
+    <seq>
+        <!-- Compute the arguments -->
+        <start.mark local=TMP0 />
+        instructions( ARG_EXPR )
+        <!- Compute the single valued function -->
+        instructions( FN_EXPR )
+        <!-- Now call the function that is on the stack -->
+        <end1.calls local=TMP0 />
+    <seq/>
+
+And more frequently, the compiler also knows the number of arguments that
+ARG_EXPR would push. In that case it can be simplified yet further.
+
+.. code-block:: xml
+
+    <seq>
+        <!-- Compute the arguments -->
+        instructions( ARG_EXPR )
+        <!-- Compute the funcion (on the stack) -->
+        instructions( FN_EXPR )
+        <!-- Now call the function that is on the stack -->
+        <set.count.calls count=NUM_ARGS />
+    <seq/>
+
+And a very common case indeed is that the function being called is held 
+in a global variable, in which case the ``set.count.call.global`` instruction
+is used.
+
+.. code-block:: xml
+
+    <seq>
+        <!-- Compute the arguments -->
+        instructions( ARG_EXPR )
+        <!-- Call the named global function -->
+        <set.count.call.global def.pkg=PKG name=NAME count=NUM_ARGS />
+    <seq/>
 
 
 
 Assignment
 ----------
-Assignments in GingerXML are defined in 'reverse'
-order; the logic behind this is that the source value is computed before
+Assignments in GingerXML are defined in 'reverse' order; the not-very strong 
+logic behind this convention is that the source value is computed before the 
+destination. 
 
-..code-block:: XML
-	<set> SRC_EXPR DEST_EXPR </set>
+.. code-block:: xml
+
+    <set> SRC_EXPR DEST_EXPR </set>
+
+There are two main cases, assignment to a variable and assignment
+to a function-call like expression. But each of these breaks down into
+sub-cases.
 
 Assignment to Local Variable
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+When DEST_EXPR is a local variable ``<id name=NAME scope="local" slot=SLOT />``
+the Ginger Runtime uses the ``pop.local`` instruction. It also ensures that 
+the SRC_EXPR delivers one and only on result - either through arity analysis
+or by using ``start.mark`` and ``check.mark1``. The latter is illustrated below.
 
+.. code-block:: xml
+
+    <seq>
+        <start.mark local=TMP0 />
+        instructions( SRC_EXPR )
+        <check.mark1 local=TMP0 />
+        <pop.local local=SLOT />
+    </seq>
 
 Assignment to Global Variable
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+This is similar to the local case except that the ``pop.global`` instruction is
+used. So for ``<id scope="global" name=NAME def.pkg=PKG />``:
 
-Assignment to Function Application
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.. code-block:: xml
+
+    <seq>
+        <start.mark local=TMP0 />
+        instructions( SRC_EXPR )
+        <check.mark1 local=TMP0 />
+        <pop.global name=NAME def.pkg=PKG />
+    </seq>
+
+Assignment to a Sequence
+~~~~~~~~~~~~~~~~~~~~~~~~
+Ginger allows assignments to several variables in a row, such as 
+
+.. code-block:: text
+
+    ( 99, 88 ) -> ( x, y );
+
+This simply generates a series of ``pop.local`` and ``pop.global`` 
+expressions as appropriate.
+
+
+Assignment to Other Expressions
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+This is an area that has not been implemented yet in the current code-base
+but is planned as to how it should work. 
+
+Assignments to ``<if/>`` elements should compile the SRC_EXPR but
+use the predicate of the ``if`` to select the DST_EXPR.
+
+Assignments to ``<app/>`` elements should be translated from
+``<set> SRC_EXPR <app> FN_EXPR ARG_EXPR </app> </set>`` into the
+below. The SRC_EXPR and ARG_EXPR values are simply passed across
+to the *updater* of the function.
+
+.. code-block:: xml
+
+    <app> 
+        <sysapp name="updater"/> FN_EXPR </sysapp> 
+        <seq> SRC_EXPR ARG_EXPR </seq> 
+    </app>
+
+Assignments to ``<sysapp/>`` elements will become:
+
+.. code-block:: xml
+
+    <sysupdate name=NAME>
+        SRC_EXPR 
+        ARG_EXPR
+    </sysupdate>
+
+
+Conditional Expressions
+-----------------------
+Conditional expressions are formed using the ``if`` element. This has
+zero (!) or more (!!) arguments. If there are an odd number of arguments then
+the last argument is an *else* clause. Otherwise the arguments pair up into
+*guard* and *action* pairs. 
+
+The rather peculiar ``<if/>`` elements is therefore equivalent to do-nothing
+or ``<seq>``. The equally peculiar ``<if> EXPR </if>`` is equivalent to 
+``EXPR``. Simplifygnx should (but doesn't right now) eliminate these oddballs.
+
+To keep it simple, we'll look at the case with 2-arguments (if-then) and the
+case with 3-arguments (if-then-else). 
+
+If-Then
+~~~~~~~
+Guards are required to evaluate to a single boolean value. 
+
+.. code-block:: xml
+
+    <if name=NAME>
+        GUARD_EXPR0
+        ACTION_EXPR0
+    </if>
+
+Compilation relies on the ``ifnot`` instruction. There is a corresponding 
+``ifso`` instruction for dealing with negated conditions. The distance jumped 
+forward is the sum of widths of the ACTION_EXPR0 instructions (plus 1).
+
+.. code-block:: xml
+
+    <seq>
+        <start.mark local=TMP0/>
+        instructions( GUARD_EXPR0 )
+        <check.mark1 local=TMP0/>
+        <ifnot to=TBC to.label="done" />
+        instructions( ACTION_EXPR0 )
+        <!-- seq used to mimick a non-op -->
+        <seq label="done"/>     
+    </seq>
+
+If-Then-Else
+~~~~~~~~~~~~
+
+.. code-block:: xml
+
+    <if name=NAME>
+        GUARD_EXPR0
+        ACTION_EXPR0
+        ELSE_EXPR
+    </if>
+
+The simple-minded approach is to generate a ``goto`` with the target being the
+end of the loop. 
+
+.. code-block:: xml
+
+    <seq>
+        <start.mark local=TMP0/>
+        instructions( GUARD_EXPR0 )
+        <check.mark1 local=TMP0/>
+        <ifnot to=TBC to.label="else" />
+        instructions( ACTION_EXPR0 )
+        <goto to=TBC to.label="done" />
+        <seq label="else" />
+        instructions( ACTION_EXPR0 )
+        <seq label="done" />     
+    </seq>
+
+The problem with generating code this way is that it is likely to generate
+jumps-to-jumps. The trick to avoid this is to pass a 'continuation' label 
+into the function that compiles an expression. The idea is that compiling
+an expression includes the transfer of control.
+
+Sketch of Dealing with Jump-to-Jumps
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Sketching this in (say) Python3, it might look like this. Note that this
+sketch assumes that the final calculation of jump-distances is handled
+in a later phase.
+
+.. code-block:: python
+
+        import abc
+
+    class MiniCompiler:
+        '''This is an abstract class for 'compilers' that are specialised to
+        a particular type of expression. The main way they are invoked is by
+        call (i.e. via __call__). They work by appending to an internal list
+        of instructions. When they invoke another mini-compiler they can 
+        optionally share their list of instructions (via the optional parameter
+        share), which just saves a bit of unnecessary copying. However the
+        ongiong shared context, such as slot-allocations should always be
+        shared with mini-compilers, so if 'share' is omitted then 'parent' should
+        be supplied.
+        '''
+
+        def __init__( self, share=None, parent=None ):
+            if parent == None:
+                # If parent is not supplied then the intention is to share everything
+                # (or this is a top-level invocation)
+                parent = share
+            if share == None:
+                # Not sharing an instruction stream, so create a new one.
+                self.instructions = MinXML( "seq" )
+            else:
+                # Share the instruction stream.
+                self.instructions = share.instructions
+            if parent == None:
+                # This is a top-level invocation i.e. used to create the body
+                # of a lambda expression.
+                self.allocations = SlotAllocations()
+            else:
+                # Invoked as a sub-compiler, so share all global context.
+                # (At the moment that is just slot-allocations.)
+                self.allocations = parent.allocations
+
+        def add( self, *args ):
+            '''Extends the instructions with an arbitrary number of GNX values'''
+            self.instructions.add( *args )
+
+        def plant( self, name, *kids, **attributes ):
+            '''Creates a single GNX element and adds it to the instruction list'''
+            self.add( MinXML( name, *kids, **attributes ) )
+
+        def setLabel( self, label ):
+            '''Adds a no-op into the tree with a label on it. This will have
+            no effect during the calculation of jump distances and will 
+            be eliminated entirely in a final backend phase.'''
+            self.plant( "seq", to_label=label.id() )
+
+        def newTmpVar( self, title ):
+            return self.allocations.newTmpVar( title )
+
+        def allocateSlot( self, var ):
+            return self.allocations.allocateSlot( var )
+
+        def deallocateSlot( self, slot ):
+            self.allocations.deallocateSlot( slot )
+
+        def __call__( self, *args, **kwargs ):
+            '''
+            Invokes the abstract method compile and then returns the instruction list.
+            This is the primary way of using these objects.
+            '''
+            self.compile( *args, **kwargs )
+            return self.instructions
+
+        def simpleContinuation( self, contn_label ):
+            '''Compiles an explicit jump to the label'''
+            if contn_label == Label.CONTINUE:
+                pass
+            elif contn_label == Label.RETURN:
+                self.plant( "return" )
+            else:
+                self.plant( "goto", to_label=contn_label.id() )
+
+        @abstractmethod
+        def compile( self, *args, **kwargs ):
+            pass
+
+    class ExprCompiler( MiniCompiler ):
+        '''
+        Compiles a general expression by handing off to 
+        subexpression compilers.
+        '''
+
+        def __init__( self, *args, **kwargs ):
+            super().__init__( *args, **kwargs )
+
+        def compile( self, expr, contn_label ):
+            if expr.getName() == "constant":
+                ConstantCompiler( share=self ).compile( expr, contn_label )
+            elif expr.getName() == "and":
+                AndCompiler( share=self )( expr, contn_label )
+            elif expr.hasName( "for" ):
+                LoopCompiler( share=self )( expr, contn_label )
+            else:
+                raise Exception( "To be implemented" )
+
+    class SingleValueCompiler( MiniCompiler ):
+        '''Compiles a general expression but ensures it generates a single
+        value'''
+
+        def __init__( self, *args, **kwargs ):
+            super().__init__( *args, **kwargs )
+
+        def compile( self, expr, contn_label ):
+            tmp0 = self.newTmpVar( 'mark' )
+            self.plant( "start.mark", local=str(tmp0) )
+            ExprCompiler( share=self )( expr, Label.CONTINUE )
+            self.plant( "check.mark", local=str(tmp0) )
+            self.simpleContinuation( contn_label )
+            self.deallocateSlot( tmp0 )
+
+    class ConstantCompiler( MiniCompiler ):
+
+        def __init__( self, *args, **kwargs ):
+            super().__init__( *args, **kwargs )
+
+        def compile( self, expr, contn_label ):   
+            self.plant( "pushq", expr )
+            self.simpleContinuation( contn_label )
+
+    class AndCompiler( MiniCompiler ):
+
+        def __init__( self, *args, **kwargs ):
+            super().__init__( *args, **kwargs )
+
+        def compile( self, expr, contn_label ):   
+            # First expression must carry on in this sequence
+            # so we pass the fake label Label.CONTINUE.
+            self.compileSingleValue( expr[0], Label.CONTINUE );
+            
+            # If false jump to the label immediately.
+            self.plant( "and", to_label=contn_label.id() )
+
+            # Run the rhs & continue to the label.
+            self.compileExpression( expr[1], contn_label ) 
+
+
+
+
+List Expressions
+----------------
+Immutable, singly linked lists are constructed via the ``[% ... %]`` syntax.
+The GingerXML that corresponds to this is:
+
+.. code-block:: xml
+
+    <list>
+        EXPR1
+        EXPR2
+        ...
+        EXPRn
+    </list>
+
+This gets translated in the obvious way into:
+
+.. code-block:: xml
+
+    <seq>
+        <start.mark local=TMP />
+        instructions( EXPR1 )
+        instructions( EXPR2 )
+        ...
+        instructions( EXPRn )
+        <set.count.mark local=TMP />
+        <syscall name="newList" />
+    </seq>
+
+
+Vector Expressions
+------------------
+An immutable 1D array is call a vector and is constructed via the ``[ ... ]`` 
+syntax. The GingerXML this corresponds to is:
+
+.. code-block:: xml
+
+    <vector>
+        EXPR1
+        EXPR2
+        ...
+        EXPRn
+    </vector>
+
+This gets translated in the obvious way into:
+
+.. code-block:: xml
+
+    <seq>
+        <start.mark local=TMP />
+        instructions( EXPR1 )
+        instructions( EXPR2 )
+        ...
+        instructions( EXPRn )
+        <set.count.mark local=TMP />
+        <syscall name="newVector" />
+    </seq>
+
+
+Bind
+----
+Bind matches a pattern to a set of values. When the match succeeds, all the 
+pattern-variables (``var``) are bound to values. If the match fails, the 
+whole bind expression fails and causes a rollback.
+
+.. code-block:: xml
+
+    <bind>
+        PATTERN
+        EXPR
+    </bind>
+
+At the time of writing the Ginger Runtime can only cope with patterns that
+consist of one or more pattern-variables. However, over time, we want to 
+extend that to the full range of allowed patterns. For the moment we restrict
+ourselves to the current case.
+
+.. code-block:: xml
+
+    <bind>
+        <seq> <var name=V1 /> <var name=V2 /> ... <var name=Vn /> </seq>
+        EXPR
+    </bind>
+
+This compiles into the following general case. Fairly obviously if the arity
+of EXPR is known, better code can be generated.
+
+.. code-block:: xml
+
+    <seq>
+        <!-- EXPR mustr deliver 'n' results -->
+        <start.mark local=TMP />
+        instructions( EXPR )
+        <check.mark local=TMP COUNT=n />
+        <pop.local slot=Vn_SLOT />
+        ...
+        <pop.local local=V2_slot />
+        <pop.local local=V1_slot />
+    </seq>
+
+Note that we also should deal with anonymous pattern-variables (in Common, a
+variable that starts with an underscore is considered a write-only variable).
+These are represented as ``var`` elements without any ``name`` attribute.
+
+In the future we will need to deal with matched constructors by invoking
+their deconstructors. For example:
+
+.. code-block:: text
+
+    [ x, y, z ] := my_array
+    f( p, q ) := some_expr
+
+In this case the vector and function calls should be deconstructed, effectively 
+re-writing the code as follows:
+
+.. code-block:: text
+
+    ( x, y, z ) := deconstructor( newVector )( my_array )
+    ( p, q ) := deconstructor( f )( some_expr )
+
+And we will deal with exploders:
+
+    ( head, tail... ) := "This is a string"
+    ### head will be bound to 'T' and the tail to "his is a string"
+
+And non-deterministic matches such as:
+
+    ( ..., char0, char1, ... ) := "My theory"...;
+    ### char0 & char1 will be bound to two successive characters (if they exist)
+
+I have had all these pattern matches working in an earlier incarnation of 
+Ginger called JSpice, incidentally. So it is possible but is probably one of
+the more demanding bits of the compiler work.
+
+For Loops
+---------
+
+Overview of Loops
+~~~~~~~~~~~~~~~~~
+In Ginger, looping is unified with the process of finding the solutions of a 
+query, so all of the expressive work is carried out by the query. For each 
+solution of the query a new set of bindings is made to the variables of the 
+query.
+
+Queries are designed so that the familiar loops can all be easily composed 
+and all work in the expected way. As an example, iterating a variable n from 
+A to B becomes (in Common and GingerXML):
+
+.. code-block:: text
+
+    for n from A to B do STMNTS endfor
+
+.. code-block::xml
+
+    <for>
+        <do>
+            <from>
+                <var name="n"/>
+                <id name="A"/>
+                <constant type="int" value="1" />
+                <id name="B"/>
+            </from>
+            STMNTS
+        </do>
+    </for>
+
+The key to understanding this is to appreciate that both ``do`` and ``from``
+are examples of *queries*. The ``do`` element finds a solution for a query and
+then runs some statements in the context of that solution. The ``from`` 
+element binds the pattern to successive values. 
+
+Ginger supports the following kinds of queries note that ``bind`` (see above)
+is actually a kind of query! (See `Read The Docs`_ for details.)
+
+.. _`Read the Docs`: http://ginger.readthedocs.io/en/latest/formats/gnx_syntax.html#queries
+
+.. code-block:: xml
+
+    <bind> PATTERN EXPR </bind>
+    <from> PATTERN FROM_EXPR [ BY_EXPR [ TO_EXPR ] ] </from>
+    <in> PATTERN EXPR </in>
+    <do> QUERY EXPR </do>
+    <cross> QUERY QUERY </cross>
+    <zip> QUERY QUERY </zip>
+    <while> QUERY EXPR </while>
+    <ok />
+    <fail />
+    <once />
+
+Initialisation, Test, Next
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+A loop has six basic parts: 
+
+ #  declaration of locals & temporaries, 
+ #  the setup 
+ #  the test for continuation
+ #  the loop body
+ #  the advance to next step
+ #  any finalisation
+
+Each of these parts is given its own compilation method:
+
+.. code-block:: python
+
+    class LoopCompiler( GnxCompiler ):
+
+        def __init__( self, *args, **kwargs ):
+            super().__init__( *args, **kwargs )
+
+        def compile( self, query, contn_label ):
+            if query.hasName( "from" ):
+                FromQueryCompiler( share=self )( query, contn_label )
+            elif query.hasName( "in" ):
+                InQueryCompiler( share=self )( query, contn_label )
+            else:
+                raise Exception( "To be implemented" )
+
+    class QueryCompiler( GnxCompiler ):
+
+        def __init__( self, *args, **kwargs ):
+            super().__init__( *args, **kwargs )
+
+        # Abstract method just sketched here.
+        def compileLoopDeclarations( self, query ): ...
+        def compileLoopInit( self, query, continue=Label.CONTINUE ): ...
+        def compileLoopTest( self, query, ifso=Label.CONTINUE, ifnot=Label.CONTINUE ): ...
+        def compileLoopBody( self, query ): ...
+        def compileLoopNext( self, query ): ...
+        def compileLoopFini( self, query, continue=Label.CONTINUE ): ...
+
+        def compile( self, query, contn_label ):
+            '''See below for an explanation of this way this works'''
+            TEST_label = Label( 'test' )
+            NEXT_label = Label( 'next' )
+            EXIT_LABEL = Label( 'exit' )
+            self.compileLoopDeclarations( query )
+            self.compileLoopInit( self, query, continue=TEST_label )
+            self.addLabel( NEXT_label )
+            self.compileLoopBody( query )
+            self.compileLoopNext( query )
+            self.addLabel( TEST_LABEL )
+            self.compileLoopTest( query, ifso=NEXT_LABEL, ifnot=Label.CONTINUE )
+            self.compileLoopFini( query, continue=contn_label )
+
+    # Just sketching the definitions.
+    class FromQueryCompiler( QueryCompiler ): ...
+    class InQueryCompiler( QueryCompiler ): ...
+
+The loop-compiler invokes ``LoopCompiler()( ... )`` and the result is code that typically
+looks a lot like this:
+
+.. code-block:: xml
+
+    <seq>
+        instructions( InitPart )
+        <goto to=TBD to.label="TEST" />
+        <seq label="NEXT" />
+        instruction( BodyPart )
+        instructions( NextPart )
+        <seq label="TEST" />
+        instructions( TestPart )
+        <ifso to=TBD to.label="NEXT"/>
+        instructions( FiniPart )
+    </seq>
+
+This slightly unexpected way of coding the loop is actually a well-known
+trick. It eliminates the need for an unconditional goto inside the loop itself. 
+Instead it has an unconditional goto after the initialisation, which is only 
+executed once. This saves an instruction per-loop.
+
+The FROM-query
+~~~~~~~~~~~~~~
+The FROM form is intended for numerical iteration from one value to another
+inclusively. At the moment, Ginger does not subscribe to Dijkstra's 
+very influential half-open loop recommendation 
+(see http://www.cs.utexas.edu/users/EWD/ewd08xx/EWD831.PDF). I do feel this is
+an area that needs re-visiting but I am just interested in documenting the
+current behaviour for the moment.
+
+Continuing the running Python sketch:
+
+.. code-block:: python
+
+    class LoopCompiler( MiniCompiler ):
+
+        def __init__( self, *args, **kwargs ):
+            super().__init__( *args, **kwargs )
+
+        def compile( self, expr, contn_label ):
+            query = expr[ 0 ]
+            if query.hasName( "from" ):
+                FromQueryCompiler( share=self )( query, contn_label )
+            elif query.hasName( "in" ):
+                InQueryCompiler( share=self )( query, contn_label )
+            else:
+                raise Exception( "To be implemented: {}".format( query.getName() ) )
+
+    class QueryCompiler( MiniCompiler ):
+
+        def __init__( self, *args, **kwargs ):
+            super().__init__( *args, **kwargs )
+
+        @abstractmethod
+        def compileLoopDeclarations( self, query ): pass
+
+        @abstractmethod
+        def compileLoopInit( self, query, contn=Label.CONTINUE ): pass
+
+        @abstractmethod
+        def compileLoopTest( self, query, ifso=Label.CONTINUE, ifnot=Label.CONTINUE ): pass
+
+        @abstractmethod
+        def compileLoopBody( self, query ): pass
+
+        @abstractmethod
+        def compileLoopNext( self, query ): pass
+
+        @abstractmethod
+        def compileLoopFini( self, query, contn=Label.CONTINUE ): pass
+
+        def compile( self, query, contn_label ):
+            '''See below for an explanation of this way this works'''
+            TEST_label = Label( 'test' )
+            NEXT_label = Label( 'next' )
+            EXIT_label = Label( 'exit' )
+            self.compileLoopDeclarations( query )
+            self.compileLoopInit( query, contn=TEST_label )
+            self.setLabel( NEXT_label )
+            self.compileLoopBody( query )
+            self.compileLoopNext( query )
+            self.setLabel( TEST_label )
+            self.compileLoopTest( query, ifso=NEXT_label, ifnot=Label.CONTINUE )
+            self.compileLoopFini( query, contn=contn_label )
+
+    class FromQueryCompiler( QueryCompiler ):
+
+        def __init__( self, *args, **kwargs ):
+            super().__init__( *args, **kwargs )
+
+        def compileLoopDeclarations( self, query ):
+            '''Hand-waving allocation of slot to the variable'''
+            self.loop_var_slot = self.allocateSlot( query[0] )
+            self.end_value_slot = self.newTmpVar( 'from_end_value' )
+
+        def compileLoopInit( self, query, contn=Label.CONTINUE ):
+            '''For simplicity we assume the BY part is always the constant 1 and
+            that there's always 4 arguments: loop variable, start, by & end.
+            '''
+            SingleValueCompiler( share=self )( query[1], Label.CONTINUE )
+            self.plant( "pop.local", local=str(self.loop_var_slot) )            
+            SingleValueCompiler( share=self )( query[3], Label.CONTINUE )
+            self.plant( "pop.local", local=str(self.end_value_slot) )            
+
+        def compileLoopTest( self, query, ifso=Label.CONTINUE, ifnot=Label.CONTINUE ):
+            if not ifso is Label.CONTINUE:
+                self.plant( "lte.ss", local0=str(self.loop_var_slot), local1=str(self.end_value_slot), to_label=ifso.id() )
+                self.simpleContinuation( ifnot )
+            else:
+                raise Exception( "Not implemented yet" )
+
+        def compileLoopBody( self, query ):
+            pass
+
+        def compileLoopNext( self, query ):
+            # Great candidate for a merged instruction push-incr-pop.
+            self.plant( "push.local", slot=str( self.loop_var_slot ) )
+            self.plant( "incr" )
+            self.plant( "pop.local", slot=str( self.loop_var_slot ) )
+
+        def compileLoopFini( self, query, contn=Label.CONTINUE ):
+            self.deallocateSlot( self.loop_var_slot )  
+
+
 
 

@@ -26,10 +26,13 @@ def _escape_char( ch ):
 
 # Helper function.
 def _minxml_escape( text ):
-	sofar = ''
-	for ch in text:
-		sofar += _escape_char( ch )
-	return sofar
+	try:
+		sofar = ''
+		for ch in text:
+			sofar += _escape_char( ch )
+		return sofar
+	except TypeError:
+		raise Exception( "Error while printing MinXML - Unexpected non-text value: {}".format( text ) )
 
 
 ################################################################################
@@ -39,11 +42,13 @@ def _minxml_escape( text ):
 class MinXML:
 	"""An implementation of Minimal XML - a clean subset of XML"""
 
-	def __init__( self, typename, *kids ):
+	def __init__( self, typename, *kids, **kwargs ):
 		self.typename = typename
-		self.attributes = {}
 		self.children = []
 		self.children.extend( kids )
+		self.attributes = {}
+		for k, v in kwargs.items():
+			self.attributes[ k ] = str( v )
 
 	def getChildren( self ):
 		return self.children
@@ -96,8 +101,9 @@ class MinXML:
 		self.strlist( sofar )
 		return ''.join( sofar )
 
-	def add( self, minx ):
-		self.children.append( minx )
+	def add( self, *minx, **kwargs ):
+		self.children.extend( minx )
+		self.attributes.update( kwargs )
 
 	def __getitem__( self, n ):
 		return self.children[ n ]
@@ -137,8 +143,16 @@ class MinXML:
 				raise KeyError
 			return otherwise
 
-	def put( self, key, value ):
-		self.attributes[ key ] = value
+	def put( self, *key_values, **kwargs ):
+		it = iter( key_values )
+		try:
+			while True:
+				key = it.__next__()
+				value = it.__next__()
+				self.attributes[ key ] = value
+		except StopIteration:
+			pass
+		self.attributes.update( kwargs )
 
 	def clear( self ):
 		self.children = []
@@ -319,7 +333,7 @@ def _entityLookup( symbol ):
 	return _entity_table[ symbol ]
 
 def _is_name_char( ch ):
-	return ch.isalnum() or ch == '-' or ch == '.'
+	return ch.isalnum() or ch == '-' or ch == '.' or ch == '_'
 
 def _readEscape( cucharin ):
 	esc = _readEscapeContent( cucharin )

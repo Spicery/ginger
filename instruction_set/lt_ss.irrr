@@ -3,7 +3,7 @@ Definition
     LT_SS LOCAL_S LOCAL_T JUMP_D
 
 Code
-    <lt.ss local.0=LOCAL_S local.1=LOCAL_T to=JUMP_D />
+    <lt.ss local0=LOCAL_S local1=LOCAL_T to=JUMP_D />
     
 Summary
     Compares a local variable LOCAL_S using less than versus another

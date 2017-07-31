@@ -3,7 +3,7 @@ Definition
     SYSCALL RAW_SYS_PTR
 
 Code
-    <syscall sysfn=NAME_OF_SYSFN />
+    <syscall name=NAME_OF_SYSFN />
 
 Summary
     Call a native function via the "system" interface.

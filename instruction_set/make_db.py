@@ -15,7 +15,7 @@ def loadStats():
 def createInstructionSetDB( db_fname ):
 	with sqlite3.connect( db_fname ) as conn:
 		conn.execute( 'DROP TABLE IF EXISTS instruction' )
-		conn.execute( 'CREATE TABLE instruction( name text PRIMARY KEY, codename text, width int, fields text )' )
+		conn.execute( 'CREATE TABLE instruction( name text PRIMARY KEY, codename text UNIQUE, width int, fields text )' )
 		conn.commit()
 		for iname, ifields in loadStats().items():
 			conn.execute( 

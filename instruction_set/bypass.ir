@@ -14,6 +14,8 @@ Unchecked Precondition
 Exceptions (Checked Preconditions)
     
 Result (Postcondition)      
+    * Immediately following instruction can only be reached through the
+      use of an ESCAPE instruction in the nested function call. 
 
 \*****************************************************************************/
 

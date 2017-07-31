@@ -12,8 +12,6 @@ Stats
 	Width=2
     
 Unchecked Precondition
-    * Immediately following instruction can only be reached through the
-      use of an ESCAPE instruction in the nested function call. 
     * JUMP_D is in range of the enclosing function object.
     
 Exceptions (Checked Preconditions)

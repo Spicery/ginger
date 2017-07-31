@@ -127,6 +127,8 @@ void CodeGenClass::compileInstruction( Gnx instruction ) {
 		this->emitSPC( vmc_return_ifso );
 	} else if ( name == VM_RETURN_IFNOT ) {
 		this->emitSPC( vmc_return_ifnot );
+	} else if ( name == VM_POP_LOCAL ) {
+		this->vmiPOP_INNER_SLOT( instruction->attributeToInt( VM_POP_LOCAL_LOCAL ) );
 	} else if ( name == VM_PUSH_LOCAL ) {
 		this->vmiPUSH_INNER_SLOT( instruction->attributeToInt( VM_PUSH_LOCAL_LOCAL ) );
 	} else if ( name == VM_PUSH_LOCAL_RET ) {
@@ -222,7 +224,23 @@ void CodeGenClass::compileInstruction( Gnx instruction ) {
 		const int count = instruction->attributeToInt( VM_CHECK_MARK_GTE_COUNT );
 		this->vmiINSTRUCTION( vmc_check_mark_gte );
 		this->emitRef( IntToRef( slot ) );
-		this->emitRef( IntToRef( count ) );		
+		this->emitRef( IntToRef( count ) );
+	} else if ( name == VM_GOTO ) {
+		const int to = instruction->attributeToInt( VM_GOTO_TO );
+		this->vmiINSTRUCTION( vmc_goto );
+		this->emitRef( IntToRef( to ) );
+	} else if ( name == VM_BYPASS ) {
+		const int to = instruction->attributeToInt( VM_BYPASS_TO );
+		this->vmiINSTRUCTION( vmc_bypass );
+		this->emitRef( IntToRef( to ) );
+	} else if ( name == VM_IFNOT ) {
+		const int to = instruction->attributeToInt( VM_IFNOT_TO );
+		this->vmiINSTRUCTION( vmc_ifnot );
+		this->emitRef( IntToRef( to ) );
+	} else if ( name == VM_IFSO ) {
+		const int to = instruction->attributeToInt( VM_IFSO_TO );
+		this->vmiINSTRUCTION( vmc_ifso );
+		this->emitRef( IntToRef( to ) );
 	} else {
 		throw Mishap( "Unrecognised instruction name" ).culprit( "Name", name );
 	}

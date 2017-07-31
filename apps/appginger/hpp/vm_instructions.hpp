@@ -7,6 +7,8 @@ namespace Ginger {
 	static const char * VM_RETURN_IFSO = "return.ifso";
 	static const char * VM_RETURN_IFNOT = "return.ifnot";
 
+	static const char * VM_POP_LOCAL = "pop.local";
+	static const char * VM_POP_LOCAL_LOCAL = "local";
 	static const char * VM_PUSH_LOCAL = "push.local";
 	static const char * VM_PUSH_LOCAL_LOCAL = "local";
 	static const char * VM_PUSH_LOCAL_RET = "push.local.ret";
@@ -58,4 +60,13 @@ namespace Ginger {
 	static const char * VM_CHECK_MARK0_LOCAL = "local";
 	static const char * VM_CHECK_MARK1 = "check.mark1";
 	static const char * VM_CHECK_MARK1_LOCAL = "local";
+
+	static const char * VM_GOTO = "goto";
+	static const char * VM_GOTO_TO = "to";
+	static const char * VM_BYPASS = "bypass";
+	static const char * VM_BYPASS_TO = "to";
+	static const char * VM_IFNOT = "ifnot";
+	static const char * VM_IFNOT_TO = "to";
+	static const char * VM_IFSO = "ifso";
+	static const char * VM_IFSO_TO = "to";
 }

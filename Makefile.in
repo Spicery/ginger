@@ -21,6 +21,7 @@ DD_INSTALL_TOOL=$(DESTDIR)$(INSTALL_TOOL)
 
 .PHONY: all
 all:
+	make -C instruction_set -f InstructionSetDB.makefile build
 	make -C apps $@
 	make -C autodocs $@
 	make -C projects $@
@@ -28,6 +29,7 @@ all:
 .PHONY: clean
 clean:
 	rm -rf _build/
+	make -C instruction_set -f InstructionSetDB.makefile clean
 	make -C apps $@
 	make -C autodocs $@
 	make -C projects $@
@@ -146,6 +148,8 @@ install-as-is:
 	chmod a+rx,u+w $(DD_INSTALL_LIB)/ginger
 	mkdir -p $(DD_INSTALL_BIN)
 	chmod a+rx,u+w $(DD_INSTALL_BIN)
+	mkdir -p $(DD_INSTALL_LIB)/instruction_set
+	chmod a+rx,u+w $(DD_INSTALL_LIB)/instruction_set
 	mkdir -p $(DD_INSTALL_LIB)/lisp2gnx
 	chmod a+rx,u+w $(DD_INSTALL_LIB)/lisp2gnx
 	mkdir -p $(DD_INSTALL_LIB)/gvmtest
@@ -156,6 +160,7 @@ install-as-is:
 	mkdir -p $(DD_INSTALL_LIB)/fn2code
 	chmod a+rx,u+w $(DD_INSTALL_LIB)/fn2code
 	cp apps/fn2code/prototype/*.py $(DD_INSTALL_LIB)/fn2code
+	/usr/bin/install -m a=r instruction_set/instruction_set.db $(DD_INSTALL_LIB)/instruction_set
 	#
 	cp -r apps/ginger/usage $(DD_INSTALL_LIB)/ginger/
 	cp -r apps/ginger-admin/admin-templates $(DD_INSTALL_LIB)

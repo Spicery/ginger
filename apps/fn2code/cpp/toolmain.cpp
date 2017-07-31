@@ -24,6 +24,7 @@
 #include <syslog.h>
 #include <stddef.h>
 #include <getopt.h>
+#include <unistd.h>
 
 #include "gngversion.hpp"
 

@@ -69,4 +69,12 @@ namespace Ginger {
 	static const char * VM_IFNOT_TO = "to";
 	static const char * VM_IFSO = "ifso";
 	static const char * VM_IFSO_TO = "to";
+
+	static const char * VM_SYSAPP = "sysapp";
+	static const char * VM_SYSAPP_NAME = "name";
+
+	static const char * VM_SET_COUNT_SYSAPP = "set.count.sysapp";
+	static const char * VM_SET_COUNT_SYSAPP_NAME = "name";
+	static const char * VM_SET_COUNT_SYSAPP_COUNT = "count";
+
 }

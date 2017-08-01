@@ -306,6 +306,7 @@ public:
 	void compileIfSo( Gnx, LabelClass * dst, LabelClass * contn );
 	void compileInstruction( Gnx instruction );
 	void compileSysAppInstruction( Gnx mnx );
+	void compileSetCountSysAppInstruction( Gnx mnx );
 
 public:
 	CodeGenClass( MachineClass * machine );

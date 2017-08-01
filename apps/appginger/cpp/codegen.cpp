@@ -121,6 +121,8 @@ void CodeGenClass::compileInstruction( Gnx instruction ) {
 	const string name = instruction->name();
 	if ( name == VM_SYSAPP ) {
 		this->compileSysAppInstruction( instruction );
+	} else if ( name == VM_SET_COUNT_SYSAPP ) {
+		this->compileSetCountSysAppInstruction( instruction );
 	} else if ( name == VM_ENTER ) {
 		this->vmiENTER();
 	} else if ( name == VM_RETURN ) {
@@ -249,8 +251,8 @@ void CodeGenClass::compileInstruction( Gnx instruction ) {
 }
 
 void CodeGenClass::compileSysAppInstruction( Gnx mnx ) {
-	const string & nm = mnx->attribute( GNX_SYSAPP_NAME );
-	SysMap::iterator it = SysMap::systemFunctionsMap().find( nm );
+	const string name = mnx->attribute( VM_SYSAPP_NAME );
+	SysMap::iterator it = SysMap::systemFunctionsMap().find( name );
 	if ( it != SysMap::systemFunctionsMap().end() ) {
 		const SysInfo & info = it->second;
 		if ( info.isSysCall() ) {
@@ -258,15 +260,42 @@ void CodeGenClass::compileSysAppInstruction( Gnx mnx ) {
 		} else if ( info.isVMOp() ) {
 			this->vmiINSTRUCTION( info.instruction );
 		} else if ( info.isCmpOp() ) {
+			//	TODO: not sure this is correct.
 			this->vmiINSTRUCTION( cmpOpInstruction( info.cmp_op ) );
 		}
 	} else {
-		const string name( nm );
 		throw SystemError( "Unknown system call" ).culprit( "Name", name );
 	}
 }
 
-
+void CodeGenClass::compileSetCountSysAppInstruction( Gnx mnx ) {
+	const string name = mnx->attribute( VM_SET_COUNT_SYSAPP_NAME );
+	const int count = mnx->attributeToInt( VM_SET_COUNT_SYSAPP_COUNT );
+	SysMap::iterator it = SysMap::systemFunctionsMap().find( name );
+	if ( it != SysMap::systemFunctionsMap().end() ) {
+		const SysInfo & info = it->second;
+		if ( info.in_arity.isExact( count ) ) {
+			if ( info.isSysCall() ) {
+				this->vmiSET_SYS_CALL( info.syscall, count );
+			} else if ( info.isVMOp() ) {
+				//	Inherently unchecked.
+				this->vmiINSTRUCTION( info.instruction );
+			} else if ( info.isCmpOp() ) {
+				//	TODO: not sure this is correct.
+				this->vmiINSTRUCTION( cmpOpInstruction( info.cmp_op ) );
+			}
+		} else {
+			throw(
+				SystemError( "System call passed wrong number of arguments" ).
+				culprit( "Name", name ).
+				culprit( "Received", count ).
+				culprit( "Expected", info.in_arity.toString() )
+			);
+		}
+	} else {
+		throw SystemError( "Unknown system call" ).culprit( "Name", name );
+	}
+}
 
 
 //	Check that what is on the stack is consistent with a given arity.

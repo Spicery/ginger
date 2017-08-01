@@ -119,7 +119,9 @@ Ref * sysCheckExplodeGteN( Ref * pc, MachineClass * vm ) {
 */
 void CodeGenClass::compileInstruction( Gnx instruction ) {
 	const string name = instruction->name();
-	if ( name == VM_ENTER ) {
+	if ( name == VM_SYSAPP ) {
+		this->compileSysAppInstruction( instruction );
+	} else if ( name == VM_ENTER ) {
 		this->vmiENTER();
 	} else if ( name == VM_RETURN ) {
 		this->vmiRETURN();
@@ -245,6 +247,27 @@ void CodeGenClass::compileInstruction( Gnx instruction ) {
 		throw Mishap( "Unrecognised instruction name" ).culprit( "Name", name );
 	}
 }
+
+void CodeGenClass::compileSysAppInstruction( Gnx mnx ) {
+	const string & nm = mnx->attribute( GNX_SYSAPP_NAME );
+	SysMap::iterator it = SysMap::systemFunctionsMap().find( nm );
+	if ( it != SysMap::systemFunctionsMap().end() ) {
+		const SysInfo & info = it->second;
+		if ( info.isSysCall() ) {
+			this->vmiSYS_CALL( info.syscall );
+		} else if ( info.isVMOp() ) {
+			this->vmiINSTRUCTION( info.instruction );
+		} else if ( info.isCmpOp() ) {
+			this->vmiINSTRUCTION( cmpOpInstruction( info.cmp_op ) );
+		}
+	} else {
+		const string name( nm );
+		throw SystemError( "Unknown system call" ).culprit( "Name", name );
+	}
+}
+
+
+
 
 //	Check that what is on the stack is consistent with a given arity.
 void CodeGenClass::vmiCHECK_EXPLODE( Arity arity ) {

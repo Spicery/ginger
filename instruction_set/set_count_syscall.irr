@@ -1,13 +1,15 @@
 /*****************************************************************************\
 Definition
-    SET_SYSCALL RAW_COUNT RAW_SYSCALL_PTR 
+    SET_COUNT_SYSCALL RAW_COUNT RAW_SYSCALL_PTR 
 
 Code
-    <set.syscall count=RAW_COUNT sysfn=NAME />
-
+    <set.count.syscall count=RAW_COUNT sysfn=NAME />
+    
 Summary
     Invokes a system-function (sysfn) with a fixed count of arguments
     in RAW_COUNT. Both arguments are cloaked from the garbage collector.
+    Note that this gives the compiler an opportunity to invoke a
+    non-checking version of the instruction.
 
 Stats
 	Width = 3

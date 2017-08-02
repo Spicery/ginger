@@ -148,8 +148,8 @@ install-as-is:
 	chmod a+rx,u+w $(DD_INSTALL_LIB)/ginger
 	mkdir -p $(DD_INSTALL_BIN)
 	chmod a+rx,u+w $(DD_INSTALL_BIN)
-	mkdir -p $(DD_INSTALL_LIB)/instruction_set
-	chmod a+rx,u+w $(DD_INSTALL_LIB)/instruction_set
+	mkdir -p $(DD_INSTALL_LIB)/system
+	chmod a+rx,u+w $(DD_INSTALL_LIB)/system
 	mkdir -p $(DD_INSTALL_LIB)/lisp2gnx
 	chmod a+rx,u+w $(DD_INSTALL_LIB)/lisp2gnx
 	mkdir -p $(DD_INSTALL_LIB)/gvmtest
@@ -160,7 +160,8 @@ install-as-is:
 	mkdir -p $(DD_INSTALL_LIB)/fn2code
 	chmod a+rx,u+w $(DD_INSTALL_LIB)/fn2code
 	cp apps/fn2code/prototype/*.py $(DD_INSTALL_LIB)/fn2code
-	/usr/bin/install -m a=r instruction_set/instruction_set.db $(DD_INSTALL_LIB)/instruction_set
+	/usr/bin/install -m a=r instruction_set/instruction_set.db $(DD_INSTALL_LIB)/system
+	cp apps/appginger/cpp/info-debug.* $(DD_INSTALL_LIB)/system
 	#
 	cp -r apps/ginger/usage $(DD_INSTALL_LIB)/ginger/
 	cp -r apps/ginger-admin/admin-templates $(DD_INSTALL_LIB)

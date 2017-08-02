@@ -300,6 +300,7 @@ static void printUsage() {
 	cout << "-j, --json            output in JSON format" << endl;
 	cout << "-r, --rst             output using reStructuredText" << endl;
 	cout << "-x, --xml             output using XML (MinXML in fact)" << endl;
+	cout << "-i, --instructions    include a section on the instruction set" << endl;
 	cout << "-H, --help            print out this help info" << endl;
 	cout << "-V, --version         print out version information and exit" << endl;
 	cout << "-K, --hexkeys         print cheat sheet for simple key values" << endl;
@@ -353,7 +354,7 @@ static struct option long_options[] =
         { "json",			no_argument,			0, 'j' },
         { "hexkeys",		no_argument,			0, 'K' },
         { "rst",            no_argument,      		0, 'r' },
-        { "verbose",		no_argument,			0, 'v' },
+        { "instructions",	no_argument,			0, 'i' },
         { "version",        no_argument,            0, 'V' },
         { "xml",          	no_argument,      		0, 'x' },
         { 0, 0, 0, 0 }
@@ -361,13 +362,13 @@ static struct option long_options[] =
 
 class Main {
 private:
-	bool verbose;
+	bool incinstructs;
 	AppContext context;
 	OutputFormat oformat;
 	Formatter * formatter;
 
 public:
-	Main() : verbose( false ), oformat( XML_FORMAT ), formatter( NULL ) {}
+	Main() : incinstructs( false ), oformat( XML_FORMAT ), formatter( NULL ) {}
 
 	~Main() {
 		delete this->formatter;
@@ -527,7 +528,7 @@ public:
 		this->printCommunityInfo();
 		this->printStdInfo();
 		this->printSynonyms();
-		if ( this->verbose ) this->printGVMInstructions();
+		if ( this->incinstructs ) this->printGVMInstructions();
 		this->formatter->endDocument();
 	}
 
@@ -536,7 +537,7 @@ public:
 	    if ( envp != NULL ) this->context.setEnvironmentVariables( envp );
 		for(;;) {
 	        int option_index = 0;
-	        int c = getopt_long( argc, argv, "HjkrvVx", long_options, &option_index );
+	        int c = getopt_long( argc, argv, "HjKrviVx", long_options, &option_index );
 	        
 	        if ( c == -1 ) break;
 	        switch ( c ) {
@@ -560,8 +561,8 @@ public:
 	                printUsage();
 	                return false;
 	            }
-	            case 'v': {
-	            	this->verbose = true;
+	            case 'i': {
+	            	this->incinstructs = true;
 	            	break;
 	            }
 	            case 'V': {

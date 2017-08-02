@@ -59,7 +59,7 @@ OBJS= syscrypto.o bigint.o rational.o sysvm.o \
 
 USEREXECUTABLES=ginger-cgi ginger-script ginger-cli ginger-info
 
-all: $(USEREXECUTABLES)
+all: $(USEREXECUTABLES) info-debug.db info-debug.rst info-debug.hlp
 
 ################################################################################
 # We need to disable optimisations based on non-overflow of integer 
@@ -92,8 +92,15 @@ LIBRARIES=../../libgng/cpp/libgng.a /usr/local/lib/librudecgi.a -lgmp -lgmpxx -l
 ginger-info: libappginger.a infomain.o
 	#ranlib libappginger.a ../../libgng/cpp/libgng.a
 	$(CXX) $(CXXFLAGS) $(BOOST_CPPFLAGS) -o $@ infomain.o $(LIBAPPGINGER) $(LIBRARIES)
+
+info-debug.hlp: ginger-info
 	./ginger-info -H > info-debug.hlp
+
+info-debug.rst: ginger-info
 	./ginger-info -r > info-debug.rst
+
+info-debug.db: ginger-info
+	./ginger-info -j | python3 make_info_db.py
 
 ginger-cli: libappginger.a climain.o
 	$(CXX) $(CXXFLAGS) $(BOOST_CPPFLAGS) -o $@ climain.o $(LIBAPPGINGER) $(LIBRARIES)
@@ -108,6 +115,7 @@ clean:
 	rm -f *.o
 	rm -f $(USEREXECUTABLES)
 	rm -f *.a
+	rm -f info-debug.*
 
 #	Nothing needs doing.
 check:

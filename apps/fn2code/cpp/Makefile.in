@@ -27,7 +27,12 @@ CXXFLAGS=$(INSTALLDIRS) -DUSESNAP=$(USESNAP) -std=c++11 -g -I../hpp -I../../libg
 
 OBJS= fn2code.o toolmain.o
 
-all: fn2code
+all:
+	@echo "Valid targets are:"
+	@echo "build - builds executable"
+	@echo "clean - cleans away all build files"
+
+build: fn2code
 
 # $@ is make shorthand for the target.
 # $@ is make shorthand for the dependencies

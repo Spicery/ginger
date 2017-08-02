@@ -1,3 +1,5 @@
+all: TARGET=build
+clean: TARGET=clean
 all clean:
 	make -C automatic/simple $@
 	make -C automatic/machine $@
@@ -22,6 +24,7 @@ all clean:
 	make -C lnx2mnx $@
 	make -C shebang $@
 	make -C simplifygnx $@
-	make -C fn2code $@
+	make -C fn2code $(TARGET)
 	make -C src2lnx $@
 	make -C tidymnx $@
+

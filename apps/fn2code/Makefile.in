@@ -1,4 +1,10 @@
 all:
+	@echo "Valid targets are:"
+	@echo "  build - builds all artefacts"
+	@echo "  clean - resets to initial state"
+	@echo "  check - will run all tests incl. unit, component & post installation checks"
+
+build:
 	make -C cpp $@
 
 clean:

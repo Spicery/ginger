@@ -87,7 +87,7 @@ with the stack-based code: push x, push 0, call greater than or equal to.
     <fn.code args.count="1" locals.count="1">
         <enter1/>
         <push.local0/>
-        <push.constant type="int" value="0"/>
+        <pushq><constant type="int" value="0"/></pushq>
         <gte/>
         ... further instructions ...
     </fn.code>
@@ -103,7 +103,7 @@ so we have to leave that blank.
     <fn.code args.count="1" locals.count="1">
         <enter1/>
         <push.local0/>
-        <push.constant type="int" value="0"/>
+        <pushq><constant type="int" value="0"/></pushq>
         <gte/>
         <and to=END/>
         ... further instructions ...
@@ -120,19 +120,20 @@ the stack frame and returns to the caller.
     <fn.code args.count="1" locals.count="1">
         <enter1/>
         <push.local0/>
-        <push.constant type="int" value="0"/>
+        <pushq><constant type="int" value="0"/></pushq>
         <gt/>
         <and to=END/>
         <push.local0/>
         <push.local0/>
         <mul/>
-        <push.constant type="int" value="1"/>
+        <pushq><constant type="int" value="1"/></pushq>
         <lt/>
         <return/>
     </fn.code>
 
 All that remains is to compute the distance that the ``and`` has to jump. The
-jump has to skip two ``push.local0`` (2 x width 1), one ``mul`` (1 x width 1), a ``push.constant`` (1 x width 2), for a total of 6 words. There is also an
+jump has to skip two ``push.local0`` (2 x width 1), one ``mul`` (1 x width 1), 
+a ``pushq`` (1 x width 2), for a total of 6 words. There is also an
 offset of 1 that has to be factored in (when the instruction is executed the
 virtual-pc is pointing one past the start of the current instruction, which is
 two words long.) So the value that has to be substituted is 6 + 1 = 7.
@@ -145,17 +146,17 @@ create a complete solution.
     <fn.code args.count="1" locals.count="1">
         <enter1/>
         <push.local0/>
-        <push.constant>
+        <pushq>
             <constant type="int" value="0"/>
-        </push.constant>
+        </pushq>
         <gt/>
         <and to="7" to.label="L1"/>
         <push.local0/>
         <push.local0/>
         <mul/>
-        <push.constant>
+        <pushq>
             <constant type="int" value="1"/>
-        </push.constant>
+        </pushq>
         <lt/>
         <return label="L1"/>
     </fn.code>

@@ -119,12 +119,22 @@ Ref * sysCheckExplodeGteN( Ref * pc, MachineClass * vm ) {
 */
 void CodeGenClass::compileInstruction( Gnx instruction ) {
 	const string name = instruction->name();
-	if ( name == VM_SYSAPP ) {
+	if ( name == VM_PUSHQ && not instruction->isEmpty() ) {
+		this->vmiPUSHQ( this->calcConstant( instruction->getChild( 0 ) ) );
+	} else if ( name == VM_PUSHQ_RET ) {
+		this->vmiPUSHQ_RETURN( this->calcConstant( instruction->getChild( 0 ) ) );
+	} else if ( name == VM_SYSCALL ) {
 		this->compileSysAppInstruction( instruction );
-	} else if ( name == VM_SET_COUNT_SYSAPP ) {
+	} else if ( name == VM_SYSRETURN ) {
+		this->emitSPC( vmc_sysreturn );
+	} else if ( name == VM_SET_COUNT_SYSCALL ) {
 		this->compileSetCountSysAppInstruction( instruction );
 	} else if ( name == VM_ENTER ) {
-		this->vmiENTER();
+		this->emitSPC( vmc_enter );
+	} else if ( name == VM_ENTER0 ) {
+		this->emitSPC( vmc_enter0 );
+	} else if ( name == VM_ENTER1 ) {
+		this->emitSPC( vmc_enter1 );
 	} else if ( name == VM_RETURN ) {
 		this->vmiRETURN();
 	} else if ( name == VM_RETURN_IFSO ) {
@@ -133,10 +143,13 @@ void CodeGenClass::compileInstruction( Gnx instruction ) {
 		this->emitSPC( vmc_return_ifnot );
 	} else if ( name == VM_POP_LOCAL ) {
 		this->vmiPOP_INNER_SLOT( instruction->attributeToInt( VM_POP_LOCAL_LOCAL ) );
+	} else if ( name == VM_POP_GLOBAL ) {
+		this->emitSPC( vmc_pop_global );
+		this->emitValof( this->resolveGlobal( instruction ) );
 	} else if ( name == VM_PUSH_LOCAL ) {
 		this->vmiPUSH_INNER_SLOT( instruction->attributeToInt( VM_PUSH_LOCAL_LOCAL ) );
 	} else if ( name == VM_PUSH_LOCAL_RET ) {
-		int slot = instruction->attributeToInt( VM_PUSH_LOCAL_RET_LOCAL );
+		const int slot = instruction->attributeToInt( VM_PUSH_LOCAL_RET_LOCAL );
 		switch ( slot ) {
 			case 0:
 				this->emitSPC( vmc_push_local0_ret );
@@ -148,15 +161,48 @@ void CodeGenClass::compileInstruction( Gnx instruction ) {
 				this->emitSPC( vmc_push_local_ret );
 				this->emitRef( IntToRef( slot ) );
 				break;
-		}	
+		}
+	} else if ( name == VM_PUSH_GLOBAL ) {
+		this->emitSPC( vmc_push_global );
+		this->emitValof( this->resolveGlobal( instruction ) );
+	} else if ( name == VM_END1_CALLS ) {
+		const int slot = instruction->attributeToInt( VM_END1_CALLS_LOCAL );
+		this->vmiEND1_CALLS( slot );
 	} else if ( name == VM_CALLS ) {
 		this->vmiCALLS();
+	} else if ( name == VM_SET_COUNT_CALLS ) {
+		const int slot = instruction->attributeToInt( VM_SET_COUNT_CALLS_COUNT );
+		this->vmiSET_CALLS( slot );
 	} else if ( name == VM_SELF_CALL ) {
 		this->vmiSELF_CALL();
 	} else if ( name == VM_SELF_CONSTANT ) {
 		this->vmiSELF_CONSTANT();
-	} else if ( name == VM_FAIL ) {
-		this->vmiFAIL();
+	} else if ( name == VM_END_CALL_GLOBAL ) {
+		const int slot = instruction->attributeToInt( VM_END_CALL_GLOBAL_LOCAL );
+		this->emitSPC( vmc_end_call_global );
+		this->emitRef( IntToRef( slot ) );
+		this->emitValof( this->resolveGlobal( instruction ) );
+	} else if ( name == VM_SET_COUNT_CALL_GLOBAL ) {
+		const int count = instruction->attributeToInt( VM_SET_COUNT_CALL_GLOBAL_COUNT );
+		this->emitSPC( vmc_set_count_call_global );
+		this->emitRef( IntToRef( count ) );
+		this->emitValof( this->resolveGlobal( instruction ) );		
+	} else if ( name == VM_AND ) {
+		const int to = instruction->attributeToInt( VM_AND_TO );
+		this->vmiINSTRUCTION( vmc_and );
+		this->emitRef( IntToRef( to ) );	
+	} else if ( name == VM_OR ) {
+		const int to = instruction->attributeToInt( VM_OR_TO );
+		this->vmiINSTRUCTION( vmc_or );
+		this->emitRef( IntToRef( to ) );	
+	} else if ( name == VM_ABSAND ) {
+		const int to = instruction->attributeToInt( VM_ABSAND_TO );
+		this->vmiINSTRUCTION( vmc_absand );
+		this->emitRef( IntToRef( to ) );	
+	} else if ( name == VM_ABSOR ) {
+		const int to = instruction->attributeToInt( VM_ABSOR_TO );
+		this->vmiINSTRUCTION( vmc_or );
+		this->emitRef( IntToRef( to ) );	
 	} else if ( name == VM_ADD ) {
 		this->vmiINSTRUCTION( vmc_add );
 	} else if ( name == VM_MUL ) {
@@ -193,8 +239,10 @@ void CodeGenClass::compileInstruction( Gnx instruction ) {
 		this->vmiINSTRUCTION( vmc_decr );
 	} else if ( name == VM_ERASE ) {
 		this->vmiINSTRUCTION( vmc_erase );
+	} else if ( name == VM_ERASE_NUM ) {
+		this->vmiERASE_NUM( instruction->attributeToInt( VM_ERASE_NUM_N ) );
 	} else if ( name == VM_START_MARK ) {
-		int slot = instruction->attributeToInt( VM_START_MARK_LOCAL );
+		const int slot = instruction->attributeToInt( VM_START_MARK_LOCAL );
 		this->vmiINSTRUCTION( vmc_start_mark );
 		this->emitRef( IntToRef( slot ) );
 	} else if ( name == VM_END_MARK ) {
@@ -245,13 +293,23 @@ void CodeGenClass::compileInstruction( Gnx instruction ) {
 		const int to = instruction->attributeToInt( VM_IFSO_TO );
 		this->vmiINSTRUCTION( vmc_ifso );
 		this->emitRef( IntToRef( to ) );
+	} else if ( name == VM_ESCAPE ) {
+		this->vmiESCAPE();
+	} else if ( name == VM_FAIL ) {
+		this->vmiFAIL();
+	} else if ( name == VM_GETITERATOR ) {
+		this->vmiINSTRUCTION( vmc_getiterator );
+	} else if ( name == VM_SEQ ) {
+		for ( auto child : *instruction ) {
+			this->compileInstruction( child );
+		}
 	} else {
 		throw Mishap( "Unrecognised instruction name" ).culprit( "Name", name );
 	}
 }
 
 void CodeGenClass::compileSysAppInstruction( Gnx mnx ) {
-	const string name = mnx->attribute( VM_SYSAPP_NAME );
+	const string name = mnx->attribute( VM_SYSCALL_NAME );
 	SysMap::iterator it = SysMap::systemFunctionsMap().find( name );
 	if ( it != SysMap::systemFunctionsMap().end() ) {
 		const SysInfo & info = it->second;
@@ -269,8 +327,8 @@ void CodeGenClass::compileSysAppInstruction( Gnx mnx ) {
 }
 
 void CodeGenClass::compileSetCountSysAppInstruction( Gnx mnx ) {
-	const string name = mnx->attribute( VM_SET_COUNT_SYSAPP_NAME );
-	const int count = mnx->attributeToInt( VM_SET_COUNT_SYSAPP_COUNT );
+	const string name = mnx->attribute( VM_SET_COUNT_SYSCALL_NAME );
+	const int count = mnx->attributeToInt( VM_SET_COUNT_SYSCALL_COUNT );
 	SysMap::iterator it = SysMap::systemFunctionsMap().find( name );
 	if ( it != SysMap::systemFunctionsMap().end() ) {
 		const SysInfo & info = it->second;

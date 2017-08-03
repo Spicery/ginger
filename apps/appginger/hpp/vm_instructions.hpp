@@ -2,10 +2,17 @@
 
 namespace Ginger {
 
+	static const char * VM_SEQ = "seq";
+
 	static const char * VM_ENTER = "enter";
+	static const char * VM_ENTER0 = "enter0";
+	static const char * VM_ENTER1 = "enter1";
 	static const char * VM_RETURN = "return";
 	static const char * VM_RETURN_IFSO = "return.ifso";
 	static const char * VM_RETURN_IFNOT = "return.ifnot";
+
+	static const char * VM_PUSHQ = "pushq";
+	static const char * VM_PUSHQ_RET = "pushq.ret";
 
 	static const char * VM_POP_LOCAL = "pop.local";
 	static const char * VM_POP_LOCAL_LOCAL = "local";
@@ -14,11 +21,30 @@ namespace Ginger {
 	static const char * VM_PUSH_LOCAL_RET = "push.local.ret";
 	static const char * VM_PUSH_LOCAL_RET_LOCAL = "local";
 
+	static const char * VM_PUSH_GLOBAL = "push.global";
+	static const char * VM_POP_GLOBAL = "pop.global";
+	static const char * VM_END_CALL_GLOBAL = "end.call.global";
+	static const char * VM_END_CALL_GLOBAL_LOCAL = "local";
+	static const char * VM_SET_COUNT_CALL_GLOBAL = "set.count.call.global";
+	static const char * VM_SET_COUNT_CALL_GLOBAL_COUNT = "count";
+
 	static const char * VM_CALLS = "calls";
+	static const char * VM_SET_COUNT_CALLS = "set.count.calls";
+	static const char * VM_SET_COUNT_CALLS_COUNT = "count";
 	static const char * VM_SELF_CALL = "self.call";
 	static const char * VM_SELF_CONSTANT = "self.constant";
+	static const char * VM_END1_CALLS = "end1.calls";
+	static const char * VM_END1_CALLS_LOCAL = "local";
 
-	static const char * VM_FAIL = "fail";
+	static const char * VM_AND = "and";
+	static const char * VM_AND_TO = "to";
+	static const char * VM_OR = "or";
+	static const char * VM_OR_TO = "to";
+
+	static const char * VM_ABSAND = "absand";
+	static const char * VM_ABSAND_TO = "to";
+	static const char * VM_ABSOR = "absor";
+	static const char * VM_ABSOR_TO = "to";
 
 	static const char * VM_ADD = "add";
 	static const char * VM_MUL = "mul";
@@ -39,6 +65,8 @@ namespace Ginger {
 
 	static const char * VM_DUP = "dup";
 	static const char * VM_ERASE = "erase";
+	static const char * VM_ERASE_NUM = "erase.num";
+	static const char * VM_ERASE_NUM_N = "n";
 	static const char * VM_INCR = "incr";
 	static const char * VM_DECR = "decr";
 
@@ -70,11 +98,16 @@ namespace Ginger {
 	static const char * VM_IFSO = "ifso";
 	static const char * VM_IFSO_TO = "to";
 
-	static const char * VM_SYSAPP = "sysapp";
-	static const char * VM_SYSAPP_NAME = "name";
+	static const char * VM_SYSCALL = "syscall";
+	static const char * VM_SYSCALL_NAME = "name";
+	static const char * VM_SYSRETURN = "sysreturn";
 
-	static const char * VM_SET_COUNT_SYSAPP = "set.count.sysapp";
-	static const char * VM_SET_COUNT_SYSAPP_NAME = "name";
-	static const char * VM_SET_COUNT_SYSAPP_COUNT = "count";
+	static const char * VM_SET_COUNT_SYSCALL = "set.count.syscall";
+	static const char * VM_SET_COUNT_SYSCALL_NAME = "name";
+	static const char * VM_SET_COUNT_SYSCALL_COUNT = "count";
 
+	static const char * VM_ESCAPE = "escape";
+	static const char * VM_FAIL = "fail";
+
+	static const char * VM_GETITERATOR = "getiterator";
 }

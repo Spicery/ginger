@@ -1,8 +1,6 @@
 /*****************************************************************************\
 Definition
-	ERASE_NUM N
-	where
-		N : long
+	ERASE_NUM N ( ... ) -> ()
 
 Code
     <erase.num n=N/>
@@ -10,6 +8,9 @@ Code
 Summary
 	Removes the topmost N items from the value stack.
 	
+Stats
+	Width = 2
+
 Unchecked Precondition
 	There is at least N values on the value stack.
 	

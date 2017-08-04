@@ -18,8 +18,12 @@ namespace Ginger {
 	static const char * VM_POP_LOCAL_LOCAL = "local";
 	static const char * VM_PUSH_LOCAL = "push.local";
 	static const char * VM_PUSH_LOCAL_LOCAL = "local";
+	static const char * VM_PUSH_LOCAL0 = "push.local0";
+	static const char * VM_PUSH_LOCAL1 = "push.local1";
 	static const char * VM_PUSH_LOCAL_RET = "push.local.ret";
 	static const char * VM_PUSH_LOCAL_RET_LOCAL = "local";
+	static const char * VM_PUSH_LOCAL0_RET = "push.local.ret";
+	static const char * VM_PUSH_LOCAL1_RET = "push.local.ret";
 
 	static const char * VM_PUSH_GLOBAL = "push.global";
 	static const char * VM_POP_GLOBAL = "pop.global";
@@ -88,6 +92,8 @@ namespace Ginger {
 	static const char * VM_CHECK_MARK0_LOCAL = "local";
 	static const char * VM_CHECK_MARK1 = "check.mark1";
 	static const char * VM_CHECK_MARK1_LOCAL = "local";
+	static const char * VM_CHECK_COUNT = "check.count";
+	static const char * VM_CHECK_COUNT_N = "n";
 
 	static const char * VM_GOTO = "goto";
 	static const char * VM_GOTO_TO = "to";
@@ -110,4 +116,7 @@ namespace Ginger {
 	static const char * VM_FAIL = "fail";
 
 	static const char * VM_GETITERATOR = "getiterator";
+
+	static const char * VM_FIELD = "field";
+	static const char * VM_FIELD_N = "n";
 }

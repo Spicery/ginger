@@ -2,9 +2,15 @@
 Definition
     FIELD N ( RECORD ) -> ( RECORD_FIELD[n] )
 
+Code
+	<field n=N />
+
 Summary
     Given a record on the top of the stack, it extracts the Nth field
     and replaces the record with this.
+
+Stats
+	Width = 2
     
 Unchecked Precondition
     * The top of the stack is a record

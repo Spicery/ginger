@@ -148,13 +148,19 @@ void CodeGenClass::compileInstruction( Gnx instruction ) {
 		this->emitValof( this->resolveGlobal( instruction ) );
 	} else if ( name == VM_PUSH_LOCAL ) {
 		this->vmiPUSH_INNER_SLOT( instruction->attributeToInt( VM_PUSH_LOCAL_LOCAL ) );
+	} else if ( name == VM_PUSH_LOCAL0 ) {
+		this->vmiPUSH_INNER_SLOT( 0 );
+	} else if ( name == VM_PUSH_LOCAL1 ) {
+		this->vmiPUSH_INNER_SLOT( 1 );
 	} else if ( name == VM_PUSH_LOCAL_RET ) {
 		const int slot = instruction->attributeToInt( VM_PUSH_LOCAL_RET_LOCAL );
 		switch ( slot ) {
 			case 0:
+				//	TODO: flag a missing optimisation. Peephole optimisation should remove this.
 				this->emitSPC( vmc_push_local0_ret );
 				break;
 			case 1:
+				//	TODO: flag a missing optimisation.
 				this->emitSPC( vmc_push_local1_ret );
 				break;
 			default:	
@@ -162,6 +168,10 @@ void CodeGenClass::compileInstruction( Gnx instruction ) {
 				this->emitRef( IntToRef( slot ) );
 				break;
 		}
+	} else if ( name == VM_PUSH_LOCAL0_RET ) {
+		this->emitSPC( vmc_push_local0_ret );
+	} else if ( name == VM_PUSH_LOCAL1_RET ) {
+		this->emitSPC( vmc_push_local1_ret );
 	} else if ( name == VM_PUSH_GLOBAL ) {
 		this->emitSPC( vmc_push_global );
 		this->emitValof( this->resolveGlobal( instruction ) );
@@ -265,6 +275,10 @@ void CodeGenClass::compileInstruction( Gnx instruction ) {
 		int slot = instruction->attributeToInt( VM_CHECK_MARK1_LOCAL );
 		this->vmiINSTRUCTION( vmc_check_mark1 );
 		this->emitRef( IntToRef( slot ) );
+	} else if ( name == VM_CHECK_COUNT ) {
+		const int n = instruction->attributeToInt( VM_CHECK_COUNT_N );
+		this->vmiINSTRUCTION( vmc_check_count );
+		this->emitRef( IntToRef( n ) );
 	} else if ( name == VM_CHECK_MARK ) {
 		const int slot = instruction->attributeToInt( VM_CHECK_MARK_LOCAL );
 		const int count = instruction->attributeToInt( VM_CHECK_MARK_COUNT );
@@ -299,6 +313,9 @@ void CodeGenClass::compileInstruction( Gnx instruction ) {
 		this->vmiFAIL();
 	} else if ( name == VM_GETITERATOR ) {
 		this->vmiINSTRUCTION( vmc_getiterator );
+	} else if ( name == VM_FIELD ) {
+		const int n = instruction->attributeToInt( VM_FIELD_N );
+		this->vmiFIELD( n );
 	} else if ( name == VM_SEQ ) {
 		for ( auto child : *instruction ) {
 			this->compileInstruction( child );
@@ -721,7 +738,7 @@ void CodeGenClass::vmiDUP() {
 	this->emitSPC( vmc_dup );
 }
 
-void CodeGenClass::vmiCHECK_COUNT( int v ) {
+void CodeGenClass::vmiCHECK_COUNT( const int v ) {
 	this->emitSPC( vmc_check_count );
 	this->emitRef( IntToRef( v ) );
 }

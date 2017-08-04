@@ -9,8 +9,8 @@ Code
     <check.mark local=LOCAL_N count=COUNT />
 
 Summary
-	Checks that the value of the local variable LOCAL_N is N less
-	than the address of the top of the stack.
+	Checks that the number of items on the stack since the local
+	LOCAL_N was recorded is exactly COUNT.
 	
 Unchecked Precondition
 	Pointer values are long-aligned and hence masquerade as Smalls

@@ -48,6 +48,8 @@ instructionSet = [
 	Instruction( "gte","i" ),
 	Instruction( "incr", "i" ),
 	Instruction( "incr_by", "ir" ),
+	Instruction( "incr_local_by", "irr" ),
+	Instruction( "incr_local_by1", "ir" ),
 	Instruction( "lt", "i" ),
 	Instruction( "lte", "i" ),
 	Instruction( "mul", "i" ),

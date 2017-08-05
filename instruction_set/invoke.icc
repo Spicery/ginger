@@ -2,16 +2,20 @@
 Description
     INVOKE METHOD_TABLE DISPATCH_TABLE
 
+Code
+    None at this time.
+
 Summary
     The purpose of INVOKE is to dispatch a core method on an
     object and its arguments. The argument count is held in VMCOUNT.
 
+Stats
+    Width = 3
     
 Unchecked Precondition
     *   INVOKE only works as the 1st instruction of a function.
         It uses -ve offsets to access the fields before the key.
     *   There are VMCOUNT + 1 values on the stack.
-
     
 Exceptions (Checked Preconditions)
     Arity mismatch.

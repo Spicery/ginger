@@ -3,7 +3,10 @@ Definition
 	DECR 
 
 Code
-	<decr />
+	<decr /> 
+	n.b. Using the more general instruction <incr.by by="-1"/>
+	is fine as peephole optimisation in the Ginger Runtime
+	makes them equal.
 
 Summary
 	Decrements the value on top of the stack by 1.
@@ -26,12 +29,8 @@ Ref rx = *VMVP;
 if ( IsSmall( rx ) ) {
 	long x = (long)rx;
 	long sum = x - (long)LongToSmall( 1 );
-	if ( sum >= x ) {
-		*( VMVP ) = (
-			vm->heap().copyDouble( 
-				static_cast< gngdouble_t >( x >> TAG ) - 1.0
-			)
-		);
+	if ( sum < x ) {
+		*( VMVP ) = ToRef( sum );
 		RETURN( pc + 1 );
 	}
 }

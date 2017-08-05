@@ -212,6 +212,8 @@ public:
 	void vmiIFSO( LabelClass * dst );
 	void vmiIFTEST( const bool sense, LabelClass * dst );
 	void vmiINCR( const long d );
+	void vmiINCR_INNER_SLOT_BY( int slot, const long d );
+	void vmiINCR_VID_BY( const VIdent & vid, const long d );
 	void vmiINSTRUCTION( Instruction instr );
 	void vmiINVOKE();
 	void vmiMAKEREF();

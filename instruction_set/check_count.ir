@@ -3,7 +3,7 @@ Definition
     CHECK_COUNT N
 
 Code
-    <check.count n=N />
+    <check.count count=N />
 
 Summary
     Checks that the VMCOUNT register equals N, otherwise throw a

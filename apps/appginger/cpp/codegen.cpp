@@ -245,6 +245,13 @@ void CodeGenClass::compileInstruction( Gnx instruction ) {
 		this->vmiINSTRUCTION( vmc_dup );
 	} else if ( name == VM_INCR ) {
 		this->vmiINSTRUCTION( vmc_incr );
+	} else if ( name == VM_INCR_BY ) {
+		const int n = instruction->attributeToInt( VM_INCR_BY_BY );
+		this->vmiINCR( n );
+	} else if ( name == VM_INCR_LOCAL_BY ) {
+		const int k = instruction->attributeToInt( VM_INCR_LOCAL_BY_LOCAL );
+		const int n = instruction->attributeToInt( VM_INCR_LOCAL_BY_BY );
+		this->vmiINCR_INNER_SLOT_BY( k, n );
 	} else if ( name == VM_DECR ) {
 		this->vmiINSTRUCTION( vmc_decr );
 	} else if ( name == VM_ERASE ) {
@@ -276,7 +283,7 @@ void CodeGenClass::compileInstruction( Gnx instruction ) {
 		this->vmiINSTRUCTION( vmc_check_mark1 );
 		this->emitRef( IntToRef( slot ) );
 	} else if ( name == VM_CHECK_COUNT ) {
-		const int n = instruction->attributeToInt( VM_CHECK_COUNT_N );
+		const int n = instruction->attributeToInt( VM_CHECK_COUNT_COUNT );
 		this->vmiINSTRUCTION( vmc_check_count );
 		this->emitRef( IntToRef( n ) );
 	} else if ( name == VM_CHECK_MARK ) {
@@ -485,6 +492,41 @@ void CodeGenClass::vmiFIELD( long index ) {
 	this->emitRef( ToRef( index ) );
 }
 
+void CodeGenClass::vmiINCR_INNER_SLOT_BY( int slot, const long d ) {
+	switch ( d ) {
+		case 0: {
+			return;
+		}
+		case 1: {
+			this->emitSPC( vmc_incr_local_by1 );
+			this->emitRef( IntToRef( slot ) );	
+			return;
+		}
+		default: {
+			//	We have to be a little careful here because we only support
+			//	Smalls and not the entire range of Long.
+			this->emitSPC( vmc_incr_local_by );
+			this->emitRef( IntToRef( slot ) );	
+			if ( canFitInSmall( d ) ) {
+				this->emitRef( LongToSmall( d ) );
+			} else {
+				throw Mishap( "Increment is out of range" ).culprit( "Increment", d );
+			}
+		}
+	}
+}
+
+void CodeGenClass::vmiINCR_VID_BY( const VIdent & vid, const long d ) {
+	if ( vid.isLocal() ) {
+		this->vmiINCR_INNER_SLOT_BY( vid.getSlot(), d );
+	} else if ( vid.isGlobal() ) {
+		this->vmiPUSH( vid );
+		this->vmiINCR( d );
+		this->vmiPOP( vid, false );
+	} else {
+		throw SystemError( "Internal Error (2)" );
+	}
+}
 
 void CodeGenClass::vmiINCR( long n ) {
 	switch ( n ) {
@@ -1585,19 +1627,17 @@ void CompileQuery::compileQueryAdvn( Gnx query, LabelClass * contn ) {
 	} else if ( nm == GNX_CROSS && N == 2 ) {
 		this->compileQueryAdvn( query->getChild( 1 ), contn );
 	} else if ( nm == GNX_FROM ) {
-
 		//	Obvious candidate for a merged instruction.
 		VIdent & lv = this->getLoopVar( query->attributeToInt( "tmp.loop.var" ) );
-		this->codegen->vmiPUSH( lv );
 		if ( query->hasAttribute( "tmp.by.expr" ) ) {
+			this->codegen->vmiPUSH( lv );
 			VIdent by( query->attributeToInt( "tmp.by.expr" ) );
 			this->codegen->vmiPUSH( by );
 			this->codegen->vmiINSTRUCTION( vmc_add );
+			this->codegen->vmiPOP( lv, false );
 		} else {
-			this->codegen->vmiINSTRUCTION( vmc_incr );
+			this->codegen->vmiINCR_VID_BY( lv, 1 );
 		}
-		this->codegen->vmiPOP( lv, false );
-
 	} else if ( nm == GNX_ONCE ) {
 		const int tmp = query->attributeToInt( "tmp.once.var" );
 		this->codegen->vmiPUSHQ( SYS_FALSE );

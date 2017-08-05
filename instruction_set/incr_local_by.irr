@@ -1,45 +1,48 @@
 /*****************************************************************************\
 Definition
-    INCR_BY N
+    INCR_LOCAL_BY LOCAL BY () -> (TMP) -> ()
 
 Summary
-    Increments the value on top of the stack by N.
+    Increments the local variable LOCAL by BY.
 
 Code
-    <incr.by by=N />
+    <incr.local.by local=LOCAL by=BY />
 
 Stats
-    Width = 2
+    Width = 3
     
 Unchecked Precondition
-    * There is at least one value on the stack
-    * N is a Small (enforced by vmiINCR(long))
+    * BY is a Small (actually enforced by vmiINCR(long))
+    * There's room on the stack for a single transient value.
 
 Exceptions (Checked Preconditions)
-    * The value on the top of the stack is a Num.
+    * The value in the local variable is a Num.
     
 Result (Postcondition)
-    The top of the stack has been incremented by N.
+    The top of the stack has been incremented by BY.
 
 Tags
     * Arithmetic operator
 
 \*****************************************************************************/
 
+long k = ToLong( *( ++pc ) );
+Ref rx = LOCAL( k );
 Ref ry = ToRef( *( (++pc)++ ) );
-Ref rx = *( VMVP );
 
 if ( IsSmall( rx ) ) {
     long y = (long)ry;
     long x = (long)rx;
     long sum = x + y;
     if ( x < 0 ? sum < y : sum >= y ) {
-        *VMVP = ToRef( sum );
+        LOCAL( k ) = ToRef( sum );
         RETURN( pc );
     } 
-}
+} 
+*( ++VMVP ) = rx;
 FREEZE;
 pc = sysAddHelper( pc, vm, ry );
 MELT;
+LOCAL( k ) = *( VMVP-- );
 RETURN( pc );
 

@@ -1,0 +1,47 @@
+/*****************************************************************************\
+Definition
+	DECR_LOCAL_BY1 LOCAL () -> ( TMP ) -> ()
+
+Code
+    <decr.local.by1 local=LOCAL />
+    N.B. Using the general instruction <incr.local.by local=LOCAL by="-1" />
+    is guaranteed to be safe.
+    
+Summary
+	Decrements a local variable by 1.
+
+Stats
+	Width = 2
+	
+Unchecked Precondition
+	* There is at room on the stack for a single transient value.
+	
+Exceptions (Checked Preconditions)
+	* The value of the local variable is a number.
+
+Result (Postcondition)
+	The local variable is one less than before.
+
+Tags
+	* Arithmetic operator
+
+\*****************************************************************************/
+
+
+long k = ToLong( *( (++pc)++ );
+Ref rx = LOCAL( k );
+
+if ( IsSmall( rx ) ) {
+	const long x = (long)rx;
+	const long sum = x - (long)LongToSmall( 1 );
+	if ( sum < x ) {
+		LOCAL( k ) = ToRef( sum );
+		RETURN( pc );
+	} 
+}
+*( ++VMVP ) = rx;
+FREEZE;
+pc = sysSubHelper( pc, vm, LongToSmall( 1 ) );
+MELT;
+LOCAL( k ) = *( VMVP-- );
+RETURN( pc );

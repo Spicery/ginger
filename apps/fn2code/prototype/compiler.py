@@ -256,7 +256,7 @@ class FromQueryCompiler( QueryCompiler ):
 
     def compileLoopTest( self, query, ifso=Label.CONTINUE, ifnot=Label.CONTINUE ):
         if not ifso is Label.CONTINUE:
-            self.plant( "lte.ss", local0=str(self.loop_var_slot), local1=str(self.end_value_slot), to_label=ifso.id() )
+            self.plant( "lte.ss", local0=str( self.loop_var_slot ), local1=str( self.end_value_slot ), to_label=ifso.id() )
             self.simpleContinuation( ifnot )
         else:
             raise Exception( "Not implemented yet" )
@@ -265,10 +265,8 @@ class FromQueryCompiler( QueryCompiler ):
         pass
 
     def compileLoopNext( self, query ):
-        # Great candidate for a merged instruction push-incr-pop.
-        self.plant( "push.local", slot=str( self.loop_var_slot ) )
-        self.plant( "incr" )
-        self.plant( "pop.local", slot=str( self.loop_var_slot ) )
+        self.plant( "incr.local.by", local=str( self.loop_var_slot ), by="1" )
+
 
     def compileLoopFini( self, query, contn=Label.CONTINUE ):
         self.deallocateSlot( self.loop_var_slot )  

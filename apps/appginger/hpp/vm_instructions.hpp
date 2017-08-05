@@ -71,8 +71,14 @@ namespace Ginger {
 	static const char * VM_ERASE = "erase";
 	static const char * VM_ERASE_NUM = "erase.num";
 	static const char * VM_ERASE_NUM_N = "n";
-	static const char * VM_INCR = "incr";
 	static const char * VM_DECR = "decr";
+	static const char * VM_INCR = "incr";
+	static const char * VM_INCR_BY = "incr.by";
+	static const char * VM_INCR_BY_BY = "by";
+
+	static const char * VM_INCR_LOCAL_BY = "incr.local.by";
+	static const char * VM_INCR_LOCAL_BY_LOCAL = "local";
+	static const char * VM_INCR_LOCAL_BY_BY = "by";
 
 	static const char * VM_START_MARK = "start.mark";
 	static const char * VM_START_MARK_LOCAL = "local";
@@ -93,7 +99,7 @@ namespace Ginger {
 	static const char * VM_CHECK_MARK1 = "check.mark1";
 	static const char * VM_CHECK_MARK1_LOCAL = "local";
 	static const char * VM_CHECK_COUNT = "check.count";
-	static const char * VM_CHECK_COUNT_N = "n";
+	static const char * VM_CHECK_COUNT_COUNT = "count";
 
 	static const char * VM_GOTO = "goto";
 	static const char * VM_GOTO_TO = "to";

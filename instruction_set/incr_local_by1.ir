@@ -1,24 +1,24 @@
 /*****************************************************************************\
 Definition
-	INCR ( X ) -> ( X1 )
+	INCR_LOCAL_BY1 LOCAL () -> ( TMP ) -> ()
 
 Code
-    <incr />
-    n.b. Using the more general instruction <incr.by by="1"/>
-	is fine as peephole optimisation in the Ginger Runtime
-	makes them equal.
+    <incr.local.by1 local=LOCAL />
+    N.B. Using the general instruction <incr.local.by local=LOCAL by="1" />
+    is guaranteed to be safe.
     
 Summary
-	Increments X, the value on top of the stack, by 1.
+	Increments a local variable by 1.
 
 Stats
-	Width = 1
+	Width = 2
 	
 Unchecked Precondition
-	There is at least one value on the value stack.
+	* There is at room on the stack for a single transient value.
 	
 Exceptions (Checked Preconditions)
-	The value on top of the stack is a number.
+	* The value of the local variable is a number.
+
 	
 Result (Postcondition)
 	The top of the stack X1 is one greater than before.
@@ -28,17 +28,20 @@ Tags
 
 \*****************************************************************************/
 
-Ref rx = *VMVP;
+long k = ToLong( *( (++pc)++ ) );
+Ref rx = LOCAL( k );
+
 if ( IsSmall( rx ) ) {
 	const long x = (long)rx;
 	const long sum = x + (long)LongToSmall( 1 );
 	if ( sum > x ) {
-		*( VMVP ) = ToRef( sum );
-		RETURN( pc + 1 );
+		LOCAL( k ) = ToRef( sum );
+		RETURN( pc );
 	} 
-} 
-pc += 1;
+}
+*( ++VMVP ) = rx;
 FREEZE;
 pc = sysAddHelper( pc, vm, LongToSmall( 1 ) );
 MELT;
+LOCAL( k ) = *( VMVP-- );
 RETURN( pc );

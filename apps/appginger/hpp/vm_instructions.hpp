@@ -32,11 +32,17 @@ namespace Ginger {
 	static const char * VM_SET_COUNT_CALL_GLOBAL = "set.count.call.global";
 	static const char * VM_SET_COUNT_CALL_GLOBAL_COUNT = "count";
 
+	static const char * VM_SET_COUNT_CALL_LOCAL = "set.count.call.local";
+	static const char * VM_SET_COUNT_CALL_LOCAL_LOCAL = "local";
+	static const char * VM_SET_COUNT_CALL_LOCAL_COUNT = "count";
+
 	static const char * VM_CALLS = "calls";
 	static const char * VM_SET_COUNT_CALLS = "set.count.calls";
 	static const char * VM_SET_COUNT_CALLS_COUNT = "count";
 	static const char * VM_SELF_CALL = "self.call";
 	static const char * VM_SELF_CONSTANT = "self.constant";
+	static const char * VM_SELF_CALL_N = "self.call.n";
+	static const char * VM_SELF_CALL_N_COUNT = "count";
 	static const char * VM_END1_CALLS = "end1.calls";
 	static const char * VM_END1_CALLS_LOCAL = "local";
 

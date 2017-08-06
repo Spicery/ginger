@@ -185,6 +185,9 @@ void CodeGenClass::compileInstruction( Gnx instruction ) {
 		this->vmiSET_CALLS( slot );
 	} else if ( name == VM_SELF_CALL ) {
 		this->vmiSELF_CALL();
+	} else if ( name == VM_SELF_CALL_N ) {
+		const int count = instruction->attributeToInt( VM_SELF_CALL_N_COUNT );
+		this->vmiSELF_CALL_N( count );
 	} else if ( name == VM_SELF_CONSTANT ) {
 		this->vmiSELF_CONSTANT();
 	} else if ( name == VM_END_CALL_GLOBAL ) {
@@ -197,6 +200,12 @@ void CodeGenClass::compileInstruction( Gnx instruction ) {
 		this->emitSPC( vmc_set_count_call_global );
 		this->emitRef( IntToRef( count ) );
 		this->emitValof( this->resolveGlobal( instruction ) );		
+	} else if ( name == VM_SET_COUNT_CALL_LOCAL ) {
+		const int slot = instruction->attributeToInt( VM_SET_COUNT_CALL_LOCAL_LOCAL );
+		const int count = instruction->attributeToInt( VM_SET_COUNT_CALL_LOCAL_COUNT );
+		this->emitSPC( vmc_set_count_call_local );
+		this->emitRef( IntToRef( count ) );
+		this->emitRef( IntToRef( slot ) );		
 	} else if ( name == VM_AND ) {
 		const int to = instruction->attributeToInt( VM_AND_TO );
 		this->vmiINSTRUCTION( vmc_and );

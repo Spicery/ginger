@@ -24,9 +24,9 @@ Result (Postcondition)
 
 \*****************************************************************************/
 
-VMCOUNT = ToLong( pc[ 1 ] );
+VMCOUNT = ToLong( *( (++pc)++ ) );
 {    
-    VMLINK = pc + 2;
+    VMLINK = pc;
     VMLINKFUNC = VMPCFUNC;
     RETURN( VMPCFUNC + 1 );
 }

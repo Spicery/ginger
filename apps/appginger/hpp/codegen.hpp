@@ -163,8 +163,10 @@ private:	//	Helper functions.
 	Valof * resolveGlobal( Gnx var_or_id );
 
 public:
-	void emitSPC( Instruction instr );
+	void emitCode( Instruction instr );
 	void emitRef( Ref ref );
+	void emitInt( int n );
+	void emitLong( long n );
 	void emitValof( Valof *v );
 	void emitVAR_REF( Gnx id );
 	void emitVIDENT_REF( const VIdent & id );

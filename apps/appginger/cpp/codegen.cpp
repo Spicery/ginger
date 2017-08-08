@@ -79,7 +79,7 @@ LabelClass * CodeGenClass::newLabel() {
 	return &this->label_vector.back();
 }
 
-void CodeGenClass::emitSPC( Instruction instr ) {
+void CodeGenClass::emitCode( Instruction instr ) {
 	const InstructionSet & ins = this->instructionSet();
 	Ref instr_ptr = ins.lookup( instr );
 	this->codegenRef( instr_ptr );
@@ -87,6 +87,18 @@ void CodeGenClass::emitSPC( Instruction instr ) {
 
 void CodeGenClass::emitRef( Ref ref ) {
 	this->codegenRef( ref );
+}
+
+void CodeGenClass::emitInt( const int n ) {
+	this->emitLong( static_cast< long >( n ) );
+}
+
+void CodeGenClass::emitLong( const long n ) {
+	if ( canFitInSmall( n ) ) {
+		this->codegenRef( LongToSmall( n ) );
+	} else {
+		throw Mishap( "Long is out of range" ).culprit( "Long value", n );
+	}
 }
 
 void CodeGenClass::emitValof( Valof * v ) {
@@ -116,222 +128,234 @@ Ref * sysCheckExplodeGteN( Ref * pc, MachineClass * vm ) {
             <push.local local="1"/>
             <add/>
             <return>
+
+	N.B. Code generated for each instruction has a fixed
+	width, so that fn2code can correctly calculate widths.
+	So there's very little opportunity for peephole
+	optimistion here.
 */
 void CodeGenClass::compileInstruction( Gnx instruction ) {
 	const string name = instruction->name();
 	if ( name == VM_PUSHQ && not instruction->isEmpty() ) {
-		this->vmiPUSHQ( this->calcConstant( instruction->getChild( 0 ) ) );
+		this->emitCode( vmc_pushq );
+		this->emitRef( this->calcConstant( instruction->getChild( 0 ) ) );
 	} else if ( name == VM_PUSHQ_RET ) {
-		this->vmiPUSHQ_RETURN( this->calcConstant( instruction->getChild( 0 ) ) );
+		this->emitCode( vmc_pushq_ret );
+		this->emitRef( this->calcConstant( instruction->getChild( 0 ) ) );
 	} else if ( name == VM_SYSCALL ) {
 		this->compileSysAppInstruction( instruction );
 	} else if ( name == VM_SYSRETURN ) {
-		this->emitSPC( vmc_sysreturn );
+		this->emitCode( vmc_sysreturn );
 	} else if ( name == VM_SET_COUNT_SYSCALL ) {
 		this->compileSetCountSysAppInstruction( instruction );
 	} else if ( name == VM_ENTER ) {
-		this->emitSPC( vmc_enter );
+		this->emitCode( vmc_enter );
 	} else if ( name == VM_ENTER0 ) {
-		this->emitSPC( vmc_enter0 );
+		this->emitCode( vmc_enter0 );
 	} else if ( name == VM_ENTER1 ) {
-		this->emitSPC( vmc_enter1 );
+		this->emitCode( vmc_enter1 );
 	} else if ( name == VM_RETURN ) {
-		this->vmiRETURN();
+		this->emitCode( vmc_return );
 	} else if ( name == VM_RETURN_IFSO ) {
-		this->emitSPC( vmc_return_ifso );
+		this->emitCode( vmc_return_ifso );
 	} else if ( name == VM_RETURN_IFNOT ) {
-		this->emitSPC( vmc_return_ifnot );
+		this->emitCode( vmc_return_ifnot );
 	} else if ( name == VM_POP_LOCAL ) {
-		this->vmiPOP_INNER_SLOT( instruction->attributeToInt( VM_POP_LOCAL_LOCAL ) );
+		const int slot = instruction->attributeToInt( VM_PUSH_LOCAL_LOCAL );
+		this->emitCode( vmc_pop_local );
+		this->emitInt( slot );
 	} else if ( name == VM_POP_GLOBAL ) {
-		this->emitSPC( vmc_pop_global );
+		this->emitCode( vmc_pop_global );
 		this->emitValof( this->resolveGlobal( instruction ) );
 	} else if ( name == VM_PUSH_LOCAL ) {
-		this->vmiPUSH_INNER_SLOT( instruction->attributeToInt( VM_PUSH_LOCAL_LOCAL ) );
+		const int slot = instruction->attributeToInt( VM_PUSH_LOCAL_LOCAL );
+		this->emitCode( vmc_push_local );
+		this->emitInt( slot );
 	} else if ( name == VM_PUSH_LOCAL0 ) {
-		this->vmiPUSH_INNER_SLOT( 0 );
+		this->emitCode( vmc_push_local0 );
 	} else if ( name == VM_PUSH_LOCAL1 ) {
-		this->vmiPUSH_INNER_SLOT( 1 );
+		this->emitCode( vmc_push_local1 );
 	} else if ( name == VM_PUSH_LOCAL_RET ) {
 		const int slot = instruction->attributeToInt( VM_PUSH_LOCAL_RET_LOCAL );
-		switch ( slot ) {
-			case 0:
-				//	TODO: flag a missing optimisation. Peephole optimisation should remove this.
-				this->emitSPC( vmc_push_local0_ret );
-				break;
-			case 1:
-				//	TODO: flag a missing optimisation.
-				this->emitSPC( vmc_push_local1_ret );
-				break;
-			default:	
-				this->emitSPC( vmc_push_local_ret );
-				this->emitRef( IntToRef( slot ) );
-				break;
-		}
+		this->emitCode( vmc_push_local_ret );
+		this->emitInt( slot );
 	} else if ( name == VM_PUSH_LOCAL0_RET ) {
-		this->emitSPC( vmc_push_local0_ret );
+		this->emitCode( vmc_push_local0_ret );
 	} else if ( name == VM_PUSH_LOCAL1_RET ) {
-		this->emitSPC( vmc_push_local1_ret );
+		this->emitCode( vmc_push_local1_ret );
 	} else if ( name == VM_PUSH_GLOBAL ) {
-		this->emitSPC( vmc_push_global );
+		this->emitCode( vmc_push_global );
 		this->emitValof( this->resolveGlobal( instruction ) );
 	} else if ( name == VM_END1_CALLS ) {
 		const int slot = instruction->attributeToInt( VM_END1_CALLS_LOCAL );
-		this->vmiEND1_CALLS( slot );
+		this->emitCode( vmc_end1_calls );
+		this->emitInt( slot );
 	} else if ( name == VM_CALLS ) {
-		this->vmiCALLS();
+		this->emitCode( vmc_calls );
 	} else if ( name == VM_SET_COUNT_CALLS ) {
 		const int slot = instruction->attributeToInt( VM_SET_COUNT_CALLS_COUNT );
-		this->vmiSET_CALLS( slot );
+		this->emitCode( vmc_set_count_calls );
+		this->emitInt( slot );
 	} else if ( name == VM_SELF_CALL ) {
-		this->vmiSELF_CALL();
+		this->emitCode( vmc_self_call );
 	} else if ( name == VM_SELF_CALL_N ) {
 		const int count = instruction->attributeToInt( VM_SELF_CALL_N_COUNT );
-		this->vmiSELF_CALL_N( count );
+		this->emitCode( vmc_self_call_n );
+		this->emitInt( count );
 	} else if ( name == VM_SELF_CONSTANT ) {
-		this->vmiSELF_CONSTANT();
+		this->emitCode( vmc_self_constant );
 	} else if ( name == VM_END_CALL_GLOBAL ) {
 		const int slot = instruction->attributeToInt( VM_END_CALL_GLOBAL_LOCAL );
-		this->emitSPC( vmc_end_call_global );
-		this->emitRef( IntToRef( slot ) );
+		this->emitCode( vmc_end_call_global );
+		this->emitInt( slot );
 		this->emitValof( this->resolveGlobal( instruction ) );
 	} else if ( name == VM_SET_COUNT_CALL_GLOBAL ) {
 		const int count = instruction->attributeToInt( VM_SET_COUNT_CALL_GLOBAL_COUNT );
-		this->emitSPC( vmc_set_count_call_global );
-		this->emitRef( IntToRef( count ) );
+		this->emitCode( vmc_set_count_call_global );
+		this->emitInt( count );
 		this->emitValof( this->resolveGlobal( instruction ) );		
 	} else if ( name == VM_SET_COUNT_CALL_LOCAL ) {
 		const int slot = instruction->attributeToInt( VM_SET_COUNT_CALL_LOCAL_LOCAL );
 		const int count = instruction->attributeToInt( VM_SET_COUNT_CALL_LOCAL_COUNT );
-		this->emitSPC( vmc_set_count_call_local );
-		this->emitRef( IntToRef( count ) );
-		this->emitRef( IntToRef( slot ) );		
+		this->emitCode( vmc_set_count_call_local );
+		this->emitInt( count );
+		this->emitInt( slot );
 	} else if ( name == VM_AND ) {
 		const int to = instruction->attributeToInt( VM_AND_TO );
-		this->vmiINSTRUCTION( vmc_and );
-		this->emitRef( IntToRef( to ) );	
+		this->emitCode( vmc_and );
+		this->emitInt( to );	
 	} else if ( name == VM_OR ) {
 		const int to = instruction->attributeToInt( VM_OR_TO );
-		this->vmiINSTRUCTION( vmc_or );
-		this->emitRef( IntToRef( to ) );	
+		this->emitCode( vmc_or );
+		this->emitInt( to );
 	} else if ( name == VM_ABSAND ) {
 		const int to = instruction->attributeToInt( VM_ABSAND_TO );
-		this->vmiINSTRUCTION( vmc_absand );
-		this->emitRef( IntToRef( to ) );	
+		this->emitCode( vmc_absand );
+		this->emitInt( to );
 	} else if ( name == VM_ABSOR ) {
 		const int to = instruction->attributeToInt( VM_ABSOR_TO );
-		this->vmiINSTRUCTION( vmc_or );
-		this->emitRef( IntToRef( to ) );	
+		this->emitCode( vmc_or );
+		this->emitInt( to );
 	} else if ( name == VM_ADD ) {
-		this->vmiINSTRUCTION( vmc_add );
+		this->emitCode( vmc_add );
 	} else if ( name == VM_MUL ) {
-		this->vmiINSTRUCTION( vmc_mul );
+		this->emitCode( vmc_mul );
 	} else if ( name == VM_SUB ) {
-		this->vmiINSTRUCTION( vmc_sub );
+		this->emitCode( vmc_sub );
 	} else if ( name == VM_DIV ) {
-		this->vmiINSTRUCTION( vmc_div );
+		this->emitCode( vmc_div );
 	} else if ( name == VM_QUO ) {
-		this->vmiINSTRUCTION( vmc_quo );
+		this->emitCode( vmc_quo );
 	} else if ( name == VM_NEG ) {
-		this->vmiINSTRUCTION( vmc_neg );
+		this->emitCode( vmc_neg );
 	} else if ( name == VM_POS ) {
-		this->vmiINSTRUCTION( vmc_pos );
+		this->emitCode( vmc_pos );
 	} else if ( name == VM_NOT ) {
-		this->vmiINSTRUCTION( vmc_not );
+		this->emitCode( vmc_not );
 	} else if ( name == VM_LT ) {
-		this->vmiINSTRUCTION( vmc_lt );
+		this->emitCode( vmc_lt );
 	} else if ( name == VM_LTE ) {
-		this->vmiINSTRUCTION( vmc_lte );
+		this->emitCode( vmc_lte );
 	} else if ( name == VM_GT ) {
-		this->vmiINSTRUCTION( vmc_gt );
+		this->emitCode( vmc_gt );
 	} else if ( name == VM_GTE ) {
-		this->vmiINSTRUCTION( vmc_gte );
+		this->emitCode( vmc_gte );
 	} else if ( name == VM_EQ ) {
-		this->vmiINSTRUCTION( vmc_eq );
+		this->emitCode( vmc_eq );
 	} else if ( name == VM_NEQ ) {
-		this->vmiINSTRUCTION( vmc_neq );
+		this->emitCode( vmc_neq );
 	} else if ( name == VM_DUP ) {
-		this->vmiINSTRUCTION( vmc_dup );
+		this->emitCode( vmc_dup );
 	} else if ( name == VM_INCR ) {
-		this->vmiINSTRUCTION( vmc_incr );
+		this->emitCode( vmc_incr );
 	} else if ( name == VM_INCR_BY ) {
 		const int n = instruction->attributeToInt( VM_INCR_BY_BY );
-		this->vmiINCR( n );
+		//	We have to be a little careful here because we only support
+		//	Smalls and not the entire range of Long.
+		this->emitCode( vmc_incr_by );
+		this->emitLong( n );
 	} else if ( name == VM_INCR_LOCAL_BY ) {
-		const int k = instruction->attributeToInt( VM_INCR_LOCAL_BY_LOCAL );
-		const int n = instruction->attributeToInt( VM_INCR_LOCAL_BY_BY );
-		this->vmiINCR_INNER_SLOT_BY( k, n );
+		const int slot = instruction->attributeToInt( VM_INCR_LOCAL_BY_LOCAL );
+		const long d = instruction->attributeToLong( VM_INCR_LOCAL_BY_BY );
+		//	We have to be a little careful here because we only support
+		//	Smalls and not the entire range of Long.
+		this->emitCode( vmc_incr_local_by );
+		this->emitInt( slot );
+		this->emitLong( d );
 	} else if ( name == VM_DECR ) {
-		this->vmiINSTRUCTION( vmc_decr );
+		this->emitCode( vmc_decr );
 	} else if ( name == VM_ERASE ) {
-		this->vmiINSTRUCTION( vmc_erase );
+		this->emitCode( vmc_erase );
 	} else if ( name == VM_ERASE_NUM ) {
-		this->vmiERASE_NUM( instruction->attributeToInt( VM_ERASE_NUM_N ) );
+		const long n = instruction->attributeToInt( VM_ERASE_NUM_N );
+		this->emitCode( vmc_erase_num );
+		this->emitInt( n );
 	} else if ( name == VM_START_MARK ) {
 		const int slot = instruction->attributeToInt( VM_START_MARK_LOCAL );
-		this->vmiINSTRUCTION( vmc_start_mark );
-		this->emitRef( IntToRef( slot ) );
+		this->emitCode( vmc_start_mark );
+		this->emitInt( slot );
 	} else if ( name == VM_END_MARK ) {
-		int slot = instruction->attributeToInt( VM_END_MARK_LOCAL );
-		this->vmiINSTRUCTION( vmc_end_mark );
-		this->emitRef( IntToRef( slot ) );
+		int slot = instruction->attributeToLong( VM_END_MARK_LOCAL );
+		this->emitCode( vmc_end_mark );
+		this->emitInt( slot );
 	} else if ( name == VM_SET_COUNT_MARK ) {
 		int slot = instruction->attributeToInt( VM_SET_COUNT_MARK_LOCAL );
-		this->vmiINSTRUCTION( vmc_set_count_mark );
-		this->emitRef( IntToRef( slot ) );
+		this->emitCode( vmc_set_count_mark );
+		this->emitInt( slot );
 	} else if ( name == VM_ERASE_MARK_LOCAL ) {
 		int slot = instruction->attributeToInt( VM_ERASE_MARK_LOCAL );
-		this->vmiINSTRUCTION( vmc_erase_mark );
-		this->emitRef( IntToRef( slot ) );
+		this->emitCode( vmc_erase_mark );
+		this->emitInt( slot );
 	} else if ( name == VM_CHECK_MARK0 ) {
 		int slot = instruction->attributeToInt( VM_CHECK_MARK0_LOCAL );
-		this->vmiINSTRUCTION( vmc_check_mark0 );
-		this->emitRef( IntToRef( slot ) );
+		this->emitCode( vmc_check_mark0 );
+		this->emitInt( slot );
 	} else if ( name == VM_CHECK_MARK1 ) {
 		int slot = instruction->attributeToInt( VM_CHECK_MARK1_LOCAL );
-		this->vmiINSTRUCTION( vmc_check_mark1 );
-		this->emitRef( IntToRef( slot ) );
+		this->emitCode( vmc_check_mark1 );
+		this->emitInt( slot );
 	} else if ( name == VM_CHECK_COUNT ) {
 		const int n = instruction->attributeToInt( VM_CHECK_COUNT_COUNT );
-		this->vmiINSTRUCTION( vmc_check_count );
-		this->emitRef( IntToRef( n ) );
+		this->emitCode( vmc_check_count );
+		this->emitInt( n );
 	} else if ( name == VM_CHECK_MARK ) {
 		const int slot = instruction->attributeToInt( VM_CHECK_MARK_LOCAL );
 		const int count = instruction->attributeToInt( VM_CHECK_MARK_COUNT );
-		this->vmiINSTRUCTION( vmc_check_mark );
-		this->emitRef( IntToRef( slot ) );
-		this->emitRef( IntToRef( count ) );		
+		this->emitCode( vmc_check_mark );
+		this->emitInt( slot );
+		this->emitInt( count );
 	} else if ( name == VM_CHECK_MARK_GTE ) {
 		const int slot = instruction->attributeToInt( VM_CHECK_MARK_GTE_LOCAL );
 		const int count = instruction->attributeToInt( VM_CHECK_MARK_GTE_COUNT );
-		this->vmiINSTRUCTION( vmc_check_mark_gte );
-		this->emitRef( IntToRef( slot ) );
-		this->emitRef( IntToRef( count ) );
+		this->emitCode( vmc_check_mark_gte );
+		this->emitInt( slot );
+		this->emitInt( count );
 	} else if ( name == VM_GOTO ) {
 		const int to = instruction->attributeToInt( VM_GOTO_TO );
-		this->vmiINSTRUCTION( vmc_goto );
-		this->emitRef( IntToRef( to ) );
+		this->emitCode( vmc_goto );
+		this->emitInt( to );
 	} else if ( name == VM_BYPASS ) {
 		const int to = instruction->attributeToInt( VM_BYPASS_TO );
-		this->vmiINSTRUCTION( vmc_bypass );
-		this->emitRef( IntToRef( to ) );
+		this->emitCode( vmc_bypass );
+		this->emitInt( to );
 	} else if ( name == VM_IFNOT ) {
 		const int to = instruction->attributeToInt( VM_IFNOT_TO );
-		this->vmiINSTRUCTION( vmc_ifnot );
-		this->emitRef( IntToRef( to ) );
+		this->emitCode( vmc_ifnot );
+		this->emitInt( to );
 	} else if ( name == VM_IFSO ) {
 		const int to = instruction->attributeToInt( VM_IFSO_TO );
-		this->vmiINSTRUCTION( vmc_ifso );
-		this->emitRef( IntToRef( to ) );
+		this->emitCode( vmc_ifso );
+		this->emitInt( to );
 	} else if ( name == VM_ESCAPE ) {
-		this->vmiESCAPE();
+		this->emitCode( vmc_escape );
 	} else if ( name == VM_FAIL ) {
-		this->vmiFAIL();
+		this->emitCode( vmc_fail );
 	} else if ( name == VM_GETITERATOR ) {
-		this->vmiINSTRUCTION( vmc_getiterator );
+		this->emitCode( vmc_getiterator );
 	} else if ( name == VM_FIELD ) {
 		const int n = instruction->attributeToInt( VM_FIELD_N );
-		this->vmiFIELD( n );
+		this->emitCode( vmc_field );
+		this->emitInt( n );
 	} else if ( name == VM_SEQ ) {
 		for ( auto child : *instruction ) {
 			this->compileInstruction( child );
@@ -347,12 +371,13 @@ void CodeGenClass::compileSysAppInstruction( Gnx mnx ) {
 	if ( it != SysMap::systemFunctionsMap().end() ) {
 		const SysInfo & info = it->second;
 		if ( info.isSysCall() ) {
-			this->vmiSYS_CALL( info.syscall );
+			this->emitCode( vmc_syscall );
+			this->emitRef( ToRef( info.syscall ) );
 		} else if ( info.isVMOp() ) {
-			this->vmiINSTRUCTION( info.instruction );
+			this->emitCode( info.instruction );
 		} else if ( info.isCmpOp() ) {
 			//	TODO: not sure this is correct.
-			this->vmiINSTRUCTION( cmpOpInstruction( info.cmp_op ) );
+			this->emitCode( cmpOpInstruction( info.cmp_op ) );
 		}
 	} else {
 		throw SystemError( "Unknown system call" ).culprit( "Name", name );
@@ -367,13 +392,15 @@ void CodeGenClass::compileSetCountSysAppInstruction( Gnx mnx ) {
 		const SysInfo & info = it->second;
 		if ( info.in_arity.isExact( count ) ) {
 			if ( info.isSysCall() ) {
-				this->vmiSET_SYS_CALL( info.syscall, count );
+				this->emitCode( vmc_set_count_syscall );
+				this->emitInt( count );
+				this->emitRef( ToRef( info.syscall ) );
 			} else if ( info.isVMOp() ) {
 				//	Inherently unchecked.
-				this->vmiINSTRUCTION( info.instruction );
+				this->emitCode( info.instruction );
 			} else if ( info.isCmpOp() ) {
 				//	TODO: not sure this is correct.
-				this->vmiINSTRUCTION( cmpOpInstruction( info.cmp_op ) );
+				this->emitCode( cmpOpInstruction( info.cmp_op ) );
 			}
 		} else {
 			throw(
@@ -393,20 +420,20 @@ void CodeGenClass::compileSetCountSysAppInstruction( Gnx mnx ) {
 void CodeGenClass::vmiCHECK_EXPLODE( Arity arity ) {
 	const int N = arity.count();
 	if ( arity.isExact() ) {
-		this->emitSPC( vmc_syscall_arg );
+		this->emitCode( vmc_syscall_arg );
 		this->emitRef( ToRef( sysCheckExplodeN ) );
 		this->emitRef( IntToRef( N ) );
 	} else if ( N > 0 ) {
 		//	N.B. We only plant code if the N > 0 as N == 0 is trivially true.
-		this->emitSPC( vmc_syscall_arg );
+		this->emitCode( vmc_syscall_arg );
 		this->emitRef( ToRef( sysCheckExplodeGteN ) );
-		this->emitRef( IntToRef( N ) );
+		this->emitInt( N );
 	}
 }
 
 void CodeGenClass::emitVAR_REF( Gnx id ) {
 	if ( id->hasAttribute( GNX_VID_SCOPE, "local" ) ) {
-		this->emitRef( IntToRef( id->attributeToInt( GNX_VID_SLOT ) ) );
+		this->emitInt( id->attributeToInt( GNX_VID_SLOT ) );
 	} else {
 		this->emitValof( resolveGlobal( id ) );
 	}
@@ -433,28 +460,28 @@ void CodeGenClass::emitVIDENT_REF( const VIdent & id ) {
 //	This would need some integration with the garbage collector along
 //	with a new instruction-field marker.
 void CodeGenClass::vmiFAIL() {
-	this->emitSPC( vmc_fail );
+	this->emitCode( vmc_fail );
 }
 
 void CodeGenClass::vmiINSTRUCTION( Instruction instr ) {
-	this->emitSPC( instr );
+	this->emitCode( instr );
 }
 
 void CodeGenClass::vmiSELF_CONSTANT() {
-	this->emitSPC( vmc_self_constant );
+	this->emitCode( vmc_self_constant );
 }
 
 void CodeGenClass::vmiSELF_CALL() {
-	this->emitSPC( vmc_self_call );
+	this->emitCode( vmc_self_call );
 }
 
 void CodeGenClass::vmiSELF_CALL_N( const int n ) {
-	this->emitSPC( vmc_self_call_n );
+	this->emitCode( vmc_self_call_n );
 	this->emitRef( IntToRef( n ) );
 }
 
 void CodeGenClass::vmiSYS_CALL( SysCall * r ) {
-	this->emitSPC( vmc_syscall );
+	this->emitCode( vmc_syscall );
 	this->emitRef( ToRef( r ) );
 }
 
@@ -466,19 +493,19 @@ void CodeGenClass::vmiSYS_CALL( SysCall * r ) {
 	@param data arbitrary data, size compatible with void*
 */
 void CodeGenClass::vmiSYS_CALL_ARG( SysCall * sys, Ref ref ) {
-	this->emitSPC( vmc_syscall_arg );
+	this->emitCode( vmc_syscall_arg );
 	this->emitRef( ToRef( sys ) );
 	this->emitRef( ref );
 }
 
 void CodeGenClass::vmiSYS_CALL_DAT( SysCall * sys, unsigned long data ) {
-	this->emitSPC( vmc_syscall_dat );
+	this->emitCode( vmc_syscall_dat );
 	this->emitRef( ToRef( sys ) );
 	this->emitRef( ToRef( data ) );
 }
 
 void CodeGenClass::vmiSYS_CALL_ARGDAT( SysCall * sys, Ref ref, unsigned long data ) {
-	this->emitSPC( vmc_syscall_argdat );
+	this->emitCode( vmc_syscall_argdat );
 	this->emitRef( ToRef( sys ) );
 	this->emitRef( ref );
 	this->emitRef( ToRef( data ) );
@@ -486,18 +513,18 @@ void CodeGenClass::vmiSYS_CALL_ARGDAT( SysCall * sys, Ref ref, unsigned long dat
 
 
 void CodeGenClass::vmiSET_SYS_CALL( SysCall * r, int A ) {
-	this->emitSPC( vmc_set_count_syscall );
+	this->emitCode( vmc_set_count_syscall );
 	this->emitRef( IntToRef( A ) );
 	this->emitRef( ToRef( r ) );
 }
 
 void CodeGenClass::vmiSYS_RETURN() {
-	this->emitSPC( vmc_sysreturn );
+	this->emitCode( vmc_sysreturn );
 }
 
 
 void CodeGenClass::vmiFIELD( long index ) {
-	this->emitSPC( vmc_field );
+	this->emitCode( vmc_field );
 	this->emitRef( ToRef( index ) );
 }
 
@@ -507,14 +534,14 @@ void CodeGenClass::vmiINCR_INNER_SLOT_BY( int slot, const long d ) {
 			return;
 		}
 		case 1: {
-			this->emitSPC( vmc_incr_local_by1 );
+			this->emitCode( vmc_incr_local_by1 );
 			this->emitRef( IntToRef( slot ) );	
 			return;
 		}
 		default: {
 			//	We have to be a little careful here because we only support
 			//	Smalls and not the entire range of Long.
-			this->emitSPC( vmc_incr_local_by );
+			this->emitCode( vmc_incr_local_by );
 			this->emitRef( IntToRef( slot ) );	
 			if ( canFitInSmall( d ) ) {
 				this->emitRef( LongToSmall( d ) );
@@ -543,17 +570,17 @@ void CodeGenClass::vmiINCR( long n ) {
 			return;
 		}
 		case 1: {
-			this->emitSPC( vmc_incr );
+			this->emitCode( vmc_incr );
 			return;
 		}
 		case -1: {
-			this->emitSPC( vmc_decr );
+			this->emitCode( vmc_decr );
 			return;
 		}
 		default: {
 			//	We have to be a little careful here because we only support
 			//	Smalls and not the entire range of Long.
-			this->emitSPC( vmc_incr_by );
+			this->emitCode( vmc_incr_by );
 			if ( canFitInSmall( n ) ) {
 				this->emitRef( LongToSmall( n ) );
 			} else {
@@ -564,7 +591,7 @@ void CodeGenClass::vmiINCR( long n ) {
 }
 
 void CodeGenClass::vmiCHAIN_LITE( Ref fn, long N ) {
-	this->emitSPC( vmc_chainlite );
+	this->emitCode( vmc_chainlite );
 	this->emitRef( fn );
 	this->emitRef( ToRef( N ) );
 }
@@ -576,7 +603,7 @@ Valof * CodeGenClass::resolveGlobal( Gnx id ) {
 }
 
 void CodeGenClass::vmiPOP_INNER_SLOT( int slot ) {
-	this->emitSPC( vmc_pop_local );
+	this->emitCode( vmc_pop_local );
 	this->emitRef( IntToRef( slot ) );	
 }
 
@@ -588,7 +615,7 @@ void CodeGenClass::vmiPOP( const VIdent & id, const bool assign_vs_bind ) {
 		if ( assign_vs_bind && v->isProtected() ) {
 			throw Ginger::Mishap( "Assigning to a protected variable" ).culprit( "Variable", v->getNameString() );
 		}
-		this->emitSPC( vmc_pop_global );
+		this->emitCode( vmc_pop_global );
 		this->emitValof( v );
 	} else {
 		throw SystemError( "Internal Error (2)" );
@@ -607,7 +634,7 @@ bool CodeGenClass::vmiTRY_POP( const VIdent & id, const bool assign_vs_bind, Lab
 		if ( assign_vs_bind && v->isProtected() ) {
 			throw Ginger::Mishap( "Assigning to a protected variable" ).culprit( "Variable", v->getNameString() );
 		}
-		this->emitSPC( vmc_pop_global );
+		this->emitCode( vmc_pop_global );
 		this->emitValof( v );
 		this->continueFrom( dst );
 		return false;
@@ -645,7 +672,7 @@ void CodeGenClass::vmiPUSH( const VIdent & vid ) {
 	} else if ( vid.isLocal() ) {
 		this->vmiPUSH_INNER_SLOT( vid.getSlot() );
 	} else if ( vid.isGlobal() ) {
-		this->emitSPC( vmc_push_global );
+		this->emitCode( vmc_push_global );
 		this->emitValof( vid.getValof() );
 	} else {
 		throw SystemError( "Internal Error( 3 )" );
@@ -658,7 +685,7 @@ void CodeGenClass::vmiPUSH( const VIdent & vid, LabelClass * contn ) {
 	} else if ( vid.isLocal() ) {
 		this->vmiPUSH_INNER_SLOT( vid.getSlot(), contn );
 	} else if ( vid.isGlobal() ) {
-		this->emitSPC( vmc_push_global );
+		this->emitCode( vmc_push_global );
 		this->emitValof( vid.getValof() );
 		this->continueFrom( contn );
 	} else {
@@ -669,13 +696,13 @@ void CodeGenClass::vmiPUSH( const VIdent & vid, LabelClass * contn ) {
 void CodeGenClass::vmiPUSH_INNER_SLOT( int slot ) {
 	switch ( slot ) {
 	case 0:
-		this->emitSPC( vmc_push_local0 );
+		this->emitCode( vmc_push_local0 );
 		return;
 	case 1:
-		this->emitSPC( vmc_push_local1 );
+		this->emitCode( vmc_push_local1 );
 		return;
 	default:	
-		this->emitSPC( vmc_push_local );
+		this->emitCode( vmc_push_local );
 		this->emitRef( IntToRef( slot ) );
 	}
 }
@@ -684,13 +711,13 @@ void CodeGenClass::vmiPUSH_INNER_SLOT( int slot, LabelClass * contn ) {
 	const bool is_ret = contn != nullptr and contn->isReturn();
 	switch ( slot ) {
 		case 0:
-			this->emitSPC( is_ret ? vmc_push_local0_ret : vmc_push_local0 );
+			this->emitCode( is_ret ? vmc_push_local0_ret : vmc_push_local0 );
 			return;
 		case 1:
-			this->emitSPC( is_ret ? vmc_push_local1_ret : vmc_push_local1 );
+			this->emitCode( is_ret ? vmc_push_local1_ret : vmc_push_local1 );
 			return;
 		default:	
-			this->emitSPC( is_ret ? vmc_push_local_ret : vmc_push_local );
+			this->emitCode( is_ret ? vmc_push_local_ret : vmc_push_local );
 			this->emitRef( IntToRef( slot ) );
 	}
 }
@@ -708,27 +735,27 @@ void CodeGenClass::vmiSETCONT() {
 }
 
 void CodeGenClass::vmiSET_COUNT_TO_MARK( int A ) {
-	this->emitSPC( vmc_set_count_mark );
+	this->emitCode( vmc_set_count_mark );
 	this->emitRef( IntToRef( A ) );
 }
 
 void CodeGenClass::vmiINVOKE() {
-	this->emitSPC( vmc_invoke );
+	this->emitCode( vmc_invoke );
 	this->emitRef( SYS_ABSENT );	//	Cache.
 	this->emitRef( SYS_ABSENT );	//	Method table.
 }
 
 void CodeGenClass::vmiCALLS() {
-	this->emitSPC( vmc_calls );
+	this->emitCode( vmc_calls );
 }
 
 void CodeGenClass::vmiEND_CALL_ID( int var, const VIdent & ident ) {
 	if ( ident.isLocal() ) {
 		this->vmiSET_COUNT_TO_MARK( var );
 		this->vmiPUSH( ident );
-		this->emitSPC( vmc_calls );
+		this->emitCode( vmc_calls );
 	} else if ( ident.isGlobal() ) {
-		this->emitSPC( vmc_end_call_global );
+		this->emitCode( vmc_end_call_global );
 		this->emitRef( IntToRef( var ) );
 		this->emitVIDENT_REF( ident );
 	} else {
@@ -738,9 +765,9 @@ void CodeGenClass::vmiEND_CALL_ID( int var, const VIdent & ident ) {
 
 void CodeGenClass::vmiSET_CALL_ID( int in_arity, const VIdent & ident ) {
 	if ( ident.isLocal() ) {
-		this->emitSPC( vmc_set_count_call_local );
+		this->emitCode( vmc_set_count_call_local );
 	} else if ( ident.isGlobal() ) {
-		this->emitSPC( vmc_set_count_call_global );
+		this->emitCode( vmc_set_count_call_global );
 	} else {
 		throw UnreachableError();
 	}
@@ -752,45 +779,45 @@ void CodeGenClass::vmiSET_CALL_ID( int in_arity, const VIdent & ident ) {
 void CodeGenClass::vmiSET_CALL_INNER_SLOT( int in_arity, int slot ) {
 	this->vmiSET_COUNT_TO_MARK( in_arity );
 	this->vmiPUSH_INNER_SLOT( slot );
-	this->emitSPC( vmc_calls );
+	this->emitCode( vmc_calls );
 }
 
 
 void CodeGenClass::vmiEND1_CALLS( int var ) {
-	this->emitSPC( vmc_end1_calls );
+	this->emitCode( vmc_end1_calls );
 	this->emitRef( IntToRef( var ) );
 }
 
 void CodeGenClass::vmiSET_CALLS( int in_arity ) {
-	this->emitSPC( vmc_set_count_calls );
+	this->emitCode( vmc_set_count_calls );
 	this->emitRef( IntToRef( in_arity ) );
 }
 
 void CodeGenClass::vmiSTART_MARK( int v ) {
-	this->emitSPC( vmc_start_mark );
+	this->emitCode( vmc_start_mark );
 	this->emitRef( IntToRef( v ) );
 }
 
 void CodeGenClass::vmiEND_MARK( int v ) {
-	this->emitSPC( vmc_end_mark );
+	this->emitCode( vmc_end_mark );
 	this->emitRef( IntToRef( v ) );
 }
 
 void CodeGenClass::vmiERASE_MARK( int var ) {
-	this->emitSPC( vmc_erase_mark );
+	this->emitCode( vmc_erase_mark );
 	this->emitRef( IntToRef( var ) );
 }
 
 void CodeGenClass::vmiERASE() {
-	this->emitSPC( vmc_erase );
+	this->emitCode( vmc_erase );
 }
 
 void CodeGenClass::vmiDUP() {
-	this->emitSPC( vmc_dup );
+	this->emitCode( vmc_dup );
 }
 
 void CodeGenClass::vmiCHECK_COUNT( const int v ) {
-	this->emitSPC( vmc_check_count );
+	this->emitCode( vmc_check_count );
 	this->emitRef( IntToRef( v ) );
 }
 
@@ -798,7 +825,7 @@ void CodeGenClass::vmiCHECK_MARK( int v, Arity a ) {
 	if ( a.isExact() ) {
 		this->vmiCHECK_MARK( v, a.count() );
 	} else {
-		this->emitSPC( vmc_check_mark_gte );
+		this->emitCode( vmc_check_mark_gte );
 		this->emitRef( IntToRef( v ) );
 		this->emitRef( IntToRef( a.count() ) );		
 	}
@@ -810,7 +837,7 @@ void CodeGenClass::vmiCHECK_MARK( int v, int N ) {
 	} else if ( N == 1 ) {
 		this->vmiCHECK_MARK1( v );
 	} else {
-		this->emitSPC( vmc_check_mark );
+		this->emitCode( vmc_check_mark );
 		this->emitRef( IntToRef( v ) );
 		this->emitRef( IntToRef( N ) );
 	}
@@ -819,7 +846,7 @@ void CodeGenClass::vmiCHECK_MARK( int v, int N ) {
 void CodeGenClass::vmiCHECK_MARK_ELSE( int v, int N, LabelClass * fail_label ) {
 	//	TODO: this is not at all good code. Opportunity to improve.
 	LabelClass cont_label( this );
-	this->emitSPC( vmc_neq_si );
+	this->emitCode( vmc_neq_si );
 	this->emitRef( IntToRef( v ) );
 	this->emitRef( LongToSmall( N ) );
 	cont_label.labelInsert();
@@ -829,23 +856,23 @@ void CodeGenClass::vmiCHECK_MARK_ELSE( int v, int N, LabelClass * fail_label ) {
 }
 
 void CodeGenClass::vmiCHECK_MARK1( int v ) {
-	this->emitSPC( vmc_check_mark1 );
+	this->emitCode( vmc_check_mark1 );
 	this->emitRef( IntToRef( v ) );
 }
 
 //	Do we ever generate this?
 void CodeGenClass::vmiCHECK_MARK0( int v ) {
-	this->emitSPC( vmc_check_mark0 );
+	this->emitCode( vmc_check_mark0 );
 	this->emitRef( IntToRef( v ) );
 }
 
 void CodeGenClass::vmiPUSHQ( Ref obj ) {
-	this->emitSPC( vmc_pushq );
+	this->emitCode( vmc_pushq );
 	this->emitRef( obj );
 }
 
 void CodeGenClass::vmiPUSHQ_RETURN( Ref obj ) {
-	this->emitSPC( vmc_pushq_ret );
+	this->emitCode( vmc_pushq_ret );
 	this->emitRef( obj );
 }
 
@@ -869,11 +896,11 @@ void CodeGenClass::vmiPUSHQ_SYMBOL( const std::string & s, LabelClass * contn ) 
 }
 
 void CodeGenClass::vmiRETURN() {
-	this->emitSPC( vmc_return );
+	this->emitCode( vmc_return );
 }
 
 void CodeGenClass::vmiENTER() {
-	this->emitSPC(
+	this->emitCode(
 		this->ninputs == 0 ? vmc_enter0 :
 		this->ninputs == 1 ? vmc_enter1 :
 		vmc_enter
@@ -929,30 +956,30 @@ Ref CodeGenClass::vmiENDFUNCTION( bool in_heap ) {
 }
 
 void CodeGenClass::vmiNOT() {
-	this->emitSPC( vmc_not );
+	this->emitCode( vmc_not );
 }
 
 void CodeGenClass::vmiAND( LabelClass * dst ) {
 	if ( dst == CONTINUE_LABEL ) throw SystemError( "vmiAND passed CONTINUE_LABEL" );
-	this->emitSPC( vmc_and );
+	this->emitCode( vmc_and );
 	dst->labelInsert();
 }
 
 void CodeGenClass::vmiOR( LabelClass * dst ) {
 	if ( dst == CONTINUE_LABEL ) throw SystemError( "vmiOR passed CONTINUE_LABEL" );
-	this->emitSPC( vmc_or );
+	this->emitCode( vmc_or );
 	dst->labelInsert();
 }
 
 void CodeGenClass::vmiABS_AND( LabelClass * dst ) {
 	if ( dst == CONTINUE_LABEL ) throw SystemError( "vmiABS_AND passed CONTINUE_LABEL" );
-	this->emitSPC( vmc_absand );
+	this->emitCode( vmc_absand );
 	dst->labelInsert();
 }
 
 void CodeGenClass::vmiABS_OR( LabelClass * dst ) {
 	if ( dst == CONTINUE_LABEL ) throw SystemError( "vmiABS_OR passed CONTINUE_LABEL" );
-	this->emitSPC( vmc_absor );
+	this->emitCode( vmc_absor );
 	dst->labelInsert();
 }
 
@@ -960,10 +987,10 @@ void CodeGenClass::vmiIFSO( LabelClass * dst ) {
 	if ( dst == CONTINUE_LABEL ) {
 		throw SystemError( "vmiIFSO called with CONTINUE_LABEL" );
 	} else if ( dst->isntReturn() ) {
-		this->emitSPC( vmc_ifso );
+		this->emitCode( vmc_ifso );
 		dst->labelInsert();
 	} else {
-		this->emitSPC( vmc_return_ifso );
+		this->emitCode( vmc_return_ifso );
 	}	
 }
 
@@ -971,10 +998,10 @@ void CodeGenClass::vmiIFNOT( LabelClass * dst ) {
 	if ( dst == CONTINUE_LABEL ) {
 		throw SystemError( "vmiIFNOT called with CONTINUE_LABEL" );
 	} else if ( dst->isntReturn() ) {
-		this->emitSPC( vmc_ifnot );
+		this->emitCode( vmc_ifnot );
 		dst->labelInsert();
 	} else {
-		this->emitSPC( vmc_return_ifnot );
+		this->emitCode( vmc_return_ifnot );
 	}	
 }
 
@@ -994,22 +1021,22 @@ void CodeGenClass::vmiIFTEST( const bool sense, LabelClass * dst ) {
 void CodeGenClass::vmiIFSO( LabelClass * d, LabelClass * contn ) {
 	if ( contn == CONTINUE_LABEL ) {
 		if ( d == CONTINUE_LABEL ) {
-			this->emitSPC( vmc_erase );
+			this->emitCode( vmc_erase );
 		} else if ( d->isntReturn() ) {
-			this->emitSPC( vmc_ifso );
+			this->emitCode( vmc_ifso );
 			d->labelInsert();
 		} else {
-			this->emitSPC( vmc_return_ifso );
+			this->emitCode( vmc_return_ifso );
 		}
 	} else if ( d == CONTINUE_LABEL ) {
 		if ( contn->isntReturn() ) {
-			this->emitSPC( vmc_ifnot );
+			this->emitCode( vmc_ifnot );
 			contn->labelInsert();
 		} else {
-			this->emitSPC( vmc_return_ifnot );
+			this->emitCode( vmc_return_ifnot );
 		}
 	} else {
-		this->emitSPC( vmc_ifso );
+		this->emitCode( vmc_ifso );
 		d->labelInsert();
 		this->continueFrom( contn );			
 	}
@@ -1028,12 +1055,12 @@ void CodeGenClass::vmiIFEQ( LabelClass * dst ) {
 		//	No branching
 		this->vmiERASE_NUM( 2 );
 	} else if ( dst->isntReturn() ) {
-		this->emitSPC( vmc_eq );
-		this->emitSPC( vmc_ifso );
+		this->emitCode( vmc_eq );
+		this->emitCode( vmc_ifso );
 		dst->labelInsert();
 	} else {
-		this->emitSPC( vmc_eq );
-		this->emitSPC( vmc_return_ifso );
+		this->emitCode( vmc_eq );
+		this->emitCode( vmc_return_ifso );
 	}
 }
 
@@ -1042,12 +1069,12 @@ void CodeGenClass::vmiIFNEQ( LabelClass * dst ) {
 		//	No branching
 		this->vmiERASE_NUM( 2 );
 	} else if ( dst->isntReturn() ) {
-		this->emitSPC( vmc_eq );
-		this->emitSPC( vmc_ifnot );
+		this->emitCode( vmc_eq );
+		this->emitCode( vmc_ifnot );
 		dst->labelInsert();
 	} else {
-		this->emitSPC( vmc_eq );
-		this->emitSPC( vmc_return_ifnot );
+		this->emitCode( vmc_eq );
+		this->emitCode( vmc_return_ifnot );
 	}
 }
 
@@ -1058,7 +1085,7 @@ void CodeGenClass::vmiIFNEQTO( Ref ref, LabelClass * dst, LabelClass *contn ) {
 	} else if ( dst == CONTINUE_LABEL ) {
 		this->vmiIFEQTO( ref, contn, dst );
 	} else {
-		this->emitSPC( vmc_pushq );
+		this->emitCode( vmc_pushq );
 		this->emitRef( ref );
 		this->vmiIFNEQ( dst );
 	}
@@ -1071,7 +1098,7 @@ void CodeGenClass::vmiIFEQTO( Ref ref, LabelClass * dst, LabelClass *contn ) {
 	} else if ( dst == CONTINUE_LABEL ) {
 		this->vmiIFNEQTO( ref, contn, dst );
 	} else {
-		this->emitSPC( vmc_pushq );
+		this->emitCode( vmc_pushq );
 		this->emitRef( ref );
 		this->vmiIFEQ( dst );
 	}
@@ -1081,9 +1108,9 @@ void CodeGenClass::vmiERASE_NUM( long n ) {
 	if ( n == 0 ) {
 		//	Do nothing
 	} else if ( n == 1 ) {
-		this->emitSPC( vmc_erase );
+		this->emitCode( vmc_erase );
 	} else {
-		this->emitSPC( vmc_erase_num );
+		this->emitCode( vmc_erase_num );
 		this->emitRef( ToRef( n ) );
 	}
 }
@@ -1107,9 +1134,9 @@ void CodeGenClass::vmiGOTO( LabelClass * dst ) {
 	if ( dst == CONTINUE_LABEL ) {
 		throw SystemError( "Trying to GOTO a fake label" );
 	} else if ( dst->isReturn() ) {
-		this->emitSPC( vmc_return );
+		this->emitCode( vmc_return );
 	} else {
-		this->emitSPC( vmc_goto );
+		this->emitCode( vmc_goto );
 		dst->labelInsert();
 	}
 }
@@ -1121,7 +1148,7 @@ void CodeGenClass::vmiBYPASS( LabelClass * dst ) {
 	if ( dst == CONTINUE_LABEL ) {
 		throw SystemError( "Trying to BYPASS a fake label" );
 	} else {
-		this->emitSPC( vmc_bypass );
+		this->emitCode( vmc_bypass );
 		dst->labelInsert();
 	}
 }
@@ -1157,7 +1184,7 @@ void CodeGenClass::vmiTEST(
 		this->vmiPUSH( vid0 );
 		this->vmiPUSH( vid1 );
 		this->vmiINSTRUCTION( cmpOpInstruction( cmp_op ) );
-		this->emitSPC( vmc_ifso );
+		this->emitCode( vmc_ifso );
 		dst->labelInsert();		
 	}
 }
@@ -2327,7 +2354,7 @@ void CodeGenClass::compileGnx( Gnx mnx, LabelClass * contn ) {
 }
 
 void CodeGenClass::vmiESCAPE() {
-	this->emitSPC( vmc_escape );
+	this->emitCode( vmc_escape );
 }
 
 void CodeGenClass::compileThrow( Gnx mnx, LabelClass * contn ) {

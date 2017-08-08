@@ -49,6 +49,8 @@ class SlotAllocations:
     def deallocateSlot( self, slot ):
         del self.slots[ slot ]
 
+
+
 class MiniCompiler:
     '''This is an abstract class for 'compilers' that are specialised to
     a particular type of expression. The main way they are invoked is by
@@ -56,7 +58,7 @@ class MiniCompiler:
     of instructions. When they invoke another mini-compiler they can 
     optionally share their list of instructions (via the optional parameter
     share), which just saves a bit of unnecessary copying. However the
-    ongiong shared context, such as slot-allocations should always be
+    ongoing shared context, such as slot-allocations should always be
     shared with mini-compilers, so if 'share' is omitted then 'parent' should
     be supplied.
     '''
@@ -81,12 +83,14 @@ class MiniCompiler:
             # (At the moment that is just slot-allocations.)
             self.allocations = parent.allocations
 
-    def add( self, *args ):
-        '''Extends the instructions with an arbitrary number of GNX values'''
-        self.instructions.add( *args )
+    def add( self, ixml ):
+        '''Extends the instructions with a single of GNX value'''
+        self.instructions.add( ixml )
 
     def plant( self, name, *kids, **attributes ):
-        '''Creates a single GNX element and adds it to the instruction list'''
+        '''
+        Creates a single GNX element and adds it to the instruction list.
+        '''
         self.add( MinXML( name, *kids, **attributes ) )
 
     def setLabel( self, label ):

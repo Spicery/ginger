@@ -408,11 +408,13 @@ private:
 			it != SysMap::systemFunctionsMap().end();
 			++it
 		) {
+			auto v = it->second;
 			this->formatter->startValue( "sysfn" );
 			this->formatter->addAttribute( "name", it->first );
 			this->formatter->addAttribute( "docstring", ( it->second.docstring != NULL ? it->second.docstring : "-" ) );
-			this->formatter->addAttribute( "in", it->second.in_arity.toString() );
-			this->formatter->addAttribute( "out", it->second.out_arity.toString() );
+			this->formatter->addAttribute( "in", v.in_arity.toString() );
+			this->formatter->addAttribute( "out", v.out_arity.toString() );
+			this->formatter->addAttribute( "flavour", v.isCmpOp() ? "cmp" : v.isVMOp() ? "vm" : "sys" );
 			this->formatter->endValue();
 		}
 

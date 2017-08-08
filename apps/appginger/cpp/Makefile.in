@@ -59,7 +59,7 @@ OBJS= syscrypto.o bigint.o rational.o sysvm.o \
 
 USEREXECUTABLES=ginger-cgi ginger-script ginger-cli ginger-info
 
-all: $(USEREXECUTABLES) info-debug.db info-debug.rst info-debug.hlp
+all: $(USEREXECUTABLES) system.db info-debug.rst info-debug.hlp
 
 ################################################################################
 # We need to disable optimisations based on non-overflow of integer 
@@ -99,8 +99,16 @@ info-debug.hlp: ginger-info
 info-debug.rst: ginger-info
 	./ginger-info -r > info-debug.rst
 
-info-debug.db: ginger-info
+info-debug.db: ginger-info 
 	./ginger-info -j | python3 make_info_db.py
+
+../../../instruction_set/instruction.db: 
+	( cd ../../../instruction_set; make -f InstructionSetDB.makefile build )
+
+system.db: info-debug.db ../../../instruction_set/instruction.db
+	rm -f system.db
+	sqlite3 info-debug.db '.dump' | sqlite3 system.db
+	sqlite3 ../../../instruction.db '.dump' | sqlite3 system.db
 
 ginger-cli: libappginger.a climain.o
 	$(CXX) $(CXXFLAGS) $(BOOST_CPPFLAGS) -o $@ climain.o $(LIBAPPGINGER) $(LIBRARIES)
@@ -116,6 +124,7 @@ clean:
 	rm -f $(USEREXECUTABLES)
 	rm -f *.a
 	rm -f info-debug.*
+	rm -f system.db
 
 #	Nothing needs doing.
 check:

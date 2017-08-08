@@ -160,8 +160,9 @@ install-as-is:
 	mkdir -p $(DD_INSTALL_LIB)/fn2code
 	chmod a+rx,u+w $(DD_INSTALL_LIB)/fn2code
 	cp apps/fn2code/prototype/*.py $(DD_INSTALL_LIB)/fn2code
-	/usr/bin/install -m a=r instruction_set/instruction_set.db $(DD_INSTALL_LIB)/system
-	cp apps/appginger/cpp/info-debug.* $(DD_INSTALL_LIB)/system
+	/usr/bin/install -m a=r apps/appginger/cpp/system.db $(DD_INSTALL_LIB)/system
+	/usr/bin/install -m a=r apps/appginger/cpp/info-debug.rst $(DD_INSTALL_LIB)/system
+	/usr/bin/install -m a=r apps/appginger/cpp/info-debug.hlp $(DD_INSTALL_LIB)/system
 	#
 	cp -r apps/ginger/usage $(DD_INSTALL_LIB)/ginger/
 	cp -r apps/ginger-admin/admin-templates $(DD_INSTALL_LIB)

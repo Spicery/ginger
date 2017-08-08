@@ -6,11 +6,11 @@ import sqlite3
 
 def addSysfns( data, conn ):
 	conn.execute( 'DROP TABLE IF EXISTS sysfn' )
-	conn.execute( 'CREATE TABLE sysfn( name text PRIMARY KEY, [in] text, [out] text, docstring text )'  )
+	conn.execute( 'CREATE TABLE sysfn( name text PRIMARY KEY, [in] text, [out] text, docstring text, flavour text )'  )
 	for ( sysapp_name, info ) in data.items():
 		conn.execute( 
-			'INSERT INTO sysfn VALUES( ?, ?, ?, ? )', 
-			( sysapp_name, info[ 'in' ], info[ 'out' ], info[ 'docstring' ] ) 
+			'INSERT INTO sysfn VALUES( ?, ?, ?, ?, ? )', 
+			( sysapp_name, info[ 'in' ], info[ 'out' ], info[ 'docstring' ], info[ 'flavour' ] ) 
 		)
 
 def addEngines( data, conn ):

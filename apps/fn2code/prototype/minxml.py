@@ -50,11 +50,20 @@ class MinXML:
 		for k, v in kwargs.items():
 			self.attributes[ k ] = str( v )
 
+	def copy( self ):
+		return MinXML( self.typename, *self.children, **self.attributes )
+
 	def getChildren( self ):
 		return self.children
 
 	def getAttributes( self ):
 		return self.attributes
+
+	def hasAttribute( self, attname ):
+		return attname in self.attributes
+
+	def hasntAttribute( self, attname ):
+		return not( attname in self.attributes )
 
 	def clear( self ):
 		self.children.clear()

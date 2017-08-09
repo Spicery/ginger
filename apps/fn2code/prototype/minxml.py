@@ -65,6 +65,12 @@ class MinXML:
 	def hasntAttribute( self, attname ):
 		return not( attname in self.attributes )
 
+	def hasAttributes( self ):
+		return self.attributes and True
+
+	def hasntAttributes( self ):
+		return self.attributes and False
+
 	def clear( self ):
 		self.children.clear()
 

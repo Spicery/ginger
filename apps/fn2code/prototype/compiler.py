@@ -97,7 +97,7 @@ class MiniCompiler:
         '''Adds a no-op into the tree with a label on it. This will have
         no effect during the calculation of jump distances and will 
         be eliminated entirely in a final backend phase.'''
-        self.plant( "seq", to_label=label.id() )
+        self.plant( "seq", label=label.id() )
 
     def newTmpVar( self, title ):
         return self.allocations.newTmpVar( title )
@@ -159,7 +159,7 @@ class SingleValueCompiler( MiniCompiler ):
         tmp0 = self.newTmpVar( 'mark' )
         self.plant( "start.mark", local=str(tmp0) )
         ExprCompiler( share=self )( expr, Label.CONTINUE )
-        self.plant( "check.mark", local=str(tmp0) )
+        self.plant( "check.mark1", local=str(tmp0) )
         self.simpleContinuation( contn_label )
         self.deallocateSlot( tmp0 )
 
@@ -229,7 +229,6 @@ class QueryCompiler( MiniCompiler ):
         '''See below for an explanation of this way this works'''
         TEST_label = Label( 'test' )
         NEXT_label = Label( 'next' )
-        EXIT_label = Label( 'exit' )
         self.compileLoopDeclarations( query )
         self.compileLoopInit( query, contn=TEST_label )
         self.setLabel( NEXT_label )
@@ -256,7 +255,8 @@ class FromQueryCompiler( QueryCompiler ):
         SingleValueCompiler( share=self )( query[1], Label.CONTINUE )
         self.plant( "pop.local", local=str(self.loop_var_slot) )            
         SingleValueCompiler( share=self )( query[3], Label.CONTINUE )
-        self.plant( "pop.local", local=str(self.end_value_slot) )            
+        self.plant( "pop.local", local=str(self.end_value_slot) )
+        self.simpleContinuation( contn )
 
     def compileLoopTest( self, query, ifso=Label.CONTINUE, ifnot=Label.CONTINUE ):
         if not ifso is Label.CONTINUE:

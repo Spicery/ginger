@@ -108,7 +108,7 @@ info-debug.db: ginger-info
 system.db: info-debug.db ../../../instruction_set/instruction.db
 	rm -f system.db
 	sqlite3 info-debug.db '.dump' | sqlite3 system.db
-	sqlite3 ../../../instruction.db '.dump' | sqlite3 system.db
+	sqlite3 ../../../instruction_set/instruction_set.db '.dump' | sqlite3 system.db
 
 ginger-cli: libappginger.a climain.o
 	$(CXX) $(CXXFLAGS) $(BOOST_CPPFLAGS) -o $@ climain.o $(LIBAPPGINGER) $(LIBRARIES)

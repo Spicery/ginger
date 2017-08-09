@@ -192,18 +192,34 @@ class ResolveLabels:
 
     def __init__( self ):
         self.instructions = MinXML( "seq" )
+        self.label_offsets = {}
 
-    def resolve( self, seqixml ):
+    def _calcOffsets( self, seqixml ):
         sofar = 0
         for i in seqixml:
             w = Widths.width( i.getName() )
             i.put( "width", str( w ) )
             i.put( "offset", str( sofar ) )
+            lab = i.get( 'label', None )
+            if lab:
+                self.label_offsets[ lab ] = sofar
             sofar += w
+
+    def _resolveJumps( self, seqixml ):
+        for ixml in seqixml:
+            offset = int( ixml.get( 'offset' ) )
+            lab = ixml.get( 'to_label', None )
+            if lab:
+                d = self.label_offsets[ lab ] - offset
+                ixml.put( 'to', str( d - 1 ) )
+
+    def edit( self, seqixml ):
+        self._calcOffsets( seqixml )
+        self._resolveJumps( seqixml )
         return seqixml
 
     def __call__( self, *args, **kwargs ):
-        return self.resolve( *args, **kwargs )
+        return self.edit( *args, **kwargs )
 
 def backEnd( ixml ):
     ixml = PeepHole()( ixml )

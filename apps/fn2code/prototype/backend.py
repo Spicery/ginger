@@ -67,28 +67,29 @@ def optEraseNum( ixml ):
         return ixml       
 
 class PeepHole:
-    def __init__( self ):
-        self.instructions = MinXML( 'seq' )
+    def __init__( self, initial=None ):
+        self.instructions = MinXML( 'seq' ) if initial is None else initial
 
     def add( self, ixml ):
         self.instructions.add( ixml )
 
-    def addPendingLabels( self, ixml ):
-        if ixml.hasAttribute( 'label' ):
-            self.pending_labels.extend( ixml.get( 'label' ).split() )
-
     def assemble( self, ixml ):
         name = ixml.getName()
         if name == 'seq':
-            self.addPendingLabels( ixml )
-            for i in ixml:
-                self.assemble( i )
+            if ixml.hasAttributes():
+                subtask = PeepHole( initial=ixml.copy() )
+                for i in ixml:
+                    subtask.assemble( i )
+                self.add( subtask.instructions )
+            else:
+                for i in ixml:
+                    self.assemble( i )
         elif name == 'noop':
             self.addPendingLabels( ixml )
         else:
-            if name in peephole:
+            if name in PEEPHOLE:
                 saved_label = ixml.get( 'label', otherwise='' )
-                ixml = peephole[ name ]( ixml )
+                ixml = PEEPHOLE[ name ]( ixml )
                 if saved_label:
                     # Extend the labels on ixml by saved_label.
                     labs = saved_label.split()
@@ -104,9 +105,6 @@ class PeepHole:
         This is the primary way of using these objects.
         '''
         self.assemble( *args, **kwargs )
-        if self.pending_labels:
-            print( 'WARNING: pending-labels were not resolved!', file=sys.stderr )
-            self.add( MinXML( "return", label=' '.join( self.pending_labels ) ) )
         return self.instructions
 
 class Flatten:
@@ -122,7 +120,7 @@ class Flatten:
         labs = ixml.get( 'label', otherwise='' ).split()
         labs.extend( self.pending_labels )
         ' '.join( labs )
-        xml.put( 'label',  ' '.join( labs ) )
+        ixml.put( 'label',  ' '.join( labs ) )
         self.pending_labels = []        
 
     def add( self, ixml ):
@@ -157,6 +155,35 @@ class Flatten:
             self.add( MinXML( "return", label=' '.join( self.pending_labels ) ) )
         return self.instructions
 
+import sqlite3
+from pathlib import Path
+
+class Widths:
+
+    INSTANCE = None
+
+    def __init__( self ):
+        self.widths = None
+
+    def populate( self ):
+        if not Path( '../../appginger/cpp/system.db' ).exists():
+            raise Exception( 'The system.db file is missing (please rebuild apps/appginger/cpp' )
+        with sqlite3.connect( '../../appginger/cpp/system.db' ) as conn:
+            cursor = conn.execute( 'SELECT codename, width FROM instruction;' )
+            self.widths = {}
+            for row in cursor:
+                self.widths[ row[0] ] = row[1]
+
+    def widthOf( self, iname ):
+        if self.widths is None:
+            self.populate()
+        return self.widths[ iname ]
+
+    @staticmethod
+    def width( iname ):
+        if not Widths.INSTANCE:
+            Widths.INSTANCE = Widths()
+        return Widths.INSTANCE.widthOf( iname )
 
 class ResolveLabels:
     '''This callable pass assumes a flat structure (no sequences) and calculates the
@@ -166,11 +193,17 @@ class ResolveLabels:
     def __init__( self ):
         self.instructions = MinXML( "seq" )
 
-    def resolve( self, ixml ):
-        pass # GOT HERE
+    def resolve( self, seqixml ):
+        sofar = 0
+        for i in seqixml:
+            w = Widths.width( i.getName() )
+            i.put( "width", str( w ) )
+            i.put( "offset", str( sofar ) )
+            sofar += w
+        return seqixml
 
     def __call__( self, *args, **kwargs ):
-        self.resolve( *args, **kwargs )
+        return self.resolve( *args, **kwargs )
 
 def backEnd( ixml ):
     ixml = PeepHole()( ixml )

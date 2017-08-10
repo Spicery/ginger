@@ -6,11 +6,17 @@ import sqlite3
 
 def addSysfns( data, conn ):
 	conn.execute( 'DROP TABLE IF EXISTS sysfn' )
-	conn.execute( 'CREATE TABLE sysfn( name text PRIMARY KEY, [in] text, [out] text, docstring text, flavour text )'  )
+	conn.execute( 'CREATE TABLE sysfn( name text PRIMARY KEY, [in] text, [out] text, docstring text )'  )
+	conn.execute( 'DROP TABLE IF EXISTS sysfn_detail' )
+	conn.execute( 'CREATE TABLE sysfn_detail( name text PRIMARY KEY, [flavour] text, [op] text )'  )
 	for ( sysapp_name, info ) in data.items():
 		conn.execute( 
-			'INSERT INTO sysfn VALUES( ?, ?, ?, ?, ? )', 
-			( sysapp_name, info[ 'in' ], info[ 'out' ], info[ 'docstring' ], info[ 'flavour' ] ) 
+			'INSERT INTO sysfn VALUES ( ?, ?, ?, ? )', 
+			( sysapp_name, info[ 'in' ], info[ 'out' ], info[ 'docstring' ] ) 
+		)
+		conn.execute(
+			'INSERT INTO sysfn_detail VALUES ( ?, ?, ? )',
+			( sysapp_name, info[ 'flavour' ], info[ 'op' ] )
 		)
 
 def addEngines( data, conn ):
@@ -22,10 +28,6 @@ def addEngines( data, conn ):
 			( info[ 'short.name' ], info[ 'long.name' ], info[ 'description' ] )
 		)			
 
-  # "ipr": [
-  #   { "topic": "license", "url": "http://www.gnu.org/licenses/gpl-3.0.txt" },
-  #   { "topic": "copyright", "notice": "Copyright (c) 2010 Stephen Leach", "email": "stephen.leach@steelypip.com" }
-  # ],
 def addPathValues( key, jdata, conn ):
 	for d in jdata[ key ]:
 		p = '.'.join(( key, d[ 'topic' ] ))
@@ -50,4 +52,4 @@ def main( jdata, fname ):
 		addProperties( jdata, conn )
 
 if __name__ == "__main__":
-	main( json.load( sys.stdin ), 'info-debug.db' )
+	main( json.load( sys.stdin ), 'info-debug.tmp' )

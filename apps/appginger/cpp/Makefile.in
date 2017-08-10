@@ -99,8 +99,10 @@ info-debug.hlp: ginger-info
 info-debug.rst: ginger-info
 	./ginger-info -r > info-debug.rst
 
-info-debug.db: ginger-info 
-	./ginger-info -j | python3 make_info_db.py
+info-debug.db: ginger-info
+	# Going around the houses with file renaming because if the command fails the target file must not exist.
+	./ginger-info -ji | python3 make_info_db.py
+	mv info-debug.tmp info-debug.db
 
 ../../../instruction_set/instruction.db: 
 	( cd ../../../instruction_set; make -f InstructionSetDB.makefile build )

@@ -414,7 +414,15 @@ private:
 			this->formatter->addAttribute( "docstring", ( it->second.docstring != NULL ? it->second.docstring : "-" ) );
 			this->formatter->addAttribute( "in", v.in_arity.toString() );
 			this->formatter->addAttribute( "out", v.out_arity.toString() );
-			this->formatter->addAttribute( "flavour", v.isCmpOp() ? "cmp" : v.isVMOp() ? "vm" : "sys" );
+			if ( this->incinstructs ) {
+				this->formatter->addAttribute( "flavour", v.isCmpOp() ? "cmp" : v.isVMOp() ? "vm" : "sys" );
+				this->formatter->addAttribute( 
+					"op", 
+					v.isVMOp() ? instructionName( v.instruction ) : 
+					v.isCmpOp() ? instructionName( cmpOpInstruction( v.cmp_op ) ) : 
+					"" 
+				);
+			}
 			this->formatter->endValue();
 		}
 
@@ -509,6 +517,15 @@ private:
 		this->formatter->addAttribute( "name", name );
 		this->formatter->addAttribute( "type", type );
 		this->formatter->endValue();
+	}
+
+	const char * instructionName( Instruction vmc ) {
+		switch ( vmc ) {
+			#define X( VMC, NAME, SIG ) case VMC: return NAME;
+			#include "instruction_set.xdef.auto"
+			#undef X			
+		}
+		throw Ginger::Mishap( "Internal error: invalid instruction" );
 	}
 
 	void printGVMInstructions() {

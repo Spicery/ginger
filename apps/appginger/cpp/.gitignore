@@ -3,3 +3,9 @@
 /info-debug.rst
 /system.db
 /Makefile
+/ginger-cgi
+/ginger-cli
+/ginger-info
+/ginger-script
+/info-debug.db
+/libappginger.a

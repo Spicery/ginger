@@ -1,2 +1,5 @@
 *.cpp.auto
 /Makefile
+/instruction_set.xdef.auto
+/instruction_set.hpp.auto
+/instruction.hpp.auto

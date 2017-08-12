@@ -1,18 +1,45 @@
 from minxml import MinXML
 import sys
+import sqlite3
+from pathlib import Path
 
+################################################################################
+# Sysfn_details provides a mapping from system functions to vm-instructions.
+################################################################################
+
+DETAILS = {}
+
+if not Path( '../../appginger/cpp/system.db' ).exists():
+    raise Exception( 'The system.db file is missing (please rebuild apps/appginger/cpp' )
+
+with sqlite3.connect( '../../appginger/cpp/system.db' ) as conn:
+    conn.row_factory = sqlite3.Row
+    for row in conn.execute( "SELECT name, op FROM sysfn_detail WHERE OP <> ''" ):
+        DETAILS[ row[ 'name' ] ] = row[ 'op' ]
+
+
+################################################################################
 # Set of peephole transformations. Note that the peephole transformations
 # are free to ignore the issue of labels. The function that applies them
 # will capture any existing label and re-apply those labels (in addition to
 # any added by the optimisation).
+################################################################################
 
 PEEPHOLE = {}
-    
+
 def PeepHole( instruction_name ):
     def peephole_decorator( func ):
         PEEPHOLE[ instruction_name ] = func
         return func
     return peephole_decorator
+
+@PeepHole( "syscall" )
+def optSysCall( ixml ):
+    name = ixml.getAttribute( "name" )
+    if name in DETAILS:
+        return MinXML( DETAILS[ name] )
+    else:
+        return ixml
 
 @PeepHole( "push.local" )
 def optPushLocal( ixml ):
@@ -38,7 +65,7 @@ def optPushLocal( ixml ):
 def optIncrBy( ixml ):
     d = ixml.get( "by" )
     if d == "0":
-        return MinXML( "noop" )
+        return MinXML( "seq" )
     elif d == "1":
         return MinXML( "incr" )
     elif d == "-1":
@@ -50,7 +77,7 @@ def optIncrBy( ixml ):
 def optIncrBy( ixml ):
     d = ixml.get( "by" )
     if d == 0:
-        return MinXML( "noop" )
+        return MinXML( "seq" )
     elif d == "1":
         return MinXML( "incr.local.by1", local=ixml.get( "local" ) )
     else:
@@ -60,18 +87,19 @@ def optIncrBy( ixml ):
 def optEraseNum( ixml ):
     n = ixml.get( "n" )
     if n == '0':
-        return MinXML( "noop" )
+        return MinXML( "seq" )
     elif n == '1':
         return MinXML( "erase" )
     else:
         return ixml       
 
 class PeepHole:
+
     def __init__( self, initial=None ):
-        self.instructions = MinXML( 'seq' ) if initial is None else initial
+        self.instructions = [] if initial is None else initial
 
     def add( self, ixml ):
-        self.instructions.add( ixml )
+        self.instructions.append( ixml )
 
     def assemble( self, ixml ):
         name = ixml.getName()
@@ -84,27 +112,28 @@ class PeepHole:
             else:
                 for i in ixml:
                     self.assemble( i )
-        elif name == 'noop':
-            self.addPendingLabels( ixml )
+        elif name in PEEPHOLE:
+            saved_label = ixml.get( 'label', otherwise='' )
+            ixml = PEEPHOLE[ name ]( ixml )
+            if saved_label:
+                # Extend the labels on ixml by saved_label.
+                labs = saved_label.split()
+                labs.extend( ixml.get( 'label', otherwise='' ).split() )
+                ixml.put( 'label', ' '.join( labs ) )
+            self.assemble( ixml )
         else:
-            if name in PEEPHOLE:
-                saved_label = ixml.get( 'label', otherwise='' )
-                ixml = PEEPHOLE[ name ]( ixml )
-                if saved_label:
-                    # Extend the labels on ixml by saved_label.
-                    labs = saved_label.split()
-                    labs.extend( ixml.get( 'label', otherwise='' ).split() )
-                    ixml.put( 'label', ' '.join( labs ) )
-                self.assemble( ixml )
-            else:
-                self.add( ixml )
+            self.add( ixml )
+
+    def assembleList( self, ixmllist ):
+        for ixml in ixmllist:
+            self.assemble( ixml )
 
     def __call__( self, *args, **kwargs ):
         '''
         Invokes the abstract method assemble and then returns the instruction list.
         This is the primary way of using these objects.
         '''
-        self.assemble( *args, **kwargs )
+        self.assembleList( *args, **kwargs )
         return self.instructions
 
 class Flatten:
@@ -112,11 +141,11 @@ class Flatten:
     '''
 
     def __init__( self ):
-        self.instructions = MinXML( 'seq' )
+        self.instructions = []
         self.pending_labels = []
 
     def _usePendingLabels( self, ixml ):
-        '''Modifies the instruction in place'''
+        '''Modifies the instruction in place - but supplied a copy'''
         labs = ixml.get( 'label', otherwise='' ).split()
         labs.extend( self.pending_labels )
         ' '.join( labs )
@@ -127,7 +156,7 @@ class Flatten:
         if self.pending_labels:
             ixml = ixml.copy()
             self._usePendingLabels( ixml )
-        self.instructions.add( ixml )
+        self.instructions.append( ixml )
 
     def addPendingLabels( self, ixml ):
         if ixml.hasAttribute( 'label' ):
@@ -139,24 +168,23 @@ class Flatten:
             self.addPendingLabels( ixml )
             for i in ixml:
                 self.flatten( i )
-        elif name == 'noop':
-            self.addPendingLabels( ixml )
         else:
             self.add( ixml )
+
+    def flattenList( self, ixmlList ):
+        for ixml in ixmlList:
+            self.flatten( ixml )
 
     def __call__( self, *args, **kwargs ):
         '''
         Invokes the abstract method assemble and then returns the instruction list.
         This is the primary way of using these objects.
         '''
-        self.flatten( *args, **kwargs )
+        self.flattenList( *args, **kwargs )
         if self.pending_labels:
             print( 'WARNING: pending-labels were not resolved!', file=sys.stderr )
             self.add( MinXML( "return", label=' '.join( self.pending_labels ) ) )
         return self.instructions
-
-import sqlite3
-from pathlib import Path
 
 class Widths:
 
@@ -191,7 +219,7 @@ class ResolveLabels:
     '''
 
     def __init__( self ):
-        self.instructions = MinXML( "seq" )
+        self.instructions = []
         self.label_offsets = {}
 
     def _calcOffsets( self, seqixml ):
@@ -221,8 +249,12 @@ class ResolveLabels:
     def __call__( self, *args, **kwargs ):
         return self.edit( *args, **kwargs )
 
-def backEnd( ixml ):
-    ixml = PeepHole()( ixml )
-    ixml = Flatten()( ixml )
-    return ResolveLabels()( ixml )
+def backEnd( seqixml ):
+    '''Result may share store with the input but the input is not updated.
+    seqixml is typically a seq of instructions but may be a single instruction.
+    At the end it is guaranteed to be a seq element with instructions.
+    '''
+    xmllist = PeepHole()( xmllist )
+    xmllist = Flatten()( xmllist )
+    return ResolveLabels()( xmllist )
 

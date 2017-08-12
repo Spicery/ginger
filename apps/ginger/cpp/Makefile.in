@@ -13,7 +13,7 @@ USESNAP=@usesnap@
 
 INSTALLDIRS=-DINSTALL_BIN='"$(INSTALL_BIN)"' -DINSTALL_LIB='"$(INSTALL_LIB)"' -DINSTALL_TOOL='"$(INSTALL_TOOL)"'
 
-CXXFLAGS=-DRUDECGI $(INSTALLDIRS) -DUSESNAP=$(USESNAP) -g -std=c++11 -I../hpp -I../../libgng/hpp -I../../automatic/machine -I../../automatic/sys -I../../automatic/sysfn -I../../automatic/simple -Wall -Wnon-virtual-dtor
+CXXFLAGS=-DRUDECGI $(INSTALLDIRS) -DUSESNAP=$(USESNAP) -g -std=c++14 -I../hpp -I../../libgng/hpp -I../../automatic/machine -I../../automatic/sys -I../../automatic/sysfn -I../../automatic/simple -Wall -Wnon-virtual-dtor
 
 # In order to exclude machine implementations, uncomment one or more of
 # the following lines.

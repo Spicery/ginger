@@ -30,7 +30,7 @@ endif
 #CXXFLAGS += -DMACHINE4_EXCLUDED
 
 
-OBJS= syscrypto.o bigint.o rational.o sysvm.o \
+OBJS= component.o compile.o syscrypto.o bigint.o rational.o sysvm.o \
 	inputstreamexternal.o outputstreamexternal.o \
 	cagefinder.o cell.o refprint.o vident.o codegen.o \
 	simplify.o cage.o registers.o roots.o cmp.o \

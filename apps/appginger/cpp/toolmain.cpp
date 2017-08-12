@@ -72,6 +72,7 @@ extern char * optarg;
 static struct option long_options[] =
     {
         { "engine",         required_argument,      0, 'E' },
+        { "fn2code",        no_argument,            0, 'F' },
         { "help",           optional_argument,      0, 'H' },
         { "machine",        required_argument,      0, 'm' },
         { "version",        no_argument,            0, 'V' },
@@ -209,7 +210,7 @@ bool ToolMain::parseArgcArgv( int argc, char **argv ) {
     //bool meta_info_needed = false;
     for(;;) {
         int option_index = 0;
-        int c = getopt_long( argc, argv, "d:e:g:H::ij:L::l:m:O:p:qv:V", long_options, &option_index );
+        int c = getopt_long( argc, argv, "d:e:Fg:H::ij:L::l:m:O:p:qv:V", long_options, &option_index );
         if ( c == -1 ) break;
         switch ( c ) {
             case 'd': {
@@ -227,6 +228,10 @@ bool ToolMain::parseArgcArgv( int argc, char **argv ) {
             case 'e':
             case 'm' : {
                 this->context.setMachineImplName( optarg );
+                break;
+            }
+            case 'F': {
+                this->context.setFn2Code( true );
                 break;
             }
             case 'g': {

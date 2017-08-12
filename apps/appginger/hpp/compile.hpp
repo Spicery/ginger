@@ -16,8 +16,8 @@
     along with Ginger.  If not, see <http://www.gnu.org/licenses/>.
 \******************************************************************************/
 
-#ifndef GNG_SIMPLIFY_HPP
-#define GNG_SIMPLIFY_HPP
+#ifndef GNG_COMPILE_HPP
+#define GNG_COMPILE_HPP
 
 #include "shared.hpp"
 #include "mnx.hpp"
@@ -25,23 +25,18 @@
 
 #include "appcontext.hpp"
 #include "package.hpp"
-#include "component.hpp"
 
 namespace Ginger {
 
 typedef shared< Ginger::Mnx > Gnx;
 
-class Simplify : Component {
-private:
-    Package * package;
+class Compile : Component {
+public:
+    Gnx compile( Gnx x );
 
 public:
-    Gnx simplify( Gnx x );
-    Package * getPackage() const { return this->package; }  // todo: may not be needed any more.
-
-public:
-    Simplify( AppContext & cxt, Package * package );
-    ~Simplify();
+    Compile( AppContext & cxt, Package * package );
+    ~Compile();
 };
 
 } // namespace Ginger

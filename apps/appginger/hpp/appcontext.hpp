@@ -194,6 +194,7 @@ private:
 		rude::CGI * 			cgi;
 	#endif
 	bool						use_stdin;
+	bool						use_fn2code;
 	PrintDetailLevel			print_detail_level;
 	bool						welcoming;
 	std::string         		initial_syntax;
@@ -238,6 +239,7 @@ public:
 	Ginger::Command stdinSyntaxCommand(); 
 	Ginger::Command fileSyntaxCommand( const std::string & filename ); 
 	void setSyntax( const std::string s ) { this->initial_syntax = s; }
+	void setFn2Code( const bool b ) { this->use_fn2code = b; }
 	const std::string getInteractivePackage() { return this->interactive_package; }
 	void setInteractivePackage( const std::string & ip ) { this->interactive_package = ip; }
  	void showMeRuntimeInfo();

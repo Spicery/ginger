@@ -16,34 +16,47 @@
     along with Ginger.  If not, see <http://www.gnu.org/licenses/>.
 \******************************************************************************/
 
-#ifndef GNG_SIMPLIFY_HPP
-#define GNG_SIMPLIFY_HPP
+#include <sys/errno.h>
 
-#include "shared.hpp"
-#include "mnx.hpp"
-#include "command.hpp"
+#ifdef GNU_FD_TO_IFSTREAM
+    #include <ext/stdio_filebuf.h> // __gnu_cxx::stdio_filebuf
+#else
+    #include "fdifstream.hpp"
+#endif
 
-#include "appcontext.hpp"
-#include "package.hpp"
+
+#include <iostream>
+#include <sstream> 
+#include <list>
+#include <string>
+
+#include "mishap.hpp"
+
+#include "debug.hpp"
 #include "component.hpp"
 
+
 namespace Ginger {
+using namespace std;
 
-typedef shared< Ginger::Mnx > Gnx;
+Component::Component( AppContext & cxt ) :
+    started( false ),
+    context( cxt )
+{
+}
 
-class Simplify : Component {
-private:
-    Package * package;
+Component::~Component() {
+    if ( this->started ) {
+        fclose( this->fout );
+    }
+}
 
-public:
-    Gnx simplify( Gnx x );
-    Package * getPackage() const { return this->package; }  // todo: may not be needed any more.
-
-public:
-    Simplify( AppContext & cxt, Package * package );
-    ~Simplify();
-};
+void Component::initIfNeeded() {
+    if ( not this->started ) {
+        command.runWithInputAndOutput();
+        this->started = true;
+        this->fout = fdopen( command.getOutputFD(), "w" );
+    }    
+}
 
 } // namespace Ginger
-
-#endif

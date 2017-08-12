@@ -33,52 +33,49 @@
 #include "mishap.hpp"
 
 #include "debug.hpp"
-#include "simplify.hpp"
+#include "compile.hpp"
 
 
 namespace Ginger {
 using namespace std;
 
-#define SIMPLIFYGNX     ( INSTALL_TOOL "/simplifygnx" )
+#define FN2CODE     ( INSTALL_TOOL "/fn2code" )
 
 static std::string executable() {
     if ( USESNAP ) {
         const char * snap = getenv( "SNAP" );
         if ( snap ) {
-            return std::string( snap ) + SIMPLIFYGNX;
+            return std::string( snap ) + FN2CODE;
         }
         
     }
-    return SIMPLIFYGNX;
+    return FN2CODE;
 }
 
-Simplify::Simplify( AppContext & cxt, Package * package ) :
+Compile::Compile( AppContext & cxt ) :
     Component( cxt )
 {
-    this->command = std::make_unique< Command >( executable() );
-    command->addArg( "-suA" );
-    {
-        list< string > & folders = cxt.getProjectFolderList();
-        for ( 
-            list< string >::iterator it = folders.begin();
-            it != folders.end();
-            ++it
-        ) {
-            command->addArg( "-j" );
-            command->addArg( *it );
-        }
+    this->command = std::make_unique( executable() );
+}
+
+Compile::~Compile() {
+    if ( this->started ) {
+        fclose( this->fout );
     }
-    command->addArg( "-p" );
-    command->addArg( package->getTitle() );
 }
 
-Simplify::~Simplify() {
+void Compile::initIfNeeded() {
+    if ( not this->started ) {
+        command.runWithInputAndOutput();
+        this->started = true;
+        this->fout = fdopen( command.getOutputFD(), "w" );
+    } 
 }
 
-Gnx Simplify::simplify( Gnx x ) {
+Gnx Compile::compile( Gnx x ) {
     this->initIfNeeded();
 
-    #ifdef DBG_SIMPLIFY
+    #ifdef DBG_COMPILE
         cerr << "appginger/simplify submitting GNX" << endl;
         cerr << "  [[";
         x->render( cerr );
@@ -90,10 +87,10 @@ Gnx Simplify::simplify( Gnx x ) {
 
 
 #ifdef GNU_FD_TO_IFSTREAM
-    __gnu_cxx::stdio_filebuf<char> buf( command->getInputFD(), ios_base::in );
+    __gnu_cxx::stdio_filebuf<char> buf( command.getInputFD(), ios_base::in );
     istream input( &buf );
 #else
-    FileDescriptorIFStream input( command->getInputFD() );
+    FileDescriptorIFStream input( command.getInputFD() );
 #endif
 
     MnxReader reader( input );
@@ -106,7 +103,7 @@ Gnx Simplify::simplify( Gnx x ) {
         cerr << "]]" << endl;
     #endif 
 
-    return r;
+    return x;
 }
 
 } // namespace Ginger

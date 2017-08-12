@@ -23,7 +23,7 @@ ifneq ($(shell uname),Darwin)
 	NONDARWINCXXFLAGS=-Wl,-Bstatic -luuid -Wl,-Bdynamic
 endif
 
-CXXFLAGS=$(INSTALLDIRS) -DUSESNAP=$(USESNAP) -std=c++11 -g -I../hpp -I../../libgng/hpp -I../../libmetainfo/hpp -Wall -Wnon-virtual-dtor
+CXXFLAGS=$(INSTALLDIRS) -DUSESNAP=$(USESNAP) -std=c++14 -g -I../hpp -I../../libgng/hpp -I../../libmetainfo/hpp -Wall -Wnon-virtual-dtor
 
 OBJS= fn2code.o toolmain.o
 

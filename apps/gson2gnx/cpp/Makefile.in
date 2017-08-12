@@ -13,7 +13,7 @@ CXX=@CXX@
 
 INSTALLDIRS=-DINSTALL_BIN='"$(INSTALL_BIN)"' -DINSTALL_LIB='"$(INSTALL_LIB)"' -DINSTALL_TOOL='"$(INSTALL_TOOL)"'
 
-CXXFLAGS=$(INSTALLDIRS) -DUSESNAP=$(USESNAP) -g -std=c++11 -I../hpp -I../../libgng/hpp -Wall
+CXXFLAGS=$(INSTALLDIRS) -DUSESNAP=$(USESNAP) -g -std=c++14 -I../hpp -I../../libgng/hpp -Wall
 
 OBJS=gson2gnx.o item_factory.o item.o toktype.o
 

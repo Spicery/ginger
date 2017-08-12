@@ -1,7 +1,7 @@
 CXX=@CXX@
 CC=@CXX@
 
-CXXFLAGS=-g -std=c++11 -I../../CppUnitLite2/src -I../hpp -I../../libgng/hpp -I../../automatic/machine -I../../automatic/sys -I../../automatic/simple -Wall -Wnon-virtual-dtor
+CXXFLAGS=-g -std=c++14 -I../../CppUnitLite2/src -I../hpp -I../../libgng/hpp -I../../automatic/machine -I../../automatic/sys -I../../automatic/simple -Wall -Wnon-virtual-dtor
 LDFLAGS=`cppunit-config --libs` 
 OBJS=testappginger.o example.o archtest.o simplekeytest.o
 ### Disabling a test that has suffered bitrot!

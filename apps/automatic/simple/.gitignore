@@ -1,2 +1,3 @@
 *.hpp.auto
 *.cpp.auto
+/Makefile

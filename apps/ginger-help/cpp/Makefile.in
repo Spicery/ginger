@@ -15,7 +15,7 @@ CXX=@CXX@
 INSTALLDIRS=-DINSTALL_BIN='"$(INSTALL_BIN)"' -DINSTALL_LIB='"$(INSTALL_LIB)"' -DINSTALL_TOOL='"$(INSTALL_TOOL)"'
 
 # -Weffc++
-CXXFLAGS=-DVERSION='"$(VERSION)"' -DUSESNAP=$(USESNAP) $(INSTALLDIRS) -g -std=c++11 -I../hpp -I../../libgng/hpp -Wall -Wnon-virtual-dtor
+CXXFLAGS=-DVERSION='"$(VERSION)"' -DUSESNAP=$(USESNAP) $(INSTALLDIRS) -g -std=c++14 -I../hpp -I../../libgng/hpp -Wall -Wnon-virtual-dtor
 
 OBJS=ginger-help.o
 

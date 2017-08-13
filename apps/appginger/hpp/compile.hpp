@@ -25,6 +25,8 @@
 
 #include "appcontext.hpp"
 #include "package.hpp"
+#include "component.hpp"
+
 
 namespace Ginger {
 
@@ -35,7 +37,7 @@ public:
     Gnx compile( Gnx x );
 
 public:
-    Compile( AppContext & cxt, Package * package );
+    Compile( AppContext & cxt );
     ~Compile();
 };
 

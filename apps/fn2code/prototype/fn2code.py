@@ -14,6 +14,7 @@ def main():
             break
         gnx = doSomeTransformation( gnx )
         print( gnx )
+        sys.stdout.flush()  # Required to ensure proper switch of control between processes.
 
 if __name__ == "__main__":
     main()

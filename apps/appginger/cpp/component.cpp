@@ -53,9 +53,9 @@ Component::~Component() {
 
 void Component::initIfNeeded() {
     if ( not this->started ) {
-        command.runWithInputAndOutput();
+        command->runWithInputAndOutput();
         this->started = true;
-        this->fout = fdopen( command.getOutputFD(), "w" );
+        this->fout = fdopen( command->getOutputFD(), "w" );
     }    
 }
 

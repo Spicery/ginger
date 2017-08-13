@@ -33,6 +33,7 @@
 #include "rcep.hpp"
 #include "mishap.hpp"
 #include "simplify.hpp"
+#include "compile.hpp"
 
 namespace Ginger {
 using namespace std;
@@ -119,10 +120,16 @@ bool RCEP::mainloop( MnxRepeater & mnxrep, std::ostream & output ) {
 		//	TODO: Fix the freezing in of the package!
 		//	NOTE: If the current package changes then it is vital to
 		//	replace the simplifier. Really this is frozen into the wrong place!!
-		Simplify simplifier( vm->getAppContext(), this->currentPackage() );
 		shared< Ginger::Mnx > mnx( mnxrep.nextMnx() );
 		if ( not mnx ) return false;
-		mnx = simplifier.simplify( mnx );
+		{
+			Simplify simplifier( vm->getAppContext(), this->currentPackage() );
+			mnx = simplifier.simplify( mnx );
+		}
+		if ( vm->getAppContext().getFn2Code() ) {
+	 		Compile compiler( vm->getAppContext() );
+			mnx = compiler.compile( mnx );
+		}
 
 		//	DEBUG.
 		#ifdef DBG_RCEP

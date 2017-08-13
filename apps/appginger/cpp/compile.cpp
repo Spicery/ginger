@@ -17,6 +17,7 @@
 \******************************************************************************/
 
 #include <sys/errno.h>
+#include <memory>
 
 #ifdef GNU_FD_TO_IFSTREAM
     #include <ext/stdio_filebuf.h> // __gnu_cxx::stdio_filebuf
@@ -55,22 +56,19 @@ static std::string executable() {
 Compile::Compile( AppContext & cxt ) :
     Component( cxt )
 {
-    this->command = std::make_unique( executable() );
+    this->command = std::make_unique< Command >( executable() );
 }
 
 Compile::~Compile() {
-    if ( this->started ) {
-        fclose( this->fout );
-    }
 }
 
-void Compile::initIfNeeded() {
-    if ( not this->started ) {
-        command.runWithInputAndOutput();
-        this->started = true;
-        this->fout = fdopen( command.getOutputFD(), "w" );
-    } 
-}
+// void Compile::initIfNeeded() {
+//     if ( not this->started ) {
+//         command.runWithInputAndOutput();
+//         this->started = true;
+//         this->fout = fdopen( command.getOutputFD(), "w" );
+//     } 
+// }
 
 Gnx Compile::compile( Gnx x ) {
     this->initIfNeeded();
@@ -87,10 +85,10 @@ Gnx Compile::compile( Gnx x ) {
 
 
 #ifdef GNU_FD_TO_IFSTREAM
-    __gnu_cxx::stdio_filebuf<char> buf( command.getInputFD(), ios_base::in );
+    __gnu_cxx::stdio_filebuf<char> buf( command->getInputFD(), ios_base::in );
     istream input( &buf );
 #else
-    FileDescriptorIFStream input( command.getInputFD() );
+    FileDescriptorIFStream input( command->getInputFD() );
 #endif
 
     MnxReader reader( input );

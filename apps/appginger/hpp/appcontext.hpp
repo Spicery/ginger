@@ -240,6 +240,7 @@ public:
 	Ginger::Command fileSyntaxCommand( const std::string & filename ); 
 	void setSyntax( const std::string s ) { this->initial_syntax = s; }
 	void setFn2Code( const bool b ) { this->use_fn2code = b; }
+	bool getFn2Code() const { return this->use_fn2code; }
 	const std::string getInteractivePackage() { return this->interactive_package; }
 	void setInteractivePackage( const std::string & ip ) { this->interactive_package = ip; }
  	void showMeRuntimeInfo();

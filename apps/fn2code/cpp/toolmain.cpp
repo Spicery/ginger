@@ -20,6 +20,7 @@
 #include <fstream>
 
 #include <cstdlib>
+#include <string>
 
 #include <syslog.h>
 #include <stddef.h>
@@ -108,11 +109,18 @@ void ToolMain::parseArgs( int argc, char **argv, char **envp ) {
 
 }
 
-#define FN2CODE_PY   ( INSTALL_LIB "/fn2code/fn2code.py" )
+#define FN2CODE_PY   		"fn2code.py"
+#define FN2CODE_PY_PATH   	( INSTALL_LIB "/fn2code/" FN2CODE_PY )
 
 
 int ToolMain::run() {
-    execl( "/usr/bin/env", "/usr/bin/env", "python3", FN2CODE_PY );
+	const char * folder = getenv( "GINGER_FN2CODE_PROTOTYPE" );
+	if ( folder ) {
+    	const std::string path = string( folder ) + "/" + FN2CODE_PY;
+		execl( "/usr/bin/env", "/usr/bin/env", "python3", path.c_str(), nullptr );
+    } else {
+    	execl( "/usr/bin/env", "/usr/bin/env", "python3", FN2CODE_PY_PATH, nullptr );
+    }
     throw Ginger::Mishap( "Cannot find fn2code.py (prototype)" );
 }
 

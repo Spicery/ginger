@@ -9,7 +9,7 @@ from pathlib import Path
 
 DETAILS = {}
 
-if not Path( '../../appginger/cpp/system.db' ).exists():
+if not Path( 'system.db' ).exists():
     raise Exception( 'The system.db file is missing (please rebuild apps/appginger/cpp' )
 
 with sqlite3.connect( '../../appginger/cpp/system.db' ) as conn:
@@ -249,7 +249,7 @@ class ResolveLabels:
     def __call__( self, *args, **kwargs ):
         return self.edit( *args, **kwargs )
 
-def backEnd( seqixml ):
+def backEnd( xmllist ):
     '''Result may share store with the input but the input is not updated.
     seqixml is typically a seq of instructions but may be a single instruction.
     At the end it is guaranteed to be a seq element with instructions.

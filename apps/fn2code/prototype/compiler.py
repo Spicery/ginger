@@ -139,14 +139,19 @@ class ExprCompiler( MiniCompiler ):
         super().__init__( *args, **kwargs )
 
     def compile( self, expr, contn_label ):
-        if expr.getName() == "constant":
+        if expr.hasName( "constant" ):
             ConstantCompiler( share=self ).compile( expr, contn_label )
-        elif expr.getName() == "and":
+        elif expr.hasName( "and" ):
             AndCompiler( share=self )( expr, contn_label )
         elif expr.hasName( "for" ):
             LoopCompiler( share=self )( expr, contn_label )
+        elif expr.hasName( "seq" ):
+            if expr:
+                for e in expr.children[0:-1]:
+                    ExprCompiler( share=self )( e, Label.CONTINUE )
+                ExprCompiler( share=self )( expr.getLast(), contn_label )
         else:
-            raise Exception( "To be implemented" )
+            raise Exception( "To be implemented: " + expr.getName() )
 
 class SingleValueCompiler( MiniCompiler ):
     '''Compiles a general expression but ensures it generates a single
@@ -274,6 +279,9 @@ class FromQueryCompiler( QueryCompiler ):
 
     def compileLoopFini( self, query, contn=Label.CONTINUE ):
         self.deallocateSlot( self.loop_var_slot )  
+
+def compile( gnx ):
+    return ExprCompiler()( gnx, Label.RETURN )
 
 if __name__ == "__main__":
     for_expr = MinXML( "for" )

@@ -4,6 +4,8 @@ language: C++
 branches:
   only:
     - master
+    - development
+    - fn2code
 before_install:
     - sudo apt-get -qq update
     - sudo apt-get -qq install uuid-dev
@@ -34,13 +36,6 @@ addons:
     packages:
     - gcc-5
     - g++-5
-# Build both master and development, so I can experiment with fixing Travis in development.
-branches:
-  only:
-  - master
-  - development
-
-
 notifications:
   # irc:
   #   channels: "irc.freenode.org#rdflib"

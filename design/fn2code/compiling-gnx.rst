@@ -212,11 +212,12 @@ reference elements have the pattern:
     <id name=NAME def.pkg=PACKAGE scope="global"/>
 
 The compiler simply pushes references onto the stack using the  ``push.global`` 
-instruction.
+instruction. Note that the attribute 'def_pkg' uses an underscore and not a 
+full-stop as the separator (for compatibility with GNX).
 
 .. code-block:: xml
 
-    <push.global name=NAME def.pkg=PACKAGE/>
+    <push.global name=NAME def_pkg=PACKAGE/>
 
 
 Local Variables

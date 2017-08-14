@@ -1,30 +1,14 @@
 from abc import abstractmethod
 from minxml import MinXML
-
-class Label:
-
-    next_id = 0
-
-    def __init__( self, name, is_return=False, is_continue=False ):
-        self.label_name = name
-        self.is_return = is_return
-        self.is_continue = is_continue
-        self.uid = '{}_{}'.format( self.label_name, Label.next_id )
-        Label.next_id += 1
-
-    def id( self ):
-        return self.uid
-
-Label.CONTINUE = Label( 'CONTINUE', is_continue=True )
-Label.RETURN = Label( 'RETURN', is_return=True )
+from label import Label
 
 class SlotAllocations:
     '''Stuff to track the way variables are allocated to slots.'''
 
-    def __init__( self ):
-        self.hi_tide = 0    # One larger than the highest slot allocated so far.
-        self.slots = {}     # slot -> title, titles do not have to be unique.
-        self.available = [] # List of available slots (< hi_tide)
+    def __init__( self, preallocated=0 ):
+        self.hi_tide = preallocated     # One larger than the highest slot allocated so far.
+        self.slots = {}                 # slot -> title, titles do not have to be unique.
+        self.available = []             # List of available slots (< hi_tide)
 
     def fetchSlot( self, title ):
         if not self.available:
@@ -63,7 +47,7 @@ class MiniCompiler:
     be supplied.
     '''
 
-    def __init__( self, share=None, parent=None ):
+    def __init__( self, share=None, parent=None, preallocated=0 ):
         if parent == None:
             # If parent is not supplied then the intention is to share everything
             # (or this is a top-level invocation)
@@ -77,7 +61,7 @@ class MiniCompiler:
         if parent == None:
             # This is a top-level invocation i.e. used to create the body
             # of a lambda expression.
-            self.allocations = SlotAllocations()
+            self.allocations = SlotAllocations( preallocated )
         else:
             # Invoked as a sub-compiler, so share all global context.
             # (At the moment that is just slot-allocations.)
@@ -116,6 +100,12 @@ class MiniCompiler:
         self.compile( *args, **kwargs )
         return self.instructions
 
+    def compileSingleValue( self, expr, contn_label ):
+        SingleValueCompiler( share=self ).compile( expr, contn_label )
+
+    def compileExpression( self, expr, contn_label ):
+        ExprCompiler( share=self ).compile( expr, contn_label )
+
     def simpleContinuation( self, contn_label ):
         '''Compiles an explicit jump to the label'''
         if contn_label == Label.CONTINUE:
@@ -141,6 +131,8 @@ class ExprCompiler( MiniCompiler ):
     def compile( self, expr, contn_label ):
         if expr.hasName( "constant" ):
             ConstantCompiler( share=self ).compile( expr, contn_label )
+        elif expr.hasName( "id" ):
+            IdCompiler( share=self ).compile( expr, contn_label )
         elif expr.hasName( "and" ):
             AndCompiler( share=self )( expr, contn_label )
         elif expr.hasName( "for" ):
@@ -175,6 +167,19 @@ class ConstantCompiler( MiniCompiler ):
 
     def compile( self, expr, contn_label ):   
         self.plant( "pushq", expr )
+        self.simpleContinuation( contn_label )
+
+class IdCompiler( MiniCompiler ):
+
+    def __init__( self, *args, **kwargs ):
+        super().__init__( *args, **kwargs )
+
+    def compile( self, expr, contn_label ):   
+        slot = expr.get( "slot", otherwise=None )
+        if slot:
+            self.plant( "push.local", local=slot )
+        else:
+            self.plant( "push.global", name=expr.get( 'name' ), def_pkg=expr.get( 'def_pkg' ) )
         self.simpleContinuation( contn_label )
 
 class AndCompiler( MiniCompiler ):

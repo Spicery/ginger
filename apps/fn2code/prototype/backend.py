@@ -2,6 +2,7 @@ from minxml import MinXML
 import sys
 import sqlite3
 from pathlib import Path
+from label import Label
 
 ################################################################################
 # Sysfn_details provides a mapping from system functions to vm-instructions.
@@ -237,7 +238,7 @@ class ResolveLabels:
         for ixml in seqixml:
             offset = int( ixml.get( 'offset' ) )
             lab = ixml.get( 'to_label', None )
-            if lab:
+            if lab and lab != Label.RETURN.id():
                 d = self.label_offsets[ lab ] - offset
                 ixml.put( 'to', str( d - 1 ) )
 

@@ -2090,7 +2090,7 @@ public:
 	void endWalk( Ginger::Mnx & element, Ginger::MnxWalkPath * path ) {
 		const string & x = element.name();
 		if ( x == Ginger::GNX_FN ) {
-			element.putAttribute( "locals.count", this->maxcount );
+			element.putAttribute( Ginger::GNX_FN_LOCALS_COUNT, this->maxcount );
 			this->popCount();			
 		} else if ( x == Ginger::GNX_BLOCK || x == Ginger::GNX_FOR || isBranchIf( path ) || isBranchSwitch( path ) ) {
 			this->popCount();

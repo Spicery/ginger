@@ -232,9 +232,9 @@ class ResolveLabels:
 
     def _resolveJumps( self, seqixml ):
         for ixml in seqixml:
-            offset = int( ixml.get( 'offset' ) )
             lab = ixml.get( 'to.label', None )
             if lab and lab != Label.RETURN.id():
+                offset = int( ixml.get( 'offset' ) )
                 d = self.label_offsets[ lab ] - offset
                 ixml.put( 'to', str( d - 1 ) )
 

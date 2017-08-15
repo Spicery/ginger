@@ -76,7 +76,7 @@ class MiniCompiler:
             MinXML( 
                 _name, 
                 *_kids, 
-                **{ k.replace( '_', '.' ): k for ( k, v ) in _attributes.items( ) } 
+                **{ k.replace( '_', '.' ): k for ( k, v ) in _attributes.items() } 
             ) 
         )
 
@@ -162,12 +162,15 @@ class SingleValueCompiler( MiniCompiler ):
         super().__init__( *args, **kwargs )
 
     def compile( self, expr, contn_label ):
-        tmp0 = self.newTmpVar( 'mark' )
-        self.plant( "start.mark", local=str(tmp0) )
-        ExprCompiler( share=self )( expr, Label.CONTINUE )
-        self.plant( "check.mark1", local=str(tmp0) )
-        self.simpleContinuation( contn_label )
-        self.deallocateSlot( tmp0 )
+        if expr.hasAttribute( "arity.eval", "1" ):
+            self.compileExpression( expr, contn_label )
+        else:
+            tmp0 = self.newTmpVar( 'mark' )
+            self.plant( "start.mark", local=str(tmp0) )
+            ExprCompiler( share=self )( expr, Label.CONTINUE )
+            self.plant( "check.mark1", local=str(tmp0) )
+            self.simpleContinuation( contn_label )
+            self.deallocateSlot( tmp0 )
 
 class VectorCompiler( MiniCompiler ):
 

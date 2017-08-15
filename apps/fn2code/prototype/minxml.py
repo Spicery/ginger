@@ -3,6 +3,8 @@
 # 	Utilities
 ################################################################################
 
+import sys
+
 class MinXMLError( Exception ):
 	def __init__( self, *args, **kwargs ):
 		super().__init__( *args, **kwargs )
@@ -32,7 +34,7 @@ def _minxml_escape( text ):
 			sofar += _escape_char( ch )
 		return sofar
 	except TypeError:
-		raise Exception( "Error while printing MinXML - Unexpected non-text value: {}".format( text ) )
+		raise MinXMLError( "Error while printing MinXML - Unexpected non-text value: {}".format( text ) )
 
 
 ################################################################################
@@ -116,6 +118,33 @@ class MinXML:
 		self.strlist( sofar )
 		return ''.join( sofar )
 
+	# Helper method for pretty.
+	def _pretty_start_tag( self, file, is_empty ):
+		print( '<', file=file, end='' )
+		print( self.typename, file=file, end='' )
+		for ( k, v ) in sorted( self.attributes.items() ):
+			print( ' ', k, '="', _minxml_escape( v ), '"', file=file, sep='', end='' )
+		print( '/>' if is_empty else '>', file=file )
+
+	# Helper method for pretty.
+	def _pretty_end_tag( self, file ):
+		print( '</', self.typename, '>', file=file, sep='' )
+
+	def _pretty_indent( self, file, indent ):
+		print( '    ' * indent, end='', file=file )
+
+	def pretty( self, file=sys.stdout, indent=0 ):
+		if not self.children:
+			self._pretty_indent( file, indent )
+			self._pretty_start_tag( file, True )
+		else:
+			self._pretty_indent( file, indent )
+			self._pretty_start_tag( file, False )
+			for k in self.children:
+				k.pretty( file=file, indent=indent+1 )
+			self._pretty_indent( file, indent )
+			self._pretty_end_tag( file )			
+
 	def add( self, *minx, **kwargs ):
 		self.children.extend( minx )
 		self.attributes.update( kwargs )
@@ -170,6 +199,12 @@ class MinXML:
 			pass
 		self.attributes.update( kwargs )
 		return self			# For chaining.
+
+	def has( self, key, value=None ):
+		return ( key in self.attributes ) and ( value is None or self.attributes[key] == value )
+
+	def hasnt( self, key, value=None ):
+		return ( not key in self.attributes ) or ( value != None and self.attributes[key] != value )
 
 	def clear( self ):
 		self.children = []

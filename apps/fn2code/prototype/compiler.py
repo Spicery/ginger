@@ -179,7 +179,7 @@ class IdCompiler( MiniCompiler ):
         if slot:
             self.plant( "push.local", local=slot )
         else:
-            self.plant( "push.global", name=expr.get( 'name' ), def_pkg=expr.get( 'def_pkg' ) )
+            self.plant( "push.global", **expr.getAttributes() )
         self.simpleContinuation( contn_label )
 
 class AndCompiler( MiniCompiler ):

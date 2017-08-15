@@ -67,15 +67,18 @@ class MiniCompiler:
             # (At the moment that is just slot-allocations.)
             self.allocations = parent.allocations
 
-    def add( self, ixml ):
-        '''Extends the instructions with a single of GNX value'''
-        self.instructions.add( ixml )
-
     def plant( self, name, *kids, **attributes ):
         '''
-        Creates a single GNX element and adds it to the instruction list.
+        Creates a single GNX element and adds it to the instruction list. Underscores
+        in attributes are replaced by full-stops - which is simply a convenience.
         '''
-        self.add( MinXML( name, *kids, **attributes ) )
+        self.instructions.add( 
+            MinXML( 
+                name, 
+                *kids, 
+                **{ k.replace( '_', '.' ): k for ( k, v ) in attributes.items( ) } 
+            ) 
+        )
 
     def setLabel( self, label ):
         '''Adds a no-op into the tree with a label on it. This will have

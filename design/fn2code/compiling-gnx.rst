@@ -566,7 +566,8 @@ Sketch of Dealing with Jump-to-Jumps
 
 Sketching this in (say) Python3, it might look like this. Note that this
 sketch assumes that the final calculation of jump-distances is handled
-in a later phase.
+in a later phase. Note that to_label is replaced by to.label in the final
+tree.
 
 .. code-block:: python
 
@@ -610,6 +611,7 @@ in a later phase.
 
         def plant( self, name, *kids, **attributes ):
             '''Creates a single GNX element and adds it to the instruction list'''
+            attributes = { k.replace( '_', '.' ): v for ( k, v ) in attributes.items() }
             self.add( MinXML( name, *kids, **attributes ) )
 
         def setLabel( self, label ):

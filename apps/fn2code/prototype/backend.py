@@ -43,11 +43,9 @@ def PeepHole( instruction_name ):
 
 @PeepHole( "syscall" )
 def optSysCall( ixml ):
-    name = ixml.getAttribute( "name" )
+    name = ixml.get( "name" )
     if name in DETAILS:
         return MinXML( DETAILS[ name] )
-    else:
-        return ixml
 
 @PeepHole( "push.local" )
 def optPushLocal( ixml ):
@@ -56,8 +54,6 @@ def optPushLocal( ixml ):
         return MinXML( "push.local0" )
     elif local == "1":
         return MinXML( "push.local1" )
-    else:
-        return ixml
 
 @PeepHole( "push.local.ret" )
 def optPushLocal( ixml ):
@@ -66,8 +62,6 @@ def optPushLocal( ixml ):
         return MinXML( "push.local0.ret" )
     elif local == "1":
         return MinXML( "push.local1.ret" )
-    else:
-        return ixml
 
 @PeepHole( "incr.by" )
 def optIncrBy( ixml ):
@@ -78,8 +72,6 @@ def optIncrBy( ixml ):
         return MinXML( "incr" )
     elif d == "-1":
         return MinXML( "decr" )
-    else:
-        return ixml
 
 @PeepHole( "incr.local.by" )
 def optIncrBy( ixml ):
@@ -88,8 +80,6 @@ def optIncrBy( ixml ):
         return MinXML( "seq" )
     elif d == "1":
         return MinXML( "incr.local.by1", local=ixml.get( "local" ) )
-    else:
-        return ixml
 
 @PeepHole( "erase.num" )
 def optEraseNum( ixml ):
@@ -98,8 +88,6 @@ def optEraseNum( ixml ):
         return MinXML( "seq" )
     elif n == '1':
         return MinXML( "erase" )
-    else:
-        return ixml       
 
 class PeepHole:
 
@@ -122,13 +110,16 @@ class PeepHole:
                     self.assemble( i )
         elif name in PEEPHOLE:
             saved_label = ixml.get( 'label', otherwise='' )
-            ixml = PEEPHOLE[ name ]( ixml )
-            if saved_label:
-                # Extend the labels on ixml by saved_label.
-                labs = saved_label.split()
-                labs.extend( ixml.get( 'label', otherwise='' ).split() )
-                ixml.put( 'label', ' '.join( labs ) )
-            self.assemble( ixml )
+            ixml1 = PEEPHOLE[ name ]( ixml )
+            if not ixml1 is None:
+                if saved_label:
+                    # Extend the labels on ixml by saved_label.
+                    labs = saved_label.split()
+                    labs.extend( ixml1.get( 'label', otherwise='' ).split() )
+                    ixml.put( 'label', ' '.join( labs ) )
+                self.assemble( ixml1 )
+            else:
+                self.add( ixml )
         else:
             self.add( ixml )
 

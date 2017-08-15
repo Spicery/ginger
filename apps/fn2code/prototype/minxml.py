@@ -119,6 +119,7 @@ class MinXML:
 	def add( self, *minx, **kwargs ):
 		self.children.extend( minx )
 		self.attributes.update( kwargs )
+		return self 	# For chaining.
 
 	def __getitem__( self, n ):
 		return self.children[ n ]
@@ -168,6 +169,7 @@ class MinXML:
 		except StopIteration:
 			pass
 		self.attributes.update( kwargs )
+		return self			# For chaining.
 
 	def clear( self ):
 		self.children = []

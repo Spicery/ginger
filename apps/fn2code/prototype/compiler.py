@@ -67,16 +67,16 @@ class MiniCompiler:
             # (At the moment that is just slot-allocations.)
             self.allocations = parent.allocations
 
-    def plant( self, name, *kids, **attributes ):
+    def plant( self, _name, *_kids, **_attributes ):
         '''
         Creates a single GNX element and adds it to the instruction list. Underscores
         in attributes are replaced by full-stops - which is simply a convenience.
         '''
         self.instructions.add( 
             MinXML( 
-                name, 
-                *kids, 
-                **{ k.replace( '_', '.' ): k for ( k, v ) in attributes.items( ) } 
+                _name, 
+                *_kids, 
+                **{ k.replace( '_', '.' ): k for ( k, v ) in _attributes.items( ) } 
             ) 
         )
 
@@ -109,6 +109,13 @@ class MiniCompiler:
     def compileExpression( self, expr, contn_label ):
         ExprCompiler( share=self ).compile( expr, contn_label )
 
+    def compileChildren( self, expr, contn_label ):
+        if expr:
+            kids = expr.children
+            for i in kids[:-1]:
+                self.compileExpression( i, Label.CONTINUE )
+            self.compileExpression( kids[-1], Label.CONTINUE )
+
     def simpleContinuation( self, contn_label ):
         '''Compiles an explicit jump to the label'''
         if contn_label == Label.CONTINUE:
@@ -136,15 +143,14 @@ class ExprCompiler( MiniCompiler ):
             ConstantCompiler( share=self ).compile( expr, contn_label )
         elif expr.hasName( "id" ):
             IdCompiler( share=self ).compile( expr, contn_label )
+        elif expr.hasName( "vector" ):
+            VectorCompiler( share=self ).compile( expr, contn_label )
         elif expr.hasName( "and" ):
             AndCompiler( share=self )( expr, contn_label )
         elif expr.hasName( "for" ):
             LoopCompiler( share=self )( expr, contn_label )
         elif expr.hasName( "seq" ):
-            if expr:
-                for e in expr.children[0:-1]:
-                    ExprCompiler( share=self )( e, Label.CONTINUE )
-                ExprCompiler( share=self )( expr.getLast(), contn_label )
+            self.compileChildren( expr )
         else:
             raise Exception( "To be implemented: " + expr.getName() )
 
@@ -162,6 +168,19 @@ class SingleValueCompiler( MiniCompiler ):
         self.plant( "check.mark1", local=str(tmp0) )
         self.simpleContinuation( contn_label )
         self.deallocateSlot( tmp0 )
+
+class VectorCompiler( MiniCompiler ):
+
+    def __init__( self, *args, **kwargs ):
+        super().__init__( *args, **kwargs )
+
+    def compile( self, expr, contn_label ):   
+        tmp0 = self.newTmpVar( 'mark' )
+        self.plant( "start.mark", local=tmp0 )
+        self.compileChildren( expr, Label.CONTINUE )
+        self.plant( "set.count.mark", local=tmp0 )
+        self.plant( "syscall", name="sysNewVector" )
+        self.simpleContinuation( contn_label )
 
 class ConstantCompiler( MiniCompiler ):
 

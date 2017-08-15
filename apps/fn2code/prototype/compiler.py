@@ -76,7 +76,7 @@ class MiniCompiler:
             MinXML( 
                 _name, 
                 *_kids, 
-                **{ k.replace( '_', '.' ): k for ( k, v ) in _attributes.items() } 
+                **{ k.replace( '_', '.' ): v for ( k, v ) in _attributes.items() } 
             ) 
         )
 
@@ -162,7 +162,7 @@ class SingleValueCompiler( MiniCompiler ):
         super().__init__( *args, **kwargs )
 
     def compile( self, expr, contn_label ):
-        if expr.hasAttribute( "arity.eval", "1" ):
+        if expr.has( "arity.eval", value="1" ):
             self.compileExpression( expr, contn_label )
         else:
             tmp0 = self.newTmpVar( 'mark' )

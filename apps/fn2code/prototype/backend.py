@@ -5,15 +5,22 @@ from pathlib import Path
 from label import Label
 
 ################################################################################
+# system.db
+################################################################################
+
+SYSTEM_DB = Path( __file__ ).parent.joinpath( 'system.db' )
+
+if not SYSTEM_DB.exists():
+    raise Exception( 'The system.db file is missing (please rebuild $GINGER_DEV_HOME/apps/appginger/cpp' )
+
+
+################################################################################
 # Sysfn_details provides a mapping from system functions to vm-instructions.
 ################################################################################
 
 DETAILS = {}
 
-if not Path( 'system.db' ).exists():
-    raise Exception( 'The system.db file is missing (please rebuild apps/appginger/cpp' )
-
-with sqlite3.connect( '../../appginger/cpp/system.db' ) as conn:
+with sqlite3.connect( SYSTEM_DB.as_posix() ) as conn:
     conn.row_factory = sqlite3.Row
     for row in conn.execute( "SELECT name, op FROM sysfn_detail WHERE OP <> ''" ):
         DETAILS[ row[ 'name' ] ] = row[ 'op' ]
@@ -195,9 +202,7 @@ class Widths:
         self.widths = None
 
     def populate( self ):
-        if not Path( 'system.db' ).exists():
-            raise Exception( 'The system.db file is missing (please rebuild $GINGER_DEV_HOME/apps/appginger/cpp' )
-        with sqlite3.connect( 'system.db' ) as conn:
+        with sqlite3.connect( SYSTEM_DB.as_posix() ) as conn:
             cursor = conn.execute( 'SELECT codename, width FROM instruction;' )
             self.widths = {}
             for row in cursor:

@@ -195,9 +195,9 @@ class Widths:
         self.widths = None
 
     def populate( self ):
-        if not Path( '../../appginger/cpp/system.db' ).exists():
-            raise Exception( 'The system.db file is missing (please rebuild apps/appginger/cpp' )
-        with sqlite3.connect( '../../appginger/cpp/system.db' ) as conn:
+        if not Path( 'system.db' ).exists():
+            raise Exception( 'The system.db file is missing (please rebuild $GINGER_DEV_HOME/apps/appginger/cpp' )
+        with sqlite3.connect( 'system.db' ) as conn:
             cursor = conn.execute( 'SELECT codename, width FROM instruction;' )
             self.widths = {}
             for row in cursor:
@@ -237,7 +237,7 @@ class ResolveLabels:
     def _resolveJumps( self, seqixml ):
         for ixml in seqixml:
             offset = int( ixml.get( 'offset' ) )
-            lab = ixml.get( 'to_label', None )
+            lab = ixml.get( 'to.label', None )
             if lab and lab != Label.RETURN.id():
                 d = self.label_offsets[ lab ] - offset
                 ixml.put( 'to', str( d - 1 ) )

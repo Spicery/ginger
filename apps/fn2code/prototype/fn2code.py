@@ -10,7 +10,9 @@ def transformFn( fn ):
     args = fn[0]
     body = fn[1]
     fn2 = MinXML( "fn2code", **fn.attributes )
-    fn2.children = backend.backEnd( compiler.compile( body ).children )
+    ( cbody, max_slots ) = compiler.compile( body )
+    fn2.children = backend.backEnd( cbody.getChildren() )
+    fn2.put( "locals.count", str( max_slots ) )
     return fn2
 
 def transform( gnx ):
@@ -28,9 +30,11 @@ def main():
         gnx = readMinXML( sys.stdin )
         if gnx == None:
             break
-        # print( "Received: ", str( gnx ), file=sys.stderr )
+        print( "Received: ", file=sys.stderr )
+        gnx.pretty( file=sys.stderr, indent=1 )
         gnx = transform( gnx )
-        # print( "Generated: ", str( gnx ), file=sys.stderr )
+        print( "Generated: ", file=sys.stderr )
+        gnx.pretty( file=sys.stderr, indent=1 )
         print( gnx )
         sys.stdout.flush()  # Required to ensure proper switch of control between processes.
 

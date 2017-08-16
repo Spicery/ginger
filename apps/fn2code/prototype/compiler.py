@@ -1,6 +1,8 @@
 from abc import abstractmethod
 from minxml import MinXML
 from label import Label
+from arity import Arity
+import sys
 
 class SlotAllocations:
     '''Stuff to track the way variables are allocated to slots.'''
@@ -9,6 +11,9 @@ class SlotAllocations:
         self.hi_tide = preallocated     # One larger than the highest slot allocated so far.
         self.slots = {}                 # slot -> title, titles do not have to be unique.
         self.available = []             # List of available slots (< hi_tide)
+
+    def slotsNeeded( self ):
+        return self.hi_tide
 
     def fetchSlot( self, title ):
         if not self.available:
@@ -143,6 +148,8 @@ class ExprCompiler( MiniCompiler ):
             ConstantCompiler( share=self ).compile( expr, contn_label )
         elif expr.hasName( "id" ):
             IdCompiler( share=self ).compile( expr, contn_label )
+        elif expr.hasName( "app" ):
+            AppCompiler( share=self ).compile( expr, contn_label )
         elif expr.hasName( "vector" ):
             VectorCompiler( share=self ).compile( expr, contn_label )
         elif expr.hasName( "and" ):
@@ -150,7 +157,7 @@ class ExprCompiler( MiniCompiler ):
         elif expr.hasName( "for" ):
             LoopCompiler( share=self )( expr, contn_label )
         elif expr.hasName( "seq" ):
-            self.compileChildren( expr )
+            self.compileChildren( expr, contn_label )
         else:
             raise Exception( "To be implemented: " + expr.getName() )
 
@@ -172,6 +179,33 @@ class SingleValueCompiler( MiniCompiler ):
             self.simpleContinuation( contn_label )
             self.deallocateSlot( tmp0 )
 
+class AppCompiler( MiniCompiler ):
+
+    def __init__( self, *args, **kwargs ):
+        super().__init__( *args, **kwargs )
+
+    def compile( self, expr, contn_label ):
+        fn_expr = expr[0]
+        arg_expr = expr[1]
+        arg_arity = Arity( arg_expr.get( "arity.eval", otherwise="+0" ) )
+        # print( 'EXACT', arg_arity.count(), arg_arity.isExact(), file=sys.stderr )
+        if fn_expr.hasName( "id" ) and fn_expr.has( "scope", value="global" ) and arg_arity.isExact():
+            self.compileExpression( arg_expr, Label.CONTINUE )
+            self.plant( "set.count.call.global", count=arg_arity.count(), **fn_expr.getAttributes() )
+        elif fn_expr.hasName( "id" ) and fn_expr.has( "scope", value="local" ) and arg_arity.isExact():
+            # TODO: UNTESTED As the test framework isn't ready!
+            self.compileExpression( arg_expr, Label.CONTINUE )
+            slot = expr.get( "slot" )
+            self.plant( "set.count.call.local", local=slot )
+        else:
+            tmp0 = self.newTmpVar( 'args_mark' )
+            self.plant( "start.mark", local=tmp0 )
+            self.compileExpression( arg_expr, Label.CONTINUE )
+            self.compileSingleValue( fn_expr, Label.CONTINUE )
+            self.plant( "end1.calls", local=tmp0 )
+            self.simpleContinuation( contn_label )
+            self.deallocateSlot( tmp0 )
+
 class VectorCompiler( MiniCompiler ):
 
     def __init__( self, *args, **kwargs ):
@@ -184,6 +218,7 @@ class VectorCompiler( MiniCompiler ):
         self.plant( "set.count.mark", local=tmp0 )
         self.plant( "syscall", name="sysNewVector" )
         self.simpleContinuation( contn_label )
+        self.deallocateSlot( tmp0 )
 
 class ConstantCompiler( MiniCompiler ):
 
@@ -311,7 +346,10 @@ class FromQueryCompiler( QueryCompiler ):
         self.deallocateSlot( self.loop_var_slot )  
 
 def compile( gnx ):
-    return ExprCompiler()( gnx, Label.RETURN )
+    ecompiler = ExprCompiler()
+    cbody = ecompiler( gnx, Label.RETURN )
+    max_slots = ecompiler.allocations.slotsNeeded()
+    return ( cbody, max_slots )
 
 if __name__ == "__main__":
     for_expr = MinXML( "for" )

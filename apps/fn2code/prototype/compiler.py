@@ -134,6 +134,16 @@ class MiniCompiler:
     def compile( self, *args, **kwargs ):
         pass
 
+SUB_COMPILER_INDEX = {}
+
+def RegisteredMiniCompiler( element_name ):
+    def sub_compiler_decorator( func ):
+        SUB_COMPILER_INDEX[ element_name ] = func
+        return func
+    return sub_compiler_decorator
+
+
+
 class ExprCompiler( MiniCompiler ):
     '''
     Compiles a general expression by handing off to 
@@ -144,22 +154,13 @@ class ExprCompiler( MiniCompiler ):
         super().__init__( *args, **kwargs )
 
     def compile( self, expr, contn_label ):
-        if expr.hasName( "constant" ):
-            ConstantCompiler( share=self ).compile( expr, contn_label )
-        elif expr.hasName( "id" ):
-            IdCompiler( share=self ).compile( expr, contn_label )
-        elif expr.hasName( "app" ):
-            AppCompiler( share=self ).compile( expr, contn_label )
-        elif expr.hasName( "vector" ):
-            VectorCompiler( share=self ).compile( expr, contn_label )
-        elif expr.hasName( "and" ):
-            AndCompiler( share=self )( expr, contn_label )
-        elif expr.hasName( "for" ):
-            LoopCompiler( share=self )( expr, contn_label )
-        elif expr.hasName( "seq" ):
+        if expr.hasName( "seq" ):
             self.compileChildren( expr, contn_label )
         else:
-            raise Exception( "To be implemented: " + expr.getName() )
+            try:
+                SUB_COMPILER_INDEX[ expr.getName() ]( share=self )( expr, contn_label )
+            except KeyError:
+                raise Exception( "To be implemented: " + expr.getName() )
 
 class SingleValueCompiler( MiniCompiler ):
     '''Compiles a general expression but ensures it generates a single
@@ -179,6 +180,29 @@ class SingleValueCompiler( MiniCompiler ):
             self.simpleContinuation( contn_label )
             self.deallocateSlot( tmp0 )
 
+@RegisteredMiniCompiler( "sysapp" )
+class SysAppCompiler( MiniCompiler ):
+
+    def __init__( self, *args, **kwargs ):
+        super().__init__( *args, **kwargs )
+
+    def compile( self, expr, contn_label ):
+        a = Arity( *( a.get( "arity.eval", otherwise="+0" ) for a in expr.getChildren() ) )
+        if a.hasExactCount( int( expr.get( "args.arity" ) ) ):
+            self.compileChildren( expr, Label.CONTINUE )
+            self.plant( "set.count.syscall", count=expr.get( "args.arity" ), name=expr.get( "name" ) )
+        else:
+            name = expr.get( "name" )
+            tmp0 = self.newTmpVar( 'args_mark' )
+            self.plant( "start.mark", local=tmp0 )
+            self.compileChildren( expr, Label.CONTINUE )
+            self.plant( "check.mark", local=tmp0, count=expr.get( "args.arity" ) )
+            self.plant( "syscall", name=name )
+            self.deallocateSlot( tmp0 )
+        self.simpleContinuation( contn_label )
+
+
+@RegisteredMiniCompiler( "app" )
 class AppCompiler( MiniCompiler ):
 
     def __init__( self, *args, **kwargs ):
@@ -206,6 +230,7 @@ class AppCompiler( MiniCompiler ):
             self.simpleContinuation( contn_label )
             self.deallocateSlot( tmp0 )
 
+@RegisteredMiniCompiler( "vector" )
 class VectorCompiler( MiniCompiler ):
 
     def __init__( self, *args, **kwargs ):
@@ -220,6 +245,7 @@ class VectorCompiler( MiniCompiler ):
         self.simpleContinuation( contn_label )
         self.deallocateSlot( tmp0 )
 
+@RegisteredMiniCompiler( "constant" )
 class ConstantCompiler( MiniCompiler ):
 
     def __init__( self, *args, **kwargs ):
@@ -229,6 +255,7 @@ class ConstantCompiler( MiniCompiler ):
         self.plant( "pushq", expr )
         self.simpleContinuation( contn_label )
 
+@RegisteredMiniCompiler( "id" )
 class IdCompiler( MiniCompiler ):
 
     def __init__( self, *args, **kwargs ):
@@ -242,6 +269,7 @@ class IdCompiler( MiniCompiler ):
             self.plant( "push.global", **expr.getAttributes() )
         self.simpleContinuation( contn_label )
 
+@RegisteredMiniCompiler( "and" )
 class AndCompiler( MiniCompiler ):
 
     def __init__( self, *args, **kwargs ):
@@ -258,6 +286,7 @@ class AndCompiler( MiniCompiler ):
         # Run the rhs & continue to the label.
         self.compileExpression( expr[1], contn_label ) 
 
+@RegisteredMiniCompiler( "for" )
 class LoopCompiler( MiniCompiler ):
 
     def __init__( self, *args, **kwargs ):

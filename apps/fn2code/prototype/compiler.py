@@ -3,6 +3,7 @@ from minxml import MinXML
 from label import Label
 from arity import Arity
 import sys
+import abc
 
 class SlotAllocations:
     '''Stuff to track the way variables are allocated to slots.'''
@@ -142,8 +143,6 @@ def RegisteredMiniCompiler( element_name ):
         return func
     return sub_compiler_decorator
 
-
-
 class ExprCompiler( MiniCompiler ):
     '''
     Compiles a general expression by handing off to 
@@ -201,7 +200,6 @@ class SysAppCompiler( MiniCompiler ):
             self.deallocateSlot( tmp0 )
         self.simpleContinuation( contn_label )
 
-
 @RegisteredMiniCompiler( "app" )
 class AppCompiler( MiniCompiler ):
 
@@ -230,26 +228,38 @@ class AppCompiler( MiniCompiler ):
             self.simpleContinuation( contn_label )
             self.deallocateSlot( tmp0 )
 
-@RegisteredMiniCompiler( "vector" )
-class VectorCompiler( MiniCompiler ):
+class ContainerMiniCompiler( MiniCompiler ):
 
     def __init__( self, *args, **kwargs ):
         super().__init__( *args, **kwargs )
+
+    @abc.abstractmethod
+    def sysFnConstructor( self ):
+        pass
 
     def compile( self, expr, contn_label ):   
         tmp0 = self.newTmpVar( 'mark' )
         self.plant( "start.mark", local=tmp0 )
         self.compileChildren( expr, Label.CONTINUE )
         self.plant( "set.count.mark", local=tmp0 )
-        self.plant( "syscall", name="sysNewVector" )
+        self.plant( "syscall", name=self.sysFnConstructor() )
         self.simpleContinuation( contn_label )
         self.deallocateSlot( tmp0 )
 
+@RegisteredMiniCompiler( "vector" )
+class VectorCompiler( ContainerMiniCompiler ):
+
+    def sysFnConstructor( self ):
+        return "sysNewVector"
+
+@RegisteredMiniCompiler( "list" )
+class ListCompiler( ContainerMiniCompiler ):
+
+    def sysFnConstructor( self ):
+        return "sysNewList"
+
 @RegisteredMiniCompiler( "constant" )
 class ConstantCompiler( MiniCompiler ):
-
-    def __init__( self, *args, **kwargs ):
-        super().__init__( *args, **kwargs )
 
     def compile( self, expr, contn_label ):   
         self.plant( "pushq", expr )
@@ -257,9 +267,6 @@ class ConstantCompiler( MiniCompiler ):
 
 @RegisteredMiniCompiler( "id" )
 class IdCompiler( MiniCompiler ):
-
-    def __init__( self, *args, **kwargs ):
-        super().__init__( *args, **kwargs )
 
     def compile( self, expr, contn_label ):   
         slot = expr.get( "slot", otherwise=None )
@@ -271,9 +278,6 @@ class IdCompiler( MiniCompiler ):
 
 @RegisteredMiniCompiler( "and" )
 class AndCompiler( MiniCompiler ):
-
-    def __init__( self, *args, **kwargs ):
-        super().__init__( *args, **kwargs )
 
     def compile( self, expr, contn_label ):   
         # First expression must carry on in this sequence
@@ -289,9 +293,6 @@ class AndCompiler( MiniCompiler ):
 @RegisteredMiniCompiler( "for" )
 class LoopCompiler( MiniCompiler ):
 
-    def __init__( self, *args, **kwargs ):
-        super().__init__( *args, **kwargs )
-
     def compile( self, expr, contn_label ):
         query = expr[ 0 ]
         if query.hasName( "from" ):
@@ -302,9 +303,6 @@ class LoopCompiler( MiniCompiler ):
             raise Exception( "To be implemented: {}".format( query.getName() ) )
 
 class QueryCompiler( MiniCompiler ):
-
-    def __init__( self, *args, **kwargs ):
-        super().__init__( *args, **kwargs )
 
     @abstractmethod
     def compileLoopDeclarations( self, query ): pass
@@ -338,9 +336,6 @@ class QueryCompiler( MiniCompiler ):
         self.compileLoopFini( query, contn=contn_label )
 
 class FromQueryCompiler( QueryCompiler ):
-
-    def __init__( self, *args, **kwargs ):
-        super().__init__( *args, **kwargs )
 
     def compileLoopDeclarations( self, query ):
         '''Hand-waving allocation of slot to the variable'''

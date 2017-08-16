@@ -2,9 +2,12 @@
 
 class Arity:
 
-    def __init__( self, arity_str ):
-        self._count = int( arity_str )
-        self._exact = not '+' in arity_str
+    def __init__( self, *arity_strings ):
+        self._count = 0
+        self._exact = True
+        for a in arity_strings:
+            self._count += int( a )
+            self._exact = self._exact and ( not '+' in a )
 
     def isExact( self ):
         return self._exact
@@ -23,3 +26,11 @@ class Arity:
 
     def count( self ):
         return self._count
+
+    def add( self, other ):
+        a = Arity()
+        a._count = self._count + other._count
+        a._exact = self._exact and other._exact
+        return a
+
+

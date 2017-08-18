@@ -94,14 +94,14 @@ Gnx Compile::compile( Gnx x ) {
     MnxReader reader( input );
     Gnx r = reader.readMnx();
 
-    #ifdef DBG_SIMPLIFY
+    #ifdef DBG_COMPILE
         cerr << "appginger/simplify receives GNX" << endl;
         cerr << "  [[";
         r->render( cerr );
         cerr << "]]" << endl;
     #endif 
 
-    return x;
+    return r;
 }
 
 } // namespace Ginger

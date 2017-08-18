@@ -115,12 +115,26 @@ class MiniCompiler:
     def compileExpression( self, expr, contn_label ):
         ExprCompiler( share=self ).compile( expr, contn_label )
 
+    def plantIfNot( self, goto_label ):
+        if goto_label == Label.RETURN:
+            self.plant( "return.ifnot" )
+        else:
+            self.plant( "ifnot", to_label=goto_label.id() )
+
+    def plantIfSo( self, label ):
+        if label == Label.RETURN:
+            self.plant( "return.ifso" )
+        else:
+            self.plant( "ifso", label=contn_label.id() )
+
     def compileChildren( self, expr, contn_label ):
         if expr:
             kids = expr.children
             for i in kids[:-1]:
                 self.compileExpression( i, Label.CONTINUE )
-            self.compileExpression( kids[-1], Label.CONTINUE )
+            self.compileExpression( kids[-1], contn_label )
+        else:
+            self.simpleContinuation( contn_label )
 
     def simpleContinuation( self, contn_label ):
         '''Compiles an explicit jump to the label'''
@@ -153,13 +167,10 @@ class ExprCompiler( MiniCompiler ):
         super().__init__( *args, **kwargs )
 
     def compile( self, expr, contn_label ):
-        if expr.hasName( "seq" ):
-            self.compileChildren( expr, contn_label )
-        else:
-            try:
-                SUB_COMPILER_INDEX[ expr.getName() ]( share=self )( expr, contn_label )
-            except KeyError:
-                raise Exception( "To be implemented: " + expr.getName() )
+        try:
+            SUB_COMPILER_INDEX[ expr.getName() ]( share=self )( expr, contn_label )
+        except KeyError:
+            raise Exception( "To be implemented: " + expr.getName() )
 
 class SingleValueCompiler( MiniCompiler ):
     '''Compiles a general expression but ensures it generates a single
@@ -179,17 +190,21 @@ class SingleValueCompiler( MiniCompiler ):
             self.simpleContinuation( contn_label )
             self.deallocateSlot( tmp0 )
 
+@RegisteredMiniCompiler( "seq" )
+class SeqCompiler( MiniCompiler ):
+
+    def compile( self, expr, contn_label ):
+        self.compileChildren( expr, contn_label )
+
 @RegisteredMiniCompiler( "sysapp" )
 class SysAppCompiler( MiniCompiler ):
 
-    def __init__( self, *args, **kwargs ):
-        super().__init__( *args, **kwargs )
-
     def compile( self, expr, contn_label ):
-        a = Arity( *( a.get( "arity.eval", otherwise="+0" ) for a in expr.getChildren() ) )
-        if a.hasExactCount( int( expr.get( "args.arity" ) ) ):
+        a = Arity( *( a.get( "arity.eval", otherwise="0+" ) for a in expr.getChildren() ) )
+        aa = Arity( expr.get( "args.arity" ) )
+        if aa.isExact() and a.hasExactCount( aa.count() ):
             self.compileChildren( expr, Label.CONTINUE )
-            self.plant( "set.count.syscall", count=expr.get( "args.arity" ), name=expr.get( "name" ) )
+            self.plant( "set.count.syscall", count=a.count(), name=expr.get( "name" ) )
         else:
             name = expr.get( "name" )
             tmp0 = self.newTmpVar( 'args_mark' )
@@ -200,11 +215,26 @@ class SysAppCompiler( MiniCompiler ):
             self.deallocateSlot( tmp0 )
         self.simpleContinuation( contn_label )
 
+@RegisteredMiniCompiler( "self.app" )
+class SelfAppCompiler( MiniCompiler ):
+
+    def compile( self, expr, contn_label ):
+        a = Arity( *( a.get( "arity.eval", otherwise="0+" ) for a in expr.getChildren() ) )
+        aa = Arity( expr.get( "args.arity" ) )
+        if aa.isExact() and a.hasExactCount( aa.count() ):
+            self.compileChildren( expr, Label.CONTINUE )
+            self.plant( "self.call.n", count=a.count() )
+        else:
+            tmp0 = self.newTmpVar( 'args_mark' )
+            self.plant( "start.mark", local=tmp0 )
+            self.compileChildren( expr, Label.CONTINUE )
+            self.plant( "set.count.mark", local=tmp0 )
+            self.plant( "self.call" )
+            self.deallocateSlot( tmp0 )
+        self.simpleContinuation( contn_label )
+
 @RegisteredMiniCompiler( "app" )
 class AppCompiler( MiniCompiler ):
-
-    def __init__( self, *args, **kwargs ):
-        super().__init__( *args, **kwargs )
 
     def compile( self, expr, contn_label ):
         fn_expr = expr[0]
@@ -283,12 +313,54 @@ class AndCompiler( MiniCompiler ):
         # First expression must carry on in this sequence
         # so we pass the fake label Label.CONTINUE.
         self.compileSingleValue( expr[0], Label.CONTINUE );
-        
         # If false jump to the label immediately.
         self.plant( "and", to_label=contn_label.id() )
-
         # Run the rhs & continue to the label.
         self.compileExpression( expr[1], contn_label ) 
+
+@RegisteredMiniCompiler( "or" )
+class OrCompiler( MiniCompiler ):
+
+    def compile( self, expr, contn_label ):   
+        # First expression must carry on in this sequence
+        # so we pass the fake label Label.CONTINUE.
+        self.compileSingleValue( expr[0], Label.CONTINUE );
+        # If true jump to the label immediately.
+        self.plant( "or", to_label=contn_label.id() )
+        # Run the rhs & continue to the label.
+        self.compileExpression( expr[1], contn_label ) 
+
+@RegisteredMiniCompiler( "if" )
+class IfCompiler( MiniCompiler ):
+
+    def compileFrom( self, expr, offset, n_remaining, contn_label ):
+        if n_remaining == 2:
+            self.compileSingleValue( expr[offset], Label.CONTINUE )
+            self.plantIfNot( contn_label )
+            self.compileExpression( expr[offset + 1], contn_label )
+        elif n_remaining == 3:
+            ELSE_label = Label( 'else' )
+            self.compileSingleValue( expr[offset], Label.CONTINUE )
+            self.plantIfNot( ELSE_label )
+            self.compileExpression( expr[offset + 1], contn_label )
+            self.setLabel( ELSE_label )
+            self.compile( expr[offset + 2], contn_label )
+        else:
+            ELSEIF_label = Label( 'elseif' )
+            self.compileSingleValue( expr[offset], Label.CONTINUE )
+            self.plantIfNot( ELSEIF_label )
+            self.compileExpression( expr[offset + 1], contn_label )
+            self.setLabel( ELSEIF_label )
+            self.compileFrom( self, expr, offset+2, n_remaining-2, contn_label )
+
+    def compile( self, expr, contn_label ): 
+        n = len( expr )
+        if n == 0:
+            pass
+        elif n == 1:
+            self.compileExpression( expr[0], contn_label )
+        else:
+            self.compileFrom( expr, 0, n, contn_label )
 
 @RegisteredMiniCompiler( "for" )
 class LoopCompiler( MiniCompiler ):

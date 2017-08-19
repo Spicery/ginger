@@ -10,7 +10,9 @@ class SlotAllocations:
 
     def __init__( self, preallocated=0 ):
         self.hi_tide = preallocated     # One larger than the highest slot allocated so far.
-        self.slots = {}                 # slot -> title, titles do not have to be unique.
+        self.slots = {                  # slot -> title, titles do not have to be unique.
+            n: 'preallocated' for n in range( 0, preallocated )
+        }
         self.available = []             # List of available slots (< hi_tide)
 
     def slotsNeeded( self ):
@@ -280,13 +282,13 @@ class ContainerMiniCompiler( MiniCompiler ):
 class VectorCompiler( ContainerMiniCompiler ):
 
     def sysFnConstructor( self ):
-        return "sysNewVector"
+        return "newVector"
 
 @RegisteredMiniCompiler( "list" )
 class ListCompiler( ContainerMiniCompiler ):
 
     def sysFnConstructor( self ):
-        return "sysNewList"
+        return "newList"
 
 @RegisteredMiniCompiler( "constant" )
 class ConstantCompiler( MiniCompiler ):
@@ -441,8 +443,8 @@ class FromQueryCompiler( QueryCompiler ):
     def compileLoopFini( self, query, contn=Label.CONTINUE ):
         self.deallocateSlot( self.loop_var_slot )  
 
-def compile( gnx ):
-    ecompiler = ExprCompiler()
+def compile( gnx, nargs ):
+    ecompiler = ExprCompiler( preallocated=nargs )
     cbody = ecompiler( gnx, Label.RETURN )
     max_slots = ecompiler.allocations.slotsNeeded()
     return ( cbody, max_slots )

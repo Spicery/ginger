@@ -17,9 +17,9 @@ def transformFn( fn ):
     '''Applies the compiler to a <fn> element'''
     args = fn[0]
     body = fn[1]
-    nargs = fn.get( "args.count" )
+    nargs = int( fn.get( "args.count" ) )
     fn2 = MinXML( "fn.code", **fn.attributes )
-    ( cbody, max_slots ) = compiler.compile( body )
+    ( cbody, max_slots ) = compiler.compile( body, nargs )
     fn2.children = [ enterInstruction( nargs ) ]
     fn2.children.extend( backend.backEnd( cbody.getChildren() ) )
     fn2.put( "locals.count", str( max_slots ) )

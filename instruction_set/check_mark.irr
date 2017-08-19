@@ -34,5 +34,5 @@ long K = ToLong( *( ++pc ) );
 	std::endl;
 #endif
 if ( VMVP == ToRefRef( LOCAL(n) ) + K ) RETURN( pc + 1 );
-throw Mishap( "Wrong number of results" ).culprit( "Needed", K ).culprit( "Found", reinterpret_cast< ptrdiff_t >( VMVP - ToRefRef( LOCAL(n) ) ) );
+throw Mishap( "Wrong number of results" ).culprit( "Needed", K ).culprit( "Found",  VMVP - ToRefRef( LOCAL(n) ) );
 RETURN( NULL );	// stupid compiler

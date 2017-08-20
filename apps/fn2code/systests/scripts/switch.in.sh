@@ -1,7 +1,7 @@
-#!/usr/local/bin/ginger-script -O,-gcmn
+#!/usr/local/bin/ginger-script -O,-gcmn,--fn2code
 
 define f( x ) =>>
 	switch x case 0 then 'a' else 'b' endswitch;
 enddefine;
 
-print( [ f( 0 ), f( 1 ) ] );
+[ f( 0 ), f( 1 ) ];

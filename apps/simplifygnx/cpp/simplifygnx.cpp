@@ -2034,14 +2034,14 @@ private:
     }
     
     static bool isBranchSwitch( Ginger::MnxWalkPath * path ) {
-        return (
-            path != nullptr && 
-            path->getMnx().name() == Ginger::GNX_SWITCH && 
-            (
-                ( ( path->getIndex() & 0x1 ) == 0x0 ) ||
-                path->isLastIndex()
-            )
-        );
+        if ( path == nullptr ) return false;
+        if ( path->getMnx().name() != Ginger::GNX_SWITCH ) return false;
+        const int idx = path->getIndex();
+        if ( idx <= 1 ) return false;
+        const bool is_even = ( idx & 0x1 ) == 0x0;
+        if ( is_even ) return true;
+        const bool last_idx = path->isLastIndex();
+        return last_idx;
     }
     
 	static bool isFormalArgs( Ginger::MnxWalkPath * path ) {
@@ -2053,8 +2053,12 @@ private:
 	}
 	
 	void popCount() {
-		this->count = this->scopes[ this->scopes.size() - 1 ];
-		this->scopes.pop_back();
+        if ( this->scopes.empty() ) {
+            throw Ginger::Mishap( "Internal error" ).culprit( "Reason", "Too many pops" );
+        } else {
+    		this->count = this->scopes.back();
+    		this->scopes.pop_back();
+        }
 	}
 	
 	void pushCount() {
@@ -2072,7 +2076,10 @@ private:
 public:
 	void startWalk( Ginger::Mnx & element, Ginger::MnxWalkPath * path ) {
 		const string & x = element.name();
-		if ( x == Ginger::GNX_ID && element.hasAttribute( "scope", "local" ) ) {
+		if ( isBranchIf( path ) || isBranchSwitch( path ) ) {
+            this->pushCount();
+        }
+        if ( x == Ginger::GNX_ID && element.hasAttribute( "scope", "local" ) ) {
 			int slot = this->uid_slot[ element.attributeToInt( "uid" ) ];
 			element.putAttribute( "slot", slot );
 		} else if ( x == Ginger::GNX_VAR && element.hasAttribute( "scope", "local" ) ) {
@@ -2080,9 +2087,9 @@ public:
 			this->uid_slot[ element.attributeToInt( "uid" ) ] = slot;
 			element.putAttribute( "slot", slot );
 		} else if ( x == Ginger::GNX_FN ) {
-			this->pushCount();
-			this->count = 0;
-		} else if ( x == Ginger::GNX_BLOCK || x == Ginger::GNX_FOR || isBranchIf( path ) || isBranchSwitch( path ) ) {
+            this->pushCount();
+            this->count = 0;
+		} else if ( x == Ginger::GNX_BLOCK || x == Ginger::GNX_FOR ) {
 			this->pushCount();
 		}
 	}
@@ -2092,7 +2099,7 @@ public:
 		if ( x == Ginger::GNX_FN ) {
 			element.putAttribute( Ginger::GNX_FN_LOCALS_COUNT, this->maxcount );
 			this->popCount();			
-		} else if ( x == Ginger::GNX_BLOCK || x == Ginger::GNX_FOR || isBranchIf( path ) || isBranchSwitch( path ) ) {
+		} else if ( x == Ginger::GNX_BLOCK || x == Ginger::GNX_FOR ) {
 			this->popCount();
             if ( x == Ginger::GNX_BLOCK ) {
                 element.name() = Ginger::GNX_SEQ;
@@ -2101,6 +2108,9 @@ public:
 			//	We are ending an argument list. Stash the count of the formals.
 			getParent( path ).putAttribute( "args.count", this->count );
 		}
+        if ( isBranchIf( path ) || isBranchSwitch( path ) ) {
+            this->popCount();
+        }
 	}	
 
 public:
@@ -2230,7 +2240,7 @@ void Main::simplify( Gnx & g ) {
 		SlotAllocation s;
 		g->walk( s );
 	}
-	
+    
 }
 
 void Main::run() {
@@ -2238,8 +2248,8 @@ void Main::run() {
 	for (;;) {	
 		Gnx g( reader.readMnx() );
 		if ( not g ) break;	
-		this->simplify( g );		
-		g->render();
+		this->simplify( g );
+        g->render();
 		cout << endl;
         #ifdef DBG_SIMPLIFYGNX
             cerr << "simplifygnx replying" << endl;

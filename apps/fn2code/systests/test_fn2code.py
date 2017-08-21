@@ -12,6 +12,7 @@ def runtest( in_file_name ):
     with open( out_file_name, 'r' ) as ex:
     	expected = ex.read().strip()
     if actual != expected:
+	    print( file=sys.stderr )
 	    print( 'ACTUAL   : ', actual, file=sys.stderr )
 	    print( 'EXPECTED : ', expected, file=sys.stderr )
     assert actual == expected

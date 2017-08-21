@@ -330,7 +330,70 @@ class OrCompiler( MiniCompiler ):
         # If true jump to the label immediately.
         self.plant( "or", to_label=contn_label.id() )
         # Run the rhs & continue to the label.
-        self.compileExpression( expr[1], contn_label ) 
+        self.compileExpression( expr[1], contn_label )
+
+
+
+@RegisteredMiniCompiler( "switch" )
+class SwitchCompiler( MiniCompiler ):
+    '''
+    This should implement full pattern matching - with variadicity.
+    However our initial version will be trivial.
+    '''
+
+    def __init__( self, *args, **kwargs ):
+        super().__init__( *args, **kwargs )
+        self.tmp0 = None
+
+    def deallocate( self ):
+        if not self.tmp0 is None:
+            self.deallocateSlot( self.tmp0 )
+
+    def compileFrom( self, expr, offset, n_remaining, contn_label ):
+        if n_remaining == 2:
+            self.compileSingleValue( expr[offset], Label.CONTINUE )
+            self.plant( "push.local", local=self.tmp0, comment="switch2_push" )
+            self.deallocate()
+            self.plant( "eq", comment="switch2_eq" )
+            self.plantIfNot( contn_label )
+            self.compileExpression( expr[offset + 1], contn_label )            
+        elif n_remaining == 3:
+            ELSE_label = Label( 'else' )
+            self.compileSingleValue( expr[offset], Label.CONTINUE )
+            self.plant( "push.local", local=self.tmp0, comment="switch3_push" )
+            self.deallocate()
+            self.plant( "eq", comment="switch3_eq" )
+            self.plantIfNot( ELSE_label )
+            self.compileExpression( expr[offset + 1], contn_label )
+            self.setLabel( ELSE_label )
+            self.compileExpression( expr[offset + 2], contn_label )            
+        else:
+            ELSEIF_label = Label( 'elseif' )
+            self.compileSingleValue( expr[offset], Label.CONTINUE )
+            self.plant( "push.local", local=self.tmp0, comment="switchN_push" )
+            self.plant( "eq", comment="switchN_eq" )
+            self.plantIfNot( ELSEIF_label )
+            self.compileExpression( expr[offset + 1], contn_label )
+            self.setLabel( ELSEIF_label )
+            self.compileFrom( expr, offset+2, n_remaining-2, contn_label )
+
+    def compile( self, expr, contn_label ): 
+        self.compileSingleValue( expr[0], Label.CONTINUE )
+        self.tmp0 = self.newTmpVar( 'switch' )
+        self.plant( "pop.local", local=self.tmp0, comment="switch_tmp" )
+        n = len( expr )
+        if n == 1:
+            # Extremely rare case, so there's no need to optimise.
+            # Corresponds to: switch EXPR endswitch
+            self.deallocate()
+        elif n == 2:
+            # Extremely rare case, so there's no need to optimise.
+            # Corresponds to: switch EXPR else EXPR endswitch
+            self.deallocate()
+            self.compileExpression( expr[1], contn_label )
+        else:
+            self.compileFrom( expr, 1, n-1, contn_label )
+
 
 @RegisteredMiniCompiler( "if" )
 class IfCompiler( MiniCompiler ):
@@ -346,14 +409,14 @@ class IfCompiler( MiniCompiler ):
             self.plantIfNot( ELSE_label )
             self.compileExpression( expr[offset + 1], contn_label )
             self.setLabel( ELSE_label )
-            self.compile( expr[offset + 2], contn_label )
+            self.compileExpression( expr[offset + 2], contn_label )
         else:
             ELSEIF_label = Label( 'elseif' )
             self.compileSingleValue( expr[offset], Label.CONTINUE )
             self.plantIfNot( ELSEIF_label )
             self.compileExpression( expr[offset + 1], contn_label )
             self.setLabel( ELSEIF_label )
-            self.compileFrom( self, expr, offset+2, n_remaining-2, contn_label )
+            self.compileFrom( expr, offset+2, n_remaining-2, contn_label )
 
     def compile( self, expr, contn_label ): 
         n = len( expr )

@@ -2298,9 +2298,8 @@ void CodeGenClass::compileGnx( Gnx mnx, LabelClass * contn ) {
 
 				this->continueFrom( contn );
 			} else {
-				throw Ginger::Mishap( "BIND not fully implemented [1]" );
+				throw Ginger::Mishap( "SET not fully implemented [1]" );
 			}
-
 		} else {
 			throw Ginger::Mishap( "SET not fully implemented yet" );
 		}

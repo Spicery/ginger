@@ -6,9 +6,9 @@
 import sys
 
 class MinXMLError( Exception ):
+	'''An exception class reserved for this module.'''
 	def __init__( self, *args, **kwargs ):
 		super().__init__( *args, **kwargs )
-
 
 def _escape_char( ch ):
 	if ch == '"':
@@ -44,72 +44,127 @@ def _minxml_escape( text ):
 class MinXML:
 	"""An implementation of Minimal XML - a clean subset of XML"""
 
-	def __init__( self, typename, *kids, **kwargs ):
-		self.typename = typename
-		self.children = []
-		self.children.extend( kids )
-		self.attributes = {}
+	def __init__( self, _typename, *kids, **kwargs ):
+		self._typename = _typename
+		self._children = []
+		self._children.extend( kids )
+		self._attributes = {}
 		for k, v in kwargs.items():
-			self.attributes[ k ] = str( v )
+			self._attributes[ k ] = str( v )
 
 	def copy( self ):
-		return MinXML( self.typename, *self.children, **self.attributes )
+		'''Returns a shallow copy of the MinXML element. The parts (name, children
+		and attributes) are all copied.'''
+		return MinXML( self._typename, *self._children, **self._attributes )
+
+	@property
+	def children( self ):
+		'''An updateable property that gets or sets the children of the element.'''
+		return self._children
+
+	@children.setter
+	def children( self, kids ):
+		self._children = kids
 
 	def getChildren( self ):
-		return self.children
+		'''deprecate'''
+		return self._children
+
+	@property
+	def attributes( self ):
+		'''An updateable property that gets or sets the attributes of the element.'''
+		return self._attributes
+
+	@attributes.setter
+	def attributes( self, a ):
+		self._attributes = a
 
 	def getAttributes( self ):
-		return self.attributes
+		'''To be deprecated'''
+		return self._attributes
 
-	def hasAttribute( self, attname ):
-		return attname in self.attributes
+	def hasAttribute( self, key ):
+		'''Returns true if the element has attributes key.'''
+		return key in self._attributes
 
-	def hasntAttribute( self, attname ):
-		return not( attname in self.attributes )
+	def hasAttributeValue( self, key, value ):
+		'''Returns true if the element has (key,value) as an attribute.'''
+		return key in self._attributes and self._attributes[key] == value
 
-	def hasAttributes( self ):
-		return self.attributes and True
+	def hasntAttribute( self, key ):
+		'''Returns true if the element doesn't have an attribute with key.'''
+		return not( key in self._attributes )
 
-	def hasntAttributes( self ):
-		return self.attributes and False
+	def hasntAttributeValue( self, key, value ):
+		'''Returns true if the element has not got (key,value) as an attribute.'''
+		return not( key in self._attributes ) or self._attributes[key] != value
+
+	def hasAnyAttributes( self ):
+		'''Returns true if there is one or more pair of attributes for this element.'''
+		return self._attributes and True
+
+	def hasntAnyAttributes( self ):
+		'''Returns true if there are no pairs of attributes for this element.'''
+		return self._attributes and False
+
+	def has( self, key, value=None ):
+		'''True if the element has an attribute with key and optionally checks the value too.'''
+		return ( key in self._attributes ) and ( value is None or self._attributes[key] == value )
+
+	def hasnt( self, key, value=None ):
+		'''True if the element does not have an attribute with key and optionally checks the value too.'''
+		return ( not key in self._attributes ) or ( value != None and self._attributes[key] != value )
 
 	def clear( self ):
-		self.children.clear()
+		'''Discards all the child elements.'''
+		self._children.clear()
+
+	@property
+	def name( self ):
+		'''An updateable property that gets or sets the name of the element.'''
+		return self._typename
+
+	@name.setter
+	def name( self, new_name ):
+		self._typename = new_name
 
 	def getName( self ):
-		return self.typename
+		'''deprecate'''
+		return self._typename
 
 	def setName( self, _name ):
-		self.typename = _name
+		'''deprecate'''
+		self._typename = _name
 
 	def hasName( self, name ):
-		return self.typename == name
+		'''Returns true if the element has the given name.'''
+		return self._typename == name
 
 	# Helper method for __str__
 	def start_tag( self, list ):
 		list.append( '<' )
-		list.append( self.typename )
-		for ( k, v ) in sorted( self.attributes.items() ):
+		list.append( self._typename )
+		for ( k, v ) in sorted( self._attributes.items() ):
 			list.append( ' ' )
 			list.append( k )
 			list.append( '="' )
 			list.append( _minxml_escape( v ) )
 			list.append( '"' )
-		list.append( '>' if self.children else '/>' )
+		list.append( '>' if self._children else '/>' )
 
 	# Helper method for __str__
 	def end_tag( self, list ):
 		list.append( '</' )
-		list.append( self.typename )
+		list.append( self._typename )
 		list.append( '>' )
 
 	# Helper method for __str__
 	def strlist( self, list ):
-		if not self.children:
+		if not self._children:
 			self.start_tag( list )
 		else:
 			self.start_tag( list )
-			for k in self.children:
+			for k in self._children:
 				k.strlist( list )
 			self.end_tag( list )
 
@@ -121,93 +176,121 @@ class MinXML:
 	# Helper method for pretty.
 	def _pretty_start_tag( self, file, is_empty ):
 		print( '<', file=file, end='' )
-		print( self.typename, file=file, end='' )
-		for ( k, v ) in sorted( self.attributes.items() ):
+		print( self._typename, file=file, end='' )
+		for ( k, v ) in sorted( self._attributes.items() ):
 			print( ' ', k, '="', _minxml_escape( v ), '"', file=file, sep='', end='' )
 		print( '/>' if is_empty else '>', file=file )
 
 	# Helper method for pretty.
 	def _pretty_end_tag( self, file ):
-		print( '</', self.typename, '>', file=file, sep='' )
+		print( '</', self._typename, '>', file=file, sep='' )
 
 	def _pretty_indent( self, file, indent ):
 		print( '    ' * indent, end='', file=file )
 
 	def pretty( self, file=sys.stdout, indent=0 ):
-		if not self.children:
+		'''Pretty prints the element to the optional file.'''
+		if not self._children:
 			self._pretty_indent( file, indent )
 			self._pretty_start_tag( file, True )
 		else:
 			self._pretty_indent( file, indent )
 			self._pretty_start_tag( file, False )
-			for k in self.children:
+			for k in self._children:
 				k.pretty( file=file, indent=indent+1 )
 			self._pretty_indent( file, indent )
 			self._pretty_end_tag( file )			
 
 	def add( self, *minx, **kwargs ):
-		self.children.extend( minx )
-		self.attributes.update( kwargs )
+		'''Adds children and attributes to the element.'''
+		self._children.extend( minx )
+		self._attributes.update( kwargs )
 		return self 	# For chaining.
 
 	def __getitem__( self, n ):
-		return self.children[ n ]
+		'''Returns the n-th child of the element.'''
+		return self._children[ n ]
 
 	def __setitem__( self, n, value ):
-		self.children[ n ] = value
+		'''Sets the n-th child of the element to value.'''
+		self._children[ n ] = value
 
 	def __len__( self ):
-		return len( self.children )
+		'''Returns the number of children of the element.'''
+		return len( self._children )
 
 	def __iter__( self ):
-		return iter( self.children )
+		'''Iterator over the children of the element.'''
+		return iter( self._children )
 
 	def __not__( self ):
-		return not( self.children )
+		'''Returns true if the element has no children.'''
+		return not( self._children )
 
 	def isEmpty( self ):
-		return not( self.children )
+		'''Returns true if the element has no children.'''
+		return not( self._children )
+
+	@property
+	def first( self ):
+		return self._children[ 0 ]
+
+	@first.setter
+	def first( self, value ):
+		self._children[ 0 ] = value
 
 	def getFirst( self ):
-		return self.children[ 0 ]
+		'''To be deprecated'''
+		return self._children[ 0 ]
 
 	def getChild( self, n ):
-		return self.children[ n ]
+		'''Gets the n-th child of the element.'''
+		return self._children[ n ]
 
 	def setChild( self, n, value ):
-		self.children[ n ] = value
+		'''Sets the n-th child of the element to value.'''
+		self._children[ n ] = value
+
+	@property
+	def last( self ):
+		'''An updateable property that gets or sets the last child.'''
+		return self._children[ -1 ]
+
+	@last.setter
+	def last( self, value ):
+		self._children[ -1 ] = value
 
 	def getLast( self ):
-		return self.children[ -1 ]
+		'''To be deprecated'''
+		return self._children[ -1 ]
 
 	def get( self, key, otherwise=KeyError ):
+		'''Gets the value of the attribute with the given key. If there
+		is no such attribute then it returns a KeyError, unless otherwise
+		is given a different value.'''
 		try:
-			return self.attributes[ key ]
+			return self._attributes[ key ]
 		except KeyError:
 			if otherwise == KeyError:
 				raise KeyError
 			return otherwise
 
 	def put( self, *key_values, **kwargs ):
+		'''The variable arguments must be a sequence of alternating keys and values
+		of even length, which are used to set the attributes of the element. If
+		keyword arguments are supplied, they are also used to set the key/value
+		pairs of the element. The intention is to give a lot of syntactic 
+		flexibility.'''
 		it = iter( key_values )
 		try:
 			while True:
 				key = it.__next__()
 				value = it.__next__()
-				self.attributes[ key ] = value
+				self._attributes[ key ] = value
 		except StopIteration:
 			pass
-		self.attributes.update( kwargs )
+		self._attributes.update( kwargs )
 		return self			# For chaining.
-
-	def has( self, key, value=None ):
-		return ( key in self.attributes ) and ( value is None or self.attributes[key] == value )
-
-	def hasnt( self, key, value=None ):
-		return ( not key in self.attributes ) or ( value != None and self.attributes[key] != value )
-
-	def clear( self ):
-		self.children = []
 
 
 ################################################################################
@@ -263,6 +346,7 @@ class Builder():
 ################################################################################
 
 class Source():
+	'''A helper class that supports a pushable stream of characters.'''
 
 	def __init__( self, source ):
 		self.source = source
@@ -450,6 +534,7 @@ def _read1Attribute( cucharin ):
 	return ( key, value )
 
 class Parser():
+	'''A helper class for reading MinXML from a file object.'''
 
 	def __init__( self, source ):
 		self.level = 0
@@ -532,6 +617,7 @@ class Parser():
 
 
 def readMinXML( fileobj ):
+	'''Reads an MinXML element from a file-object.'''
 	return Parser( fileobj ).readElement()
 
 ################################################################################

@@ -100,7 +100,7 @@ class PeepHole:
     def assemble( self, ixml ):
         name = ixml.getName()
         if name == 'seq':
-            if ixml.hasAttributes():
+            if ixml.hasAnyAttributes():
                 subtask = PeepHole( initial=ixml.copy() )
                 for i in ixml:
                     subtask.assemble( i )

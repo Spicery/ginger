@@ -117,6 +117,9 @@ class MiniCompiler:
     def compileExpression( self, expr, contn_label ):
         ExprCompiler( share=self ).compile( expr, contn_label )
 
+    def compileDeterministicUpdate( self, expr, contn_label ):
+        DeterministicUpdateCompiler( share=self ).compile( expr, contn_label )
+
     def plantIfNot( self, goto_label ):
         if goto_label == Label.RETURN:
             self.plant( "return.ifnot" )
@@ -178,9 +181,6 @@ class SingleValueCompiler( MiniCompiler ):
     '''Compiles a general expression but ensures it generates a single
     value'''
 
-    def __init__( self, *args, **kwargs ):
-        super().__init__( *args, **kwargs )
-
     def compile( self, expr, contn_label ):
         if expr.has( "arity.eval", value="1" ):
             self.compileExpression( expr, contn_label )
@@ -191,6 +191,30 @@ class SingleValueCompiler( MiniCompiler ):
             self.plant( "check.mark1", local=str(tmp0) )
             self.simpleContinuation( contn_label )
             self.deallocateSlot( tmp0 )
+
+class DeterministicUpdateCompiler( MiniCompiler ):
+    '''
+    Compiles the target of an assignment (or binding?) when it is known
+    that there are no choice points in the assignment. Background: assignment
+    and pattern matching are unified in Ginger and some of the targets have
+    multiple possible bindings e.g. ( a..., b... ) := x... 
+    The effect of this is that the general form of pattern-matching and
+    assignment requires looping and backtracking.
+    '''
+
+    def compile( self, expr, contn_label ):
+        if expr.hasName( "id" ):
+            if expr.has( "scope", "local" ):
+                self.plant( "pop.local", local=expr.get( "slot" ) ) 
+            else:
+                self.plant( "pop.global", **expr.getAttributes() )
+        elif expr.hasName( "seq" ):
+            for i in reversed( range( 0, len( expr ) ) ):
+                DeterministicUpdateCompiler( share=self ).compile( expr[ i ], Label.CONTINUE )
+        else:
+            raise Exception( "Assignment is not fully implemented yet" )
+        self.simpleContinuation( contn_label )
+
 
 @RegisteredMiniCompiler( "seq" )
 class SeqCompiler( MiniCompiler ):
@@ -307,6 +331,41 @@ class IdCompiler( MiniCompiler ):
         else:
             self.plant( "push.global", **expr.getAttributes() )
         self.simpleContinuation( contn_label )
+
+
+
+@RegisteredMiniCompiler( "bind" )
+class BindCompiler( MiniCompiler ):
+
+    def compile( self, expr, contn_label ):   
+        # Expr = <set> SOURCE TARGET </set>
+        src = expr[ 1 ]
+        src_a = Arity( src.get( "arity.eval", otherwise="0+" ) )
+        dst = expr[ 0 ]
+        dst_a = Arity( dst.get( "arity.pattern", otherwise="0+" ) )
+        if src_a.isExact() and dst_a.isExact():
+            self.compileExpression( src, Label.CONTINUE )
+            self.compileDeterministicUpdate( dst, contn_label )
+        else:
+            raise Exception( "Assignment is not fully implemented" )
+
+
+
+@RegisteredMiniCompiler( "set" )
+class SetCompiler( MiniCompiler ):
+
+    def compile( self, expr, contn_label ):   
+        # Expr = <set> SOURCE TARGET </set>
+        src = expr[ 0 ]
+        src_a = Arity( src.get( "arity.eval", otherwise="0+" ) )
+        dst = expr[ 1 ]
+        dst_a = Arity( dst.get( "arity.eval", otherwise="0+" ) )
+        if src_a.isExact() and dst_a.isExact():
+            self.compileExpression( src, Label.CONTINUE )
+            self.compileDeterministicUpdate( dst, contn_label )
+        else:
+            raise Exception( "Assignment is not fully implemented: {} {}".format( str(src_a), str(dst_a) ) )
+
 
 @RegisteredMiniCompiler( "and" )
 class AndCompiler( MiniCompiler ):

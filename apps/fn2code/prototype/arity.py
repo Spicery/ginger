@@ -6,8 +6,8 @@ class Arity:
         self._count = 0
         self._exact = True
         for a in arity_strings:
-            self._exact = a and a[-1] == '+'
-            if self._exact:
+            self._exact = a and a[-1] != '+'
+            if not self._exact:
                 self._count += int( a[:-1] )
             else:
                 self._count += int( a )
@@ -35,5 +35,8 @@ class Arity:
         a._count = self._count + other._count
         a._exact = self._exact and other._exact
         return a
+
+    def __str__( self ):
+        return "{}{}".format( self._count, '' if self._exact else '+' )
 
 

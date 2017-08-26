@@ -136,9 +136,13 @@ Ref * sysCheckExplodeGteN( Ref * pc, MachineClass * vm ) {
 */
 void CodeGenClass::compileInstruction( Gnx instruction ) {
 	const string name = instruction->name();
-	if ( name == VM_PUSHQ && not instruction->isEmpty() ) {
-		this->emitCode( vmc_pushq );
-		this->emitRef( this->calcConstant( instruction->getChild( 0 ) ) );
+	if ( name == VM_PUSHQ ) {
+		if ( not instruction->isEmpty() ) {
+			this->emitCode( vmc_pushq );
+			this->emitRef( this->calcConstant( instruction->getChild( 0 ) ) );
+		} else {
+			throw Mishap( "Missing constant from instruction" ).culprit( "Instruction", VM_PUSHQ );
+		}
 	} else if ( name == VM_PUSHQ_RET ) {
 		this->emitCode( vmc_pushq_ret );
 		this->emitRef( this->calcConstant( instruction->getChild( 0 ) ) );
@@ -1646,6 +1650,8 @@ void CompileQuery::compileQueryBody( Gnx query, LabelClass * contn ) {
 	} else if ( nm == GNX_ZIP && N == 2 ) {
 		this->compileQueryBody( query->getChild( 0 ), CONTINUE_LABEL );
 		this->compileQueryBody( query->getChild( 1 ), contn );
+	} else {
+		this->codegen->continueFrom( contn );		
 	}
 }
 
@@ -1674,12 +1680,14 @@ void CompileQuery::compileQueryAdvn( Gnx query, LabelClass * contn ) {
 		} else {
 			this->codegen->vmiINCR_VID_BY( lv, 1 );
 		}
+		this->codegen->continueFrom( contn );
 	} else if ( nm == GNX_ONCE ) {
 		const int tmp = query->attributeToInt( "tmp.once.var" );
 		this->codegen->vmiPUSHQ( SYS_FALSE );
 		this->codegen->vmiPOP_INNER_SLOT( tmp );
+		this->codegen->continueFrom( contn );
 	} else if ( nm == GNX_IN || nm == GNX_BIND || nm == GNX_OK ) {
-		//	Nothing.
+		this->codegen->continueFrom( contn );
 	} else {
 		throw SystemError( "Not implemented general queries" );
 	}

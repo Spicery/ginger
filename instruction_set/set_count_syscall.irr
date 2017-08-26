@@ -3,7 +3,7 @@ Definition
     SET_COUNT_SYSCALL RAW_COUNT RAW_SYSCALL_PTR 
 
 Code
-    <set.count.syscall count=RAW_COUNT sysfn=NAME />
+    <set.count.syscall count=RAW_COUNT name=NAME />
     
 Summary
     Invokes a system-function (sysfn) with a fixed count of arguments

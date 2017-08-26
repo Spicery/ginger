@@ -165,8 +165,8 @@ private:	//	Helper functions.
 public:
 	void emitCode( Instruction instr );
 	void emitRef( Ref ref );
-	void emitInt( int n );
-	void emitLong( long n );
+	void emitRawLong( long n );
+	void emitSmall( long n );
 	void emitValof( Valof *v );
 	void emitVAR_REF( Gnx id );
 	void emitVIDENT_REF( const VIdent & id );

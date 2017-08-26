@@ -1,13 +1,24 @@
 /*****************************************************************************\
-Instruction TBD
+Definition
+    * NEQ_SI LOCAL_S VALUE_I JUMP_D
 
 Summary
-	
+    Compares the value of local variable LOCAL_S using identity to
+    a constant VALUE_I jumping JUMP_D words if false, else falling
+    through to the next instruction.
+    
 Unchecked Precondition
-	
+    * JUMP_D is in the bounds of the enclosing function object
+    * LOCAL_S is a valid index into the callstack.
+    
+    Q: should this really be marked as rrr????
+    
 Exceptions (Checked Preconditions)
-	
-Result (Postcondition)		
+    None
+    
+Result (Postcondition)      
+    *   Control is transferred to the target forwards or backwards if
+        the local variable is not-identical to a constant.
 
 \*****************************************************************************/
 

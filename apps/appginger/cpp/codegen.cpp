@@ -89,11 +89,11 @@ void CodeGenClass::emitRef( Ref ref ) {
 	this->codegenRef( ref );
 }
 
-void CodeGenClass::emitInt( const int n ) {
-	this->emitLong( static_cast< long >( n ) );
+void CodeGenClass::emitRawLong( long n ) {
+	this->codegenRef( ToRef( n ) );
 }
 
-void CodeGenClass::emitLong( const long n ) {
+void CodeGenClass::emitSmall( const long n ) {
 	if ( canFitInSmall( n ) ) {
 		this->codegenRef( LongToSmall( n ) );
 	} else {
@@ -136,9 +136,13 @@ Ref * sysCheckExplodeGteN( Ref * pc, MachineClass * vm ) {
 */
 void CodeGenClass::compileInstruction( Gnx instruction ) {
 	const string name = instruction->name();
-	if ( name == VM_PUSHQ && not instruction->isEmpty() ) {
-		this->emitCode( vmc_pushq );
-		this->emitRef( this->calcConstant( instruction->getChild( 0 ) ) );
+	if ( name == VM_PUSHQ ) {
+		if ( not instruction->isEmpty() ) {
+			this->emitCode( vmc_pushq );
+			this->emitRef( this->calcConstant( instruction->getChild( 0 ) ) );
+		} else {
+			throw Mishap( "Missing constant from instruction" ).culprit( "Instruction", VM_PUSHQ );
+		}
 	} else if ( name == VM_PUSHQ_RET ) {
 		this->emitCode( vmc_pushq_ret );
 		this->emitRef( this->calcConstant( instruction->getChild( 0 ) ) );
@@ -163,14 +167,14 @@ void CodeGenClass::compileInstruction( Gnx instruction ) {
 	} else if ( name == VM_POP_LOCAL ) {
 		const int slot = instruction->attributeToInt( VM_PUSH_LOCAL_LOCAL );
 		this->emitCode( vmc_pop_local );
-		this->emitInt( slot );
+		this->emitRawLong( slot );
 	} else if ( name == VM_POP_GLOBAL ) {
 		this->emitCode( vmc_pop_global );
 		this->emitValof( this->resolveGlobal( instruction ) );
 	} else if ( name == VM_PUSH_LOCAL ) {
 		const int slot = instruction->attributeToInt( VM_PUSH_LOCAL_LOCAL );
 		this->emitCode( vmc_push_local );
-		this->emitInt( slot );
+		this->emitRawLong( slot );
 	} else if ( name == VM_PUSH_LOCAL0 ) {
 		this->emitCode( vmc_push_local0 );
 	} else if ( name == VM_PUSH_LOCAL1 ) {
@@ -178,7 +182,7 @@ void CodeGenClass::compileInstruction( Gnx instruction ) {
 	} else if ( name == VM_PUSH_LOCAL_RET ) {
 		const int slot = instruction->attributeToInt( VM_PUSH_LOCAL_RET_LOCAL );
 		this->emitCode( vmc_push_local_ret );
-		this->emitInt( slot );
+		this->emitRawLong( slot );
 	} else if ( name == VM_PUSH_LOCAL0_RET ) {
 		this->emitCode( vmc_push_local0_ret );
 	} else if ( name == VM_PUSH_LOCAL1_RET ) {
@@ -189,53 +193,53 @@ void CodeGenClass::compileInstruction( Gnx instruction ) {
 	} else if ( name == VM_END1_CALLS ) {
 		const int slot = instruction->attributeToInt( VM_END1_CALLS_LOCAL );
 		this->emitCode( vmc_end1_calls );
-		this->emitInt( slot );
+		this->emitRawLong( slot );
 	} else if ( name == VM_CALLS ) {
 		this->emitCode( vmc_calls );
 	} else if ( name == VM_SET_COUNT_CALLS ) {
 		const int slot = instruction->attributeToInt( VM_SET_COUNT_CALLS_COUNT );
 		this->emitCode( vmc_set_count_calls );
-		this->emitInt( slot );
+		this->emitRawLong( slot );
 	} else if ( name == VM_SELF_CALL ) {
 		this->emitCode( vmc_self_call );
 	} else if ( name == VM_SELF_CALL_N ) {
 		const int count = instruction->attributeToInt( VM_SELF_CALL_N_COUNT );
 		this->emitCode( vmc_self_call_n );
-		this->emitInt( count );
+		this->emitRawLong( count );
 	} else if ( name == VM_SELF_CONSTANT ) {
 		this->emitCode( vmc_self_constant );
 	} else if ( name == VM_END_CALL_GLOBAL ) {
 		const int slot = instruction->attributeToInt( VM_END_CALL_GLOBAL_LOCAL );
 		this->emitCode( vmc_end_call_global );
-		this->emitInt( slot );
+		this->emitRawLong( slot );
 		this->emitValof( this->resolveGlobal( instruction ) );
 	} else if ( name == VM_SET_COUNT_CALL_GLOBAL ) {
 		const int count = instruction->attributeToInt( VM_SET_COUNT_CALL_GLOBAL_COUNT );
 		this->emitCode( vmc_set_count_call_global );
-		this->emitInt( count );
+		this->emitRawLong( count );
 		this->emitValof( this->resolveGlobal( instruction ) );		
 	} else if ( name == VM_SET_COUNT_CALL_LOCAL ) {
 		const int slot = instruction->attributeToInt( VM_SET_COUNT_CALL_LOCAL_LOCAL );
 		const int count = instruction->attributeToInt( VM_SET_COUNT_CALL_LOCAL_COUNT );
 		this->emitCode( vmc_set_count_call_local );
-		this->emitInt( count );
-		this->emitInt( slot );
+		this->emitRawLong( count );
+		this->emitRawLong( slot );
 	} else if ( name == VM_AND ) {
 		const int to = instruction->attributeToInt( VM_AND_TO );
 		this->emitCode( vmc_and );
-		this->emitInt( to );	
+		this->emitRawLong( to );	
 	} else if ( name == VM_OR ) {
 		const int to = instruction->attributeToInt( VM_OR_TO );
 		this->emitCode( vmc_or );
-		this->emitInt( to );
+		this->emitRawLong( to );
 	} else if ( name == VM_ABSAND ) {
 		const int to = instruction->attributeToInt( VM_ABSAND_TO );
 		this->emitCode( vmc_absand );
-		this->emitInt( to );
+		this->emitRawLong( to );
 	} else if ( name == VM_ABSOR ) {
 		const int to = instruction->attributeToInt( VM_ABSOR_TO );
 		this->emitCode( vmc_or );
-		this->emitInt( to );
+		this->emitRawLong( to );
 	} else if ( name == VM_ADD ) {
 		this->emitCode( vmc_add );
 	} else if ( name == VM_MUL ) {
@@ -273,15 +277,15 @@ void CodeGenClass::compileInstruction( Gnx instruction ) {
 		//	We have to be a little careful here because we only support
 		//	Smalls and not the entire range of Long.
 		this->emitCode( vmc_incr_by );
-		this->emitLong( n );
+		this->emitSmall( n );
 	} else if ( name == VM_INCR_LOCAL_BY ) {
 		const int slot = instruction->attributeToInt( VM_INCR_LOCAL_BY_LOCAL );
 		const long d = instruction->attributeToLong( VM_INCR_LOCAL_BY_BY );
 		//	We have to be a little careful here because we only support
 		//	Smalls and not the entire range of Long.
 		this->emitCode( vmc_incr_local_by );
-		this->emitInt( slot );
-		this->emitLong( d );
+		this->emitRawLong( slot );
+		this->emitSmall( d );
 	} else if ( name == VM_DECR ) {
 		this->emitCode( vmc_decr );
 	} else if ( name == VM_ERASE ) {
@@ -289,63 +293,63 @@ void CodeGenClass::compileInstruction( Gnx instruction ) {
 	} else if ( name == VM_ERASE_NUM ) {
 		const long n = instruction->attributeToInt( VM_ERASE_NUM_N );
 		this->emitCode( vmc_erase_num );
-		this->emitInt( n );
+		this->emitRawLong( n );
 	} else if ( name == VM_START_MARK ) {
 		const int slot = instruction->attributeToInt( VM_START_MARK_LOCAL );
 		this->emitCode( vmc_start_mark );
-		this->emitInt( slot );
+		this->emitRawLong( slot );
 	} else if ( name == VM_END_MARK ) {
 		int slot = instruction->attributeToLong( VM_END_MARK_LOCAL );
 		this->emitCode( vmc_end_mark );
-		this->emitInt( slot );
+		this->emitRawLong( slot );
 	} else if ( name == VM_SET_COUNT_MARK ) {
 		int slot = instruction->attributeToInt( VM_SET_COUNT_MARK_LOCAL );
 		this->emitCode( vmc_set_count_mark );
-		this->emitInt( slot );
+		this->emitRawLong( slot );
 	} else if ( name == VM_ERASE_MARK_LOCAL ) {
 		int slot = instruction->attributeToInt( VM_ERASE_MARK_LOCAL );
 		this->emitCode( vmc_erase_mark );
-		this->emitInt( slot );
+		this->emitRawLong( slot );
 	} else if ( name == VM_CHECK_MARK0 ) {
 		int slot = instruction->attributeToInt( VM_CHECK_MARK0_LOCAL );
 		this->emitCode( vmc_check_mark0 );
-		this->emitInt( slot );
+		this->emitRawLong( slot );
 	} else if ( name == VM_CHECK_MARK1 ) {
 		int slot = instruction->attributeToInt( VM_CHECK_MARK1_LOCAL );
 		this->emitCode( vmc_check_mark1 );
-		this->emitInt( slot );
+		this->emitRawLong( slot );
 	} else if ( name == VM_CHECK_COUNT ) {
 		const int n = instruction->attributeToInt( VM_CHECK_COUNT_COUNT );
 		this->emitCode( vmc_check_count );
-		this->emitInt( n );
+		this->emitRawLong( n );
 	} else if ( name == VM_CHECK_MARK ) {
 		const int slot = instruction->attributeToInt( VM_CHECK_MARK_LOCAL );
 		const int count = instruction->attributeToInt( VM_CHECK_MARK_COUNT );
 		this->emitCode( vmc_check_mark );
-		this->emitInt( slot );
-		this->emitInt( count );
+		this->emitRawLong( slot );
+		this->emitRawLong( count );
 	} else if ( name == VM_CHECK_MARK_GTE ) {
 		const int slot = instruction->attributeToInt( VM_CHECK_MARK_GTE_LOCAL );
 		const int count = instruction->attributeToInt( VM_CHECK_MARK_GTE_COUNT );
 		this->emitCode( vmc_check_mark_gte );
-		this->emitInt( slot );
-		this->emitInt( count );
+		this->emitRawLong( slot );
+		this->emitRawLong( count );
 	} else if ( name == VM_GOTO ) {
 		const int to = instruction->attributeToInt( VM_GOTO_TO );
 		this->emitCode( vmc_goto );
-		this->emitInt( to );
+		this->emitRawLong( to );
 	} else if ( name == VM_BYPASS ) {
 		const int to = instruction->attributeToInt( VM_BYPASS_TO );
 		this->emitCode( vmc_bypass );
-		this->emitInt( to );
+		this->emitRawLong( to );
 	} else if ( name == VM_IFNOT ) {
 		const int to = instruction->attributeToInt( VM_IFNOT_TO );
 		this->emitCode( vmc_ifnot );
-		this->emitInt( to );
+		this->emitRawLong( to );
 	} else if ( name == VM_IFSO ) {
 		const int to = instruction->attributeToInt( VM_IFSO_TO );
 		this->emitCode( vmc_ifso );
-		this->emitInt( to );
+		this->emitRawLong( to );
 	} else if ( name == VM_ESCAPE ) {
 		this->emitCode( vmc_escape );
 	} else if ( name == VM_FAIL ) {
@@ -355,7 +359,7 @@ void CodeGenClass::compileInstruction( Gnx instruction ) {
 	} else if ( name == VM_FIELD ) {
 		const int n = instruction->attributeToInt( VM_FIELD_N );
 		this->emitCode( vmc_field );
-		this->emitInt( n );
+		this->emitRawLong( n );
 	} else if ( name == VM_SEQ ) {
 		for ( auto child : *instruction ) {
 			this->compileInstruction( child );
@@ -393,7 +397,7 @@ void CodeGenClass::compileSetCountSysAppInstruction( Gnx mnx ) {
 		if ( info.in_arity.isExact( count ) ) {
 			if ( info.isSysCall() ) {
 				this->emitCode( vmc_set_count_syscall );
-				this->emitInt( count );
+				this->emitSmall( count );
 				this->emitRef( ToRef( info.syscall ) );
 			} else if ( info.isVMOp() ) {
 				//	Inherently unchecked.
@@ -427,13 +431,13 @@ void CodeGenClass::vmiCHECK_EXPLODE( Arity arity ) {
 		//	N.B. We only plant code if the N > 0 as N == 0 is trivially true.
 		this->emitCode( vmc_syscall_arg );
 		this->emitRef( ToRef( sysCheckExplodeGteN ) );
-		this->emitInt( N );
+		this->emitSmall( N );
 	}
 }
 
 void CodeGenClass::emitVAR_REF( Gnx id ) {
 	if ( id->hasAttribute( GNX_VID_SCOPE, "local" ) ) {
-		this->emitInt( id->attributeToInt( GNX_VID_SLOT ) );
+		this->emitSmall( id->attributeToInt( GNX_VID_SLOT ) );
 	} else {
 		this->emitValof( resolveGlobal( id ) );
 	}
@@ -1646,6 +1650,8 @@ void CompileQuery::compileQueryBody( Gnx query, LabelClass * contn ) {
 	} else if ( nm == GNX_ZIP && N == 2 ) {
 		this->compileQueryBody( query->getChild( 0 ), CONTINUE_LABEL );
 		this->compileQueryBody( query->getChild( 1 ), contn );
+	} else {
+		this->codegen->continueFrom( contn );		
 	}
 }
 
@@ -1674,12 +1680,14 @@ void CompileQuery::compileQueryAdvn( Gnx query, LabelClass * contn ) {
 		} else {
 			this->codegen->vmiINCR_VID_BY( lv, 1 );
 		}
+		this->codegen->continueFrom( contn );
 	} else if ( nm == GNX_ONCE ) {
 		const int tmp = query->attributeToInt( "tmp.once.var" );
 		this->codegen->vmiPUSHQ( SYS_FALSE );
 		this->codegen->vmiPOP_INNER_SLOT( tmp );
+		this->codegen->continueFrom( contn );
 	} else if ( nm == GNX_IN || nm == GNX_BIND || nm == GNX_OK ) {
-		//	Nothing.
+		this->codegen->continueFrom( contn );
 	} else {
 		throw SystemError( "Not implemented general queries" );
 	}

@@ -2,6 +2,17 @@ from minxml import MinXML
 import sys
 import sqlite3
 from pathlib import Path
+from label import Label
+
+################################################################################
+# system.db
+################################################################################
+
+SYSTEM_DB = Path( __file__ ).parent.joinpath( 'system.db' )
+
+if not SYSTEM_DB.exists():
+    raise Exception( 'The system.db file is missing (please rebuild $GINGER_DEV_HOME/apps/appginger/cpp' )
+
 
 ################################################################################
 # Sysfn_details provides a mapping from system functions to vm-instructions.
@@ -9,10 +20,7 @@ from pathlib import Path
 
 DETAILS = {}
 
-if not Path( '../../appginger/cpp/system.db' ).exists():
-    raise Exception( 'The system.db file is missing (please rebuild apps/appginger/cpp' )
-
-with sqlite3.connect( '../../appginger/cpp/system.db' ) as conn:
+with sqlite3.connect( SYSTEM_DB.as_posix() ) as conn:
     conn.row_factory = sqlite3.Row
     for row in conn.execute( "SELECT name, op FROM sysfn_detail WHERE OP <> ''" ):
         DETAILS[ row[ 'name' ] ] = row[ 'op' ]
@@ -35,11 +43,9 @@ def PeepHole( instruction_name ):
 
 @PeepHole( "syscall" )
 def optSysCall( ixml ):
-    name = ixml.getAttribute( "name" )
+    name = ixml.get( "name" )
     if name in DETAILS:
         return MinXML( DETAILS[ name] )
-    else:
-        return ixml
 
 @PeepHole( "push.local" )
 def optPushLocal( ixml ):
@@ -48,8 +54,6 @@ def optPushLocal( ixml ):
         return MinXML( "push.local0" )
     elif local == "1":
         return MinXML( "push.local1" )
-    else:
-        return ixml
 
 @PeepHole( "push.local.ret" )
 def optPushLocal( ixml ):
@@ -58,8 +62,6 @@ def optPushLocal( ixml ):
         return MinXML( "push.local0.ret" )
     elif local == "1":
         return MinXML( "push.local1.ret" )
-    else:
-        return ixml
 
 @PeepHole( "incr.by" )
 def optIncrBy( ixml ):
@@ -70,8 +72,6 @@ def optIncrBy( ixml ):
         return MinXML( "incr" )
     elif d == "-1":
         return MinXML( "decr" )
-    else:
-        return ixml
 
 @PeepHole( "incr.local.by" )
 def optIncrBy( ixml ):
@@ -80,8 +80,6 @@ def optIncrBy( ixml ):
         return MinXML( "seq" )
     elif d == "1":
         return MinXML( "incr.local.by1", local=ixml.get( "local" ) )
-    else:
-        return ixml
 
 @PeepHole( "erase.num" )
 def optEraseNum( ixml ):
@@ -90,8 +88,6 @@ def optEraseNum( ixml ):
         return MinXML( "seq" )
     elif n == '1':
         return MinXML( "erase" )
-    else:
-        return ixml       
 
 class PeepHole:
 
@@ -104,7 +100,7 @@ class PeepHole:
     def assemble( self, ixml ):
         name = ixml.getName()
         if name == 'seq':
-            if ixml.hasAttributes():
+            if ixml.hasAnyAttributes():
                 subtask = PeepHole( initial=ixml.copy() )
                 for i in ixml:
                     subtask.assemble( i )
@@ -114,13 +110,16 @@ class PeepHole:
                     self.assemble( i )
         elif name in PEEPHOLE:
             saved_label = ixml.get( 'label', otherwise='' )
-            ixml = PEEPHOLE[ name ]( ixml )
-            if saved_label:
-                # Extend the labels on ixml by saved_label.
-                labs = saved_label.split()
-                labs.extend( ixml.get( 'label', otherwise='' ).split() )
-                ixml.put( 'label', ' '.join( labs ) )
-            self.assemble( ixml )
+            ixml1 = PEEPHOLE[ name ]( ixml )
+            if not ixml1 is None:
+                if saved_label:
+                    # Extend the labels on ixml by saved_label.
+                    labs = saved_label.split()
+                    labs.extend( ixml1.get( 'label', otherwise='' ).split() )
+                    ixml.put( 'label', ' '.join( labs ) )
+                self.assemble( ixml1 )
+            else:
+                self.add( ixml )
         else:
             self.add( ixml )
 
@@ -194,9 +193,7 @@ class Widths:
         self.widths = None
 
     def populate( self ):
-        if not Path( '../../appginger/cpp/system.db' ).exists():
-            raise Exception( 'The system.db file is missing (please rebuild apps/appginger/cpp' )
-        with sqlite3.connect( '../../appginger/cpp/system.db' ) as conn:
+        with sqlite3.connect( SYSTEM_DB.as_posix() ) as conn:
             cursor = conn.execute( 'SELECT codename, width FROM instruction;' )
             self.widths = {}
             for row in cursor:
@@ -235,9 +232,9 @@ class ResolveLabels:
 
     def _resolveJumps( self, seqixml ):
         for ixml in seqixml:
-            offset = int( ixml.get( 'offset' ) )
-            lab = ixml.get( 'to_label', None )
-            if lab:
+            lab = ixml.get( 'to.label', None )
+            if lab and lab != Label.RETURN.id():
+                offset = int( ixml.get( 'offset' ) )
                 d = self.label_offsets[ lab ] - offset
                 ixml.put( 'to', str( d - 1 ) )
 
@@ -249,7 +246,7 @@ class ResolveLabels:
     def __call__( self, *args, **kwargs ):
         return self.edit( *args, **kwargs )
 
-def backEnd( seqixml ):
+def backEnd( xmllist ):
     '''Result may share store with the input but the input is not updated.
     seqixml is typically a seq of instructions but may be a single instruction.
     At the end it is guaranteed to be a seq element with instructions.

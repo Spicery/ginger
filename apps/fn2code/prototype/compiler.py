@@ -126,11 +126,48 @@ class MiniCompiler:
         else:
             self.plant( "ifnot", to_label=goto_label.id() )
 
-    def plantIfSo( self, label ):
-        if label == Label.RETURN:
+    def plantIfSo( self, goto_label ):
+        if goto_label == Label.RETURN:
             self.plant( "return.ifso" )
         else:
-            self.plant( "ifso", label=contn_label.id() )
+            self.plant( "ifso", to_label=goto_label.id() )
+
+    def plantIfSoNot( self, ifso_label, ifnot_label ):
+        if ifso_label == Label.CONTINUE:
+            self.plantIfNot( ifnot_label )
+        elif ifnot_label == Label.CONTINUE:
+            self.plantIfSo( ifso_label )
+        else:
+            self.plantIfNot( ifnot_label )
+            self.simpleContinuation( ifso_label )
+
+    def plantIfLocalEqValue( self, local, value, ifso_label, ifnot_label ):
+        # TODO: replace with the specialised instruction eq_si.
+        self.plant( "push.local", local=local )
+        self.plant( "pushq", value=value )
+        self.plant( "eq" )
+        self.plantIfSoNot( ifso_label, ifnot_label )
+
+    def plantIfLocalEqLocal( self, local0, local1, ifso_label, ifnot_label ):
+        # TODO: replace with the specialised instruction eq_ss.
+        self.plant( "push.local", local=local0 )
+        self.plant( "push.local", local=local1 )
+        self.plant( "eq" )
+        self.plantIfSoNot( ifso_label, ifnot_label )
+
+    def plantIfLocalNotEqValue( self, local, value, ifso_label, ifnot_label ):
+        # TODO: replace with the specialised instruction neq_si.
+        self.plant( "push.local", local=local )
+        self.plant( "pushq", value )
+        self.plant( "neq" )
+        self.plantIfSoNot( ifso_label, ifnot_label )
+
+    def plantIfLocalNotEqLocal( self, local0, local1, ifso, ifnot ):
+        # TODO: replace with the specialised instruction neq_ss.
+        self.plant( "push.local", local=local0 )
+        self.plant( "push.local", local=local1 )
+        self.plant( "neq" )
+        self.plantIfSoNot( ifso_label, ifnot_label )
 
     def compileChildren( self, expr, contn_label ):
         if expr:
@@ -489,12 +526,24 @@ class IfCompiler( MiniCompiler ):
 @RegisteredMiniCompiler( "for" )
 class LoopCompiler( MiniCompiler ):
 
+    def newInstance( self, query ):
+        if query.hasName( "from" ):
+            return FromQueryCompiler( share=self )
+        elif query.hasName( "in" ):
+            return InQueryCompiler( share=self )
+        elif query.hasName( "do" ):
+            return DoQueryCompiler( share=self )
+        else:
+            raise Exception( "To be implemented: {}".format( query.getName() ) )
+
     def compile( self, expr, contn_label ):
         query = expr[ 0 ]
         if query.hasName( "from" ):
             FromQueryCompiler( share=self )( query, contn_label )
         elif query.hasName( "in" ):
             InQueryCompiler( share=self )( query, contn_label )
+        elif query.hasName( "do" ):
+            DoQueryCompiler( share=self )( query, contn_label )
         else:
             raise Exception( "To be implemented: {}".format( query.getName() ) )
 
@@ -510,10 +559,10 @@ class QueryCompiler( MiniCompiler ):
     def compileLoopTest( self, query, ifso=Label.CONTINUE, ifnot=Label.CONTINUE ): pass
 
     @abstractmethod
-    def compileLoopBody( self, query ): pass
+    def compileLoopBody( self, query, contn=Label.CONTINUE ): pass
 
     @abstractmethod
-    def compileLoopNext( self, query ): pass
+    def compileLoopNext( self, query, contn=Label.CONTINUE ): pass
 
     @abstractmethod
     def compileLoopFini( self, query, contn=Label.CONTINUE ): pass
@@ -530,6 +579,37 @@ class QueryCompiler( MiniCompiler ):
         self.setLabel( TEST_label )
         self.compileLoopTest( query, ifso=NEXT_label, ifnot=Label.CONTINUE )
         self.compileLoopFini( query, contn=contn_label )
+
+
+class DoQueryCompiler( QueryCompiler ):
+
+    # this->compileQueryDecl( query->getChild( 0 )  );
+    def compileLoopDeclarations( self, query ):
+        self.LHS = LoopCompiler( share=self ).newInstance( query[0] )
+        self.LHS.compileLoopDeclarations( query[0] )
+
+    # this->compileQueryInit( query->getChild( 0 ), contn );
+    def compileLoopInit( self, query, contn=Label.CONTINUE ):
+        self.LHS.compileLoopInit( query[0], contn )
+
+    # this->compileQueryTest( query->getChild( 0 ), dst, contn );
+    def compileLoopTest( self, query, ifso=Label.CONTINUE, ifnot=Label.CONTINUE ):
+        self.LHS.compileLoopTest( query[0], ifso, ifnot )
+
+    # this->compileQueryBody( query->getChild( 0 ), CONTINUE_LABEL );
+    # this->codegen->compileGnx( query->getChild( 1 ), contn );
+    def compileLoopBody( self, query, contn=Label.CONTINUE ):
+        self.LHS.compileLoopBody( query[0], Label.CONTINUE )
+        self.compileExpression( query[1], contn )        
+
+    # this->compileQueryAdvn( query->getChild( 0 ), contn );
+    def compileLoopNext( self, query, contn=Label.CONTINUE ):
+        self.LHS.compileLoopNext( query[0], contn )
+        
+    # this->compileQueryFini( query->getChild( 0 ), contn );
+    def compileLoopFini( self, query, contn=Label.CONTINUE ):
+        self.LHS.compileLoopFini( query[0], contn )
+
 
 class FromQueryCompiler( QueryCompiler ):
 
@@ -555,15 +635,65 @@ class FromQueryCompiler( QueryCompiler ):
         else:
             raise Exception( "Not implemented yet" )
 
-    def compileLoopBody( self, query ):
-        pass
+    def compileLoopBody( self, query, contn=Label.CONTINUE ):
+        self.simpleContinuation( contn )
 
-    def compileLoopNext( self, query ):
+    def compileLoopNext( self, query, contn=Label.CONTINUE ):
         self.plant( "incr.local.by", local=str( self.loop_var_slot ), by="1" )
-
+        self.simpleContinuation( contn )
 
     def compileLoopFini( self, query, contn=Label.CONTINUE ):
         self.deallocateSlot( self.loop_var_slot )  
+        self.simpleContinuation( contn )
+
+# This is the terminating value that indicates the end of a stream.
+TERMIN=MinXML( "constant", type="termin", value="termin" )
+
+class InQueryCompiler( QueryCompiler ):
+
+    def compileLoopDeclarations( self, query ):
+        # Should really bind against a pattern - but we'll take the simplest 
+        # case of a single <var> element.
+        if query[0].hasName( "var" ):
+            self.loop_var_slot = self.allocateSlot( query[0] )
+            self.tmp_next_fn = self.newTmpVar( 'tmp_next_fn' )
+            self.tmp_context = self.newTmpVar( 'tmp_context' )
+            self.tmp_state = self.newTmpVar( 'tmp_state' );       
+        else:
+            raise Exception( "TBD: {}".format( query.name ) )
+
+    def compileLoopInit( self, query, contn=Label.CONTINUE ):
+        self.compileSingleValue( query[1], Label.CONTINUE )
+        self.plant( "getiterator" )
+        self.plant( "pop.local", local=self.tmp_next_fn )
+        self.plant( "pop.local", local=self.tmp_context )
+        self.plant( "pop.local", local=self.tmp_state )
+        self.simpleContinuation( contn )        
+
+    # VIdent & vid = this->getLoopVar( query->attributeToInt( "tmp.loop.var" ) );
+    # this->codegen->vmiPOP( vid, false );
+    # VIdent id_tmp_state( tmp_state );
+    # VIdent termin( SYS_TERMIN );
+    # this->codegen->compileComparison( id_tmp_state, CMP_NEQ, termin, dst, contn );
+    def compileLoopTest( self, query, pass_label=Label.CONTINUE, fail_label=Label.CONTINUE ):
+        self.plant( "push.local", local=self.tmp_state )
+        self.plant( "push.local", local=self.tmp_context )
+        self.plant( "set.count.call.local", count=2, local=self.tmp_next_fn )       
+        self.plant( "pop.local", local=self.tmp_state )
+        self.plant( "pop.local", local=self.loop_var_slot )
+        self.plantIfLocalNotEqValue( self.tmp_state, TERMIN, pass_label, fail_label )       
+
+    def compileLoopBody( self, query, contn=Label.CONTINUE ):
+        self.simpleContinuation( contn )
+
+    def compileLoopNext( self, query, contn=Label.CONTINUE ):
+        self.simpleContinuation( contn )
+
+    def compileLoopFini( self, query, contn=Label.CONTINUE ):
+        self.deallocateSlot( self.tmp_next_fn )
+        self.deallocateSlot( self.tmp_context )
+        self.deallocateSlot( self.tmp_state )
+        self.simpleContinuation( contn )
 
 def compile( gnx, nargs ):
     ecompiler = ExprCompiler( preallocated=nargs )

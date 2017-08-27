@@ -144,7 +144,7 @@ class MiniCompiler:
     def plantIfLocalEqValue( self, local, value, ifso_label, ifnot_label ):
         # TODO: replace with the specialised instruction eq_si.
         self.plant( "push.local", local=local )
-        self.plant( "pushq", value=value )
+        self.plant( "pushq", value )
         self.plant( "eq" )
         self.plantIfSoNot( ifso_label, ifnot_label )
 
@@ -736,8 +736,7 @@ class CrossQueryCompiler( QueryCompiler ):
         # We need a flag to say if we're on the outer loop (True) or 
         # inner loop (False).
         self.on_outer_loop_flag = self.newTmpVar( 'on_outer_loop_flag' )
-        self.plant( "pushq", value=SYS_TRUE )
-        self.pop( "pop.local", local=self.on_outer_loop_flag )
+        self.plant( "pushq.pop.local", SYS_TRUE, local=self.on_outer_loop_flag )
         self.OUTER.compileLoopInit( query[0], contn )
 
     def compileLoopTest( self, query, ifso=Label.CONTINUE, ifnot=Label.CONTINUE ):
@@ -754,8 +753,7 @@ class CrossQueryCompiler( QueryCompiler ):
         self.setLabel( outer_loop_label )
         self.OUTER.compileLoopTest( query[0], Label.CONTINUE, done_loop_label.replaceCONTINUE( contn ) )
         # Set the flag so we know we're on the inner loop.
-        self.plant( "pushq", value=SYS_FALSE )
-        self.plant( "pop.local", local=self.on_outer_loop_flag )
+        self.plant( "pushq.pop.local", SYS_FALSE, local=self.on_outer_loop_flag )
         # Before we enter the inner loop, we must run its body and
         # next parts and then initialise the inner loop.
         self.OUTER.compileLoopBody( query[0], Label.CONTINUE )
@@ -769,8 +767,7 @@ class CrossQueryCompiler( QueryCompiler ):
         # If we get here then the inner loop has failed. So we ought to run
         # the finish action of the inner loop, set the inner-vs-outer flag to 
         # outer, and then jump back to the outer-loop test.
-        self.plant( "pushq", value=SYS_TRUE )
-        self.plant( "pop.local", local=self.on_outer_loop_flag )
+        self.plant( "pushq.pop.local", SYS_TRUE, local=self.on_outer_loop_flag )
         self.simpleContinuation( outer_loop_label )
 
         self.setLabel( done_loop_label )

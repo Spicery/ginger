@@ -134,7 +134,7 @@ Ref * sysCheckExplodeGteN( Ref * pc, MachineClass * vm ) {
 	So there's very little opportunity for peephole
 	optimistion here.
 */
-//	TODO: This code is very fragile because if a nattribute is badly defined it
+//	TODO: This code is very fragile because if an attribute is badly defined it
 //	will throw unstructured exceptions. Needs revisiting. We could do with being
 //	able to throw a general 'malformed instruction' and giving some helpful 
 //	logging.

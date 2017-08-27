@@ -134,6 +134,10 @@ Ref * sysCheckExplodeGteN( Ref * pc, MachineClass * vm ) {
 	So there's very little opportunity for peephole
 	optimistion here.
 */
+//	TODO: This code is very fragile because if a nattribute is badly defined it
+//	will throw unstructured exceptions. Needs revisiting. We could do with being
+//	able to throw a general 'malformed instruction' and giving some helpful 
+//	logging.
 void CodeGenClass::compileInstruction( Gnx instruction ) {
 	const string name = instruction->name();
 	if ( name == VM_PUSHQ ) {
@@ -142,6 +146,15 @@ void CodeGenClass::compileInstruction( Gnx instruction ) {
 			this->emitRef( this->calcConstant( instruction->getChild( 0 ) ) );
 		} else {
 			throw Mishap( "Missing constant from instruction" ).culprit( "Instruction", VM_PUSHQ );
+		}
+	} else if ( name == VM_PUSHQ_POP_LOCAL ) {
+		if ( not instruction->isEmpty() ) {
+			const int slot = instruction->attributeToInt( VM_PUSH_LOCAL_LOCAL );
+			this->emitCode( vmc_pushq_pop_local );
+			this->emitRef( this->calcConstant( instruction->getChild( 0 ) ) );
+			this->emitRawLong( slot );
+		} else {
+			throw Mishap( "Missing constant from instruction" ).culprit( "Instruction", VM_PUSHQ_POP_LOCAL );
 		}
 	} else if ( name == VM_PUSHQ_RET ) {
 		this->emitCode( vmc_pushq_ret );

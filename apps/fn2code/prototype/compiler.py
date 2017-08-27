@@ -544,6 +544,10 @@ class LoopCompiler( MiniCompiler ):
             InQueryCompiler( share=self )( query, contn_label )
         elif query.hasName( "do" ):
             DoQueryCompiler( share=self )( query, contn_label )
+        elif query.hasName( "zip" ):
+            ZipQueryCompiler( share=self )( query, contn_label )
+        elif query.hasName( "cross" ):
+            CrossQueryCompiler( share=self )( query, contn_label )
         else:
             raise Exception( "To be implemented: {}".format( query.getName() ) )
 
@@ -583,30 +587,23 @@ class QueryCompiler( MiniCompiler ):
 
 class DoQueryCompiler( QueryCompiler ):
 
-    # this->compileQueryDecl( query->getChild( 0 )  );
     def compileLoopDeclarations( self, query ):
         self.LHS = LoopCompiler( share=self ).newInstance( query[0] )
         self.LHS.compileLoopDeclarations( query[0] )
 
-    # this->compileQueryInit( query->getChild( 0 ), contn );
     def compileLoopInit( self, query, contn=Label.CONTINUE ):
         self.LHS.compileLoopInit( query[0], contn )
 
-    # this->compileQueryTest( query->getChild( 0 ), dst, contn );
     def compileLoopTest( self, query, ifso=Label.CONTINUE, ifnot=Label.CONTINUE ):
         self.LHS.compileLoopTest( query[0], ifso, ifnot )
 
-    # this->compileQueryBody( query->getChild( 0 ), CONTINUE_LABEL );
-    # this->codegen->compileGnx( query->getChild( 1 ), contn );
     def compileLoopBody( self, query, contn=Label.CONTINUE ):
         self.LHS.compileLoopBody( query[0], Label.CONTINUE )
         self.compileExpression( query[1], contn )        
 
-    # this->compileQueryAdvn( query->getChild( 0 ), contn );
     def compileLoopNext( self, query, contn=Label.CONTINUE ):
         self.LHS.compileLoopNext( query[0], contn )
         
-    # this->compileQueryFini( query->getChild( 0 ), contn );
     def compileLoopFini( self, query, contn=Label.CONTINUE ):
         self.LHS.compileLoopFini( query[0], contn )
 
@@ -647,7 +644,9 @@ class FromQueryCompiler( QueryCompiler ):
         self.simpleContinuation( contn )
 
 # This is the terminating value that indicates the end of a stream.
-TERMIN=MinXML( "constant", type="termin", value="termin" )
+TERMIN = MinXML( "constant", type="termin", value="termin" )
+SYS_TRUE = MinXML( "constant", type="boolean", value="true" )
+SYS_FALSE = MinXML( "constant", type="boolean", value="false" )
 
 class InQueryCompiler( QueryCompiler ):
 
@@ -670,11 +669,6 @@ class InQueryCompiler( QueryCompiler ):
         self.plant( "pop.local", local=self.tmp_state )
         self.simpleContinuation( contn )        
 
-    # VIdent & vid = this->getLoopVar( query->attributeToInt( "tmp.loop.var" ) );
-    # this->codegen->vmiPOP( vid, false );
-    # VIdent id_tmp_state( tmp_state );
-    # VIdent termin( SYS_TERMIN );
-    # this->codegen->compileComparison( id_tmp_state, CMP_NEQ, termin, dst, contn );
     def compileLoopTest( self, query, pass_label=Label.CONTINUE, fail_label=Label.CONTINUE ):
         self.plant( "push.local", local=self.tmp_state )
         self.plant( "push.local", local=self.tmp_context )
@@ -694,6 +688,104 @@ class InQueryCompiler( QueryCompiler ):
         self.deallocateSlot( self.tmp_context )
         self.deallocateSlot( self.tmp_state )
         self.simpleContinuation( contn )
+
+
+class ZipQueryCompiler( QueryCompiler ):
+
+   def compileLoopDeclarations( self, query ):
+        self.LHS = LoopCompiler( share=self ).newInstance( query[0] )
+        self.RHS = LoopCompiler( share=self ).newInstance( query[1] )
+        self.LHS.compileLoopDeclarations( query[0] )
+        self.RHS.compileLoopDeclarations( query[1] )
+
+    def compileLoopInit( self, query, contn=Label.CONTINUE ):
+        self.LHS.compileLoopInit( query[0], Label.CONTINUE )
+        self.LHS.compileLoopInit( query[1], contn )
+
+    def compileLoopTest( self, query, ifso=Label.CONTINUE, ifnot=Label.CONTINUE ):
+        DONE_label = Label( 'zip.done' )
+        self.LHS.compileLoopTest( query[0], Label.CONTINUE, DONE_label.replacesCONTNUE( ifnot ) )
+        self.RHS.compileLoopTest( query[1], ifso, contn )
+        self.setLabel( DONE_label )
+
+    def compileLoopBody( self, query, contn=Label.CONTINUE ):
+        self.LHS.compileLoopBody( query[0], label=Label.CONTINUE )
+        self.RHS.compileLoopBody( query[1], label=contn )
+        
+    def compileLoopNext( self, query, contn=Label.CONTINUE ):
+        self.LHS.compileLoopNext( query[0], label=Label.CONTINUE )
+        self.RHS.compileLoopNext( query[1], label=contn )
+        
+    def compileLoopFini( self, query, contn=Label.CONTINUE ):
+        # I note that the C++ JIT compiler does not recursively apply
+        # the finish parts. Surely that is not correct?!
+        # TODO: verify this interpretation is the right one.
+        self.LHS.compileLoopFini( query[0], Label.CONTINUE )
+        self.RHS.compileLoopFini( query[1], contn )
+
+class CrossQueryCompiler( QueryCompiler ):
+
+   def compileLoopDeclarations( self, query ):
+        self.OUTER = LoopCompiler( share=self ).newInstance( query[0] )
+        self.INNER = LoopCompiler( share=self ).newInstance( query[1] )
+        self.OUTER.compileLoopDeclarations( query[0] )
+        self.INNER.compileLoopDeclarations( query[1] )
+
+    def compileLoopInit( self, query, contn=Label.CONTINUE ):
+        '''Only initialise the outer loop'''
+        # We need a flag to say if we're on the outer loop (True) or 
+        # inner loop (False).
+        self.on_outer_loop_flag = self.newTmpVar( 'on_outer_loop_flag' )
+        self.plant( "pushq", value=SYS_TRUE )
+        self.pop( "pop.local", local=self.on_outer_loop_flag )
+        self.OUTER.compileLoopInit( query[0], contn )
+
+    def compileLoopTest( self, query, ifso=Label.CONTINUE, ifnot=Label.CONTINUE ):
+        outer_loop_label = Label( 'cross.outer.loop.label' )
+        inner_loop_label = Label( 'cross.inner.loop.label' )
+        done_loop_label = Label( 'cross.done.loop.label' )
+
+        # Are we running the inner or outer loop?
+        self.plant( "push.local", local=self.on_outer_loop_flag )
+        self.plantIfNot( inner_loop_label )
+
+        # At this point we are on the outer loop. So we should run the 
+        # outer test and, if it passes, drop into the inner loop.
+        self.setLabel( outer_loop_label )
+        self.OUTER.compileLoopTest( query[0], Label.CONTINUE, done_loop_label.replaceCONTINUE( contn ) )
+        # Set the flag so we know we're on the inner loop.
+        self.plant( "pushq", value=SYS_FALSE )
+        self.plant( "pop.local", local=self.on_outer_loop_flag )
+        # Before we enter the inner loop, we must run its body and
+        # next parts and then initialise the inner loop.
+        self.OUTER.compileLoopBody( query[0], Label.CONTINUE )
+        self.OUTER.compileLoopNext( query[0], Label.CONTINUE )
+        self.INNER.compileLoopInit( query[1], Label.CONTINUE )
+
+        # Now we're in the inner loop. Let's see if we pass.
+        self.setLabel( inner_loop_label )
+        self.INNER.compileLoopTest( query[1], done_loop_label.replaceCONTINUE( contn ), Label.CONTINUE )
+
+        # If we get here then the inner loop has failed. So we ought to run
+        # the finish action of the inner loop, set the inner-vs-outer flag to 
+        # outer, and then jump back to the outer-loop test.
+        self.plant( "pushq", value=SYS_TRUE )
+        self.plant( "pop.local", local=self.on_outer_loop_flag )
+        self.simpleContinuation( outer_loop_label )
+
+        self.setLabel( done_loop_label )
+
+    def compileLoopBody( self, query, contn=Label.CONTINUE ):
+        self.INNER.compileLoopBody( query[1], label=contn )
+
+    def compileLoopNext( self, query, contn=Label.CONTINUE ):
+        self.INNER.compileLoopNext( query[1], label=contn )
+        
+    def compileLoopFini( self, query, contn=Label.CONTINUE ):
+        # When the outer loop finally fails, we should run
+        # the finish-action of the outer loop.
+        self.OUTER.compileLoopFini( query[0], contn )
+        self.deallocateSlot( self.on_outer_loop_flag )
 
 def compile( gnx, nargs ):
     ecompiler = ExprCompiler( preallocated=nargs )

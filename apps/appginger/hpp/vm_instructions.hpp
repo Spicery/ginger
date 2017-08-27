@@ -12,6 +12,8 @@ namespace Ginger {
 	static const char * VM_RETURN_IFNOT = "return.ifnot";
 
 	static const char * VM_PUSHQ = "pushq";
+	static const char * VM_PUSHQ_POP_LOCAL = "pushq.pop.local";
+	static const char * VM_PUSHQ_POP_LOCAL_LOCAL = "local";
 	static const char * VM_PUSHQ_RET = "pushq.ret";
 
 	static const char * VM_POP_LOCAL = "pop.local";

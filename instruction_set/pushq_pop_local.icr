@@ -1,0 +1,28 @@
+/*****************************************************************************\
+Definition
+    PUSHQ_POP_LOCAL CONST SLOT
+
+Code
+	<pushq.pop.local local=SLOT> GNX_CONSTANT_EXPR </pushq>
+	
+Summary
+    Pushes a constant into a local slot.
+
+Stats
+    Width = 3
+
+Unchecked Precondition
+    There are at least SLOT slots in the current frame.
+    
+Exceptions (Checked Preconditions)
+    None.
+    
+Result (Postcondition)      
+    * The slot is set to the constant.
+    * Execution continues at the next instruction.
+
+\*****************************************************************************/
+
+Ref c = *( ++pc );
+LOCAL( ToLong( *( ++pc ) ) ) = c;
+RETURN( pc + 1 );

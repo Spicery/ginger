@@ -12,6 +12,12 @@ class Label:
     def id( self ):
         return self.uid
 
+    def replacesCONTNUE( self, contn ):		# aka jumpToJump
+    	if contn == Label.CONTINUE:
+    		return self
+    	else:
+    		return contn
+
 Label.CONTINUE = Label( 'CONTINUE', is_continue=True, uid='CONTINUE' )
 Label.RETURN = Label( 'RETURN', is_return=True, uid='RETURN' )
 

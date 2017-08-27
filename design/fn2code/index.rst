@@ -11,6 +11,8 @@ Contents
 
    fn2code-plan
    compiling-gnx
+   pattern-matching
+   special-conditionals
 
 Indices and tables
 ------------------

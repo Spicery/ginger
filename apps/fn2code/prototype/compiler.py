@@ -692,7 +692,7 @@ class InQueryCompiler( QueryCompiler ):
 
 class ZipQueryCompiler( QueryCompiler ):
 
-   def compileLoopDeclarations( self, query ):
+    def compileLoopDeclarations( self, query ):
         self.LHS = LoopCompiler( share=self ).newInstance( query[0] )
         self.RHS = LoopCompiler( share=self ).newInstance( query[1] )
         self.LHS.compileLoopDeclarations( query[0] )
@@ -725,7 +725,7 @@ class ZipQueryCompiler( QueryCompiler ):
 
 class CrossQueryCompiler( QueryCompiler ):
 
-   def compileLoopDeclarations( self, query ):
+    def compileLoopDeclarations( self, query ):
         self.OUTER = LoopCompiler( share=self ).newInstance( query[0] )
         self.INNER = LoopCompiler( share=self ).newInstance( query[1] )
         self.OUTER.compileLoopDeclarations( query[0] )

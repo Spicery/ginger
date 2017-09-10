@@ -44,6 +44,10 @@ public:
 	bool isntExact() const;
 	bool isExact( int count ) const;
 	bool isntExact( int count ) const;
+	bool isInexact() const;
+	bool isntInexact() const;
+	bool isInexact( int count ) const;
+	bool isntInexact( int count ) const;
 	int count() const;
 	
 public:

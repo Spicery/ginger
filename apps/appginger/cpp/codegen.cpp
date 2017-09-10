@@ -407,7 +407,7 @@ void CodeGenClass::compileSetCountSysAppInstruction( Gnx mnx ) {
 	SysMap::iterator it = SysMap::systemFunctionsMap().find( name );
 	if ( it != SysMap::systemFunctionsMap().end() ) {
 		const SysInfo & info = it->second;
-		if ( info.in_arity.isExact( count ) ) {
+		if ( info.in_arity.isExact( count ) || info.in_arity.isInexact( count ) ) {
 			if ( info.isSysCall() ) {
 				this->emitCode( vmc_set_count_syscall );
 				this->emitSmall( count );
@@ -418,6 +418,8 @@ void CodeGenClass::compileSetCountSysAppInstruction( Gnx mnx ) {
 			} else if ( info.isCmpOp() ) {
 				//	TODO: not sure this is correct.
 				this->emitCode( cmpOpInstruction( info.cmp_op ) );
+			} else {
+				throw UnreachableError();
 			}
 		} else {
 			throw(

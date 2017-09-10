@@ -58,7 +58,23 @@ bool Arity::isExact( const int count ) const {
 }
 
 bool Arity::isntExact( const int count ) const {
-	return this->more && this->arity == count;
+	return not( this->isExact( count ) );
+}
+
+bool Arity::isInexact() const {
+	return this->more;
+}
+
+bool Arity::isntInexact() const {
+	return not( this->more );
+}
+
+bool Arity::isInexact( const int count ) const {
+	return this->more && this->arity <= count;
+}
+
+bool Arity::isntInexact( const int count ) const {
+	return not( this->isInexact( count ) );
 }
 
 int Arity::count() const {

@@ -533,6 +533,10 @@ class LoopCompiler( MiniCompiler ):
             return InQueryCompiler( share=self )
         elif query.hasName( "do" ):
             return DoQueryCompiler( share=self )
+        elif query.hasName( "zip" ):
+            return ZipQueryCompiler( share=self )
+        elif query.hasName( "cross" ):
+            return CrossQueryCompiler( share=self )
         else:
             raise Exception( "To be implemented: {}".format( query.getName() ) )
 
@@ -705,16 +709,16 @@ class ZipQueryCompiler( QueryCompiler ):
     def compileLoopTest( self, query, ifso=Label.CONTINUE, ifnot=Label.CONTINUE ):
         DONE_label = Label( 'zip.done' )
         self.LHS.compileLoopTest( query[0], Label.CONTINUE, DONE_label.replacesCONTNUE( ifnot ) )
-        self.RHS.compileLoopTest( query[1], ifso, contn )
+        self.RHS.compileLoopTest( query[1], ifso, ifnot )
         self.setLabel( DONE_label )
 
     def compileLoopBody( self, query, contn=Label.CONTINUE ):
-        self.LHS.compileLoopBody( query[0], label=Label.CONTINUE )
-        self.RHS.compileLoopBody( query[1], label=contn )
+        self.LHS.compileLoopBody( query[0], contn=Label.CONTINUE )
+        self.RHS.compileLoopBody( query[1], contn=contn )
         
     def compileLoopNext( self, query, contn=Label.CONTINUE ):
-        self.LHS.compileLoopNext( query[0], label=Label.CONTINUE )
-        self.RHS.compileLoopNext( query[1], label=contn )
+        self.LHS.compileLoopNext( query[0], contn=Label.CONTINUE )
+        self.RHS.compileLoopNext( query[1], contn=contn )
         
     def compileLoopFini( self, query, contn=Label.CONTINUE ):
         # I note that the C++ JIT compiler does not recursively apply

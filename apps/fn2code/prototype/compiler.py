@@ -36,7 +36,10 @@ class SlotAllocations:
         return self.fetchSlot( title )
 
     def allocateSlot( self, var ):
-        return self.fetchSlot( var.get( 'name' ) )
+        if var.hasAttribute( 'slot' ):
+            return int( var.get( 'slot' ) )
+        else:
+            return self.fetchSlot( var.get( 'name' ) )
 
     def deallocateSlot( self, slot ):
         del self.slots[ slot ]
@@ -542,18 +545,7 @@ class LoopCompiler( MiniCompiler ):
 
     def compile( self, expr, contn_label ):
         query = expr[ 0 ]
-        if query.hasName( "from" ):
-            FromQueryCompiler( share=self )( query, contn_label )
-        elif query.hasName( "in" ):
-            InQueryCompiler( share=self )( query, contn_label )
-        elif query.hasName( "do" ):
-            DoQueryCompiler( share=self )( query, contn_label )
-        elif query.hasName( "zip" ):
-            ZipQueryCompiler( share=self )( query, contn_label )
-        elif query.hasName( "cross" ):
-            CrossQueryCompiler( share=self )( query, contn_label )
-        else:
-            raise Exception( "To be implemented: {}".format( query.getName() ) )
+        self.newInstance( query )( query, contn_label )
 
 class QueryCompiler( MiniCompiler ):
 
@@ -661,7 +653,7 @@ class InQueryCompiler( QueryCompiler ):
             self.loop_var_slot = self.allocateSlot( query[0] )
             self.tmp_next_fn = self.newTmpVar( 'tmp_next_fn' )
             self.tmp_context = self.newTmpVar( 'tmp_context' )
-            self.tmp_state = self.newTmpVar( 'tmp_state' );       
+            self.tmp_state = self.newTmpVar( 'tmp_state' )
         else:
             raise Exception( "TBD: {}".format( query.name ) )
 
@@ -704,7 +696,7 @@ class ZipQueryCompiler( QueryCompiler ):
 
     def compileLoopInit( self, query, contn=Label.CONTINUE ):
         self.LHS.compileLoopInit( query[0], Label.CONTINUE )
-        self.LHS.compileLoopInit( query[1], contn )
+        self.RHS.compileLoopInit( query[1], contn )
 
     def compileLoopTest( self, query, ifso=Label.CONTINUE, ifnot=Label.CONTINUE ):
         DONE_label = Label( 'zip.done' )
@@ -788,8 +780,8 @@ class CrossQueryCompiler( QueryCompiler ):
         self.OUTER.compileLoopFini( query[0], contn )
         self.deallocateSlot( self.on_outer_loop_flag )
 
-def compile( gnx, nargs ):
-    ecompiler = ExprCompiler( preallocated=nargs )
+def compile( gnx, nargs, nlocals ):
+    ecompiler = ExprCompiler( preallocated=nlocals )
     cbody = ecompiler( gnx, Label.RETURN )
     max_slots = ecompiler.allocations.slotsNeeded()
     return ( cbody, max_slots )

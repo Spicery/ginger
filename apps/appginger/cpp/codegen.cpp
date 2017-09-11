@@ -410,7 +410,7 @@ void CodeGenClass::compileSetCountSysAppInstruction( Gnx mnx ) {
 		if ( info.in_arity.isExact( count ) || info.in_arity.isInexact( count ) ) {
 			if ( info.isSysCall() ) {
 				this->emitCode( vmc_set_count_syscall );
-				this->emitSmall( count );
+				this->emitRawLong( count );
 				this->emitRef( ToRef( info.syscall ) );
 			} else if ( info.isVMOp() ) {
 				//	Inherently unchecked.

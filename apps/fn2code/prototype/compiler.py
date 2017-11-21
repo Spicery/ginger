@@ -641,8 +641,8 @@ class FromQueryCompiler( QueryCompiler ):
 
 # This is the terminating value that indicates the end of a stream.
 TERMIN = MinXML( "constant", type="termin", value="termin" )
-SYS_TRUE = MinXML( "constant", type="boolean", value="true" )
-SYS_FALSE = MinXML( "constant", type="boolean", value="false" )
+SYS_TRUE = MinXML( "constant", type="bool", value="true" )
+SYS_FALSE = MinXML( "constant", type="bool", value="false" )
 
 class InQueryCompiler( QueryCompiler ):
 
@@ -700,7 +700,7 @@ class ZipQueryCompiler( QueryCompiler ):
 
     def compileLoopTest( self, query, ifso=Label.CONTINUE, ifnot=Label.CONTINUE ):
         DONE_label = Label( 'zip.done' )
-        self.LHS.compileLoopTest( query[0], Label.CONTINUE, DONE_label.replacesCONTNUE( ifnot ) )
+        self.LHS.compileLoopTest( query[0], Label.CONTINUE, DONE_label.replaceCONTINUE( ifnot ) )
         self.RHS.compileLoopTest( query[1], ifso, ifnot )
         self.setLabel( DONE_label )
 
@@ -747,7 +747,7 @@ class CrossQueryCompiler( QueryCompiler ):
         # At this point we are on the outer loop. So we should run the 
         # outer test and, if it passes, drop into the inner loop.
         self.setLabel( outer_loop_label )
-        self.OUTER.compileLoopTest( query[0], Label.CONTINUE, done_loop_label.replaceCONTINUE( contn ) )
+        self.OUTER.compileLoopTest( query[0], Label.CONTINUE, done_loop_label.replaceCONTINUE( ifnot ) )
         # Set the flag so we know we're on the inner loop.
         self.plant( "pushq.pop.local", SYS_FALSE, local=self.on_outer_loop_flag )
         # Before we enter the inner loop, we must run its body and
@@ -758,7 +758,7 @@ class CrossQueryCompiler( QueryCompiler ):
 
         # Now we're in the inner loop. Let's see if we pass.
         self.setLabel( inner_loop_label )
-        self.INNER.compileLoopTest( query[1], done_loop_label.replaceCONTINUE( contn ), Label.CONTINUE )
+        self.INNER.compileLoopTest( query[1], done_loop_label.replaceCONTINUE( ifnot ), Label.CONTINUE )
 
         # If we get here then the inner loop has failed. So we ought to run
         # the finish action of the inner loop, set the inner-vs-outer flag to 
@@ -769,10 +769,10 @@ class CrossQueryCompiler( QueryCompiler ):
         self.setLabel( done_loop_label )
 
     def compileLoopBody( self, query, contn=Label.CONTINUE ):
-        self.INNER.compileLoopBody( query[1], label=contn )
+        self.INNER.compileLoopBody( query[1], contn=contn )
 
     def compileLoopNext( self, query, contn=Label.CONTINUE ):
-        self.INNER.compileLoopNext( query[1], label=contn )
+        self.INNER.compileLoopNext( query[1], contn=contn )
         
     def compileLoopFini( self, query, contn=Label.CONTINUE ):
         # When the outer loop finally fails, we should run

@@ -12,7 +12,7 @@ class Label:
     def id( self ):
         return self.uid
 
-    def replacesCONTNUE( self, contn ):		# aka jumpToJump
+    def replaceCONTINUE( self, contn ):		# aka jumpToJump
     	if contn == Label.CONTINUE:
     		return self
     	else:

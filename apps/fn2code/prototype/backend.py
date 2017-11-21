@@ -11,7 +11,7 @@ from label import Label
 SYSTEM_DB = Path( __file__ ).parent.joinpath( 'system.db' )
 
 if not SYSTEM_DB.exists():
-    raise Exception( 'The system.db file is missing (please rebuild $GINGER_DEV_HOME/apps/appginger/cpp' )
+    raise Exception( 'The system.db file is missing (looking for {}, please rebuild $GINGER_DEV_HOME/apps/appginger/cpp'.format( SYSTEM_DB ) )
 
 
 ################################################################################

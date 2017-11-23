@@ -125,23 +125,19 @@ class MiniCompiler:
     def compileDeterministicUpdate( self, expr, contn_label ):
         DeterministicUpdateCompiler( share=self ).compile( expr, contn_label )
 
-    def plantGoto( self, goto_label ):
-        if goto_label == Label.RETURN:
-            self.plant( "return" )
-        elif goto_label == Label.CONTINUE:
-            pass
-        else:
-            self.plant( "goto", to_label=goto_label.id() )        
-
     def plantIfNot( self, goto_label ):
         if goto_label == Label.RETURN:
             self.plant( "return.ifnot" )
+        elif goto_label == Label.CONTINUE:
+            raise Exception( 'TBD' )
         else:
             self.plant( "ifnot", to_label=goto_label.id() )
 
     def plantIfSo( self, goto_label ):
         if goto_label == Label.RETURN:
             self.plant( "return.ifso" )
+        elif goto_label == Label.CONTINUE:
+            raise Exception( 'TBD' )
         else:
             self.plant( "ifso", to_label=goto_label.id() )
 
@@ -152,7 +148,7 @@ class MiniCompiler:
             self.plantIfSo( ifso_label )
         else:
             self.plantIfNot( ifnot_label )
-            self.simpleContinuation( ifso_label )
+            self.plantGoto( ifso_label )
 
     def plantIfLocal( self, local, ifso=Label.CONTINUE, ifnot=Label.CONTINUE ):
         # TODO: there ought to be a specialised instruction for this.
@@ -195,16 +191,16 @@ class MiniCompiler:
                 self.compileExpression( i, Label.CONTINUE )
             self.compileExpression( kids[-1], contn_label )
         else:
-            self.simpleContinuation( contn_label )
+            self.plantGoto( contn_label )
 
-    def simpleContinuation( self, contn_label ):
+    def plantGoto( self, goto_label ):
         '''Compiles an explicit jump to the label'''
-        if contn_label == Label.CONTINUE:
-            pass
-        elif contn_label == Label.RETURN:
+        if goto_label == Label.RETURN:
             self.plant( "return" )
+        elif goto_label == Label.CONTINUE:
+            pass
         else:
-            self.plant( "goto", to_label=contn_label.id() )
+            self.plant( "goto", to_label=goto_label.id() )        
 
     @abstractmethod
     def compile( self, *args, **kwargs ):
@@ -245,7 +241,7 @@ class SingleValueCompiler( MiniCompiler ):
             self.plant( "start.mark", local=str(tmp0) )
             ExprCompiler( share=self )( expr, Label.CONTINUE )
             self.plant( "check.mark1", local=str(tmp0) )
-            self.simpleContinuation( contn_label )
+            self.plantGoto( contn_label )
             self.deallocateSlot( tmp0 )
 
 class DeterministicUpdateCompiler( MiniCompiler ):
@@ -269,7 +265,7 @@ class DeterministicUpdateCompiler( MiniCompiler ):
                 DeterministicUpdateCompiler( share=self ).compile( expr[ i ], Label.CONTINUE )
         else:
             raise Exception( "Assignment is not fully implemented yet" )
-        self.simpleContinuation( contn_label )
+        self.plantGoto( contn_label )
 
 
 @RegisteredMiniCompiler( "seq" )
@@ -295,7 +291,7 @@ class SysAppCompiler( MiniCompiler ):
             self.plant( "check.mark", local=tmp0, count=expr.get( "args.arity" ) )
             self.plant( "syscall", name=name )
             self.deallocateSlot( tmp0 )
-        self.simpleContinuation( contn_label )
+        self.plantGoto( contn_label )
 
 @RegisteredMiniCompiler( "self.app" )
 class SelfAppCompiler( MiniCompiler ):
@@ -313,7 +309,7 @@ class SelfAppCompiler( MiniCompiler ):
             self.plant( "set.count.mark", local=tmp0 )
             self.plant( "self.call" )
             self.deallocateSlot( tmp0 )
-        self.simpleContinuation( contn_label )
+        self.plantGoto( contn_label )
 
 @RegisteredMiniCompiler( "app" )
 class AppCompiler( MiniCompiler ):
@@ -337,7 +333,7 @@ class AppCompiler( MiniCompiler ):
             self.compileExpression( arg_expr, Label.CONTINUE )
             self.compileSingleValue( fn_expr, Label.CONTINUE )
             self.plant( "end1.calls", local=tmp0 )
-            self.simpleContinuation( contn_label )
+            self.plantGoto( contn_label )
             self.deallocateSlot( tmp0 )
 
 class ContainerMiniCompiler( MiniCompiler ):
@@ -355,7 +351,7 @@ class ContainerMiniCompiler( MiniCompiler ):
         self.compileChildren( expr, Label.CONTINUE )
         self.plant( "set.count.mark", local=tmp0 )
         self.plant( "syscall", name=self.sysFnConstructor() )
-        self.simpleContinuation( contn_label )
+        self.plantGoto( contn_label )
         self.deallocateSlot( tmp0 )
 
 @RegisteredMiniCompiler( "vector" )
@@ -375,7 +371,7 @@ class ConstantCompiler( MiniCompiler ):
 
     def compile( self, expr, contn_label ):   
         self.plant( "pushq", expr )
-        self.simpleContinuation( contn_label )
+        self.plantGoto( contn_label )
 
 @RegisteredMiniCompiler( "id" )
 class IdCompiler( MiniCompiler ):
@@ -386,7 +382,7 @@ class IdCompiler( MiniCompiler ):
             self.plant( "push.local", local=slot )
         else:
             self.plant( "push.global", **expr.getAttributes() )
-        self.simpleContinuation( contn_label )
+        self.plantGoto( contn_label )
 
 
 
@@ -641,24 +637,24 @@ class FromQueryCompiler( QueryCompiler ):
         self.plant( "pop.local", local=str(self.loop_var_slot) )            
         SingleValueCompiler( share=self )( query[3], Label.CONTINUE )
         self.plant( "pop.local", local=str(self.end_value_slot) )
-        self.simpleContinuation( contn )
+        self.plantGoto( contn )
 
     def compileLoopTest( self, query, ifso=Label.CONTINUE, ifnot=Label.CONTINUE ):
         if not ifso is Label.CONTINUE:
             self.plant( "lte.ss", local0=str( self.loop_var_slot ), local1=str( self.end_value_slot ), to_label=ifso.id() )
-            self.simpleContinuation( ifnot )
+            self.plantGoto( ifnot )
         else:
             raise Exception( "Not implemented yet" )
 
     def compileLoopBody( self, query, contn=Label.CONTINUE ):
-        self.simpleContinuation( contn )
+        self.plantGoto( contn )
 
     def compileLoopNext( self, query, contn=Label.CONTINUE ):
         self.plant( "incr.local.by", local=str( self.loop_var_slot ), by="1" )
-        self.simpleContinuation( contn )
+        self.plantGoto( contn )
 
     def compileLoopFini( self, query, contn=Label.CONTINUE ):
-        self.simpleContinuation( contn )
+        self.plantGoto( contn )
 
     def compileLoopTeardown( self ):
         self.deallocateSlot( self.loop_var_slot )  
@@ -687,7 +683,7 @@ class InQueryCompiler( QueryCompiler ):
         self.plant( "pop.local", local=self.tmp_next_fn )
         self.plant( "pop.local", local=self.tmp_context )
         self.plant( "pop.local", local=self.tmp_state )
-        self.simpleContinuation( contn )        
+        self.plantGoto( contn )        
 
     def compileLoopTest( self, query, ifso=Label.CONTINUE, ifnot=Label.CONTINUE ):
         self.plant( "push.local", local=self.tmp_state )
@@ -698,13 +694,13 @@ class InQueryCompiler( QueryCompiler ):
         self.plantIfLocalNotEqValue( self.tmp_state, TERMIN, ifso, ifnot )       
 
     def compileLoopBody( self, query, contn=Label.CONTINUE ):
-        self.simpleContinuation( contn )
+        self.plantGoto( contn )
 
     def compileLoopNext( self, query, contn=Label.CONTINUE ):
-        self.simpleContinuation( contn )
+        self.plantGoto( contn )
 
     def compileLoopFini( self, query, contn=Label.CONTINUE ):
-        self.simpleContinuation( contn )
+        self.plantGoto( contn )
 
     def compileLoopTeardown( self ):
         self.deallocateSlot( self.tmp_next_fn )

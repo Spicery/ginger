@@ -1,11 +1,17 @@
 /*****************************************************************************\
 Definition
-    * NEQ_SI LOCAL_S VALUE_I JUMP_D
+    * NEQ_SI LOCAL_S VALUE_I JUMP_D () -> ()
 
 Summary
     Compares the value of local variable LOCAL_S using identity to
     a constant VALUE_I jumping JUMP_D words if false, else falling
     through to the next instruction.
+    
+Code
+    <neq.si local=LOCAL_S value=VALUE_I to=JUMP_D />
+
+Stats
+    Width = 4
     
 Unchecked Precondition
     * JUMP_D is in the bounds of the enclosing function object

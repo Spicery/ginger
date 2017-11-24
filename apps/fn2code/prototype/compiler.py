@@ -129,7 +129,7 @@ class MiniCompiler:
         if goto_label == Label.RETURN:
             self.plant( "return.ifnot" )
         elif goto_label == Label.CONTINUE:
-            raise Exception( 'TBD' )
+            self.plant( "erase" )
         else:
             self.plant( "ifnot", to_label=goto_label.id() )
 
@@ -137,7 +137,7 @@ class MiniCompiler:
         if goto_label == Label.RETURN:
             self.plant( "return.ifso" )
         elif goto_label == Label.CONTINUE:
-            raise Exception( 'TBD' )
+            self.plant( "erase" )
         else:
             self.plant( "ifso", to_label=goto_label.id() )
 
@@ -155,7 +155,6 @@ class MiniCompiler:
         self.plant( "push.local", local=local )
         self.plantIfSoNot( ifso, ifnot )
 
-
     def plantIfLocalEqValue( self, local, value, ifso_label, ifnot_label ):
         # TODO: replace with the specialised instruction eq_si.
         self.plant( "push.local", local=local )
@@ -170,12 +169,17 @@ class MiniCompiler:
         self.plant( "eq" )
         self.plantIfSoNot( ifso_label, ifnot_label )
 
-    def plantIfLocalNotEqValue( self, local, value, ifso_label, ifnot_label ):
+    def plantIfLocalNotEqValue( self, local, value, ifso=Label.CONTINUE, ifnot=Label.CONTINUE ):
         # TODO: replace with the specialised instruction neq_si.
-        self.plant( "push.local", local=local )
-        self.plant( "pushq", value )
-        self.plant( "neq" )
-        self.plantIfSoNot( ifso_label, ifnot_label )
+        if ifso == ifnot:
+            pass
+        elif ifnot.isCONTINUE():
+            self.plant( "neq_si", value, local=local, label=ifso )
+        elif ifso.isCONTINUE():
+            self.plant( "eq_si", value, local=local, label=ifnot )
+        else:
+            self.plant( "neq_si", value, local=local, label=ifso )
+            self.plantGoto( ifnot )
 
     def plantIfLocalNotEqLocal( self, local0, local1, ifso, ifnot ):
         # TODO: replace with the specialised instruction neq_ss.
@@ -691,7 +695,7 @@ class InQueryCompiler( QueryCompiler ):
         self.plant( "set.count.call.local", count=2, local=self.tmp_next_fn )       
         self.plant( "pop.local", local=self.tmp_state )
         self.plant( "pop.local", local=self.loop_var_slot )
-        self.plantIfLocalNotEqValue( self.tmp_state, TERMIN, ifso, ifnot )       
+        self.plantIfLocalNotEqValue( self.tmp_state, TERMIN, ifso=ifso, ifnot=ifnot )       
 
     def compileLoopBody( self, query, contn=Label.CONTINUE ):
         self.plantGoto( contn )

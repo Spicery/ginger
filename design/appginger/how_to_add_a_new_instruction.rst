@@ -43,21 +43,30 @@ How to Add a New Instruction
 		FREEZE = copy volatile state into VM object
 		MELT   = copy VM state into volatile store
 		
-4.	Add the new instruction to the Java code generator. This needs rework
-	unfortunately, so it is a bit messy.
-	
-	(a) Add new instruction to GeneralInstructionSet.java
-	(b) Add to Implementation#instructions()
+4.	Add the new instruction to make_machine.py in 
+	${GINGER_DEV_HOME}/apps/automatic/machine/. This will cause the
+	appropriate C++ variables to be created. In that folder run:
+
+		make clean
+		make
+
+5.  In order for the CodeGNX to work
+
+	[a] Add constant definitions to vm_instructions.hpp in 
+		${GINGER_DEV_HOME}/apps/appginger/hpp
+	[b] Add to the method CodeGenClass::compileInstruction in
+		${GINGER_DEV_HOME}/apps/appginger/cpp
+ 
 	
 5.	Change directory to the appginger source directory. Clean out the
 	*.o files and rebuild.
 
-		cd $appginger/c/appginger/cpp
+		cd ${GINGER_DEV_HOME}
 		make clean
 		make
 		
 6.	Rerun functional tests.
 
-		cd $appginger/c/appginger/functests
+		cd ${GINGER_DEV_HOME}
 		make clean
 		make check

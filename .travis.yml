@@ -46,3 +46,5 @@ notifications:
   #   channels: "irc.freenode.org#rdflib"
   #   on_success: change
   #   on_failure: change
+  slack:
+    secure: X5QZcG+g0jW8NLEaKwfR5qLUxBSDVTvrls8iotKiEiqN5x8AM/dEwgBJt+MJiIj11O8Gt3sfTqPdqE6nOIS9IrjyOB3x1aPu5JQAK7C2PdJCKNRbwmw4iro/dH6V4fa//YRomP7NLCuZo7WIPXhzB0Wn/oolYBJa5md/j533fk0=

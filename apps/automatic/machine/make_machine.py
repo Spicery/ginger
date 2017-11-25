@@ -86,6 +86,7 @@ instructionSet = [
 	Instruction( "halt", "i" ),
 	Instruction( "ifnot", "ir" ),
 	Instruction( "ifso", "ir" ),
+	Instruction( "ifso_local", "irr" ),
 	Instruction( "and", "ir" ),
 	Instruction( "or", "ir" ),
 	Instruction( "absand", "ir" ),

@@ -85,6 +85,7 @@ instructionSet = [
 	Instruction( "gte_ss", "irrr" ),
 	Instruction( "halt", "i" ),
 	Instruction( "ifnot", "ir" ),
+	Instruction( "ifnot_local", "irr" ),
 	Instruction( "ifso", "ir" ),
 	Instruction( "ifso_local", "irr" ),
 	Instruction( "and", "ir" ),

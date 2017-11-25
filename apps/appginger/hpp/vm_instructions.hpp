@@ -130,6 +130,10 @@ namespace Ginger {
 	static const char * VM_IFSO_LOCAL_TO = "to";
 	static const char * VM_IFSO_LOCAL_LOCAL = "local";
 
+	static const char * VM_IFNOT_LOCAL = "ifnot.local";
+	static const char * VM_IFNOT_LOCAL_TO = "to";
+	static const char * VM_IFNOT_LOCAL_LOCAL = "local";
+
 	static const char * VM_SYSCALL = "syscall";
 	static const char * VM_SYSCALL_NAME = "name";
 	static const char * VM_SYSRETURN = "sysreturn";

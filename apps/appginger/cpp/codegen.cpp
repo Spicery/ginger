@@ -373,6 +373,12 @@ void CodeGenClass::compileInstruction( Gnx instruction ) {
 		const int to = instruction->attributeToInt( VM_IFNOT_TO );
 		this->emitCode( vmc_ifnot );
 		this->emitRawLong( to );
+	} else if ( name == VM_IFNOT_LOCAL ) {
+		const int slot = instruction->attributeToInt( VM_IFNOT_LOCAL_LOCAL );
+		const int to = instruction->attributeToInt( VM_IFNOT_LOCAL_TO );
+		this->emitCode( vmc_ifnot );
+		this->emitRawLong( slot );
+		this->emitRawLong( to );
 	} else if ( name == VM_IFSO ) {
 		const int to = instruction->attributeToInt( VM_IFSO_TO );
 		this->emitCode( vmc_ifso );

@@ -44,11 +44,11 @@ def main():
         if gnx.hasName( 'seq' ) and not( gnx ):
             print( gnx )
         else:
-            print( "Received: ", file=sys.stderr )
-            gnx.pretty( file=sys.stderr, indent=1 )
+            # print( "Received: ", file=sys.stderr )
+            # gnx.pretty( file=sys.stderr, indent=1 )
             gnx = transform( gnx )
-            print( "Generated: ", file=sys.stderr )
-            gnx.pretty( file=sys.stderr, indent=1 )
+            # print( "Generated: ", file=sys.stderr )
+            # gnx.pretty( file=sys.stderr, indent=1 )
             print( gnx )
         sys.stdout.flush()  # Required to ensure proper switch of control between processes.
 

@@ -327,10 +327,9 @@ class AppCompiler( MiniCompiler ):
             self.compileExpression( arg_expr, Label.CONTINUE )
             self.plant( "set.count.call.global", count=arg_arity.count(), **fn_expr.getAttributes() )
         elif fn_expr.hasName( "id" ) and fn_expr.has( "scope", value="local" ) and arg_arity.isExact():
-            # TODO: UNTESTED As the test framework isn't ready!
             self.compileExpression( arg_expr, Label.CONTINUE )
-            slot = expr.get( "slot" )
-            self.plant( "set.count.call.local", local=slot )
+            slot = fn_expr.get( "slot" )
+            self.plant( "set.count.call.local", count=arg_arity.count(), local=slot )
         else:
             tmp0 = self.newTmpVar( 'args_mark' )
             self.plant( "start.mark", local=tmp0 )
@@ -339,6 +338,8 @@ class AppCompiler( MiniCompiler ):
             self.plant( "end1.calls", local=tmp0 )
             self.plantGoto( contn_label )
             self.deallocateSlot( tmp0 )
+        self.plantGoto( contn_label )
+
 
 class ContainerMiniCompiler( MiniCompiler ):
 

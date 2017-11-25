@@ -1,0 +1,34 @@
+/*****************************************************************************\
+Definition
+    * IFNOT LOCAL JUMP_TO () -> ()
+
+Code
+    <ifnot local=LOCAL to=JUMP_TO />
+
+Summary
+    Compare the top of the stack against false. If it is false then
+    jump to JUMP_TO, otherwise fall through. Remove the top of the stack
+    in either case.
+
+Stats
+    Width = 3
+
+Unchecked Precondition
+    None.
+    
+Exceptions (Checked Preconditions)
+    JUMP_TO is in range of the current enclosing function object.
+    
+Result (Postcondition)
+    * If LOCAL is false
+        * Execution continues at JUMP_TO + 1.
+    * Otherwise
+        * Execution continues at the next instruction.
+
+\*****************************************************************************/
+
+RETURN(
+    LOCAL( ToLong( pc[1] ) ) == SYS_FALSE ?
+    pc + ToLong( pc[2] ) + 1 :
+    pc + 3
+);

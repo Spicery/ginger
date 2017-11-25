@@ -75,6 +75,14 @@ namespace Ginger {
 	static const char * VM_EQ = "eq";
 	static const char * VM_NEQ = "neq";
 
+	static const char * VM_NEQ_SI = "neq_si";
+	static const char * VM_NEQ_SI_LOCAL = "local";
+	static const char * VM_NEQ_SI_TO = "to";
+
+	static const char * VM_EQ_SI = "eq_si";
+	static const char * VM_EQ_SI_LOCAL = "local";
+	static const char * VM_EQ_SI_TO = "to";
+
 	static const char * VM_DUP = "dup";
 	static const char * VM_ERASE = "erase";
 	static const char * VM_ERASE_NUM = "erase.num";
@@ -117,6 +125,14 @@ namespace Ginger {
 	static const char * VM_IFNOT_TO = "to";
 	static const char * VM_IFSO = "ifso";
 	static const char * VM_IFSO_TO = "to";
+
+	static const char * VM_IFSO_LOCAL = "ifso.local";
+	static const char * VM_IFSO_LOCAL_TO = "to";
+	static const char * VM_IFSO_LOCAL_LOCAL = "local";
+
+	static const char * VM_IFNOT_LOCAL = "ifnot.local";
+	static const char * VM_IFNOT_LOCAL_TO = "to";
+	static const char * VM_IFNOT_LOCAL_LOCAL = "local";
 
 	static const char * VM_SYSCALL = "syscall";
 	static const char * VM_SYSCALL_NAME = "name";

@@ -141,33 +141,37 @@ class MiniCompiler:
         else:
             self.plant( "ifso", to_label=goto_label.id() )
 
-    def plantIfSoNot( self, ifso_label, ifnot_label ):
-        if ifso_label == Label.CONTINUE:
+    def plantIfSoNot( self, ifso=Label.CONTINUE, ifnot=Label.CONTINUE ):
+        if ifso == Label.CONTINUE:
             self.plantIfNot( ifnot_label )
-        elif ifnot_label == Label.CONTINUE:
-            self.plantIfSo( ifso_label )
+        elif ifnot == Label.CONTINUE:
+            self.plantIfSo( ifso )
         else:
-            self.plantIfNot( ifnot_label )
-            self.plantGoto( ifso_label )
+            self.plantIfNot( ifnot )
+            self.plantGoto( ifso )
 
     def plantIfLocal( self, local, ifso=Label.CONTINUE, ifnot=Label.CONTINUE ):
-        # TODO: there ought to be a specialised instruction for this.
-        self.plant( "push.local", local=local )
-        self.plantIfSoNot( ifso, ifnot )
+        if ifso == Label.CONTINUE:
+            self.plant( "ifnot.label", local=local, to=ifnot.id() )
+        elif ifnot == Label.CONTINUE:
+            self.plant( "ifso.local", local=local, to=ifso.id() )
+        else:
+            self.plant( "ifnot.label", local=local, to=ifnot.id() )
+            self.plantGoto( ifso.id() )
 
     def plantIfLocalEqValue( self, local, value, ifso_label, ifnot_label ):
         # TODO: replace with the specialised instruction eq_si.
         self.plant( "push.local", local=local )
         self.plant( "pushq", value )
         self.plant( "eq" )
-        self.plantIfSoNot( ifso_label, ifnot_label )
+        self.plantIfSoNot( ifso=ifso_label, ifnot=ifnot_label )
 
     def plantIfLocalEqLocal( self, local0, local1, ifso_label, ifnot_label ):
         # TODO: replace with the specialised instruction eq_ss.
         self.plant( "push.local", local=local0 )
         self.plant( "push.local", local=local1 )
         self.plant( "eq" )
-        self.plantIfSoNot( ifso_label, ifnot_label )
+        self.plantIfSoNot( ifso=ifso_label, ifnot=ifnot_label )
 
     def plantIfLocalNotEqValue( self, local, value, ifso=Label.CONTINUE, ifnot=Label.CONTINUE ):
         # TODO: replace with the specialised instruction neq_si.
@@ -186,7 +190,7 @@ class MiniCompiler:
         self.plant( "push.local", local=local0 )
         self.plant( "push.local", local=local1 )
         self.plant( "neq" )
-        self.plantIfSoNot( ifso_label, ifnot_label )
+        self.plantIfSoNot( ifso=ifso_label, ifnot=ifnot_label )
 
     def compileChildren( self, expr, contn_label ):
         if expr:
@@ -514,22 +518,26 @@ class SwitchCompiler( MiniCompiler ):
 @RegisteredMiniCompiler( "if" )
 class IfCompiler( MiniCompiler ):
 
+    def ifNotLocal( self, subexpr ):
+        if subexpr.hasName( "id" ) and subexpr.has( "scope", value="local" ):
+            self.plantIfLocal( local=subexpr.get( "slot" ), ifnot=contn_label )
+        else:
+            self.compileSingleValue( subexpr, Label.CONTINUE )
+            self.plantIfNot( contn_label )
+
     def compileFrom( self, expr, offset, n_remaining, contn_label ):
         if n_remaining == 2:
-            self.compileSingleValue( expr[offset], Label.CONTINUE )
-            self.plantIfNot( contn_label )
+            self.ifNotLocal( expr[ offset ], contn_label )
             self.compileExpression( expr[offset + 1], contn_label )
         elif n_remaining == 3:
             ELSE_label = Label( 'else' )
-            self.compileSingleValue( expr[offset], Label.CONTINUE )
-            self.plantIfNot( ELSE_label )
+            self.ifNotLocal( expr[ offset ], ELSE_label )
             self.compileExpression( expr[offset + 1], contn_label )
             self.setLabel( ELSE_label )
             self.compileExpression( expr[offset + 2], contn_label )
         else:
             ELSEIF_label = Label( 'elseif' )
-            self.compileSingleValue( expr[offset], Label.CONTINUE )
-            self.plantIfNot( ELSEIF_label )
+            self.ifNotLocal( expr[ offset ], ELSEIF_label )
             self.compileExpression( expr[offset + 1], contn_label )
             self.setLabel( ELSEIF_label )
             self.compileFrom( expr, offset+2, n_remaining-2, contn_label )

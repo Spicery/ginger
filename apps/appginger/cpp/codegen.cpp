@@ -286,6 +286,14 @@ void CodeGenClass::compileInstruction( Gnx instruction ) {
 		this->emitRawLong( slot );
 		this->emitRef( this->calcConstant( instruction->getChild( 0 ) ) );
 		this->emitRawLong( to );
+	} else if ( name == VM_EQ_SS ) {
+		const int slot0 = instruction->attributeToInt( VM_EQ_SS_LOCAL0 );
+		const int slot1 = instruction->attributeToInt( VM_EQ_SS_LOCAL1 );
+		const int to = instruction->attributeToInt( VM_EQ_SS_TO );
+		this->emitCode( vmc_eq_si );
+		this->emitRawLong( slot0 );
+		this->emitRawLong( slot1 );
+		this->emitRawLong( to );
 	} else if ( name == VM_NEQ ) {
 		this->emitCode( vmc_neq );
 	} else if ( name == VM_NEQ_SI ) {
@@ -294,6 +302,14 @@ void CodeGenClass::compileInstruction( Gnx instruction ) {
 		this->emitCode( vmc_neq_si );
 		this->emitRawLong( slot );
 		this->emitRef( this->calcConstant( instruction->getChild( 0 ) ) );
+		this->emitRawLong( to );
+	} else if ( name == VM_NEQ_SS ) {
+		const int slot0 = instruction->attributeToInt( VM_NEQ_SS_LOCAL0 );
+		const int slot1 = instruction->attributeToInt( VM_NEQ_SS_LOCAL1 );
+		const int to = instruction->attributeToInt( VM_NEQ_SS_TO );
+		this->emitCode( vmc_neq_si );
+		this->emitRawLong( slot0 );
+		this->emitRawLong( slot1 );
 		this->emitRawLong( to );
 	} else if ( name == VM_DUP ) {
 		this->emitCode( vmc_dup );
@@ -376,7 +392,7 @@ void CodeGenClass::compileInstruction( Gnx instruction ) {
 	} else if ( name == VM_IFNOT_LOCAL ) {
 		const int slot = instruction->attributeToInt( VM_IFNOT_LOCAL_LOCAL );
 		const int to = instruction->attributeToInt( VM_IFNOT_LOCAL_TO );
-		this->emitCode( vmc_ifnot );
+		this->emitCode( vmc_ifnot_local );
 		this->emitRawLong( slot );
 		this->emitRawLong( to );
 	} else if ( name == VM_IFSO ) {
@@ -386,7 +402,7 @@ void CodeGenClass::compileInstruction( Gnx instruction ) {
 	} else if ( name == VM_IFSO_LOCAL ) {
 		const int slot = instruction->attributeToInt( VM_IFSO_LOCAL_LOCAL );
 		const int to = instruction->attributeToInt( VM_IFSO_LOCAL_TO );
-		this->emitCode( vmc_ifso );
+		this->emitCode( vmc_ifso_local );
 		this->emitRawLong( slot );
 		this->emitRawLong( to );
 	} else if ( name == VM_ESCAPE ) {

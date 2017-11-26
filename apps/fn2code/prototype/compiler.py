@@ -152,11 +152,11 @@ class MiniCompiler:
 
     def plantIfLocal( self, local, ifso=Label.CONTINUE, ifnot=Label.CONTINUE ):
         if ifso == Label.CONTINUE:
-            self.plant( "ifnot.label", local=local, to=ifnot.id() )
+            self.plant( "ifnot.label", local=local, to_label=ifnot.id() )
         elif ifnot == Label.CONTINUE:
-            self.plant( "ifso.local", local=local, to=ifso.id() )
+            self.plant( "ifso.local", local=local, to_label=ifso.id() )
         else:
-            self.plant( "ifnot.label", local=local, to=ifnot.id() )
+            self.plant( "ifnot.label", local=local, to_label=ifnot.id() )
             self.plantGoto( ifso.id() )
 
     def plantIfLocalEqValue( self, local, value, ifso_label, ifnot_label ):
@@ -174,15 +174,14 @@ class MiniCompiler:
         self.plantIfSoNot( ifso=ifso_label, ifnot=ifnot_label )
 
     def plantIfLocalNotEqValue( self, local, value, ifso=Label.CONTINUE, ifnot=Label.CONTINUE ):
-        # TODO: replace with the specialised instruction neq_si.
         if ifso == ifnot:
             pass
         elif ifnot.isCONTINUE():
-            self.plant( "neq_si", value, local=local, label=ifso )
+            self.plant( "neq.si", value, local=local, to_label=ifso.id() )
         elif ifso.isCONTINUE():
-            self.plant( "eq_si", value, local=local, label=ifnot )
+            self.plant( "eq.si", value, local=local, to_label=ifnot.id() )
         else:
-            self.plant( "neq_si", value, local=local, label=ifso )
+            self.plant( "neq.si", value, local=local, to_label=ifso.id() )
             self.plantGoto( ifnot )
 
     def plantIfLocalNotEqLocal( self, local0, local1, ifso, ifnot ):
@@ -208,7 +207,7 @@ class MiniCompiler:
         elif goto_label == Label.CONTINUE:
             pass
         else:
-            self.plant( "goto", to_label=goto_label.id() )        
+            self.plant( "goto", to_label=goto_label.id() )      
 
     @abstractmethod
     def compile( self, *args, **kwargs ):
@@ -518,7 +517,7 @@ class SwitchCompiler( MiniCompiler ):
 @RegisteredMiniCompiler( "if" )
 class IfCompiler( MiniCompiler ):
 
-    def ifNotLocal( self, subexpr ):
+    def ifNotLocal( self, subexpr, contn_label ):
         if subexpr.hasName( "id" ) and subexpr.has( "scope", value="local" ):
             self.plantIfLocal( local=subexpr.get( "slot" ), ifnot=contn_label )
         else:
@@ -719,6 +718,7 @@ class InQueryCompiler( QueryCompiler ):
         self.deallocateSlot( self.tmp_next_fn )
         self.deallocateSlot( self.tmp_context )
         self.deallocateSlot( self.tmp_state )
+        self.deallocateSlot( self.loop_var_slot )
 
 
 class ZipQueryCompiler( QueryCompiler ):

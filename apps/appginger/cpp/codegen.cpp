@@ -273,6 +273,14 @@ void CodeGenClass::compileInstruction( Gnx instruction ) {
 		this->emitCode( vmc_lt );
 	} else if ( name == VM_LTE ) {
 		this->emitCode( vmc_lte );
+	} else if ( name == VM_LTE_SS ) {
+		const int slot0 = instruction->attributeToInt( VM_LTE_SS_LOCAL0 );
+		const int slot1 = instruction->attributeToInt( VM_LTE_SS_LOCAL1 );
+		const int to = instruction->attributeToInt( VM_LTE_SS_TO );
+		this->emitCode( vmc_lte_ss );
+		this->emitRawLong( slot0 );
+		this->emitRawLong( slot1 );
+		this->emitRawLong( to );
 	} else if ( name == VM_GT ) {
 		this->emitCode( vmc_gt );
 	} else if ( name == VM_GTE ) {
@@ -329,6 +337,12 @@ void CodeGenClass::compileInstruction( Gnx instruction ) {
 		this->emitCode( vmc_incr_local_by );
 		this->emitRawLong( slot );
 		this->emitSmall( d );
+	} else if ( name == VM_INCR_LOCAL_BY1 ) {
+		const int slot = instruction->attributeToInt( VM_INCR_LOCAL_BY1_LOCAL );
+		//	We have to be a little careful here because we only support
+		//	Smalls and not the entire range of Long.
+		this->emitCode( vmc_incr_local_by1 );
+		this->emitRawLong( slot );
 	} else if ( name == VM_DECR ) {
 		this->emitCode( vmc_decr );
 	} else if ( name == VM_ERASE ) {

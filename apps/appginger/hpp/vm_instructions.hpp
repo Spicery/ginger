@@ -75,6 +75,11 @@ namespace Ginger {
 	static const char * VM_EQ = "eq";
 	static const char * VM_NEQ = "neq";
 
+	static const char * VM_LTE_SS = "lte.ss";
+	static const char * VM_LTE_SS_LOCAL0 = "local0";
+	static const char * VM_LTE_SS_LOCAL1 = "local1";
+	static const char * VM_LTE_SS_TO = "to";
+
 	static const char * VM_NEQ_SI = "neq.si";
 	static const char * VM_NEQ_SI_LOCAL = "local";
 	static const char * VM_NEQ_SI_TO = "to";
@@ -105,6 +110,9 @@ namespace Ginger {
 	static const char * VM_INCR_LOCAL_BY = "incr.local.by";
 	static const char * VM_INCR_LOCAL_BY_LOCAL = "local";
 	static const char * VM_INCR_LOCAL_BY_BY = "by";
+
+	static const char * VM_INCR_LOCAL_BY1 = "incr.local.by1";
+	static const char * VM_INCR_LOCAL_BY1_LOCAL = "local";
 
 	static const char * VM_START_MARK = "start.mark";
 	static const char * VM_START_MARK_LOCAL = "local";

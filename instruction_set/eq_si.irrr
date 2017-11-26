@@ -6,6 +6,14 @@ Summary
     Compares the value of local variable LOCAL_S using identity to
     a constant VALUE_I jumping JUMP_D words if true, else falling
     through to the next instruction.
+
+Code 
+    <eq.si local=LOCAL_S to=JUMP_D>
+        GNX of VALUE_I 
+    </eq.si>
+
+Stats
+    Width = 4
     
 Unchecked Precondition
     * JUMP_D is in the bounds of the enclosing function object

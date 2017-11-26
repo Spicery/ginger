@@ -10,6 +10,9 @@ Summary
     jump to JUMP_TO, otherwise fall through. Remove the top of the stack
     in either case.
 
+    Note that the JUMP_TO offset is calculated from the position of the
+    label.
+
 Stats
     Width = 3
 
@@ -29,6 +32,6 @@ Result (Postcondition)
 
 RETURN(
     LOCAL( ToLong( pc[1] ) ) == SYS_FALSE ?
-    pc + ToLong( pc[2] ) + 1 :
+    pc + ToLong( pc[2] ) + 2 :
     pc + 3
 );

@@ -231,12 +231,19 @@ class ResolveLabels:
             sofar += w
 
     def _resolveJumps( self, seqixml ):
+        '''Unfortunately, the offsets are calculated from the position of the label in the instruction
+        rather than the instruction. This needs fixing BUT the time is not right for fixing this.
+        We should hold off fixing this until the new compiler is written. In the interim, we exploit the
+        fact that the label is always the LAST operand. This means its position is INSTRUCTION_BASE + WIDTH - 1. 
+        '''
         for ixml in seqixml:
+            # print( ixml, file=sys.stderr )
             lab = ixml.get( 'to.label', None )
             if lab and lab != Label.RETURN.id():
-                offset = int( ixml.get( 'offset' ) )
-                d = self.label_offsets[ lab ] - offset
-                ixml.put( 'to', str( d - 1 ) )
+                instruction_base = int( ixml.get( 'offset' ) )
+                label_position = instruction_base + int( ixml.get( 'width' ) ) - 1
+                d = self.label_offsets[ lab ] - label_position
+                ixml.put( 'to', str( d ) )
 
     def edit( self, seqixml ):
         self._calcOffsets( seqixml )

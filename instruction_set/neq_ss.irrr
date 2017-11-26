@@ -8,6 +8,9 @@ Code
 Summary
     Compares two local variables LOCAL_S and LOCAL_T for identity and
     jumping to JUMP_D if they are different, otherwise falling through.
+
+Stats
+    Width = 4
     
 Unchecked Precondition
     * JUMP_D is in range of the enclosing function object.

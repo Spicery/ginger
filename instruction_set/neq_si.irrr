@@ -8,7 +8,9 @@ Summary
     through to the next instruction.
     
 Code
-    <neq.si local=LOCAL_S value=VALUE_I to=JUMP_D />
+    <neq.si local=LOCAL_S to=JUMP_D >
+        GNX of VALUE_I
+    </neq.si>
 
 Stats
     Width = 4

@@ -1,6 +1,7 @@
 all: TARGET=build
 clean: TARGET=clean
 all clean:
+	make -C automatic/codegen $@
 	make -C automatic/simple $@
 	make -C automatic/machine $@
 	make -C automatic/sys $@

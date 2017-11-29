@@ -301,6 +301,7 @@ class Implementation4( Implementation ):
 	def generateImplementationCPP( self, output ):
 		for inst in instructionSet:
 			output.write( "case vmc_{}: {{\n".format( inst.getName() ) )
+			# output.write( "std::cerr << \"vmc_{}\" << std::endl;".format( inst.getName() ) )
 			inst.generateBody( output, 1 )
 			output.write( "}; break;\n\n" )
 

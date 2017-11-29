@@ -328,6 +328,10 @@ void CodeGenClass::plant_quo( Gnx instruction ) {
 	this->emitCode( vmc_quo );
 }
 
+void CodeGenClass::plant_mod( Gnx instruction ) {
+	this->emitCode( vmc_mod );
+}
+
 void CodeGenClass::plant_neg( Gnx instruction ) {
 	this->emitCode( vmc_neg );
 }
@@ -601,7 +605,7 @@ void CodeGenClass::plant_seq( Gnx instruction ) {
 //	logging.
 void CodeGenClass::compileInstruction( Gnx instruction ) {
 	const string name = instruction->name();
-	if ( name == VM_PUSHQ ) {
+/*	if ( name == VM_PUSHQ ) {
 		this->plant_pushq( instruction );
 	} else if ( name == VM_PUSHQ_POP_LOCAL ) {
 		this->plant_pushq_pop_local( instruction );
@@ -766,6 +770,9 @@ void CodeGenClass::compileInstruction( Gnx instruction ) {
 	} else {
 		throw Mishap( "Unrecognised instruction name" ).culprit( "Name", name );
 	}
+	*/
+	#include "codegen.cpp.auto"
+	throw Mishap( "Unrecognised instruction name" ).culprit( "Name", name );
 }
 
 void CodeGenClass::compileSysAppInstruction( Gnx mnx ) {

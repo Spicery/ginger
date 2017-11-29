@@ -45,10 +45,10 @@ INSTRUCTIONS = {
     "sub":                      [],
     "div":                      [],
     "quo":                      [],
-    "rem":                      [],
     "neg":                      [],
     "pos":                      [],
     "not":                      [],
+    "mod":                      [],
 
     "lt":                       [],
     "lte":                      [],
@@ -68,7 +68,6 @@ INSTRUCTIONS = {
     "erase":                    [],
     "erase.num":                [ 'n' ],
     "decr":                     [],
-    "decr.by":                  [ 'by' ],
     "incr":                     [],
     "incr.by":                  [ 'by' ],
 
@@ -162,35 +161,44 @@ def tmpNames():
         n += 1
         yield 'tmp{}'.format( n )
 
-def genSwitchToMethods( codenames, depth, tmpcounter ):
-    # print( 'CODENAMES', codenames )
-    n = len( codenames )
-    indent = TAB * depth
-    if n == 0:
-        raise Exception( 'Internal error' )
-    elif n <= 2:
-        for name in codenames:
-            print( indent, 'if ( name == "{}" ) {{ this->plant_{}(); return; }}'.format( name, baseName( name ) ) )
-    else:
-        n2 = n // 2
-        name = codenames[ n2 ]
-        tmp = tmpcounter.__next__()
-        print( indent, 'int {} = name.compare( "{}" )'.format( tmp, name ) )
-        print( indent, 'if ( {} < 0 ) {{'.format( tmp ) )
-        # print( 'SPLIT LEFT', n, codenames[0:n2] )
-        genSwitchToMethods( codenames[0:n2], depth + 1, tmpcounter )
-        print( indent, '}} else if ( {} > 0 ) {{'.format( tmp ) )
-        # print( 'SPLIT RIGHT', n, codenames[n2+1:] )
-        genSwitchToMethods( codenames[n2+1:], depth + 1, tmpcounter )
-        print( indent, '} else {' )
-        print( TAB * ( depth + 1 ), 'this->plant_{}(); return;'.format( baseName( name ) ) )
-        print( indent, '}' )
 
-def generateSwitchToMethods():
-    genSwitchToMethods( sorted( INSTRUCTIONS.keys() ), 0, tmpNames() )
+class GenSwitchToMethods:
+
+    def __init__( self, fileobj ):
+        self._tmpcounter = tmpNames()
+        self._fileobj = fileobj
+
+    def generate( self, codenames, depth ):
+        # print( 'CODENAMES', codenames )
+        n = len( codenames )
+        indent = TAB * depth
+        if n == 0:
+            raise Exception( 'Internal error' )
+        elif n <= 2:
+            for name in codenames:
+                print( indent, 'if ( name == "{}" ) {{ this->plant_{}( instruction ); return; }}'.format( name, baseName( name ) ), file=self._fileobj )
+        else:
+            n2 = n // 2
+            name = codenames[ n2 ]
+            tmp = self._tmpcounter.__next__()
+            print( indent, 'int {} = name.compare( "{}" );'.format( tmp, name ), file=self._fileobj )
+            print( indent, 'if ( {} < 0 ) {{'.format( tmp ), file=self._fileobj )
+            # print( 'SPLIT LEFT', n, codenames[0:n2] )
+            self.generate( codenames[0:n2], depth + 1 )
+            print( indent, '}} else if ( {} > 0 ) {{'.format( tmp ), file=self._fileobj )
+            # print( 'SPLIT RIGHT', n, codenames[n2+1:] )
+            self.generate( codenames[n2+1:], depth + 1 )
+            print( indent, '} else {', file=self._fileobj )
+            print( TAB * ( depth + 1 ), 'this->plant_{}( instruction ); return;'.format( baseName( name ) ), file=self._fileobj )
+            print( indent, '}', file=self._fileobj )
+
+def generateSwitchToMethods( fileobj ):
+    GenSwitchToMethods( fileobj ).generate( sorted( INSTRUCTIONS.keys() ), 0 )
 
 
 
 if __name__ == "__main__":
     with open( 'codegen.hpp.auto', 'w' ) as f:
         generatePrototypes( f )
+    with open( 'codegen.cpp.auto', 'w' ) as f:
+        generateSwitchToMethods( f )

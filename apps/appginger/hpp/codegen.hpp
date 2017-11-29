@@ -313,6 +313,9 @@ public:
 	void compileSetCountSysAppInstruction( Gnx mnx );
 
 public:
+	#include "codegen.hpp.auto"
+
+public:
 	CodeGenClass( MachineClass * machine );
 };
 

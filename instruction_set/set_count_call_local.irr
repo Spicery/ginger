@@ -27,11 +27,11 @@ Result (Postcondition)
 \*****************************************************************************/
 
 VMCOUNT = ToLong( *( ++ pc ) );
-Ref r = LOCAL( ToLong( *( ++pc )++ ) );
+Ref r = LOCAL( ToLong( *( ++pc ) ) );
 {    
     Ref *ptr;
     if ( IsObj( r ) && IsFunctionKey( *( ptr = RefToPtr4( r ) ) ) ) {
-        VMLINK = pc;
+        VMLINK = pc + 1;
         VMLINKFUNC = VMPCFUNC;
         VMPCFUNC = ptr;
         RETURN( ptr + 1 );
@@ -39,7 +39,7 @@ Ref r = LOCAL( ToLong( *( ++pc )++ ) );
         *( ++VMVP ) = r;
         VMCOUNT += 1;
         FREEZE;
-        pc = sysApply( pc, vm );
+        pc = sysApply( pc + 1, vm );
         MELT;
         RETURN( pc );
     }

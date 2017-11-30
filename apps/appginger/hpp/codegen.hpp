@@ -311,6 +311,7 @@ public:
 	void compileInstruction( Gnx instruction );
 	void compileSysAppInstruction( Gnx mnx );
 	void compileSetCountSysAppInstruction( Gnx mnx );
+	Ref compileGnxFnCodeStandalone( Gnx mnx );
 
 public:
 	#include "codegen.hpp.auto"

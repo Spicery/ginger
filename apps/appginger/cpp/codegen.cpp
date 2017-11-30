@@ -1328,8 +1328,6 @@ void CodeGenClass::vmiFUNCTION( const string name, int N, int A ) {
 	this->save( name, N, A );
 }
 
-
-
 Ref CodeGenClass::vmiENDFUNCTION( bool in_heap, Ref fnkey ) {
 	Ref r;
 
@@ -1366,6 +1364,8 @@ Ref CodeGenClass::vmiENDFUNCTION( Ref fnkey ) {
 Ref CodeGenClass::vmiENDFUNCTION( bool in_heap ) {
 	return this->vmiENDFUNCTION( in_heap, in_heap ? sysFunctionKey : sysCoreFunctionKey );
 }
+
+
 
 void CodeGenClass::vmiNOT() {
 	this->emitCode( vmc_not );
@@ -2267,15 +2267,20 @@ void CodeGenClass::compileGnxFn( Gnx mnx, LabelClass * contn ) {
 }
 
 void CodeGenClass::compileGnxFnCode( Gnx mnx, LabelClass * contn ) {
+	this->vmiPUSHQ( this->compileGnxFnCodeStandalone( mnx ) );
+	this->continueFrom( contn );
+}
+
+Ref CodeGenClass::compileGnxFnCodeStandalone( Gnx mnx ) {
 	int args_count = mnx->attributeToInt( GNX_FN_CODE_ARGS_COUNT );
 	int locals_count = mnx->attributeToInt( GNX_FN_CODE_LOCALS_COUNT );
 	this->vmiFUNCTION( mnx->attribute( GNX_FN_CODE_NAME, GNX_EMPTY_FN_NAME ), locals_count, args_count );	
 	for ( Gnx instruction : *mnx ) {
 		this->compileInstruction( instruction );
 	}
-	this->vmiPUSHQ( this->vmiENDFUNCTION() );
-	this->continueFrom( contn );
+	return this->vmiENDFUNCTION();
 }
+
 
 void CodeGenClass::compileChildrenChecked( Gnx mnx, Arity arity ) {
 	Ginger::Arity args_arity( mnx->attribute( GNX_ARGS_ARITY, "+0" ) );

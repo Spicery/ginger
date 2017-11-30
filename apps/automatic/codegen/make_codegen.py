@@ -1,5 +1,15 @@
 #!/usr/bin/python3
+# Generator for:
+#   codegen.hpp.auto - a list of C++ method prototypes to be included in the CodeGenClass.
+#   codegen.cpp.auto - a balanced binary chop that dispatches the CodeGenClass::method that 
+#       implements an instruction.
+#
 
+#
+# This is a list of instructions understood by the runtime system.
+# It is a mapping from the name of the instruction to a list of
+# required fields.
+#
 INSTRUCTIONS = {
     'seq':                      [],
     'enter':                    [],

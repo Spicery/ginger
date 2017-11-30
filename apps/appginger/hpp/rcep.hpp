@@ -36,6 +36,9 @@ private:
 private:
 	static int level;
 
+	Ref compileTopLevel( shared< Ginger::Mnx > gnx );
+
+
 public:
 	void setPrinting( bool p ) {
 		this->printing = p;

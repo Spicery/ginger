@@ -20,7 +20,7 @@ INSTRUCTIONS = {
     "return.ifnot":             [],
     
     'pushq':                    [],
-    'pushq.pop.local':          ['local'],
+    'pushq.pop.local':          [ 'local' ],
     'pushq.ret':                [],
 
     'pop.local':                [ 'local' ],
@@ -110,8 +110,8 @@ INSTRUCTIONS = {
 
     "getiterator":              [],
 
-    "field":                    [ 'n' ]
-    
+    "field":                    [ 'n' ],
+
 }
 
 def cppName( codename ):

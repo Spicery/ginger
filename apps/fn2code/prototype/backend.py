@@ -47,6 +47,12 @@ def optSysCall( ixml ):
     if name in DETAILS:
         return MinXML( DETAILS[ name] )
 
+@PeepHole( "set.count.syscall" )
+def optSysCall( ixml ):
+    name = ixml.get( "name" )
+    if name in DETAILS:
+        return MinXML( DETAILS[ name] )
+
 @PeepHole( "push.local" )
 def optPushLocal( ixml ):
     local = ixml.get( "local" )

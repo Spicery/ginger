@@ -153,7 +153,19 @@ void CodeGenClass::plant_pushq_ret( Gnx instruction ) {
 }
 
 void CodeGenClass::plant_syscall( Gnx instruction ) {
-	this->compileSysAppInstruction( instruction );
+	const string name = instruction->attribute( VM_SYSCALL_NAME );
+	SysMap::iterator it = SysMap::systemFunctionsMap().find( name );
+	if ( it != SysMap::systemFunctionsMap().end() ) {
+		const SysInfo & info = it->second;
+		if ( info.isSysCall() ) {
+			this->emitCode( vmc_syscall );
+			this->emitRef( ToRef( info.syscall ) );
+		} else {
+			throw Mishap( "System call should have been replaced by specific instruction" ).culprit( "Syscall name", name );
+		}
+	} else {
+		throw Mishap( "Unknown syscall" ).culprit( "Syscall name", name );
+	}
 }
 
 void CodeGenClass::plant_sysreturn( Gnx instruction ) {
@@ -161,7 +173,30 @@ void CodeGenClass::plant_sysreturn( Gnx instruction ) {
 }
 
 void CodeGenClass::plant_set_count_syscall( Gnx instruction ) {
-	this->compileSetCountSysAppInstruction( instruction );
+	const string name = instruction->attribute( VM_SET_COUNT_SYSCALL_NAME );
+	const int count = instruction->attributeToInt( VM_SET_COUNT_SYSCALL_COUNT );
+	SysMap::iterator it = SysMap::systemFunctionsMap().find( name );
+	if ( it != SysMap::systemFunctionsMap().end() ) {
+		const SysInfo & info = it->second;
+		if ( info.in_arity.isExact( count ) || info.in_arity.isInexact( count ) ) {
+			if ( info.isSysCall() ) {
+				this->emitCode( vmc_set_count_syscall );
+				this->emitRawLong( count );
+				this->emitRef( ToRef( info.syscall ) );
+			} else {
+				throw Mishap( "System call should have been replaced by specific instruction" ).culprit( "Syscall name", name );
+			}
+		} else {
+			throw(
+				SystemError( "System call passed wrong number of arguments" ).
+				culprit( "Name", name ).
+				culprit( "Received", count ).
+				culprit( "Expected", info.in_arity.toString() )
+			);
+		}
+	} else {
+		throw Mishap( "Unknown syscall" ).culprit( "Syscall name", name );
+	}
 }
 
 void CodeGenClass::plant_enter( Gnx instruction ) {
@@ -635,7 +670,7 @@ void CodeGenClass::compileInstruction( Gnx instruction ) {
 				throw Mishap( "Internal Error - offset sync error" ).culprit( "Next instruction", name ).culprit( "Offset", offset );
 			}
 		}
-		cerr << "Instruction: " << name << endl;
+		// cerr << "Instruction: " << name << endl;
 	}
 	#include "codegen.cpp.auto"
 	throw Mishap( "Unrecognised instruction name" ).culprit( "Name", name );

@@ -84,11 +84,11 @@ def main():
             print( gnx )
         else:
             try:
-                print( "Received: ", file=sys.stderr )
-                gnx.pretty( file=sys.stderr, indent=1 )
+                # print( "Received: ", file=sys.stderr )
+                # gnx.pretty( file=sys.stderr, indent=1 )
                 gnx = transform( gnx )
-                print( "Generated: ", file=sys.stderr )
-                gnx.pretty( file=sys.stderr, indent=1 )
+                # print( "Generated: ", file=sys.stderr )
+                # gnx.pretty( file=sys.stderr, indent=1 )
                 print( gnx )
             except problem.ProblemException as p:
                 print( p.problem() )

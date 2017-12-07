@@ -71,7 +71,7 @@ VIdent::VIdent( CodeGen codegen, shared< Ginger::Mnx > vid ) {
 		this->slot = 0;
 		this->ref = codegen->calcConstant( vid );
 	} else {
-		throw "TODO";
+		throw Mishap( "Internal Error - unrecognised element name" ).culprit( "Element name", nm );
 	}
 }
 

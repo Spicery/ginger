@@ -26,6 +26,7 @@
 
 #include <stddef.h>
 #include <string.h>
+#include <assert.h>
 
 #include "numbers.hpp"
 #include "gnxconstants.hpp"
@@ -200,6 +201,12 @@ void CodeGenClass::plant_push_local( Gnx instruction ) {
 }
 
 void CodeGenClass::plant_pop_global( Gnx instruction ) {
+	/*if ( instruction->hasAttribute( "declare" ) ) {
+		const string dpnm = instruction->attribute( GNX_VID_DEF_PKG );
+		Package * def_pkg = this->vm->getPackage( dpnm );
+		const bool prot = instruction->attribute( GNX_VID_PROTECTED, "true" ) == "true";
+		def_pkg->add( instruction->attribute( GNX_VID_NAME ), prot );
+	}*/
 	this->emitCode( vmc_pop_global );
 	this->emitValof( this->resolveGlobal( instruction ) );
 }
@@ -586,6 +593,21 @@ void CodeGenClass::plant_seq( Gnx instruction ) {
 	}
 }
 
+static void throwProblem( Gnx mnx ) {
+	Ginger::Mishap mishap( mnx->attribute( GNX_PROBLEM_MESSAGE ), mnx->attribute( GNX_PROBLEM_CATEGORY, "S" ) );
+	MnxChildIterator mnxit( mnx );
+	while ( mnxit.hasNext() ) {
+		Gnx & culprit = mnxit.next();
+		if ( culprit->hasName( GNX_CULPRIT ) && culprit->hasAttribute( GNX_CULPRIT_NAME ) && culprit->hasAttribute( GNX_CULPRIT_VALUE ) ) {
+			mishap.culprit( culprit->attribute( GNX_CULPRIT_NAME ), culprit->attribute( GNX_CULPRIT_VALUE ) );
+		}
+	}
+	throw mishap;
+}
+
+// void CodeGenClass::plant_fn2code( Gnx instruction ) {
+// 	this->compileGnxFnCode( instruction, CONTINUE_LABEL );
+// }
 
 /*	Driving Example
             <enter/>
@@ -605,172 +627,16 @@ void CodeGenClass::plant_seq( Gnx instruction ) {
 //	logging.
 void CodeGenClass::compileInstruction( Gnx instruction ) {
 	const string name = instruction->name();
-/*	if ( name == VM_PUSHQ ) {
-		this->plant_pushq( instruction );
-	} else if ( name == VM_PUSHQ_POP_LOCAL ) {
-		this->plant_pushq_pop_local( instruction );
-	} else if ( name == VM_PUSHQ_RET ) {
-		this->plant_pushq_ret( instruction );
-	} else if ( name == VM_SYSCALL ) {
-		this->plant_syscall( instruction );
-	} else if ( name == VM_SYSRETURN ) {
-		this->plant_sysreturn( instruction );
-	} else if ( name == VM_SET_COUNT_SYSCALL ) {
-		this->plant_set_count_syscall( instruction );
-	} else if ( name == VM_ENTER ) {
-		this->plant_enter( instruction );
-	} else if ( name == VM_ENTER0 ) {
-		this->plant_enter0( instruction );
-	} else if ( name == VM_ENTER1 ) {
-		this->plant_enter1( instruction );
-	} else if ( name == VM_RETURN ) {
-		this->plant_return( instruction );
-	} else if ( name == VM_RETURN_IFSO ) {
-		this->plant_return_ifso( instruction );
-	} else if ( name == VM_RETURN_IFNOT ) {
-		this->plant_return_ifnot( instruction );
-	} else if ( name == VM_POP_LOCAL ) {
-		this->plant_pop_local( instruction );
-	} else if ( name == VM_POP_GLOBAL ) {
-		this->plant_pop_global( instruction );
-	} else if ( name == VM_PUSH_LOCAL ) {
-		this->plant_push_local( instruction );
-	} else if ( name == VM_PUSH_LOCAL0 ) {
-		this->plant_push_local0( instruction );
-	} else if ( name == VM_PUSH_LOCAL1 ) {
-		this->plant_push_local1( instruction );
-	} else if ( name == VM_PUSH_LOCAL_RET ) {
-		this->plant_push_local_ret( instruction );
-	} else if ( name == VM_PUSH_LOCAL0_RET ) {
-		this->plant_push_local0_ret( instruction );
-	} else if ( name == VM_PUSH_LOCAL1_RET ) {
-		this->plant_push_local1_ret( instruction );
-	} else if ( name == VM_PUSH_GLOBAL ) {
-		this->plant_push_global( instruction );
-	} else if ( name == VM_END1_CALLS ) {
-		this->plant_end1_calls( instruction );
-	} else if ( name == VM_CALLS ) {
-		this->plant_calls( instruction );
-	} else if ( name == VM_SET_COUNT_CALLS ) {
-		this->plant_set_count_calls( instruction );
-	} else if ( name == VM_SELF_CALL ) {
-		this->plant_self_call( instruction );
-	} else if ( name == VM_SELF_CALL_N ) {
-		this->plant_self_call_n( instruction );
-	} else if ( name == VM_SELF_CONSTANT ) {
-		this->plant_self_constant( instruction );
-	} else if ( name == VM_END_CALL_GLOBAL ) {
-		this->plant_end_call_global( instruction );
-	} else if ( name == VM_SET_COUNT_CALL_GLOBAL ) {
-		this->plant_set_count_call_global( instruction );
-	} else if ( name == VM_SET_COUNT_CALL_LOCAL ) {
-		this->plant_set_count_call_local( instruction );
-	} else if ( name == VM_AND ) {
-		this->plant_and( instruction );
-	} else if ( name == VM_OR ) {
-		this->plant_or( instruction );
-	} else if ( name == VM_ABSAND ) {
-		this->plant_absand( instruction );
-	} else if ( name == VM_ABSOR ) {
-		this->plant_absor( instruction );
-	} else if ( name == VM_ADD ) {
-		this->plant_add( instruction );
-	} else if ( name == VM_MUL ) {
-		this->plant_mul( instruction );
-	} else if ( name == VM_SUB ) {
-		this->plant_sub( instruction );
-	} else if ( name == VM_DIV ) {
-		this->plant_div( instruction );
-	} else if ( name == VM_QUO ) {
-		this->plant_quo( instruction );
-	} else if ( name == VM_NEG ) {
-		this->plant_neg( instruction );
-	} else if ( name == VM_POS ) {
-		this->plant_pos( instruction );
-	} else if ( name == VM_NOT ) {
-		this->plant_not( instruction );
-	} else if ( name == VM_LT ) {
-		this->plant_lt( instruction );
-	} else if ( name == VM_LTE ) {
-		this->plant_lte( instruction );
-	} else if ( name == VM_LTE_SS ) {
-		this->plant_lte_ss( instruction );
-	} else if ( name == VM_GT ) {
-		this->plant_gt( instruction );
-	} else if ( name == VM_GTE ) {
-		this->plant_gte( instruction );
-	} else if ( name == VM_EQ ) {
-		this->plant_eq( instruction );
-	} else if ( name == VM_EQ_SI ) {
-		this->plant_eq_si( instruction );
-	} else if ( name == VM_EQ_SS ) {
-		this->plant_eq_ss( instruction );
-	} else if ( name == VM_NEQ ) {
-		this->plant_neq( instruction );
-	} else if ( name == VM_NEQ_SI ) {
-		this->plant_neq_si( instruction );
-	} else if ( name == VM_NEQ_SS ) {
-		this->plant_neq_ss( instruction );
-	} else if ( name == VM_DUP ) {
-		this->plant_dup( instruction );
-	} else if ( name == VM_INCR ) {
-		this->plant_incr( instruction );
-	} else if ( name == VM_INCR_BY ) {
-		this->plant_incr_by( instruction );
-	} else if ( name == VM_INCR_LOCAL_BY ) {
-		this->plant_incr_local_by( instruction );
-	} else if ( name == VM_INCR_LOCAL_BY1 ) {
-		this->plant_incr_local_by1( instruction );
-	} else if ( name == VM_DECR ) {
-		this->plant_decr( instruction );
-	} else if ( name == VM_ERASE ) {
-		this->plant_erase( instruction );
-	} else if ( name == VM_ERASE_NUM ) {
-		this->plant_erase_num( instruction );
-	} else if ( name == VM_START_MARK ) {
-		this->plant_start_mark( instruction );
-	} else if ( name == VM_END_MARK ) {
-		this->plant_end_mark( instruction );
-	} else if ( name == VM_SET_COUNT_MARK ) {
-		this->plant_set_count_mark( instruction );
-	} else if ( name == VM_ERASE_MARK ) {
-		this->plant_erase_mark( instruction );
-	} else if ( name == VM_CHECK_MARK0 ) {
-		this->plant_check_mark0( instruction );
-	} else if ( name == VM_CHECK_MARK1 ) {
-		this->plant_check_mark1( instruction );
-	} else if ( name == VM_CHECK_COUNT ) {
-		this->plant_check_count( instruction );
-	} else if ( name == VM_CHECK_MARK ) {
-		this->plant_check_mark( instruction );
-	} else if ( name == VM_CHECK_MARK_GTE ) {
-		this->plant_check_mark_gte( instruction );
-	} else if ( name == VM_GOTO ) {
-		this->plant_goto( instruction );
-	} else if ( name == VM_BYPASS ) {
-		this->plant_bypass( instruction );
-	} else if ( name == VM_IFNOT ) {
-		this->plant_ifnot( instruction );
-	} else if ( name == VM_IFNOT_LOCAL ) {
-		this->plant_ifnot_local( instruction );
-	} else if ( name == VM_IFSO ) {
-		this->plant_ifso( instruction );
-	} else if ( name == VM_IFSO_LOCAL ) {
-		this->plant_ifso_local( instruction );
-	} else if ( name == VM_ESCAPE ) {
-		this->plant_escape( instruction );
-	} else if ( name == VM_FAIL ) {
-		this->plant_fail( instruction );
-	} else if ( name == VM_GETITERATOR ) {
-		this->plant_getiterator( instruction );
-	} else if ( name == VM_FIELD ) {
-		this->plant_field( instruction );
-	} else if ( name == VM_SEQ ) {
-		this->plant_seq( instruction );
-	} else {
-		throw Mishap( "Unrecognised instruction name" ).culprit( "Name", name );
+	{
+		int offset = instruction->attributeToInt( "offset", -1 );
+		if ( offset >= 0 ) {
+			size_t posn = this->codePosition();
+			if ( posn != offset ) {
+				throw Mishap( "Internal Error - offset sync error" ).culprit( "Next instruction", name ).culprit( "Offset", offset );
+			}
+		}
+		cerr << "Instruction: " << name << endl;
 	}
-	*/
 	#include "codegen.cpp.auto"
 	throw Mishap( "Unrecognised instruction name" ).culprit( "Name", name );
 }
@@ -2412,88 +2278,94 @@ void CodeGenClass::compileGnxSelfCall( Gnx mnx, LabelClass * contn ) {
 
 
 Ref CodeGenClass::calcConstant( Gnx mnx ) {
-	#ifdef DBG_CODEGEN
-		std::cout << "calcConstant: " << mnx->toString() << std::endl;
-	#endif
-	const string & type = mnx->attribute( GNX_CONSTANT_TYPE );
-	if ( type == "int" ) {
-		Maybe< long > v( mnx->maybeAttributeToLong( GNX_CONSTANT_VALUE ) );
-		if ( v.isValid() && canFitInSmall( v.fastValue() ) ) {
-			return LongToRef( v.fastValue() );
-		} else {
-			return this->vm->heap().copyBigInt( mnx->attribute( GNX_CONSTANT_VALUE ).c_str() );
-		}
-	} else if ( type == "bool" ) {
-		return mnx->hasAttribute( GNX_CONSTANT_VALUE, "false" ) ? SYS_FALSE : SYS_TRUE;
-	} else if ( type == "absent" ) {
-		return SYS_ABSENT;
-	} else if ( type == "termin" ) {
-		return SYS_TERMIN;
-	} else if ( type == "undefined" ) {
-		return SYS_UNDEFINED;
-	} else if ( type == "indeterminate" ) {
-		return SYS_INDETERMINATE;
-	} else if ( type == "char" ) {
-		const string & s = mnx->attribute( GNX_CONSTANT_VALUE );
-		if ( not s.empty() ) {
-			return CharToCharacter( s[ 0 ] );
-		} else {
-			throw SystemError( "Invalid character string" );
-		}
-	} else if ( type == "string" ) {
-		return this->vm->heap().copyString( mnx->attribute( GNX_CONSTANT_VALUE ).c_str() );
-	} else if ( type == "double" ) {
-		gngdouble_t d;
-		const std::string& numtext( mnx->attribute( GNX_CONSTANT_VALUE ) );
-		if ( numtext == "infinity" || numtext == "+infinity" || numtext == "inf" ) {
-			return this->vm->heap().copyDouble( 1.0 / 0.0 );
-		} else if ( numtext == "-infinity" || numtext == "-inf" ) {
-			return this->vm->heap().copyDouble( -1.0 / 0.0 );
-		} else if ( numtext == "nullity" || numtext == "nan" ) {
-			return this->vm->heap().copyDouble( 0.0 / 0.0 );
-		} else {
-			std::istringstream i( numtext );
-			if ( not ( i >> d ) ) {
-				throw Ginger::Mishap( "Format of double precision number incorrect" ).culprit( "Number", numtext );
+	if ( mnx->hasName( GNX_CONSTANT ) ) {
+		#ifdef DBG_CODEGEN
+			std::cout << "calcConstant: " << mnx->toString() << std::endl;
+		#endif
+		const string & type = mnx->attribute( GNX_CONSTANT_TYPE );
+		if ( type == "int" ) {
+			Maybe< long > v( mnx->maybeAttributeToLong( GNX_CONSTANT_VALUE ) );
+			if ( v.isValid() && canFitInSmall( v.fastValue() ) ) {
+				return LongToRef( v.fastValue() );
 			} else {
-				char c;
-				if ( i >> c && c == '%' ) {
-					d *= 0.01;
-				}
-				return this->vm->heap().copyDouble( d );
+				return this->vm->heap().copyBigInt( mnx->attribute( GNX_CONSTANT_VALUE ).c_str() );
 			}
-		}
-	} else if ( type == "symbol" ) {
-		return refMakeSymbol( mnx->attribute( GNX_CONSTANT_VALUE ) );
-	} else if ( type == GNX_SYSFN and mnx->hasAttribute( GNX_SYSFN_VALUE ) ) {
-		Ref r = makeSysFn( this, mnx->attribute( GNX_SYSFN_VALUE ), SYS_UNDEFINED );
-		if ( r == SYS_UNDEFINED ) {
-			throw Ginger::Mishap( "No such system function" ).culprit( "Function", mnx->attribute( GNX_SYSFN_VALUE ) );
-		}
-		return r;
-	} else if ( type == "sysclass" ) {
-		/*
-		<constant type="sysclass" value="Absent"/>          ### class for absent
-		<constant type="sysclass" value="Bool"/>            ### class for true & false
-		<constant type="sysclass" value="Small"/>        	### class for 'small' integers
-		<constant type="sysclass" value="Float"/>           ### class for floats
-		<constant type="sysclass" value="String"/>          ### class for strings
-		<constant type="sysclass" value="Char"/>            ### class for characters
-		<constant type="sysclass" value="Nil"/>             ### class for nil
-		<constant type="sysclass" value="Pair"/>            ### class for list pairs
-		<constant type="sysclass" value="Vector"/>          ### class for vectors
-		<constant type="sysclass" value="Class"/>           ### class for classes
-		*/
-		const std::string cname( mnx->attribute( GNX_CONSTANT_VALUE ) );
-		Ref r = nameToKey( cname );
-		if ( r != SYS_ABSENT ) {
+		} else if ( type == "bool" ) {
+			return mnx->hasAttribute( GNX_CONSTANT_VALUE, "false" ) ? SYS_FALSE : SYS_TRUE;
+		} else if ( type == "absent" ) {
+			return SYS_ABSENT;
+		} else if ( type == "termin" ) {
+			return SYS_TERMIN;
+		} else if ( type == "undefined" ) {
+			return SYS_UNDEFINED;
+		} else if ( type == "indeterminate" ) {
+			return SYS_INDETERMINATE;
+		} else if ( type == "char" ) {
+			const string & s = mnx->attribute( GNX_CONSTANT_VALUE );
+			if ( not s.empty() ) {
+				return CharToCharacter( s[ 0 ] );
+			} else {
+				throw SystemError( "Invalid character string" );
+			}
+		} else if ( type == "string" ) {
+			return this->vm->heap().copyString( mnx->attribute( GNX_CONSTANT_VALUE ).c_str() );
+		} else if ( type == "double" ) {
+			gngdouble_t d;
+			const std::string& numtext( mnx->attribute( GNX_CONSTANT_VALUE ) );
+			if ( numtext == "infinity" || numtext == "+infinity" || numtext == "inf" ) {
+				return this->vm->heap().copyDouble( 1.0 / 0.0 );
+			} else if ( numtext == "-infinity" || numtext == "-inf" ) {
+				return this->vm->heap().copyDouble( -1.0 / 0.0 );
+			} else if ( numtext == "nullity" || numtext == "nan" ) {
+				return this->vm->heap().copyDouble( 0.0 / 0.0 );
+			} else {
+				std::istringstream i( numtext );
+				if ( not ( i >> d ) ) {
+					throw Ginger::Mishap( "Format of double precision number incorrect" ).culprit( "Number", numtext );
+				} else {
+					char c;
+					if ( i >> c && c == '%' ) {
+						d *= 0.01;
+					}
+					return this->vm->heap().copyDouble( d );
+				}
+			}
+		} else if ( type == "symbol" ) {
+			return refMakeSymbol( mnx->attribute( GNX_CONSTANT_VALUE ) );
+		} else if ( type == GNX_SYSFN and mnx->hasAttribute( GNX_SYSFN_VALUE ) ) {
+			Ref r = makeSysFn( this, mnx->attribute( GNX_SYSFN_VALUE ), SYS_UNDEFINED );
+			if ( r == SYS_UNDEFINED ) {
+				throw Ginger::Mishap( "No such system function" ).culprit( "Function", mnx->attribute( GNX_SYSFN_VALUE ) );
+			}
 			return r;
+		} else if ( type == "sysclass" ) {
+			/*
+			<constant type="sysclass" value="Absent"/>          ### class for absent
+			<constant type="sysclass" value="Bool"/>            ### class for true & false
+			<constant type="sysclass" value="Small"/>        	### class for 'small' integers
+			<constant type="sysclass" value="Float"/>           ### class for floats
+			<constant type="sysclass" value="String"/>          ### class for strings
+			<constant type="sysclass" value="Char"/>            ### class for characters
+			<constant type="sysclass" value="Nil"/>             ### class for nil
+			<constant type="sysclass" value="Pair"/>            ### class for list pairs
+			<constant type="sysclass" value="Vector"/>          ### class for vectors
+			<constant type="sysclass" value="Class"/>           ### class for classes
+			*/
+			const std::string cname( mnx->attribute( GNX_CONSTANT_VALUE ) );
+			Ref r = nameToKey( cname );
+			if ( r != SYS_ABSENT ) {
+				return r;
+			} else {
+				//	TODO: Function keys - not as easy as the documentation makes out.
+				//	TODO: Map keys - same deal
+				//			<sysclass value="Fn"/>              ### class for function objects
+				throw SystemError( "System class not recognised" ).culprit( "Expression", mnx->toString() );
+			}
 		} else {
-			//	TODO: Function keys - not as easy as the documentation makes out.
-			//	TODO: Map keys - same deal
-			//			<sysclass value="Fn"/>              ### class for function objects
-			throw SystemError( "System class not recognised" ).culprit( "Expression", mnx->toString() );
+			throw SystemError( "System constant not recognised" ).culprit( "Expression", mnx->toString() );
 		}
+	} else if ( mnx->hasName( GNX_FN_CODE ) ) {
+		return this->compileGnxFnCodeStandalone( mnx );
 	} else {
 		throw SystemError( "System constant not recognised" ).culprit( "Expression", mnx->toString() );
 	}
@@ -2503,17 +2375,7 @@ void CodeGenClass::compileGnxConstant( Gnx mnx, LabelClass * contn ) {
 	this->vmiPUSHQ( this->calcConstant( mnx ), contn );
 }
 
-static void throwProblem( Gnx mnx ) {
-	Ginger::Mishap mishap( mnx->attribute( GNX_PROBLEM_MESSAGE ), mnx->attribute( GNX_PROBLEM_CATEGORY, "S" ) );
-	MnxChildIterator mnxit( mnx );
-	while ( mnxit.hasNext() ) {
-		Gnx & culprit = mnxit.next();
-		if ( culprit->hasName( GNX_CULPRIT ) && culprit->hasAttribute( GNX_CULPRIT_NAME ) && culprit->hasAttribute( GNX_CULPRIT_VALUE ) ) {
-			mishap.culprit( culprit->attribute( GNX_CULPRIT_NAME ), culprit->attribute( GNX_CULPRIT_VALUE ) );
-		}
-	}
-	throw mishap;
-}
+
 
 /**
 	Boolean test, bool_vs_abs == true

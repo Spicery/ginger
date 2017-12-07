@@ -36,6 +36,7 @@ private:
 private:
 	static int level;
 
+	void declareGlobals( shared< Ginger::Mnx > mnx );
 	Ref compileTopLevel( shared< Ginger::Mnx > gnx );
 
 

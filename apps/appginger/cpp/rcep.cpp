@@ -23,6 +23,7 @@
 
 #include <setjmp.h>
 #include <time.h>
+#include <assert.h>
 
 #include "debug.hpp"
 
@@ -80,18 +81,8 @@ int RCEP::level = 0;
 
 void RCEP::execGnx( shared< Ginger::Mnx > mnx, std::ostream & output ) {
 	Machine vm = this->getMachine();
-    CodeGen codegen;
-    Ref r;
-    
 	try {
-	    codegen = vm->codegen();
-	    codegen->vmiFUNCTION( "Top Level Loop", 0, 0 );
-	    codegen->vmiENTER();
-	    LabelClass retn( codegen, true );
-        codegen->compileGnx( mnx, &retn );
-        retn.labelSet();
-	    codegen->vmiRETURN();				//	TODO: We might be able to eliminate this.
-	    r = codegen->vmiENDFUNCTION();
+	    Ref r = this->compileTopLevel( mnx );
 	    vm->addToQueue( r );
 	    if ( this->isTopLevel() ) {
         	#ifdef DBG_RCEP
@@ -109,15 +100,12 @@ void RCEP::execGnx( shared< Ginger::Mnx > mnx, std::ostream & output ) {
     output.flush();
 }
 
-
 Ref RCEP::compileTopLevel( shared< Ginger::Mnx > mnx ) {
 	Machine vm = this->getMachine();
     CodeGen codegen = vm->codegen();
 	if ( vm->getAppContext().getFn2Code() ) {
 	    MnxBuilder b;
-	    b.start( GNX_FN );
-	    b.start( GNX_SEQ );
-	    b.end();
+	    b.start( "top.level" );
 	    b.add( mnx );
 	    b.end();
 	    shared< Mnx > top_level = b.build();
@@ -125,25 +113,28 @@ Ref RCEP::compileTopLevel( shared< Ginger::Mnx > mnx ) {
 		top_level = simplifier.simplify( top_level );
 		Compile compiler( vm->getAppContext() );
 		top_level = compiler.compile( top_level );
-		if ( top_level->name() == GNX_FN_CODE ) {
-			return codegen->compileGnxFnCodeStandalone( top_level );
+		shared< Mnx > declarations = top_level->getChild( 0 );
+		for ( shared< Mnx > v : *declarations ) {
+			Ginger::VIdent vid( codegen, v );
 		}
+		shared< Mnx > fn2 = top_level->getChild( 1 );
+		return codegen->compileGnxFnCodeStandalone( fn2 );
+	} else {
+		//	Fallback code in case the prototype compiler went wrong.
+		Simplify simplifier( vm->getAppContext(), this->currentPackage() );
+		mnx = simplifier.simplify( mnx );
+		if ( vm->getAppContext().getFn2Code() ) {
+	 		Compile compiler( vm->getAppContext() );
+			mnx = compiler.compile( mnx );
+		}
+	    codegen->vmiFUNCTION( "Top level loop", 0, 0 );
+	    codegen->vmiENTER();
+	    LabelClass retn( codegen, true );
+	    codegen->compileGnx( mnx, &retn );
+	    retn.labelSet();
+	    codegen->vmiRETURN();				//	TODO: We might be able to eliminate this.
+		return codegen->vmiENDFUNCTION();
 	}
-
-	//	Fallback code in case the prototype compiler went wrong.
-	Simplify simplifier( vm->getAppContext(), this->currentPackage() );
-	mnx = simplifier.simplify( mnx );
-	if ( vm->getAppContext().getFn2Code() ) {
- 		Compile compiler( vm->getAppContext() );
-		mnx = compiler.compile( mnx );
-	}
-    codegen->vmiFUNCTION( "Top level loop", 0, 0 );
-    codegen->vmiENTER();
-    LabelClass retn( codegen, true );
-    codegen->compileGnx( mnx, &retn );
-    retn.labelSet();
-    codegen->vmiRETURN();				//	TODO: We might be able to eliminate this.
-	return codegen->vmiENDFUNCTION();
 }
 
 bool RCEP::mainloop( MnxRepeater & mnxrep, std::ostream & output ) {

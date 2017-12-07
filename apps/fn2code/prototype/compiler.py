@@ -1,9 +1,99 @@
+import sys
+import abc
 from abc import abstractmethod
 from minxml import MinXML
 from label import Label
 from arity import Arity
-import sys
-import abc
+import backend
+import problem
+
+class Ident:
+    
+    @staticmethod
+    def newIdent( var_expr, mini_compiler ):
+        if var_expr.hasAttributeValue( "scope", "local" ):
+            return LocalIdent( var_expr, mini_compiler )
+        elif var_expr.hasAttributeValue( "scope", "global" ):
+            return GlobalIdent( var_expr, mini_compiler )
+        else:
+            raise Exception( 'Internal error' )
+
+    def allocate( self ):
+        return self
+
+    def deallocate( self ):
+        pass
+
+    @abc.abstractmethod
+    def plantPop( self ):
+        pass
+
+    @abc.abstractmethod
+    def plantPush( self ):
+        pass
+
+    @abc.abstractmethod
+    def plantIncrLocalBy1( self ):
+        pass
+
+    @abc.abstractmethod
+    def plantLTE_SS( self, slot, ifso ):
+        pass
+
+class LocalIdent( Ident ):
+
+    def __init__( self, var_expr, mini_compiler ):
+        self._var_expr = var_expr
+        self._mini_compiler = mini_compiler
+        self._slot = self._mini_compiler.allocateSlot( self._var_expr )
+
+    def deallocate( self ):
+        return self._mini_compiler.deallocateSlot( self._slot )
+
+    def plantPop( self ):
+        self._mini_compiler.plant( "pop.local", local=str( self._slot ) )
+
+    def plantPush( self ):
+        self._mini_compiler.plant( "push.local", local=str( self._slot ) )
+
+    def plantIncrBy1( self ):
+        self._mini_compiler.plant( "incr.local.by1", local=str( self._slot ) )
+
+    def plantLTE_SS( self, other_slot, ifso ):
+        self._mini_compiler.plant( "lte.ss", local0=str( self._slot ), local1=str( other_slot ), to_label=ifso.id() )
+
+def TmpIdent( LocalIdent ):
+
+    def __init__( self, slot, mini_compiler ):
+        # TODO: should almost certainly pass in the title.
+        self._var_expr = None
+        self._mini_compiler = mini_compiler
+        self._slot = slot
+
+class GlobalIdent( Ident ):
+
+    def __init__( self, var_expr, mini_compiler ):
+        self._var = var_expr
+        self._mini_compiler = mini_compiler
+
+    def plantPop( self ):
+        self._mini_compiler.plant( "pop.global", **self._var.attributes )
+
+    def plantPush( self ):
+        self._mini_compiler.plant( "push.global", **self._var.attributes )
+
+    def plantIncrBy1( self ):
+        self.plantPush()
+        self._mini_compiler.plant( "incr" )
+        self.plantPop()
+
+    def plantLTE_SS( self, other_slot, ifso ):
+        tmp0 = self._mini_compiler.newTmpVar( 'tmpswap' )
+        self.plantPush()
+        self._mini_compiler.plant( "pop.local", local=str( tmp0 ) )
+        self._mini_compiler.plant( "lte.ss", local0=str( tmp0 ), local1=str( other_slot ), to_label=ifso.id() )
+        self._mini_compiler.deallocateSlot( tmp0 )
+
 
 class SlotAllocations:
     '''Stuff to track the way variables are allocated to slots.'''
@@ -98,6 +188,12 @@ class MiniCompiler:
         if label == Label.CONTINUE:
             raise Exception( 'Cannot set label CONTINUE' )
         self.plant( "seq", label=label.id() )
+
+    def newIdent( self, var_expr ):
+        return Ident.newIdent( var_expr, self )
+
+    def newTmpIdent( self, title ):
+        return TmpIdent( self.newTmpVar( title ), self )
 
     def newTmpVar( self, title ):
         return self.allocations.newTmpVar( title )
@@ -221,6 +317,9 @@ def RegisteredMiniCompiler( element_name ):
         return func
     return sub_compiler_decorator
 
+def throwProblem( problem_expr ):
+    raise problem.ProblemException( problem=problem_expr )
+
 class ExprCompiler( MiniCompiler ):
     '''
     Compiles a general expression by handing off to 
@@ -234,7 +333,10 @@ class ExprCompiler( MiniCompiler ):
         try:
             SUB_COMPILER_INDEX[ expr.getName() ]( share=self )( expr, contn_label )
         except KeyError:
-            raise Exception( "To be implemented: " + expr.getName() )
+            if expr.getName() == "problem":
+                throwProblem( expr )
+            else:
+                raise Exception( "To be implemented: " + expr.getName() )
 
 class SingleValueCompiler( MiniCompiler ):
     '''Compiles a general expression but ensures it generates a single
@@ -262,7 +364,7 @@ class DeterministicUpdateCompiler( MiniCompiler ):
     '''
 
     def compile( self, expr, contn_label ):
-        if expr.hasName( "id" ):
+        if expr.hasName( "id" ) or expr.hasName( "var" ):
             if expr.has( "scope", "local" ):
                 self.plant( "pop.local", local=expr.get( "slot" ) ) 
             else:
@@ -271,9 +373,34 @@ class DeterministicUpdateCompiler( MiniCompiler ):
             for i in reversed( range( 0, len( expr ) ) ):
                 DeterministicUpdateCompiler( share=self ).compile( expr[ i ], Label.CONTINUE )
         else:
-            raise Exception( "Assignment is not fully implemented yet" )
+            raise Exception( "Assignment is not fully implemented yet: {}".format( expr.name ) )
         self.plantGoto( contn_label )
 
+
+@RegisteredMiniCompiler( "fn" )
+class FnCompiler( MiniCompiler ):
+
+    @staticmethod
+    def enterInstruction( nargs ):
+        if nargs == "0":
+            return MinXML( "enter0" )
+        elif nargs == "1":
+            return MinXML( "enter1" )
+        else:
+            return MinXML( "enter" )
+
+    def compile( self, fn, contn_label ):
+        '''Applies the compiler to a <fn> element'''
+        args = fn[0]
+        body = fn[1]
+        nargs = int( fn.get( "args.count" ) )
+        nlocals = int( fn.get( "locals.count" ) )
+        fn2 = MinXML( "fn.code", **fn.attributes )
+        ( cbody, max_slots ) = compile( body, nargs, nlocals )
+        fn2.children = backend.backEnd( [ self.enterInstruction( nlocals ), *cbody.getChildren() ] )
+        fn2.put( "locals.count", str( max_slots ) )
+        self.plant( "pushq", fn2 )
+        self.plantGoto( contn_label )
 
 @RegisteredMiniCompiler( "seq" )
 class SeqCompiler( MiniCompiler ):
@@ -638,7 +765,8 @@ class FromQueryCompiler( QueryCompiler ):
 
     def compileLoopDeclarations( self, query ):
         '''Hand-waving allocation of slot to the variable'''
-        self.loop_var_slot = self.allocateSlot( query[0] )
+        # self.loop_var_slot = self.allocateSlot( query[0] )
+        self.loop_var_ident = self.newIdent( query[0] ).allocate()
         self.end_value_slot = self.newTmpVar( 'from_end_value' )
 
     def compileLoopInit( self, query, contn=Label.CONTINUE ):
@@ -646,14 +774,15 @@ class FromQueryCompiler( QueryCompiler ):
         that there's always 4 arguments: loop variable, start, by & end.
         '''
         SingleValueCompiler( share=self )( query[1], Label.CONTINUE )
-        self.plant( "pop.local", local=str(self.loop_var_slot) )            
+        # self.plant( "pop.local", local=str(self.loop_var_slot) )
+        self.loop_var_ident.plantPop()
         SingleValueCompiler( share=self )( query[3], Label.CONTINUE )
         self.plant( "pop.local", local=str(self.end_value_slot) )
         self.plantGoto( contn )
 
     def compileLoopTest( self, query, ifso=Label.CONTINUE, ifnot=Label.CONTINUE ):
         if not ifso is Label.CONTINUE:
-            self.plant( "lte.ss", local0=str( self.loop_var_slot ), local1=str( self.end_value_slot ), to_label=ifso.id() )
+            self.loop_var_ident.plantLTE_SS( self.end_value_slot, ifso )
             self.plantGoto( ifnot )
         else:
             raise Exception( "Not implemented yet" )
@@ -662,14 +791,14 @@ class FromQueryCompiler( QueryCompiler ):
         self.plantGoto( contn )
 
     def compileLoopNext( self, query, contn=Label.CONTINUE ):
-        self.plant( "incr.local.by", local=str( self.loop_var_slot ), by="1" )
+        self.loop_var_ident.plantIncrBy1()
         self.plantGoto( contn )
 
     def compileLoopFini( self, query, contn=Label.CONTINUE ):
         self.plantGoto( contn )
 
     def compileLoopTeardown( self ):
-        self.deallocateSlot( self.loop_var_slot )  
+        self.loop_var_ident.deallocate()  
 
 # This is the terminating value that indicates the end of a stream.
 TERMIN = MinXML( "constant", type="termin", value="termin" )

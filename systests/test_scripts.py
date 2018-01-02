@@ -2,11 +2,19 @@ import os
 import re
 import glob
 import subprocess
+import sys
 
 def runtest( in_file_name ):
     out_file_name = re.sub( r'\.in.sh$', '.out.txt', in_file_name )
     res = subprocess.getoutput( "{0}".format( in_file_name ) )
-    assert res.strip() == open( out_file_name ).read().strip()
+    expected = open( out_file_name ).read().strip()
+    actual = res.strip()
+    if expected != actual:
+    	print( '-- Expected --', file=sys.stderr )
+    	print( expected , file=sys.stderr)
+    	print( '-- Actual --', file=sys.stderr )
+    	print( actual, file=sys.stderr )
+    assert expected == actual
 
 def test_examples():
     for in_file_name in glob.glob( "scripts/*.in.sh" ):

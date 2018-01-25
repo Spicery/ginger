@@ -64,6 +64,8 @@ class MinXML:
 
 	@children.setter
 	def children( self, kids ):
+		# TODO: My concern about the setter is that it implements store sharing & that 
+		# limits possible implementations. Consider self._attributes = kids.copy()
 		self._children = kids
 
 	def getChildren( self ):
@@ -77,6 +79,8 @@ class MinXML:
 
 	@attributes.setter
 	def attributes( self, a ):
+		# TODO: My concern about the setter is that it implements store sharing & that 
+		# limits possible implementations. Consider self._attributes = a.copy()
 		self._attributes = a
 
 	def getAttributes( self ):
@@ -84,7 +88,7 @@ class MinXML:
 		return self._attributes
 
 	def hasAttribute( self, key ):
-		'''Returns true if the element has attributes key.'''
+		'''Returns true if the element has attribute with key key.'''
 		return key in self._attributes
 
 	def hasAttributeValue( self, key, value ):
@@ -92,7 +96,7 @@ class MinXML:
 		return key in self._attributes and self._attributes[key] == value
 
 	def hasntAttribute( self, key ):
-		'''Returns true if the element doesn't have an attribute with key.'''
+		'''Returns true if the element doesn't have an attribute with key key.'''
 		return not( key in self._attributes )
 
 	def hasntAttributeValue( self, key, value ):
@@ -272,7 +276,7 @@ class MinXML:
 			return self._attributes[ key ]
 		except KeyError:
 			if otherwise == KeyError:
-				raise KeyError
+				raise KeyError( "Cannot find key", key )
 			return otherwise
 
 	def put( self, *key_values, **kwargs ):
@@ -280,7 +284,10 @@ class MinXML:
 		of even length, which are used to set the attributes of the element. If
 		keyword arguments are supplied, they are also used to set the key/value
 		pairs of the element. The intention is to give a lot of syntactic 
-		flexibility.'''
+		flexibility.
+
+		It returns itself to make method chaining more convenient.
+		'''
 		it = iter( key_values )
 		try:
 			while True:

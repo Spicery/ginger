@@ -100,6 +100,21 @@ void RCEP::execGnx( shared< Ginger::Mnx > mnx, std::ostream & output ) {
     output.flush();
 }
 
+//	TODO: REFACTOR - eliminate duplicate in codegen.cpp.
+static void throwIfProblem( Gnx mnx ) {
+	if ( mnx->hasName( GNX_PROBLEM ) ) {
+		Ginger::Mishap mishap( mnx->attribute( GNX_PROBLEM_MESSAGE ), mnx->attribute( GNX_PROBLEM_CATEGORY, "S" ) );
+		MnxChildIterator mnxit( mnx );
+		while ( mnxit.hasNext() ) {
+			Gnx & culprit = mnxit.next();
+			if ( culprit->hasName( GNX_CULPRIT ) && culprit->hasAttribute( GNX_CULPRIT_NAME ) && culprit->hasAttribute( GNX_CULPRIT_VALUE ) ) {
+				mishap.culprit( culprit->attribute( GNX_CULPRIT_NAME ), culprit->attribute( GNX_CULPRIT_VALUE ) );
+			}
+		}
+		throw mishap;
+	}
+}
+
 Ref RCEP::compileTopLevel( shared< Ginger::Mnx > mnx ) {
 	Machine vm = this->getMachine();
     CodeGen codegen = vm->codegen();
@@ -113,6 +128,7 @@ Ref RCEP::compileTopLevel( shared< Ginger::Mnx > mnx ) {
 		top_level = simplifier.simplify( top_level );
 		Compile compiler( vm->getAppContext() );
 		top_level = compiler.compile( top_level );
+		throwIfProblem( top_level );
 		shared< Mnx > declarations = top_level->getChild( 0 );
 		for ( shared< Mnx > v : *declarations ) {
 			Ginger::VIdent vid( codegen, v );

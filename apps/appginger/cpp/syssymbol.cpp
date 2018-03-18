@@ -35,9 +35,9 @@ using namespace std;
 	MAX_SERIAL = 2^( sizeof( unsigned long ) - TAGGG ) - 1
 */
 #define MAX_SERIAL_WIDTH ( sizeof( unsigned long ) - TAGGG )
-#define MAX_SERIAL ( (1 << MAX_SERIAL_WIDTH ) - 1 )
+#define MAX_SERIAL ( ( 1 << MAX_SERIAL_WIDTH ) - 1 )
 
-#define SymbolSerial( r ) 	( ToULong(r) >> LENGTH_OFFSET )
+#define SymbolSerial( r ) 	( ToULong(r) >> TAGGG )
 
 //	Converts std::strings to serial numbers.
 typedef std::map< const std::string, unsigned long > SYMTAB;
@@ -59,6 +59,7 @@ static unsigned long nextSerial() {
 		if ( available( next_serial ) ) return next_serial++ ;
 		if ( next_serial > MAX_SERIAL ) {
 			if ( resetted ) {
+				//	TODO: force a garbage collection before abandoning hope.
 				throw Ginger::Mishap( "Symbol table is full" );
 			} else { 
 				next_serial = 0;

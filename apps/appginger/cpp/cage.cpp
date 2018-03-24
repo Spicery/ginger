@@ -29,6 +29,10 @@
 #include "key.hpp"
 #include "mishap.hpp"
 #include "machine.hpp"
+#include "misclayout.hpp"
+
+
+#define RUNTIME_CHECK 1
 
 namespace Ginger {
 
@@ -183,6 +187,15 @@ Ref * XfrClass::makeRefRef() {
 	if ( this->origin == NULL ) {
 		throw std::runtime_error( "Origin was not set during copy" );
 	}
+
+	#ifdef RUNTIME_CHECK
+		unsigned long len = lengthAfterObjectKey( this->origin );
+		ptrdiff_t d = this->tmptop - this->origin;
+		if ( d != len + 1 ) {
+			throw Mishap( "Internal check failed" ).culprit( "delta", d ).culprit( "len", len );
+		}
+	#endif 
+
 	this->cage->top = this->tmptop;
 	//std::cout << "Origin = " << std::hex << (unsigned long)( *RefToPtr4( origin ) ) << std::dec << std::endl;
 	return this->origin;

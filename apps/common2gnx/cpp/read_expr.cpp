@@ -175,6 +175,17 @@ void ReadStateClass::checkToken( TokType fnc ) {
     }
 }
 
+void ReadStateClass::checkToken( TokType fnc1, TokType fnc2 ) {
+    Item it = this->item_factory->read();
+    if ( it->tok_type != fnc1 && it->tok_type != fnc2 ) {
+        Ginger::Mishap err = CompileTimeError( "Unexpected token" ).culprit( "Found", it->nameString() ).culprit( "Expected", tok_type_name( fnc1 ) ).culprit( "Or", tok_type_name( fnc2 ) );
+        if ( it->item_is_eof() ) {
+            throw UnexpectedEndOfInputError().cause( err );
+        }
+        throw err;
+    }
+}
+
 bool ReadStateClass::tryPeekToken( TokType fnc ) {
     Item it = this->item_factory->peek();
     return it->tok_type == fnc;
@@ -219,6 +230,16 @@ bool ReadStateClass::tryName( const char * name ) {
 bool ReadStateClass::tryToken( TokType fnc ) {
     ItemFactory ifact = this->item_factory;
     if ( ifact->peek()->tok_type == fnc ) {
+        ifact->drop();
+        return true;
+    } else {
+        return false;
+    }
+}
+
+bool ReadStateClass::tryToken( TokType fnc1, TokType fnc2 ) {
+    ItemFactory ifact = this->item_factory;
+    if ( ifact->peek()->tok_type == fnc1 || ifact->peek()->tok_type == fnc2 ) {
         ifact->drop();
         return true;
     } else {
@@ -316,10 +337,15 @@ Node ReadStateClass::readStmnts() {
     }
 }
 
-
 Node ReadStateClass::readStmntsCheck( TokType fnc ) {
     Node t = this->readStmnts();
     this->checkToken( fnc );
+    return t;
+}
+    
+Node ReadStateClass::readStmntsCheck( TokType fnc1, TokType fnc2 ) {
+    Node t = this->readStmnts();
+    this->checkToken( fnc1, fnc2 );
     return t;
 }
     
@@ -504,7 +530,7 @@ Node ReadStateClass::postfixProcessing( Node lhs, Item item, int prec ) {
                 node.start( Ginger::GNX_DO );
                 node.add( lhs );
                 Node do_stmnts = this->readCompoundStmnts();
-                if ( not this->tryToken( tokty_enddo ) ) {
+                if ( not this->tryToken( tokty_enddo, tokty_end ) ) {
                     this->checkPeekCloser();
                 }
                 node.add( do_stmnts );
@@ -652,11 +678,11 @@ Node ReadStateClass::readIf( TokType sense, TokType closer ) {
         predicate( sense, ifunless, pred );
         ifunless.add( then_part );
         Node x = this->readStmnts();
-        if ( not this->cstyle_mode ) this->checkToken( closer );
+        if ( not this->cstyle_mode ) this->checkToken( closer, tokty_end );
         ifunless.add( x );
         ifunless.end();
         return ifunless.build();
-    } else if ( this->cstyle_mode || this->tryToken( closer ) ) {
+    } else if ( this->cstyle_mode || this->tryToken( closer, tokty_end ) ) {
         NodeFactory ifunless;
         ifunless.start( Ginger::GNX_IF );
         predicate( sense, ifunless, pred );
@@ -714,7 +740,7 @@ Node ReadStateClass::readFor() {
         NodeFactory for_node;
         for_node.start( Ginger::GNX_FOR );
         for_node.add( query );
-        this->checkToken( tokty_endfor );
+        this->checkToken( tokty_endfor, tokty_end );
         for_node.end();
         return for_node.build();
     }
@@ -1050,7 +1076,7 @@ Node ReadStateClass::readLambda() {
     #endif
     if ( not this->cstyle_mode ) this->checkToken( tokty_fnarrow );
     Node body = this->readCompoundStmnts();
-    if ( not this->cstyle_mode ) this->checkToken( tokty_endfn );   
+    if ( not this->cstyle_mode ) this->checkToken( tokty_endfn, tokty_end );   
 
     Uncurry components( ap, body );
     components.uncurry();
@@ -1083,7 +1109,7 @@ Node ReadStateClass::readDefinition() {
 
     if ( not this->cstyle_mode ) this->checkToken( tokty_fnarrow );
     Node body0 = this->readCompoundStmnts();
-    if ( not this->cstyle_mode ) this->checkToken( tokty_enddefine );
+    if ( not this->cstyle_mode ) this->checkToken( tokty_enddefine, tokty_end );
     if ( this->cstyle_mode ) {
         this->is_postfix_allowed = false;
     }
@@ -1148,7 +1174,7 @@ Node ReadStateClass::readTry( const bool try_vs_transaction ) {
         ftry.end();
     }
 
-    this->checkToken( try_vs_transaction? tokty_endtry : tokty_endtransaction );
+    this->checkToken( try_vs_transaction? tokty_endtry : tokty_endtransaction, tokty_end );
     ftry.end();
     return ftry.build();
 }
@@ -1359,7 +1385,7 @@ Node ReadStateClass::readSwitch() {
                 break;
             }
         }
-        this->checkToken( tokty_endswitch );
+        this->checkToken( tokty_endswitch, tokty_end );
     }
 
     if ( else_seen ) {
@@ -1463,7 +1489,7 @@ Node ReadStateClass::readPackage() {
     string url = this->readPkgName();
     pkg.put( "url", url );
     this->checkToken( tokty_semi );
-    Node body = this->readStmntsCheck( tokty_endpackage );
+    Node body = this->readStmntsCheck( tokty_endpackage, tokty_end );
     pkg.add( body );
     pkg.end();
     return pkg.build();
@@ -1556,8 +1582,12 @@ Node ReadStateClass::readRecordClass() {
         slot_names.push_back( this->readIdName() );
         this->checkToken( tokty_semi );
     }
-    this->checkToken( this->cstyle_mode ? tokty_cbrace : tokty_endrecordclass );
-
+    if ( this->cstyle_mode ) {
+        this->checkToken( tokty_cbrace );
+    } else {
+        this->checkToken( tokty_endrecordclass, tokty_end );
+    }
+    
     NodeFactory f;
     f.start( Ginger::GNX_SEQ );
 

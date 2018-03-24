@@ -25,6 +25,7 @@ private:
 	Node prefixProcessingCore();
 	Node postfixProcessing( Node lhs, Item item, int prec );
 	Node readStmntsCheck( TokType fnc );
+	Node readStmntsCheck( TokType fnc1, TokType fnc2 );
 	Node readStmnts();
 	Node readCompoundStmnts();
 	Node readCompoundCore();
@@ -77,8 +78,10 @@ public:
 	Node readOptExprPrec( int prec );
 	Node readSingleStmnt( const bool top_level = false );
 	void checkToken( TokType fnc );
+	void checkToken( TokType fnc1, TokType fnc2 );
 	void checkPeekToken( TokType fnc );
 	bool tryToken( TokType fnc );
+	bool tryToken( TokType fnc1, TokType fnc2 );
 	bool tryPeekCloser();
 	void checkPeekCloser();
 	bool tryPeekToken( TokType fnc );

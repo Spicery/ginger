@@ -259,6 +259,7 @@ public:
 		//is_trapping_mishap( true ),
 		is_gctrace( false ),
 		use_stdin( false ),
+		use_fn2code( false ),
 		welcoming( true ),
 		interactive_package( INTERACTIVE_PACKAGE ),
 		user_settings( USER_SETTINGS_FILE )

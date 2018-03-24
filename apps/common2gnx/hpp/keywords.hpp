@@ -50,6 +50,7 @@
 #define KW_ELSE 					"else"
 #define KW_ELSEIF 					"elseif"
 #define KW_ELSEUNLESS 				"elseunless"
+#define KW_END                      "end"
 #define KW_END_ELEMENT				"</>"
 #define KW_ENDDEFINE 				"enddefine"
 #define KW_ENDDO                    "enddo"

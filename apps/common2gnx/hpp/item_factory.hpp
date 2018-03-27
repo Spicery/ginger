@@ -4,6 +4,8 @@
 #include <string>
 #include <list>
 #include <iostream>
+#include <utility>      // std::pair, std::make_pair
+
 
 //#include <stdio.h>
 
@@ -41,7 +43,7 @@ public:
 	
 private:
 	int trychar( int ch );
-	int eatsWhiteSpaceAndComments();
+	std::pair< int, bool > eatsWhiteSpaceAndComments();
 	void readAtEndOfFile();
 	void readAtDigitOrSign( int ch );
 	void readAtAlpha( int ch );

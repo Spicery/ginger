@@ -46,6 +46,7 @@ static struct option long_options[] =
         { "tokenise",		no_argument,			0, 'T' },
         { "version",        no_argument,            0, 'V' },
         { "nospan",         no_argument,            0, 's' },
+        { "break",          no_argument,            0, 'b' },
         { 0, 0, 0, 0 }
     };
 
@@ -54,12 +55,17 @@ static struct option long_options[] =
 void ToolMain::parseArgs( int argc, char **argv, char **envp ) {
 	this->gen_lnx = false;
 	this->use_stdin = true;
+	this->break_on_nl = false;
 
 	for(;;) {
 		int option_index = 0;
-		int c = getopt_long( argc, argv, "TH::L::Vs", long_options, &option_index );
+		int c = getopt_long( argc, argv, "TH::L::Vsb", long_options, &option_index );
 		if ( c == -1 ) break;
 		switch ( c ) {
+			case 'b': {
+				this->break_on_nl = true;
+				break;
+			}
 			case 'T': {
 				this->gen_lnx = true;
 				break;
@@ -76,6 +82,7 @@ void ToolMain::parseArgs( int argc, char **argv, char **envp ) {
 					cout << "-V, --version         print out version information and exit" << endl;
 					cout << "-L, --license[=PART]  print out license information and exit (see --help=license)" << endl;
 					cout << "-s, --nospan          suppress span attribution" << endl;
+					cout << "-b, --break           line breaks can break statements" << endl;
 					cout << endl;
 				} else if ( std::string( optarg ) == "help" ) {
 					cout << "--help=help           this short help" << endl;
@@ -185,7 +192,7 @@ void ToolMain::tokenise( FILE *in ) {
 
 void ToolMain::parse( FILE * in ) {
 	ItemFactoryClass ifact( in, this->cstyle );
-	ReadStateClass input( &ifact, not this->no_span );
+	ReadStateClass input( &ifact, not this->no_span, this->break_on_nl );
 	input.setCStyleMode( this->cstyle );
 	while ( not input.isAtEndOfInput() ) {
 		input.reset();

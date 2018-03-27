@@ -57,7 +57,7 @@ ItemMap::ItemMap( const bool cstyle ) {
 	add( true,	 	KW_COMMA, 			tokty_comma, 		BFo, 		prec_comma	);
 	add( cstyle,	KW_COLON,			tokty_colon,		Clo,		0 		);
 	add( !cstyle, 	KW_CROSS,			tokty_cross,		PoF,		prec_cross );
-	add( !cstyle, 	KW_SEMICOLON, 		tokty_semi, 		PoF, 		prec_semi	);
+	add( !cstyle, 	KW_SEMICOLON, 		tokty_semi, 		Clo, 		0	);
 	add( cstyle, 	KW_SEMICOLON, 		tokty_semi, 		Clo, 		0		);
 	add( !cstyle, 	KW_2_SEMICOLON,		tokty_dsemi,		PoF,		prec_semi	);
 	add( true,	 	KW_MAPLET_THIN, 	tokty_maplet, 		BSy, 		prec_arrow	);

@@ -16,6 +16,7 @@ public:
 	bool		pattern_mode;
 	bool		cstyle_mode;
 	bool		span_mode;
+	bool		break_on_nl;
 	
 private:
 	bool 		is_postfix_allowed;
@@ -77,9 +78,11 @@ public:
 	Node readOptEmptyExprCheck( TokType fnc );
 	Node readOptExprPrec( int prec );
 	Node readSingleStmnt( const bool top_level = false );
+	void checkSemiOrLineBreak();
 	void checkToken( TokType fnc );
 	void checkToken( TokType fnc1, TokType fnc2 );
 	void checkPeekToken( TokType fnc );
+	bool trySemiOrLineBreak();
 	bool tryToken( TokType fnc );
 	bool tryToken( TokType fnc1, TokType fnc2 );
 	bool tryPeekCloser();
@@ -87,14 +90,16 @@ public:
 	bool tryPeekToken( TokType fnc );
 	bool tryName( const char * name );
 	bool isAtEndOfInput();
+	bool tryAtLineBreak();
 
 	
 public:
-	ReadStateClass( ItemFactory ifact, bool span_mode ) :
+	ReadStateClass( ItemFactory ifact, bool span_mode, bool break_on_nl ) :
 		item_factory( ifact ),
 		pattern_mode( false ),
 		cstyle_mode( false ),
 		span_mode( span_mode ),
+		break_on_nl( break_on_nl ),
 		is_postfix_allowed( true )
 	{
 	}

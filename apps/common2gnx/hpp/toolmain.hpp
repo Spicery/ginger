@@ -24,9 +24,15 @@ private:
 	bool cstyle;
 	const char * app_title;
 	bool no_span;
+	bool break_on_nl;
 	
 public:
-	ToolMain( bool cstyle, const char * title ) : cstyle( cstyle ), app_title( title ), no_span( false ) {}
+	ToolMain( bool cstyle, const char * title ) : 
+		cstyle( cstyle ), 
+		app_title( title ), 
+		no_span( false ),
+		break_on_nl( false )
+	{}
 
 public:
 	std::string version() { return "0.2"; }

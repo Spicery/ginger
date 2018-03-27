@@ -18,6 +18,7 @@ public:
     Role 					role;			//	mandatory
     int 					precedence;
   	bool					is_name;
+  	bool					ate_newline;
     
 public:
 	std::string & 	nameString() { return this->name; }
@@ -28,7 +29,8 @@ public:
 		tok_type( f ),
 		role( r ),
 		precedence( p ),
-		is_name( false )
+		is_name( false ),
+		ate_newline( false )
 	{
 	}
 	
@@ -36,11 +38,15 @@ public:
 		name( "" ),
 		tok_type( tokty___default ),
 		role( PrefixRole ),
-		precedence( 0 )
+		precedence( 0 ),
+		is_name( false ),
+		ate_newline( false )
 	{
 	}
 
 public:
+	void setAteLineBreak( bool x ) { this->ate_newline = x; }
+	bool ateLineBreak() { return this->ate_newline; }
 	bool item_is_neg_num();
 	bool item_is_signed_num();
 	int item_int();

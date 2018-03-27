@@ -132,29 +132,35 @@ bool isSignCharType( const char ch ) {
 	return charType( ch ) == SignCharType;
 }
 
-int ItemFactoryClass::eatsWhiteSpaceAndComments() {
-	int ch;
+std::pair< int, bool > ItemFactoryClass::eatsWhiteSpaceAndComments() {
+    int ch;
+    bool line_break = false;
     for(;;) {
         ch = this->nextchar();
-        if ( isspace( ch ) ) continue;
+        if ( isspace( ch ) ) {
+            if ( ch == '\n' or ch == '\r' ) {
+                line_break = true;
+            }
+            continue;
+        }
         if ( ch == '#' || ( this->cstyle_mode && ch == '/' && this->trychar( '/' ) ) ) {
             do
                 ch = this->nextchar();
             while ( ch != '\n' && ch != '\r' );
         } else if ( ch == '/' && this->cstyle_mode && this->trychar( '*' ) ) {
-        	this->nextchar();
-        	for (;;) {
-        		ch = this->nextchar();
-        		if ( ch == '*' && this->trychar( '/' ) ) {
-        			this->nextchar();
-        			break;
-        		}
-        	}
+            this->nextchar();
+            for (;;) {
+                ch = this->nextchar();
+                if ( ch == '*' && this->trychar( '/' ) ) {
+                    this->nextchar();
+                    break;
+                }
+            }
         } else {
-	        break;
-	    }
+            break;
+        }
     }
-    return ch;
+    return std::make_pair( ch, line_break );
 }
 
 void ItemFactoryClass::readAtEndOfFile() {
@@ -399,7 +405,8 @@ Item ItemFactoryClass::read() {
         return this->item;
     }
 
-	int ch = this->eatsWhiteSpaceAndComments();
+	std::pair< int, bool > ch_linebreak = this->eatsWhiteSpaceAndComments();
+    int ch = ch_linebreak.first;
     this->text.clear();
 
     if ( ch == EOF ) {
@@ -435,6 +442,10 @@ Item ItemFactoryClass::read() {
 				throw "Invalid character (%c)"; //  ch );
     	}
 	}
+    if ( this->item != nullptr ) {
+        const bool linebreak = ch_linebreak.second;
+        this->item->setAteLineBreak( linebreak );
+    }
     return this->item;
 }
 

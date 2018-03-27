@@ -177,13 +177,19 @@ void ReadStateClass::checkToken( TokType fnc ) {
 
 void ReadStateClass::checkToken( TokType fnc1, TokType fnc2 ) {
     Item it = this->item_factory->read();
-    if ( it->tok_type != fnc1 && it->tok_type != fnc2 ) {
-        Ginger::Mishap err = CompileTimeError( "Unexpected token" ).culprit( "Found", it->nameString() ).culprit( "Expected", tok_type_name( fnc1 ) ).culprit( "Or", tok_type_name( fnc2 ) );
+    if ( it->tok_type != fnc1 and it->tok_type != fnc2 ) {
+        Ginger::Mishap err = CompileTimeError( "Unexpected token" ).culprit( "Found", it->nameString() ).culprit( "Expected", tok_type_name( fnc1 ) ).culprit( "Or expected", tok_type_name( fnc2 ) );
         if ( it->item_is_eof() ) {
             throw UnexpectedEndOfInputError().cause( err );
         }
         throw err;
     }
+}
+
+void ReadStateClass::checkSemiOrLineBreak() {
+    if ( this->tryToken( tokty_semi ) ) return;
+    if ( this->break_on_nl and this->tryAtLineBreak() ) return;
+    this->checkToken( tokty_semi );
 }
 
 bool ReadStateClass::tryPeekToken( TokType fnc ) {
@@ -225,6 +231,22 @@ bool ReadStateClass::tryName( const char * name ) {
     } else {
         return false;
     }
+}
+
+bool ReadStateClass::trySemiOrLineBreak() {
+    if ( this->tryToken( tokty_semi ) ) return true;
+    return this->tryAtLineBreak();
+}
+
+bool ReadStateClass::tryAtLineBreak() {
+    if ( not this->break_on_nl ) return false;
+    ItemFactory ifact = this->item_factory;
+    Item item = ifact->peek();
+    if ( item->ateLineBreak() ) {
+        item->setAteLineBreak( false );
+        return true;
+    }
+    return false;
 }
 
 bool ReadStateClass::tryToken( TokType fnc ) {
@@ -309,14 +331,14 @@ Node ReadStateClass::readSingleStmnt( const bool top_level ) {
     
     //  Fall thru!
     Node n = this->readOptEmptyExpr();
-    if ( this->tryToken( tokty_dsemi ) ) {
+    if ( this->trySemiOrLineBreak() ) {
+        return n;
+    } else if ( this->tryToken( tokty_dsemi ) ) {
         NodeFactory f;
         f.start( Ginger::GNX_ERASE );
         f.add( n );
         f.end();
         return f.build();
-    } else if ( this->tryToken( tokty_semi ) ) {
-        return n;
     } else {
         if ( this->item_factory->peek()->role.IsCloser() && not top_level ) {
             return n;   
@@ -333,7 +355,28 @@ Node ReadStateClass::readStmnts() {
     if ( this->cstyle_mode ) {
         return this->readSingleStmnt();
     } else {
-        return this->readOptEmptyExprPrec( prec_max );
+        NodeFactory f;
+        f.start( Ginger::GNX_SEQ );
+        for (;;) {                
+            Node n = this->readOptEmptyExprPrec( prec_semi );
+            if ( not n ) break;
+            const bool nontrivial = not( n->isEmpty() and n->hasName( Ginger::GNX_SEQ ) );
+            if ( this->tryToken( tokty_dsemi ) ) {
+                if ( nontrivial ) {
+                    f.start( Ginger::GNX_ERASE );
+                    f.add( n );
+                    f.end();
+                }
+            } else if ( this->trySemiOrLineBreak() ) {
+                if ( nontrivial ) f.add( n );
+            } else {
+                if ( nontrivial ) f.add( n );
+                break;
+            }
+        }
+        f.end();
+        Node seq = f.build();
+        return seq->size() == 1 ? seq->getFirstChild() : seq;
     }
 }
 
@@ -578,21 +621,6 @@ Node ReadStateClass::postfixProcessing( Node lhs, Item item, int prec ) {
                 node.end();
                 return node.build();
             }
-            case tokty_dsemi:
-            case tokty_semi: {
-                Node rhs = this->readOptExprPrec( prec );
-                bool hasnt_rhs = not( rhs );
-                if ( fnc == tokty_semi && hasnt_rhs ) {
-                    return lhs;
-                } else {
-                    NodeFactory s;
-                    s.start( fnc == tokty_semi ? Ginger::GNX_SEQ : Ginger::GNX_ERASE );
-                    s.add( lhs );
-                    if ( not hasnt_rhs ) s.add( rhs );
-                    s.end();
-                    return s.build();
-                }
-            }
             case tokty_obracket: {
                 //  Indexing operator.
                 Node rhs = this->readStmntsCheck( tokty_cbracket );
@@ -646,6 +674,21 @@ Node ReadStateClass::postfixProcessing( Node lhs, Item item, int prec ) {
                 return t;
             }
             */
+            // case tokty_dsemi:
+            // case tokty_semi: {
+            //     Node rhs = this->readOptExprPrec( prec );
+            //     bool hasnt_rhs = not( rhs );
+            //     if ( fnc == tokty_semi && hasnt_rhs ) {
+            //         return lhs;
+            //     } else {
+            //         NodeFactory s;
+            //         s.start( fnc == tokty_semi ? Ginger::GNX_SEQ : Ginger::GNX_ERASE );
+            //         s.add( lhs );
+            //         if ( not hasnt_rhs ) s.add( rhs );
+            //         s.end();
+            //         return s.build();
+            //     }
+            // }
             default: {
                 throw SystemError( "This keyword not handled" ).culprit( "Keyword", item->nameString() );
             }
@@ -1483,12 +1526,13 @@ Node ReadStateClass::readDHat() {
     return maplet.build();
 }
 
+
 Node ReadStateClass::readPackage() {
     NodeFactory pkg;
     pkg.start( "package" );
     string url = this->readPkgName();
     pkg.put( "url", url );
-    this->checkToken( tokty_semi );
+    this->checkSemiOrLineBreak();
     Node body = this->readStmntsCheck( tokty_endpackage, tokty_end );
     pkg.add( body );
     pkg.end();
@@ -1580,7 +1624,7 @@ Node ReadStateClass::readRecordClass() {
     if ( this->cstyle_mode ) this->checkToken( tokty_obrace );
     while ( this->tryToken( tokty_slot ) ) {
         slot_names.push_back( this->readIdName() );
-        this->checkToken( tokty_semi );
+        this->checkSemiOrLineBreak();
     }
     if ( this->cstyle_mode ) {
         this->checkToken( tokty_cbrace );
@@ -1862,10 +1906,8 @@ Node ReadStateClass::readOptExprPrec( int prec ) {
     ItemFactory ifact = this->item_factory;
     Node e = this->prefixProcessing();
     if ( not e ) return Node();
-    //cerr << "starting postfix checking ... " << this->isPostfixAllowed() << endl;
     while ( this->isPostfixAllowed() ) {
         int q;
-        //cerr << "peeking" << endl;
         Item it = ifact->peek();
         if ( it->item_is_signed_num() ) {
             NodeFactory t;

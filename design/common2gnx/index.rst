@@ -8,6 +8,7 @@ Contents:
 .. toctree::
    :maxdepth: 2
 
+   break-mode
    arrows-in-common        
    cstyle                  
    dhat                    

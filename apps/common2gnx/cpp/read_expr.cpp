@@ -45,6 +45,36 @@ using namespace std;
 
 typedef Ginger::MnxBuilder NodeFactory;
 
+
+class SpanMarker {
+private:
+    ItemFactory ifact;
+    bool span_mode;
+    int start;
+
+public:
+    SpanMarker( ReadStateClass * reader ) {
+        this->ifact = reader->item_factory;
+        this->span_mode = reader->span_mode;
+        this->start = reader->item_factory->lineNumber();
+    }
+
+    void markSpan( Node node ) {
+        if ( node && this->span_mode && not node->hasAttribute( Ginger::GNX_SPAN ) ) {
+            const int end = this->ifact->lineNumber();
+            stringstream span;
+            span << start;
+            if ( start != end ) {
+                span << ";" << end;
+            }
+            string spanstr( span.str() );
+            string spanspan( Ginger::GNX_SPAN );
+            node->putAttribute( spanspan, spanstr );
+        }        
+    }
+};
+
+
 static Node makeApp( Node lhs, Node rhs ) {
     if ( lhs->name() == Ginger::GNX_SYSFN ) {
         NodeFactory sysapp;
@@ -1306,20 +1336,9 @@ Node ReadStateClass::readElement() {
 }
 
 Node ReadStateClass::prefixProcessing() {
-    ItemFactory ifact = this->item_factory;
-    const int start = ifact->lineNumber();
+    SpanMarker m( this );
     Node node = this->prefixProcessingCore();
-    if ( node && this->span_mode ) {
-        const int end = ifact->lineNumber();
-        stringstream span;
-        span << start;
-        if ( start != end ) {
-            span << ";" << end;
-        }
-        string spanstr( span.str() );
-        string spanspan( Ginger::GNX_SPAN );
-        node->putAttribute( spanspan, spanstr );
-    }
+    m.markSpan( node );
     return node;
 }
 
@@ -1925,7 +1944,7 @@ Node ReadStateClass::readOptExprPrec( int prec ) {
             t.end();
             e = t.build();
             ifact->drop();
-        } else if ( it->item_is_postfix() ) {
+        } else if ( it->item_is_postfix( this->break_on_nl ) ) {
             q = it->precedence;
             if ( q >= prec ) break;
             ifact->drop();

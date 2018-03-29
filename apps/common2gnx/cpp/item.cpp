@@ -5,7 +5,8 @@ bool ItemClass::item_is_prefix() {
     return this->role.IsPrefix();
 }
 
-bool ItemClass::item_is_postfix() {
+bool ItemClass::item_is_postfix( bool break_on_nl ) {
+	if ( this->role.IsBothfix() and break_on_nl and this->ate_newline ) return false;
     return this->role.IsPostfix();
 }
 

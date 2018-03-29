@@ -51,7 +51,7 @@ public:
 	bool item_is_signed_num();
 	int item_int();
 	bool item_is_prefix();
-	bool item_is_postfix();
+	bool item_is_postfix( bool break_on_nl );
 	bool item_is_anyfix();
 	bool item_is_binary();
 	bool item_is_name();

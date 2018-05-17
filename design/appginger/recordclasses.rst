@@ -1,0 +1,47 @@
+
+Example
+-------
+
+Input::
+
+    recordclass Foo
+        slot fooBar;
+    endrecordclass;
+
+Transforms into::
+
+    <seq span="1">
+        <bind>
+            <var name="Foo"/>
+            <sysapp name="newRecordClass">
+                <constant type="string" value="Foo"/>
+                <constant type="int" value="1"/>
+            </sysapp>
+        </bind>
+        <bind>
+            <var name="newFoo"/>
+            <sysapp name="newClassConstructor">
+                <id name="Foo"/>
+            </sysapp>
+        </bind>
+        <bind>
+            <var name="explodeFoo"/>
+            <sysapp name="newClassExploder">
+                <id name="Foo"/>
+            </sysapp>
+        </bind>
+        <bind>
+            <var name="isFoo"/>
+            <sysapp name="newClassRecogniser">
+                <id name="Foo"/>
+            </sysapp>
+        </bind>
+        <bind>
+            <var name="fooBar"/>
+            <sysapp name="newClassAccessor">
+                <id name="Foo"/>
+                <constant type="int" value="1"/>
+            </sysapp>
+        </bind>
+    </seq>
+

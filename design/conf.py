@@ -16,7 +16,7 @@
 import sys
 import os
 import shlex
-import cloud_sptheme as csp
+# import cloud_sptheme as csp
 
 
 # If extensions (or modules to document with autodoc) are in another directory,
@@ -123,7 +123,7 @@ html_theme_options = {}
 #html_theme_options = {"defaultcollapsed":True}
 
 # Add any paths that contain custom themes here, relative to this directory.
-html_theme_path = [csp.get_theme_dir()]
+html_theme_path = []
 
 # The name for this set of Sphinx documents.  If None, it defaults to
 # "<project> v<release> documentation".

@@ -57,7 +57,7 @@ static unsigned long nextSerial() {
 	bool resetted = false;
 	for (;;) {
 		if ( available( next_serial ) ) return next_serial++ ;
-		if ( next_serial > MAX_SERIAL ) {
+		if ( ++next_serial > MAX_SERIAL ) {
 			if ( resetted ) {
 				throw Ginger::Mishap( "Symbol table is full" );
 			} else { 

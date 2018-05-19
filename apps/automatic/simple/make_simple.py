@@ -54,7 +54,7 @@ class Layout:
 
 	def __init__( self, name ):
 		self._name = name
-		self._ordinal = Layout._count.next()
+		self._ordinal = Layout._count.__next__()
 		Layout._values.append( self )
 
 	def name( self ):
@@ -127,18 +127,18 @@ Kind.STRING_SUBLAYOUT 		= counterTo( Kind.ATOMIC_SUBLAYOUT )
 Kind.MIXED_SUBLAYOUT 		= counterTo( Kind.ATOMIC_SUBLAYOUT )
 Kind.WRECORD_SUBLAYOUT 		= counterTo( Kind.ATOMIC_SUBLAYOUT )
 
-Kind.KEYLESS_KIND 	= Kind( "KEYLESS", Layout.KEYLESS_LAYOUT, Kind.KEYLESS_SUBLAYOUT.next() )
-Kind.RECORD_KIND	= Kind( "RECORD", Layout.RECORD_LAYOUT, Kind.RECORD_SUBLAYOUT.next() )
-Kind.PAIR_KIND 		= Kind( "PAIR", Layout.RECORD_LAYOUT, Kind.RECORD_SUBLAYOUT.next() )
-Kind.MAP_KIND 		= Kind( "MAP", Layout.RECORD_LAYOUT, Kind.RECORD_SUBLAYOUT.next() )
-Kind.VECTOR_KIND 	= Kind( "VECTOR", Layout.VECTOR_LAYOUT, Kind.VECTOR_SUBLAYOUT.next() )
-Kind.STRING_KIND 	= Kind( "STRING", Layout.STRING_LAYOUT, Kind.STRING_SUBLAYOUT.next() )
-Kind.ATTR_KIND 		= Kind( "ATTR", Layout.MIXED_LAYOUT, Kind.MIXED_SUBLAYOUT.next() )
+Kind.KEYLESS_KIND 	= Kind( "KEYLESS", Layout.KEYLESS_LAYOUT, Kind.KEYLESS_SUBLAYOUT.__next__() )
+Kind.RECORD_KIND	= Kind( "RECORD", Layout.RECORD_LAYOUT, Kind.RECORD_SUBLAYOUT.__next__() )
+Kind.PAIR_KIND 		= Kind( "PAIR", Layout.RECORD_LAYOUT, Kind.RECORD_SUBLAYOUT.__next__() )
+Kind.MAP_KIND 		= Kind( "MAP", Layout.RECORD_LAYOUT, Kind.RECORD_SUBLAYOUT.__next__() )
+Kind.VECTOR_KIND 	= Kind( "VECTOR", Layout.VECTOR_LAYOUT, Kind.VECTOR_SUBLAYOUT.__next__() )
+Kind.STRING_KIND 	= Kind( "STRING", Layout.STRING_LAYOUT, Kind.STRING_SUBLAYOUT.__next__() )
+Kind.ATTR_KIND 		= Kind( "ATTR", Layout.MIXED_LAYOUT, Kind.MIXED_SUBLAYOUT.__next__() )
 #print "ATTR KIND", Kind.ATTR_KIND.kind()
-Kind.MIXED_KIND 	= Kind( "MIXED", Layout.MIXED_LAYOUT, Kind.MIXED_SUBLAYOUT.next() )	
+Kind.MIXED_KIND 	= Kind( "MIXED", Layout.MIXED_LAYOUT, Kind.MIXED_SUBLAYOUT.__next__() )	
 #print "MIXED KIND", Kind.MIXED_KIND.kind()
-Kind.WRECORD_KIND 	= Kind( "WRECORD", Layout.WRECORD_LAYOUT, Kind.WRECORD_SUBLAYOUT.next() )	
-Kind.EXTERNAL_KIND 	= Kind( "EXTERNAL", Layout.RECORD_LAYOUT, Kind.RECORD_SUBLAYOUT.next() )	
+Kind.WRECORD_KIND 	= Kind( "WRECORD", Layout.WRECORD_LAYOUT, Kind.WRECORD_SUBLAYOUT.__next__() )	
+Kind.EXTERNAL_KIND 	= Kind( "EXTERNAL", Layout.RECORD_LAYOUT, Kind.RECORD_SUBLAYOUT.__next__() )	
 Kind.ATOMIC_WRECORD_KIND = Kind( "ATOMIC_WRECORD", Layout.WRECORD_LAYOUT, Kind.ATOMIC_SUBLAYOUT )
 
 ################################################################################
@@ -176,7 +176,7 @@ class KeyData:
 #	first draft. (However it does mean that we should really amend the
 #	build script so that there's an initial 32/64 bit selection
 #	phase i.e. make all32 and make all64.
-wordsPerDouble = ( struct.calcsize( "d" ) + struct.calcsize( "P" ) - 1 ) / struct.calcsize( "P" )
+wordsPerDouble = ( struct.calcsize( "d" ) + struct.calcsize( "P" ) - 1 ) // struct.calcsize( "P" )
 
 keys = [
 	KeyData( "Absent", 			0, 	0, 	Kind.KEYLESS_KIND 	),

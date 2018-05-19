@@ -1,5 +1,5 @@
 all:
-	python3 make_simple3.py
+	python3 make_simple.py
 
 clean:
 	rm -f *.auto

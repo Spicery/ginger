@@ -1,5 +1,5 @@
 # http://travis-ci.org/#!/ghiggins/ginger
-dist: trusty
+dist: precise
 sudo: required
 language: C++
 # whitelist

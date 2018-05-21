@@ -1,5 +1,5 @@
 # http://travis-ci.org/#!/ghiggins/ginger
-dist: precise
+dist: trusty
 sudo: required
 language: C++
 # whitelist
@@ -16,8 +16,9 @@ before_install:
     - sudo apt-get -qq install guile-2.0
     - sudo apt-get -qq install libpcap-dev libssl-dev
     - sudo apt-get -qq install libgmp-dev
+    - sudo apt-get -qq install python3-pip
     - sudo pip3 install --upgrade pip
-    - sudo pip3 install nose2 
+    - sudo pip3 install nose2 --ignore-installed six
     - wget http://www.rudeserver.com/cgiparser/download/rudecgi-5.0.0.tar.bz2
     - tar jxf rudecgi-5.0.0.tar.bz2
     - pushd rudecgi-5.0.0

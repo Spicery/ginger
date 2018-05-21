@@ -13,9 +13,9 @@ Stats
     Width = 3
     
 Unchecked Precondition
-    *   INVOKE only works as the 1st instruction of a function.
-        It uses -ve offsets to access the fields before the key.
-    *   There are VMCOUNT + 1 values on the stack.
+    *   INVOKE only works as the 1st instruction of a lite function.
+    *   It uses -ve offsets to access the fields before the key.
+    *   There will be VMCOUNT + 1 values on the stack.
     
 Exceptions (Checked Preconditions)
     Arity mismatch.
@@ -34,9 +34,6 @@ if ( VMCOUNT != A ) {
 //  Get the subject.
 Ref subject = VMVP[ A - 1 ];
 
-//  Get the method.
-//  Ref method = Ptr4ToRef( pc - 1 );   //  Self pointer (tagged) !!!!
-        
 //  Select the method fragment to call.
 if ( IsObj( subject ) ) {
     Ref * subject_K = RefToPtr4( subject );
@@ -45,16 +42,37 @@ if ( IsObj( subject ) ) {
     //  Does the method cache contain this key?
     {
         Ref method_table = pc[ 1 ];
-        while ( method_table != SYS_ABSENT ) {
-            Ref * entry_K = RefToPtr4( method_table );
-            if ( key == entry_K[ ASSOC_OFFSET_KEY ] ) {
-                Ref fn = entry_K[ ASSOC_OFFSET_VALUE ];
-                //  Now chain out.
+        if ( method_table != SYS_ABSENT ) {
+            //  Is it the very first one?
+            Ref * entry_K_orig = RefToPtr4( method_table );
+            if ( key == entry_K_orig[ ASSOC_OFFSET_KEY ] ) {
+                Ref fn = entry_K_orig[ ASSOC_OFFSET_VALUE ];
                 Ref * fn_K = RefToPtr4( fn );
                 VMPCFUNC = fn_K;
                 RETURN( fn_K + 1 );
-            } else {
-                method_table = entry_K[ ASSOC_OFFSET_NEXT ];
+            }
+
+            //  We will search the rest of the table.
+            method_table = entry_K_orig[ ASSOC_OFFSET_NEXT ];
+            while ( method_table != SYS_ABSENT ) {
+                Ref * entry_K = RefToPtr4( method_table );
+                if ( key == entry_K[ ASSOC_OFFSET_KEY ] ) {
+                    
+                    //  Re-order the table, switching the initial value with the current.
+                    Ref fn = entry_K[ ASSOC_OFFSET_VALUE ];
+                    entry_K[ ASSOC_OFFSET_KEY ] = entry_K_orig[ ASSOC_OFFSET_KEY ];
+                    entry_K[ ASSOC_OFFSET_VALUE ] = entry_K_orig[ ASSOC_OFFSET_VALUE ];
+                    entry_K_orig[ ASSOC_OFFSET_KEY ] = key;
+                    entry_K_orig[ ASSOC_OFFSET_VALUE ] = fn;
+
+                    //  And chain out.
+                    Ref * fn_K = RefToPtr4( fn );
+                    VMPCFUNC = fn_K;
+                    RETURN( fn_K + 1 );
+
+                } else {
+                    method_table = entry_K[ ASSOC_OFFSET_NEXT ];
+                }
             }
         }
     }

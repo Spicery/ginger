@@ -20,6 +20,7 @@ Contents:
    maths
    roadmap
    envvars
+   dependency_injection.rst
    fn2code/index.rst
    simplifygnx/index.rst
    fetchgnx/index.rst

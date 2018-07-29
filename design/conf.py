@@ -16,7 +16,6 @@
 import sys
 import os
 import shlex
-# import cloud_sptheme as csp
 
 
 # If extensions (or modules to document with autodoc) are in another directory,
@@ -113,7 +112,7 @@ todo_include_todos = False
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
-html_theme = 'sphinx_rtd_theme'
+html_theme = 'groundwork'
 #html_theme = 'cloud'
 
 # Theme options are theme-specific and customize the look and feel of a theme

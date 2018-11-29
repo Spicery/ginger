@@ -1,18 +1,16 @@
 Design of the Inventory Format
 ==============================
-
 The idea is to represent the whole of a project inside a single file, called
-an inventory (\*.ivy). The inventory will be regarded as the library format
-by the run-time system. The development loop will automatically detect when
-the inventory is out of date with regard to source files and rebuild it on
-the fly.
+an inventory (\*.ivy). The inventory will be regarded as the archive/library 
+format by the run-time system. The development loop will automatically detect 
+when the inventory is out of date with regard to source files and rebuild it 
+on the fly.
 
 The interactive environment will be modelled by a temporary inventory that
 is automatically maintained.
 
-Existing Structure
-------------------
-
+Project-on-Disk Structure
+-------------------------
 The current file-based structure is as follows::
 
     <project folder>
@@ -21,7 +19,7 @@ The current file-based structure is as follows::
             <tag>.auto              (many)
                 *.<known-extn>      (many)
             <tag>.lib               (many)
-                *.<known-extn>      (one)
+                *.<known-extn>      (many)
             load                    (one)
                 *.<known-extn>      (many)
             help                    (one)
@@ -34,19 +32,47 @@ The advantage of this format are that
   * It represents a collection of packages, named in an obvious way.
   * The packages share a set of imports.
   * Variables are provided in separate files, which supports autoloading.
+  * Source control friendly.
 
-The disadvantage are that
+The disadvantages are that
 
   * Tagging is very clumsy - it's not really possible to apply multiple tags.
   * There's no obvious place for self-documentation.
-  * The format is not performant.
+  * The format is not performant for searching.
 
-These disavantages are so severe, it will be necessary to redesign the format
-somewhat. I suggest that it would be better to put the tagging information 
+New Folder-Based Structure
+--------------------------
+The disavantages of the current on-disk format are serious. Fortunately the
+but the strengths and weaknesses of the inventory format and the 
+folder-structure are complementary. Where the on-disk structure is good for
+version control the inventory is weak, where the on-disk structure is not 
+performant for listing and searching contents, the inventory is strong - and so
+on.
+
+By accepting the need for two representations, and the necessity of keeping them
+both synchronised so that the programmer is not burdened with the management of
+two representations, we can simplify the on-disk structure. This is because we
+do not need to design the on-disk structure to support a wide range of searches
+but can concentrate making it programmer-friendly.
+
+    <project folder>
+        <package folder>            (many)
+            imports.gnx             (one)
+            auto                    (one)
+                *.<known-extn>      (many)
+            lib                     (one)
+                *.<known-extn>      (many)
+            load                    (one)
+                *.<known-extn>      (many)
+            help                    (one)
+                *.txt               (many)
+
+The on-disk format must still support dependency management. The roles of the 
+auto, lib and load folders 
+
 
 Inventory Structure
 -------------------
-
 The inventory will be a SQLITE3 file. It will capture :-
 
   * The name of the inventory and any documentation that goes with it.
@@ -74,11 +100,11 @@ Here's a suggested schema. Note that the intention is to represent the initialis
 
 Storing Source Code
 -------------------
-
-The inventory could also be used to store the source code itself. This 
-would be quite a convenient way to build a development environment. 
-The basic idea would be to change the code columns in tables onload 
-and definition to be a coderef. 
+An intriguing possibility is to entirely replace the folder based structure by 
+the inventory format. To make this work the inventory could also be used to 
+store the source code itself. This would be quite a convenient way to build a 
+development environment. The basic idea would be to change the code columns in 
+tables onload and definition to be a coderef. 
 
 A code ref would additionally reference the source file, the source (text), 
 mimetype (text) and updated dates. The minor benefit of this change is that 
@@ -118,14 +144,11 @@ too.::
     CREATE TABLE gnxcode( ref integer PRIMARY KEY, gnx text, updated date );
 
 
-
 The catch here is that:-
 
   * Version control tools (e.g. git) would be significantly less convenient.
   * The drag and drop semantics for autoloading/autoconversion would be
     lost.
-
-This could be alleviated by having an import/export tool that generated the 
 
 
 

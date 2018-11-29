@@ -70,15 +70,16 @@ This cannot be a runtime construct as it may be gating syntax changes. So we
 require a conditional compilation form that can be pre-processed::
  
 	#region
-	#case FeatureA or FeatureB
+	#case +FeatureA +FeatureB
 		...
-	#case not( FeatureA )
+	#case -FeatureA
 		...
 	#else
 		...
 	#endregion
 
-Only one of these branches will be taken. 
+Only the first branch whose conditions match will be inserted, the rest are
+erased at the tokenisation stage.
 
 
 Baselining
@@ -93,7 +94,7 @@ the version baseline is implied by their file extension. e.g.::
 
 	Common source code: *.ggr1.common
 	Project: *.ggr2.proj
-	Package: *.gg1.pkg
+	Package: *.ggr1.pkg
 
 In this case, the file is a suitable level of granularity.
 
@@ -104,9 +105,9 @@ basic obligation on those systems is that they serve GNX, which means that they
 are free to deal with features how they wish, provided that the requirements
 are pushed into GNX.::
 
-	<seq feature.required="FeatureA" feature.incompatible="FeatureB">
+	<feature required="FeatureA" feature.incompatible="FeatureB">
 		...
-	</seq>
+	</feture>
 
 N.B. Inserting multiple 'required' will be easier when Ginger switches
 GNX over to HydraXML.

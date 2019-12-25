@@ -22,7 +22,7 @@ Issues
 							Currently			Considering
 							---------			-----------
 Symbol quotes				`foo` 				
-Selectors										@foo /foo `foo
+Selectors										@foo /foo `foo \foo §foo
 												nickname::`foo
 Mapping selector to value	^^bar
 Mapping variable to resolved name
@@ -30,7 +30,7 @@ Mapping variable to resolved name
 Package nickname separator	lists::isEmpty		
 Type assertion				x : String
 Optional parameters 		f( order=`asc` )
-Annotations					[ order(`asc`) ]	[ order=@asc ]
+Annotations					[ order(`asc`) ]	[ order=/asc ]
 
 
 

@@ -190,10 +190,19 @@ void tokenize(
 
 void ToolMain::integrityChecks() {
     int integrity_failure = 0;
-    if ( MAX_OFFSET_FROM_START_TO_KEY < OFFSET_FROM_FN_LENGTH_TO_KEY ) {
-        integrity_failure = 1;
+    if ( sizeof( unsigned long ) != sizeof( Ref ) ) {
+        integrity_failure |= 0x0001;        
     }
-    if ( integrity_failure ) {
+    if ( sizeof( SysCall * ) != sizeof( Ref ) ) {
+        integrity_failure |= 0b0010;       
+    }
+    if ( sizeof( Cell ) != sizeof( Ref ) ) {
+        integrity_failure |= 0b0100;
+    }
+    if ( MAX_OFFSET_FROM_START_TO_KEY < OFFSET_FROM_FN_LENGTH_TO_KEY ) {
+        integrity_failure |= 0b1000;
+    }
+    if ( integrity_failure != 0 ) {
         cerr << "ERROR: Integrity check failed: code " << integrity_failure << endl;
         exit( EXIT_FAILURE );
     }

@@ -56,7 +56,7 @@ def optPushLocal( ixml ):
         return MinXML( "push.local1" )
 
 @PeepHole( "push.local.ret" )
-def optPushLocal( ixml ):
+def optPushLocalRet( ixml ):
     local = ixml.get( "local" )
     if local == "0":
         return MinXML( "push.local0.ret" )
@@ -74,7 +74,7 @@ def optIncrBy( ixml ):
         return MinXML( "decr" )
 
 @PeepHole( "incr.local.by" )
-def optIncrBy( ixml ):
+def optIncrLocalBy( ixml ):
     d = ixml.get( "by" )
     if d == 0:
         return MinXML( "seq" )

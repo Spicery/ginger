@@ -1,6 +1,6 @@
 /*****************************************************************************\
 Definition
-	GTE_SI LOCAL_S VALUE_B:Num JUMP_D
+	* GTE_SI( LOCAL_S: raw, VALUE_B:constant, JUMP_D: raw )
 
 Code
     <gte.si local=LOCAL value=VALUE_B to=JUMP_D />

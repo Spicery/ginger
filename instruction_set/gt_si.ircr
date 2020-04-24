@@ -1,6 +1,6 @@
 /*****************************************************************************\
 Definition
-    GT_SI LOCAL_S VALUE_B JUMP_D
+    * GT_SI( LOCAL_S: raw, VALUE_B: constant, JUMP_D: raw )
 
 Summary
     Compares a local variable LOCAL_S using greater than versus a 

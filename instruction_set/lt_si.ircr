@@ -1,6 +1,6 @@
 /*****************************************************************************\
 Definition
-    LT_SI LOCAL_S VALUE_B JUMP_D
+    * LT_SI( LOCAL_S : raw,  VALUE_B : constant, JUMP_D : raw )
 
 Code
     <lt.si local=LOCAL_S value=VALUE_B to=JUMP_D />

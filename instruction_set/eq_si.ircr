@@ -1,6 +1,6 @@
 /*****************************************************************************\
 Definition
-    * EQ_SI LOCAL_S VALUE_I JUMP_D
+    * EQ_SI( LOCAL_S: raw, VALUE_I: constant, JUMP_D: raw )
 
 Summary
     Compares the value of local variable LOCAL_S using identity to

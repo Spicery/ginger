@@ -1,6 +1,6 @@
 /*****************************************************************************\
 Definition
-    LTE_SI A, K, L
+    * LTE_SI( A : raw, K : constant, L : raw )
 
 Summary
     * Compares the local variable A against a constant K.

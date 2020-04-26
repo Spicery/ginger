@@ -136,7 +136,7 @@ def generateGingerInteractive():
 	if not os.path.exists( dir ):
 		os.makedirs( dir )
 	f = open( os.path.join( dir, "imports.gnx" ), 'w' )
-	f.write( "<package>" );
+	f.write( "<package>" )
 	f.write( "<import from=\"ginger.library\" match0=\"public\" />" )
 	f.write( "<import from=\"ginger.constants\" match0=\"public\" />" )
 	f.write( "</package>\n" )

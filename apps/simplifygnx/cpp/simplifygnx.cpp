@@ -318,14 +318,14 @@ void Main::parseArgs( int argc, char **argv, char **envp ) {
         		break;
         	}
         	case '6': {
-        		//this->sysapp_processing = true;
-        		//this->flatten_processing = true;	//	introduces new flattening opportunities.
-        		this->setSysappProcessing();
+        		//this->scope_processing = true;
+        		this->setScopeProcessing();
         		break;
         	}
         	case '7': {
-        		//this->scope_processing = true;
-        		this->setScopeProcessing();
+        		//this->sysapp_processing = true;
+        		//this->flatten_processing = true;	//	introduces new flattening opportunities.
+        		this->setSysappProcessing();
         		break;
         	}
         	case '8': {

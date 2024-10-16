@@ -4,7 +4,7 @@
 AC_PREREQ(2.61)
 AC_INIT([Ginger],[0.9.3-dev],[https://github.com/Spicery/ginger],[ginger])
 AC_CONFIG_SRCDIR([appginger.png])
-AC_CONFIG_HEADER([config.h])
+AC_CONFIG_HEADERS([config.h])
 
 # Checks for programs.
 AC_PROG_CXX
@@ -16,7 +16,6 @@ AC_PROG_MAKE_SET
 
 # Checks for header files.
 AC_HEADER_DIRENT
-AC_HEADER_STDC
 AC_CHECK_HEADERS([stdlib.h string.h unistd.h])
 
 # Checks for typedefs, structures, and compiler characteristics.

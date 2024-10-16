@@ -3,3 +3,7 @@
 /config.log
 /config.status
 /configure
+/autom4te.cache/
+/configure.ac~
+/configure~
+/autodocs/_build/

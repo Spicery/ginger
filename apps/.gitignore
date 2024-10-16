@@ -1,2 +1,4 @@
 /gngreadline.tgz
 /Makefile
+*.o
+*~

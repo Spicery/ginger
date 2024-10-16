@@ -21,6 +21,7 @@
 #include <string>
 #include <map>
 #include <sstream>
+#include <climits>
 
 #include "mnxsax.hpp"
 #include "mishap.hpp"
